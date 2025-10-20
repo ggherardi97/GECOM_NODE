@@ -1,0 +1,391 @@
+<style>
+    .wizard-big.wizard > .content {
+        min-height: 375px !important;
+    }
+</style>
+
+    <div id="wrapper-clientes">
+        <div id="page-wrapper-clientes" class="gray-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0; display: none;">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i></a>
+                        <form role="search" class="navbar-form-custom" action="search_results.html">
+                            <div class="form-group">
+                                <input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search">
+                            </div>
+                        </form>
+                    </div>
+
+                </nav>
+            </div>
+
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-title">
+                                <h5>Criação de processo</h5>
+                                <div class="ibox-tools">
+                                </div>
+                            </div>
+                            <div class="ibox-content">
+                                
+                                <p>
+                                    Preencha as informações do processo.                           
+                                </p>
+
+                                <form id="form" action="#" class="wizard-big">
+                                    <h1>Detalhes</h1>
+                                    <fieldset>
+                                        <div class="row">
+                                            <div class="col-lg-9">
+
+                                                <div class="row">
+                                                    <div class="form-group col-lg-6">
+                                                        <label>Nº do Processo *</label>
+                                                        <input id="processnumber" name="processnumber" type="text" class="form-control required">
+                                                    </div>
+                                                    <div class="form-group col-lg-6">
+                                                        <label>Cliente *</label>
+                                                        <div class="input-group m-b">
+                                                            <input id="client" name="client" type="text" class="form-control required" />
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-6">
+                                                        <label>Tipo de Processo *</label>
+                                                        <select class="form-control m-b required" name="processtype" required>
+                                                            <option value="">Selecionar...</option>
+                                                            <option>Exportação</option>
+                                                            <option>Importação</option>
+                                                            <option>Nacional</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-lg-6">
+                                                        <label>Tipo de Transporte *</label>
+                                                        <select class="form-control m-b required" name="transporttype" required>
+                                                            <option value="">Selecionar...</option>
+                                                            <option>Aéreo</option>
+                                                            <option>Marítimo</option>
+                                                            <option>Terrestre</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="form-group col-lg-6">
+                                                        <label>Invoice Relacionado *</label>
+                                                        <input id="invoicenumber" name="invoicenumber"placeholder="Ex: INV-029842" type="text" class="form-control required">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3">
+                                                <div class="text-center">
+                                                    <div style="margin-top: 20px">
+                                                        <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </fieldset>
+                                    <h1>Transporte</h1>
+                                    <fieldset>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Companhia de transporte *</label>
+                                                    <input id="transportcompany" name="transportcompany" type="text" class="form-control required" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Contato</label>
+                                                    <input type="text" autocomplete="off" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Origem *</label>
+                                                    <input type="text" autocomplete="off" placeholder="Digite o país de origem" class="form-control autocompleteCountry" required />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Destino *</label>
+                                                    <input type="text" autocomplete="off" placeholder="Digite o país de destino" class="form-control autocompleteCountry" required />
+                                                </div>
+                                            </div>
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="form-group col-lg-4">
+                                                        <label>Previsão de Embarque *</label>
+                                                        <div class="input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                            <input type="text" class="form-control datepicker" value="13/06/2025">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-lg-4">
+                                                        <label>Tempo de Trânsito (dias) *</label>
+                                                        <input type="number" autocomplete="off" class="form-control" required />
+                                                    </div>
+                                                    <div class="form-group col-lg-4">
+                                                        <label>Previsão Desembarque *</label>
+                                                        <div class="input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                            <input type="text" class="form-control datepicker" value="13/06/2025">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+                                    <h1>Valores</h1>
+                                    <fieldset>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Moeda</label>
+                                                    <select class="form-control m-b required" name="processtype" required>
+                                                        <option value="">Selecionar...</option>
+                                                        <option>USD - Dólar</option>
+                                                        <option>R$ - Real</option>
+                                                        <option>€ - Euro</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Total de Taxas</label>
+                                                    <div class="input-group m-b">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-addon">$</span>
+                                                        </div>
+                                                        <input type="text" class="form-control">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-addon">.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Total Frete</label>
+                                                    <div class="input-group m-b">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-addon">$</span>
+                                                        </div>
+                                                        <input type="text" class="form-control">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-addon">.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Valor Total</label>
+                                                    <div class="input-group m-b">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-addon">$</span>
+                                                        </div>
+                                                        <input type="text" class="form-control">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-addon">.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Valor GECOM</label>
+                                                    <div class="input-group m-b">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-addon">$</span>
+                                                        </div>
+                                                        <input type="text" class="form-control">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-addon">.00</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </fieldset>
+
+                                    <h1>Documentos</h1>
+                                    <fieldset>
+                                        <h3>Adicione documentos do processo</h3>
+                                        <div class="ibox-content">
+
+                                            <form action="#" class="dropzone dz-clickable" id="dropzoneForm">
+
+                                                <div class="dz-default dz-message">
+                                                    <span><strong>Drop files here or click to upload. </strong>
+                                                        <br>
+                                                        (This is just a demo dropzone. Selected files are not actually uploaded.)</span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </fieldset>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <% contentFor('scripts') %>
+ <script src="../Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
+
+ <!-- Jquery Validate -->
+ <script src="../Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
+ <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
+ <!-- Typehead -->
+ <script src="../Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+ <!-- DROPZONE -->
+ <script src="../Assets/inspinia/js/plugins/dropzone/dropzone.js"></script>
+ <!-- Data picker -->
+ <script src="../Assets/inspinia/js/plugins/datapicker/bootstrap-datepicker.js"></script>
+<%  %>
+
+ <script>
+     $(document).ready(function () {
+         $("#pageName").text("Novo Processo");
+         $("#subSecoundPageName").text("Novo Processo");
+         $("#subpageName").text("Processos");
+         $("#subpageName").attr("href", "Processos.aspx");
+         $("#path").show();
+
+         Dropzone.options.dropzoneForm = {
+             paramName: "file", // The name that will be used to transfer the file
+             maxFilesize: 2, // MB
+             dictDefaultMessage: "<strong>Drop files here or click to upload. </strong></br> (This is just a demo dropzone. Selected files are not actually uploaded.)"
+         };
+
+         setTimeout(function () {
+             $('#client').typeahead({
+                 source: [
+                     "GECOM", "Convert Solution", "IncaSol", "Cardenas", "Riplast"
+                 ]
+             });
+         }, 500);
+
+     });
+
+     $(document).ready(function () {
+         $("#wizard").steps();
+         $("#form").steps({
+             bodyTag: "fieldset",
+             onStepChanging: function (event, currentIndex, newIndex) {
+                 // Always allow going backward even if the current step contains invalid fields!
+                 if (currentIndex > newIndex) {
+                     return true;
+                 }
+
+                 // Forbid suppressing "Warning" step if the user is to young
+                 if (newIndex === 3 && Number($("#age").val()) < 18) {
+                     return false;
+                 }
+
+                 var form = $(this);
+
+                 // Clean up if user went backward before
+                 if (currentIndex < newIndex) {
+                     // To remove error styles
+                     $(".body:eq(" + newIndex + ") label.error", form).remove();
+                     $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                 }
+
+                 // Disable validation on fields that are disabled or hidden.
+                 form.validate().settings.ignore = ":disabled,:hidden";
+
+                 // Start validation; Prevent going forward if false
+                 return form.valid();
+             },
+             onStepChanged: function (event, currentIndex, priorIndex) {
+                 // Suppress (skip) "Warning" step if the user is old enough.
+                 if (currentIndex === 2 && Number($("#age").val()) >= 18) {
+                     $(this).steps("next");
+                 }
+                 //if (currentIndex === 3) {
+                 //    Dropzone.options.dropzoneForm = {
+                 //        paramName: "file", // The name that will be used to transfer the file
+                 //        maxFilesize: 2, // MB
+                 //        dictDefaultMessage: "<strong>Drop files here or click to upload. </strong></br> (This is just a demo dropzone. Selected files are not actually uploaded.)"
+                 //    };
+                 //}
+                 if (currentIndex === 1) {
+                     $('.autocompleteCountry').typeahead({
+                         source: [
+                             "Afeganistão", "África do Sul", "Albânia", "Alemanha", "Andorra", "Angola", "Antígua e Barbuda", "Arábia Saudita",
+                             "Argélia", "Argentina", "Armênia", "Austrália", "Áustria", "Azerbaijão", "Bahamas", "Bangladesh", "Barbados",
+                             "Bahrein", "Bélgica", "Belize", "Benin", "Bielorrússia", "Bolívia", "Bósnia e Herzegovina", "Botsuana",
+                             "Brasil", "Brunei", "Bulgária", "Burkina Faso", "Burundi", "Butão", "Cabo Verde", "Camarões", "Camboja",
+                             "Canadá", "Catar", "Cazaquistão", "Chade", "Chile", "China", "Chipre", "Colômbia", "Comores", "Congo",
+                             "Coreia do Norte", "Coreia do Sul", "Costa do Marfim", "Costa Rica", "Croácia", "Cuba", "Dinamarca", "Dominica",
+                             "Egito", "El Salvador", "Emirados Árabes Unidos", "Equador", "Eritreia", "Eslováquia", "Eslovênia", "Espanha",
+                             "Estados Unidos", "Estônia", "Eswatini", "Etiópia", "Fiji", "Filipinas", "Finlândia", "França", "Gabão", "Gâmbia",
+                             "Gana", "Geórgia", "Granada", "Grécia", "Guatemala", "Guiana", "Guiana Francesa", "Guiné", "Guiné-Bissau",
+                             "Guiné Equatorial", "Haiti", "Holanda", "Honduras", "Hungria", "Iêmen", "Ilhas Marshall", "Ilhas Salomão",
+                             "Índia", "Indonésia", "Irã", "Iraque", "Irlanda", "Islândia", "Israel", "Itália", "Jamaica", "Japão", "Jordânia",
+                             "Kiribati", "Kuwait", "Laos", "Lesoto", "Letônia", "Líbano", "Libéria", "Líbia", "Liechtenstein", "Lituânia",
+                             "Luxemburgo", "Macedônia do Norte", "Madagascar", "Malásia", "Maláui", "Maldivas", "Mali", "Malta", "Marrocos",
+                             "Maurício", "Mauritânia", "México", "Micronésia", "Moçambique", "Moldávia", "Mônaco", "Mongólia", "Montenegro",
+                             "Myanmar (Birmânia)", "Namíbia", "Nauru", "Nepal", "Nicarágua", "Níger", "Nigéria", "Noruega", "Nova Zelândia",
+                             "Omã", "Palau", "Palestina", "Panamá", "Papua-Nova Guiné", "Paquistão", "Paraguai", "Peru", "Polônia",
+                             "Portugal", "Quênia", "Quirguistão", "Reino Unido", "República Centro-Africana", "República Democrática do Congo",
+                             "República Dominicana", "República Tcheca", "Romênia", "Ruanda", "Rússia", "São Cristóvão e Nevis", "São Marino",
+                             "Santa Lúcia", "São Tomé e Príncipe", "São Vicente e Granadinas", "Seicheles", "Senegal", "Serra Leoa", "Sérvia",
+                             "Singapura", "Síria", "Somália", "Sri Lanka", "Sudão", "Sudão do Sul", "Suécia", "Suíça", "Suriname", "Tailândia",
+                             "Taiwan", "Tajiquistão", "Tanzânia", "Timor-Leste", "Togo", "Tonga", "Trinidad e Tobago", "Tunísia", "Turcomenistão",
+                             "Turquia", "Tuvalu", "Ucrânia", "Uganda", "Uruguai", "Uzbequistão", "Vanuatu", "Vaticano", "Venezuela",
+                             "Vietnã", "Zâmbia", "Zimbábue"
+                         ]
+                     });
+
+                     $('.datepicker').datepicker({
+                         todayBtn: "linked",
+                         keyboardNavigation: false,
+                         forceParse: false,
+                         calendarWeeks: true,
+                         autoclose: true
+                     });
+                 }
+
+                 // Suppress (skip) "Warning" step if the user is old enough and wants to the previous step.
+                 if (currentIndex === 2 && priorIndex === 3) {
+                     $(this).steps("previous");
+                 }
+             },
+             onFinishing: function (event, currentIndex) {
+                 var form = $(this);
+
+                 // Disable validation on fields that are disabled.
+                 // At this point it's recommended to do an overall check (mean ignoring only disabled fields)
+                 form.validate().settings.ignore = ":disabled";
+
+                 // Start validation; Prevent form submission if false
+                 return form.valid();
+             },
+             onFinished: function (event, currentIndex) {
+                 var form = $(this);
+
+                 // Submit form input
+                 form.submit();
+                 window.location = "Clientes.aspx"
+             }
+         }).validate({
+             errorPlacement: function (error, element) {
+                 element.before(error);
+             },
+             rules: {
+                 confirm: {
+                     equalTo: "#password"
+                 }
+             }
+         });
+     });
+
+ </script>

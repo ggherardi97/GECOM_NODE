@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GECOM | Sua Plataforma de Processos</title>
+    
+    <link rel="shortcut icon" href="../Pages/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="../Pages/favicon.ico" type="image/x-icon" />
+    <link href="../Assets/inspinia/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../Assets/inspinia/css/animate.css" rel="stylesheet">
+    <link href="../Assets/inspinia/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .fa {
+            margin-right: 5px;
+        }
+
+        .dark-timeline .vertical-timeline-content, .dark-timeline.center-orientation .vertical-timeline-content {
+            background: #e3e3e3d1;
+        }
+
+        #vertical-timeline::before {
+            background: #e3e3e3d1;
+        }
+    </style>
+</head>
+
+<body class="top-navigation">
+
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom white-bg">
+                <nav class="navbar navbar-expand-lg navbar-static-top" role="navigation">
+                    <!--<div class="navbar-header">-->
+                    <!--<button aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" class="navbar-toggle collapsed" type="button">-->
+                    <!--<i class="fa fa-reorder"></i>-->
+                    <!--</button>-->
+
+                    <img src="../Assets/img/icon.png" style="width:100px;background:white;" class="navbar-brand" />
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fa fa-reorder"></i>
+                    </button>
+
+                    <!--</div>-->
+                    <div class="navbar-collapse collapse" id="navbar">
+                        <ul class="nav navbar-nav mr-auto">
+                            <li class="active">
+                                <a aria-expanded="false" role="button" href="Login.aspx">Retornar ao menu</a>
+                            </li>
+                            <li class="dropdown">
+                                <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown">Menu item</a>
+                                <ul role="menu" class="dropdown-menu">
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="dropdown">
+                                <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown">Menu item</a>
+                                <ul role="menu" class="dropdown-menu">
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                    <li><a href="">Menu item</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                        <ul class="nav navbar-top-links navbar-right">
+                            <li>
+                                <a href="Login.aspx">
+                                    <i class="fa fa-sign-out"></i>Entrar
+                        </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <div class="row">
+                <div class="col-lg-10">
+                    <div class="wrapper wrapper-content animated fadeInUp">
+                        <div class="ibox">
+                            <div class="ibox-content">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="m-b-md">
+                                            <h2>Processo PRC-32456236</h2>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Status:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1"><span class="label label-primary">Active</span></dd>
+                                            </div>
+                                        </dl>
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Created by:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1">Alex Smith</dd>
+                                            </div>
+                                        </dl>
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Invoice:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1">INV-09384</dd>
+                                            </div>
+                                        </dl>
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Client:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1"><a href="#" class="text-navy">Zender Company</a> </dd>
+                                            </div>
+                                        </dl>
+                           
+                                    </div>
+                                    <div class="col-lg-6" id="cluster_info">
+
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Data Estimada de Entrega:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1">16.08.2014 12:15:57</dd>
+                                            </div>
+                                        </dl>
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Início do Processo:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="mb-1">10.07.2014 23:36:57</dd>
+                                            </div>
+                                        </dl>
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-4 text-sm-right">
+                                                <dt>Participants:</dt>
+                                            </div>
+                                            <div class="col-sm-8 text-sm-left">
+                                                <dd class="project-people mb-1">
+                                                    <a href="">
+                                                        <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a3.jpg"></a>
+                                                    <a href="">
+                                                        <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a1.jpg"></a>
+                                                    <a href="">
+                                                        <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a2.jpg"></a>
+                                                    <a href="">
+                                                        <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a4.jpg"></a>
+                                                    <a href="">
+                                                        <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a5.jpg"></a>
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <dl class="row mb-0">
+                                            <div class="col-sm-2 text-sm-right">
+                                                <dt>Completed:</dt>
+                                            </div>
+                                            <div class="col-sm-10 text-sm-left">
+                                                <dd>
+                                                    <div class="progress m-b-1">
+                                                        <div style="width: 60%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                                                    </div>
+                                                    <small>Project completed in <strong>60%</strong>. Remaining close the project, sign a contract and invoice.</small>
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="row m-t-sm">
+                                    <div class="col-lg-12">
+                                        <div class="panel blank-panel">
+                                            <div class="panel-heading">
+                                                <div class="panel-options">
+                                                    <ul class="nav nav-tabs">
+                                                        <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Timeline</a></li>
+                                                        <li><a class="nav-link" href="#tab-2" data-toggle="tab">Histórico do Processo</a></li>
+                                                        <li><a class="nav-link" href="#tab-3" onclick="loadMapLeft()" data-toggle="tab">Rastreamento</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <div class="panel-body">
+
+                                                <div class="tab-content">
+                                                    <div class="tab-pane active" id="tab-1">
+                                                        <div class="col-lg-12">
+                                                            <div class="ibox ">
+                                                                <div id="ibox-content">
+
+                                                                    <div id="vertical-timeline" class="vertical-container dark-timeline center-orientation">
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon navy-bg">
+                                                                                <i class="fa fa-briefcase"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Meeting</h2>
+                                                                                <p>
+                                                                                    Conference on the sales results for the previous year. Monica please examine sales trends in marketing and products. Below please find the current status of the sale.
+                                                                                </p>
+                                                                                <a href="#" class="btn btn-sm btn-primary">More info</a>
+                                                                                <span class="vertical-date">Today
+                                                                         <br>
+                                                                                    <small>Dec 24</small>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon blue-bg">
+                                                                                <i class="fa fa-file-text"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Send documents to Mike</h2>
+                                                                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since.</p>
+                                                                                <a href="#" class="btn btn-sm btn-success">Download document </a>
+                                                                                <span class="vertical-date">Today
+                                                                         <br>
+                                                                                    <small>Dec 24</small>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon lazur-bg">
+                                                                                <i class="fa fa-coffee"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Coffee Break</h2>
+                                                                                <p>Go to shop and find some products. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's. </p>
+                                                                                <a href="#" class="btn btn-sm btn-info">Read more</a>
+                                                                                <span class="vertical-date">Yesterday
+                                                                         <br>
+                                                                                    <small>Dec 23</small></span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon yellow-bg">
+                                                                                <i class="fa fa-phone"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Phone with Jeronimo</h2>
+                                                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
+                                                                                <span class="vertical-date">Yesterday
+                                                                         <br>
+                                                                                    <small>Dec 23</small></span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon lazur-bg">
+                                                                                <i class="fa fa-user-md"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Go to the doctor dr Smith</h2>
+                                                                                <p>Find some issue and go to doctor. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. </p>
+                                                                                <span class="vertical-date">Yesterday
+                                                                         <br>
+                                                                                    <small>Dec 23</small></span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="vertical-timeline-block">
+                                                                            <div class="vertical-timeline-icon navy-bg">
+                                                                                <i class="fa fa-comments"></i>
+                                                                            </div>
+
+                                                                            <div class="vertical-timeline-content">
+                                                                                <h2>Chat with Monica and Sandra</h2>
+                                                                                <p>Web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like). </p>
+                                                                                <span class="vertical-date">Yesterday
+                                                                         <br>
+                                                                                    <small>Dec 23</small></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="tab-pane" id="tab-2">
+
+                                                        <table class="table table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Status</th>
+                                                                    <th>Title</th>
+                                                                    <th>Start Time</th>
+                                                                    <th>End Time</th>
+                                                                    <th>Comments</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Completed</span>
+                                                                    </td>
+                                                                    <td>Create project in webapp
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable.
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Accepted</span>
+                                                                    </td>
+                                                                    <td>Various versions
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
+                                                                    </td>
+                                                                    <td>There are many variations
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Reported</span>
+                                                                    </td>
+                                                                    <td>Latin words
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            Latin words, combined with a handful of model sentence structures
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Accepted</span>
+                                                                    </td>
+                                                                    <td>The generated Lorem
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
+                                                                    </td>
+                                                                    <td>The first line
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Reported</span>
+                                                                    </td>
+                                                                    <td>The standard chunk
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Completed</span>
+                                                                    </td>
+                                                                    <td>Lorem Ipsum is that
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable.
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
+                                                                    </td>
+                                                                    <td>Contrary to popular
+                                                                    </td>
+                                                                    <td>12.07.2014 10:10:1
+                                                                    </td>
+                                                                    <td>14.07.2014 10:16:36
+                                                                    </td>
+                                                                    <td>
+                                                                        <p class="small">
+                                                                            Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical
+                                                                        </p>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            </tbody>
+                                                        </table>
+
+                                                    </div>
+                                                    <div class="tab-pane" id="tab-3">
+                                                        <div id="map" style="height: 500px;"></div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="wrapper wrapper-content project-manager">
+                        <h4>Descrição do Processo</h4>
+                        <img src="../Assets/inspinia/img/zender_logo.png" class="img-fluid">
+                        <p class="small">
+                            Importação de carros antigos.
+                        </p>
+                        <p class="small font-bold">
+                            <span><i class="fa fa-circle text-warning"></i>Prioridade Alta</span>
+                        </p>
+                        <h5>Documentos do processo</h5>
+                        <ul class="list-unstyled project-files">
+                            <li><a href=""><i class="fa fa-file"></i>INV-0928423.pdf</a></li>
+                            <li><a href=""><i class="fa fa-file-picture-o"></i>Logo_zender_company.jpg</a></li>
+                            <li><a href=""><i class="fa fa-stack-exchange"></i>Email_from_Alex.mln</a></li>
+                            <li><a href=""><i class="fa fa-file"></i>Contract_20_11_2014.pdf</a></li>
+                        </ul>
+                        <div class="m-t-md">
+                            <input type="button" class="btn btn-xs btn-primary" value="Adicionar Documentos" onclick="openLoadFile()" />
+                            <input type="file" style="display: none;" id="fileInput" />
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="float-right">
+                    10GB of <strong>250GB</strong> Free.
+           
+                </div>
+                <div>
+                    <strong>Copyright</strong> Example Company &copy; 2014-2018
+           
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- Mainly scripts -->
+    <script src="../Assets/inspinia/js/jquery-3.1.1.min.js"></script>
+    <script src="../Assets/inspinia/js/popper.min.js"></script>
+    <script src="../Assets/inspinia/js/bootstrap.js"></script>
+    <script src="../Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../Assets/inspinia/js/inspinia.js"></script>
+    <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+
+    <!-- Flot -->
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+
+    <!-- ChartJS-->
+    <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+    <!-- Jvectormap -->
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            $('#loading-example-btn').click(function () {
+                btn = $(this);
+                simpleLoad(btn, true)
+
+                simpleLoad(btn, false)
+            });
+
+        });
+
+        function openLoadFile() {
+            $("#fileInput").click();
+        }
+
+        function loadMapLeft() {
+            setTimeout(function () {
+                // Inicializa o mapa centralizado e com zoom inicial
+                var map = L.map('map').setView([0, 0], 2);
+
+                // Adiciona o mapa base (OpenStreetMap)
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                }).addTo(map);
+
+                // Coordenadas dos pontos
+                var points = [
+                    {
+                        coords: [38.7169, -9.1399],
+                        name: 'Lisboa, Portugal'
+                    },
+                    {
+                        coords: [-33.9249, 18.4241],
+                        name: 'Cape Town, África do Sul'
+                    },
+                    {
+                        coords: [-22.9068, -43.1729],
+                        name: 'Rio de Janeiro, Brasil'
+                    }
+                ];
+
+                // Adiciona os markers no mapa
+                points.forEach(function (point) {
+                    L.marker(point.coords)
+                        .addTo(map)
+                        .bindPopup(`<b>${point.name}</b>`)
+                        .openPopup();
+                });
+
+                // Desenha a linha conectando os pontos
+                var latlngs = points.map(p => p.coords);
+
+                var polyline = L.polyline(latlngs, {
+                    color: 'red',
+                    weight: 3
+                }).addTo(map);
+
+                // Ajusta o zoom para caber todos os pontos e linhas
+                map.fitBounds(polyline.getBounds());
+            }, 500);
+        }
+
+
+        function simpleLoad(btn, state) {
+            if (state) {
+                btn.children().addClass('fa-spin');
+                btn.contents().last().replaceWith(" Loading");
+            } else {
+                setTimeout(function () {
+                    btn.children().removeClass('fa-spin');
+                    btn.contents().last().replaceWith(" Refresh");
+                }, 2000);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>GECOM | Login</title>
+    <link rel="shortcut icon" href="../Pages/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="../Pages/favicon.ico" type="image/x-icon" />
+    <link href="../Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../Assets/inspinia/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="../Assets/inspinia/css/animate.css" rel="stylesheet" />
+    <link href="../Assets/inspinia/css/style.css" rel="stylesheet" />
+    <script src="../Assets/js/pages/Login.js"></script>
+    <style>
+        .loginscreen.middle-box {
+            width: 350px;
+        }
+    </style>
+</head>
+<body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
+    <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" />
+
+    <!-- Login Form -->
+    <form id="loginForm" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px;">
+        <h3>Bem Vindo à GECOM</h3>
+        <div id="world-map" style="height: 100px; margin-top: 20px;"></div>
+        <p style="margin-top: 20px; font-size: 12px;">
+            Sua plataforma de processos em importação e exportação.
+        </p>
+
+        <div class="form-group">
+            <input type="email" class="form-control" placeholder="Email" name="email" required />
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control" placeholder="Senha" name="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+
+        <a onclick="changeView('#forgotPassword')"><small>Esqueceu a senha? Clique aqui</small></a>
+        <p class="text-muted text-center"><small>Possui um número de acesso?</small></p>
+        <a class="btn btn-sm btn-white btn-block" onclick="changeView('#acessNumberForm')">Entre com número de acesso</a>
+    </form>
+
+    <!-- Access Number Form -->
+    <form id="acessNumberForm" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
+        <h3>Entre com número de acesso</h3>
+        <p style="margin-top: 20px; font-size: 12px;">
+            Digite abaixo o número fornecido por nosso time.
+        </p>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Ex: PRC-0000111" name="number" required />
+        </div>
+        <a href="PublicProcessDetail.aspx" class="btn btn-primary block full-width m-b">Acessar</a>
+        <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
+            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+        </a>
+    </form>
+
+    <!-- Forgot Password Form -->
+    <form id="forgotPassword" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
+        <h3>Esqueceu a senha?</h3>
+        <p style="margin-top: 20px; font-size: 12px;">
+            Digite abaixo o email cadastrado
+        </p>
+        <div class="form-group">
+            <input type="text" class="form-control" id="forgotEmail" name="forgotEmail" required />
+        </div>
+        <a href="PublicProcessDetail.aspx" class="btn btn-primary block full-width m-b">Enviar email de reset</a>
+        <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
+            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+        </a>
+    </form>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../Assets/inspinia/js/popper.min.js"></script>
+    <script src="../Assets/inspinia/js/bootstrap.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+
+    <script>
+        function changeView(id) {
+            $("form").hide();
+            $(id).show();
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
+            if (!this.checkValidity()) return;
+            event.preventDefault();
+
+            const email = this.email.value;
+            const senha = this.password.value;
+
+            // Aqui você pode substituir pela sua rota Node.js
+            fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password: senha })
+            }).then(res => res.json())
+              .then(data => {
+                  if (data.status === "OK") {
+                      window.location = "Default"; // ou .ejs, etc.
+                  } else {
+                      alert(data.message || "Login inválido");
+                  }
+              });
+        });
+
+        $(document).ready(function () {
+            var mapData = {
+                "US": 498, "SA": 200, "CA": 1300, "DE": 220, "FR": 540,
+                "CN": 120, "AU": 760, "BR": 550, "IN": 200, "GB": 120, "RU": 2000
+            };
+
+            $('#world-map').vectorMap({
+                map: 'world_mill_en',
+                backgroundColor: "transparent",
+                zoomButtons: false,
+                regionStyle: {
+                    initial: {
+                        fill: '#e4e4e4',
+                        "fill-opacity": 1,
+                        stroke: 'none',
+                        "stroke-width": 0,
+                        "stroke-opacity": 0
+                    }
+                },
+                series: {
+                    regions: [{
+                        values: mapData,
+                        scale: ["#1ab394", "#22d6b1"],
+                        normalizeFunction: 'polynomial'
+                    }]
+                }
+            });
+        });
+    </script>
+</body>
+</html>

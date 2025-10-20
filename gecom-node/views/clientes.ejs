@@ -1,0 +1,231 @@
+
+<style>
+    .ibox-title {
+        padding: 15px 90px 20px 15px;
+    }
+    .clicker {
+        cursor: pointer;
+    }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h5>Clientes ativos</h5>
+                <div class="ibox-tools">
+                    <!-- ferramentas removidas -->
+                </div>
+            </div>
+            <div class="ibox-content">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control form-control-sm" id="searchinput" placeholder="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-primary" type="button">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-9 m-b-xs">
+                        <a type="button" class="btn btn-sm btn-primary" href="NewClient.html" style="float: inline-end;">Novo Cliente</a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped" id="clientes">
+                        <thead>
+    <tr>
+
+        <th>#</th>
+        <th>Company Name</th>
+        <th>Primary Contact</th>
+        <th>Phone </th>
+        <th>Number of Invoices</th>
+        <th>Date</th>
+        <th>Account Number</th>
+    </tr>
+</thead>
+<tbody id="lines">
+    <!-- <tr class="clicker" onclick="redirectToProcess()">
+        <td>1</td>
+        <td>Inceptos Hymenaeos Ltd</td>
+        <td>Patrick Smith</td>
+        <td>0800 051213</td>
+        <td>20</td>
+        <td>Jul 14, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr class="clicker" onclick="redirectToProcess()">
+        <td>2</td>
+        <td>Alpha project</td>
+        <td>Alice Jackson</td>
+        <td>0500 780909</td>
+        <td>40</td>
+        <td>Jul 16, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr class="clicker" onclick="redirectToProcess()">
+        <td>3</td>
+        <td>Betha project</td>
+        <td>John Smith</td>
+        <td>0800 1111</td>
+        <td>75</td>
+        <td>Jul 18, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>Gamma project</td>
+        <td>Anna Jordan</td>
+        <td>(016977) 0648</td>
+        <td>18</td>
+        <td>Jul 22, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Alpha project</td>
+        <td>Alice Jackson</td>
+        <td>0500 780909</td>
+        <td>40</td>
+        <td>Jul 16, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+
+    <tr>
+        <td>1</td>
+        <td>Project <small>This is example of project</small></td>
+        <td>Patrick Smith</td>
+        <td>0800 051213</td>
+        <td>20</td>
+        <td>Jul 14, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>Gamma project</td>
+        <td>Anna Jordan</td>
+        <td>(016977) 0648</td>
+        <td>18</td>
+        <td>Jul 22, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Nec Euismod In Company</td>
+        <td>Alice Jackson</td>
+        <td>0500 780909</td>
+        <td>40</td>
+        <td>Jul 16, 2013</td>
+        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
+    </tr>-->
+</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% contentFor('scripts') %>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
+<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.spline.js"></script>
+<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.pie.js"></script>
+<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.symbol.js"></script>
+<script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
+<script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
+
+<script src="../Assets/inspinia/js/inspinia.js"></script>
+<script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+
+<script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+
+<script src="../Assets/inspinia/js/plugins/sparkline/jquery.sparkline.min.js"></script>
+<script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
+
+<script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+<%  %>
+
+
+<!-- JS -->
+<script>
+    function redirectToProcess() {
+        window.location = "ClientDetails.html";
+    }
+
+    $(document).ready(function () {
+        $("#pageName").text("Clientes");
+        $("#subpageName").text("Clientes");
+    });
+
+    $('#searchinput').on('keyup change', function () {
+        var index = 1;
+        var value = $(this).val().toLowerCase();
+
+        $('#clientes tbody tr').filter(function () {
+            $(this).toggle(
+                $(this).find('td').eq(index).text().toLowerCase().indexOf(value) > -1
+            );
+        });
+    });
+
+    async function fetchClients(params = {}) {
+  const q = new URLSearchParams(params);
+  const resp = await fetch(`/api/clients?${q.toString()}`, { headers: { 'Accept': 'application/json' } });
+  const json = await resp.json();
+  if (!json.ok) throw new Error(json.error || 'Falha ao carregar clients');
+  return json;
+}
+
+function renderClientsTable({ rows }) {
+    debugger;
+  const tbody = document.querySelector('#lines');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  if (!rows || rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4">Nenhum cliente encontrado.</td></tr>`;
+    return;
+  }
+
+  for (const c of rows) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.id}</td>
+      <td><a href="/clients/${c.id}">${c.name ?? ''}</a></td>
+      <td>${c.email ?? ''}</td>
+      <td>${c.created_at ?? ''}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function applyClientsFilter(e) {
+  if (e) e.preventDefault();
+  const search = document.querySelector('#filter-search')?.value ?? '';
+  const startDate = document.querySelector('#filter-start')?.value ?? '';
+  const endDate = document.querySelector('#filter-end')?.value ?? '';
+  const pageSize = document.querySelector('#filter-pageSize')?.value || '20';
+
+  const data = await fetchClients({ search, startDate, endDate, page: 1, pageSize });
+  renderClientsTable(data);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Primeira carga
+  applyClientsFilter();
+
+  // Bind do formulário
+  const form = document.querySelector('#clients-filter-form');
+  if (form) {
+    form.addEventListener('submit', applyClientsFilter);
+  }
+});
+
+</script>
