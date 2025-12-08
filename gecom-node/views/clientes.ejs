@@ -47,7 +47,7 @@
     </tr>
 </thead>
 <tbody id="lines">
-    <tr class="clicker" onclick="redirectToProcess()">
+    <tr class="clicker" onclick="redirectToProcess(1)">
         <td>1</td>
         <td>Inceptos Hymenaeos Ltd</td>
         <td>Patrick Smith</td>
@@ -56,7 +56,7 @@
         <td>Jul 14, 2013</td>
         <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
     </tr>
-    <tr class="clicker" onclick="redirectToProcess()">
+    <tr class="clicker" onclick="redirectToProcess(2)">
         <td>2</td>
         <td>Alpha project</td>
         <td>Alice Jackson</td>
@@ -65,7 +65,7 @@
         <td>Jul 16, 2013</td>
         <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
     </tr>
-    <tr class="clicker" onclick="redirectToProcess()">
+    <tr class="clicker" onclick="redirectToProcess(3)">
         <td>3</td>
         <td>Betha project</td>
         <td>John Smith</td>
@@ -155,7 +155,35 @@
 
 <!-- JS -->
 <script>
-    function redirectToProcess() {
+    //Exemplo de objeto para funcionar front-end
+    var clients = [{ "CompanyName": "Inceptos Hymenaeos Ltd",
+        "ContactName":"Patrick Smith",
+        "Phone": "0800 051213",
+        "Email": "inceptos@email.com",
+        "CreatedOn": "Jul 14, 2013",
+        "Id": "1"
+     },
+     { "CompanyName": "Alpha project",
+        "ContactName":"Alice Jackson",
+        "Phone": "0500 780909",
+        "Email": "alpha@email.com",
+        "CreatedOn": "Jul 14, 2013",
+        "Id": "2"
+     }];
+
+    function redirectToProcess(id) {
+        // 1. Buscar o cliente pelo Id
+        const selectedClient = clients.find(c => c.Id === String(id));
+
+        if (!selectedClient) {
+            console.error("Client not found for id:", id);
+            return;
+        }
+
+        // 2. Salvar no localStorage
+        localStorage.setItem("selectedClient", JSON.stringify(selectedClient));
+
+        // 3. Redirecionar para a página
         window.location = "ClientDetails";
     }
 

@@ -86,7 +86,7 @@
                              </tr>
                          </thead>
                          <tbody>
-                             <tr class="clicker" onclick="redirectToProcess()">
+                             <tr class="clicker" onclick="redirectToProcess(1)">
                                  <td>1</td>
                                  <td>Project <small>This is example of project</small></td>
                                  <td>Patrick Smith</td>
@@ -99,7 +99,7 @@
                                      <span class="label label-success">No Prazo</span>
                                  </td>
                              </tr>
-                             <tr class="clicker" onclick="redirectToProcess()">
+                             <tr class="clicker" onclick="redirectToProcess(2)">
                                  <td>2</td>
                                  <td>Alpha project</td>
                                  <td>Alice Jackson</td>
@@ -287,10 +287,35 @@
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
 <%  %>
   <script>
+   //Exemplo de objeto para funcionar front-end
+    var projects = [{ "ProjectName": "PRC-32456236",
+        "ContactName":"Patrick Smith",
+        "Phone": "0800 051213",
+        "CompanyName": "Inceptos Hymenaeos Ltd",
+        "CreatedOn": "Jul 14, 2013",
+        "Status": "No prazo",
+        "Id": "1"
+     },
+     { "ProjectName": "PRC-15948651",
+        "ContactName":"Alice Jackson",
+        "Phone": "0500 780909",
+        "CompanyName": "Alpha project",
+        "CreatedOn": "Jul 14, 2013",
+        "Status": "Encerrado",
+        "Id": "2"
+     }];
 
-      function redirectToProcess() {
-          window.location = "ProcessDetail";
-      }
+    function redirectToProcess(id) {
+        const selectedProject = projects.find(c => c.Id === String(id));
+
+        if (!selectedProject) {
+            console.error("Client not found for id:", id);
+            return;
+        }
+
+        localStorage.setItem("selectedProject", JSON.stringify(selectedProject));
+        window.location = "ProcessDetail";
+    }
 
       $(document).ready(function () {
           $("#pageName").text("Processos");

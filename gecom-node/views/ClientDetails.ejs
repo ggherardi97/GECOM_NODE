@@ -10,7 +10,7 @@
                         <div class="col-lg-12">
                             <div class="m-b-md">
                                 <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os detalhes do cliente</a>
-                                <h2>Zender Company</h2>
+                                <h2 id="companyName">Zender Company</h2>
                             </div>
 
                         </div>
@@ -46,7 +46,7 @@
                                     <dt>Nome Fantasia:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1"><a href="#" class="text-navy">Zender Company</a> </dd>
+                                    <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName">Zender Company</a> </dd>
                                 </div>
                             </dl>
                         </div>
@@ -57,7 +57,7 @@
                                     <dt>Telefone:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1">+55 11 961383-445</dd>
+                                    <dd class="mb-1" id="phone">+55 11 961383-445</dd>
                                 </div>
                             </dl>
                             <dl class="row mb-0">
@@ -65,7 +65,7 @@
                                     <dt>Email:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1">zender.company@zender.com</dd>
+                                    <dd class="mb-1" id="email">zender.company@zender.com</dd>
                                 </div>
                             </dl>
                         </div>
@@ -676,6 +676,19 @@
           $("#subpageName").text("Clientes");
           $("#subpageName").attr("href", "Clientes");
           $("#path").show();
+          
+          var client = localStorage.getItem("selectedClient");
+
+          if(client != null){
+            let clientParse = JSON.parse(client);
+
+            $("#companyName").text(clientParse.CompanyName);
+            $("#fantasyName").text(clientParse.CompanyName);
+
+            $("#email").text(clientParse.Email);
+            $("#phone").text(clientParse.Phone);
+          }else
+            alert("Erro ao carregar dados do cliente!");
       });
 
       function onContactClick(element) {

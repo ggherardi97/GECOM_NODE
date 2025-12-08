@@ -17,7 +17,7 @@
                           <div class="col-lg-12">
                               <div class="m-b-md">
                                   <a href="#" class="btn btn-white btn-xs float-right">Edit project</a>
-                                  <h2>Processo PRC-32456236</h2>
+                                  <h2 id="projectName"></h2>
                               </div>
 
                           </div>
@@ -29,7 +29,7 @@
                                       <dt>Status:</dt>
                                   </div>
                                   <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1"><span class="label label-primary">Active</span></dd>
+                                      <dd class="mb-1"><span class="label label-primary" id="state">Active</span></dd>
                                   </div>
                               </dl>
                               <dl class="row mb-0">
@@ -37,7 +37,7 @@
                                       <dt>Created by:</dt>
                                   </div>
                                   <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1">Alex Smith</dd>
+                                      <dd class="mb-1" id="contactName">Alex Smith</dd>
                                   </div>
                               </dl>
                               <dl class="row mb-0">
@@ -53,7 +53,7 @@
                                       <dt>Client:</dt>
                                   </div>
                                   <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1"><a href="#" class="text-navy">Zender Company</a> </dd>
+                                      <dd class="mb-1"><a href="#" class="text-navy" id="companyName">Zender Company</a> </dd>
                                   </div>
                               </dl>
                              
@@ -483,6 +483,18 @@
          $("#subpageName").attr("href", "Processos");
          $("#path").show();
 
+          var project = localStorage.getItem("selectedProject");
+
+          if(project != null){
+            let projectObject = JSON.parse(project);
+
+            $("#projectName").text("Processo " + projectObject.ProjectName);
+            $("#companyName").text(projectObject.CompanyName);
+
+            $("#contactName").text(projectObject.ContactName);
+            $("#state").text(projectObject.State);
+          }else
+            alert("Erro ao carregar dados do cliente!");
      });
      $(document).ready(function () {
 
