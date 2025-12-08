@@ -9,7 +9,7 @@ async function renderClients(req, res) {
 
     const data = await repo.listClients({ page, pageSize, search });
     // Render da sua view clientes.ejs
-    res.render('clientes', { data, search });
+    //res.render('clientes', { data, search });
   } catch (e) {
     console.error(e);
     res.status(500).send('Erro ao carregar clientes.');
@@ -21,7 +21,7 @@ async function renderClientDetails(req, res) {
     const id = Number(req.params.id);
     const client = await repo.getClientById(id);
     if (!client) return res.status(404).send('Cliente não encontrado.');
-    res.render('ClientDetails', { client });
+    //res.render('ClientDetails', { client });
   } catch (e) {
     console.error(e);
     res.status(500).send('Erro ao carregar cliente.');

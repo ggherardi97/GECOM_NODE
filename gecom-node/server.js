@@ -34,8 +34,9 @@ app.use('/api', authRoutes);               // suas rotas de autenticação sob /
 
 /* ---------- Páginas (EJS) ---------- */
 // Clients (render pelo controller com dados do banco)
-app.get('/clientes', clientsCtrl.renderClients);                 // lista
-app.get('/ClientDetails/:id', clientsCtrl.renderClientDetails);  // detalhe
+//app.get('/clientes', clientsCtrl.renderClients);     
+app.get('/clientes', (req, res) => res.render('clientes'));              // lista
+//app.get('/ClientDetails/:id', clientsCtrl.renderClientDetails);  // detalhe
 
 // Demais páginas “estáticas” (se quiser, depois pode trocar por controllers)
 app.get('/ClientDetails', (req, res) => res.render('ClientDetails'));

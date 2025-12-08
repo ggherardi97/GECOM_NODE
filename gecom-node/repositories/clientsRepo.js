@@ -21,7 +21,7 @@ async function listClients({
   const argsData = [];
 
   // Texto
-  where.push('(? = "" OR name LIKE ? OR email LIKE ?)');
+  where.push('(? = "" OR name LIKE ?)');
   argsCount.push(search, like, like);
   argsData.push(search, like, like);
 
@@ -30,13 +30,13 @@ async function listClients({
   const end = toDateOrNull(endDate);
 
   if (start) {
-    where.push('DATE(created_at) >= ?');
+    where.push('DATE(createdon) >= ?');
     const ymd = start.toISOString().slice(0, 10);
     argsCount.push(ymd);
     argsData.push(ymd);
   }
   if (end) {
-    where.push('DATE(created_at) <= ?');
+    where.push('DATE(createdon) <= ?');
     const ymd = end.toISOString().slice(0, 10);
     argsCount.push(ymd);
     argsData.push(ymd);
@@ -50,11 +50,9 @@ async function listClients({
     ${whereSql}
   `;
   const dataSql = `
-    SELECT id, name, email, created_at
+    SELECT idaccount, name, createdon
     FROM account
-    ${whereSql}
-    ORDER BY created_at DESC
-    LIMIT ? OFFSET ?
+    ORDER BY createdon DESC
   `;
 
   const [[countRow]] = await pool.query(countSql, argsCount);
@@ -65,7 +63,7 @@ async function listClients({
 
 async function getClientById(id) {
   const [rows] = await pool.query(
-    `SELECT id, name, email, created_at FROM account WHERE id = ?`,
+    `SELECT idaccount, name, createdon FROM account WHERE idaccount = ?`,
     [id]
   );
   return rows[0] ?? null;

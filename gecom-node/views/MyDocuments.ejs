@@ -378,13 +378,16 @@
         </div>
     </div>
 </div>
-
+<% contentFor('scripts') %>
+    
+    <script src="/Assets/inspinia/js/popper.min.js"></script>
+<%  %>
  <script>
      $(document).ready(function () {
          $("#pageName").text("Meus Documentos");
          $("#subSecoundPageName").text("");
          $("#subpageName").text("Meus Documentos");
-         $("#subpageName").attr("href", "MyDocuments.aspx");
+         $("#subpageName").attr("href", "MyDocuments");
          $("#path").hide();
 
          let isRaiz = true;
