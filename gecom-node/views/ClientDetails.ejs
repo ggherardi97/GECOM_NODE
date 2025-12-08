@@ -9,7 +9,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="m-b-md">
-                                <a href="#" class="btn btn-white btn-xs float-right">Edite os detalhes do cliente</a>
+                                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os detalhes do cliente</a>
                                 <h2>Zender Company</h2>
                             </div>
 
@@ -323,7 +323,7 @@
                                                                 <div class="btn-group">
                                                                     <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
                                                                     <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item" href="#">Nova Pasta</a></li>
+                                                                        <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a></li>
                                                                         <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
                                                                         <li><a class="dropdown-item" href="#">Link do Drive</a></li>
                                                                         <li class="dropdown-divider"></li>
@@ -680,5 +680,61 @@
 
       function onContactClick(element) {
           DynamicsModal.openDynamicsModal();
+      }
+
+      function callEditDetails(){
+         const html = `
+            <div class="form-group">
+                <label for="txtName">Name</label>
+                <input id="txtName" class="form-control" value="Zender Company" />
+            </div>
+            <div class="form-group">
+                <label for="txtQty">Email</label>
+                <input id="txtQty" class="form-control" value="zender.company@zender.com" />
+            </div>
+            <div class="form-group">
+                <label for="txtTel">Telefone</label>
+                <input id="txtTel" class="form-control" value="+55 11 961383-445"  />
+            </div>
+        `;
+
+        SideModal.open({
+            title: 'Editar detalhes do Cliente',
+            html: html,
+            onOk: function () {
+                // Read values and do something
+                const name = $('#txtName').val();
+                const qty = $('#txtQty').val();
+                console.log('OK clicked', { name, qty });
+                // aqui você pode fazer submit via AJAX, etc.
+            },
+            onCancel: function () {
+                console.log('Modal canceled');
+            }
+        });
+      }
+
+      function callNewFolder(){
+        const html = `
+            <div class="form-group">
+                <label for="txtName">Nome da pasta</label>
+                <input id="txtName" class="form-control" />
+            </div>
+        `;
+
+        SideModal.open({
+            title: 'Criar nova pasta',
+            html: html,
+            onOk: function () {
+                // Read values and do something
+                const name = $('#txtName').val();
+                const qty = $('#txtQty').val();
+                console.log('OK clicked', { name, qty });
+                // aqui você pode fazer submit via AJAX, etc.
+            },
+            onCancel: function () {
+                console.log('Modal canceled');
+            }
+        });
       }
   </script>

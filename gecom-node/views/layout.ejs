@@ -37,21 +37,61 @@
     <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
 
     <%- typeof headerLink !== 'undefined' ? headerLink : '' %>
-    <style>
-      .dynamic-modal {
-        display: none;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
-        position: fixed;
-        left: 75%;
-        height: 100%;
-        z-index: 999999;
-        background-color: rgb(250, 250, 250);
-        width: 25%;
-        padding: 20px;
-        overflow-y: auto;
-        top: 0;
-      }
-    </style>
+   <style>
+  .dynamic-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 999998;
+  }
+
+  .dynamic-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 999999;
+    background-color: #fafafa;
+    width: 430px; /* parecido com quick create */
+    padding: 20px;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+  }
+
+  .dynamic-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .dynamic-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .dynamic-modal-close {
+    border: none;
+    background: none;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .dynamic-modal-body {
+    margin-bottom: 20px;
+  }
+
+  .dynamic-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 10px;
+  }
+</style>
   </head>
   <body>
     <div id="wrapper">
@@ -123,6 +163,29 @@
           <div class="float-right">Sistema GECOM</div>
           <div><strong>Copyright</strong> GECOM &copy;</div>
         </div>
+      </div>
+    </div>
+
+      <!-- Side Modal (global) -->
+    <div id="dynamicModalOverlay" class="dynamic-modal-overlay"></div>
+
+    <div id="dynamicModal" class="dynamic-modal">
+      <div class="dynamic-modal-header">
+        <h3 id="dynamicModalTitle" class="dynamic-modal-title"></h3>
+        <button type="button" id="dynamicModalCloseBtn" class="dynamic-modal-close">&times;</button>
+      </div>
+
+      <div id="dynamicModalBody" class="dynamic-modal-body">
+        <!-- Dynamic content here -->
+      </div>
+
+      <div class="dynamic-modal-footer">
+        <button type="button" id="dynamicModalCancelBtn" class="btn btn-default">
+          Cancel
+        </button>
+        <button type="button" id="dynamicModalOkBtn" class="btn btn-primary">
+          OK
+        </button>
       </div>
     </div>
 
