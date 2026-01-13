@@ -1,408 +1,425 @@
 <style>
-    .ibox-title { padding: 15px 90px 20px 15px; }
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  .wizard-big.wizard>.content {
+    min-height: 350px !important;
+  }
 </style>
 
 <% contentFor('headerLink') %>
-<link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-<link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
-<%  %>
+  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+  <link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
+  <% %>
 
-<div>
-  <div id="wrapper-clientes">
-    <div id="page-wrapper-clientes" class="gray-bg">
-      <div class="row border-bottom">
-        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0; display: none;">
-          <div class="navbar-header">
-            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i></a>
-            <form role="search" class="navbar-form-custom" action="search_results.html">
-              <div class="form-group">
-                <input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search">
+    <div>
+      <div id="wrapper-clientes">
+        <div id="page-wrapper-clientes" class="gray-bg">
+          <div class="row border-bottom">
+            <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0; display: none;">
+              <div class="navbar-header">
+                <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i></a>
+                <form role="search" class="navbar-form-custom" action="search_results.html">
+                  <div class="form-group">
+                    <input type="text" placeholder="Search for something..." class="form-control" name="top-search"
+                      id="top-search">
+                  </div>
+                </form>
               </div>
-            </form>
+            </nav>
           </div>
-        </nav>
-      </div>
 
-      <div class="wrapper wrapper-content animated fadeInRight">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="ibox">
-              <div class="ibox-title">
-                <h5>Criação de cliente</h5>
-                <div class="ibox-tools"></div>
-              </div>
+          <div class="wrapper wrapper-content animated fadeInRight">
+            <div class="row">
+              <div class="col-lg-12">
+                <div class="ibox">
+                  <div class="ibox-title">
+                    <h5>Criação de cliente</h5>
+                    <div class="ibox-tools"></div>
+                  </div>
 
-              <div class="ibox-content">
-                <p>Preencha as informações de conta e contato.</p>
+                  <div class="ibox-content">
+                    <p>Preencha as informações de conta e contato.</p>
 
-                <form id="form" action="#" class="wizard-big">
-                  <h1>Cliente</h1>
-                  <fieldset>
-                    <h2>Informações do cliente</h2>
-                    <div class="row">
-                      <div class="col-lg-4">
-                        <div class="form-group">
-                          <label>Nome da Empresa *</label>
-                          <input id="companyname" name="companyname" type="text" class="form-control required">
-                        </div>
-                        <div class="form-group">
-                          <label>Telefone *</label>
-                          <input id="phone" name="phone" onkeyup="maskPhone(this)" type="text" class="form-control required" maxlength="15">
-                        </div>
-                        <div class="form-group">
-                          <label>Setor</label>
-                          <input id="setor" name="setor" type="text" class="form-control required" maxlength="18" placeholder="Ex:.. Agrícola">
-                        </div>
-                      </div>
+                    <form id="form" action="#" class="wizard-big">
+                      <h1>Cliente</h1>
+                      <fieldset>
+                        <h2>Informações do cliente</h2>
+                        <div class="row">
+                          <div class="col-lg-4">
+                            <div class="form-group">
+                              <label>Nome da Empresa *</label>
+                              <input id="companyname" name="companyname" type="text" class="form-control required">
+                            </div>
+                            <div class="form-group">
+                              <label>Telefone *</label>
+                              <input id="phone" name="phone" onkeyup="maskPhone(this)" type="text"
+                                class="form-control required" maxlength="15">
+                            </div>
+                            <div class="form-group">
+                              <label>Setor</label>
+                              <input id="setor" name="setor" type="text" class="form-control" maxlength="18"
+                                placeholder="Ex:.. Agrícola">
+                            </div>
+                          </div>
 
-                      <div class="col-lg-4">
-                        <div class="form-group">
-                          <label>CNPJ *</label>
-                          <input id="cnpj" name="cnpj" onkeyup="maskCNPJ(this)" type="text" class="form-control required" maxlength="18">
-                        </div>
-                        <div class="form-group">
-                          <label>Categoria</label>
-                          <input id="categoria" name="categoria" type="text" class="form-control required" maxlength="18" placeholder="Ex:.. Software">
-                        </div>
-                      </div>
+                          <div class="col-lg-4">
+                            <div class="form-group">
+                              <label>CNPJ *</label>
+                              <input id="cnpj" name="cnpj" onkeyup="maskCNPJ(this)" type="text"
+                                class="form-control required" maxlength="18">
+                            </div>
+                            <div class="form-group">
+                              <label>Porte</label>
+                                <select id="categoria" class="form-control">
+                                  <option value="-1" selected>Selecionar...</option>
+                                  <option value="0" >Pequeno</option>
+                                  <option value="1" >Médio</option>
+                                  <option value="2" >Grande</option>
+                                </select>
+                            </div>
+                          </div>
 
-                      <div class="col-lg-4">
-                        <div class="text-center">
-                          <div style="margin-top: 20px">
-                            <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
+                          <div class="col-lg-4">
+                            <div class="text-center">
+                              <div style="margin-top: 20px">
+                                <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </fieldset>
+                      </fieldset>
 
-                  <h1>Acesso</h1>
-                  <fieldset>
-                    <h2>Informações do contato</h2>
-                    <div class="row">
-                      <div class="col-lg-6">
-                        <div class="form-group">
-                          <label>Nome Completo *</label>
-                          <input id="name" name="name" type="text" class="form-control required">
-                        </div>
-                        <div class="form-group">
-                          <label>Telefone pessoal</label>
-                          <input id="telphone" onkeyup="maskPhone(this)" name="telphone" type="text" class="form-control" maxlength="15">
-                        </div>
-                      </div>
+                      <h1>Acesso</h1>
+                      <fieldset>
+                        <h2>Informações do contato</h2>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Nome Completo *</label>
+                              <input id="name" name="name" type="text" class="form-control required">
+                            </div>
+                            <div class="form-group">
+                              <label>Telefone pessoal</label>
+                              <input id="telphone" onkeyup="maskPhone(this)" name="telphone" type="text"
+                                class="form-control" maxlength="15">
+                            </div>
+                          </div>
 
-                      <div class="col-lg-6">
-                        <div class="form-group">
-                          <label>Email *</label>
-                          <input id="email" name="email" type="text" class="form-control required email">
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Email *</label>
+                              <input id="email" name="email" type="text" class="form-control required email">
+                            </div>
+                            <div class="form-group">
+                              <label for="acessToPortal" style="width: 100%">Enviar acesso ao portal?</label>
+                              <input type="checkbox" id="acessToPortal" class="i-checks" checked>
+                            </div>
+                          </div>
                         </div>
-                        <div class="form-group">
-                          <label for="acessToPortal" style="width: 100%">Enviar acesso ao portal?</label>
-                          <input type="checkbox" id="acessToPortal" class="i-checks" checked>
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
+                      </fieldset>
 
-                  <h1>Dados Opcionais</h1>
-                  <fieldset>
-                    <div class="row">
-                      <div class="col-lg-6">
-                        <div class="form-group">
-                          <label>Código Postal</label>
-                          <input id="postalcode" name="postalcode" type="text" class="form-control" maxlength="9" placeholder="00000-000">
-                          <small id="postalHelp" style="display:none; color:#999;">Buscando endereço...</small>
-                        </div>
-                        <div class="form-group">
-                          <label>Rua</label>
-                          <input id="street" name="street" type="text" class="form-control">
-                        </div>
-                        <div class="form-group">
-                          <label>País</label>
-                          <input id="country" name="country" type="text" class="form-control">
-                        </div>
-                      </div>
+                      <h1>Dados Opcionais</h1>
+                      <fieldset>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Código Postal</label>
+                              <input id="postalcode" name="postalcode" type="text" class="form-control" maxlength="9"
+                                placeholder="00000-000">
+                              <small id="postalHelp" style="display:none; color:#999;">Buscando endereço...</small>
+                            </div>
+                            <div class="form-group">
+                              <label>Rua</label>
+                              <input id="street" name="street" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                              <label>País</label>
+                              <input id="country" name="country" type="text" class="form-control">
+                            </div>
+                          </div>
 
-                      <div class="col-lg-6">
-                        <div class="form-group">
-                          <label>Cidade</label>
-                          <input id="city" name="city" type="text" class="form-control">
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Cidade</label>
+                              <input id="city" name="city" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                              <label>Estado</label>
+                              <input id="state" name="state" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                              <label>Complemento</label>
+                              <input id="complemento" name="complemento" type="text" class="form-control">
+                            </div>
+                          </div>
                         </div>
-                        <div class="form-group">
-                          <label>Estado</label>
-                          <input id="state" name="state" type="text" class="form-control">
-                        </div>
-                        <div class="form-group">
-                          <label>Complemento</label>
-                          <input id="complemento" name="complemento" type="text" class="form-control">
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
+                      </fieldset>
 
-                  <!-- <h1>Finish</h1>
+                      <!-- <h1>Finish</h1>
                   <fieldset>
                     <h2>Terms and Conditions</h2>
                     <label for="acceptTerms">I agree with the Terms and Conditions.</label>
                     <input id="acceptTerms" name="acceptTerms" type="checkbox" class="required">
                   </fieldset> -->
-                </form>
+                    </form>
 
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
-
     </div>
-  </div>
-</div>
 
-<% contentFor('scripts') %>
-<script src="../Assets/inspinia/js/jquery-3.1.1.min.js"></script>
-<script src="../Assets/inspinia/js/popper.min.js"></script>
-<script src="../Assets/inspinia/js/bootstrap.js"></script>
-<script src="../Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-<script src="../Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <% contentFor('scripts') %>
+      <script src="../Assets/inspinia/js/jquery-3.1.1.min.js"></script>
+      <script src="../Assets/inspinia/js/popper.min.js"></script>
+      <script src="../Assets/inspinia/js/bootstrap.js"></script>
+      <script src="../Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+      <script src="../Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
-<script src="../Assets/inspinia/js/inspinia.js"></script>
-<script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+      <script src="../Assets/inspinia/js/inspinia.js"></script>
+      <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 
-<script src="../Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
-<%  %>
+      <script src="../Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
+      <script src="../Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
+      <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
+      <% %>
 
-<script>
-  // -------------------- UI helpers --------------------
-  function getValue(id) {
-    const el = document.getElementById(id);
-    return (el && el.value ? el.value : "").trim();
-  }
+        <script>
+          // -------------------- UI helpers --------------------
+          function getValue(id) {
+            const el = document.getElementById(id);
+            return (el && el.value ? el.value : "").trim();
+          }
 
-  function normalizeCep(value) {
-    return String(value || "").replace(/\D/g, "").slice(0, 8);
-  }
+          function normalizeCep(value) {
+            return String(value || "").replace(/\D/g, "").slice(0, 8);
+          }
 
-  function showPostalLoading(isLoading) {
-    const el = document.getElementById("postalHelp");
-    if (!el) return;
-    el.style.display = isLoading ? "block" : "none";
-  }
+          function showPostalLoading(isLoading) {
+            const el = document.getElementById("postalHelp");
+            if (!el) return;
+            el.style.display = isLoading ? "block" : "none";
+          }
 
-  // -------------------- CEP lookup (server-side proxy) --------------------
-  let cepTimer = null;
+          // -------------------- CEP lookup (server-side proxy) --------------------
+          let cepTimer = null;
 
-  async function lookupAddressByPostalCode() {
-    const cep = normalizeCep(getValue("postalcode"));
-    if (cep.length !== 8) return;
+          async function lookupAddressByPostalCode() {
+            const cep = normalizeCep(getValue("postalcode"));
+            if (cep.length !== 8) return;
 
-    try {
-      showPostalLoading(true);
+            try {
+              showPostalLoading(true);
 
-      const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
-        method: "GET",
-        headers: { "Accept": "application/json" }
-      });
+              const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+              });
 
-      const data = await response.json().catch(() => ({}));
+              const data = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        console.warn("CEP lookup failed:", data);
-        return;
-      }
+              if (!response.ok) {
+                console.warn("CEP lookup failed:", data);
+                return;
+              }
 
-      // Fill fields (only if empty to not overwrite user edits)
-      const street = document.getElementById("street");
-      const city = document.getElementById("city");
-      const state = document.getElementById("state");
-      const country = document.getElementById("country");
+              // Fill fields (only if empty to not overwrite user edits)
+              const street = document.getElementById("street");
+              const city = document.getElementById("city");
+              const state = document.getElementById("state");
+              const country = document.getElementById("country");
 
-      if (street && !street.value.trim() && data.street) street.value = data.street;
-      if (city && !city.value.trim() && data.city) city.value = data.city;
-      if (state && !state.value.trim() && data.state) state.value = data.state;
+              if (street && !street.value.trim() && data.street) street.value = data.street;
+              if (city && !city.value.trim() && data.city) city.value = data.city;
+              if (state && !state.value.trim() && data.state) state.value = data.state;
 
-      // In Brazil, you can force "Brasil" if you prefer
-      if (country && !country.value.trim()) country.value = data.country || "Brasil";
+              // In Brazil, you can force "Brasil" if you prefer
+              if (country && !country.value.trim()) country.value = data.country || "Brasil";
 
-    } catch (e) {
-      console.error("CEP lookup error:", e);
-    } finally {
-      showPostalLoading(false);
-    }
-  }
+            } catch (e) {
+              console.error("CEP lookup error:", e);
+            } finally {
+              showPostalLoading(false);
+            }
+          }
 
-  function attachPostalAutoFill() {
-    const postal = document.getElementById("postalcode");
-    if (!postal) return;
+          function attachPostalAutoFill() {
+            const postal = document.getElementById("postalcode");
+            if (!postal) return;
 
-    postal.addEventListener("input", function () {
-      // simple CEP mask 00000-000
-      let v = postal.value.replace(/\D/g, "").slice(0, 8);
-      if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
-      postal.value = v;
+            postal.addEventListener("input", function () {
+              // simple CEP mask 00000-000
+              let v = postal.value.replace(/\D/g, "").slice(0, 8);
+              if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+              postal.value = v;
 
-      clearTimeout(cepTimer);
-      cepTimer = setTimeout(lookupAddressByPostalCode, 500);
-    });
+              clearTimeout(cepTimer);
+              cepTimer = setTimeout(lookupAddressByPostalCode, 500);
+            });
 
-    postal.addEventListener("blur", function () {
-      lookupAddressByPostalCode();
-    });
-  }
+            postal.addEventListener("blur", function () {
+              lookupAddressByPostalCode();
+            });
+          }
 
-  // -------------------- Create user + company --------------------
-  function generateTempPassword() {
-    // simple temp password (you can replace later)
-    const rand = Math.random().toString(36).slice(2);
-    return `Tmp@${rand}9`;
-  }
+          // -------------------- Create user + company --------------------
+          function generateTempPassword() {
+            // simple temp password (you can replace later)
+            const rand = Math.random().toString(36).slice(2);
+            return `Tmp@${rand}9`;
+          }
 
-  async function createUser() {
-    debugger;
-    const sendAccess = $("#acessToPortal").is(":checked");
-    const password = sendAccess ? generateTempPassword() : "";
+          async function createUser() {
+            debugger;
+            const sendAccess = $("#acessToPortal").is(":checked");
+            const password = sendAccess ? generateTempPassword() : "";
 
-    const payload = {
-        full_name: getValue("name"),
-        email: getValue("email"),
-        password: password,
-        //first_access: sendAccess,
-        role: "USER",
-        status: "ACTIVE"
-    };
+            const payload = {
+              full_name: getValue("name"),
+              email: getValue("email"),
+              password: password,
+              //first_access: sendAccess,
+              role: "USER",
+              status: "ACTIVE"
+            };
 
-    const response = await fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+            const response = await fetch("/api/users", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Create user failed", data);
-      throw new Error(data?.message || "Failed to create user");
-    }
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              console.error("Create user failed", data);
+              throw new Error(data?.message || "Failed to create user");
+            }
 
-    // Try common id keys
-    const userId =
-      data.user_id || data.userId || data.id || data.uuid || data._id;
+            // Try common id keys
+            const userId =
+              data.user_id || data.userId || data.id || data.uuid || data._id;
 
-    if (!userId) {
-      console.warn("User created but no id returned:", data);
-      throw new Error("User created but user id was not returned by backend.");
-    }
+            if (!userId) {
+              console.warn("User created but no id returned:", data);
+              throw new Error("User created but user id was not returned by backend.");
+            }
 
-    return { userId, raw: data };
-  }
+            return { userId, raw: data };
+          }
 
-  async function createCompanyWithUser(userId) {
-    const payload = {
-      company_name: getValue("companyname"),
-      user_id: userId,
-      phone: getValue("phone"),
-      company_number: getValue("cnpj"),
-      sector: getValue("setor"),
-      category: getValue("categoria"),
-      address_line: getValue("complemento"),
-      address_street: getValue("street"),
-      address_number: "", // you can add an input later if needed
-      address_city: getValue("city"),
-      address_country: getValue("country")
-    };
+          async function createCompanyWithUser(userId) {
+            const payload = {
+              company_name: getValue("companyname"),
+              user_id: userId,
+              phone: getValue("phone"),
+              company_number: getValue("cnpj"),
+              sector: getValue("setor"),
+              category: $("#categoria").val() = -1 ? $("#categoria").text() : "",
+              address_line: getValue("complemento"),
+              address_street: getValue("street"),
+              address_number: "", // you can add an input later if needed
+              address_city: getValue("city"),
+              address_country: getValue("country")
+            };
 
-    const response = await fetch("/api/companies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+            const response = await fetch("/api/companies", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Create company failed", data);
-      throw new Error(data?.message || "Failed to create company");
-    }
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              console.error("Create company failed", data);
+              throw new Error(data?.message || "Failed to create company");
+            }
 
-    return data;
-  }
+            return data;
+          }
 
-  // -------------------- Masks --------------------
-  function maskPhone(element) {
-    let value = element.value.replace(/\D/g, '');
-    if (value.length <= 10) {
-      element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    } else {
-      element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    }
-  }
+          // -------------------- Masks --------------------
+          function maskPhone(element) {
+            let value = element.value.replace(/\D/g, '');
+            if (value.length <= 10) {
+              element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else {
+              element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+            }
+          }
 
-  function maskCNPJ(element) {
-    let value = element.value;
-    value = value.replace(/\D/g, '');
-    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-    value = value.replace(/(\d{4})(\d)/, "$1-$2");
-    element.value = value;
-  }
+          function maskCNPJ(element) {
+            let value = element.value;
+            value = value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+            value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+            value = value.replace(/(\d{4})(\d)/, "$1-$2");
+            element.value = value;
+          }
 
-  // -------------------- Wizard init --------------------
-  $(document).ready(function () {
-    $("#pageName").text("Novo Cliente");
-    $("#subSecoundPageName").text("Novo Cliente");
-    $("#subpageName").text("Clientes");
-    $("#subpageName").attr("href", "Clientes");
-    $("#path").show();
+          // -------------------- Wizard init --------------------
+          $(document).ready(function () {
+            $("#pageName").text("Novo Cliente");
+            $("#subSecoundPageName").text("Novo Cliente");
+            $("#subpageName").text("Clientes");
+            $("#subpageName").attr("href", "Clientes");
+            $("#path").show();
 
-    $('.i-checks').iCheck({
-      checkboxClass: 'icheckbox_square-green',
-      radioClass: 'iradio_square-green'
-    });
+            $('.i-checks').iCheck({
+              checkboxClass: 'icheckbox_square-green',
+              radioClass: 'iradio_square-green'
+            });
 
-    attachPostalAutoFill();
+            attachPostalAutoFill();
 
-    $("#wizard").steps();
-    $("#form").steps({
-      bodyTag: "fieldset",
-      onStepChanging: function (event, currentIndex, newIndex) {
-        if (currentIndex > newIndex) return true;
+            $("#wizard").steps();
+            $("#form").steps({
+              bodyTag: "fieldset",
+              onStepChanging: function (event, currentIndex, newIndex) {
+                if (currentIndex > newIndex) return true;
 
-        const form = $(this);
+                const form = $(this);
 
-        if (currentIndex < newIndex) {
-          $(".body:eq(" + newIndex + ") label.error", form).remove();
-          $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
-        }
+                if (currentIndex < newIndex) {
+                  $(".body:eq(" + newIndex + ") label.error", form).remove();
+                  $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                }
 
-        form.validate().settings.ignore = ":disabled,:hidden";
-        return form.valid();
-      },
-      onFinishing: function () {
-        const form = $(this);
-        form.validate().settings.ignore = ":disabled";
-        return form.valid();
-      },
-      onFinished: async function () {
-        try {
-          // 1) create user
-          const userResult = await createUser();
+                form.validate().settings.ignore = ":disabled,:hidden";
+                return form.valid();
+              },
+              onFinishing: function () {
+                const form = $(this);
+                form.validate().settings.ignore = ":disabled";
+                return form.valid();
+              },
+              onFinished: async function () {
+                try {
+                  // 1) create user
+                  const userResult = await createUser();
 
-          // 2) create company with user_id
-          const companyResult = await createCompanyWithUser(userResult.userId);
+                  // 2) create company with user_id
+                  const companyResult = await createCompanyWithUser(userResult.userId);
 
-          console.log("User created:", userResult.raw);
-          console.log("Company created:", companyResult);
+                  console.log("User created:", userResult.raw);
+                  console.log("Company created:", companyResult);
 
-          window.location = "Clientes";
-        } catch (e) {
-          console.error(e);
-          alert(e.message || "Erro ao criar cliente.");
-        }
-      }
-    }).validate({
-      errorPlacement: function (error, element) {
-        element.before(error);
-      }
-    });
-  });
-</script>
+                  window.location = "Clientes";
+                } catch (e) {
+                  console.error(e);
+                  alert(e.message || "Erro ao criar cliente.");
+                }
+              }
+            }).validate({
+              errorPlacement: function (error, element) {
+                element.before(error);
+              }
+            });
+          });
+        </script>

@@ -608,7 +608,7 @@
         CompanyName: company.company_name ?? "",
         Phone: company.phone ?? "",
         Sector: company.sector ?? "Geral",
-        Size: company.size ?? company.porte ?? "-",
+        Size: company.category ?? company.porte ?? "-",
         Status: company.status ?? "Active",
         // Email belongs to Users table; fallback to primary user email
         Email: company.email ?? primaryUser?.email ?? ""
@@ -803,7 +803,7 @@
               company_name: $("#txtCompanyName").val(),
               phone: $("#txtPhone").val(),
               sector: $("#txtSector").val(),
-              size: $("#txtSize").val()
+              category: $("#txtSize").val()
             };
 
             await patchCompanyById(vm.Id, payload);

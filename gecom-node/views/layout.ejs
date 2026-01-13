@@ -1,213 +1,517 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>GECOM - Portal</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Novo Processo links -->
-    <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-    <link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
-    <link href="../Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
-    <link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
-    <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<head>
+  <meta charset="utf-8" />
+  <title>GECOM - Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Ícone -->
-    <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
-    <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <!-- Novo Processo links -->
+  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+  <link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
+  <link href="../Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
+  <link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
+  <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
 
-    <!-- CSS -->
-    <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="/Assets/inspinia/css/animate.css" rel="stylesheet" />
-    <link href="/Assets/inspinia/css/style.css" rel="stylesheet" />
-    <link href="/Assets/inspinia/css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet" />
+  <!-- Ícone -->
+  <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
 
-    <!-- JS head -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="/Assets/inspinia/js/popper.min.js"></script>
-    <script src="/Assets/inspinia/js/bootstrap.min.js"></script>
-    <script src="/Assets/inspinia/js/jquery-3.1.1.min.js"></script>
-    <script src="/Assets/inspinia/js/inspinia.js"></script>
-    <script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-    <script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-    <script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
-    <script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
-    <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
-    <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
+  <!-- CSS -->
+  <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/animate.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/style.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet" />
 
-    <%- typeof headerLink !== 'undefined' ? headerLink : '' %>
-   <style>
-  .dynamic-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 999998;
-  }
 
-  .dynamic-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    z-index: 999999;
-    background-color: #fafafa;
-    width: 430px; /* parecido com quick create */
-    padding: 20px;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-  }
+  <!-- JS head -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/Assets/inspinia/js/popper.min.js"></script>
+  <script src="/Assets/inspinia/js/bootstrap.min.js"></script>
+  <script src="/Assets/inspinia/js/jquery-3.1.1.min.js"></script>
+  <script src="/Assets/inspinia/js/inspinia.js"></script>
+  <script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+  <script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
+  <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
 
-  .dynamic-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
+  <%- typeof headerLink !=='undefined' ? headerLink : '' %>
+    <style>
+      .dynamic-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999998;
+      }
 
-  .dynamic-modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-  }
+      .dynamic-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        z-index: 999999;
+        background-color: #fafafa;
+        width: 430px;
+        /* parecido com quick create */
+        padding: 20px;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+      }
 
-  .dynamic-modal-close {
-    border: none;
-    background: none;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
-  }
+      .dynamic-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
 
-  .dynamic-modal-body {
-    margin-bottom: 20px;
-  }
+      .dynamic-modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+      }
 
-  .dynamic-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    padding-top: 10px;
-  }
-</style>
-  </head>
-  <body>
-    <div id="wrapper">
-      <!-- Sidebar -->
-      <nav class="navbar-default navbar-static-side" role="navigation">
-        <div class="sidebar-collapse">
-          <ul class="nav metismenu" id="side-menu">
-            <li class="nav-header text-center">
-              <div class="dropdown profile-element">
-                <span>
-                  <img alt="image" class="rounded-circle" style="width: 80px;" src="https://media.licdn.com/dms/image/v2/D4D03AQEerJZZBBAQTQ/profile-displayphoto-shrink_800_800/B4DZcM22u5IAAc-/0/1748267396670?e=1762387200&v=beta&t=FDyVnwH0JYhgHCLyaO1A0Qe73RsqByvyc072KI-7Qxs" />
-                </span>
-                <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                  <span class="block m-t-xs font-bold">Gustavo Gherardi</span>
-                  <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
-                </a>
-                <ul class="dropdown-menu animated fadeInRight m-t-xs">
-                  <li><a href="#">Perfil</a></li>
-                  <li class="divider"></li>
-                  <li><a onclick="LogOut()">Sair</a></li>
-                </ul>
-              </div>
-              <div class="logo-element">GC</div>
-            </li>
-            <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
-            <li><a href="/Processos"><i class="fa fa-file"></i> <span class="nav-label">Processos</span></a></li>
-            <li><a href="/MyDocuments"><i class="fa fa-folder"></i> <span class="nav-label">Meus Documentos</span></a></li>
-            <li><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
-          </ul>
-        </div>
-      </nav>
+      .dynamic-modal-close {
+        border: none;
+        background: none;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+      }
 
-      <!-- Conteúdo principal -->
-      <div id="page-wrapper" class="gray-bg">
-        <div class="row border-bottom">
-          <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0;">
-            <div class="navbar-header">
-              <a class="navbar-minimalize minimalize-styl-2 btn btn-primary" href="#"><i class="fa fa-bars"></i></a>
+      .dynamic-modal-body {
+        margin-bottom: 20px;
+      }
+
+      .dynamic-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 10px;
+      }
+
+      .gecom-spinner-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, .65);
+        z-index: 1000000;
+        /* maior que seus modais */
+        align-items: center;
+        justify-content: center;
+      }
+
+      .gecom-spinner-overlay.is-visible {
+        display: flex;
+      }
+
+      .gecom-spinner-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .gecom-spinner-text {
+        font-weight: 600;
+        color: #333;
+      }
+    </style>
+</head>
+
+<body>
+  <!-- Global Spinner Overlay -->
+  <div id="globalSpinner" class="gecom-spinner-overlay" aria-hidden="true">
+    <div class="gecom-spinner-content">
+      <div class="sk-spinner sk-spinner-wandering-cubes">
+        <div class="sk-cube1"></div>
+        <div class="sk-cube2"></div>
+      </div>
+      <div class="gecom-spinner-text" id="globalSpinnerText" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <nav class="navbar-default navbar-static-side" role="navigation">
+      <div class="sidebar-collapse">
+        <ul class="nav metismenu" id="side-menu">
+          <li class="nav-header text-center">
+            <div class="dropdown profile-element">
+              <span>
+                <img alt="image" class="rounded-circle" style="width: 80px;"
+                  src="https://media.licdn.com/dms/image/v2/D4D03AQEerJZZBBAQTQ/profile-displayphoto-shrink_800_800/B4DZcM22u5IAAc-/0/1748267396670?e=1762387200&v=beta&t=FDyVnwH0JYhgHCLyaO1A0Qe73RsqByvyc072KI-7Qxs" />
+              </span>
+              <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                <span class="block m-t-xs font-bold">Gustavo Gherardi</span>
+                <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
+              </a>
+              <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                <li><a href="#">Perfil</a></li>
+                <li class="divider"></li>
+                <li><a onclick="LogOut()">Sair</a></li>
+              </ul>
             </div>
-            <ul class="nav navbar-top-links navbar-right">
-              <li><a href="/"><i class="fa fa-sign-out"></i> Sair</a></li>
-            </ul>
-          </nav>
-        </div>
+            <div class="logo-element">GC</div>
+          </li>
+          <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
+          <li><a href="/Processos"><i class="fa fa-file"></i> <span class="nav-label">Processos</span></a></li>
+          <li><a href="/MyDocuments"><i class="fa fa-folder"></i> <span class="nav-label">Meus Documentos</span></a>
+          </li>
+          <li><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
+        </ul>
+      </div>
+    </nav>
 
-        <div class="row wrapper border-bottom white-bg page-heading">
-          <div class="col-lg-10">
-            <h2 id="pageName"></h2>
-            <ol class="breadcrumb">
-              <li class="breadcrumb-item">
-                <a id="subpageName">Home</a>
-              </li>
-              <li class="breadcrumb-item" id="path" style="display: none;">
-                <a id="subSecoundPageName">Forms</a>
-              </li>
-              <li class="breadcrumb-item active" id="subpath" style="display: none;">
-                <strong id="subpathName">Wizard</strong>
-              </li>
-            </ol>
+    <!-- Conteúdo principal -->
+    <div id="page-wrapper" class="gray-bg">
+      <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0;">
+          <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary" href="#"><i class="fa fa-bars"></i></a>
           </div>
-          <div class="col-lg-2"></div>
-        </div>
+          <ul class="nav navbar-top-links navbar-right">
+            <li><a href="/"><i class="fa fa-sign-out"></i> Sair</a></li>
+          </ul>
+        </nav>
+      </div>
 
-        <!-- Render page content here -->
-        <%- body %>
+      <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+          <h2 id="pageName"></h2>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a id="subpageName">Home</a>
+            </li>
+            <li class="breadcrumb-item" id="path" style="display: none;">
+              <a id="subSecoundPageName">Forms</a>
+            </li>
+            <li class="breadcrumb-item active" id="subpath" style="display: none;">
+              <strong id="subpathName">Wizard</strong>
+            </li>
+          </ol>
+        </div>
+        <div class="col-lg-2"></div>
+      </div>
+
+      <!-- Render page content here -->
+      <%- body %>
 
         <!-- Footer -->
         <div class="footer">
           <div class="float-right">Sistema GECOM</div>
           <div><strong>Copyright</strong> GECOM &copy;</div>
         </div>
-      </div>
+    </div>
+  </div>
+
+  <!-- Side Modal (global) -->
+  <div id="dynamicModalOverlay" class="dynamic-modal-overlay"></div>
+
+  <div id="dynamicModal" class="dynamic-modal">
+    <div class="dynamic-modal-header">
+      <h3 id="dynamicModalTitle" class="dynamic-modal-title"></h3>
+      <button type="button" id="dynamicModalCloseBtn" class="dynamic-modal-close">&times;</button>
     </div>
 
-      <!-- Side Modal (global) -->
-    <div id="dynamicModalOverlay" class="dynamic-modal-overlay"></div>
-
-    <div id="dynamicModal" class="dynamic-modal">
-      <div class="dynamic-modal-header">
-        <h3 id="dynamicModalTitle" class="dynamic-modal-title"></h3>
-        <button type="button" id="dynamicModalCloseBtn" class="dynamic-modal-close">&times;</button>
-      </div>
-
-      <div id="dynamicModalBody" class="dynamic-modal-body">
-        <!-- Dynamic content here -->
-      </div>
-
-      <div class="dynamic-modal-footer">
-        <button type="button" id="dynamicModalCancelBtn" class="btn btn-default">
-          Cancel
-        </button>
-        <button type="button" id="dynamicModalOkBtn" class="btn btn-primary">
-          OK
-        </button>
-      </div>
+    <div id="dynamicModalBody" class="dynamic-modal-body">
+      <!-- Dynamic content here -->
     </div>
 
-    <%- typeof script !== 'undefined' ? script : '' %>
-<%- typeof scripts !== 'undefined' ? scripts : '' %>
-    <script>
-      async function LogOut(){
-        try {
+    <div class="dynamic-modal-footer">
+      <button type="button" id="dynamicModalCancelBtn" class="btn btn-default">
+        Cancel
+      </button>
+      <button type="button" id="dynamicModalOkBtn" class="btn btn-primary">
+        OK
+      </button>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-primary" style="display: none;" data-toggle="modal" id="modalButton"
+    data-target="#GlobalModal">
+    Large Modal
+  </button>
+  <div class="modal inmodal fade" id="GlobalModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+              class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="modalTitle"></h4>
+          <!-- <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small> -->
+        </div>
+        <div class="modal-body" id="modalBody">
+
+        </div>
+        <div class="modal-footer">
+          <button id="saveModal" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+          <button id="closeModal" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- typeof script !=='undefined' ? script : '' %>
+    <%- typeof scripts !=='undefined' ? scripts : '' %>
+      <script>
+        async function LogOut() {
+          try {
             const response = await fetch("/auth/logout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                }
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              }
             });
 
             window.location.href = "/";
-        }
-        catch (err) {
+          }
+          catch (err) {
             alert("Unexpected error");
+          }
         }
+      </script>
+<script>
+  (function () {
+    // Prevent double-installation
+    if (window.__authFetchInterceptorInstalled) return;
+    window.__authFetchInterceptorInstalled = true;
+
+    // ---------------- Global Spinner (counter-based) ----------------
+    const spinnerOverlay = document.getElementById("globalSpinner");
+    const spinnerText = document.getElementById("globalSpinnerText");
+
+    let pendingCount = 0;
+    let hideTimer = null;
+
+    function spinnerRender() {
+      if (!spinnerOverlay) return;
+
+      if (pendingCount > 0) {
+        if (hideTimer) clearTimeout(hideTimer);
+        spinnerOverlay.classList.add("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "false");
+        return;
       }
-    </script>
-  </body>
-  
+
+      // Small delay avoids flicker for very fast requests
+      hideTimer = setTimeout(() => {
+        spinnerOverlay.classList.remove("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "true");
+        if (spinnerText) {
+          spinnerText.style.display = "none";
+          spinnerText.textContent = "";
+        }
+      }, 150);
+    }
+
+    function spinnerShow(message) {
+      pendingCount++;
+      if (spinnerText && message) {
+        spinnerText.textContent = String(message);
+        spinnerText.style.display = "block";
+      }
+      spinnerRender();
+    }
+
+    function spinnerHide() {
+      pendingCount = Math.max(0, pendingCount - 1);
+      spinnerRender();
+    }
+
+    function spinnerReset() {
+      pendingCount = 0;
+      spinnerRender();
+    }
+
+    async function spinnerWrap(promiseOrFn, message) {
+      spinnerShow(message);
+      try {
+        const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
+        return await p;
+      } finally {
+        spinnerHide();
+      }
+    }
+
+    window.GECOM = window.GECOM || {};
+    window.GECOM.spinner = { show: spinnerShow, hide: spinnerHide, reset: spinnerReset, wrap: spinnerWrap };
+
+    // ---------------- Modal helpers (uses your global dynamic modal DOM) ----------------
+    function openSessionExpiredModal() {
+      const overlay = document.getElementById("dynamicModalOverlay");
+      const modal = document.getElementById("dynamicModal");
+      const title = document.getElementById("dynamicModalTitle");
+      const body = document.getElementById("dynamicModalBody");
+      const btnClose = document.getElementById("dynamicModalCloseBtn");
+      const btnCancel = document.getElementById("dynamicModalCancelBtn");
+      const btnOk = document.getElementById("dynamicModalOkBtn");
+
+      if (!overlay || !modal) {
+        alert("Sua sessão expirou. Faça login novamente.");
+        window.location.href = "/";
+        return;
+      }
+
+      title.textContent = "Sessão expirada";
+      body.innerHTML = `
+        <p>Sua sessão expirou ou você perdeu autorização.</p>
+        <p>Você precisa fazer login novamente.</p>
+      `;
+
+      // Only show "OK"
+      btnCancel.style.display = "none";
+      btnOk.textContent = "Ir para Login";
+
+      function closeModal() {
+        overlay.style.display = "none";
+        modal.style.display = "none";
+        btnCancel.style.display = "";
+        btnOk.textContent = "OK";
+        btnClose.removeEventListener("click", onOk);
+        btnOk.removeEventListener("click", onOk);
+        overlay.removeEventListener("click", onOk);
+      }
+
+      function onOk() {
+        closeModal();
+        window.location.href = "/";
+      }
+
+      overlay.style.display = "block";
+      modal.style.display = "block";
+
+      btnClose.addEventListener("click", onOk);
+      btnOk.addEventListener("click", onOk);
+      overlay.addEventListener("click", onOk);
+    }
+
+    // ---------------- Refresh flow (single-flight) ----------------
+    let refreshPromise = null;
+
+    async function refreshAccessToken() {
+      if (refreshPromise) return refreshPromise;
+
+      refreshPromise = (async () => {
+        const resp = await fetch("/auth/refresh", {
+          method: "POST",
+          headers: { "Accept": "application/json" },
+          credentials: "same-origin"
+        });
+
+        if (!resp.ok) {
+          throw new Error("Refresh failed");
+        }
+
+        return true;
+      })();
+
+      try {
+        return await refreshPromise;
+      } finally {
+        refreshPromise = null;
+      }
+    }
+
+    // ---------------- Helpers: decide when to show spinner ----------------
+    function shouldIgnoreSpinner(url) {
+      if (!url) return false;
+
+      // auth endpoints
+      if (url.includes("/auth/refresh") || url.includes("/auth/logout")) return true;
+
+      // static assets (avoid noisy spinner)
+      const lower = url.toLowerCase();
+      if (
+        lower.includes("/assets/") ||
+        lower.endsWith(".css") ||
+        lower.endsWith(".js") ||
+        lower.endsWith(".png") ||
+        lower.endsWith(".jpg") ||
+        lower.endsWith(".jpeg") ||
+        lower.endsWith(".svg") ||
+        lower.endsWith(".gif") ||
+        lower.endsWith(".webp") ||
+        lower.endsWith(".ico") ||
+        lower.endsWith(".woff") ||
+        lower.endsWith(".woff2") ||
+        lower.endsWith(".ttf") ||
+        lower.endsWith(".map")
+      ) return true;
+
+      return false;
+    }
+
+    // ---------------- jQuery Ajax global hook ----------------
+    // Covers $.ajax / $.get / $.post etc.
+    if (window.jQuery) {
+      jQuery(document).ajaxStart(function () {
+        spinnerShow();
+      });
+
+      jQuery(document).ajaxStop(function () {
+        spinnerReset();
+      });
+    }
+
+    // ---------------- Fetch interceptor ----------------
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async function (input, init) {
+      const requestUrl = typeof input === "string" ? input : (input && input.url) || "";
+
+      // Avoid infinite loops: never intercept refresh/logout itself
+      const isAuthRefresh = requestUrl.includes("/auth/refresh");
+      const isAuthLogout = requestUrl.includes("/auth/logout");
+      if (isAuthRefresh || isAuthLogout) {
+        return originalFetch(input, init);
+      }
+
+      // Ensure cookies are sent (important if your auth is cookie-based)
+      const safeInit = init ? { ...init } : {};
+      if (!safeInit.credentials) safeInit.credentials = "same-origin";
+
+      const ignoreSpinner = shouldIgnoreSpinner(requestUrl);
+      if (!ignoreSpinner) spinnerShow();
+
+      try {
+        let response = await originalFetch(input, safeInit);
+
+        // If not 401, return normally
+        if (response.status !== 401) return response;
+
+        // Try refresh once
+        try {
+          await refreshAccessToken();
+        } catch (e) {
+          console.warn("Token refresh failed:", e);
+          openSessionExpiredModal();
+          return response;
+        }
+
+        // Retry original request once after refresh
+        response = await originalFetch(input, safeInit);
+
+        // If still unauthorized, show modal
+        if (response.status === 401) {
+          openSessionExpiredModal();
+        }
+
+        return response;
+      } finally {
+        if (!ignoreSpinner) spinnerHide();
+      }
+    };
+  })();
+</script>
+
+<script src="/Assets/js/globalSpinner.js"></script>
+
+</body>
+
 </html>
