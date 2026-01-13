@@ -1,19 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const repo = require('../repositories/clientsRepo');
+const { createProxyHandler } = require("../services/apiProxy");
 
-// GET /api/clients?search=&startDate=&endDate=&page=1&pageSize=20
-router.get('/', async (req, res) => {
-  try {
-    const { search = '', startDate = '', endDate = '' } = req.query;
-    const page = Number(req.query.page ?? 1);
-    const pageSize = Number(req.query.pageSize ?? 20);
-    const data = await repo.listClients({ page, pageSize, search, startDate, endDate });
-    res.json({ ok: true, ...data });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ ok: false, error: 'Erro ao listar clientes' });
-  }
+// GET /api/clients -> backend GET /clients (ajuste o path conforme seu backend)
+router.get("/clients", createProxyHandler({ backendPath: "/clients" }));
+
+// Example: GET /api/clients/:id -> backend GET /clients/:id
+router.get("/clients/:id", (req, res, next) => {
+    // You can compose dynamic path:
+    const handler = createProxyHandler({ backendPath: `/clients/${req.params.id}` });
+    return handler(req, res, next);
 });
+
+// Example: POST /api/clients -> backend POST /clients
+router.post("/clients", createProxyHandler({ backendPath: "/clients" }));
 
 module.exports = router;

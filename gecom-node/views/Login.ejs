@@ -18,7 +18,26 @@
 </head>
 <body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
     <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" />
+    <button type="button" class="btn btn-primary" style="display: none;" data-toggle="modal" id="modalLoginButton" data-target="#loginModal">
+        Large Modal
+    </button>
+    <div class="modal inmodal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <!-- <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small> -->
+                </div>
+                <div class="modal-body" id="loginModalBody">
 
+                </div>
+                <div class="modal-footer">
+                    <button onclick="window.location = '/'" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Login Form -->
     <form id="loginForm" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px;">
         <h3>Bem Vindo à GECOM</h3>
@@ -28,10 +47,10 @@
         </p>
 
         <div class="form-group">
-            <input type="email" class="form-control" placeholder="Email" name="email" required />
+            <input type="email" class="form-control" placeholder="Email" id="email" required />
         </div>
         <div class="form-group">
-            <input type="password" class="form-control" placeholder="Senha" name="password" required />
+            <input type="password" class="form-control" placeholder="Senha" id="password" required />
         </div>
         <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
 
@@ -64,7 +83,28 @@
         <div class="form-group">
             <input type="text" class="form-control" id="forgotEmail" name="forgotEmail" required />
         </div>
-        <a href="PublicProcessDetail" class="btn btn-primary block full-width m-b">Enviar email de reset</a>
+        <a onclick="onForgotPassword()" style="color: white;" class="btn btn-primary block full-width m-b">Enviar email de reset</a>
+        <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
+            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+        </a>
+    </form>
+
+    <!-- ResetPassword Form -->
+    <form id="resetPassword" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
+        <h3>Nova Senha</h3>
+        <p style="margin-top: 20px; font-size: 12px;">
+            Digite a nova senha abaixo
+        </p>
+        <div class="form-group">
+            <input type="password" class="form-control" id="newPassword" required />
+        </div>
+        <p style="margin-top: 20px; font-size: 12px;">
+            Confirmar senha
+        </p>
+        <div class="form-group">
+            <input type="password" class="form-control" id="confirmPassword" required />
+        </div>
+        <a onclick="onResetPassword()" style="color: white;" class="btn btn-primary block full-width m-b">Confirmar Nova Senha</a>
         <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
             <i class="fa fa-arrow-left me-1"></i>Voltar para o login
         </a>
@@ -79,33 +119,160 @@
 
     <script>
         function changeView(id) {
-            $("form").hide();
+            $("#loginForm, #acessNumberForm, #forgotPassword, #resetPassword").hide();
             $(id).show();
+
+            // Pequena melhoria: focar no campo principal da tela
+            if (id === "#loginForm") {
+                setTimeout(() => $("#email").focus(), 50);
+            }
+            if (id === "#forgotPassword") {
+                setTimeout(() => $("#forgotEmail").focus(), 50);
+            }
+            if (id === "#resetPassword") {
+                setTimeout(() => $("#newPassword").focus(), 50);
+            }
         }
 
-        document.getElementById("loginForm").addEventListener("submit", function (event) {
-            if (!this.checkValidity()) return;
-            event.preventDefault();
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
 
-            const email = this.email.value;
-            const senha = this.password.value;
+        function showModalMessage(title, message) {
+            $("#modalTitle").text(title || "Mensagem");
+            $("#loginModalBody").html("<p>" + (message || "") + "</p>");
+            $("#modalLoginButton").click();
+        }
 
-            // Aqui você pode substituir pela sua rota Node.js
-            fetch("/api/login", {
+        function initViewFromUrl() {
+                const token = getQueryParam("token");
+                const userId = getQueryParam("userId");
+            if (token != null && userId != null) {
+
+                if (!token || !userId) {
+                    changeView("#loginForm");
+                    showModalMessage("Link inválido", "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.");
+                    return;
+                }
+
+                changeView("#resetPassword");
+            } else {
+                changeView("#loginForm");
+            }
+        }
+
+        async function onForgotPassword() {
+            var email = $("#forgotEmail").val();
+
+            if (!email) {
+                showModalMessage("Recuperação de Senha", "Por favor, informe o email cadastrado.");
+                return;
+            }
+
+            const resp = await fetch("/auth/forgot-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password: senha })
-            }).then(res => res.json())
-              .then(data => {
-                  if (data.status === "OK") {
-                      window.location = "Default"; // ou .ejs, etc.
-                  } else {
-                      alert(data.message || "Login inválido");
-                  }
-              });
+                body: JSON.stringify({ email })
+            });
+
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok) {
+                showModalMessage("Recuperação de Senha", data.message || "Não foi possível solicitar o reset de senha. Tente novamente.");
+                return;
+            }
+
+            showModalMessage("Recuperação de Senha", data.message || "Um email com instruções foi enviado com sucesso.");
+        }
+
+        async function onResetPassword() {
+            const token = getQueryParam("token");
+            const userId = getQueryParam("userId");
+
+            if (!token || !userId) {
+                showModalMessage("Link inválido", "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.");
+                return;
+            }
+
+            const newPassword = $("#newPassword").val();
+            const confirmPassword = $("#confirmPassword").val();
+
+            if (!newPassword || !confirmPassword) {
+                showModalMessage("Redefinir senha", "Por favor, preencha a nova senha e a confirmação.");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showModalMessage("Redefinir senha", "As senhas não conferem. Verifique e tente novamente.");
+                return;
+            }
+
+            const payload = {
+                user_id: userId,
+                token: token,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            };
+
+            const resp = await fetch("/auth/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok) {
+                showModalMessage("Redefinir senha", data.message || "Não foi possível redefinir a senha. Tente novamente.");
+                return;
+            }
+
+            // Limpa URL, volta para o login, foca no email e mostra o modal de sucesso
+            window.history.replaceState({}, document.title, "/");
+            changeView("#loginForm");
+
+            // Limpa campos do reset
+            $("#newPassword").val("");
+            $("#confirmPassword").val("");
+
+            showModalMessage("Senha redefinida", data.message || "Sua senha foi redefinida com sucesso. Você já pode fazer login.");
+
+            // Foco no email após abrir o modal
+            setTimeout(() => $("#email").focus(), 200);
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    showModalMessage("Login", error.message || "Não foi possível realizar o login. Verifique suas credenciais.");
+                    return;
+                }
+
+                window.location.href = "/clientes";
+            }
+            catch (err) {
+                showModalMessage("Login", "Ocorreu um erro inesperado. Tente novamente.");
+            }
         });
 
         $(document).ready(function () {
+            initViewFromUrl();
+
             var mapData = {
                 "US": 498, "SA": 200, "CA": 1300, "DE": 220, "FR": 540,
                 "CN": 120, "AU": 760, "BR": 550, "IN": 200, "GB": 120, "RU": 2000

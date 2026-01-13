@@ -1,8 +1,8 @@
-
 <style>
     .ibox-title {
         padding: 15px 90px 20px 15px;
     }
+
     .clicker {
         cursor: pointer;
     }
@@ -21,106 +21,36 @@
                 <div class="row">
                     <div class="col-sm-3">
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control form-control-sm" id="searchinput" placeholder="Search">
+                            <input type="text" class="form-control form-control-sm" id="searchinput"
+                                placeholder="Search">
                             <div class="input-group-append">
                                 <button class="btn btn-sm btn-primary" type="button">Search</button>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-9 m-b-xs">
-                        <a type="button" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;">Novo Cliente</a>
+                        <a type="button" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;">Novo
+                            Cliente</a>
                     </div>
                 </div>
 
                 <div class="table-responsive">
                     <table class="table table-striped" id="clientes">
                         <thead>
-    <tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Company Name</th>
+                                <th>Primary Contact</th>
+                                <th>Phone</th>
+                                <th>Sector</th>
+                                <th>Number of Invoices</th>
+                                <th>Date</th>
+                                <th>CNPJ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lines"></tbody>
 
-        <th>#</th>
-        <th>Company Name</th>
-        <th>Primary Contact</th>
-        <th>Phone </th>
-        <th>Number of Invoices</th>
-        <th>Date</th>
-        <th>Account Number</th>
-    </tr>
-</thead>
-<tbody id="lines">
-    <tr class="clicker" onclick="redirectToProcess(1)">
-        <td>1</td>
-        <td>Inceptos Hymenaeos Ltd</td>
-        <td>Patrick Smith</td>
-        <td>0800 051213</td>
-        <td>20</td>
-        <td>Jul 14, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr class="clicker" onclick="redirectToProcess(2)">
-        <td>2</td>
-        <td>Alpha project</td>
-        <td>Alice Jackson</td>
-        <td>0500 780909</td>
-        <td>40</td>
-        <td>Jul 16, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr class="clicker" onclick="redirectToProcess(3)">
-        <td>3</td>
-        <td>Betha project</td>
-        <td>John Smith</td>
-        <td>0800 1111</td>
-        <td>75</td>
-        <td>Jul 18, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>Gamma project</td>
-        <td>Anna Jordan</td>
-        <td>(016977) 0648</td>
-        <td>18</td>
-        <td>Jul 22, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>Alpha project</td>
-        <td>Alice Jackson</td>
-        <td>0500 780909</td>
-        <td>40</td>
-        <td>Jul 16, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
 
-    <tr>
-        <td>1</td>
-        <td>Project <small>This is example of project</small></td>
-        <td>Patrick Smith</td>
-        <td>0800 051213</td>
-        <td>20</td>
-        <td>Jul 14, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>Gamma project</td>
-        <td>Anna Jordan</td>
-        <td>(016977) 0648</td>
-        <td>18</td>
-        <td>Jul 22, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>Nec Euismod In Company</td>
-        <td>Alice Jackson</td>
-        <td>0500 780909</td>
-        <td>40</td>
-        <td>Jul 16, 2013</td>
-        <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-    </tr>
-</tbody>
                     </table>
                 </div>
             </div>
@@ -130,130 +60,245 @@
 
 <% contentFor('scripts') %>
     <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.spline.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.pie.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.symbol.js"></script>
-<script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
-<script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.spline.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.pie.js"></script>
+    <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.symbol.js"></script>
+    <script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
+    <script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
 
-<script src="../Assets/inspinia/js/inspinia.js"></script>
-<script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+    <script src="../Assets/inspinia/js/inspinia.js"></script>
+    <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 
-<script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
 
-<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
+    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
 
-<script src="../Assets/inspinia/js/plugins/sparkline/jquery.sparkline.min.js"></script>
-<script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
+    <script src="../Assets/inspinia/js/plugins/sparkline/jquery.sparkline.min.js"></script>
+    <script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
 
-<script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
-<%  %>
+    <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+    <% %>
+
+        <script>
+            // Global cache used by redirectToProcess and other functions
+            let clients = [];
+
+            // Cache of userId -> full_name to avoid repeated calls
+            const userNameCache = new Map();
+
+            function escapeHtml(value) {
+                if (value == null) return "";
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function formatDate(value) {
+                if (!value) return "";
+                const d = new Date(value);
+                if (Number.isNaN(d.getTime())) return String(value);
+                return d.toLocaleDateString("pt-BR");
+            }
+
+            function isNonEmptyString(value) {
+                return typeof value === "string" && value.trim().length > 0;
+            }
+
+            async function fetchCompanies() {
+                const resp = await fetch("/api/companies", {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                });
+
+                const data = await resp.json().catch(() => ({}));
+
+                if (!resp.ok) {
+                    const msg = data?.message || "Falha ao carregar companies.";
+                    throw new Error(msg);
+                }
+
+                return data;
+            }
+
+            async function fetchUserById(userId) {
+                const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                });
+
+                const data = await resp.json().catch(() => ({}));
+
+                if (!resp.ok) {
+                    // If user not found or unauthorized, just return null (do not block the whole table)
+                    return null;
+                }
+
+                return data;
+            }
+
+            // Simple concurrency limiter (no external libs)
+            async function runWithConcurrency(items, limit, worker) {
+                const queue = [...items];
+                const results = new Array(items.length);
+
+                const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+                    while (queue.length > 0) {
+                        const item = queue.shift();
+                        const index = items.indexOf(item);
+                        results[index] = await worker(item);
+                    }
+                });
+
+                await Promise.all(runners);
+                return results;
+            }
+
+            async function resolveUserNames(userIds) {
+                const uniqueIds = [...new Set(userIds.filter(isNonEmptyString))];
+
+                // Filter only those not in cache
+                const toFetch = uniqueIds.filter(id => !userNameCache.has(id));
+
+                if (toFetch.length === 0) return;
+
+                // Fetch with concurrency limit to avoid hammering backend
+                const concurrency = 5;
+
+                await runWithConcurrency(toFetch, concurrency, async (id) => {
+                    const user = await fetchUserById(id);
+                    const fullName = user?.full_name ?? user?.fullName ?? user?.name ?? "";
+                    userNameCache.set(id, isNonEmptyString(fullName) ? String(fullName).trim() : "");
+                    return true;
+                });
+            }
+
+            function mapCompanyToClient(company, index) {
+                const id = company.id ?? company.company_id ?? company.companyId ?? String(index + 1);
+
+                const sector =
+                    company.sector ??
+                    company.company_sector ??
+                    company.sector_name ??
+                    null;
+
+                const userId = company.user_id ?? company.userId ?? "";
+
+                // ContactName will be filled later using userId -> full_name
+                return {
+                    Id: String(id),
+                    CompanyName: company.company_name ?? "",
+                    ContactName: "", // will be resolved
+                    Phone: company.phone ?? "",
+                    Email: company.email ?? "",
+                    UserId: userId,
+
+                    CreatedOn: company.created_on ?? company.createdAt ?? company.created_at ?? "",
+                    CompanyNumber: company.company_number ?? "",
+                    Sector: sector && String(sector).trim() ? String(sector).trim() : "Geral",
+                    NumberOfInvoices: company.number_of_invoices ?? ""
+                };
+            }
+
+            function renderCompaniesTable(list) {
+                const tbody = document.querySelector("#lines");
+                if (!tbody) return;
+
+                tbody.innerHTML = "";
+
+                if (!list || list.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8">Nenhum cliente encontrado.</td></tr>`;
+                    return;
+                }
+
+                list.forEach((c, idx) => {
+                    const tr = document.createElement("tr");
+                    tr.className = "clicker";
+                    tr.onclick = () => redirectToProcess(c.Id);
+
+                    tr.innerHTML = `
+        <td>${escapeHtml(idx + 1)}</td>
+        <td>${escapeHtml(c.CompanyName)}</td>
+        <td>${escapeHtml(c.ContactName)}</td>
+        <td>${escapeHtml(c.Phone)}</td>
+        <td>${escapeHtml(c.Sector)}</td>
+        <td>${escapeHtml(c.NumberOfInvoices ?? "")}</td>
+        <td>${escapeHtml(formatDate(c.CreatedOn))}</td>
+        <td>${escapeHtml(c.CompanyNumber)}</td>
+      `;
+
+                    tbody.appendChild(tr);
+                });
+            }
+
+            async function loadCompanies() {
+                try {
+                    const apiData = await fetchCompanies();
+
+                    const rows = Array.isArray(apiData)
+                        ? apiData
+                        : (apiData.data ?? apiData.rows ?? apiData.companies ?? [apiData]);
+
+                    // 1) Build clients from companies
+                    clients = rows.map(mapCompanyToClient);
+
+                    // 2) Resolve user names from user_id
+                    const userIds = clients.map(c => c.UserId);
+                    await resolveUserNames(userIds);
+
+                    // 3) Fill ContactName using cache
+                    for (const c of clients) {
+                        const name = c.UserId ? userNameCache.get(c.UserId) : "";
+                        // Fallback to whatever came from company payload (if any)
+                        c.ContactName = isNonEmptyString(name)
+                            ? name
+                            : (c.ContactName || "");
+                    }
+
+                    // 4) Render table
+                    renderCompaniesTable(clients);
+                } catch (err) {
+                    console.error("loadCompanies error:", err);
+                    const tbody = document.querySelector("#lines");
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="8">${escapeHtml(err.message || "Erro ao carregar clientes.")}</td></tr>`;
+                    }
+                }
+            }
+            function redirectToProcess(id) {
+                const selectedClient = clients.find(c => c.Id === String(id));
+                if (!selectedClient) {
+                    console.error("Client not found for id:", id);
+                    return;
+                }
+
+                // Always store the id (source of truth)
+                localStorage.setItem("selectedClientId", String(selectedClient.Id));
+
+                // Optional: keep cached object (fast), but remove if you want to force refresh
+                localStorage.setItem("selectedClient", JSON.stringify(selectedClient));
+
+                window.location = "ClientDetails";
+            }
 
 
-<!-- JS -->
-<script>
-    //Exemplo de objeto para funcionar front-end
-    var clients = [{ "CompanyName": "Inceptos Hymenaeos Ltd",
-        "ContactName":"Patrick Smith",
-        "Phone": "0800 051213",
-        "Email": "inceptos@email.com",
-        "CreatedOn": "Jul 14, 2013",
-        "Id": "1"
-     },
-     { "CompanyName": "Alpha project",
-        "ContactName":"Alice Jackson",
-        "Phone": "0500 780909",
-        "Email": "alpha@email.com",
-        "CreatedOn": "Jul 14, 2013",
-        "Id": "2"
-     }];
 
-    function redirectToProcess(id) {
-        // 1. Buscar o cliente pelo Id
-        const selectedClient = clients.find(c => c.Id === String(id));
+            $(document).ready(function () {
+                $("#pageName").text("Clientes");
+                $("#subpageName").text("Clientes");
 
-        if (!selectedClient) {
-            console.error("Client not found for id:", id);
-            return;
-        }
+                loadCompanies();
 
-        // 2. Salvar no localStorage
-        localStorage.setItem("selectedClient", JSON.stringify(selectedClient));
-
-        // 3. Redirecionar para a página
-        window.location = "ClientDetails";
-    }
-
-    $(document).ready(function () {
-        $("#pageName").text("Clientes");
-        $("#subpageName").text("Clientes");
-    });
-
-    $('#searchinput').on('keyup change', function () {
-        var index = 1;
-        var value = $(this).val().toLowerCase();
-
-        $('#clientes tbody tr').filter(function () {
-            $(this).toggle(
-                $(this).find('td').eq(index).text().toLowerCase().indexOf(value) > -1
-            );
-        });
-    });
-
-async function fetchClients(params = {}) {
-  const q = new URLSearchParams(params);
-  const resp = await fetch(`/api/clients?${q.toString()}`, { headers: { 'Accept': 'application/json' } });
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || 'Falha ao carregar clients');
-  return json;
-}
-
-function renderClientsTable({ rows }) {
-    debugger;
-  const tbody = document.querySelector('#lines');
-  if (!tbody) return;
-
-  tbody.innerHTML = '';
-  if (!rows || rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4">Nenhum cliente encontrado.</td></tr>`;
-    return;
-  }
-
-  for (const c of rows) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.id}</td>
-      <td><a href="/clients/${c.id}">${c.name ?? ''}</a></td>
-      <td>${c.email ?? ''}</td>
-      <td>${c.created_at ?? ''}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-
-async function applyClientsFilter(e) {
-  if (e) e.preventDefault();
-  const search = document.querySelector('#filter-search')?.value ?? '';
-  const startDate = document.querySelector('#filter-start')?.value ?? '';
-  const endDate = document.querySelector('#filter-end')?.value ?? '';
-  const pageSize = document.querySelector('#filter-pageSize')?.value || '20';
-
- // const data = await fetchClients({ search, startDate, endDate, page: 1, pageSize });
-  //renderClientsTable(data);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Primeira carga
-  applyClientsFilter();
-
-  // Bind do formulário
-  const form = document.querySelector('#clients-filter-form');
-  if (form) {
-    form.addEventListener('submit', applyClientsFilter);
-  }
-});
-
-</script>
+                $("#searchinput").on("keyup change", function () {
+                    const value = $(this).val().toLowerCase();
+                    $("#clientes tbody tr").filter(function () {
+                        $(this).toggle($(this).find("td").eq(1).text().toLowerCase().indexOf(value) > -1);
+                    });
+                });
+            });
+        </script>

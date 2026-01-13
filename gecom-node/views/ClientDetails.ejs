@@ -9,8 +9,9 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="m-b-md">
-                                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os detalhes do cliente</a>
-                                <h2 id="companyName">Zender Company</h2>
+                                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os
+                                    detalhes do cliente</a>
+                                <h2 id="companyName"></h2>
                             </div>
 
                         </div>
@@ -22,7 +23,8 @@
                                     <dt>Status:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1"><span class="label label-primary">Active</span></dd>
+                                    <dd class="mb-1"><span class="label label-primary" id="statusLabel"></span>
+                                    </dd>
                                 </div>
                             </dl>
                             <dl class="row mb-0">
@@ -30,7 +32,7 @@
                                     <dt>Porte:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1">Médio</dd>
+                                    <dd class="mb-1" id="size">Médio</dd>
                                 </div>
                             </dl>
                             <dl class="row mb-0">
@@ -38,7 +40,7 @@
                                     <dt>Setor:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1">Agrícola</dd>
+                                    <dd class="mb-1" id="sector"></dd>
                                 </div>
                             </dl>
                             <dl class="row mb-0">
@@ -46,7 +48,8 @@
                                     <dt>Nome Fantasia:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName">Zender Company</a> </dd>
+                                    <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName"></a>
+                                    </dd>
                                 </div>
                             </dl>
                         </div>
@@ -57,7 +60,7 @@
                                     <dt>Telefone:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="phone">+55 11 961383-445</dd>
+                                    <dd class="mb-1" id="phone"></dd>
                                 </div>
                             </dl>
                             <dl class="row mb-0">
@@ -65,7 +68,7 @@
                                     <dt>Email:</dt>
                                 </div>
                                 <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="email">zender.company@zender.com</dd>
+                                    <dd class="mb-1" id="email"></dd>
                                 </div>
                             </dl>
                         </div>
@@ -79,7 +82,8 @@
                                 <div class="col-sm-10 text-sm-left">
                                     <dd>
                                         <div class="progress m-b-1">
-                                            <div style="width: 60%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                                            <div style="width: 60%;"
+                                                class="progress-bar progress-bar-striped progress-bar-animated"></div>
                                         </div>
                                         <small>Valor total de <strong>R$ 750.000,00</strong>.</small>
                                     </dd>
@@ -96,7 +100,8 @@
                                 <div class="panel-heading">
                                     <div class="panel-options">
                                         <ul class="nav nav-tabs">
-                                            <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a></li>
+                                            <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a>
+                                            </li>
                                             <li><a class="nav-link" href="#tab-2" data-toggle="tab">Documentos</a></li>
                                         </ul>
                                     </div>
@@ -108,237 +113,52 @@
                                         <div class="tab-pane active" id="tab-1">
                                             <div class="col-lg-12">
                                                 <div class="wrapper wrapper-content animated fadeInRight">
-                                                    <div class="row">
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box" onclick="onContactClick(this);">
-                                                                <a class="row">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="https://media.licdn.com/dms/image/v2/D4D03AQEerJZZBBAQTQ/profile-displayphoto-shrink_800_800/B4DZcM22u5IAAc-/0/1748267396670?e=1754524800&v=beta&t=6PP9hS47eOELB9r3cCltjjSSXETq21qjLo3vkCLp5mc">
-                                                                            <div class="m-t-xs font-bold">Graphics designer</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Gustavo Gherardi</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a1.jpg">
-                                                                            <div class="m-t-xs font-bold">CEO</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Alex Johnatan</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a2.jpg">
-                                                                            <div class="m-t-xs font-bold">Graphics designer</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>John Smith</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a3.jpg">
-                                                                            <div class="m-t-xs font-bold">Marketing manager</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Monica Smith</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a4.jpg">
-                                                                            <div class="m-t-xs font-bold">Sales manager</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Michael Zimber</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a5.jpg">
-                                                                            <div class="m-t-xs font-bold">Graphics designer</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Sandra Smith</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-4">
-                                                            <div class="contact-box">
-                                                                <a class="row" href="profile.html">
-                                                                    <div class="col-4">
-                                                                        <div class="text-center">
-                                                                            <img alt="image" class="rounded-circle m-t-xs img-fluid" src="../Assets/inspinia/img/a6.jpg">
-                                                                            <div class="m-t-xs font-bold">Graphics designer</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <h3><strong>Janet Carton</strong></h3>
-                                                                        <p><i class="fa fa-map-marker"></i>Riviera State 32/106</p>
-                                                                        <address>
-                                                                            <strong>Twitter, Inc.</strong><br>
-                                                                            795 Folsom Ave, Suite 600<br>
-                                                                            San Francisco, CA 94107<br>
-                                                                            <abbr title="Phone">P:</abbr>
-                                                                            (123) 456-7890
-                                                                        </address>
-                                                                    </div>
-                                                                </a>
-                                                            </div>
-                                                        </div>
+                                                    <div class="row" id="contactsContainer">
+                                                        <!-- Contacts will be rendered here -->
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
+
                                         <div class="tab-pane" id="tab-2">
 
                                             <div class="wrapper wrapper-content animated fadeInRight">
                                                 <div class="row">
-                                                    <div class="col-lg-3">
-                                                        <div class="ibox ">
-                                                            <div class="ibox-content">
-                                                                <div class="file-manager">
-                                                                    <div class="row">
-                                                                        <h5 class="tag-title">Filters</h5>
-                                                                        <ul class="tag-list" style="padding: 0">
-                                                                            <li><a href="">Family</a></li>
-                                                                            <li><a href="">Work</a></li>
-                                                                            <li><a href="">Home</a></li>
-                                                                            <li><a href="">Children</a></li>
-                                                                            <li><a href="">Holidays</a></li>
-                                                                            <li><a href="">Music</a></li>
-                                                                            <li><a href="">Photography</a></li>
-                                                                            <li><a href="">Film</a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                    <div style="margin: 0 -15px;">
-                                                                        <div class="hr-line-dashed"></div>
-                                                                        <h5>Folders</h5>
-                                                                        <ul class="folder-list" style="padding: 0">
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Files</a></li>
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Pictures</a></li>
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Web pages</a></li>
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Illustrations</a></li>
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Films</a></li>
-                                                                            <li><a href=""><i class="fa fa-folder"></i>Books</a></li>
-                                                                        </ul>
-                                                                        <br />
-                                                                        <div class="clearfix"></div>
-                                                                        <button class="btn btn-primary btn-block">Upload Files</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-9 animated fadeInRight">
+                                                    <div class="col-lg-12 animated fadeInRight">
                                                         <div class="row" style="padding: 0 15px;">
                                                             <div class="col-lg-9" style="margin-left: -15px;">
-                                                                <input type="button" class="btn btn-primary" value="< Voltar" style="display: none;" id="btnVoltar" onclick="changeView(false)" />
+                                                                <input type="button" class="btn btn-primary"
+                                                                    value="< Voltar" style="display: none;"
+                                                                    id="btnVoltar" onclick="changeView(false)" />
                                                                 <div class="btn-group">
-                                                                    <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
+                                                                    <button data-toggle="dropdown"
+                                                                        class="btn btn-primary dropdown-toggle">Adicionar</button>
                                                                     <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a></li>
-                                                                        <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
-                                                                        <li><a class="dropdown-item" href="#">Link do Drive</a></li>
+                                                                        <li><a class="dropdown-item"
+                                                                                onclick="callNewFolder()">Nova Pasta</a>
+                                                                        </li>
+                                                                        <li><a class="dropdown-item"
+                                                                                onclick="fileInput.click()">Upload de
+                                                                                Documento</a></li>
+                                                                        <li><a class="dropdown-item" href="#">Link do
+                                                                                Drive</a></li>
                                                                         <li class="dropdown-divider"></li>
-                                                                        <li><a class="dropdown-item" href="#">Solicitar Acesso</a></li>
+                                                                        <li><a class="dropdown-item" href="#">Solicitar
+                                                                                Acesso</a></li>
                                                                     </ul>
                                                                 </div>
                                                             </div>
                                                             <div class="col-lg-3">
-                                                                <div class="btn-group" style="margin: 0px 0 15px -15px;">
-                                                                    <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
+                                                                <div class="btn-group"
+                                                                    style="margin: 0px 0 15px -15px;">
+                                                                    <button type="button" class="btn btn-white"><i
+                                                                            class="fa fa-chevron-left"></i></button>
                                                                     <button class="btn btn-white">1</button>
                                                                     <button class="btn btn-white  active">2</button>
                                                                     <button class="btn btn-white">3</button>
                                                                     <button class="btn btn-white">4</button>
-                                                                    <button type="button" class="btn btn-white"><i class="fa fa-chevron-right"></i></button>
+                                                                    <button type="button" class="btn btn-white"><i
+                                                                            class="fa fa-chevron-right"></i></button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -353,7 +173,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Despachante
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -368,7 +188,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Despachante
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -383,7 +203,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Despachante
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -399,7 +219,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Monica's birthday.mpg4
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 18, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -415,7 +235,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Annual report 2014.xls
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 22, 2014</small>
                                                                             </div>
                                                                         </div>
@@ -431,7 +251,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Document_2014.doc
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -444,11 +264,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p1.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p1.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Italy street.jpg
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 6, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -461,11 +282,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p2.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p2.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 My feel.png
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 7, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -481,7 +303,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Michal Jackson.mp3
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 22, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -493,11 +315,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p3.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p3.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Document_2014.doc
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -513,7 +336,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Monica's birthday.mpg4
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 18, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -529,7 +352,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Annual report 2014.xls
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 22, 2014</small>
                                                                             </div>
                                                                         </div>
@@ -545,7 +368,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Document_2014.doc
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -558,11 +381,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p1.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p1.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Italy street.jpg
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 6, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -575,11 +399,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p2.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p2.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 My feel.png
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 7, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -595,7 +420,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Michal Jackson.mp3
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Jan 22, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -607,11 +432,12 @@
                                                                             <span class="corner"></span>
 
                                                                             <div class="image">
-                                                                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p3.jpg">
+                                                                                <img alt="image" class="img-fluid"
+                                                                                    src="../Assets/inspinia/img/p3.jpg">
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Document_2014.doc
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 11, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -627,7 +453,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Monica's birthday.mpg4
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 18, 2014</small>
                                                                             </div>
                                                                         </a>
@@ -643,7 +469,7 @@
                                                                             </div>
                                                                             <div class="file-name">
                                                                                 Annual report 2014.xls
-                                <br />
+                                                                                <br />
                                                                                 <small>Added: Fab 22, 2014</small>
                                                                             </div>
                                                                         </div>
@@ -669,85 +495,380 @@
         </div>
     </div>
 </div>
-  <script>
-      $(document).ready(function () {
-          $("#pageName").text("Detalhes do Cliente");
-          $("#subSecoundPageName").text("Detalhes do Cliente");
-          $("#subpageName").text("Clientes");
-          $("#subpageName").attr("href", "Clientes");
-          $("#path").show();
-          
-          var client = localStorage.getItem("selectedClient");
+<script>
+  (function () {
+    // -------------------- DOM helpers --------------------
+    function setText(selector, value) {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = value ?? "";
+    }
 
-          if(client != null){
-            let clientParse = JSON.parse(client);
+    function setAttr(selector, attr, value) {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute(attr, value);
+    }
 
-            $("#companyName").text(clientParse.CompanyName);
-            $("#fantasyName").text(clientParse.CompanyName);
+    function show(selector) {
+      const el = document.querySelector(selector);
+      if (el) el.style.display = "";
+    }
 
-            $("#email").text(clientParse.Email);
-            $("#phone").text(clientParse.Phone);
-          }else
-            alert("Erro ao carregar dados do cliente!");
+    // -------------------- Utils --------------------
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function safeJsonParse(raw) {
+      try {
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function normalizeUsers(company) {
+      const u = company?.users;
+      if (Array.isArray(u)) return u;
+      if (u) return [u];
+      return [];
+    }
+
+    function normalizeStatusToSelectValue(status) {
+      const s = String(status ?? "").toUpperCase();
+      if (s === "INACTIVE" || s === "INATIVO") return "INACTIVE";
+      return "ACTIVE";
+    }
+
+    function mapSelectValueToApiStatus(selectValue) {
+      // Keep same values your backend expects (ACTIVE/INACTIVE)
+      const v = String(selectValue ?? "").toUpperCase();
+      return v === "INACTIVE" ? "INACTIVE" : "ACTIVE";
+    }
+
+    // -------------------- API: Companies --------------------
+    async function fetchCompanyById(companyId) {
+      const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
+        method: "GET",
+        headers: { Accept: "application/json" }
       });
 
-      function onContactClick(element) {
-          DynamicsModal.openDynamicsModal();
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao carregar company por id.");
+      return data;
+    }
+
+    async function patchCompanyById(companyId, patchBody) {
+      const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify(patchBody ?? {})
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar empresa.");
+      return data;
+    }
+
+    // -------------------- API: Users --------------------
+    async function patchUserById(userId, patchBody) {
+      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify(patchBody ?? {})
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar usuário.");
+      return data;
+    }
+
+    // -------------------- Mapping --------------------
+    function getPrimaryUser(company) {
+      const users = normalizeUsers(company);
+      return users[0] ?? null;
+    }
+
+    function mapCompanyToViewModel(company) {
+      const primaryUser = getPrimaryUser(company);
+
+      return {
+        Id: String(company.id ?? company.company_id ?? company.companyId ?? ""),
+        CompanyName: company.company_name ?? "",
+        Phone: company.phone ?? "",
+        Sector: company.sector ?? "Geral",
+        Size: company.size ?? company.porte ?? "-",
+        Status: company.status ?? "Active",
+        // Email belongs to Users table; fallback to primary user email
+        Email: company.email ?? primaryUser?.email ?? ""
+      };
+    }
+
+    function mapCompanyUsersToContacts(company) {
+      const users = normalizeUsers(company);
+
+      return users.map((x) => ({
+        id: x.id ?? "",
+        fullName: x.full_name ?? x.fullName ?? "",
+        email: x.email ?? "",
+        role: x.role ?? "USER",
+        status: x.status ?? "ACTIVE",
+        phone: "",
+        imageUrl: "/Assets/inspinia/img/user.png"
+      }));
+    }
+
+    // -------------------- Header fill --------------------
+    function fillClientHeader(vm) {
+      setText("#companyName", vm?.CompanyName ?? "");
+      setText("#fantasyName", vm?.CompanyName ?? "");
+      setText("#email", vm?.Email ?? "");
+      setText("#phone", vm?.Phone ?? "");
+      setText("#sector", vm?.Sector ?? "Geral");
+      setText("#size", vm?.Size ?? "-");
+      setText("#statusLabel", vm?.Status ?? "Active");
+    }
+
+    // -------------------- Contacts rendering --------------------
+    function renderContacts(contacts) {
+      const container = document.querySelector("#contactsContainer");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      if (!contacts || contacts.length === 0) {
+        container.innerHTML = `<div class="col-lg-12"><p>Nenhum contato encontrado.</p></div>`;
+        return;
       }
 
-      function callEditDetails(){
-         const html = `
-            <div class="form-group">
-                <label for="txtName">Name</label>
-                <input id="txtName" class="form-control" value="Zender Company" />
-            </div>
-            <div class="form-group">
-                <label for="txtQty">Email</label>
-                <input id="txtQty" class="form-control" value="zender.company@zender.com" />
-            </div>
-            <div class="form-group">
-                <label for="txtTel">Telefone</label>
-                <input id="txtTel" class="form-control" value="+55 11 961383-445"  />
-            </div>
+      contacts.forEach((c, index) => {
+        const col = document.createElement("div");
+        col.className = "col-lg-4";
+
+        col.innerHTML = `
+          <div class="contact-box" onclick="onContactClick(${index});">
+            <a class="row">
+              <div class="col-4">
+                <div class="text-center">
+                  <img alt="image" class="rounded-circle m-t-xs img-fluid" src="${escapeHtml(c.imageUrl)}">
+                  <div class="m-t-xs font-bold">${escapeHtml(c.role ?? "")}</div>
+                </div>
+              </div>
+              <div class="col-8">
+                <h3><strong>${escapeHtml(c.fullName)}</strong></h3>
+                ${c.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(c.email)}</p>` : ""}
+                <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(c.status ?? ""))}</p>
+              </div>
+            </a>
+          </div>
         `;
 
-        SideModal.open({
-            title: 'Editar detalhes do Cliente',
-            html: html,
-            onOk: function () {
-                // Read values and do something
-                const name = $('#txtName').val();
-                const qty = $('#txtQty').val();
-                console.log('OK clicked', { name, qty });
-                // aqui você pode fazer submit via AJAX, etc.
-            },
-            onCancel: function () {
-                console.log('Modal canceled');
-            }
-        });
+        container.appendChild(col);
+      });
+
+      window.__contacts = contacts;
+    }
+
+    // -------------------- Side modal: Edit User (PATCH) --------------------
+    function onContactClick(index) {
+      const contacts = window.__contacts ?? [];
+      const c = contacts[index];
+      if (!c || !c.id) return;
+
+      const statusValue = normalizeStatusToSelectValue(c.status);
+
+      const html = `
+        <div class="form-group">
+          <label for="txtName">Nome</label>
+          <input id="txtName" class="form-control" value="${escapeHtml(c.fullName)}" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtEmail">Email</label>
+          <input id="txtEmail" class="form-control" value="${escapeHtml(c.email)}" />
+          <small class="text-muted">Alterar o email irá alterar o acesso deste usuário à plataforma.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="txtRole">Role</label>
+          <input id="txtRole" class="form-control" value="${escapeHtml(c.role)}" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="selStatus">Status</label>
+          <select id="selStatus" class="form-control">
+            <option value="ACTIVE" ${statusValue === "ACTIVE" ? "selected" : ""}>Ativo</option>
+            <option value="INACTIVE" ${statusValue === "INACTIVE" ? "selected" : ""}>Inativo</option>
+          </select>
+          <small class="text-muted">Ao inativar o user, o mesmo não poderá mais acessar a plataforma.</small>
+        </div>
+      `;
+
+      SideModal.open({
+        title: "Editar Contato",
+        html: html,
+
+        onOk: async function () {
+          try {
+            const name = $("#txtName").val();
+            const email = $("#txtEmail").val();
+            const status = mapSelectValueToApiStatus($("#selStatus").val());
+
+            const payload = {
+              full_name: name,
+              email: email,
+              status: status
+              // role is readonly (not sent)
+            };
+
+            await patchUserById(c.id, payload);
+
+            // Option A: reload everything (most reliable)
+            localStorage.removeItem("selectedClient");
+            location.reload();
+
+            // Option B (if you prefer no reload):
+            // c.fullName = String(name ?? "");
+            // c.email = String(email ?? "");
+            // c.status = String(status ?? "");
+            // renderContacts(window.__contacts);
+          } catch (err) {
+            console.error(err);
+            alert(err?.message || "Erro ao salvar usuário.");
+          }
+        },
+
+        onCancel: function () { }
+      });
+    }
+
+    // Expose for inline onclick="onContactClick(x)"
+    window.onContactClick = onContactClick;
+
+    // -------------------- Side modal: Edit Company (PATCH) --------------------
+    function callEditDetails() {
+      const vm = window.__companyViewModel ?? safeJsonParse(localStorage.getItem("selectedClient"));
+
+      if (!vm?.Id) {
+        alert("Cliente inválido (Id não encontrado).");
+        return;
       }
 
-      function callNewFolder(){
-        const html = `
-            <div class="form-group">
-                <label for="txtName">Nome da pasta</label>
-                <input id="txtName" class="form-control" />
-            </div>
-        `;
+      const html = `
+        <div class="form-group">
+          <label for="txtCompanyName">Nome da Empresa</label>
+          <input id="txtCompanyName" class="form-control" value="${escapeHtml(vm.CompanyName ?? "")}" />
+        </div>
 
-        SideModal.open({
-            title: 'Criar nova pasta',
-            html: html,
-            onOk: function () {
-                // Read values and do something
-                const name = $('#txtName').val();
-                const qty = $('#txtQty').val();
-                console.log('OK clicked', { name, qty });
-                // aqui você pode fazer submit via AJAX, etc.
-            },
-            onCancel: function () {
-                console.log('Modal canceled');
-            }
-        });
+        <div class="form-group">
+          <label for="txtPhone">Telefone</label>
+          <input id="txtPhone" class="form-control" value="${escapeHtml(vm.Phone ?? "")}" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtSector">Setor</label>
+          <input id="txtSector" class="form-control" value="${escapeHtml(vm.Sector ?? "")}" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtSize">Porte</label>
+          <input id="txtSize" class="form-control" value="${escapeHtml(vm.Size ?? "")}" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtEmail">Email (contato principal)</label>
+          <input id="txtEmail" class="form-control" value="${escapeHtml(vm.Email ?? "")}" readonly />
+          <small class="text-muted">O email vem do usuário principal (tabela Users).</small>
+        </div>
+      `;
+
+      SideModal.open({
+        title: "Editar detalhes do Cliente",
+        html: html,
+
+        onOk: async function () {
+          try {
+            const payload = {
+              company_name: $("#txtCompanyName").val(),
+              phone: $("#txtPhone").val(),
+              sector: $("#txtSector").val(),
+              size: $("#txtSize").val()
+            };
+
+            await patchCompanyById(vm.Id, payload);
+
+            localStorage.removeItem("selectedClient");
+            location.reload();
+          } catch (err) {
+            console.error(err);
+            alert(err?.message || "Erro ao salvar dados do cliente.");
+          }
+        },
+
+        onCancel: function () { }
+      });
+    }
+
+    // Expose for inline onclick="callEditDetails()"
+    window.callEditDetails = callEditDetails;
+
+    // -------------------- Init --------------------
+    async function init() {
+      setText("#pageName", "Detalhes do Cliente");
+      setText("#subSecoundPageName", "Detalhes do Cliente");
+      setText("#subpageName", "Clientes");
+      setAttr("#subpageName", "href", "Clientes");
+      show("#path");
+
+      const selectedClientId = localStorage.getItem("selectedClientId");
+      const rawClient = localStorage.getItem("selectedClient");
+
+      if (!selectedClientId && !rawClient) {
+        alert("Erro ao carregar dados do cliente! (no localStorage)");
+        return;
       }
-  </script>
+
+      // 1) Fill from cache
+      const cached = safeJsonParse(rawClient);
+      if (cached) fillClientHeader(cached);
+
+      // 2) Fetch source-of-truth by id
+      if (selectedClientId) {
+        try {
+          const company = await fetchCompanyById(selectedClientId);
+
+          window.__companyRaw = company;
+
+          const vm = mapCompanyToViewModel(company);
+          window.__companyViewModel = vm;
+
+          localStorage.setItem("selectedClient", JSON.stringify(vm));
+          fillClientHeader(vm);
+
+          const contacts = mapCompanyUsersToContacts(company);
+          renderContacts(contacts);
+        } catch (err) {
+          console.error("Failed to fetch company by id:", err);
+          if (!cached) alert("Erro ao carregar dados do cliente via API.");
+        }
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  })();
+</script>

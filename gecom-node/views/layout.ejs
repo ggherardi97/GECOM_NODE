@@ -111,7 +111,7 @@
                 <ul class="dropdown-menu animated fadeInRight m-t-xs">
                   <li><a href="#">Perfil</a></li>
                   <li class="divider"></li>
-                  <li><a href="#">Sair</a></li>
+                  <li><a onclick="LogOut()">Sair</a></li>
                 </ul>
               </div>
               <div class="logo-element">GC</div>
@@ -191,7 +191,23 @@
 
     <%- typeof script !== 'undefined' ? script : '' %>
 <%- typeof scripts !== 'undefined' ? scripts : '' %>
+    <script>
+      async function LogOut(){
+        try {
+            const response = await fetch("/auth/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
 
+            window.location.href = "/";
+        }
+        catch (err) {
+            alert("Unexpected error");
+        }
+      }
+    </script>
   </body>
   
 </html>
