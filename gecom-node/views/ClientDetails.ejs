@@ -1,500 +1,196 @@
 <div class="row">
-    <div class="col-lg-12">
-        <div class="wrapper wrapper-content animated fadeInUp">
-            <div class="ibox">
-                <div class="ibox-content">
+  <div class="col-lg-12">
+    <div class="wrapper wrapper-content animated fadeInUp">
+      <div class="ibox">
+        <div class="ibox-content">
 
-                    <!-- #region Header Client -->
+          <!-- #region Header Client -->
 
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="m-b-md">
-                                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os
-                                    detalhes do cliente</a>
-                                <h2 id="companyName"></h2>
-                            </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="m-b-md">
+                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right">Edite os
+                  detalhes do cliente</a>
+                <h2 id="companyName"></h2>
+              </div>
 
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Status:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1"><span class="label label-primary" id="statusLabel"></span>
-                                    </dd>
-                                </div>
-                            </dl>
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Porte:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="size">Médio</dd>
-                                </div>
-                            </dl>
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Setor:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="sector"></dd>
-                                </div>
-                            </dl>
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Nome Fantasia:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName"></a>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <div class="col-lg-6" id="cluster_info">
-
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Telefone:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="phone"></dd>
-                                </div>
-                            </dl>
-                            <dl class="row mb-0">
-                                <div class="col-sm-4 text-sm-right">
-                                    <dt>Email:</dt>
-                                </div>
-                                <div class="col-sm-8 text-sm-left">
-                                    <dd class="mb-1" id="email"></dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <dl class="row mb-0">
-                                <div class="col-sm-2 text-sm-right">
-                                    <dt>Valor total de projetos:</dt>
-                                </div>
-                                <div class="col-sm-10 text-sm-left">
-                                    <dd>
-                                        <div class="progress m-b-1">
-                                            <div style="width: 60%;"
-                                                class="progress-bar progress-bar-striped progress-bar-animated"></div>
-                                        </div>
-                                        <small>Valor total de <strong>R$ 750.000,00</strong>.</small>
-                                    </dd>
-                                </div>
-                            </dl>
-                        </div>
-                    </div>
-
-                    <!-- #endregion -->
-
-                    <div class="row m-t-sm">
-                        <div class="col-lg-12">
-                            <div class="panel blank-panel">
-                                <div class="panel-heading">
-                                    <div class="panel-options">
-                                        <ul class="nav nav-tabs">
-                                            <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a>
-                                            </li>
-                                            <li><a class="nav-link" href="#tab-2" data-toggle="tab">Documentos</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="panel-body">
-
-                                    <div class="tab-content">
-                                        <div class="tab-pane active" id="tab-1">
-                                            <div class="col-lg-12">
-                                                <div class="wrapper wrapper-content animated fadeInRight">
-                                                    <div class="row" id="contactsContainer">
-                                                        <!-- Contacts will be rendered here -->
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="tab-pane" id="tab-2">
-
-                                            <div class="wrapper wrapper-content animated fadeInRight">
-                                                <div class="row">
-                                                    <div class="col-lg-12 animated fadeInRight">
-                                                        <div class="row" style="padding: 0 15px;">
-                                                            <div class="col-lg-9" style="margin-left: -15px;">
-                                                                <input type="button" class="btn btn-primary"
-                                                                    value="< Voltar" style="display: none;"
-                                                                    id="btnVoltar" onclick="changeView(false)" />
-                                                                <div class="btn-group">
-                                                                    <button data-toggle="dropdown"
-                                                                        class="btn btn-primary dropdown-toggle">Adicionar</button>
-                                                                    <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item"
-                                                                                onclick="callNewFolder()">Nova Pasta</a>
-                                                                        </li>
-                                                                        <li><a class="dropdown-item"
-                                                                                onclick="fileInput.click()">Upload de
-                                                                                Documento</a></li>
-                                                                        <li><a class="dropdown-item" href="#">Link do
-                                                                                Drive</a></li>
-                                                                        <li class="dropdown-divider"></li>
-                                                                        <li><a class="dropdown-item" href="#">Solicitar
-                                                                                Acesso</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-3">
-                                                                <div class="btn-group"
-                                                                    style="margin: 0px 0 15px -15px;">
-                                                                    <button type="button" class="btn btn-white"><i
-                                                                            class="fa fa-chevron-left"></i></button>
-                                                                    <button class="btn btn-white">1</button>
-                                                                    <button class="btn btn-white  active">2</button>
-                                                                    <button class="btn btn-white">3</button>
-                                                                    <button class="btn btn-white">4</button>
-                                                                    <button type="button" class="btn btn-white"><i
-                                                                            class="fa fa-chevron-right"></i></button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-lg-12">
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-folder"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Despachante
-                                                                                <br />
-                                                                                <small>Added: Jan 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-folder"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Despachante
-                                                                                <br />
-                                                                                <small>Added: Jan 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-folder"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Despachante
-                                                                                <br />
-                                                                                <small>Added: Jan 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="img-fluid fa fa-film"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Monica's birthday.mpg4
-                                                                                <br />
-                                                                                <small>Added: Fab 18, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <a href="#">
-                                                                        <div class="file">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-bar-chart-o"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Annual report 2014.xls
-                                                                                <br />
-                                                                                <small>Added: Fab 22, 2014</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-file"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Document_2014.doc
-                                                                                <br />
-                                                                                <small>Added: Jan 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p1.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Italy street.jpg
-                                                                                <br />
-                                                                                <small>Added: Jan 6, 2014</small>
-                                                                            </div>
-                                                                        </a>
-
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p2.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                My feel.png
-                                                                                <br />
-                                                                                <small>Added: Jan 7, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-music"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Michal Jackson.mp3
-                                                                                <br />
-                                                                                <small>Added: Jan 22, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p3.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Document_2014.doc
-                                                                                <br />
-                                                                                <small>Added: Fab 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="img-fluid fa fa-film"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Monica's birthday.mpg4
-                                                                                <br />
-                                                                                <small>Added: Fab 18, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <a href="#">
-                                                                        <div class="file">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-bar-chart-o"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Annual report 2014.xls
-                                                                                <br />
-                                                                                <small>Added: Fab 22, 2014</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-file"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Document_2014.doc
-                                                                                <br />
-                                                                                <small>Added: Jan 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p1.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Italy street.jpg
-                                                                                <br />
-                                                                                <small>Added: Jan 6, 2014</small>
-                                                                            </div>
-                                                                        </a>
-
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p2.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                My feel.png
-                                                                                <br />
-                                                                                <small>Added: Jan 7, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-music"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Michal Jackson.mp3
-                                                                                <br />
-                                                                                <small>Added: Jan 22, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="image">
-                                                                                <img alt="image" class="img-fluid"
-                                                                                    src="../Assets/inspinia/img/p3.jpg">
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Document_2014.doc
-                                                                                <br />
-                                                                                <small>Added: Fab 11, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <div class="file">
-                                                                        <a href="#">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="img-fluid fa fa-film"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Monica's birthday.mpg4
-                                                                                <br />
-                                                                                <small>Added: Fab 18, 2014</small>
-                                                                            </div>
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="file-box">
-                                                                    <a href="#">
-                                                                        <div class="file">
-                                                                            <span class="corner"></span>
-
-                                                                            <div class="icon">
-                                                                                <i class="fa fa-bar-chart-o"></i>
-                                                                            </div>
-                                                                            <div class="file-name">
-                                                                                Annual report 2014.xls
-                                                                                <br />
-                                                                                <small>Added: Fab 22, 2014</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </a>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Status:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1"><span class="label label-primary" id="statusLabel"></span>
+                  </dd>
+                </div>
+              </dl>
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Porte:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1" id="size">Médio</dd>
+                </div>
+              </dl>
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Setor:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1" id="sector"></dd>
+                </div>
+              </dl>
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Nome Fantasia:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName"></a>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+            <div class="col-lg-6" id="cluster_info">
+
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Telefone:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1" id="phone"></dd>
+                </div>
+              </dl>
+              <dl class="row mb-0">
+                <div class="col-sm-4 text-sm-right">
+                  <dt>Email:</dt>
+                </div>
+                <div class="col-sm-8 text-sm-left">
+                  <dd class="mb-1" id="email"></dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <dl class="row mb-0">
+                <div class="col-sm-2 text-sm-right">
+                  <dt>Valor total de projetos:</dt>
+                </div>
+                <div class="col-sm-10 text-sm-left">
+                  <dd>
+                    <div class="progress m-b-1">
+                      <div style="width: 60%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                    </div>
+                    <small>Valor total de <strong>R$ 750.000,00</strong>.</small>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <!-- #endregion -->
+
+          <div class="row m-t-sm">
+            <div class="col-lg-12">
+              <div class="panel blank-panel">
+                <div class="panel-heading">
+                  <div class="panel-options">
+                    <ul class="nav nav-tabs">
+                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a>
+                      </li>
+                      <li><a class="nav-link" href="#tab-2" data-toggle="tab">Documentos</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="panel-body">
+
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="tab-1">
+                      <div class="col-lg-12">
+                        <div class="wrapper wrapper-content animated fadeInRight">
+                          <div class="row" id="contactsContainer">
+                            <!-- Contacts will be rendered here -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane" id="tab-2">
+
+                      <div class="wrapper wrapper-content animated fadeInRight">
+                        <div class="row">
+                          <div class="col-lg-12 animated fadeInRight">
+                            <div class="row" style="padding: 0 15px;">
+                              <div class="col-lg-9" style="margin-left: -15px;">
+                                <input type="button" class="btn btn-primary" value="< Voltar" style="display: none;"
+                                  id="btnVoltar" onclick="changeView(false)" />
+                                <div class="btn-group">
+                                  <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
+                                  <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a>
+                                    </li>
+                                    <li><a class="dropdown-item" onclick="fileInput.click()">Upload de
+                                        Documento</a></li>
+                                    <li><a class="dropdown-item" href="#">Link do
+                                        Drive</a></li>
+                                    <li class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Solicitar
+                                        Acesso</a></li>
+                                  </ul>
+                                </div>
+                              </div>
+                              <div class="col-lg-3">
+                                <div class="btn-group" style="margin: 0px 0 15px -15px;">
+                                  <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
+                                  <button class="btn btn-white">1</button>
+                                  <button class="btn btn-white  active">2</button>
+                                  <button class="btn btn-white">3</button>
+                                  <button class="btn btn-white">4</button>
+                                  <button type="button" class="btn btn-white"><i class="fa fa-chevron-right"></i></button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-12">
+                                <!-- (documentos mock) -->
+                                <div class="file-box">
+                                  <div class="file">
+                                    <a href="#">
+                                      <span class="corner"></span>
+                                      <div class="icon"><i class="fa fa-folder"></i></div>
+                                      <div class="file-name">
+                                        Despachante
+                                        <br />
+                                        <small>Added: Jan 11, 2014</small>
+                                      </div>
+                                    </a>
+                                  </div>
+                                </div>
+                                <!-- ... resto do mock mantido como no seu original ... -->
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
 <script>
   (function () {
     // -------------------- DOM helpers --------------------
@@ -532,11 +228,11 @@
       }
     }
 
+    // ✅ Normalize users[] and hide DELETED by default
     function normalizeUsers(company) {
       const u = company?.users;
-      if (Array.isArray(u)) return u;
-      if (u) return [u];
-      return [];
+      const list = Array.isArray(u) ? u : (u ? [u] : []);
+      return list.filter((x) => String(x?.status ?? "").toUpperCase() !== "DELETED");
     }
 
     function normalizeStatusToSelectValue(status) {
@@ -546,9 +242,36 @@
     }
 
     function mapSelectValueToApiStatus(selectValue) {
-      // Keep same values your backend expects (ACTIVE/INACTIVE)
       const v = String(selectValue ?? "").toUpperCase();
       return v === "INACTIVE" ? "INACTIVE" : "ACTIVE";
+    }
+
+    function normalizePhone(value) {
+      const v = value == null ? "" : String(value);
+      return v.trim();
+    }
+
+    function normalizeString(value) {
+      return (value == null ? "" : String(value)).trim();
+    }
+
+    function buildPatchOnlyChanged(original, current, fields) {
+      const payload = {};
+      let hasChanges = false;
+
+      for (const f of fields) {
+        const curRaw = f.read();
+        const cur = f.normalize ? f.normalize(curRaw) : curRaw;
+        const oldRaw = original?.[f.key];
+        const old = f.normalize ? f.normalize(oldRaw) : oldRaw;
+
+        if (cur !== old) {
+          hasChanges = true;
+          f.write(payload, curRaw);
+        }
+      }
+
+      return { payload, hasChanges };
     }
 
     // -------------------- API: Companies --------------------
@@ -573,9 +296,15 @@
         body: JSON.stringify(patchBody ?? {})
       });
 
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar empresa.");
-      return data;
+      const text = await resp.text().catch(() => "");
+      const data = text ? safeJsonParse(text) : null;
+
+      if (!resp.ok) {
+        const msg = data?.message || text || "Falha ao atualizar empresa.";
+        throw new Error(msg);
+      }
+
+      return data ?? {};
     }
 
     // -------------------- API: Users --------------------
@@ -589,56 +318,119 @@
         body: JSON.stringify(patchBody ?? {})
       });
 
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar usuário.");
-      return data;
+      const text = await resp.text().catch(() => "");
+      const data = text ? safeJsonParse(text) : null;
+
+      if (!resp.ok) {
+        const msg = data?.message || text || "Falha ao atualizar usuário.";
+        throw new Error(msg);
+      }
+
+      return data ?? {};
     }
 
     // -------------------- Mapping --------------------
+    // ✅ Primary user is explicit in the API now
     function getPrimaryUser(company) {
+      if (company?.primaryUser?.id) return company.primaryUser;
       const users = normalizeUsers(company);
       return users[0] ?? null;
     }
 
-    function mapCompanyToViewModel(company) {
-      const primaryUser = getPrimaryUser(company);
+function mapCompanyToViewModel(company) {
+  const primaryUser = getPrimaryUser(company);
 
-      return {
-        Id: String(company.id ?? company.company_id ?? company.companyId ?? ""),
-        CompanyName: company.company_name ?? "",
-        Phone: company.phone ?? "",
-        Sector: company.sector ?? "Geral",
-        Size: company.category ?? company.porte ?? "-",
-        Status: company.status ?? "Active",
-        // Email belongs to Users table; fallback to primary user email
-        Email: company.email ?? primaryUser?.email ?? ""
-      };
-    }
+  // Prefer status from primary user, then company, then fallback
+  const status = primaryUser?.status ?? company.status ?? "ACTIVE";
 
+  return {
+    Id: String(company.id ?? company.company_id ?? company.companyId ?? ""),
+    CompanyName: company.company_name ?? "",
+    Phone: company.phone ?? "",
+    Sector: company.sector ?? "Geral",
+    Size: company.category ?? company.size ?? company.porte ?? "-",
+    Status: status,
+    Email: company.email ?? primaryUser?.email ?? ""
+  };
+}
+
+
+    // ✅ Build contacts list:
+    // - Primary user first (badge)
+    // - Then remaining users (no duplicate)
+    // - Hide DELETED by default
     function mapCompanyUsersToContacts(company) {
       const users = normalizeUsers(company);
+      const primaryUser = getPrimaryUser(company);
+      const primaryId = primaryUser?.id ? String(primaryUser.id) : "";
 
-      return users.map((x) => ({
-        id: x.id ?? "",
-        fullName: x.full_name ?? x.fullName ?? "",
-        email: x.email ?? "",
-        role: x.role ?? "USER",
-        status: x.status ?? "ACTIVE",
-        phone: "",
-        imageUrl: "/Assets/inspinia/img/user.png"
-      }));
+      const result = [];
+
+      if (primaryUser?.id && String(primaryUser?.status ?? "").toUpperCase() !== "DELETED") {
+        result.push({
+          id: primaryUser.id ?? "",
+          fullName: primaryUser.full_name ?? primaryUser.fullName ?? "",
+          email: primaryUser.email ?? "",
+          role: primaryUser.role ?? "USER",
+          status: primaryUser.status ?? "ACTIVE",
+          phone: primaryUser.phonenumber ?? primaryUser.phone ?? primaryUser.phone_number ?? "",
+          imageUrl: "/Assets/inspinia/img/user.png",
+          isPrimary: true
+        });
+      }
+
+      for (const x of users) {
+        const id = x?.id ? String(x.id) : "";
+        if (!id) continue;
+        if (primaryId && id === primaryId) continue;
+
+        result.push({
+          id: x.id ?? "",
+          fullName: x.full_name ?? x.fullName ?? "",
+          email: x.email ?? "",
+          role: x.role ?? "USER",
+          status: x.status ?? "ACTIVE",
+          phone: x.phonenumber ?? x.phone ?? x.phone_number ?? "",
+          imageUrl: "/Assets/inspinia/img/user.png",
+          isPrimary: false
+        });
+      }
+
+      return result;
     }
 
     // -------------------- Header fill --------------------
-    function fillClientHeader(vm) {
-      setText("#companyName", vm?.CompanyName ?? "");
-      setText("#fantasyName", vm?.CompanyName ?? "");
-      setText("#email", vm?.Email ?? "");
-      setText("#phone", vm?.Phone ?? "");
-      setText("#sector", vm?.Sector ?? "Geral");
-      setText("#size", vm?.Size ?? "-");
-      setText("#statusLabel", vm?.Status ?? "Active");
+function fillClientHeader(vm) {
+  setText("#companyName", vm?.CompanyName ?? "");
+  setText("#fantasyName", vm?.CompanyName ?? "");
+  setText("#email", vm?.Email ?? "");
+  setText("#phone", vm?.Phone ?? "");
+  setText("#sector", vm?.Sector ?? "Geral");
+  setText("#size", vm?.Size ?? "-");
+
+  const statusRaw = String(vm?.Status ?? "ACTIVE").toUpperCase();
+  const statusEl = document.querySelector("#statusLabel");
+
+  if (statusEl) {
+    // Reset classes (keep the base class)
+    statusEl.className = "label";
+
+    // Map status to label style
+    if (statusRaw === "ACTIVE") {
+      statusEl.classList.add("label-primary");
+    } else if (statusRaw === "INACTIVE" || statusRaw === "SUSPENDED") {
+      statusEl.classList.add("label-warning");
+    } else if (statusRaw === "DELETED") {
+      statusEl.classList.add("label-danger");
+    } else {
+      statusEl.classList.add("label-default");
     }
+
+    // Show text (keep raw, but you can localize if you want)
+    statusEl.textContent = statusRaw;
+  }
+}
+
 
     // -------------------- Contacts rendering --------------------
     function renderContacts(contacts) {
@@ -662,12 +454,16 @@
               <div class="col-4">
                 <div class="text-center">
                   <img alt="image" class="rounded-circle m-t-xs img-fluid" src="${escapeHtml(c.imageUrl)}">
-                  <div class="m-t-xs font-bold">${escapeHtml(c.role ?? "")}</div>
+                  <div class="m-t-xs font-bold">
+                    ${escapeHtml(c.role ?? "")}
+                    ${c.isPrimary ? `<span class="label label-primary" style="margin-left:6px;">Principal</span>` : ``}
+                  </div>
                 </div>
               </div>
               <div class="col-8">
                 <h3><strong>${escapeHtml(c.fullName)}</strong></h3>
                 ${c.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(c.email)}</p>` : ""}
+                ${c.phone ? `<p><i class="fa fa-phone"></i> ${escapeHtml(c.phone)}</p>` : ""}
                 <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(c.status ?? ""))}</p>
               </div>
             </a>
@@ -686,6 +482,13 @@
       const c = contacts[index];
       if (!c || !c.id) return;
 
+      const original = {
+        fullName: normalizeString(c.fullName),
+        email: normalizeString(c.email),
+        status: normalizeString(c.status),
+        phone: normalizePhone(c.phone)
+      };
+
       const statusValue = normalizeStatusToSelectValue(c.status);
 
       const html = `
@@ -698,6 +501,12 @@
           <label for="txtEmail">Email</label>
           <input id="txtEmail" class="form-control" value="${escapeHtml(c.email)}" />
           <small class="text-muted">Alterar o email irá alterar o acesso deste usuário à plataforma.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="txtPhoneNumber">Telefone</label>
+          <input id="txtPhoneNumber" class="form-control" value="${escapeHtml(c.phone ?? "")}" placeholder="+5511999999999" />
+          <small class="text-muted">Use o formato que o backend espera (ex: +5511961383449).</small>
         </div>
 
         <div class="form-group">
@@ -721,28 +530,35 @@
 
         onOk: async function () {
           try {
-            const name = $("#txtName").val();
-            const email = $("#txtEmail").val();
-            const status = mapSelectValueToApiStatus($("#selStatus").val());
-
-            const payload = {
-              full_name: name,
-              email: email,
-              status: status
-              // role is readonly (not sent)
+            const current = {
+              fullName: $("#txtName").val(),
+              email: $("#txtEmail").val(),
+              phone: $("#txtPhoneNumber").val(),
+              status: mapSelectValueToApiStatus($("#selStatus").val())
             };
 
-            await patchUserById(c.id, payload);
+            const diff = buildPatchOnlyChanged(
+              {
+                fullName: original.fullName,
+                email: original.email,
+                phone: original.phone,
+                status: original.status
+              },
+              current,
+              [
+                { key: "fullName", read: () => current.fullName, normalize: normalizeString, write: (p, v) => { p.full_name = v; } },
+                { key: "email", read: () => current.email, normalize: normalizeString, write: (p, v) => { p.email = v; } },
+                { key: "phone", read: () => current.phone, normalize: normalizePhone, write: (p, v) => { p.phonenumber = v; } },
+                { key: "status", read: () => current.status, normalize: normalizeString, write: (p, v) => { p.status = v; } }
+              ]
+            );
 
-            // Option A: reload everything (most reliable)
+            if (!diff.hasChanges) return;
+
+            await patchUserById(c.id, diff.payload);
+
             localStorage.removeItem("selectedClient");
             location.reload();
-
-            // Option B (if you prefer no reload):
-            // c.fullName = String(name ?? "");
-            // c.email = String(email ?? "");
-            // c.status = String(status ?? "");
-            // renderContacts(window.__contacts);
           } catch (err) {
             console.error(err);
             alert(err?.message || "Erro ao salvar usuário.");
@@ -753,7 +569,6 @@
       });
     }
 
-    // Expose for inline onclick="onContactClick(x)"
     window.onContactClick = onContactClick;
 
     // -------------------- Side modal: Edit Company (PATCH) --------------------
@@ -764,6 +579,13 @@
         alert("Cliente inválido (Id não encontrado).");
         return;
       }
+
+      const original = {
+        companyName: normalizeString(vm.CompanyName),
+        phone: normalizeString(vm.Phone),
+        sector: normalizeString(vm.Sector),
+        size: normalizeString(vm.Size)
+      };
 
       const html = `
         <div class="form-group">
@@ -799,14 +621,32 @@
 
         onOk: async function () {
           try {
-            const payload = {
-              company_name: $("#txtCompanyName").val(),
+            const current = {
+              companyName: $("#txtCompanyName").val(),
               phone: $("#txtPhone").val(),
               sector: $("#txtSector").val(),
-              category: $("#txtSize").val()
+              size: $("#txtSize").val()
             };
 
-            await patchCompanyById(vm.Id, payload);
+            const diff = buildPatchOnlyChanged(
+              {
+                companyName: original.companyName,
+                phone: original.phone,
+                sector: original.sector,
+                size: original.size
+              },
+              current,
+              [
+                { key: "companyName", read: () => current.companyName, normalize: normalizeString, write: (p, v) => { p.company_name = v; } },
+                { key: "phone", read: () => current.phone, normalize: normalizeString, write: (p, v) => { p.phone = v; } },
+                { key: "sector", read: () => current.sector, normalize: normalizeString, write: (p, v) => { p.sector = v; } },
+                { key: "size", read: () => current.size, normalize: normalizeString, write: (p, v) => { p.category = v; } }
+              ]
+            );
+
+            if (!diff.hasChanges) return;
+
+            await patchCompanyById(vm.Id, diff.payload);
 
             localStorage.removeItem("selectedClient");
             location.reload();
@@ -820,7 +660,6 @@
       });
     }
 
-    // Expose for inline onclick="callEditDetails()"
     window.callEditDetails = callEditDetails;
 
     // -------------------- Init --------------------

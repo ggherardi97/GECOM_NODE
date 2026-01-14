@@ -29,8 +29,23 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function hasOwn(obj, key) {
+  return obj != null && Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+async function readJsonSafe(response) {
+  const text = await response.text().catch(() => "");
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    // if backend returned non-json error
+    return { message: text };
+  }
+}
+
 /* -------------------- GET /api/users/:id -------------------- */
-// Forwards to BACKEND_API_BASE_URL/users/{id}
 router.get("/users/:id", async (req, res) => {
   try {
     const { id } = req.params ?? {};
@@ -53,15 +68,7 @@ router.get("/users/:id", async (req, res) => {
       },
     });
 
-    const text = await response.text();
-
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text ? { message: text } : null;
-    }
-
+    const data = await readJsonSafe(response);
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("GET /api/users/:id error:", error);
@@ -69,10 +76,10 @@ router.get("/users/:id", async (req, res) => {
   }
 });
 
-// POST /api/users  -> forwards to BACKEND_API_BASE_URL/users
+/* -------------------- POST /api/users -------------------- */
 router.post("/users", async (req, res) => {
   try {
-    const { full_name, email, password, role, status } = req.body ?? {};
+    const { full_name, email, password, role, status, phonenumber, first_access, company_id } = req.body ?? {};
 
     const missing = [];
     if (!isNonEmptyString(full_name)) missing.push("full_name");
@@ -86,9 +93,6 @@ router.post("/users", async (req, res) => {
       });
     }
 
-    const baseUrl = getBackendBaseUrl();
-    const authHeader = getAuthHeader(req);
-
     const payload = {
       full_name: String(full_name).trim(),
       email: String(email).trim(),
@@ -97,24 +101,30 @@ router.post("/users", async (req, res) => {
       status: isNonEmptyString(status) ? String(status).trim() : "ACTIVE",
     };
 
+    // Optional fields if your backend supports them on POST
+    if (isNonEmptyString(phonenumber)) payload.phonenumber = String(phonenumber).trim();
+
+    // allow boolean/number/string for first_access
+    if (hasOwn(req.body, "first_access")) payload.first_access = req.body.first_access;
+
+    // ✅ NEW: allow linking user -> company (N users : 1 company)
+    // Only send if provided and non-empty
+    if (isNonEmptyString(company_id)) payload.company_id = String(company_id).trim();
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
     const response = await fetch(`${baseUrl}/users`, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
         ...(authHeader ? { Authorization: authHeader } : {}),
       },
       body: JSON.stringify(payload),
     });
 
-    const text = await response.text();
-
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text ? { message: text } : null;
-    }
-
+    const data = await readJsonSafe(response);
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("POST /api/users error:", error);
@@ -123,7 +133,6 @@ router.post("/users", async (req, res) => {
 });
 
 /* -------------------- PATCH /api/users/:id -------------------- */
-// Forwards to BACKEND_API_BASE_URL/users/{id}
 router.patch("/users/:id", async (req, res) => {
   try {
     const { id } = req.params ?? {};
@@ -135,21 +144,32 @@ router.patch("/users/:id", async (req, res) => {
       });
     }
 
-    // Allow partial updates; only forward known fields if present
-    const { full_name, email, role, status, password } = req.body ?? {};
+    const body = req.body ?? {};
 
+    // Allow partial updates; only forward known fields if present
     const payload = {};
-    if (isNonEmptyString(full_name)) payload.full_name = String(full_name).trim();
-    if (isNonEmptyString(email)) payload.email = String(email).trim();
-    if (isNonEmptyString(role)) payload.role = String(role).trim();
-    if (isNonEmptyString(status)) payload.status = String(status).trim();
+
+    if (isNonEmptyString(body.full_name)) payload.full_name = String(body.full_name).trim();
+    if (isNonEmptyString(body.email)) payload.email = String(body.email).trim();
+    if (isNonEmptyString(body.role)) payload.role = String(body.role).trim();
+    if (isNonEmptyString(body.status)) payload.status = String(body.status).trim();
+
+    // ✅ send the correct field name
+    if (isNonEmptyString(body.phonenumber)) payload.phonenumber = String(body.phonenumber).trim();
+
+    // first_access might be boolean/number/string (do not block false/0)
+    if (hasOwn(body, "first_access")) payload.first_access = body.first_access;
+
     // Optional: only if your backend supports updating password via PATCH
-    if (isNonEmptyString(password)) payload.password = String(password);
+    if (isNonEmptyString(body.password)) payload.password = String(body.password);
+
+    // ✅ NEW: allow linking user -> company (N users : 1 company)
+    if (isNonEmptyString(body.company_id)) payload.company_id = String(body.company_id).trim();
 
     if (Object.keys(payload).length === 0) {
       return res.status(400).json({
         message: "Validation error. No valid fields to update.",
-        allowed: ["full_name", "email", "role", "status", "password"],
+        allowed: ["full_name", "email", "role", "status", "phonenumber", "first_access", "password", "company_id"],
       });
     }
 
@@ -166,15 +186,7 @@ router.patch("/users/:id", async (req, res) => {
       body: JSON.stringify(payload),
     });
 
-    const text = await response.text();
-
-    let data = null;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text ? { message: text } : null;
-    }
-
+    const data = await readJsonSafe(response);
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("PATCH /api/users/:id error:", error);
@@ -183,7 +195,6 @@ router.patch("/users/:id", async (req, res) => {
 });
 
 /* -------------------- DELETE /api/users/:id -------------------- */
-// Removes a user
 router.delete("/users/:id", async (req, res) => {
   try {
     const { id } = req.params ?? {};
@@ -191,7 +202,7 @@ router.delete("/users/:id", async (req, res) => {
     if (!isNonEmptyString(id)) {
       return res.status(400).json({
         message: "Validation error. Missing or invalid path parameter.",
-        missing: ["id"]
+        missing: ["id"],
       });
     }
 
@@ -202,8 +213,8 @@ router.delete("/users/:id", async (req, res) => {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
@@ -213,6 +224,5 @@ router.delete("/users/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = router;

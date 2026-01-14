@@ -190,236 +190,265 @@
       <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
       <% %>
 
-        <script>
-          // -------------------- UI helpers --------------------
-          function getValue(id) {
-            const el = document.getElementById(id);
-            return (el && el.value ? el.value : "").trim();
-          }
+<script>
+  // -------------------- UI helpers --------------------
+  function getValue(id) {
+    const el = document.getElementById(id);
+    return (el && el.value ? el.value : "").trim();
+  }
 
-          function normalizeCep(value) {
-            return String(value || "").replace(/\D/g, "").slice(0, 8);
-          }
+  function normalizeCep(value) {
+    return String(value || "").replace(/\D/g, "").slice(0, 8);
+  }
 
-          function showPostalLoading(isLoading) {
-            const el = document.getElementById("postalHelp");
-            if (!el) return;
-            el.style.display = isLoading ? "block" : "none";
-          }
+  function showPostalLoading(isLoading) {
+    const el = document.getElementById("postalHelp");
+    if (!el) return;
+    el.style.display = isLoading ? "block" : "none";
+  }
 
-          // -------------------- CEP lookup (server-side proxy) --------------------
-          let cepTimer = null;
+  // -------------------- CEP lookup (server-side proxy) --------------------
+  let cepTimer = null;
 
-          async function lookupAddressByPostalCode() {
-            const cep = normalizeCep(getValue("postalcode"));
-            if (cep.length !== 8) return;
+  async function lookupAddressByPostalCode() {
+    const cep = normalizeCep(getValue("postalcode"));
+    if (cep.length !== 8) return;
 
-            try {
-              showPostalLoading(true);
+    try {
+      showPostalLoading(true);
 
-              const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
-                method: "GET",
-                headers: { "Accept": "application/json" }
-              });
+      const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+      });
 
-              const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
-              if (!response.ok) {
-                console.warn("CEP lookup failed:", data);
-                return;
-              }
+      if (!response.ok) {
+        console.warn("CEP lookup failed:", data);
+        return;
+      }
 
-              // Fill fields (only if empty to not overwrite user edits)
-              const street = document.getElementById("street");
-              const city = document.getElementById("city");
-              const state = document.getElementById("state");
-              const country = document.getElementById("country");
+      // Fill fields (only if empty to not overwrite user edits)
+      const street = document.getElementById("street");
+      const city = document.getElementById("city");
+      const state = document.getElementById("state");
+      const country = document.getElementById("country");
 
-              if (street && !street.value.trim() && data.street) street.value = data.street;
-              if (city && !city.value.trim() && data.city) city.value = data.city;
-              if (state && !state.value.trim() && data.state) state.value = data.state;
+      if (street && !street.value.trim() && data.street) street.value = data.street;
+      if (city && !city.value.trim() && data.city) city.value = data.city;
+      if (state && !state.value.trim() && data.state) state.value = data.state;
 
-              // In Brazil, you can force "Brasil" if you prefer
-              if (country && !country.value.trim()) country.value = data.country || "Brasil";
+      if (country && !country.value.trim()) country.value = data.country || "Brasil";
+    } catch (e) {
+      console.error("CEP lookup error:", e);
+    } finally {
+      showPostalLoading(false);
+    }
+  }
 
-            } catch (e) {
-              console.error("CEP lookup error:", e);
-            } finally {
-              showPostalLoading(false);
-            }
-          }
+  function attachPostalAutoFill() {
+    const postal = document.getElementById("postalcode");
+    if (!postal) return;
 
-          function attachPostalAutoFill() {
-            const postal = document.getElementById("postalcode");
-            if (!postal) return;
+    postal.addEventListener("input", function () {
+      let v = postal.value.replace(/\D/g, "").slice(0, 8);
+      if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+      postal.value = v;
 
-            postal.addEventListener("input", function () {
-              // simple CEP mask 00000-000
-              let v = postal.value.replace(/\D/g, "").slice(0, 8);
-              if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
-              postal.value = v;
+      clearTimeout(cepTimer);
+      cepTimer = setTimeout(lookupAddressByPostalCode, 500);
+    });
 
-              clearTimeout(cepTimer);
-              cepTimer = setTimeout(lookupAddressByPostalCode, 500);
-            });
+    postal.addEventListener("blur", function () {
+      lookupAddressByPostalCode();
+    });
+  }
 
-            postal.addEventListener("blur", function () {
-              lookupAddressByPostalCode();
-            });
-          }
+  // -------------------- Create user + company --------------------
+  function generateTempPassword() {
+    // simple temp password (you can replace later)
+    const rand = Math.random().toString(36).slice(2);
+    return `Tmp@${rand}9`;
+  }
 
-          // -------------------- Create user + company --------------------
-          function generateTempPassword() {
-            // simple temp password (you can replace later)
-            const rand = Math.random().toString(36).slice(2);
-            return `Tmp@${rand}9`;
-          }
+  function pickIdFromApiResponse(data) {
+    // Try common id keys for user/company responses
+    return (
+      data?.company_id ||
+      data?.companyId ||
+      data?.user_id ||
+      data?.userId ||
+      data?.id ||
+      data?.uuid ||
+      data?._id ||
+      null
+    );
+  }
 
-          async function createUser() {
-            debugger;
-            const sendAccess = $("#acessToPortal").is(":checked");
-            const password = sendAccess ? generateTempPassword() : "";
+  function buildCompanyDetailUrl(companyId) {
+    // ✅ Ajuste aqui se seu route for diferente.
+    // Opção 1 (querystring): return `ClienteDetalhe?id=${encodeURIComponent(companyId)}`;
+    // Opção 2 (path): return `Clientes/Detalhe/${encodeURIComponent(companyId)}`;
 
-            const payload = {
-              full_name: getValue("name"),
-              email: getValue("email"),
-              password: password,
-              //first_access: sendAccess,
-              role: "USER",
-              status: "ACTIVE"
-            };
+    // Vou colocar o mais "safe" (querystring), porque costuma bater com EJS routes:
+    return `ClientDetails?id=${encodeURIComponent(companyId)}`;
+  }
 
-            const response = await fetch("/api/users", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            });
+  async function createUser() {
+    const sendAccess = $("#acessToPortal").is(":checked");
+    const password = sendAccess ? generateTempPassword() : "";
 
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-              console.error("Create user failed", data);
-              throw new Error(data?.message || "Failed to create user");
-            }
+    const payload = {
+      full_name: getValue("name"),
+      email: getValue("email"),
+      password: password,
+      role: "USER",
+      status: "ACTIVE",
+      // Se seu backend já aceita phone (você comentou disso):
+      phone: getValue("telphone") || null
+    };
 
-            // Try common id keys
-            const userId =
-              data.user_id || data.userId || data.id || data.uuid || data._id;
+    const response = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-            if (!userId) {
-              console.warn("User created but no id returned:", data);
-              throw new Error("User created but user id was not returned by backend.");
-            }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("Create user failed", data);
+      throw new Error(data?.message || "Failed to create user");
+    }
 
-            return { userId, raw: data };
-          }
+    const userId =
+      data?.user_id || data?.userId || data?.id || data?.uuid || data?._id || null;
 
-          async function createCompanyWithUser(userId) {
-            const payload = {
-              company_name: getValue("companyname"),
-              user_id: userId,
-              phone: getValue("phone"),
-              company_number: getValue("cnpj"),
-              sector: getValue("setor"),
-              category: $("#categoria").val() = -1 ? $("#categoria").text() : "",
-              address_line: getValue("complemento"),
-              address_street: getValue("street"),
-              address_number: "", // you can add an input later if needed
-              address_city: getValue("city"),
-              address_country: getValue("country")
-            };
+    if (!userId) {
+      console.warn("User created but no id returned:", data);
+      throw new Error("User created but user id was not returned by backend.");
+    }
 
-            const response = await fetch("/api/companies", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            });
+    return { userId, raw: data };
+  }
 
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-              console.error("Create company failed", data);
-              throw new Error(data?.message || "Failed to create company");
-            }
+  async function createCompanyWithUser(userId) {
+    const payload = {
+      company_name: getValue("companyname"),
+      user_id: userId, 
+      phone: getValue("phone"),
+      company_number: getValue("cnpj"),
+      sector: getValue("setor"),
+      category: $("#categoria").text().includes("Selecionar") ? "" :  $("#categoria").text(),
+      address_postalcode: normalizeCep(getValue("postalcode")) || null,
+      address_line: getValue("complemento"),
+      address_street: getValue("street"),
+      address_number: "", 
+      address_city: getValue("city"),
+      address_state: getValue("state"),
+      address_country: getValue("country")
+    };
 
-            return data;
-          }
+    var stringPayload = JSON.stringify(payload);
+    const response = await fetch("/api/companies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: stringPayload
+    });
 
-          // -------------------- Masks --------------------
-          function maskPhone(element) {
-            let value = element.value.replace(/\D/g, '');
-            if (value.length <= 10) {
-              element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-            } else {
-              element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-            }
-          }
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("Create company failed", data);
+      throw new Error(data?.message || "Failed to create company");
+    }
 
-          function maskCNPJ(element) {
-            let value = element.value;
-            value = value.replace(/\D/g, '');
-            value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-            value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-            value = value.replace(/(\d{4})(\d)/, "$1-$2");
-            element.value = value;
-          }
+    const companyId = pickIdFromApiResponse(data);
+    if (!companyId) {
+      console.warn("Company created but no id returned:", data);
+      throw new Error("Company created but company id was not returned by backend.");
+    }
 
-          // -------------------- Wizard init --------------------
-          $(document).ready(function () {
-            $("#pageName").text("Novo Cliente");
-            $("#subSecoundPageName").text("Novo Cliente");
-            $("#subpageName").text("Clientes");
-            $("#subpageName").attr("href", "Clientes");
-            $("#path").show();
+    return { companyId, raw: data };
+  }
 
-            $('.i-checks').iCheck({
-              checkboxClass: 'icheckbox_square-green',
-              radioClass: 'iradio_square-green'
-            });
+  // -------------------- Masks --------------------
+  function maskPhone(element) {
+    let value = element.value.replace(/\D/g, '');
+    if (value.length <= 10) {
+      element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else {
+      element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    }
+  }
 
-            attachPostalAutoFill();
+  function maskCNPJ(element) {
+    let value = element.value;
+    value = value.replace(/\D/g, '');
+    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+    value = value.replace(/(\d{4})(\d)/, "$1-$2");
+    element.value = value;
+  }
 
-            $("#wizard").steps();
-            $("#form").steps({
-              bodyTag: "fieldset",
-              onStepChanging: function (event, currentIndex, newIndex) {
-                if (currentIndex > newIndex) return true;
+  // -------------------- Wizard init --------------------
+  $(document).ready(function () {
+    $("#pageName").text("Novo Cliente");
+    $("#subSecoundPageName").text("Novo Cliente");
+    $("#subpageName").text("Clientes");
+    $("#subpageName").attr("href", "Clientes");
+    $("#path").show();
 
-                const form = $(this);
+    $('.i-checks').iCheck({
+      checkboxClass: 'icheckbox_square-green',
+      radioClass: 'iradio_square-green'
+    });
 
-                if (currentIndex < newIndex) {
-                  $(".body:eq(" + newIndex + ") label.error", form).remove();
-                  $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
-                }
+    attachPostalAutoFill();
 
-                form.validate().settings.ignore = ":disabled,:hidden";
-                return form.valid();
-              },
-              onFinishing: function () {
-                const form = $(this);
-                form.validate().settings.ignore = ":disabled";
-                return form.valid();
-              },
-              onFinished: async function () {
-                try {
-                  // 1) create user
-                  const userResult = await createUser();
+    $("#wizard").steps();
+    $("#form").steps({
+      bodyTag: "fieldset",
+      onStepChanging: function (event, currentIndex, newIndex) {
+        if (currentIndex > newIndex) return true;
 
-                  // 2) create company with user_id
-                  const companyResult = await createCompanyWithUser(userResult.userId);
+        const form = $(this);
 
-                  console.log("User created:", userResult.raw);
-                  console.log("Company created:", companyResult);
+        if (currentIndex < newIndex) {
+          $(".body:eq(" + newIndex + ") label.error", form).remove();
+          $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+        }
 
-                  window.location = "Clientes";
-                } catch (e) {
-                  console.error(e);
-                  alert(e.message || "Erro ao criar cliente.");
-                }
-              }
-            }).validate({
-              errorPlacement: function (error, element) {
-                element.before(error);
-              }
-            });
-          });
-        </script>
+        form.validate().settings.ignore = ":disabled,:hidden";
+        return form.valid();
+      },
+      onFinishing: function () {
+        const form = $(this);
+        form.validate().settings.ignore = ":disabled";
+        return form.valid();
+      },
+      onFinished: async function () {
+        try {
+          // 1) create user (returns userId)
+          const userResult = await createUser();
+
+          // 2) create company with user_id (returns companyId)
+          const companyResult = await createCompanyWithUser(userResult.userId);
+
+          console.log("User created:", userResult.raw);
+          console.log("Company created:", companyResult.raw);
+
+          // 3) redirect to client detail of the newly created company
+          window.location.href = buildCompanyDetailUrl(companyResult.companyId);
+        } catch (e) {
+          console.error(e);
+          alert(e?.message || "Erro ao criar cliente.");
+        }
+      }
+    }).validate({
+      errorPlacement: function (error, element) {
+        element.before(error);
+      }
+    });
+  });
+</script>
