@@ -6,6 +6,22 @@
   .wizard-big.wizard>.content {
     min-height: 350px !important;
   }
+
+  .users-table th,
+  .users-table td {
+    vertical-align: middle !important;
+  }
+
+  .users-table input.form-control {
+    height: 34px;
+    padding: 6px 10px;
+  }
+
+  .btn-xs2 {
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
 </style>
 
 <% contentFor('headerLink') %>
@@ -40,100 +56,94 @@
                   </div>
 
                   <div class="ibox-content">
-                    <p>Preencha as informações de conta e contato.</p>
+                    <p>Preencha as informações da empresa, depois os dados opcionais e por último os usuários de acesso.
+                    </p>
 
+                    <!-- ✅ NEW ORDER: Cliente -> Dados Opcionais -> Acesso -->
                     <form id="form" action="#" class="wizard-big">
+
+                      <!-- ===================== STEP 1: CLIENTE ===================== -->
                       <h1>Cliente</h1>
                       <fieldset>
                         <h2>Informações do cliente</h2>
                         <div class="row">
                           <div class="col-lg-4">
                             <div class="form-group">
-                              <label>Nome da Empresa *</label>
-                              <input id="companyname" name="companyname" type="text" class="form-control required">
+                              <label>CNPJ *</label>
+                              <input id="cnpj" name="cnpj" onkeyup="maskCNPJ(this)" type="text"
+                                class="form-control required" maxlength="18" placeholder="00.000.000/0000-00">
+                              <small id="cnpjHelp" style="display:none; color:#999;">Buscando dados do CNPJ...</small>
                             </div>
+
                             <div class="form-group">
                               <label>Telefone *</label>
                               <input id="phone" name="phone" onkeyup="maskPhone(this)" type="text"
                                 class="form-control required" maxlength="15">
                             </div>
+
                             <div class="form-group">
                               <label>Setor</label>
-                              <input id="setor" name="setor" type="text" class="form-control" maxlength="18"
+                              <input id="setor" name="setor" type="text" class="form-control" maxlength="120"
                                 placeholder="Ex:.. Agrícola">
                             </div>
                           </div>
 
                           <div class="col-lg-4">
                             <div class="form-group">
-                              <label>CNPJ *</label>
-                              <input id="cnpj" name="cnpj" onkeyup="maskCNPJ(this)" type="text"
-                                class="form-control required" maxlength="18">
+                              <label>Nome da Empresa *</label>
+                              <input id="companyname" name="companyname" type="text" class="form-control required">
                             </div>
+
                             <div class="form-group">
                               <label>Porte</label>
-                                <select id="categoria" class="form-control">
-                                  <option value="-1" selected>Selecionar...</option>
-                                  <option value="0" >Pequeno</option>
-                                  <option value="1" >Médio</option>
-                                  <option value="2" >Grande</option>
-                                </select>
+                              <select id="categoria" class="form-control">
+                                <option value="-1" selected>Selecionar...</option>
+                                <option value="0">Pequeno</option>
+                                <option value="1">Médio</option>
+                                <option value="2">Grande</option>
+                              </select>
+                            </div>
+
+                            <div class="form-group">
+                              <label>Status</label>
+                              <input class="form-control" value="Ativo" readonly />
                             </div>
                           </div>
 
                           <div class="col-lg-4">
                             <div class="text-center">
                               <div style="margin-top: 20px">
-                                <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
+                                <i class="fa fa-building" style="font-size: 180px; color: #e5e5e5"></i>
                               </div>
+                              <!-- <div class="m-t-sm">
+                            <small class="text-muted">
+                              Ao avançar para o próximo passo, você preencherá os dados opcionais.
+                              <br />
+                            </small>
+                          </div> -->
                             </div>
                           </div>
                         </div>
                       </fieldset>
 
-                      <h1>Acesso</h1>
-                      <fieldset>
-                        <h2>Informações do contato</h2>
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Nome Completo *</label>
-                              <input id="name" name="name" type="text" class="form-control required">
-                            </div>
-                            <div class="form-group">
-                              <label>Telefone pessoal</label>
-                              <input id="telphone" onkeyup="maskPhone(this)" name="telphone" type="text"
-                                class="form-control" maxlength="15">
-                            </div>
-                          </div>
-
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Email *</label>
-                              <input id="email" name="email" type="text" class="form-control required email">
-                            </div>
-                            <div class="form-group">
-                              <label for="acessToPortal" style="width: 100%">Enviar acesso ao portal?</label>
-                              <input type="checkbox" id="acessToPortal" class="i-checks" checked>
-                            </div>
-                          </div>
-                        </div>
-                      </fieldset>
-
+                      <!-- ===================== STEP 2: DADOS OPCIONAIS ===================== -->
                       <h1>Dados Opcionais</h1>
                       <fieldset>
+                        <h2>Endereço (opcional)</h2>
                         <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group">
                               <label>Código Postal</label>
                               <input id="postalcode" name="postalcode" type="text" class="form-control" maxlength="9"
-                                placeholder="00000-000">
+                                placeholder="00000-000" oninput="maskCEP(this)">
                               <small id="postalHelp" style="display:none; color:#999;">Buscando endereço...</small>
                             </div>
+
                             <div class="form-group">
                               <label>Rua</label>
                               <input id="street" name="street" type="text" class="form-control">
                             </div>
+
                             <div class="form-group">
                               <label>País</label>
                               <input id="country" name="country" type="text" class="form-control">
@@ -145,24 +155,63 @@
                               <label>Cidade</label>
                               <input id="city" name="city" type="text" class="form-control">
                             </div>
+
                             <div class="form-group">
                               <label>Estado</label>
                               <input id="state" name="state" type="text" class="form-control">
                             </div>
+
                             <div class="form-group">
                               <label>Complemento</label>
                               <input id="complemento" name="complemento" type="text" class="form-control">
                             </div>
                           </div>
                         </div>
+
                       </fieldset>
 
-                      <!-- <h1>Finish</h1>
-                  <fieldset>
-                    <h2>Terms and Conditions</h2>
-                    <label for="acceptTerms">I agree with the Terms and Conditions.</label>
-                    <input id="acceptTerms" name="acceptTerms" type="checkbox" class="required">
-                  </fieldset> -->
+                      <!-- ===================== STEP 3: ACESSO (MULTI USERS) ===================== -->
+                      <h1>Acesso</h1>
+                      <fieldset>
+                        <h2>Usuários de acesso</h2>
+
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <div class="alert alert-warning" id="companyNotCreatedBanner" style="display:none;">
+                              A Company ainda não foi criada. Volte um passo e clique em Next no Step 2.
+                            </div>
+
+                            <div class="m-b-sm">
+                              <button type="button" class="btn btn-primary btn-xs2" onclick="addUserRow()">
+                                <i class="fa fa-plus"></i> Adicionar usuário
+                              </button>
+                              <small class="text-muted m-l-sm">
+                                Marque <strong>Principal</strong> para definir o usuário principal da empresa.
+                              </small>
+                            </div>
+
+                            <div class="table-responsive">
+                              <table class="table table-bordered users-table">
+                                <thead>
+                                  <tr>
+                                    <th style="width:70px;">Principal</th>
+                                    <th>Nome *</th>
+                                    <th>Email *</th>
+                                    <th>Telefone</th>
+                                    <th style="width:150px;">Enviar acesso?</th>
+                                    <th style="width:90px;">Ações</th>
+                                  </tr>
+                                </thead>
+                                <tbody id="usersTbody">
+                                  <!-- rows -->
+                                </tbody>
+                              </table>
+                            </div>
+
+                          </div>
+                        </div>
+                      </fieldset>
+
                     </form>
 
                   </div>
@@ -190,265 +239,584 @@
       <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
       <% %>
 
-<script>
-  // -------------------- UI helpers --------------------
-  function getValue(id) {
-    const el = document.getElementById(id);
-    return (el && el.value ? el.value : "").trim();
-  }
+        <script>
+          (function () {
+            // ===================== State =====================
+            window.__newClientState = window.__newClientState || {
+              companyId: null,
+              placeholderUserId: null,
+              lastCnpjFetched: null,
+              companyCreated: false,
+              creatingCompany: false,
+              userRowsSeq: 0
+            };
 
-  function normalizeCep(value) {
-    return String(value || "").replace(/\D/g, "").slice(0, 8);
-  }
+            // ===================== UI helpers =====================
+            function getValue(id) {
+              const el = document.getElementById(id);
+              return (el && el.value ? el.value : "").trim();
+            }
 
-  function showPostalLoading(isLoading) {
-    const el = document.getElementById("postalHelp");
-    if (!el) return;
-    el.style.display = isLoading ? "block" : "none";
-  }
+            function setIfEmpty(id, value) {
+              const el = document.getElementById(id);
+              if (!el) return;
+              if (String(el.value || "").trim().length > 0) return;
+              el.value = value ?? "";
+            }
 
-  // -------------------- CEP lookup (server-side proxy) --------------------
-  let cepTimer = null;
+            function normalizeCep(value) {
+              return String(value || "").replace(/\D/g, "").slice(0, 8);
+            }
 
-  async function lookupAddressByPostalCode() {
-    const cep = normalizeCep(getValue("postalcode"));
-    if (cep.length !== 8) return;
+            function onlyDigits(value) {
+              return String(value || "").replace(/\D/g, "");
+            }
 
-    try {
-      showPostalLoading(true);
+            function showPostalLoading(isLoading) {
+              const el = document.getElementById("postalHelp");
+              if (!el) return;
+              el.style.display = isLoading ? "block" : "none";
+            }
 
-      const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
-        method: "GET",
-        headers: { "Accept": "application/json" }
-      });
+            function showCnpjLoading(isLoading) {
+              const el = document.getElementById("cnpjHelp");
+              if (!el) return;
+              el.style.display = isLoading ? "block" : "none";
+            }
 
-      const data = await response.json().catch(() => ({}));
+            // Anti-spam alert (cooldown)
+            function showAlertOnce(message) {
+              const now = Date.now();
+              const last = window.__lastAlertAt || 0;
+              if (now - last < 2500) return;
+              window.__lastAlertAt = now;
+              alert(message);
+            }
 
-      if (!response.ok) {
-        console.warn("CEP lookup failed:", data);
-        return;
-      }
+            function pickIdFromApiResponse(data) {
+              return (data?.company_id || data?.companyId || data?.user_id || data?.userId || data?.id || data?.uuid || data?._id || null);
+            }
 
-      // Fill fields (only if empty to not overwrite user edits)
-      const street = document.getElementById("street");
-      const city = document.getElementById("city");
-      const state = document.getElementById("state");
-      const country = document.getElementById("country");
+            function generateTempPassword() {
+              const rand = Math.random().toString(36).slice(2);
+              return `Tmp@${rand}9`;
+            }
 
-      if (street && !street.value.trim() && data.street) street.value = data.street;
-      if (city && !city.value.trim() && data.city) city.value = data.city;
-      if (state && !state.value.trim() && data.state) state.value = data.state;
+            function buildCompanyDetailUrl(companyId) {
+              return `ClientDetails?id=${encodeURIComponent(companyId)}`;
+            }
 
-      if (country && !country.value.trim()) country.value = data.country || "Brasil";
-    } catch (e) {
-      console.error("CEP lookup error:", e);
-    } finally {
-      showPostalLoading(false);
-    }
-  }
+            function getSelectedCategoryText() {
+              const txt = $("#categoria option:selected").text() || "";
+              return txt.includes("Selecionar") ? "" : txt;
+            }
 
-  function attachPostalAutoFill() {
-    const postal = document.getElementById("postalcode");
-    if (!postal) return;
+            // ===================== CNPJ lookup (via your BFF proxy) =====================
+            async function fetchCompanyByCnpj(cnpjDigits) {
+              const resp = await fetch(`/api/cnpj/lookup?cnpj=${encodeURIComponent(cnpjDigits)}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+              });
 
-    postal.addEventListener("input", function () {
-      let v = postal.value.replace(/\D/g, "").slice(0, 8);
-      if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
-      postal.value = v;
+              const data = await resp.json().catch(() => ({}));
+              if (!resp.ok) throw new Error(data?.message || "Falha ao consultar CNPJ.");
+              return data;
+            }
 
-      clearTimeout(cepTimer);
-      cepTimer = setTimeout(lookupAddressByPostalCode, 500);
-    });
+            async function tryAutoFillFromCnpj(options) {
+              const opts = options || {};
+              const showAlert = !!opts.showAlert;
 
-    postal.addEventListener("blur", function () {
-      lookupAddressByPostalCode();
-    });
-  }
+              const cnpjDigits = onlyDigits(getValue("cnpj"));
+              if (cnpjDigits.length !== 14) return;
 
-  // -------------------- Create user + company --------------------
-  function generateTempPassword() {
-    // simple temp password (you can replace later)
-    const rand = Math.random().toString(36).slice(2);
-    return `Tmp@${rand}9`;
-  }
+              if (window.__newClientState.lastCnpjFetched === cnpjDigits) return;
 
-  function pickIdFromApiResponse(data) {
-    // Try common id keys for user/company responses
-    return (
-      data?.company_id ||
-      data?.companyId ||
-      data?.user_id ||
-      data?.userId ||
-      data?.id ||
-      data?.uuid ||
-      data?._id ||
-      null
-    );
-  }
+              try {
+                showCnpjLoading(true);
 
-  function buildCompanyDetailUrl(companyId) {
-    // ✅ Ajuste aqui se seu route for diferente.
-    // Opção 1 (querystring): return `ClienteDetalhe?id=${encodeURIComponent(companyId)}`;
-    // Opção 2 (path): return `Clientes/Detalhe/${encodeURIComponent(companyId)}`;
+                const data = await fetchCompanyByCnpj(cnpjDigits);
+                window.__newClientState.lastCnpjFetched = cnpjDigits;
 
-    // Vou colocar o mais "safe" (querystring), porque costuma bater com EJS routes:
-    return `ClientDetails?id=${encodeURIComponent(companyId)}`;
-  }
+                setIfEmpty("companyname", data?.nome);
 
-  async function createUser() {
-    const sendAccess = $("#acessToPortal").is(":checked");
-    const password = sendAccess ? generateTempPassword() : "";
+                const setorText =
+                  (data?.atividade_principal && data.atividade_principal.text)
+                    ? data.atividade_principal.text
+                    : "";
+                setIfEmpty("setor", setorText);
 
-    const payload = {
-      full_name: getValue("name"),
-      email: getValue("email"),
-      password: password,
-      role: "USER",
-      status: "ACTIVE",
-      // Se seu backend já aceita phone (você comentou disso):
-      phone: getValue("telphone") || null
-    };
+                setIfEmpty("postalcode", data?.cep.replace(".", "") || "");
+                setIfEmpty("street", data?.logradouro || "");
+                setIfEmpty("city", data?.municipio || "");
+                setIfEmpty("state", data?.uf || "");
+                setIfEmpty("country", "Brasil");
 
-    const response = await fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+                const cep = normalizeCep(getValue("postalcode"));
+                if (cep.length === 8) lookupAddressByPostalCode();
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Create user failed", data);
-      throw new Error(data?.message || "Failed to create user");
-    }
+              } catch (e) {
+                console.error("[CNPJ] lookup failed:", e);
+                if (showAlert) showAlertOnce(e?.message || "Não foi possível buscar os dados do CNPJ.");
+              } finally {
+                showCnpjLoading(false);
+              }
+            }
 
-    const userId =
-      data?.user_id || data?.userId || data?.id || data?.uuid || data?._id || null;
+            function installCnpjAutoFill() {
+              if (window.__cnpjListenersInstalled) return;
+              window.__cnpjListenersInstalled = true;
 
-    if (!userId) {
-      console.warn("User created but no id returned:", data);
-      throw new Error("User created but user id was not returned by backend.");
-    }
+              let debounceTimer = null;
 
-    return { userId, raw: data };
-  }
+              document.addEventListener("keyup", function (ev) {
+                const target = ev.target;
+                if (!target || target.id !== "cnpj") return;
 
-  async function createCompanyWithUser(userId) {
-    const payload = {
-      company_name: getValue("companyname"),
-      user_id: userId, 
-      phone: getValue("phone"),
-      company_number: getValue("cnpj"),
-      sector: getValue("setor"),
-      category: $("#categoria").text().includes("Selecionar") ? "" :  $("#categoria").text(),
-      address_postalcode: normalizeCep(getValue("postalcode")) || null,
-      address_line: getValue("complemento"),
-      address_street: getValue("street"),
-      address_number: "", 
-      address_city: getValue("city"),
-      address_state: getValue("state"),
-      address_country: getValue("country")
-    };
+                const digits = onlyDigits(target.value);
+                if (digits.length !== 14) return;
 
-    var stringPayload = JSON.stringify(payload);
-    const response = await fetch("/api/companies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: stringPayload
-    });
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                  tryAutoFillFromCnpj({ showAlert: false });
+                }, 600);
+              }, true);
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Create company failed", data);
-      throw new Error(data?.message || "Failed to create company");
-    }
+              document.addEventListener("blur", function (ev) {
+                const target = ev.target;
+                if (!target || target.id !== "cnpj") return;
+                tryAutoFillFromCnpj({ showAlert: true });
+              }, true);
+            }
 
-    const companyId = pickIdFromApiResponse(data);
-    if (!companyId) {
-      console.warn("Company created but no id returned:", data);
-      throw new Error("Company created but company id was not returned by backend.");
-    }
+            // ===================== CEP lookup (server-side proxy) =====================
+            let cepTimer = null;
 
-    return { companyId, raw: data };
-  }
+            async function lookupAddressByPostalCode() {
+              const cep = normalizeCep(getValue("postalcode"));
+              if (cep.length !== 8) return;
 
-  // -------------------- Masks --------------------
-  function maskPhone(element) {
-    let value = element.value.replace(/\D/g, '');
-    if (value.length <= 10) {
-      element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    } else {
-      element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    }
-  }
+              try {
+                showPostalLoading(true);
 
-  function maskCNPJ(element) {
-    let value = element.value;
-    value = value.replace(/\D/g, '');
-    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-    value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-    value = value.replace(/(\d{4})(\d)/, "$1-$2");
-    element.value = value;
-  }
+                const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
+                  method: "GET",
+                  headers: { "Accept": "application/json" }
+                });
 
-  // -------------------- Wizard init --------------------
-  $(document).ready(function () {
-    $("#pageName").text("Novo Cliente");
-    $("#subSecoundPageName").text("Novo Cliente");
-    $("#subpageName").text("Clientes");
-    $("#subpageName").attr("href", "Clientes");
-    $("#path").show();
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) return;
 
-    $('.i-checks').iCheck({
-      checkboxClass: 'icheckbox_square-green',
-      radioClass: 'iradio_square-green'
-    });
+                const street = document.getElementById("street");
+                const city = document.getElementById("city");
+                const state = document.getElementById("state");
+                const country = document.getElementById("country");
 
-    attachPostalAutoFill();
+                if (street && !street.value.trim() && data.street) street.value = data.street;
+                if (city && !city.value.trim() && data.city) city.value = data.city;
+                if (state && !state.value.trim() && data.state) state.value = data.state;
+                if (country && !country.value.trim()) country.value = data.country || "Brasil";
+              } catch (e) {
+                console.error("CEP lookup error:", e);
+              } finally {
+                showPostalLoading(false);
+              }
+            }
+            window.lookupAddressByPostalCode = lookupAddressByPostalCode;
 
-    $("#wizard").steps();
-    $("#form").steps({
-      bodyTag: "fieldset",
-      onStepChanging: function (event, currentIndex, newIndex) {
-        if (currentIndex > newIndex) return true;
+            function attachPostalAutoFill() {
+              const postal = document.getElementById("postalcode");
+              if (!postal) return;
 
-        const form = $(this);
+              postal.addEventListener("input", function () {
+                let v = postal.value.replace(/\D/g, "").slice(0, 8);
+                if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+                postal.value = v;
 
-        if (currentIndex < newIndex) {
-          $(".body:eq(" + newIndex + ") label.error", form).remove();
-          $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
-        }
+                clearTimeout(cepTimer);
+                cepTimer = setTimeout(lookupAddressByPostalCode, 500);
+              });
 
-        form.validate().settings.ignore = ":disabled,:hidden";
-        return form.valid();
-      },
-      onFinishing: function () {
-        const form = $(this);
-        form.validate().settings.ignore = ":disabled";
-        return form.valid();
-      },
-      onFinished: async function () {
-        try {
-          // 1) create user (returns userId)
-          const userResult = await createUser();
+              postal.addEventListener("blur", function () {
+                lookupAddressByPostalCode();
+              });
+            }
 
-          // 2) create company with user_id (returns companyId)
-          const companyResult = await createCompanyWithUser(userResult.userId);
+            // ===================== Masks =====================
+            function maskPhone(element) {
+              let value = element.value.replace(/\D/g, '');
+              if (value.length <= 10) {
+                element.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+              } else {
+                element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+              }
+            }
+            function maskCNPJ(element) {
+              let value = element.value;
+              value = value.replace(/\D/g, '');
+              value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+              value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+              value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+              value = value.replace(/(\d{4})(\d)/, "$1-$2");
+              element.value = value;
+            }
+            function maskCEP(element) {
+              let v = String(element.value || "").replace(/\D/g, "").slice(0, 8);
+              if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+              element.value = v;
+            }
+            window.maskPhone = maskPhone;
+            window.maskCNPJ = maskCNPJ;
+            window.maskCEP = maskCEP;
 
-          console.log("User created:", userResult.raw);
-          console.log("Company created:", companyResult.raw);
+            // ===================== API calls =====================
+            async function apiCreateUser(payload) {
+              const response = await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify(payload || {})
+              });
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(data?.message || "Falha ao criar usuário.");
+              return data;
+            }
 
-          // 3) redirect to client detail of the newly created company
-          window.location.href = buildCompanyDetailUrl(companyResult.companyId);
-        } catch (e) {
-          console.error(e);
-          alert(e?.message || "Erro ao criar cliente.");
-        }
-      }
-    }).validate({
-      errorPlacement: function (error, element) {
-        element.before(error);
-      }
-    });
-  });
-</script>
+            async function apiPatchUser(userId, payload) {
+              const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify(payload || {})
+              });
+              const text = await response.text().catch(() => "");
+              const data = text ? (function () { try { return JSON.parse(text); } catch { return { message: text }; } })() : {};
+              if (!response.ok) throw new Error(data?.message || text || "Falha ao atualizar usuário.");
+              return data;
+            }
+
+            async function apiCreateCompany(payload) {
+              const response = await fetch("/api/companies", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify(payload || {})
+              });
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(data?.message || "Falha ao criar company.");
+              return data;
+            }
+
+            async function apiPatchCompany(companyId, payload) {
+              const response = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify(payload || {})
+              });
+              const text = await response.text().catch(() => "");
+              const data = text ? (function () { try { return JSON.parse(text); } catch { return { message: text }; } })() : {};
+              if (!response.ok) throw new Error(data?.message || text || "Falha ao atualizar company.");
+              return data;
+            }
+
+            // ===================== Multi-users UI =====================
+            function escapeHtml(value) {
+              if (value == null) return "";
+              return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+            }
+
+            function ensureAtLeastOneRow() {
+              const tbody = document.getElementById("usersTbody");
+              if (!tbody) return;
+              if (tbody.children.length === 0) addUserRow();
+            }
+
+            function addUserRow(prefill) {
+              const tbody = document.getElementById("usersTbody");
+              if (!tbody) return;
+
+              const seq = ++window.__newClientState.userRowsSeq;
+              const rowId = `urow_${seq}`;
+
+              const p = prefill || {};
+              const name = p.full_name || "";
+              const email = p.email || "";
+              const phone = p.phonenumber || "";
+              const send = (p.send_access !== false); // default true
+
+              const tr = document.createElement("tr");
+              tr.setAttribute("data-row-id", rowId);
+
+              tr.innerHTML = `
+        <td class="text-center">
+          <input type="radio" name="primaryUserRadio" value="${escapeHtml(rowId)}" ${tbody.children.length === 0 ? "checked" : ""} />
+        </td>
+        <td>
+          <input type="text" class="form-control" id="${rowId}_name" placeholder="Nome Completo" value="${escapeHtml(name)}" />
+        </td>
+        <td>
+          <input type="text" class="form-control" id="${rowId}_email" placeholder="email@empresa.com" value="${escapeHtml(email)}" />
+        </td>
+        <td>
+          <input type="text" class="form-control" id="${rowId}_phone" placeholder="(11) 99999-9999" value="${escapeHtml(phone)}" onkeyup="maskPhone(this)" maxlength="15" />
+        </td>
+        <td class="text-center">
+          <label style="margin:0; cursor:pointer;">
+            <input type="checkbox" id="${rowId}_send" ${send ? "checked" : ""} />
+            <span class="m-l-xs">Sim</span>
+          </label>
+        </td>
+        <td class="text-center">
+          <button type="button" class="btn btn-danger btn-xs2" onclick="removeUserRow('${rowId}')">
+            <i class="fa fa-trash"></i>
+          </button>
+        </td>
+      `;
+
+              tbody.appendChild(tr);
+            }
+            window.addUserRow = addUserRow;
+
+            function removeUserRow(rowId) {
+              const tbody = document.getElementById("usersTbody");
+              if (!tbody) return;
+
+              const tr = tbody.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
+              if (tr) tr.remove();
+
+              // if removed the checked primary, ensure one remains checked
+              const checked = tbody.querySelector(`input[name="primaryUserRadio"]:checked`);
+              if (!checked) {
+                const first = tbody.querySelector(`input[name="primaryUserRadio"]`);
+                if (first) first.checked = true;
+              }
+
+              ensureAtLeastOneRow();
+            }
+            window.removeUserRow = removeUserRow;
+
+            function readUsersFromTable() {
+              const tbody = document.getElementById("usersTbody");
+              if (!tbody) return { users: [], primaryRowId: null };
+
+              const rows = Array.from(tbody.querySelectorAll("tr[data-row-id]"));
+              const primary = tbody.querySelector(`input[name="primaryUserRadio"]:checked`);
+              const primaryRowId = primary ? primary.value : null;
+
+              const users = rows.map(r => {
+                const rowId = r.getAttribute("data-row-id");
+                const full_name = (document.getElementById(`${rowId}_name`)?.value || "").trim();
+                const email = (document.getElementById(`${rowId}_email`)?.value || "").trim();
+                const phonenumber = (document.getElementById(`${rowId}_phone`)?.value || "").trim();
+                const send_access = !!document.getElementById(`${rowId}_send`)?.checked;
+                return { rowId, full_name, email, phonenumber, send_access };
+              });
+
+              return { users, primaryRowId };
+            }
+
+            function validateUsersTable() {
+              const { users } = readUsersFromTable();
+              if (!users || users.length === 0) return "Adicione pelo menos 1 usuário.";
+
+              const invalid = users.find(u => !u.full_name || !u.email);
+              if (invalid) return "Preencha Nome e Email em todos os usuários.";
+
+              // very basic email check
+              const badEmail = users.find(u => !/^\S+@\S+\.\S+$/.test(u.email));
+              if (badEmail) return `Email inválido: ${badEmail.email}`;
+
+              // unique email check
+              const emails = users.map(u => u.email.toLowerCase());
+              const hasDup = new Set(emails).size !== emails.length;
+              if (hasDup) return "Existe email duplicado na lista de usuários.";
+
+              return null;
+            }
+            // ===================== Core rule: create company on step2 -> next =====================
+            async function ensureCompanyCreatedBeforeAccess() {
+              if (window.__newClientState.companyCreated && window.__newClientState.companyId) return true;
+              if (window.__newClientState.creatingCompany) return false;
+
+              window.__newClientState.creatingCompany = true;
+
+              try {
+                // ✅ Create company directly (NO placeholder user)
+                const payloadCompany = {
+                  company_name: getValue("companyname"),
+                  // ✅ user_id removed
+                  phone: getValue("phone"),
+                  company_number: getValue("cnpj"),
+                  sector: getValue("setor"),
+                  category: getSelectedCategoryText(),
+
+                  address_postalcode: normalizeCep(getValue("postalcode")) || null,
+                  address_line: getValue("complemento"),
+                  address_street: getValue("street"),
+                  address_number: "",
+                  address_city: getValue("city"),
+                  address_state: getValue("state"),
+                  address_country: getValue("country") || "Brasil"
+                };
+
+                const createdCompany = await apiCreateCompany(payloadCompany);
+                const companyId = pickIdFromApiResponse(createdCompany);
+                if (!companyId) throw new Error("Company criada, mas não retornou ID.");
+
+                window.__newClientState.companyId = companyId;
+                window.__newClientState.companyCreated = true;
+
+                // ✅ mantém seu cache do companyId como estava
+    localStorage.setItem("selectedClientId", String(companyId));
+    localStorage.setItem("selectedClient", JSON.stringify(payloadCompany));
+
+                console.log("[NewClient] Company created:", companyId);
+                return true;
+              } catch (e) {
+                console.error("[NewClient] ensureCompanyCreatedBeforeAccess failed:", e);
+                showAlertOnce(e?.message || "Erro ao criar company no Step 2.");
+                return false;
+              } finally {
+                window.__newClientState.creatingCompany = false;
+              }
+            }
+
+            function showCompanyNotCreatedBanner(show) {
+              const el = document.getElementById("companyNotCreatedBanner");
+              if (!el) return;
+              el.style.display = show ? "block" : "none";
+            }
+
+            // ===================== Finish: create all users + link + set primary =====================
+            async function finishCreateUsersAndLink() {
+              const companyId = window.__newClientState.companyId;
+              if (!companyId) throw new Error("CompanyId não encontrado. Volte e avance no Step 2 para criar a company.");
+
+              const validationMsg = validateUsersTable();
+              if (validationMsg) throw new Error(validationMsg);
+
+              const { users, primaryRowId } = readUsersFromTable();
+              if (!primaryRowId) throw new Error("Selecione um usuário como Principal.");
+
+              // create users (real)
+              const createdUsers = [];
+              for (const u of users) {
+                const password = u.send_access ? generateTempPassword() : "";
+
+                const payload = {
+                  full_name: u.full_name,
+                  email: u.email,
+                  password: password,
+                  role: "USER",
+                  status: "ACTIVE",
+                  phonenumber: u.phonenumber || null,
+
+                  // ✅ link on create (needs usersApi.js to forward company_id)
+                  company_id: companyId
+                };
+
+                const created = await apiCreateUser(payload);
+                const userId = pickIdFromApiResponse(created);
+                if (!userId) throw new Error(`Usuário criado (${u.email}), mas não retornou ID.`);
+
+                createdUsers.push({ rowId: u.rowId, userId, email: u.email });
+              }
+
+              // choose primary
+              const primary = createdUsers.find(x => x.rowId === primaryRowId);
+              if (!primary) throw new Error("Não foi possível identificar o usuário Principal criado.");
+
+              // patch company user_id to primary
+              await apiPatchCompany(companyId, { user_id: primary.userId });
+
+              // ensure all users have company_id (in case backend ignored on create)
+              for (const cu of createdUsers) {
+                await apiPatchUser(cu.userId, { company_id: companyId });
+              }
+
+              window.location.href = buildCompanyDetailUrl(companyId);
+            }
+
+            // ===================== Wizard init =====================
+            $(document).ready(function () {
+              $("#pageName").text("Novo Cliente");
+              $("#subSecoundPageName").text("Novo Cliente");
+              $("#subpageName").text("Clientes");
+              $("#subpageName").attr("href", "Clientes");
+              $("#path").show();
+
+              $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green'
+              });
+
+              attachPostalAutoFill();
+              installCnpjAutoFill();
+
+
+              // initial table
+              ensureAtLeastOneRow();
+
+              $("#form").steps({
+                bodyTag: "fieldset",
+
+                onStepChanging: async function (event, currentIndex, newIndex) {
+                  // allow back
+                  if (currentIndex > newIndex) return true;
+
+                  const form = $(this);
+
+                  // clean next step errors
+                  if (currentIndex < newIndex) {
+                    $(".body:eq(" + newIndex + ") label.error", form).remove();
+                    $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                  }
+
+                  form.validate().settings.ignore = ":disabled,:hidden";
+                  const ok = form.valid();
+                  if (!ok) return false;
+
+                  // ✅ when leaving Step 2 (Dados Opcionais) to Step 3 (Acesso): create company
+                  // Step indexes: 0 Cliente, 1 Dados Opcionais, 2 Acesso
+                  if (currentIndex === 1 && newIndex === 2) {
+                    const created = await ensureCompanyCreatedBeforeAccess();
+                    showCompanyNotCreatedBanner(!created);
+                    return created;
+                  }
+
+                  return true;
+                },
+
+                onStepChanged: function (event, currentIndex) {
+                  // If user lands on access but company not created, show banner
+                  if (currentIndex === 2) {
+                    const hasCompany = !!(window.__newClientState.companyId);
+                    showCompanyNotCreatedBanner(!hasCompany);
+                  }
+                },
+
+                onFinishing: function () {
+                  const form = $(this);
+                  form.validate().settings.ignore = ":disabled";
+                  return form.valid();
+                },
+
+                onFinished: async function () {
+                  try {
+                    await finishCreateUsersAndLink();
+                  } catch (e) {
+                    console.error(e);
+                    showAlertOnce(e?.message || "Erro ao finalizar criação.");
+                  }
+                }
+              }).validate({
+                errorPlacement: function (error, element) {
+                  element.before(error);
+                }
+              });
+            });
+
+          })();
+        </script>

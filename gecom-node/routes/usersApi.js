@@ -40,7 +40,6 @@ async function readJsonSafe(response) {
   try {
     return JSON.parse(text);
   } catch {
-    // if backend returned non-json error
     return { message: text };
   }
 }
@@ -84,7 +83,7 @@ router.post("/users", async (req, res) => {
     const missing = [];
     if (!isNonEmptyString(full_name)) missing.push("full_name");
     if (!isNonEmptyString(email)) missing.push("email");
-    if (!isNonEmptyString(password)) missing.push("password");
+    if (!hasOwn(req.body, "password")) missing.push("password"); // allow empty string password
 
     if (missing.length > 0) {
       return res.status(400).json({
@@ -96,19 +95,15 @@ router.post("/users", async (req, res) => {
     const payload = {
       full_name: String(full_name).trim(),
       email: String(email).trim(),
-      password: String(password),
+      password: String(password ?? ""),
       role: isNonEmptyString(role) ? String(role).trim() : "USER",
       status: isNonEmptyString(status) ? String(status).trim() : "ACTIVE",
     };
 
-    // Optional fields if your backend supports them on POST
     if (isNonEmptyString(phonenumber)) payload.phonenumber = String(phonenumber).trim();
-
-    // allow boolean/number/string for first_access
     if (hasOwn(req.body, "first_access")) payload.first_access = req.body.first_access;
 
-    // ✅ NEW: allow linking user -> company (N users : 1 company)
-    // Only send if provided and non-empty
+    // ✅ allow link user -> company (N users -> 1 company)
     if (isNonEmptyString(company_id)) payload.company_id = String(company_id).trim();
 
     const baseUrl = getBackendBaseUrl();
@@ -145,25 +140,17 @@ router.patch("/users/:id", async (req, res) => {
     }
 
     const body = req.body ?? {};
-
-    // Allow partial updates; only forward known fields if present
     const payload = {};
 
     if (isNonEmptyString(body.full_name)) payload.full_name = String(body.full_name).trim();
     if (isNonEmptyString(body.email)) payload.email = String(body.email).trim();
     if (isNonEmptyString(body.role)) payload.role = String(body.role).trim();
     if (isNonEmptyString(body.status)) payload.status = String(body.status).trim();
-
-    // ✅ send the correct field name
     if (isNonEmptyString(body.phonenumber)) payload.phonenumber = String(body.phonenumber).trim();
-
-    // first_access might be boolean/number/string (do not block false/0)
     if (hasOwn(body, "first_access")) payload.first_access = body.first_access;
-
-    // Optional: only if your backend supports updating password via PATCH
     if (isNonEmptyString(body.password)) payload.password = String(body.password);
 
-    // ✅ NEW: allow linking user -> company (N users : 1 company)
+    // ✅ allow update membership
     if (isNonEmptyString(body.company_id)) payload.company_id = String(body.company_id).trim();
 
     if (Object.keys(payload).length === 0) {

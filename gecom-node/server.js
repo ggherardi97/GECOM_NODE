@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
 const companiesApiRoutes = require("./routes/companiesApi");
 const processApiRoutes = require("./routes/processApi");
+const cnpjApiRoutes = require('./routes/cnpjApi');
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 console.log("usersApi resolved to:", usersApiPath);
@@ -37,6 +38,7 @@ app.use('/auth', authRoutes);
 app.use("/api", companiesApiRoutes);
 app.use("/api", usersApiRoutes);
 app.use("/api", processApiRoutes);
+app.use('/api', cnpjApiRoutes);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes')); 
