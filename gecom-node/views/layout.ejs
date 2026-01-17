@@ -148,7 +148,7 @@
                   src="https://media.licdn.com/dms/image/v2/D4D03AQEerJZZBBAQTQ/profile-displayphoto-shrink_800_800/B4DZcM22u5IAAc-/0/1748267396670?e=1762387200&v=beta&t=FDyVnwH0JYhgHCLyaO1A0Qe73RsqByvyc072KI-7Qxs" />
               </span>
               <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                <span class="block m-t-xs font-bold">Gustavo Gherardi</span>
+                <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
                 <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
               </a>
               <ul class="dropdown-menu animated fadeInRight m-t-xs">
@@ -518,6 +518,27 @@
       </script>
 
       <script src="/Assets/js/globalSpinner.js"></script>
+      <script>
+        (function () {
+          try {
+            const raw = localStorage.getItem("currentUser");
+            if (!raw) return;
+
+            const user = JSON.parse(raw);
+
+            const name = (user && (user.full_name || user.name)) ? String(user.full_name || user.name).trim() : "";
+            const el = document.getElementById("currentUserName");
+            if (el && name) el.textContent = name;
+
+            if(user.role == "ADMIN"){
+                
+            }
+
+          } catch (e) {
+            console.warn("Failed to load currentUser from localStorage:", e);
+          }
+        })();
+      </script>
 
 </body>
 </html>

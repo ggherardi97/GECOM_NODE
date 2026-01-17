@@ -263,6 +263,19 @@
                     return;
                 }
 
+               const meResp = await fetch(`/api/auth/me`, {
+                method: "GET",
+                headers: { "Accept": "application/json" },
+                credentials: "same-origin"
+                });
+
+                const me = await meResp.json().catch(() => ({}));
+
+                if (meResp.ok && me && me.id) {
+                    localStorage.setItem("currentUser", JSON.stringify(me));
+                    localStorage.setItem("currentUserId", String(me.id));
+                }
+
                 window.location.href = "/clientes";
             }
             catch (err) {

@@ -1,260 +1,135 @@
-  <style>
-      .ibox-title {
-          padding: 15px 90px 20px 15px;
-      }
+<style>
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
 
-      th {
-          padding-left: 0px;
-      }
+  th {
+    padding-left: 0px;
+  }
 
-      .clicker{
-          cursor: pointer;
-      }
-  </style>
-   <div class="row animated fadeInRight" style="margin-top: 25px;">
-     <div class="col-lg-12">
-         <div class="ibox ">
-             <div class="ibox-title">
-                 <h5>Processos ativos</h5>
-                 <div class="ibox-tools">
-                     <a type="button" class="btn btn-sm btn-primary" value="Novo Cliente" href="/NovoProcesso">Novo Processo</a>
-                  
-                 </div>
-             </div>
-             <div class="ibox-content">
-                 <div class="row">
-                     <div class="col-sm-9 m-b-xs">
-                         <div data-toggle="buttons" class="btn-group btn-group-toggle">
-                             <label class="btn btn-sm btn-white">
-                                 <input type="radio" id="option1" name="options">
-                                 Day
-                             </label>
-                             <label class="btn btn-sm btn-white active">
-                                 <input type="radio" id="option2" name="options">
-                                 Week
-                             </label>
-                             <label class="btn btn-sm btn-white">
-                                 <input type="radio" id="option3" name="options">
-                                 Month
-                             </label>
-                         </div>
-                     </div>
-                     <div class="col-sm-3">
-                        
-                     </div>
-                 </div>
-                 <div class="table-responsive">
-                     <table class="table table-striped" id="process">
-                         <thead>
-                             <tr>
-                                 <th></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Project" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Name" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Phone" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Company" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Completed" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Task" /></th>
-                                 <th>
-                                     <input type="text" class="form-control input-sm" placeholder="Filter by Date" /></th>
-                                 <th>
-                                     <select id="actionFilter" class="form-control input-sm">
-                                         <option value="">Todos</option>
-                                         <option value="No Prazo">No Prazo</option>
-                                         <option value="Próximo do prazo">Próximo do prazo</option>
-                                         <option value="Atrasado">Atrasado</option>
-                                         <option value="Encerrado">Encerrado</option>
-                                     </select>
-                                 </th>
-                             </tr>
-                             <tr>
+  .clicker {
+    cursor: pointer;
+  }
 
-                                 <th>#</th>
-                                 <th>Project </th>
-                                 <th>Name </th>
-                                 <th>Phone </th>
-                                 <th>Company </th>
-                                 <th>Completed </th>
-                                 <th>Task</th>
-                                 <th>Date</th>
-                                 <th>Action</th>
-                             </tr>
-                         </thead>
-                         <tbody>
-                             <tr class="clicker" onclick="redirectToProcess(1)">
-                                 <td>1</td>
-                                 <td>Project <small>This is example of project</small></td>
-                                 <td>Patrick Smith</td>
-                                 <td>0800 051213</td>
-                                 <td>Inceptos Hymenaeos Ltd</td>
-                                 <td><span class="pie">0.52/1.561</span></td>
-                                 <td>20%</td>
-                                 <td>Jul 14, 2013</td>
-                                 <td>
-                                     <span class="label label-success">No Prazo</span>
-                                 </td>
-                             </tr>
-                             <tr class="clicker" onclick="redirectToProcess(2)">
-                                 <td>2</td>
-                                 <td>Alpha project</td>
-                                 <td>Alice Jackson</td>
-                                 <td>0500 780909</td>
-                                 <td>Nec Euismod In Company</td>
-                                 <td><span class="pie">6,9</span></td>
-                                 <td>40%</td>
-                                 <td>Jul 16, 2013</td>
-                                 <td>
-                                     <span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>3</td>
-                                 <td>Betha project</td>
-                                 <td>John Smith</td>
-                                 <td>0800 1111</td>
-                                 <td>Erat Volutpat</td>
-                                 <td><span class="pie">3,1</span></td>
-                                 <td>75%</td>
-                                 <td>Jul 18, 2013</td>
-                                 <td>
-                                     <span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>4</td>
-                                 <td>Gamma project</td>
-                                 <td>Anna Jordan</td>
-                                 <td>(016977) 0648</td>
-                                 <td>Tellus Ltd</td>
-                                 <td><span class="pie">4,9</span></td>
-                                 <td>18%</td>
-                                 <td>Jul 22, 2013</td>
-                                 <td>
-                                     <span class="label label-danger">Encerrado</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>2</td>
-                                 <td>Alpha project</td>
-                                 <td>Alice Jackson</td>
-                                 <td>0500 780909</td>
-                                 <td>Nec Euismod In Company</td>
-                                 <td><span class="pie">6,9</span></td>
-                                 <td>40%</td>
-                                 <td>Jul 16, 2013</td>
-                                 <td><span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>1</td>
-                                 <td>Project <small>This is example of project</small></td>
-                                 <td>Patrick Smith</td>
-                                 <td>0800 051213</td>
-                                 <td>Inceptos Hymenaeos Ltd</td>
-                                 <td><span class="pie">0.52/1.561</span></td>
-                                 <td>20%</td>
-                                 <td>Jul 14, 2013</td>
-                                 <td><span class="label label-error">Atrasado</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>4</td>
-                                 <td>Gamma project</td>
-                                 <td>Anna Jordan</td>
-                                 <td>(016977) 0648</td>
-                                 <td>Tellus Ltd</td>
-                                 <td><span class="pie">4,9</span></td>
-                                 <td>18%</td>
-                                 <td>Jul 22, 2013</td>
-                                 <td><span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>1</td>
-                                 <td>Project <small>This is example of project</small></td>
-                                 <td>Patrick Smith</td>
-                                 <td>0800 051213</td>
-                                 <td>Inceptos Hymenaeos Ltd</td>
-                                 <td><span class="pie">0.52/1.561</span></td>
-                                 <td>20%</td>
-                                 <td>Jul 14, 2013</td>
-                                 <td><span class="label label-warning">Próximo do prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>2</td>
-                                 <td>Alpha project</td>
-                                 <td>Alice Jackson</td>
-                                 <td>0500 780909</td>
-                                 <td>Nec Euismod In Company</td>
-                                 <td><span class="pie">6,9</span></td>
-                                 <td>40%</td>
-                                 <td>Jul 16, 2013</td>
-                                 <td><span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>3</td>
-                                 <td>Betha project</td>
-                                 <td>John Smith</td>
-                                 <td>0800 1111</td>
-                                 <td>Erat Volutpat</td>
-                                 <td><span class="pie">3,1</span></td>
-                                 <td>75%</td>
-                                 <td>Jul 18, 2013</td>
-                                 <td><span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr onclick="redirectToProcess()">
-                                 <td>4</td>
-                                 <td>Gamma project</td>
-                                 <td>Anna Jordan</td>
-                                 <td>(016977) 0648</td>
-                                 <td>Tellus Ltd</td>
-                                 <td><span class="pie">4,9</span></td>
-                                 <td>18%</td>
-                                 <td>Jul 22, 2013</td>
-                                 <td><span class="label label-warning">Próximo do prazo</span></td>
-                             </tr>
-                             <tr>
-                                 <td>2</td>
-                                 <td>Alpha project</td>
-                                 <td>Alice Jackson</td>
-                                 <td>0500 780909</td>
-                                 <td>Nec Euismod In Company</td>
-                                 <td><span class="pie">6,9</span></td>
-                                 <td>40%</td>
-                                 <td>Jul 16, 2013</td>
-                                 <td><span class="label label-success">No Prazo</span></td>
-                             </tr>
-                             <tr>
-                                 <td>1</td>
-                                 <td>Project <small>This is example of project</small></td>
-                                 <td>Patrick Smith</td>
-                                 <td>0800 051213</td>
-                                 <td>Inceptos Hymenaeos Ltd</td>
-                                 <td><span class="pie">0.52/1.561</span></td>
-                                 <td>20%</td>
-                                 <td>Jul 14, 2013</td>
-                                 <td><span class="label label-primary">Pendente</span></td>
-                             </tr>
-                             <tr>
-                                 <td>4</td>
-                                 <td>Gamma project</td>
-                                 <td>Anna Jordan</td>
-                                 <td>(016977) 0648</td>
-                                 <td>Tellus Ltd</td>
-                                 <td><span class="pie">4,9</span></td>
-                                 <td>18%</td>
-                                 <td>Jul 22, 2013</td>
-                                 <td><span class="label label-primary">Pendente</span></td>
-                             </tr>
-                         </tbody>
-                     </table>
-                 </div>
+  .bulk-actions{
+    display:none;
+    align-items:center;
+    gap:10px;
+    padding:10px 15px;
+    background:#f3f3f4;
+    border:1px solid #e7eaec;
+    border-radius:4px;
+    margin-bottom:10px;
+  }
+  .bulk-actions .count{ font-weight:600; }
+  .bulk-actions .btn{ margin:0; }
 
-             </div>
-         </div>
-     </div>
- </div>
+  /* Sorting UX */
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+  th.sortable .sort-indicator {
+    margin-left: 6px;
+    font-size: 11px;
+    opacity: .75;
+  }
+</style>
 
- <% contentFor('scripts') %>
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox ">
+      <div class="ibox-title">
+        <h5>Processos ativos</h5>
+        <div class="ibox-tools">
+          <a type="button" class="btn btn-sm btn-primary" value="Novo Cliente" href="/NovoProcesso">Novo Processo</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-sm-9 m-b-xs">
+            <div data-toggle="buttons" class="btn-group btn-group-toggle">
+              <label class="btn btn-sm btn-white">
+                <input type="radio" id="option1" name="options">
+                Day
+              </label>
+              <label class="btn btn-sm btn-white active">
+                <input type="radio" id="option2" name="options">
+                Week
+              </label>
+              <label class="btn btn-sm btn-white">
+                <input type="radio" id="option3" name="options">
+                Month
+              </label>
+            </div>
+          </div>
+          <div class="col-sm-3"></div>
+        </div>
+
+        <!-- Bulk actions -->
+        <div id="bulkActions" class="bulk-actions">
+          <span class="count">Selecionados: <span id="selectedCount">0</span></span>
+          <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
+            <i class="fa fa-trash"></i> Remover
+          </button>
+          <button id="btnClearSelection" type="button" class="btn btn-white btn-sm">
+            Limpar seleção
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="process">
+            <thead>
+              <!-- Filters row -->
+              <tr>
+                <th style="width:40px;"></th>
+                <th></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Project" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Name" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Phone" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Company" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Completed" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Task" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Date" /></th>
+                <th>
+                  <select id="actionFilter" class="form-control input-sm">
+                    <option value="">Todos</option>
+                    <option value="No Prazo">No Prazo</option>
+                    <option value="Próximo do prazo">Próximo do prazo</option>
+                    <option value="Atrasado">Atrasado</option>
+                    <option value="Encerrado">Encerrado</option>
+                  </select>
+                </th>
+              </tr>
+
+              <!-- Header row -->
+              <tr>
+                <th style="width:40px;">
+                  <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
+                </th>
+                <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ProjectName">Project <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ContactName">Name <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Phone">Phone <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompanyName">Company <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompletedNumber">Completed <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Task">Task <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="DateValue">Date <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ActionText">Action <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+
+            <tbody id="processLines"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
 <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
 <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
 <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.spline.js"></script>
@@ -286,66 +161,655 @@
 <!-- ChartJS-->
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
 <%  %>
-  <script>
-   //Exemplo de objeto para funcionar front-end
-    var projects = [{ "ProjectName": "PRC-32456236",
-        "ContactName":"Patrick Smith",
-        "Phone": "0800 051213",
-        "CompanyName": "Inceptos Hymenaeos Ltd",
-        "CreatedOn": "Jul 14, 2013",
-        "Status": "No prazo",
-        "Id": "1"
-     },
-     { "ProjectName": "PRC-15948651",
-        "ContactName":"Alice Jackson",
-        "Phone": "0500 780909",
-        "CompanyName": "Alpha project",
-        "CreatedOn": "Jul 14, 2013",
-        "Status": "Encerrado",
-        "Id": "2"
-     }];
 
-    function redirectToProcess(id) {
-        const selectedProject = projects.find(c => c.Id === String(id));
+<script>
+  // -------------------- Global state --------------------
+  let processes = [];
 
-        if (!selectedProject) {
-            console.error("Client not found for id:", id);
-            return;
+  const userCache = new Map();     // userId -> { full_name, phonenumber }
+  const companyCache = new Map();  // companyId -> { company_name }
+
+  const selectedProcessIds = new Set();
+
+  // Sorting state
+  const sortState = { key: null, dir: "asc" };
+
+  // -------------------- Utils --------------------
+  function escapeHtml(value) {
+    if (value == null) return "";
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function isNonEmptyString(value) {
+    return typeof value === "string" && value.trim().length > 0;
+  }
+
+  function toNumber(value) {
+    const n = Number(value);
+    return Number.isNaN(n) ? 0 : n;
+  }
+
+  function formatDatePtBR(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString("pt-BR");
+  }
+
+  function parseDateValue(value) {
+    if (!value) return 0;
+    const d = new Date(value);
+    const t = d.getTime();
+    return Number.isNaN(t) ? 0 : t;
+  }
+
+  function pickIdFromApi(obj) {
+    return obj?.id || obj?.process_id || obj?.processId || obj?._id || obj?.uuid || null;
+  }
+
+  function setBulkActionsVisible(isVisible) {
+    const bar = document.getElementById("bulkActions");
+    if (!bar) return;
+    bar.style.display = isVisible ? "flex" : "none";
+  }
+
+  function updateBulkUI() {
+    const countEl = document.getElementById("selectedCount");
+    if (countEl) countEl.textContent = String(selectedProcessIds.size);
+
+    setBulkActionsVisible(selectedProcessIds.size > 0);
+
+    const chkAll = document.getElementById("chkSelectAll");
+    if (chkAll) {
+      const rowChecks = document.querySelectorAll("input.process-check");
+      const total = rowChecks.length;
+      const checked = Array.from(rowChecks).filter((x) => x.checked).length;
+      chkAll.checked = total > 0 && checked === total;
+      chkAll.indeterminate = checked > 0 && checked < total;
+    }
+  }
+
+  function applyPeity() {
+    // Re-apply after rendering
+    if (window.jQuery) {
+      try {
+        $(".pie").peity("pie");
+      } catch (e) {
+        // ignore if plugin not loaded
+      }
+    }
+  }
+
+  // -------------------- API --------------------
+  async function fetchProcesses() {
+    const resp = await fetch("/api/processes", {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "Falha ao carregar processos.");
+    return data;
+  }
+
+  async function fetchUserById(userId) {
+    const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) return null;
+    return data;
+  }
+
+  async function fetchCompanyById(companyId) {
+    const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) return null;
+    return data;
+  }
+
+  async function deleteProcessById(processId) {
+    const resp = await fetch(`/api/processes/${encodeURIComponent(processId)}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "Falha ao remover processo.");
+    return data;
+  }
+
+  async function runWithConcurrency(items, limit, worker) {
+    const queue = [...items];
+    const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (queue.length > 0) {
+        const item = queue.shift();
+        await worker(item);
+      }
+    });
+    await Promise.all(workers);
+  }
+
+  async function preloadUsers(userIds) {
+    const unique = [...new Set(userIds.filter(isNonEmptyString))];
+    const toFetch = unique.filter((id) => !userCache.has(id));
+    if (toFetch.length === 0) return;
+
+    await runWithConcurrency(toFetch, 5, async (id) => {
+      const u = await fetchUserById(id);
+      const full_name = u?.full_name ?? u?.fullName ?? u?.name ?? "";
+      const phonenumber = u?.phonenumber ?? u?.phone ?? u?.phone_number ?? "";
+      userCache.set(id, {
+        full_name: isNonEmptyString(full_name) ? String(full_name).trim() : "",
+        phonenumber: isNonEmptyString(phonenumber) ? String(phonenumber).trim() : "",
+      });
+    });
+  }
+
+  async function preloadCompanies(companyIds) {
+    const unique = [...new Set(companyIds.filter(isNonEmptyString))];
+    const toFetch = unique.filter((id) => !companyCache.has(id));
+    if (toFetch.length === 0) return;
+
+    await runWithConcurrency(toFetch, 5, async (id) => {
+      const c = await fetchCompanyById(id);
+      const company_name = c?.company_name ?? c?.companyName ?? c?.name ?? "";
+      companyCache.set(id, {
+        company_name: isNonEmptyString(company_name) ? String(company_name).trim() : "",
+      });
+    });
+  }
+
+  // -------------------- Status (FIXED mapping) --------------------
+  // 0 - No Prazo
+  // 1 - Próximo do prazo
+  // 2 - Atrasado
+  // 3 - Encerrado
+  function statusToLabel(statusValue) {
+    const s = Number(statusValue);
+    if (Number.isNaN(s)) return "No Prazo";
+
+    switch (s) {
+      case 0: return "No Prazo";
+      case 1: return "Próximo do prazo";
+      case 2: return "Atrasado";
+      case 3: return "Encerrado";
+      default: return "No Prazo";
+    }
+  }
+
+  function labelClass(labelText) {
+    const v = String(labelText || "").toLowerCase();
+    if (v.includes("no prazo")) return "label label-success";
+    if (v.includes("próximo")) return "label label-warning";
+    if (v.includes("atras")) return "label label-error";
+    if (v.includes("encerr")) return "label label-danger";
+    return "label label-primary";
+  }
+
+  // -------------------- Mapping --------------------
+  function mapApiToRow(p, index) {
+    const id = pickIdFromApi(p) || p?.process_number || String(index + 1);
+
+    const process_number = p?.process_number ?? p?.processNumber ?? "";
+    const invoice = p?.invoice ?? "";
+    const ship_date = p?.ship_date ?? p?.shipDate ?? p?.created_on ?? p?.createdAt ?? p?.created_at ?? "";
+    const status = p?.status;
+
+    const completedRaw = p?.completed;
+    const completedNumber = Math.max(0, Math.min(100, toNumber(completedRaw))); // clamp 0..100
+
+    const company_id = p?.company_id ?? p?.companyId ?? "";
+    const primary_contact_id = p?.primary_contact_id ?? p?.primaryContactId ?? "";
+
+    const actionText = statusToLabel(status);
+
+    return {
+      Id: String(id),
+
+      ProjectName: isNonEmptyString(process_number)
+        ? String(process_number)
+        : (isNonEmptyString(invoice) ? String(invoice) : `PRC-${String(id)}`),
+
+      Task: isNonEmptyString(invoice) ? String(invoice) : "",
+
+      // Keep both display date and numeric date for sorting
+      Date: ship_date,
+      DateValue: parseDateValue(ship_date),
+
+      // Completed numeric + display pie text
+      CompletedNumber: completedNumber,
+
+      ActionText: actionText,
+
+      CompanyId: isNonEmptyString(company_id) ? String(company_id) : "",
+      PrimaryContactId: isNonEmptyString(primary_contact_id) ? String(primary_contact_id) : "",
+
+      CompanyName: "",
+      ContactName: "",
+      Phone: "",
+
+      // for sorting row number
+      rowNumber: index + 1,
+    };
+  }
+
+  // -------------------- Sorting --------------------
+  function normalizeForCompare(value) {
+    if (value == null) return "";
+    return String(value).toLowerCase();
+  }
+
+  function sortProcesses(list) {
+    if (!sortState.key) return list;
+
+    const key = sortState.key;
+    const dir = sortState.dir;
+
+    const sorted = [...list].sort((a, b) => {
+      // numeric keys
+      if (key === "CompletedNumber" || key === "DateValue" || key === "rowNumber") {
+        const av = Number(a[key] ?? 0);
+        const bv = Number(b[key] ?? 0);
+        return av - bv;
+      }
+
+      // default string compare
+      const av = normalizeForCompare(a[key]);
+      const bv = normalizeForCompare(b[key]);
+      if (av < bv) return -1;
+      if (av > bv) return 1;
+      return 0;
+    });
+
+    if (dir === "desc") sorted.reverse();
+    return sorted;
+  }
+
+  function updateSortIndicators() {
+    const headers = document.querySelectorAll("#process thead tr:nth-child(2) th.sortable");
+    headers.forEach((th) => {
+      const indicator = th.querySelector(".sort-indicator");
+      if (!indicator) return;
+
+      const key = th.getAttribute("data-sort-key");
+      if (key && key === sortState.key) {
+        indicator.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      } else {
+        indicator.textContent = "";
+      }
+    });
+  }
+
+  function bindSorting() {
+    const headers = document.querySelectorAll("#process thead tr:nth-child(2) th.sortable");
+    headers.forEach((th) => {
+      th.addEventListener("click", function (e) {
+        e.stopPropagation();
+
+        const key = this.getAttribute("data-sort-key");
+        if (!key) return;
+
+        if (sortState.key === key) {
+          sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+        } else {
+          sortState.key = key;
+          sortState.dir = "asc";
         }
 
-        localStorage.setItem("selectedProject", JSON.stringify(selectedProject));
-        window.location = "ProcessDetail";
+        updateSortIndicators();
+        renderProcessTable(processes);
+        applyCurrentFilters();
+      });
+    });
+  }
+
+  // -------------------- Render --------------------
+  function renderProcessTable(list) {
+    const tbody = document.getElementById("processLines");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    const sorted = sortProcesses(list);
+
+    if (!sorted || sorted.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10">Nenhum processo encontrado.</td></tr>`;
+      updateBulkUI();
+      return;
     }
 
-      $(document).ready(function () {
-          $("#pageName").text("Processos");
-          $("#subpageName").text("Processos");
+    sorted.forEach((p, idx) => {
+      const tr = document.createElement("tr");
+      tr.className = "clicker";
+      tr.setAttribute("data-process-id", String(p.Id));
 
-          //filtro por coluna
-          $('#process thead input').on('keyup change', function () {
-              var index = $(this).parent().index();
-              var value = $(this).val().toLowerCase();
-
-              $('#process tbody tr').filter(function () {
-                  $(this).toggle(
-                      $(this).find('td').eq(index).text().toLowerCase().indexOf(value) > -1
-                  );
-              });
-          });
-
-          const actionIndex = 8; 
-          const table = $('#process');
-          $('#actionFilter').on('change', function () {
-              const selected = $(this).val().toLowerCase();
-
-              table.find('tbody tr').each(function () {
-                  const cell = $(this).find('td').eq(actionIndex).text().toLowerCase();
-                  if (selected === '' || cell.indexOf(selected) > -1) {
-                      $(this).show();
-                  } else {
-                      $(this).hide();
-                  }
-              });
-          });
+      tr.addEventListener("click", function () {
+        redirectToProcess(p.Id);
       });
-  </script>
+
+      const isChecked = selectedProcessIds.has(String(p.Id));
+
+      // Completed as mini pie:
+      // Use "X/100" so Peity renders a proper slice.
+      const pieValue = `${p.CompletedNumber}/100`;
+
+      tr.innerHTML = `
+        <td>
+          <input
+            class="process-check"
+            type="checkbox"
+            data-id="${escapeHtml(String(p.Id))}"
+            ${isChecked ? "checked" : ""}
+            title="Selecionar"
+          />
+        </td>
+        <td>${escapeHtml(String(idx + 1))}</td>
+        <td>${escapeHtml(p.ProjectName)}</td>
+        <td>${escapeHtml(p.ContactName)}</td>
+        <td>${escapeHtml(p.Phone)}</td>
+        <td>${escapeHtml(p.CompanyName)}</td>
+        <td>
+          <span class="pie">${escapeHtml(pieValue)}</span>
+          <span class="sr-only">${escapeHtml(String(p.CompletedNumber))}</span>
+        </td>
+        <td>${escapeHtml(p.Task)}</td>
+        <td>${escapeHtml(formatDatePtBR(p.Date))}</td>
+        <td><span class="${escapeHtml(labelClass(p.ActionText))}">${escapeHtml(p.ActionText)}</span></td>
+      `;
+
+      // Prevent redirect when clicking checkbox
+      const chk = tr.querySelector("input.process-check");
+      chk.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const id = String(this.getAttribute("data-id") ?? "");
+        if (!id) return;
+
+        if (this.checked) selectedProcessIds.add(id);
+        else selectedProcessIds.delete(id);
+
+        updateBulkUI();
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    updateBulkUI();
+    applyPeity();
+  }
+
+  // -------------------- Navigation --------------------
+  function redirectToProcess(id) {
+    const selected = processes.find((x) => x.Id === String(id));
+    if (!selected) {
+      console.error("Process not found for id:", id);
+      return;
+    }
+
+    localStorage.setItem("selectedProcessId", String(selected.Id));
+    localStorage.setItem("selectedProcess", JSON.stringify(selected));
+
+    window.location = `ProcessDetail?id=${encodeURIComponent(String(selected.Id))}`;
+  }
+  window.redirectToProcess = redirectToProcess;
+
+  // -------------------- Bulk delete (GlobalModal) --------------------
+  function showBulkDeleteConfirm(selectedIds) {
+    if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+      return Promise.resolve(false);
+    }
+
+    const qty = selectedIds.length;
+
+    const modalBtn = document.getElementById("modalButton");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const btnSave = document.getElementById("saveModal");
+    const btnClose = document.getElementById("closeModal");
+
+    if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+      const ok = confirm(`Remover ${qty} processo(s)?`);
+      return Promise.resolve(ok);
+    }
+
+    modalTitle.textContent = "Remover processos";
+    modalBody.innerHTML = `
+      <p>Você está prestes a remover <strong>${escapeHtml(qty)}</strong> processo(s).</p>
+      <p class="text-danger">Esta ação não poderá ser desfeita.</p>
+      <p>Deseja continuar?</p>
+    `;
+
+    btnSave.textContent = "Remover";
+    btnSave.classList.remove("btn-primary");
+    btnSave.classList.add("btn-danger");
+
+    btnClose.textContent = "Cancelar";
+
+    return new Promise((resolve) => {
+      const cleanup = () => {
+        btnSave.onclick = null;
+        btnClose.onclick = null;
+
+        btnSave.classList.remove("btn-danger");
+        btnSave.classList.add("btn-primary");
+        btnSave.textContent = "Save";
+        btnClose.textContent = "Close";
+      };
+
+      btnSave.onclick = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      btnClose.onclick = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      modalBtn.click();
+    });
+  }
+
+  async function executeBulkDelete() {
+    const ids = Array.from(selectedProcessIds);
+    if (ids.length === 0) return;
+
+    const confirmed = await showBulkDeleteConfirm(ids);
+    if (!confirmed) return;
+
+    const btn = document.getElementById("btnBulkDelete");
+    const oldText = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Removendo...`;
+    }
+
+    try {
+      const failures = [];
+      await runWithConcurrency(ids, 5, async (id) => {
+        try {
+          await deleteProcessById(id);
+        } catch (e) {
+          failures.push({ id, message: e?.message || "Erro ao remover." });
+        }
+      });
+
+      if (failures.length > 0) {
+        console.warn("Bulk delete failures:", failures);
+        alert(`Alguns processos não puderam ser removidos (${failures.length}). Veja o console para detalhes.`);
+      }
+
+      const failedIds = new Set(failures.map((x) => String(x.id)));
+      const removedIds = ids.filter((id) => !failedIds.has(String(id)));
+
+      processes = processes.filter((p) => !removedIds.includes(String(p.Id)));
+      removedIds.forEach((id) => selectedProcessIds.delete(String(id)));
+
+      renderProcessTable(processes);
+      applyCurrentFilters();
+    } catch (err) {
+      console.error("executeBulkDelete error:", err);
+      alert(err?.message || "Erro ao remover processos.");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = oldText || `<i class="fa fa-trash"></i> Remover`;
+      }
+      updateBulkUI();
+    }
+  }
+
+  function clearSelection() {
+    // FIX: do not touch filters/rows state; just clear selection and re-render
+    selectedProcessIds.clear();
+    renderProcessTable(processes);
+    applyCurrentFilters();
+  }
+
+  function bindBulkEvents() {
+    const chkAll = document.getElementById("chkSelectAll");
+    const btnDelete = document.getElementById("btnBulkDelete");
+    const btnClear = document.getElementById("btnClearSelection");
+
+    if (chkAll) {
+      chkAll.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const checks = document.querySelectorAll("input.process-check");
+        checks.forEach((chk) => {
+          const id = String(chk.getAttribute("data-id") ?? "");
+          if (!id) return;
+
+          chk.checked = this.checked;
+
+          if (this.checked) selectedProcessIds.add(id);
+          else selectedProcessIds.delete(id);
+        });
+
+        updateBulkUI();
+      });
+    }
+
+    if (btnDelete) btnDelete.addEventListener("click", executeBulkDelete);
+    if (btnClear) btnClear.addEventListener("click", clearSelection);
+  }
+
+  // -------------------- Filters (same behavior, with safe apply) --------------------
+  function installColumnFilters() {
+    $("#process thead input").on("keyup change", function () {
+      applyCurrentFilters();
+    });
+
+    $("#actionFilter").on("change", function () {
+      applyCurrentFilters();
+    });
+  }
+
+  function applyCurrentFilters() {
+    const table = $("#process");
+    const actionSelected = String($("#actionFilter").val() || "").toLowerCase();
+
+    // Column filter inputs are in header row 1 (filters row)
+    const filterInputs = $("#process thead tr:nth-child(1) input");
+
+    table.find("tbody tr").each(function () {
+      const $row = $(this);
+      let visible = true;
+
+      // Apply text inputs per column:
+      // Row columns:
+      // 0 chk, 1 #, 2 Project, 3 Name, 4 Phone, 5 Company, 6 Completed, 7 Task, 8 Date, 9 Action
+      filterInputs.each(function (i) {
+        const value = String($(this).val() || "").toLowerCase();
+        if (!value) return;
+
+        // filter row columns start at index 2 in header but our inputs list includes only inputs in those ths
+        // We placed inputs in columns: Project(2), Name(3), Phone(4), Company(5), Completed(6), Task(7), Date(8)
+        // input index mapping:
+        // 0 Project => td 2
+        // 1 Name    => td 3
+        // 2 Phone   => td 4
+        // 3 Company => td 5
+        // 4 Completed => td 6
+        // 5 Task => td 7
+        // 6 Date => td 8
+        const map = [2,3,4,5,6,7,8];
+        const tdIndex = map[i];
+
+        const cellText = String($row.find("td").eq(tdIndex).text() || "").toLowerCase();
+        if (cellText.indexOf(value) === -1) visible = false;
+      });
+
+      // Action dropdown filter (td 9)
+      if (visible && actionSelected) {
+        const actionText = String($row.find("td").eq(9).text() || "").toLowerCase();
+        if (actionText.indexOf(actionSelected) === -1) visible = false;
+      }
+
+      $row.toggle(visible);
+    });
+  }
+
+  // -------------------- Load --------------------
+  async function loadProcesses() {
+    try {
+      const apiData = await fetchProcesses();
+
+      const rows = Array.isArray(apiData)
+        ? apiData
+        : (apiData.data ?? apiData.rows ?? apiData.processes ?? [apiData]);
+
+      processes = rows.map(mapApiToRow);
+
+      const userIds = processes.map((x) => x.PrimaryContactId);
+      const companyIds = processes.map((x) => x.CompanyId);
+
+      await preloadUsers(userIds);
+      await preloadCompanies(companyIds);
+
+      for (const p of processes) {
+        if (p.PrimaryContactId && userCache.has(p.PrimaryContactId)) {
+          const u = userCache.get(p.PrimaryContactId);
+          p.ContactName = u?.full_name || p.ContactName || "";
+          p.Phone = u?.phonenumber || p.Phone || "";
+        }
+
+        if (p.CompanyId && companyCache.has(p.CompanyId)) {
+          const c = companyCache.get(p.CompanyId);
+          p.CompanyName = c?.company_name || p.CompanyName || "";
+        }
+      }
+
+      updateSortIndicators();
+      renderProcessTable(processes);
+      applyCurrentFilters();
+    } catch (err) {
+      console.error("loadProcesses error:", err);
+      const tbody = document.getElementById("processLines");
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="10">${escapeHtml(err?.message || "Erro ao carregar processos.")}</td></tr>`;
+      }
+    }
+  }
+
+  // -------------------- Init --------------------
+  $(document).ready(function () {
+    $("#pageName").text("Processos");
+    $("#subpageName").text("Processos");
+
+    bindBulkEvents();
+    bindSorting();
+    installColumnFilters();
+    loadProcesses();
+  });
+</script>

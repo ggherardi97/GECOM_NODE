@@ -212,4 +212,104 @@ router.delete("/users/:id", async (req, res) => {
   }
 });
 
+async function readJsonSafe(response) {
+  const text = await response.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
+
+router.get("/users/by-email", async (req, res) => {
+  try {
+    const email = String(req.query?.email || "").trim();
+    console.log("[BFF] req.query =", req.query);
+
+    if (!isNonEmptyString(email)) {
+      return res.status(400).json({
+        message: "Validation error. Missing or invalid query parameter.",
+        missing: ["email"],
+      });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    async function callBackend(path) {
+      const response = await fetch(`${baseUrl}${path}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+      });
+
+      const data = await readJsonSafe(response);
+      return { response, data };
+    }
+
+    let result = await callBackend(`/users/by-email?email=${encodeURIComponent(email)}`);
+    if (result.response.ok) return res.status(200).json(result.data ?? {});
+
+    result = await callBackend(`/users?email=${encodeURIComponent(email)}`);
+    if (result.response.ok) {
+      const rows = Array.isArray(result.data)
+        ? result.data
+        : (result.data?.data ?? result.data?.rows ?? result.data?.users ?? []);
+
+      const first = Array.isArray(rows) ? rows[0] : null;
+      if (first) return res.status(200).json(first);
+    }
+
+    result = await callBackend(`/users?search=${encodeURIComponent(email)}`);
+    if (result.response.ok) {
+      const rows = Array.isArray(result.data)
+        ? result.data
+        : (result.data?.data ?? result.data?.rows ?? result.data?.users ?? []);
+
+      const first = Array.isArray(rows) ? rows[0] : null;
+      if (first) return res.status(200).json(first);
+    }
+
+    return res.status(404).json({
+      message: "User not found by email.",
+      email,
+    });
+  } catch (error) {
+    console.error("GET /api/users/by-email error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* -------------------- GET /api/auth/me -------------------- */
+/**
+ * Forwards to BACKEND: GET {BACKEND_API_BASE_URL}/auth/me
+ * Sends cookies through (refresh_token is HttpOnly) so backend can resolve current user.
+ */
+router.get("/auth/me", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+
+    // Forward cookies to backend (refresh_token lives in HttpOnly cookie)
+    const cookieHeader = req.headers.cookie || "";
+
+    const response = await fetch(`${baseUrl}/auth/me`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Cookie: cookieHeader,
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/auth/me error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = router;
