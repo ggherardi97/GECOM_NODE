@@ -1,0 +1,415 @@
+<style>
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .muted {
+    color: #888;
+    font-size: 12px;
+  }
+
+  .form-row {
+    margin-bottom: 12px;
+  }
+
+  .form-row label {
+    font-weight: 600;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div class="header-row">
+          <div>
+            <h5 style="margin-bottom:4px;">Novo Produto</h5>
+            <div class="muted" id="subtitle">Preencha os campos e clique em Criar.</div>
+          </div>
+
+          <div class="toolbar-right">
+            <a class="btn btn-sm btn-white" href="/Products">
+              <i class="fa fa-arrow-left"></i> Voltar
+            </a>
+
+            <button id="btnCreate" class="btn btn-sm btn-primary" disabled>
+              <i class="fa fa-plus"></i> Criar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="tabs-container">
+          <ul class="nav nav-tabs">
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-info">Informações</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-pricing">Preços</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <div id="tab-info" class="tab-pane active">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <div class="form-row">
+                      <label>Nome do produto *</label>
+                      <input id="name" type="text" class="form-control" placeholder="Nome do produto" />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Código do produto *</label>
+                      <input id="product_code" type="text" class="form-control" placeholder="Ex: SRV-CONT-001" />
+                      <div class="muted" style="margin-top:6px;">Esse código precisa ser único.</div>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Marca</label>
+                      <input id="brand" type="text" class="form-control" placeholder="Marca" />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Unidade</label>
+                      <input id="unit" type="text" class="form-control" placeholder="pacote, serviço, caixa..." />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Descrição</label>
+                      <textarea id="description" class="form-control" rows="5"
+                        placeholder="Descrição do produto"></textarea>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4">
+                    <div class="form-row">
+                      <label>Status</label>
+                      <select id="is_active" class="form-control">
+                        <option value="true" selected>Ativo</option>
+                        <option value="false">Inativo</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Moeda *</label>
+                      <select id="currency_id" class="form-control"></select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-pricing" class="tab-pane">
+              <div class="panel-body">
+                <div class="row">
+
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Preço padrão *</label>
+                  
+                      <div class="input-group m-b">
+                        <div class="input-group-prepend">
+                          <span class="input-group-addon" id="pricePrefix">R$</span>
+                        </div>
+                  
+                        <input id="default_unit_price" type="text" class="form-control" placeholder="0,00" autocomplete="off"
+                          inputmode="decimal" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Imposto padrão (0..1)</label>
+                      <input id="default_tax_rate" type="text" class="form-control" placeholder="Ex: 0,15" />
+                      <div class="muted" style="margin-top:6px;">Use 0,15 para 15%.</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div><!-- tab-content -->
+        </div><!-- tabs-container -->
+      </div><!-- ibox-content -->
+    </div><!-- ibox -->
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+  <script>
+    (function () {
+      let currencies = [];
+      let initialModel = null;
+
+      function toStr(v) { return v == null ? "" : String(v); }
+
+      async function readJsonSafe(response) {
+        const text = await response.text();
+        if (!text) return {};
+        try { return JSON.parse(text); } catch { return { message: text }; }
+      }
+
+      async function apiGet(url) {
+        const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+        const data = await readJsonSafe(res);
+        if (!res.ok) throw new Error(data?.message || "Request failed");
+        return data;
+      }
+
+      async function apiPost(url, body) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Accept": "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(body ?? {})
+        });
+        const data = await readJsonSafe(res);
+        if (!res.ok) throw new Error(data?.message || "Request failed");
+        return data;
+      }
+
+      function formatMoneyByCurrency(value, currencyId) {
+        const n = Number(value || 0);
+        const currency = (currencies || []).find(c => c.id === currencyId) || null;
+        const code = currency?.code ? String(currency.code).toUpperCase() : null;
+        const symbol = currency?.symbol ? String(currency.symbol).trim() : "";
+
+        const numberText = n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (symbol) return `${symbol} ${numberText}`;
+        if (code) return `${code} ${numberText}`;
+        return numberText;
+      }
+
+      function moneyToDecimalString(value) {
+        if (!value) return "0";
+        const cleaned = String(value)
+          .replace(/[^\d,.\-]/g, "")
+          .replace(/\./g, "")
+          .replace(",", ".")
+          .trim();
+        return cleaned || "0";
+      }
+      function escapeHtml(value) {
+        if (value == null) return "";
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function getCurrencyPrefix(currencyId) {
+        const currency = (currencies || []).find(c => c.id === currencyId) || null;
+        const symbol = currency?.symbol ? String(currency.symbol).trim() : "";
+        const code = currency?.code ? String(currency.code).toUpperCase() : "";
+        return symbol || code || "$";
+      }
+
+     function formatMoneyPtBr(value) {
+  if (value == null) return "";
+
+  // keep digits only
+  const digits = String(value).replace(/\D/g, "");
+  if (!digits) return "";
+
+  const number = Number(digits) / 100;
+  if (Number.isNaN(number)) return "";
+
+  return number.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function installMoneyMaskClassic() {
+  const input = document.getElementById("default_unit_price");
+  const prefix = document.getElementById("pricePrefix");
+  if (!input || !prefix) return;
+
+  // Set initial prefix based on selected currency
+  prefix.textContent = getCurrencyPrefix($("#currency_id").val());
+
+  if (!input.value) input.value = "0,00";
+
+  input.addEventListener("input", function () {
+    const caret = input.selectionStart;
+    const raw = input.value;
+
+    const formatted = formatMoneyPtBr(raw);
+    input.value = formatted;
+
+    const pos = Math.min(input.value.length, caret);
+    try { input.setSelectionRange(pos, pos); } catch {}
+  });
+
+  input.addEventListener("blur", function () {
+    if (!input.value || input.value === ",") {
+      input.value = "0,00";
+    }
+  });
+}
+
+
+function installTaxMaskClassic() {
+  const input = document.getElementById("default_tax_rate");
+  if (!input) return;
+
+  input.addEventListener("input", function () {
+    let v = input.value.replace(/[^\d,]/g, "");
+
+    const parts = v.split(",");
+    if (parts.length > 2) {
+      v = parts[0] + "," + parts.slice(1).join("");
+    }
+
+    if (v.startsWith(",")) v = "0" + v;
+
+    input.value = v;
+  });
+
+  input.addEventListener("blur", function () {
+    let v = input.value;
+    if (!v) v = "0,00";
+    if (!v.includes(",")) v += ",00";
+
+    const [i, d] = v.split(",");
+    input.value = i + "," + (d || "00").padEnd(2, "0").slice(0, 2);
+  });
+}
+
+      function getModel() {
+        return {
+          product_code: $("#product_code").val().trim(),
+          name: $("#name").val().trim(),
+          brand: $("#brand").val().trim() || null,
+          unit: $("#unit").val().trim() || null,
+          description: $("#description").val().trim() || null,
+          currency_id: $("#currency_id").val() || null,
+         default_unit_price: moneyToDecimalString($("#default_unit_price").val()),
+default_tax_rate: moneyToDecimalString($("#default_tax_rate").val()),
+          is_active: $("#is_active").val() === "true"
+        };
+      }
+
+      function validate(model) {
+        if (!model.name) return "Nome do produto é obrigatório.";
+        if (!model.product_code) return "Código do produto é obrigatório.";
+        if (!model.currency_id) return "Moeda é obrigatória.";
+
+        const price = Number(model.default_unit_price);
+        if (Number.isNaN(price) || price < 0) return "Preço padrão inválido.";
+
+        const tax = Number(model.default_tax_rate);
+        if (Number.isNaN(tax) || tax < 0) return "Imposto padrão inválido.";
+
+        return null;
+      }
+
+      function isDirty() {
+        if (!initialModel) return false;
+        return JSON.stringify(getModel()) !== JSON.stringify(initialModel);
+      }
+
+      function updateCreateEnabled() {
+        const model = getModel();
+        const requiredOk = !!model.name && !!model.product_code && !!model.currency_id;
+        $("#btnCreate").prop("disabled", !(requiredOk && isDirty()));
+      }
+
+      pageLoad();
+      async function pageLoad() {
+        $("#pageName").text("Produtos");
+        $("#subpageName").text("Novo Produto");
+
+        try {
+          const cur = await apiGet("/api/currencies?is_active=true");
+          currencies = Array.isArray(cur) ? cur : (cur?.data || []);
+
+          const sel = $("#currency_id");
+          sel.empty();
+          currencies.forEach(c => {
+            const code = c.code || "";
+            const symbol = c.symbol ? ` (${c.symbol})` : "";
+            sel.append(`<option value="${c.id}">${code}${symbol}</option>`);
+          });
+
+          // defaults
+          // defaults
+          $("#default_tax_rate").val("0,00");
+
+          const firstCurrencyId = currencies?.[0]?.id || null;
+          if (firstCurrencyId) $("#currency_id").val(firstCurrencyId);
+
+          // install masks
+          installMoneyMaskClassic();
+installTaxMaskClassic();
+
+
+          initialModel = getModel();
+          updateCreateEnabled();
+
+          $("#currency_id").on("change", function () {
+  const curId = $("#currency_id").val();
+
+  // Put currency symbol/code in the addon (NOT inside the input)
+  $("#pricePrefix").text(getCurrencyPrefix(curId));
+
+  // Keep input numeric only, just re-mask it
+  const input = document.getElementById("default_unit_price");
+  if (input) {
+    input.value = formatMoneyPtBr(input.value);
+  }
+
+  updateCreateEnabled();
+});
+
+
+          $("input, textarea, select").on("keyup change", updateCreateEnabled);
+
+          $("#btnCreate").on("click", async function () {
+            try {
+              const payload = getModel();
+              const err = validate(payload);
+              if (err) { alert(err); return; }
+
+              $("#btnCreate").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Criando...');
+
+              const created = await apiPost("/api/products", payload);
+
+              alert("Produto criado com sucesso.");
+
+              if (created?.id) {
+                window.location = `/ProductDetail?id=${encodeURIComponent(created.id)}`;
+                return;
+              }
+
+              window.location = "/Products";
+            } catch (e) {
+              console.error(e);
+              $("#btnCreate").html('<i class="fa fa-plus"></i> Criar');
+              updateCreateEnabled();
+              alert("Falha ao criar o produto.");
+            }
+          });
+        } catch (e) {
+          console.error(e);
+          alert("Falha ao carregar moedas.");
+          window.location = "/Products";
+        }
+      }
+    })();
+  </script>
+  <% %>

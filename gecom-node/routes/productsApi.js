@@ -111,4 +111,58 @@ router.patch("/products/:id", async (req, res) => {
   }
 });
 
+// ✅ POST /api/products  -> proxies backend POST /products
+router.post("/products", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/products`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {})
+      },
+      body: JSON.stringify(req.body ?? {})
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("POST /api/products error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ❌ DELETE /api/products/:id  -> proxies backend DELETE /products/:id
+router.delete("/products/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const productId = String(req.params.id || "").trim();
+    if (!productId) {
+      return res.status(400).json({ message: "Missing product id" });
+    }
+
+    const response = await fetch(
+      `${baseUrl}/products/${encodeURIComponent(productId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {})
+        }
+      }
+    );
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("DELETE /api/products/:id error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;

@@ -49,6 +49,11 @@
               <i class="fa fa-arrow-left"></i> Voltar
             </a>
 
+            <a class="btn btn-sm btn-danger" style="color: white !important;" 
+  onclick="deleteProduct()">
+              <i class="fa fa-trash"></i> Deletar
+            </a>
+
             <button id="btnSave" class="btn btn-sm btn-primary" disabled>
               <i class="fa fa-save"></i> Salvar
             </button>
@@ -185,6 +190,98 @@
 
 <% contentFor('scripts') %>
 <script>
+  async function deleteProduct() {
+    
+    let productId = getQueryParam("id");
+    if (!productId) return;
+    
+    const confirmed = await showBulkDeleteConfirm();
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      const text = await response.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
+      if (!response.ok) {
+        console.error("Delete product error:", data);
+        alert(data?.message || "Erro ao excluir produto.");
+        return;
+      }
+
+      alert("Produto excluído com sucesso.");
+      window.location.href = "/products";
+    } catch (error) {
+      console.error("Delete product exception:", error);
+      alert("Erro inesperado ao excluir produto.");
+    }
+  }
+
+  function showBulkDeleteConfirm() {
+
+    const modalBtn = document.getElementById("modalButton");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const btnSave = document.getElementById("saveModal");
+    const btnClose = document.getElementById("closeModal");
+
+    if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+      const ok = confirm(`Confirma a exclusão do produto?`);
+      return Promise.resolve(ok);
+    }
+
+    modalTitle.textContent = "Remover produto";
+    modalBody.innerHTML = `
+      <p>Você está prestes a remover o produto `+ $("#name").val() +`.</p>
+      <p class="text-danger">Esta ação não poderá ser desfeita.</p>
+      <p>Deseja continuar?</p>
+    `;
+
+    btnSave.textContent = "Remover";
+    btnSave.classList.remove("btn-primary");
+    btnSave.classList.add("btn-danger");
+
+    btnClose.textContent = "Cancelar";
+
+    return new Promise((resolve) => {
+      const cleanup = () => {
+        btnSave.onclick = null;
+        btnClose.onclick = null;
+
+        btnSave.classList.remove("btn-danger");
+        btnSave.classList.add("btn-primary");
+        btnSave.textContent = "Save";
+        btnClose.textContent = "Close";
+      };
+
+      btnSave.onclick = () => {
+        cleanup();
+        resolve(true);
+      };
+
+      btnClose.onclick = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      modalBtn.click();
+    });
+  }
+
+ function getQueryParam(name) {
+    return new URL(window.location.href).searchParams.get(name);
+  }
 (function () {
   let productId = null;
   let initialModel = null;

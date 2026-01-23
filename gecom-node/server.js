@@ -62,6 +62,7 @@ app.get(['/Products', '/products'], (req, res) => res.render('Products'));
 app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
 app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
+app.get('/NewProduct', (req, res) => res.render('NewProduct'));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

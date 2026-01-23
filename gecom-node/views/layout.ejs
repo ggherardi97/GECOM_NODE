@@ -121,6 +121,17 @@
         font-weight: 600;
         color: #333;
       }
+
+      .menuDivider{
+        width: 100%;
+    text-align: left;
+    color: white !important;
+    padding-bottom: 2px !important;
+      }
+
+      .menuDivider:hover{
+          background-color: unset !important;
+      }
     </style>
 </head>
 
@@ -160,11 +171,11 @@
             <div class="logo-element">GC</div>
           </li>
           <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
-          <!-- <li><a style="width: 100%; text-align: center;">Services</a></li> -->
+          <li><a class="menuDivider">Services</a></li>
           <li><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
           <li><a href="/Processos"><i class="fa fa-file"></i> <span class="nav-label">Processos</span></a></li>
           <li><a href="/MyDocuments"><i class="fa fa-folder"></i> <span class="nav-label">Meus Documentos</span></a></li>
-           <!-- <li><a style="width: 100%; text-align: center;">Sales</a></li> -->
+           <li><a class="menuDivider">Sales</a></li>
             <!-- <li class="dropdown-divider"></li> -->
           <li><a href="/Invoices"><i class="fa fa-money"></i> <span class="nav-label">Invoices</span></a></li>
           <li><a href="/Products"><i class="fa fa-cube"></i> <span class="nav-label">Produtos</span></a></li>
@@ -542,6 +553,106 @@
           }
         })();
       </script>
+
+      <!-- Esse script altera o alert nativo do navegador para nosso modal -->
+<script>
+  (function () {
+    if (window.__gecomDialogOverridden) return;
+    window.__gecomDialogOverridden = true;
+
+    const originalAlert = window.alert;
+    const originalConfirm = window.confirm;
+
+    function getModalElements() {
+      return {
+        modalBtn: document.getElementById("modalButton"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalBody: document.getElementById("modalBody"),
+        btnSave: document.getElementById("saveModal"),
+        btnClose: document.getElementById("closeModal"),
+      };
+    }
+
+    /* =========================
+       ALERT (fire-and-forget)
+       ========================= */
+    window.alert = function (message, options) {
+      const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
+
+      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+        originalAlert(message);
+        return;
+      }
+
+      const opts = options || {};
+      modalTitle.textContent = opts.title || "Aviso";
+      modalBody.innerHTML = `<p>${String(message || "")}</p>`;
+
+      btnSave.textContent = opts.okText || "OK";
+      btnSave.className = "btn btn-primary";
+      btnClose.style.display = "none";
+
+      const cleanup = () => {
+        btnSave.onclick = null;
+        btnClose.onclick = null;
+        btnClose.style.display = "";
+        btnSave.textContent = "Save";
+      };
+
+      btnSave.onclick = () => cleanup();
+
+      modalBtn.click();
+    };
+
+    /* =========================
+       CONFIRM (Promise<boolean>)
+       ========================= */
+    window.confirm = function (message, options) {
+      const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
+
+      // Fallback se modal não existir
+      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+        return Promise.resolve(originalConfirm(message));
+      }
+
+      const opts = options || {};
+
+      modalTitle.textContent = opts.title || "Confirmação";
+      modalBody.innerHTML = `<p>${String(message || "")}</p>`;
+
+      btnSave.textContent = opts.okText || "Confirmar";
+      btnClose.textContent = opts.cancelText || "Cancelar";
+
+      btnSave.className = opts.danger
+        ? "btn btn-danger"
+        : "btn btn-primary";
+
+      return new Promise((resolve) => {
+        const cleanup = () => {
+          btnSave.onclick = null;
+          btnClose.onclick = null;
+          btnSave.className = "btn btn-primary";
+          btnSave.textContent = "Save";
+          btnClose.textContent = "Close";
+        };
+
+        btnSave.onclick = () => {
+          cleanup();
+          resolve(true);
+        };
+
+        btnClose.onclick = () => {
+          cleanup();
+          resolve(false);
+        };
+
+        modalBtn.click();
+      });
+    };
+
+  })();
+</script>
+
 
 </body>
 </html>
