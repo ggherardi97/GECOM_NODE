@@ -1,0 +1,442 @@
+<style>
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  th {
+    padding-left: 0px;
+  }
+
+  .clicker {
+    cursor: pointer;
+  }
+
+  /* Sorting UX */
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  th.sortable .sort-indicator {
+    margin-left: 6px;
+    font-size: 11px;
+    opacity: .75;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox ">
+      <div class="ibox-title">
+        <h5>Produtos</h5>
+        <div class="ibox-tools">
+          <a type="button" class="btn btn-sm btn-primary" href="/ProductDetail">Novo Produto</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="row">
+          <!-- <div class="col-sm-9 m-b-xs">
+            <div data-toggle="buttons" class="btn-group btn-group-toggle">
+              <label class="btn btn-sm btn-white">
+                <input type="radio" id="option1" name="options"> Day
+              </label>
+              <label class="btn btn-sm btn-white active">
+                <input type="radio" id="option2" name="options"> Week
+              </label>
+              <label class="btn btn-sm btn-white">
+                <input type="radio" id="option3" name="options"> Month
+              </label>
+            </div>
+          </div> -->
+
+          <div class="col-sm-3" style="display:none;">
+            <select id="activeFilter" class="form-control input-sm">
+              <option value="">Todos</option>
+              <option value="true" selected>Ativos</option>
+              <option value="false">Inativos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="productsTable">
+            <thead>
+              <!-- Filters row -->
+              <tr>
+                <th style="width:60px;"></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Code" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Name" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Brand" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Unit" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Currency" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Price" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filter by Tax" /></th>
+
+                <!-- ✅ Active column filter: picklist -->
+                <th>
+                  <select id="activeColumnFilter" class="form-control input-sm">
+                    <option value="">Todos</option>
+                    <option value="yes">Ativo</option>
+                    <option value="no">Inativo</option>
+                  </select>
+                </th>
+
+                <!-- ✅ Created filter: datepicker -->
+                <th>
+                  <input id="createdOnFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa" />
+                </th>
+              </tr>
+
+              <!-- Header row -->
+              <tr>
+                <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="product_code">Code <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="name">Name <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="brand">Brand <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="unit">Unit <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="currency_text">Currency <span class="sort-indicator"></span></th>
+
+                <!-- NOTE: sorting uses displayed value (string). If you want numeric sort, I can adjust to use hidden numeric -->
+                <th class="sortable" data-sort-key="default_unit_price">Default Price <span
+                    class="sort-indicator"></span></th>
+
+                <th class="sortable" data-sort-key="default_tax_rate">Tax Rate <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text">Active <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text">Created <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+
+            <tbody id="productsLines"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+  <!-- jQuery UI (datepicker) -->
+  <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+
+  <script>
+      function redirectToProduct(productId) {
+        if (!productId) return;
+
+        // Optional: keep for later use
+        localStorage.setItem("selectedProductId", String(productId));
+
+        // Use querystring to load detail
+        window.location = `/ProductDetail?id=${encodeURIComponent(productId)}`;
+      }
+    (function () {
+      init();
+      console.log("[Products] Script loaded");
+
+      // -------------------- Breadcrumbs (same pattern) --------------------
+      function setBreadcrumbs() {
+        $("#pageName").text("Produtos");
+        $("#subpageName").text("Produtos");
+      }
+
+
+      // -------------------- State --------------------
+      let products = [];
+      const currencyCache = new Map(); // currency_id -> { code, name, symbol }
+      const sortState = { key: null, dir: "asc" };
+
+      // -------------------- Utils --------------------
+      function escapeHtml(value) {
+        if (value == null) return "";
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatDatePtBR(value) {
+        if (!value) return "";
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return String(value);
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      function parseDecimalSafe(value) {
+        if (value == null) return 0;
+        const normalized = String(value).replace(",", ".");
+        const n = Number(normalized);
+        return Number.isNaN(n) ? 0 : n;
+      }
+
+      function formatMoneyPtBR(amountNumber, currency) {
+        const symbol = currency?.symbol ? String(currency.symbol).trim() : "";
+        const formatted = new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(amountNumber);
+
+        return symbol ? `${symbol} ${formatted}` : formatted;
+      }
+
+      // -------------------- API --------------------
+      async function readJsonSafe(response) {
+        const text = await response.text();
+        if (!text) return {};
+        try { return JSON.parse(text); } catch { return { message: text }; }
+      }
+
+      async function apiGet(url) {
+        const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+        const data = await readJsonSafe(res);
+
+        if (!res.ok) {
+          console.error("[Products] API error:", url, data);
+          throw new Error(data?.message || "Request failed");
+        }
+
+        return data;
+      }
+
+      async function loadCurrencies() {
+        const currencies = await apiGet("/api/currencies?is_active=true");
+        (currencies || []).forEach(c => currencyCache.set(c.id, c));
+      }
+
+      async function loadProducts() {
+        const active = $("#activeFilter").val(); // "", "true", "false"
+        const qs = new URLSearchParams();
+        if (active !== "") qs.set("is_active", active);
+
+        const url = `/api/products${qs.toString() ? "?" + qs.toString() : ""}`;
+        console.log("[Products] Fetching:", url);
+
+        const data = await apiGet(url);
+
+        // Accept either array or { data: [] }
+        products = Array.isArray(data) ? data : (data?.data || []);
+        console.log("[Products] Products count:", products.length);
+      }
+
+      // -------------------- Rendering --------------------
+      function buildRowModel(p, index) {
+        const currency = currencyCache.get(p.currency_id) || null;
+
+        const currencyText = currency
+          ? `${currency.code}${currency.symbol ? " (" + currency.symbol + ")" : ""}`
+          : "";
+
+        const priceNumber = parseDecimalSafe(p.default_unit_price);
+        const formattedPrice = formatMoneyPtBR(priceNumber, currency);
+
+        return {
+          rowNumber: index + 1,
+          product_code: p.product_code || "",
+          name: p.name || "",
+          brand: p.brand || "",
+          unit: p.unit || "",
+          currency_text: currencyText,
+
+          // ✅ formatted money
+          default_unit_price: formattedPrice,
+
+          default_tax_rate: String(p.default_tax_rate ?? "0"),
+          is_active_text: p.is_active ? "Yes" : "No",
+          created_at_text: formatDatePtBR(p.created_at),
+        };
+      }
+
+      function renderTable() {
+        const tbody = $("#productsLines");
+        tbody.empty();
+
+        products.forEach((p, idx) => {
+          const r = buildRowModel(p, idx);
+
+          tbody.append(`
+      <tr class="clicker" onclick="redirectToProduct('${escapeHtml(p.id)}')">
+        <td>${r.rowNumber}</td>
+        <td>${escapeHtml(r.product_code)}</td>
+        <td>${escapeHtml(r.name)}</td>
+        <td>${escapeHtml(r.brand)}</td>
+        <td>${escapeHtml(r.unit)}</td>
+        <td>${escapeHtml(r.currency_text)}</td>
+        <td class="text-right">${escapeHtml(r.default_unit_price)}</td>
+        <td class="text-right">${escapeHtml(r.default_tax_rate)}</td>
+        <td>${escapeHtml(r.is_active_text)}</td>
+        <td>${escapeHtml(r.created_at_text)}</td>
+      </tr>
+    `);
+        });
+
+        rerunAllFilters();
+      }
+
+      // -------------------- Filters --------------------
+      function rerunAllFilters() {
+        const table = $("#productsTable");
+        table.find("tbody tr").show();
+
+        // Text filters (all inputs except createdOnFilter)
+        table.find("thead tr:eq(0) input").each(function () {
+          const input = $(this);
+          const id = input.attr("id");
+
+          if (id === "createdOnFilter") return;
+
+          const index = input.parent().index();
+          const value = (input.val() || "").toLowerCase();
+          if (!value) return;
+
+          table.find("tbody tr:visible").each(function () {
+            const cellText = $(this).find("td").eq(index).text().toLowerCase();
+            if (cellText.indexOf(value) === -1) $(this).hide();
+          });
+        });
+
+        // Active column filter (select)
+        const activeSelected = ($("#activeColumnFilter").val() || "").toLowerCase(); // "", "yes", "no"
+        if (activeSelected) {
+          const activeColIndex = $("#activeColumnFilter").parent().index();
+          table.find("tbody tr:visible").each(function () {
+            const cellText = $(this).find("td").eq(activeColIndex).text().toLowerCase(); // "yes" / "no"
+            if (cellText !== activeSelected) $(this).hide();
+          });
+        }
+
+        // Created date filter (exact match dd/mm/yyyy)
+        const createdValue = ($("#createdOnFilter").val() || "").trim();
+        if (createdValue) {
+          const createdColIndex = $("#createdOnFilter").parent().index();
+          table.find("tbody tr:visible").each(function () {
+            const cellText = $(this).find("td").eq(createdColIndex).text().trim();
+            if (cellText !== createdValue) $(this).hide();
+          });
+        }
+      }
+
+      // -------------------- Sorting --------------------
+      function compareValues(a, b) {
+        const an = Number(a), bn = Number(b);
+        const bothNumbers = !Number.isNaN(an) && !Number.isNaN(bn);
+        if (bothNumbers) return an - bn;
+        return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true, sensitivity: "base" });
+      }
+
+      function sortProductsBy(key, dir) {
+        products = products.slice().sort((pa, pb) => {
+          const rowA = buildRowModel(pa, 0);
+          const rowB = buildRowModel(pb, 0);
+
+          let a = rowA[key];
+          let b = rowB[key];
+
+          // ✅ Special case: numeric sort for price
+          if (key === "default_unit_price") {
+            a = rowA.default_unit_price_number;
+            b = rowB.default_unit_price_number;
+          }
+
+          const an = Number(a);
+          const bn = Number(b);
+          const bothNumbers = !Number.isNaN(an) && !Number.isNaN(bn);
+
+          const cmp = bothNumbers
+            ? an - bn
+            : String(a ?? "").localeCompare(String(b ?? ""), undefined, {
+              numeric: true,
+              sensitivity: "base",
+            });
+
+          return dir === "asc" ? cmp : -cmp;
+        });
+      }
+
+
+      function updateSortIndicators() {
+        $("#productsTable thead tr:eq(1) th.sortable").each(function () {
+          const th = $(this);
+          const key = th.data("sort-key");
+          const indicator = th.find(".sort-indicator");
+
+          if (sortState.key === key) {
+            indicator.text(sortState.dir === "asc" ? "▲" : "▼");
+          } else {
+            indicator.text("");
+          }
+        });
+      }
+
+      // -------------------- Init --------------------
+      async function init() {
+        console.log("[Products] Document ready fired");
+        setBreadcrumbs();
+
+        try {
+          await loadCurrencies();
+          await loadProducts();
+          renderTable();
+          updateSortIndicators();
+        } catch (e) {
+          console.error(e);
+          alert("Falha ao carregar produtos.");
+        }
+
+        // Column input filters
+        $("#productsTable thead tr:eq(0) input").on("keyup change", function () {
+          rerunAllFilters();
+        });
+
+        // Active column filter
+        $("#activeColumnFilter").on("change", function () {
+          rerunAllFilters();
+        });
+
+        // Datepicker for created filter
+        if ($.fn.datepicker) {
+          $("#createdOnFilter").datepicker({
+            dateFormat: "dd/mm/yy",
+            changeMonth: true,
+            changeYear: true
+          }).on("change", function () {
+            rerunAllFilters();
+          });
+        }
+
+        // Top filter (API reload)
+        $("#activeFilter").on("change", async function () {
+          try {
+            await loadProducts();
+            renderTable();
+            updateSortIndicators();
+          } catch (e) {
+            console.error(e);
+            alert("Falha ao aplicar filtro.");
+          }
+        });
+
+        // Sort headers
+        $("#productsTable thead tr:eq(1) th.sortable").on("click", function () {
+          const key = $(this).data("sort-key");
+          if (!key) return;
+
+          if (sortState.key === key) {
+            sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+          } else {
+            sortState.key = key;
+            sortState.dir = "asc";
+          }
+
+          sortProductsBy(sortState.key, sortState.dir);
+          renderTable();
+          updateSortIndicators();
+        });
+      }
+    })();
+  </script>
+  <% %>

@@ -1,0 +1,334 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .muted {
+    color: #888;
+    font-size: 12px;
+  }
+
+  .form-row {
+    margin-bottom: 12px;
+  }
+
+  .form-row label {
+    font-weight: 600;
+  }
+
+  .readonly-hint {
+    font-size: 11px;
+    color: #999;
+    margin-left: 6px;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div class="header-row">
+          <div>
+            <h5 style="margin-bottom: 4px;">Produto</h5>
+            <div class="muted" id="subtitle">Carregando...</div>
+          </div>
+
+          <div class="toolbar-right">
+            <a class="btn btn-sm btn-white" href="/Products">
+              <i class="fa fa-arrow-left"></i> Voltar
+            </a>
+
+            <button id="btnSave" class="btn btn-sm btn-primary" disabled>
+              <i class="fa fa-save"></i> Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="tabs-container">
+          <ul class="nav nav-tabs">
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-info">Informações</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-pricing">Preços</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-system">Sistema</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-images">Imagem</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- ==================== INFORMAÇÕES ==================== -->
+            <div id="tab-info" class="tab-pane active">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <div class="form-row">
+                      <label>Nome do produto</label>
+                      <input id="name" type="text" class="form-control" placeholder="Nome do produto" />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Código do produto <span class="readonly-hint">(bloqueado)</span></label>
+                      <input id="product_code" type="text" class="form-control" disabled />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Marca</label>
+                      <input id="brand" type="text" class="form-control" placeholder="Marca" />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Unidade</label>
+                      <input id="unit" type="text" class="form-control" placeholder="pacote, serviço, caixa..." />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Descrição</label>
+                      <textarea id="description" class="form-control" rows="5" placeholder="Descrição do produto"></textarea>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4">
+                    <div class="form-row">
+                      <label>Status</label>
+                      <select id="is_active" class="form-control">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Moeda</label>
+                      <select id="currency_id" class="form-control"></select>
+                      <div class="muted" style="margin-top:6px;">
+                        Moeda utilizada no preço padrão.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ==================== PREÇOS ==================== -->
+            <div id="tab-pricing" class="tab-pane">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Preço padrão</label>
+                      <input id="default_unit_price" type="text" class="form-control" placeholder="R$ 0,00" />
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Imposto padrão (%)</label>
+                      <input id="default_tax_rate" type="text" class="form-control" placeholder="Ex: 0,15 para 15%" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ==================== SISTEMA ==================== -->
+            <div id="tab-system" class="tab-pane">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>ID <span class="readonly-hint">(bloqueado)</span></label>
+                      <input id="id" type="text" class="form-control" disabled />
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Atualizado em <span class="readonly-hint">(bloqueado)</span></label>
+                      <input id="updated_at" type="text" class="form-control" disabled />
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Criado em <span class="readonly-hint">(bloqueado)</span></label>
+                      <input id="created_at" type="text" class="form-control" disabled />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ==================== IMAGEM ==================== -->
+            <div id="tab-images" class="tab-pane">
+              <div class="panel-body">
+                <div class="alert alert-info">
+                  Upload de imagem ainda não implementado.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+<script>
+(function () {
+  let productId = null;
+  let initialModel = null;
+  let currencies = [];
+
+  // ---------------- Utils ----------------
+  function getQueryParam(name) {
+    return new URL(window.location.href).searchParams.get(name);
+  }
+
+  function formatDatePtBR(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    return d.toLocaleDateString("pt-BR");
+  }
+
+function formatMoneyByCurrency(value, currencyId) {
+  const n = Number(value || 0);
+
+  const currency = (currencies || []).find(c => c.id === currencyId) || null;
+  const code = currency?.code ? String(currency.code).toUpperCase() : null;
+  const symbol = currency?.symbol ? String(currency.symbol).trim() : "";
+
+  // Keep pt-BR numeric style, but prefix using symbol/code
+  const numberText = n.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  if (symbol) return `${symbol} ${numberText}`;
+  if (code) return `${code} ${numberText}`;
+  return numberText;
+}
+
+function parseMoneyPtBrToDecimalString(value) {
+  if (!value) return "0";
+
+  // Remove currency code/symbol and spaces, keep digits and separators
+  const cleaned = String(value)
+    .replace(/[^\d,.\-]/g, "") // keep digits, comma, dot, minus
+    .replace(/\./g, "")        // remove thousand separators
+    .replace(",", ".")         // decimal comma -> dot
+    .trim();
+
+  return cleaned || "0";
+}
+
+
+function moneyToDecimal(value) {
+  return parseMoneyPtBrToDecimalString(value);
+}
+
+  async function apiGet(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error();
+    return r.json();
+  }
+
+  async function apiPatch(url, body) {
+    const r = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error();
+    return r.json();
+  }
+
+  function setDirty(v) {
+    $("#btnSave").prop("disabled", !v);
+  }
+
+  function isDirty() {
+    const current = JSON.stringify(getFormModel());
+    return current !== JSON.stringify(initialModel);
+  }
+
+  function getFormModel() {
+    return {
+      name: $("#name").val().trim(),
+      brand: $("#brand").val().trim() || null,
+      unit: $("#unit").val().trim() || null,
+      description: $("#description").val().trim() || null,
+      currency_id: $("#currency_id").val(),
+      default_unit_price: moneyToDecimal($("#default_unit_price").val()),
+      default_tax_rate: $("#default_tax_rate").val().trim() || "0",
+      is_active: $("#is_active").val() === "true"
+    };
+  }
+
+  // ---------------- Init ----------------
+pageLoad();
+  async function pageLoad() {
+    $("#pageName").text("Produtos");
+    $("#subpageName").text("Detalhe do Produto");
+
+    productId = getQueryParam("id");
+    if (!productId) return;
+
+    currencies = await apiGet("/api/currencies?is_active=true");
+    currencies.forEach(c =>
+      $("#currency_id").append(`<option value="${c.id}">${c.code} (${c.symbol})</option>`)
+    );
+
+    const product = await apiGet(`/api/products/${productId}`);
+
+    $("#name").val(product.name);
+    $("#product_code").val(product.product_code);
+    $("#brand").val(product.brand);
+    $("#unit").val(product.unit);
+    $("#description").val(product.description);
+    $("#currency_id").val(product.currency_id);
+    $("#default_unit_price").val(formatMoneyByCurrency(product.default_unit_price, product.currency_id));
+    $("#default_tax_rate").val(product.default_tax_rate);
+    $("#is_active").val(String(product.is_active));
+    $("#id").val(product.id);
+    $("#created_at").val(formatDatePtBR(product.created_at));
+    $("#updated_at").val(formatDatePtBR(product.updated_at));
+    $("#subtitle").text(product.product_code);
+
+    initialModel = getFormModel();
+    setDirty(false);
+
+    $("input, textarea, select").on("keyup change", () => setDirty(isDirty()));
+
+    $("#btnSave").on("click", async function () {
+      try {
+        setDirty(false);
+        await apiPatch(`/api/products/${productId}`, getFormModel());
+        alert("Produto salvo com sucesso.");
+        initialModel = getFormModel();
+      } catch {
+        alert("Erro ao salvar o produto.");
+        setDirty(true);
+      }
+    });
+
+    $("#currency_id").on("change", function () {
+  const currencyId = $("#currency_id").val();
+  const decimalValue = moneyToDecimal($("#default_unit_price").val());
+  $("#default_unit_price").val(formatMoneyByCurrency(decimalValue, currencyId));
+});
+
+  }
+})();
+</script>
+<% %>

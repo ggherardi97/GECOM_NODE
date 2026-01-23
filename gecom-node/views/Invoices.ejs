@@ -1,0 +1,153 @@
+<style>
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  th.sortable .sort-indicator {
+    margin-left: 6px;
+    font-size: 11px;
+    opacity: .75;
+  }
+
+  .clicker {
+    cursor: pointer;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5>Invoices</h5>
+        <div class="ibox-tools">
+          <a href="/NewInvoice" class="btn btn-sm btn-primary">
+            Novo Invoice
+          </a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="table-responsive">
+          <table class="table table-striped" id="invoices">
+            <thead>
+              <!-- Filters -->
+              <tr>
+                <th></th>
+                <th><input class="form-control input-sm" placeholder="Invoice #" /></th>
+                <th><input class="form-control input-sm" placeholder="Company" /></th>
+                <th><input class="form-control input-sm" placeholder="Status" /></th>
+                <th><input class="form-control input-sm" placeholder="Subtotal" /></th>
+                <th><input class="form-control input-sm" placeholder="Tax" /></th>
+                <th><input class="form-control input-sm" placeholder="Total" /></th>
+                <th><input class="form-control input-sm" placeholder="Issued" /></th>
+                <th><input class="form-control input-sm" placeholder="Due" /></th>
+              </tr>
+
+              <!-- Headers -->
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-sort="invoice_number">Invoice <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="company">Company <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="subtotal">Subtotal <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="tax_total">Tax <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="total">Total <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="issued_at">Issued <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="due_at">Due <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+
+            <tbody id="invoiceLines"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let invoices = [];
+  let sortState = { key: null, dir: "asc" };
+
+  function formatDate(v) {
+    if (!v) return "";
+    return new Date(v).toLocaleDateString("pt-BR");
+  }
+
+  function statusLabel(v) {
+    switch (Number(v)) {
+      case 0: return "Draft";
+      case 1: return "Issued";
+      case 2: return "Overdue";
+      case 3: return "Paid";
+      default: return "Draft";
+    }
+  }
+
+  function fetchInvoices() {
+    return fetch("/api/invoices")
+      .then(r => r.json());
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById("invoiceLines");
+    tbody.innerHTML = "";
+
+    data.forEach((i, idx) => {
+      const tr = document.createElement("tr");
+      tr.className = "clicker";
+
+      tr.onclick = () => {
+        window.location = `/InvoiceDetail?id=${i.id}`;
+      };
+
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td>${i.invoice_number}</td>
+        <td>${i.company_name || ""}</td>
+        <td>${statusLabel(i.status)}</td>
+        <td>${i.subtotal}</td>
+        <td>${i.tax_total}</td>
+        <td><strong>${i.total}</strong></td>
+        <td>${formatDate(i.issued_at)}</td>
+        <td>${formatDate(i.due_at)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function sortData(key) {
+    if (sortState.key === key) {
+      sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+    } else {
+      sortState.key = key;
+      sortState.dir = "asc";
+    }
+
+    invoices.sort((a, b) => {
+      let av = a[key] ?? "";
+      let bv = b[key] ?? "";
+      if (av > bv) return sortState.dir === "asc" ? 1 : -1;
+      if (av < bv) return sortState.dir === "asc" ? -1 : 1;
+      return 0;
+    });
+
+    renderTable(invoices);
+  }
+
+  document.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+      sortData(th.dataset.sort);
+    });
+  });
+
+  fetchInvoices().then(data => {
+    invoices = data?.data ?? data;
+    renderTable(invoices);
+  });
+</script>

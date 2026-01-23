@@ -9,12 +9,17 @@ const authRoutes = require('./routes/auth');
 const companiesApiRoutes = require("./routes/companiesApi");
 const processApiRoutes = require("./routes/processApi");
 const cnpjApiRoutes = require('./routes/cnpjApi');
+const invoicesApiRoutes = require('./routes/invoicesApi');
+const productsApiRoutes = require('./routes/productsApi');
+const currenciesApiRoutes = require('./routes/currenciesApi');
+
+console.log("invoicesApiRoutes typeof:", typeof invoicesApiRoutes);
+console.log("productsApiRoutes typeof:", typeof productsApiRoutes);
+console.log("currenciesApiRoutes typeof:", typeof currenciesApiRoutes);
+
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
-console.log("usersApi resolved to:", usersApiPath);
-
 const usersApiRoutes = require(usersApiPath);
-console.log("usersApiRoutes typeof:", typeof usersApiRoutes);
 
 const app = express();
 
@@ -39,6 +44,10 @@ app.use("/api", companiesApiRoutes);
 app.use("/api", usersApiRoutes);
 app.use("/api", processApiRoutes);
 app.use('/api', cnpjApiRoutes);
+app.use('/api', invoicesApiRoutes);
+app.use('/api', productsApiRoutes);
+app.use('/api', currenciesApiRoutes);
+app.use('/api', companiesApiRoutes);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes')); 
@@ -49,6 +58,10 @@ app.get('/Default',       (req, res) => res.render('Default'));
 app.get('/Processos',     (req, res) => res.render('Processos'));
 app.get('/NovoProcesso',  (req, res) => res.render('NovoProcesso'));
 app.get('/ProcessDetail', (req, res) => res.render('ProcessDetail'));
+app.get(['/Products', '/products'], (req, res) => res.render('Products'));
+app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
+app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
+app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

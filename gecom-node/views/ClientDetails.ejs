@@ -112,6 +112,14 @@
                     <div class="tab-pane active" id="tab-1">
                       <div class="col-lg-12">
                         <div class="wrapper wrapper-content animated fadeInRight">
+                          <div class="row" style="margin-bottom: 10px;">
+  <div class="col-lg-12 text-right">
+    <button type="button" class="btn btn-primary btn-sm" onclick="callNewContact()">
+      <i class="fa fa-plus"></i> Novo contato
+    </button>
+  </div>
+</div>
+
                           <div class="row" id="contactsContainer">
                             <!-- Contacts will be rendered here -->
                           </div>
@@ -228,11 +236,11 @@
       }
     }
 
-    // ✅ Normalize users[] and hide DELETED by default
     function normalizeUsers(company) {
       const u = company?.users;
-      const list = Array.isArray(u) ? u : (u ? [u] : []);
-      return list.filter((x) => String(x?.status ?? "").toUpperCase() !== "DELETED");
+      if (Array.isArray(u)) return u;
+      if (u) return [u];
+      return [];
     }
 
     function normalizeStatusToSelectValue(status) {
@@ -246,32 +254,63 @@
       return v === "INACTIVE" ? "INACTIVE" : "ACTIVE";
     }
 
-    function normalizePhone(value) {
-      const v = value == null ? "" : String(value);
-      return v.trim();
-    }
-
     function normalizeString(value) {
-      return (value == null ? "" : String(value)).trim();
+      return String(value ?? "").trim();
     }
 
-    function buildPatchOnlyChanged(original, current, fields) {
+    function normalizePhone(value) {
+      return String(value ?? "").trim();
+    }
+
+    function buildPatchOnlyChanged(originalObj, currentObj, fields) {
       const payload = {};
       let hasChanges = false;
 
       for (const f of fields) {
-        const curRaw = f.read();
-        const cur = f.normalize ? f.normalize(curRaw) : curRaw;
-        const oldRaw = original?.[f.key];
-        const old = f.normalize ? f.normalize(oldRaw) : oldRaw;
+        const originalValue = f.normalize(originalObj[f.key]);
+        const currentValue = f.normalize(f.read());
 
-        if (cur !== old) {
+        if (originalValue !== currentValue) {
+          f.write(payload, currentValue);
           hasChanges = true;
-          f.write(payload, curRaw);
         }
       }
 
-      return { payload, hasChanges };
+      return { hasChanges, payload };
+    }
+
+    function isNonEmptyString(value) {
+      return typeof value === "string" && value.trim().length > 0;
+    }
+
+    function isValidEmail(email) {
+      const v = String(email ?? "").trim();
+      // simple & safe enough for UI validation
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function generateTempPassword() {
+      // Strong-ish temp password (copy/paste safe)
+      // Ex: Tmp@5nhdi548dl49
+      const letters = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const digits = "0123456789";
+      const specials = "@$!%*#?&";
+      const rand = (s) => s[Math.floor(Math.random() * s.length)];
+
+      let pwd = "";
+      pwd += "Tmp";
+      pwd += rand(specials);
+      pwd += rand(upper);
+      for (let i = 0; i < 10; i++) pwd += rand(letters + digits);
+      pwd += rand(digits);
+      return pwd;
+    }
+
+    function getCurrentCompanyId() {
+      const vm = window.__companyViewModel ?? safeJsonParse(localStorage.getItem("selectedClient"));
+      const selectedClientId = localStorage.getItem("selectedClientId");
+      return String(vm?.Id ?? selectedClientId ?? "").trim();
     }
 
     // -------------------- API: Companies --------------------
@@ -296,15 +335,9 @@
         body: JSON.stringify(patchBody ?? {})
       });
 
-      const text = await resp.text().catch(() => "");
-      const data = text ? safeJsonParse(text) : null;
-
-      if (!resp.ok) {
-        const msg = data?.message || text || "Falha ao atualizar empresa.";
-        throw new Error(msg);
-      }
-
-      return data ?? {};
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar empresa.");
+      return data;
     }
 
     // -------------------- API: Users --------------------
@@ -318,119 +351,70 @@
         body: JSON.stringify(patchBody ?? {})
       });
 
-      const text = await resp.text().catch(() => "");
-      const data = text ? safeJsonParse(text) : null;
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar usuário.");
+      return data;
+    }
 
-      if (!resp.ok) {
-        const msg = data?.message || text || "Falha ao atualizar usuário.";
-        throw new Error(msg);
-      }
+    async function createUser(payload) {
+      const resp = await fetch(`/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify(payload ?? {})
+      });
 
-      return data ?? {};
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao criar usuário.");
+      return data;
     }
 
     // -------------------- Mapping --------------------
-    // ✅ Primary user is explicit in the API now
     function getPrimaryUser(company) {
-      if (company?.primaryUser?.id) return company.primaryUser;
       const users = normalizeUsers(company);
       return users[0] ?? null;
     }
 
-function mapCompanyToViewModel(company) {
-  const primaryUser = getPrimaryUser(company);
+    function mapCompanyToViewModel(company) {
+      const primaryUser = getPrimaryUser(company);
 
-  // Prefer status from primary user, then company, then fallback
-  const status = primaryUser?.status ?? company.status ?? "ACTIVE";
+      return {
+        Id: String(company.id ?? company.company_id ?? company.companyId ?? ""),
+        CompanyName: company.company_name ?? "",
+        Phone: company.phone ?? "",
+        Sector: company.sector ?? "Geral",
+        Size: company.category ?? company.porte ?? "-",
+        Status: company.status ?? "Active",
+        Email: company.email ?? primaryUser?.email ?? ""
+      };
+    }
 
-  return {
-    Id: String(company.id ?? company.company_id ?? company.companyId ?? ""),
-    CompanyName: company.company_name ?? "",
-    Phone: company.phone ?? "",
-    Sector: company.sector ?? "Geral",
-    Size: company.category ?? company.size ?? company.porte ?? "-",
-    Status: status,
-    Email: company.email ?? primaryUser?.email ?? ""
-  };
-}
-
-
-    // ✅ Build contacts list:
-    // - Primary user first (badge)
-    // - Then remaining users (no duplicate)
-    // - Hide DELETED by default
     function mapCompanyUsersToContacts(company) {
       const users = normalizeUsers(company);
-      const primaryUser = getPrimaryUser(company);
-      const primaryId = primaryUser?.id ? String(primaryUser.id) : "";
 
-      const result = [];
-
-      if (primaryUser?.id && String(primaryUser?.status ?? "").toUpperCase() !== "DELETED") {
-        result.push({
-          id: primaryUser.id ?? "",
-          fullName: primaryUser.full_name ?? primaryUser.fullName ?? "",
-          email: primaryUser.email ?? "",
-          role: primaryUser.role ?? "USER",
-          status: primaryUser.status ?? "ACTIVE",
-          phone: primaryUser.phonenumber ?? primaryUser.phone ?? primaryUser.phone_number ?? "",
-          imageUrl: "/Assets/inspinia/img/user.png",
-          isPrimary: true
-        });
-      }
-
-      for (const x of users) {
-        const id = x?.id ? String(x.id) : "";
-        if (!id) continue;
-        if (primaryId && id === primaryId) continue;
-
-        result.push({
-          id: x.id ?? "",
-          fullName: x.full_name ?? x.fullName ?? "",
-          email: x.email ?? "",
-          role: x.role ?? "USER",
-          status: x.status ?? "ACTIVE",
-          phone: x.phonenumber ?? x.phone ?? x.phone_number ?? "",
-          imageUrl: "/Assets/inspinia/img/user.png",
-          isPrimary: false
-        });
-      }
-
-      return result;
+      return users.map((x) => ({
+        id: x.id ?? "",
+        fullName: x.full_name ?? x.fullName ?? "",
+        email: x.email ?? "",
+        role: x.role ?? "USER",
+        status: x.status ?? "ACTIVE",
+        phone: x.phonenumber ?? "",
+        imageUrl: "/Assets/inspinia/img/user.png"
+      }));
     }
 
     // -------------------- Header fill --------------------
-function fillClientHeader(vm) {
-  setText("#companyName", vm?.CompanyName ?? "");
-  setText("#fantasyName", vm?.CompanyName ?? "");
-  setText("#email", vm?.Email ?? "");
-  setText("#phone", vm?.Phone ?? "");
-  setText("#sector", vm?.Sector ?? "Geral");
-  setText("#size", vm?.Size ?? "-");
-
-  const statusRaw = String(vm?.Status ?? "ACTIVE").toUpperCase();
-  const statusEl = document.querySelector("#statusLabel");
-
-  if (statusEl) {
-    // Reset classes (keep the base class)
-    statusEl.className = "label";
-
-    // Map status to label style
-    if (statusRaw === "ACTIVE") {
-      statusEl.classList.add("label-primary");
-    } else if (statusRaw === "INACTIVE" || statusRaw === "SUSPENDED") {
-      statusEl.classList.add("label-warning");
-    } else if (statusRaw === "DELETED") {
-      statusEl.classList.add("label-danger");
-    } else {
-      statusEl.classList.add("label-default");
+    function fillClientHeader(vm) {
+      setText("#companyName", vm?.CompanyName ?? "");
+      setText("#fantasyName", vm?.CompanyName ?? "");
+      setText("#email", vm?.Email ?? "");
+      setText("#phone", vm?.Phone ?? "");
+      setText("#sector", vm?.Sector ?? "Geral");
+      setText("#size", vm?.Size ?? "-");
+      setText("#statusLabel", vm?.Status ?? "Active");
     }
-
-    // Show text (keep raw, but you can localize if you want)
-    statusEl.textContent = statusRaw;
-  }
-}
-
 
     // -------------------- Contacts rendering --------------------
     function renderContacts(contacts) {
@@ -454,10 +438,7 @@ function fillClientHeader(vm) {
               <div class="col-4">
                 <div class="text-center">
                   <img alt="image" class="rounded-circle m-t-xs img-fluid" src="${escapeHtml(c.imageUrl)}">
-                  <div class="m-t-xs font-bold">
-                    ${escapeHtml(c.role ?? "")}
-                    ${c.isPrimary ? `<span class="label label-primary" style="margin-left:6px;">Principal</span>` : ``}
-                  </div>
+                  <div class="m-t-xs font-bold">${escapeHtml(c.role ?? "")}</div>
                 </div>
               </div>
               <div class="col-8">
@@ -485,8 +466,8 @@ function fillClientHeader(vm) {
       const original = {
         fullName: normalizeString(c.fullName),
         email: normalizeString(c.email),
-        status: normalizeString(c.status),
-        phone: normalizePhone(c.phone)
+        phone: normalizePhone(c.phone),
+        status: normalizeString(c.status)
       };
 
       const statusValue = normalizeStatusToSelectValue(c.status);
@@ -505,8 +486,7 @@ function fillClientHeader(vm) {
 
         <div class="form-group">
           <label for="txtPhoneNumber">Telefone</label>
-          <input id="txtPhoneNumber" class="form-control" value="${escapeHtml(c.phone ?? "")}" placeholder="+5511999999999" />
-          <small class="text-muted">Use o formato que o backend espera (ex: +5511961383449).</small>
+          <input id="txtPhoneNumber" class="form-control" value="${escapeHtml(c.phone ?? "")}" />
         </div>
 
         <div class="form-group">
@@ -570,6 +550,103 @@ function fillClientHeader(vm) {
     }
 
     window.onContactClick = onContactClick;
+
+    // -------------------- Side modal: New Contact (POST) --------------------
+    function callNewContact() {
+      const companyId = getCurrentCompanyId();
+      if (!isNonEmptyString(companyId)) {
+        alert("Não foi possível identificar o company_id desta página.");
+        return;
+      }
+
+      const html = `
+        <div class="form-group">
+          <label for="txtNewName">Nome</label>
+          <input id="txtNewName" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtNewEmail">Email</label>
+          <input id="txtNewEmail" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtNewPhone">Telefone</label>
+          <input id="txtNewPhone" class="form-control" placeholder="+5511961381234" />
+        </div>
+
+        <div class="form-group">
+          <label for="selNewRole">Role</label>
+          <select id="selNewRole" class="form-control">
+            <option value="USER" selected>User</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top:10px;">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="chkSendAccess" checked />
+              Enviar acesso à plataforma (primeiro acesso)
+            </label>
+          </div>
+          <small class="text-muted">
+            Se marcado, o sistema irá enviar um email para que o usuário acesse a plataforma.
+          </small>
+        </div>
+      `;
+
+      SideModal.open({
+        title: "Novo Contato",
+        html: html,
+
+        onOk: async function () {
+          try {
+            const fullName = normalizeString($("#txtNewName").val());
+            const email = normalizeString($("#txtNewEmail").val());
+            const phonenumber = normalizePhone($("#txtNewPhone").val());
+            const role = normalizeString($("#selNewRole").val()) || "USER";
+            const sendAccess = $("#chkSendAccess").is(":checked") === true;
+
+            if (!isNonEmptyString(fullName)) {
+              alert("Informe o Nome.");
+              return;
+            }
+
+            if (!isNonEmptyString(email) || !isValidEmail(email)) {
+              alert("Informe um Email válido.");
+              return;
+            }
+
+            // Always send a temp password (keeps backend happy if password is required)
+            const tempPassword = generateTempPassword();
+
+            const payload = {
+              full_name: fullName,
+              email: email,
+              password: tempPassword,
+              role: role === "ADMIN" ? "ADMIN" : "USER",
+              phonenumber: phonenumber,
+              first_access: sendAccess,
+              company_id: companyId,
+              status: "ACTIVE"
+            };
+
+            await createUser(payload);
+
+            localStorage.removeItem("selectedClient");
+            location.reload();
+          } catch (err) {
+            console.error(err);
+            alert(err?.message || "Erro ao criar contato.");
+          }
+        },
+
+        onCancel: function () { }
+      });
+    }
+
+    window.callNewContact = callNewContact;
 
     // -------------------- Side modal: Edit Company (PATCH) --------------------
     function callEditDetails() {
@@ -711,3 +788,4 @@ function fillClientHeader(vm) {
     }
   })();
 </script>
+
