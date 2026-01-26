@@ -1,6 +1,5 @@
 // routes/invoicesApi.js
 const express = require("express");
-
 const router = express.Router();
 
 function getBackendBaseUrl() {
@@ -43,15 +42,37 @@ router.get("/invoices", async (req, res) => {
       method: "GET",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("GET /api/invoices error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
+// ✅ GET /api/invoices/:id (by id)
+router.get("/invoices/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(req.params.id)}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/invoices/:id error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
   }
 });
 
@@ -61,22 +82,49 @@ router.post("/invoices", async (req, res) => {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
 
-    const response = await fetch(`${baseUrl}/invoices`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      },
-      body: JSON.stringify(req.body ?? {})
+    // 🔎 debug (remove depois)
+    console.log("[BFF] POST /api/invoices ->", {
+      baseUrl,
+      hasAuth: !!authHeader,
+      bodyKeys: Object.keys(req.body || {}),
     });
 
-    const data = await readJsonSafe(response);
+    const url = `${baseUrl}/invoices`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const rawText = await response.text();
+    let data = {};
+    try { data = rawText ? JSON.parse(rawText) : {}; } catch { data = { message: rawText }; }
+
+    // 🔎 debug (remove depois)
+    console.log("[BFF] backend response ->", {
+      status: response.status,
+      statusText: response.statusText,
+      body: data,
+    });
+
+    // Se backend devolveu erro, repassa a msg real
     return res.status(response.status).json(data ?? {});
   } catch (error) {
-    console.error("POST /api/invoices error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("POST /api/invoices error (BFF):", error);
+
+    // ✅ devolve erro real pra você ver no browser
+    return res.status(500).json({
+      message: error?.message || "Erro interno do servidor",
+      stack: process.env.NODE_ENV === "production" ? undefined : String(error?.stack || ""),
+    });
   }
 });
+
 
 // PATCH /api/invoices/:id
 router.patch("/invoices/:id", async (req, res) => {
@@ -97,9 +145,34 @@ router.patch("/invoices/:id", async (req, res) => {
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("PATCH /api/invoices/:id error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Erro interno do servidor" });
   }
 });
 
+// ✅ DELETE /api/invoices/:id
+router.delete("/invoices/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(req.params.id)}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+
+    // Se o backend retornar 204 (no content), devolve no content também
+    if (response.status === 204) return res.status(204).send();
+
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("DELETE /api/invoices/:id error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
 
 module.exports = router;

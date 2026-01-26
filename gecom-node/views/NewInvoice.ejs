@@ -1,770 +1,1087 @@
 <style>
-  .ibox-title { padding: 15px 90px 20px 15px; }
-  .wizard-big.wizard > .content { min-height: 400px !important; }
-  .table td, .table th { vertical-align: middle !important; }
-  .money { font-family: monospace; }
-  .clicker { cursor: pointer; }
-  .line-actions .btn { margin-right: 6px; }
-  .side-search { margin-bottom: 10px; }
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  .table td,
+  .table th {
+    vertical-align: middle !important;
+  }
+
+  .money {
+    font-family: monospace;
+  }
+
+  .clicker {
+    cursor: pointer;
+  }
+
+  /* Better spacing (fix “grudados na linha”) */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .row-tight {
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+
+  .row-tight>[class*="col-"] {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .panel-body {
+    padding-top: 12px;
+  }
+
+  /* Dynamics-like layout helpers */
+  .invoice-panel {
+    min-height: 560px;
+  }
+
+  .lines-disabled {
+    opacity: .55;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .lines-banner {
+    display: none;
+    margin-bottom: 10px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .header-actions .left-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .line-actions .btn {
+    margin-right: 6px;
+  }
+
+  .small-muted {
+    font-size: 12px;
+    color: #777;
+  }
 </style>
 
 <% contentFor('headerLink') %>
-<link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-<link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
-<% %>
+  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+  <% %>
 
-<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 25px;">
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="ibox">
-        <div class="ibox-title">
-          <h5>Criação de Invoice</h5>
-          <div class="ibox-tools"></div>
-        </div>
+    <div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0px;">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Criação de Fatura</h5>
+              <div class="ibox-tools"></div>
+            </div>
 
-        <div class="ibox-content">
-          <p>Preencha os dados do invoice, o endereço de faturação e depois adicione as linhas (produtos).</p>
+            <div class="ibox-content">
+              <form id="form" action="#" onsubmit="return false;">
 
-          <div class="alert alert-warning" id="invoiceNotCreatedBanner" style="display:none;">
-            O invoice ainda não foi criado. Clique em <strong>Next</strong> no passo "Billing Address" para salvar e liberar as linhas.
+                <div class="row">
+
+                  <!-- ===================== ESQUERDA: HEADER (col-lg-3) ===================== -->
+                  <div class="col-lg-4">
+                    <div class="panel panel-default invoice-panel">
+                      <div class="panel-heading">
+                        <strong>Cabeçalho da Fatura</strong>
+                      </div>
+                      <div class="panel-body">
+
+                        <div class="form-group">
+                          <label>Empresa *</label>
+                          <select id="company_id" class="form-control"></select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Moeda *</label>
+                          <select id="currency_id" class="form-control"></select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Data da Cotação</label>
+                          <input id="quote_at" type="datetime-local" class="form-control" />
+                          <!-- <div class="small-muted" style="margin-top:4px;">(Opcional)</div> -->
+                        </div>
+
+                        <div class="row row-tight">
+                          <div class="col-lg-7">
+                             <div class="form-group">
+                              <label>Status</label>
+                              <select id="status" class="form-control">
+                                <option value="0" selected>Ativo</option>
+                                <option value="1">Expirado</option>
+                                <option value="2">Faturado</option>
+                                <option value="3">Pago</option>
+                              </select>
+                            </div>
+                            
+                          </div>
+                          <div class="col-lg-5">
+                              <div class="form-group">
+                              <label>Desconto %</label>
+                              <input id="discount_percent" type="number" min="0" max="100" class="form-control"
+                                value="0" readonly />
+                                <div class="small-muted" style="margin-top:4px;">*A porcentagem será calculada sob o total bruto (Subtotal)</div>
+                            </div>
+                            <div class="form-group" style="display: none;">
+                              <label>Taxa de câmbio</label>
+                              <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row row-tight" style="display: none;">
+                          <div class="col-xs-6">
+                          
+                          </div>
+                          <div class="col-xs-6">
+                            <div class="form-group">
+                              <label>Versão</label>
+                              <input id="version" type="number" min="1" class="form-control" value="1" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Observações</label>
+                          <textarea id="notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group"  style="display: none;">
+                          <label>Termos</label>
+                          <textarea id="terms" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <hr style="margin: 10px 0;">
+
+                        <strong>Endereço de Cobrança</strong>
+
+                        <div class="form-group" style="margin-top:10px;">
+                          <label>Linha 1</label>
+                          <input id="billing_address_line1" type="text" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                          <label>Linha 2</label>
+                          <input id="billing_address_line2" type="text" class="form-control" />
+                        </div>
+
+                        <div class="row row-tight">
+                          <div class="col-xs-6">
+                            <div class="form-group">
+                              <label>Cidade</label>
+                              <input id="billing_address_city" type="text" class="form-control" />
+                            </div>
+                          </div>
+                          <div class="col-xs-6">
+                            <div class="form-group">
+                              <label>Estado</label>
+                              <input id="billing_address_state" type="text" class="form-control" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="row row-tight">
+                          <div class="col-xs-6">
+                            <div class="form-group">
+                              <label>CEP</label>
+                              <input id="billing_address_postal_code" type="text" class="form-control" />
+                            </div>
+                          </div>
+                          <div class="col-xs-6">
+                            <div class="form-group">
+                              <label>País</label>
+                              <input id="billing_address_country" type="text" class="form-control" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="m-t-sm">
+                          <button type="button" class="btn btn-primary btn-block" id="btnSaveHeader">
+                            <i class="fa fa-save"></i> Salvar cabeçalho
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ===================== MEIO: LINES (col-lg-6) ===================== -->
+                  <div class="col-lg-8">
+                    <div class="panel panel-default invoice-panel">
+                      <div class="panel-heading">
+                        <div class="header-actions">
+                          <div class="left-actions">
+                            <button type="button" class="btn btn-primary" id="btnAddProduct">
+                              <i class="fa fa-plus"></i> Adicionar produto
+                            </button>
+
+                            <button type="button" class="btn btn-white" id="btnAddManualLine">
+                              <i class="fa fa-pencil"></i> Adicionar linha manual
+                            </button>
+
+                            <button type="button" class="btn btn-success" id="btnSaveInvoice">
+                              <i class="fa fa-check"></i> Salvar fatura
+                            </button>
+                          </div>
+
+                          <span class="text-muted">
+                            ID da Fatura: <span id="uiInvoiceId">-</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="panel-body">
+                        <div id="invoiceNotCreatedBanner" class="alert alert-warning lines-banner">
+                          Salve o cabeçalho da fatura para liberar as linhas.
+                        </div>
+
+                        <div id="linesArea" class="lines-disabled">
+                          <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="linesTable">
+                              <thead>
+                                <tr>
+                                  <th style="width:55px;">#</th>
+                                  <th>Produto</th>
+                                  <th>Descrição</th>
+                                  <th style="width:110px;">Unidade</th>
+                                  <th style="width:120px;">Preço</th>
+                                  <th style="width:90px;">Qtd</th>
+                                  <th style="width:120px;">Imposto</th>
+                                  <th style="width:140px;">Total linha</th>
+                                  <th style="width:160px;">Ações</th>
+                                </tr>
+                              </thead>
+                              <tbody id="linesTbody"></tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="panel panel-default invoice-panel">
+                      <div class="panel-heading">
+                        <strong>Totalizadores</strong>
+                      </div>
+                      <div class="panel-body">
+                        <table class="table">
+                          <tr>
+                            <th>Subtotal</th>
+                            <td class="text-right money" id="uiSubtotal">0.0000</td>
+                          </tr>
+                          <tr>
+                            <th>Desconto</th>
+                            <td class="text-right money" id="uiDiscount">0.0000</td>
+                          </tr>
+                          <tr>
+                            <th>Impostos</th>
+                            <td class="text-right money" id="uiTaxTotal">0.0000</td>
+                          </tr>
+                          <tr>
+                            <th>Total</th>
+                            <td class="text-right money" id="uiTotal">0.0000</td>
+                          </tr>
+                        </table>
+
+                        <div class="help-block">
+                          <small class="text-muted">Os totalizadores são calculados a partir das linhas.</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ===================== DIREITA: TOTALS (col-lg-3) ===================== -->
+                  <div class="col-lg-3">
+                    
+                  </div>
+
+                </div>
+
+              </form>
+            </div>
           </div>
-
-          <form id="form" action="#" class="wizard-big">
-
-            <!-- ===================== STEP 1: INVOICE ===================== -->
-            <h1>Invoice</h1>
-            <fieldset>
-              <h2>Dados do Invoice</h2>
-
-              <div class="row">
-                <div class="col-lg-4">
-                  <div class="form-group">
-                    <label>Company *</label>
-                    <select id="company_id" class="form-control required"></select>
-                  </div>
-                </div>
-
-                <div class="col-lg-4">
-                  <div class="form-group">
-                    <label>Currency *</label>
-                    <select id="currency_id" class="form-control required"></select>
-                  </div>
-                </div>
-
-                <div class="col-lg-4">
-                  <div class="form-group">
-                    <label>Quote Date</label>
-                    <input id="quote_at" type="datetime-local" class="form-control" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Exchange Rate</label>
-                    <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Status</label>
-                    <select id="status" class="form-control">
-                      <option value="0" selected>Active</option>
-                      <option value="1">Expired</option>
-                      <option value="2">Invoiced</option>
-                      <option value="3">Paid</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Discount %</label>
-                    <input id="discount_percent" type="number" min="0" max="100" class="form-control" value="0" />
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Version</label>
-                    <input id="version" type="number" min="1" class="form-control" value="1" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="notes" class="form-control" rows="3"></textarea>
-                  </div>
-                </div>
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label>Terms</label>
-                    <textarea id="terms" class="form-control" rows="3"></textarea>
-                  </div>
-                </div>
-              </div>
-            </fieldset>
-
-            <!-- ===================== STEP 2: BILLING ADDRESS ===================== -->
-            <h1>Billing Address</h1>
-            <fieldset>
-              <h2>Endereço de faturação</h2>
-
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label>Line 1</label>
-                    <input id="billing_address_line1" type="text" class="form-control" />
-                  </div>
-                </div>
-
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label>Line 2</label>
-                    <input id="billing_address_line2" type="text" class="form-control" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>City</label>
-                    <input id="billing_address_city" type="text" class="form-control" />
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>State</label>
-                    <input id="billing_address_state" type="text" class="form-control" />
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Postal Code</label>
-                    <input id="billing_address_postal_code" type="text" class="form-control" />
-                  </div>
-                </div>
-
-                <div class="col-lg-3">
-                  <div class="form-group">
-                    <label>Country</label>
-                    <input id="billing_address_country" type="text" class="form-control" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- <div class="alert alert-info">
-                Ao clicar em <strong>Next</strong>, o sistema irá <strong>criar o invoice</strong> e liberar o passo das linhas.
-              </div> -->
-            </fieldset>
-
-            <!-- ===================== STEP 3: LINES ===================== -->
-            <h1>Lines</h1>
-            <fieldset>
-              <h2>Linhas do Invoice</h2>
-
-              <div class="row m-b-sm">
-                <div class="col-lg-12">
-                  <button type="button" class="btn btn-primary" id="btnAddProduct">
-                    <i class="fa fa-plus"></i> Add product
-                  </button>
-
-                  <button type="button" class="btn btn-white" id="btnAddManualLine">
-                    <i class="fa fa-pencil"></i> Add manual line
-                  </button>
-
-                  <span class="pull-right text-muted">
-                    Invoice ID: <span id="uiInvoiceId">-</span>
-                  </span>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="linesTable">
-                  <thead>
-                    <tr>
-                      <th style="width:60px;">#</th>
-                      <th>Product</th>
-                      <th>Description</th>
-                      <th style="width:120px;">Unit</th>
-                      <th style="width:140px;">Unit Price</th>
-                      <th style="width:120px;">Qty</th>
-                      <th style="width:120px;">Tax Rate</th>
-                      <th style="width:160px;">Line Total</th>
-                      <th style="width:120px;">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="linesTbody"></tbody>
-                </table>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-4 col-lg-offset-8">
-                  <table class="table">
-                    <tr>
-                      <th>Subtotal</th>
-                      <td class="text-right money" id="uiSubtotal">0.0000</td>
-                    </tr>
-                    <tr>
-                      <th>Discount</th>
-                      <td class="text-right money" id="uiDiscount">0.0000</td>
-                    </tr>
-                    <tr>
-                      <th>Tax Total</th>
-                      <td class="text-right money" id="uiTaxTotal">0.0000</td>
-                    </tr>
-                    <tr>
-                      <th>Total</th>
-                      <td class="text-right money" id="uiTotal">0.0000</td>
-                    </tr>
-                  </table>
-                </div>
-              </div>
-
-              <div class="alert alert-success">
-                Clique em <strong>Finish</strong> para salvar as linhas no invoice.
-              </div>
-            </fieldset>
-
-          </form>
         </div>
-
       </div>
     </div>
-  </div>
-</div>
 
-<% contentFor('scripts') %>
-<script>
-  (function () {
-    // -------------------- Breadcrumbs --------------------
-    $("#pageName").text("Invoices");
-    $("#subpageName").text("Invoices");
-    $("#path").show();
-    $("#subSecoundPageName").text("Forms");
-    $("#subpath").show();
-    $("#subpathName").text("New Invoice");
+    <% contentFor('scripts') %>
+      <script>
+        (function () {
+          // -------------------- Breadcrumbs --------------------
+          $("#pageName").text("Faturas");
+          $("#subpageName").text("Faturas");
+          $("#path").show();
+          $("#subSecoundPageName").text("Formulários");
+          $("#subpath").show();
+          $("#subpathName").text("Nova Fatura");
 
-    // -------------------- State --------------------
-    let invoiceId = null;
-    let productsCache = [];
-    let lines = [];
-    let creatingInvoice = false;
+          // -------------------- State --------------------
+          let invoiceId = null;
+          let creatingInvoice = false;
 
-    // -------------------- Helpers (Dynamic Side Modal) --------------------
-    function openSideModal({ title, bodyHtml, okText, cancelText, onOk, onCancel }) {
-      const overlay = document.getElementById("dynamicModalOverlay");
-      const modal = document.getElementById("dynamicModal");
-      const titleEl = document.getElementById("dynamicModalTitle");
-      const bodyEl = document.getElementById("dynamicModalBody");
-      const btnClose = document.getElementById("dynamicModalCloseBtn");
-      const btnCancel = document.getElementById("dynamicModalCancelBtn");
-      const btnOk = document.getElementById("dynamicModalOkBtn");
+          /** products cached on load (per your request) */
+          let productsCache = [];
+          /** lines shown in UI (not persisted until Save Invoice) */
+          let lines = [];
 
-      titleEl.textContent = title || "";
-      bodyEl.innerHTML = bodyHtml || "";
-      btnOk.textContent = okText || "OK";
-      btnCancel.textContent = cancelText || "Cancel";
+          // -------------------- Helpers (Dynamic Side Modal - from layout.ejs) --------------------
+          function openSideModal({ title, bodyHtml, okText, cancelText, onOk, onCancel }) {
+            const overlay = document.getElementById("dynamicModalOverlay");
+            const modal = document.getElementById("dynamicModal");
+            const titleEl = document.getElementById("dynamicModalTitle");
+            const bodyEl = document.getElementById("dynamicModalBody");
+            const btnClose = document.getElementById("dynamicModalCloseBtn");
+            const btnCancel = document.getElementById("dynamicModalCancelBtn");
+            const btnOk = document.getElementById("dynamicModalOkBtn");
 
-      function close() {
-        overlay.classList.remove("open");
-        modal.classList.remove("open");
-        btnOk.onclick = null;
-        btnCancel.onclick = null;
-        btnClose.onclick = null;
-      }
+            if (!overlay || !modal) {
+              alert("Modal global não encontrado no layout.");
+              return;
+            }
 
-      btnOk.onclick = async () => {
-        if (typeof onOk === "function") await onOk(close);
-        else close();
-      };
+            titleEl.textContent = title || "";
+            bodyEl.innerHTML = bodyHtml || "";
+            btnOk.textContent = okText || "OK";
+            btnCancel.textContent = cancelText || "Cancelar";
 
-      btnCancel.onclick = () => {
-        if (typeof onCancel === "function") onCancel(close);
-        else close();
-      };
+            const close = () => {
+              overlay.style.display = "none";
+              modal.style.display = "none";
+              btnOk.onclick = null;
+              btnCancel.onclick = null;
+              btnClose.onclick = null;
+            };
 
-      btnClose.onclick = () => {
-        if (typeof onCancel === "function") onCancel(close);
-        else close();
-      };
+            btnOk.onclick = async () => {
+              try {
+                if (typeof onOk === "function") await onOk();
+              } finally {
+                close();
+              }
+            };
 
-      overlay.classList.add("open");
-      modal.classList.add("open");
-    }
+            btnCancel.onclick = () => {
+              if (typeof onCancel === "function") onCancel();
+              close();
+            };
 
-    function escapeHtml(str) {
-      if (str == null) return "";
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+            btnClose.onclick = () => {
+              if (typeof onCancel === "function") onCancel();
+              close();
+            };
 
-    // UI decimals (display only; server is source of truth)
-    function toDec(value, fallback) {
-      const v = String(value ?? "").trim();
-      if (!v) return String(fallback ?? "0");
-      return v.replace(",", ".");
-    }
-    function decMul(a, b) {
-      const x = Number(toDec(a, 0));
-      const y = Number(toDec(b, 0));
-      return (x * y).toFixed(4);
-    }
-    function decAdd(a, b) {
-      const x = Number(toDec(a, 0));
-      const y = Number(toDec(b, 0));
-      return (x + y).toFixed(4);
-    }
+            overlay.style.display = "block";
+            modal.style.display = "block";
+          }
 
-    // -------------------- API helpers --------------------
-    async function readJsonSafe(response) {
-      const text = await response.text();
-      if (!text) return {};
-      try { return JSON.parse(text); } catch { return { message: text }; }
-    }
+          // -------------------- Utils --------------------
+          function isNonEmptyString(v) { return typeof v === "string" && v.trim().length > 0; }
 
-    async function apiGet(url) {
-      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
-      const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
-      return data;
-    }
+          function escapeHtml(value) {
+            if (value == null) return "";
+            return String(value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
 
-    async function apiPost(url, payload) {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(payload ?? {})
-      });
-      const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
-      return data;
-    }
+          function parseNumberSafe(value, fallback) {
+            const n = Number(String(value ?? "").replace(",", "."));
+            return Number.isFinite(n) ? n : (fallback ?? 0);
+          }
 
-    async function apiPatch(url, payload) {
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(payload ?? {})
-      });
-      const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
-      return data;
-    }
+          function money4(v) {
+            const n = parseNumberSafe(v, 0);
+            return n.toFixed(4);
+          }
 
-    // -------------------- Load dropdowns --------------------
-    async function loadCompanies() {
-      const companies = await apiGet("/api/companies");
-      const el = document.getElementById("company_id");
-      el.innerHTML = `<option value="">Select...</option>` + (companies || []).map(c =>
-        `<option value="${escapeHtml(c.id)}">${escapeHtml(c.company_name || c.companyName || c.id)}</option>`
-      ).join("");
-    }
+          function clamp01(n) {
+            const x = parseNumberSafe(n, 0);
+            return Math.max(0, Math.min(1, x));
+          }
 
-    async function loadCurrencies() {
-      const currencies = await apiGet("/api/currencies?is_active=true");
-      const el = document.getElementById("currency_id");
-      el.innerHTML = `<option value="">Select...</option>` + (currencies || []).map(c =>
-        `<option value="${escapeHtml(c.id)}">${escapeHtml(c.code)} - ${escapeHtml(c.name)} ${c.symbol ? "(" + escapeHtml(c.symbol) + ")" : ""}</option>`
-      ).join("");
-    }
+          // -------------------- API helpers --------------------
+          async function readJsonSafe(response) {
+            const text = await response.text();
+            if (!text) return {};
+            try { return JSON.parse(text); } catch { return { message: text }; }
+          }
 
-    // -------------------- Lines UI --------------------
-    function calculateLineTotalUi(line) {
-      const subtotal = decMul(line.unit_price, line.quantity);
-      const taxAmount = decMul(subtotal, line.tax_rate || "0");
-      return decAdd(subtotal, taxAmount);
-    }
+          async function apiGet(url) {
+            const resp = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
 
-    function updateTotalsUi() {
-      let subtotal = "0.0000";
-      let taxTotal = "0.0000";
+          async function apiPost(url, payload) {
+            const resp = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify(payload || {})
+            });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
 
-      lines.forEach(l => {
-        const lineSub = decMul(l.unit_price, l.quantity);
-        const lineTax = decMul(lineSub, l.tax_rate || "0");
-        subtotal = decAdd(subtotal, lineSub);
-        taxTotal = decAdd(taxTotal, lineTax);
-      });
+          async function apiPatch(url, payload) {
+            const resp = await fetch(url, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify(payload || {})
+            });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
 
-      const discountPercent = Number(document.getElementById("discount_percent").value || 0);
-      const discountAmount = (Number(subtotal) * (discountPercent / 100)).toFixed(4);
-      const total = (Number(subtotal) - Number(discountAmount) + Number(taxTotal)).toFixed(4);
+          // -------------------- Load picklists --------------------
+          async function loadCompanies() {
+            const companies = await apiGet("/api/companies");
+            const list = Array.isArray(companies) ? companies : (companies?.data ?? companies?.rows ?? companies?.companies ?? []);
+            const ddl = document.getElementById("company_id");
+            if (!ddl) return;
 
-      document.getElementById("uiSubtotal").textContent = subtotal;
-      document.getElementById("uiTaxTotal").textContent = taxTotal;
-      document.getElementById("uiDiscount").textContent = Number(discountAmount).toFixed(4);
-      document.getElementById("uiTotal").textContent = total;
-    }
+            ddl.innerHTML = `<option value="">Selecionar...</option>`;
+            for (const c of list) {
+              const id = c.id ?? c.company_id ?? c.companyId ?? c._id ?? "";
+              const name = c.company_name ?? c.name ?? c.companyName ?? "";
+              ddl.innerHTML += `<option value="${escapeHtml(String(id))}">${escapeHtml(String(name))}</option>`;
+            }
+          }
 
-    function renderLines() {
-      const tbody = document.getElementById("linesTbody");
-      tbody.innerHTML = "";
+          async function loadCurrencies() {
+            const currencies = await apiGet("/api/currencies");
+            const list = Array.isArray(currencies) ? currencies : (currencies?.data ?? currencies?.rows ?? currencies?.currencies ?? []);
+            const ddl = document.getElementById("currency_id");
+            if (!ddl) return;
 
-      lines.forEach((l, idx) => {
-        const productText = l.product ? `${l.product.product_code} - ${l.product.name}` : "";
+            ddl.innerHTML = `<option value="">Selecionar...</option>`;
+            for (const c of list) {
+              const id = c.id ?? c.currency_id ?? c.currencyId ?? c._id ?? "";
+              const name = c.name ?? c.currency_name ?? c.currencyName ?? "";
+              ddl.innerHTML += `<option value="${escapeHtml(String(id))}">${escapeHtml(String(name))}</option>`;
+            }
+          }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${idx + 1}</td>
-          <td>${escapeHtml(productText)}</td>
-          <td><input class="form-control input-sm" data-field="description" data-idx="${idx}" value="${escapeHtml(l.description || "")}" /></td>
-          <td><input class="form-control input-sm" data-field="unit" data-idx="${idx}" value="${escapeHtml(l.unit || "")}" /></td>
-          <td><input class="form-control input-sm money" data-field="unit_price" data-idx="${idx}" value="${escapeHtml(l.unit_price)}" /></td>
-          <td><input class="form-control input-sm money" data-field="quantity" data-idx="${idx}" value="${escapeHtml(l.quantity)}" /></td>
-          <td>
-            <input class="form-control input-sm money" data-field="tax_rate" data-idx="${idx}" value="${escapeHtml(l.tax_rate)}" />
-            <small class="text-muted">0..1</small>
-          </td>
-          <td class="text-right money">${escapeHtml(calculateLineTotalUi(l))}</td>
+          async function preloadProducts() {
+            const currencyId = String($("#currency_id").val() || "").trim();
+            if (!currencyId) { productsCache = []; return; }
+
+            const qs = new URLSearchParams();
+            qs.set("currency_id", currencyId);
+            qs.set("is_active", "true");
+
+            const data = await apiGet(`/api/products?${qs.toString()}`);
+            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
+            productsCache = list.map(toProductModel);
+          }
+
+          async function searchProducts(term) {
+            const currencyId = String($("#currency_id").val() || "").trim();
+            if (!currencyId) { productsCache = []; return; }
+
+            const qs = new URLSearchParams();
+            qs.set("currency_id", currencyId);
+            qs.set("is_active", "true");
+            if (term) qs.set("q", String(term));
+
+            const data = await apiGet(`/api/products?${qs.toString()}`);
+            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
+            productsCache = list.map(toProductModel);
+          }
+
+          // recarrega quando mudar moeda
+          $("#currency_id").on("change", async function () {
+            try { await preloadProducts(); } catch (e) { console.error(e); productsCache = []; }
+          });
+
+          // ✅ recarrega products quando a moeda mudar
+          $("#currency_id").on("change", async function () {
+            try {
+              await preloadProducts();
+            } catch (e) {
+              console.error(e);
+              productsCache = [];
+            }
+          });
+          function toProductModel(p) {
+            const id = String(p?.id || "").trim();
+            return {
+              id,
+              name: String(p?.name || ""),
+              description: String(p?.description || ""),
+              unit: String(p?.unit || ""),
+              defaultUnitPrice: parseNumberSafe(p?.default_unit_price, 0),
+              defaultTaxRate: clamp01(p?.default_tax_rate),
+              isActive: !!p?.is_active
+            };
+          }
+
+          function getProductById(productId) {
+            const id = String(productId || "");
+            return productsCache.find((p) => String(p.id) === id) || null;
+          }
+
+          function buildProductsOptionsHtml(selectedId) {
+            const selected = String(selectedId || "");
+            const options = [`<option value="">Selecionar...</option>`];
+
+            for (const p of productsCache) {
+              const isSel = selected && p.id === selected ? "selected" : "";
+              options.push(
+                `<option value="${escapeHtml(p.id)}"
+        data-price="${escapeHtml(String(p.defaultUnitPrice))}"
+        data-taxrate="${escapeHtml(String(p.defaultTaxRate))}"
+        data-unit="${escapeHtml(p.unit)}"
+        data-desc="${escapeHtml(p.description)}"
+        ${isSel}>${escapeHtml(p.name)}</option>`
+              );
+            }
+
+            return options.join("");
+          }
+
+
+          // -------------------- Payload builders --------------------
+          function buildInvoiceHeaderPayload() {
+            return {
+              company_id: $("#company_id").val() || null,
+              currency_id: $("#currency_id").val() || null,
+              quote_at: $("#quote_at").val() || null,
+              exchange_rate: $("#exchange_rate").val() || null,
+              status: parseNumberSafe($("#status").val(), 0),
+              discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
+              version: parseNumberSafe($("#version").val(), 1),
+              notes: $("#notes").val() || "",
+              terms: $("#terms").val() || ""
+            };
+          }
+
+          function buildBillingPayload() {
+            return {
+              billing_address_line1: $("#billing_address_line1").val() || "",
+              billing_address_line2: $("#billing_address_line2").val() || "",
+              billing_address_city: $("#billing_address_city").val() || "",
+              billing_address_state: $("#billing_address_state").val() || "",
+              billing_address_postal_code: $("#billing_address_postal_code").val() || "",
+              billing_address_country: $("#billing_address_country").val() || ""
+            };
+          }
+
+          function buildLinesPayload() {
+  // Backend DTO expects only:
+  // product_id, description, unit, unit_price (string), quantity (string), tax_rate (string), discount_percent (int)
+  // And it does NOT accept: line_number, tax_amount, discount_amount, line_subtotal, line_total
+  return (lines || []).map((l) => ({
+    product_id: l.product_id || null,
+    description: l.description || "",
+    unit: l.unit || "",
+    unit_price: String(parseNumberSafe(l.unit_price, 0)),       // ✅ string
+    quantity: String(parseNumberSafe(l.quantity, 1)),           // ✅ string
+    tax_rate: String(clamp01(l.tax_rate)),                      // ✅ string 0..1
+    discount_percent: parseInt(String(l.discount_percent ?? 0), 10) || 0
+  }));
+}
+
+          // -------------------- Invoice creation (header-only) --------------------
+          async function createInvoiceIfNeeded() {
+            if (invoiceId || creatingInvoice) return true;
+
+            const payload = {
+              ...buildInvoiceHeaderPayload(),
+              ...buildBillingPayload(),
+              lines: []
+            };
+
+            if (!payload.company_id || !payload.currency_id) {
+              alert("Empresa e Moeda são obrigatórios.");
+              return false;
+            }
+
+            try {
+              creatingInvoice = true;
+              const created = await apiPost("/api/invoices", payload);
+              invoiceId = created?.id || created?.invoice_id || null;
+
+              $("#uiInvoiceId").text(invoiceId || "-");
+              $("#invoiceNotCreatedBanner").hide();
+
+              return !!invoiceId;
+            } catch (e) {
+              console.error(e);
+              alert(e?.message || "Falha ao criar a fatura.");
+              return false;
+            } finally {
+              creatingInvoice = false;
+            }
+          }
+
+          function setLinesEnabled(isEnabled) {
+            const area = document.getElementById("linesArea");
+            if (!area) return;
+            if (isEnabled) area.classList.remove("lines-disabled");
+            else area.classList.add("lines-disabled");
+          }
+
+          // -------------------- Lines calc --------------------
+          function recalcLine(line) {
+            const qty = parseNumberSafe(line.quantity, 1);
+            const unitPrice = parseNumberSafe(line.unit_price, 0);
+
+            const taxRate = clamp01(line.tax_rate); // 0..1
+            const discountPercent = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
+
+            const lineSubtotal = qty * unitPrice;
+            const discountAmount = lineSubtotal * (discountPercent / 100);
+            const taxableBase = Math.max(0, lineSubtotal - discountAmount);
+            const taxAmount = taxableBase * taxRate;
+            const lineTotal = taxableBase + taxAmount;
+
+            line.quantity = qty;
+            line.unit_price = unitPrice;
+            line.tax_rate = taxRate;
+            line.discount_percent = discountPercent;
+
+            line.line_subtotal = lineSubtotal;
+            line.discount_amount = discountAmount;
+            line.tax_amount = taxAmount;
+            line.line_total = lineTotal;
+
+            return line;
+          }
+
+          function computeTotals() {
+            let subtotal = 0;
+            let taxTotal = 0;
+            let discountTotal = 0;
+            let total = 0;
+
+            for (const l of (lines || [])) {
+              subtotal += parseNumberSafe(l.line_subtotal, 0);
+              taxTotal += parseNumberSafe(l.tax_amount, 0);
+              discountTotal += parseNumberSafe(l.discount_amount, 0);
+              total += parseNumberSafe(l.line_total, 0);
+            }
+
+            // Header discount% still exists; but line already has discount.
+            // To avoid double discount, totals reflect lines only (Dynamics-like).
+            $("#uiSubtotal").text(money4(subtotal));
+            $("#uiDiscount").text(money4(discountTotal));
+            $("#uiTaxTotal").text(money4(taxTotal));
+            $("#uiTotal").text(money4(total));
+          }
+
+          function renderLines() {
+            const tbody = document.getElementById("linesTbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            if (!lines || lines.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
+              computeTotals();
+              return;
+            }
+
+            lines.forEach((l, idx) => {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+          <td>${escapeHtml(String(l.line_number ?? (idx + 1)))}</td>
+          <td>${escapeHtml(l.product_name || (l.product_id ? l.product_id : "Manual"))}</td>
+          <td>${escapeHtml(l.description || "")}</td>
+          <td>${escapeHtml(l.unit || "")}</td>
+          <td class="text-right money">${money4(l.unit_price || 0)}</td>
+          <td class="text-right">${money4(l.quantity || 0)}</td>
+          <td class="text-right money">${money4(l.tax_amount || 0)}</td>
+          <td class="text-right money">${money4(l.line_total || 0)}</td>
           <td class="line-actions">
-            <button class="btn btn-xs btn-danger" data-action="remove" data-idx="${idx}">
-              <i class="fa fa-trash"></i>
+            <button type="button" class="btn btn-white btn-xs" data-act="edit" data-idx="${idx}">
+              <i class="fa fa-pencil"></i> Editar
+            </button>
+            <button type="button" class="btn btn-danger btn-xs" data-act="del" data-idx="${idx}">
+              <i class="fa fa-trash"></i> Excluir
             </button>
           </td>
         `;
-        tbody.appendChild(tr);
-      });
+              tbody.appendChild(tr);
+            });
 
-      updateTotalsUi();
-    }
+            tbody.querySelectorAll("button[data-act]").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                const act = btn.getAttribute("data-act");
+                const idx = parseInt(btn.getAttribute("data-idx"), 10);
+                if (!Number.isFinite(idx)) return;
 
-    document.getElementById("linesTbody").addEventListener("input", (e) => {
-      const el = e.target;
-      const idx = Number(el.getAttribute("data-idx"));
-      const field = el.getAttribute("data-field");
-      if (Number.isNaN(idx) || !field) return;
+                if (act === "del") {
+                  lines.splice(idx, 1);
+                  // resequence line_number
+                  lines.forEach((x, i) => x.line_number = i + 1);
+                  renderLines();
+                }
 
-      lines[idx][field] = el.value;
-      renderLines();
-    });
+                if (act === "edit") {
+                  openInvoiceLineModal({ mode: "edit", index: idx });
+                }
+              });
+            });
 
-    document.getElementById("linesTbody").addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
+            computeTotals();
+          }
 
-      const action = btn.getAttribute("data-action");
-      const idx = Number(btn.getAttribute("data-idx"));
-      if (action === "remove" && !Number.isNaN(idx)) {
-        lines.splice(idx, 1);
-        renderLines();
-      }
-    });
+          function getProductById(productId) {
+            const id = String(productId || "");
+            return productsCache.find((p) => String(p.id ?? p.product_id ?? p.productId ?? p._id ?? "") === id) || null;
+          }
 
-    document.getElementById("discount_percent").addEventListener("input", updateTotalsUi);
+          function buildProductsOptionsHtml(selectedId) {
+            const selected = String(selectedId || "");
+            const options = [`<option value="">Selecionar...</option>`];
 
-    // -------------------- Products modal --------------------
-    async function ensureProductsLoaded(search) {
-      const q = (search || "").trim();
-      const url = q ? `/api/products?q=${encodeURIComponent(q)}` : `/api/products?is_active=true`;
-      const data = await apiGet(url);
-      productsCache = Array.isArray(data) ? data : (data?.data || []);
-    }
+            for (const p of productsCache) {
+              const id = String(p.id ?? p.product_id ?? p.productId ?? p._id ?? "");
+              const name = String(p.name ?? p.product_name ?? p.productName ?? "");
+              const price = p.price ?? p.unit_price ?? 0;
 
-    function buildProductsModalHtml() {
-      const rows = (productsCache || []).map(p => `
-        <tr class="clicker" data-pid="${escapeHtml(p.id)}">
-          <td>${escapeHtml(p.product_code)}</td>
-          <td>${escapeHtml(p.name)}</td>
-          <td>${escapeHtml(p.brand || "")}</td>
-          <td>${escapeHtml(p.unit || "")}</td>
-          <td class="text-right money">${escapeHtml(String(p.default_unit_price ?? "0"))}</td>
-          <td class="text-right money">${escapeHtml(String(p.default_tax_rate ?? "0"))}</td>
-        </tr>
-      `).join("");
+              const isSel = selected && id === selected ? "selected" : "";
+              options.push(`<option value="${escapeHtml(id)}" data-price="${escapeHtml(String(price))}" ${isSel}>${escapeHtml(name)}</option>`);
+            }
 
-      return `
-        <div class="side-search">
-          <input id="productSearch" class="form-control" placeholder="Search product (code, name, brand)..." />
-          <small class="text-muted">Click a row to add the product to invoice lines.</small>
+            return options.join("");
+          }
+
+          // -------------------- Modal: Add/Edit invoice line --------------------
+          function openInvoiceLineModal({ mode, index }) {
+            const isEdit = mode === "edit";
+            const existing = isEdit ? (lines[index] || null) : null;
+
+            const nextLineNumber = isEdit
+              ? (existing?.line_number ?? (index + 1))
+              : (lines.length + 1);
+
+            const line = existing ? { ...existing } : {
+              line_number: nextLineNumber,
+              product_id: null,
+              product_name: "",
+              description: "",
+              unit: "",
+              unit_price: 0,
+              quantity: 1,
+              tax_rate: 0,
+              tax_amount: 0,
+              discount_percent: 0,
+              discount_amount: 0,
+              line_subtotal: 0,
+              line_total: 0
+            };
+
+            recalcLine(line);
+
+            const bodyHtml = `
+        <div class="row row-tight">
+          <div class="col-xs-4">
+            <div class="form-group">
+              <label>Nº linha</label>
+              <input id="il_line_number" type="number" class="form-control" value="${escapeHtml(String(line.line_number))}" readonly />
+            </div>
+          </div>
+
+          <div class="col-xs-8">
+            <div class="form-group">
+              <label>Produto</label>
+              <select id="il_product_id" class="form-control">
+                ${buildProductsOptionsHtml(line.product_id)}
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered" id="productsPickTable">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Brand</th>
-                <th>Unit</th>
-                <th style="width:140px;">Default Price</th>
-                <th style="width:120px;">Tax Rate</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
+        <div class="form-group">
+          <label>Descrição</label>
+          <input id="il_description" type="text" class="form-control" value="${escapeHtml(line.description || "")}" />
+        </div>
+
+        <div class="row row-tight">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Unidade</label>
+              <input id="il_unit" type="text" class="form-control" maxlength="50" value="${escapeHtml(line.unit || "")}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Preço unitário</label>
+              <input id="il_unit_price" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.unit_price))}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-tight">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Quantidade</label>
+              <input id="il_quantity" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.quantity))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Taxa de imposto (0..1)</label>
+              <input id="il_tax_rate" type="number" step="0.0001" min="0" max="1" class="form-control" value="${escapeHtml(String(line.tax_rate))}" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-tight">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Desconto %</label>
+              <input id="il_discount_percent" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(line.discount_percent))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Desconto (valor)</label>
+              <input id="il_discount_amount" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.discount_amount))}" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-tight">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Subtotal da linha</label>
+              <input id="il_line_subtotal" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.line_subtotal))}" readonly />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Imposto (valor)</label>
+              <input id="il_tax_amount" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.tax_amount))}" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Total da linha</label>
+          <input id="il_line_total" type="number" step="0.0001" class="form-control" value="${escapeHtml(String(line.line_total))}" readonly />
+        </div>
+
+        <div class="small-muted">
+          Os campos calculados (desconto/imposto/subtotal/total) são atualizados automaticamente.
         </div>
       `;
+
+            function syncCalculatedFields() {
+              const productId = $("#il_product_id").val() || null;
+              const product = productId ? getProductById(productId) : null;
+
+              const unitPrice = parseNumberSafe($("#il_unit_price").val(), product?.price ?? product?.unit_price ?? 0);
+              const qty = parseNumberSafe($("#il_quantity").val(), 1);
+              const taxRate = clamp01($("#il_tax_rate").val());
+              const discountPercent = Math.max(0, Math.min(100, parseNumberSafe($("#il_discount_percent").val(), 0)));
+
+              const work = {
+                ...line,
+                product_id: productId ? String(productId) : null,
+                product_name: product ? String(product.name ?? product.product_name ?? product.productName ?? "") : (productId ? String(productId) : "Manual"),
+                description: $("#il_description").val() || "",
+                unit: $("#il_unit").val() || "",
+                unit_price: unitPrice,
+                quantity: qty,
+                tax_rate: taxRate,
+                discount_percent: discountPercent
+              };
+
+              recalcLine(work);
+
+              $("#il_discount_amount").val(money4(work.discount_amount));
+              $("#il_tax_amount").val(money4(work.tax_amount));
+              $("#il_line_subtotal").val(money4(work.line_subtotal));
+              $("#il_line_total").val(money4(work.line_total));
+
+              // keep "line" updated for onOk
+              Object.assign(line, work);
+            }
+
+            openSideModal({
+              title: isEdit ? "Editar linha da fatura" : "Adicionar linha da fatura",
+              bodyHtml,
+              okText: isEdit ? "Salvar" : "Adicionar",
+              cancelText: "Cancelar",
+              onOk: async () => {
+                // Validate minimal
+                const qty = parseNumberSafe(line.quantity, 0);
+                if (qty <= 0) {
+                  alert("Quantidade deve ser maior que 0.");
+                  return;
+                }
+
+                // Insert / Update
+                if (isEdit) {
+                  lines[index] = { ...line };
+                } else {
+                  lines.push({ ...line });
+                }
+
+                // resequence line_number
+                lines.forEach((x, i) => x.line_number = i + 1);
+
+                renderLines();
+              },
+              onCancel: null
+            });
+
+            // After modal is open, attach events
+            setTimeout(() => {
+              // When select product changes, auto-fill unit_price if empty or if product chosen
+              $("#il_product_id").on("change", function () {
+                const pid = $(this).val() || null;
+                const p = pid ? getProductById(pid) : null;
+
+                if (p) {
+                  $("#il_unit_price").val(String(p.defaultUnitPrice));
+                  $("#il_tax_rate").val(String(p.defaultTaxRate));
+                  $("#il_unit").val(String(p.unit || ""));
+                  // Preenche descrição só se estiver vazia
+                  if (!String($("#il_description").val() || "").trim()) {
+                    $("#il_description").val(String(p.description || ""));
+                  }
+                }
+
+                syncCalculatedFields();
+              });
+
+
+              $("#il_description, #il_unit, #il_unit_price, #il_quantity, #il_tax_rate, #il_discount_percent")
+                .on("keyup change input", function () {
+                  syncCalculatedFields();
+                });
+
+              // Initial calc
+              syncCalculatedFields();
+            }, 50);
+          }
+
+          // -------------------- Add buttons --------------------
+          async function onAddProductClick() {
+            if (!invoiceId) {
+              $("#invoiceNotCreatedBanner").show();
+              return;
+            }
+            openInvoiceLineModal({ mode: "add" });
+          }
+
+          async function onAddManualLineClick() {
+            if (!invoiceId) {
+              $("#invoiceNotCreatedBanner").show();
+              return;
+            }
+            // Opens same modal; user can leave product empty.
+            openInvoiceLineModal({ mode: "add" });
+          }
+
+         async function saveInvoice() {
+  const ok = await createInvoiceIfNeeded();
+  if (!ok) {
+    $("#invoiceNotCreatedBanner").show();
+    setLinesEnabled(false);
+    return false;
+  }
+
+  setLinesEnabled(true);
+  $("#invoiceNotCreatedBanner").hide();
+  $("#discount_percent").removeAttr("readonly");
+
+  // ✅ Always save header
+  const headerPayload = {
+    ...buildInvoiceHeaderPayload(),
+    ...buildBillingPayload()
+  };
+
+  try {
+    // ✅ If there are no lines, save header only (Dynamics-like)
+    if (!lines || lines.length === 0) {
+      await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, headerPayload);
+      // no alert
+      return true;
     }
 
-    async function openProductsPicker() {
-      if (!invoiceId) {
-        $("#invoiceNotCreatedBanner").show();
-        return;
-      }
+    // ✅ If there are lines, save header + lines
+    const payload = {
+      ...headerPayload,
+      lines: buildLinesPayload()
+    };
 
-      await ensureProductsLoaded("");
+    await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
+    alert("Fatura salva com sucesso.");
+    return true;
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Falha ao salvar a fatura.");
+    return false;
+  }
+}
 
-      openSideModal({
-        title: "Select a product",
-        bodyHtml: buildProductsModalHtml(),
-        okText: "Close",
-        cancelText: "Close",
-        onOk: (close) => close(),
-        onCancel: (close) => close()
-      });
+          // -------------------- Events --------------------
+          $("#btnAddProduct").on("click", onAddProductClick);
+          $("#btnAddManualLine").on("click", onAddManualLineClick);
 
-      const searchInput = document.getElementById("productSearch");
-      let searchTimeout = null;
-
-      function wireProductsRowClick() {
-        const table = document.getElementById("productsPickTable");
-        if (!table) return;
-
-        table.addEventListener("click", (ev) => {
-          const tr = ev.target.closest("tr");
-          if (!tr) return;
-
-          const pid = tr.getAttribute("data-pid");
-          const product = (productsCache || []).find(p => p.id === pid);
-          if (!product) return;
-
-          lines.push({
-            product_id: product.id,
-            product: product,
-            description: product.name,
-            unit: product.unit || "",
-            unit_price: String(product.default_unit_price ?? "0"),
-            quantity: "1",
-            tax_rate: String(product.default_tax_rate ?? "0"),
-            discount_percent: 0
+          $("#btnSaveHeader").on("click", async function () {
+            const ok = await createInvoiceIfNeeded();
+            if (!ok) {
+              $("#invoiceNotCreatedBanner").show();
+              setLinesEnabled(false);
+              return;
+            }
+            setLinesEnabled(true);
+            $("#invoiceNotCreatedBanner").hide();
+            renderLines();
           });
 
-          renderLines();
-          document.getElementById("dynamicModalCloseBtn").click();
-        }, { once: true });
-      }
+          $("#btnSaveInvoice").on("click", async function () {
+            await saveInvoice();
+          });
 
-      searchInput.addEventListener("input", () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(async () => {
-          await ensureProductsLoaded(searchInput.value);
-          document.getElementById("dynamicModalBody").innerHTML = buildProductsModalHtml();
-          wireProductsRowClick();
+          // If header discount% changes, do not recalc lines; totals reflect line discounts.
+          $("#discount_percent").on("keyup change", function () {
+            computeTotals();
+          });
 
-          const si = document.getElementById("productSearch");
-          if (si) {
-            si.value = searchInput.value;
-            si.focus();
-          }
-        }, 250);
-      });
+          // -------------------- Init --------------------
+          (async function init() {
+  try {
+    await Promise.all([loadCompanies(), loadCurrencies()]);
+    await preloadProducts(); // depende do currency_id
 
-      wireProductsRowClick();
-    }
+    $("#uiInvoiceId").text("-");
+    $("#invoiceNotCreatedBanner").show();
+    setLinesEnabled(false);
+    renderLines();
+  } catch (e) {
+    console.error(e);
+    alert("Falha ao carregar Empresa/Moeda/Produtos.");
+  }
+})();
 
-    function addManualLine() {
-      if (!invoiceId) {
-        $("#invoiceNotCreatedBanner").show();
-        return;
-      }
-
-      lines.push({
-        product_id: null,
-        product: null,
-        description: "",
-        unit: "",
-        unit_price: "0",
-        quantity: "1",
-        tax_rate: "0",
-        discount_percent: 0
-      });
-      renderLines();
-    }
-
-    // -------------------- Invoice payloads --------------------
-    function buildInvoiceHeaderPayload() {
-      const company_id = $("#company_id").val();
-      const currency_id = $("#currency_id").val();
-
-      const quoteAtLocal = $("#quote_at").val();
-      return {
-        company_id: company_id || undefined,
-        currency_id: currency_id || undefined,
-        quote_at: quoteAtLocal ? new Date(quoteAtLocal).toISOString() : undefined,
-        exchange_rate: $("#exchange_rate").val() || "1",
-        version: Number($("#version").val() || 1),
-        status: Number($("#status").val() || 0),
-        discount_percent: Number($("#discount_percent").val() || 0),
-        notes: $("#notes").val() || undefined,
-        terms: $("#terms").val() || undefined,
-      };
-    }
-
-    function buildBillingPayload() {
-      return {
-        billing_address_line1: $("#billing_address_line1").val() || undefined,
-        billing_address_line2: $("#billing_address_line2").val() || undefined,
-        billing_address_city: $("#billing_address_city").val() || undefined,
-        billing_address_state: $("#billing_address_state").val() || undefined,
-        billing_address_postal_code: $("#billing_address_postal_code").val() || undefined,
-        billing_address_country: $("#billing_address_country").val() || undefined,
-      };
-    }
-
-    function buildLinesPayload() {
-      return (lines || []).map(l => ({
-        product_id: l.product_id || undefined,
-        description: l.description || undefined,
-        unit: l.unit || undefined,
-        unit_price: String(l.unit_price || "0"),
-        quantity: String(l.quantity || "1"),
-        tax_rate: String(l.tax_rate || "0"),
-        discount_percent: Number(l.discount_percent || 0)
-      }));
-    }
-
-    async function createInvoiceIfNeeded() {
-      if (invoiceId || creatingInvoice) return true;
-
-      const payload = {
-        ...buildInvoiceHeaderPayload(),
-        ...buildBillingPayload(),
-        lines: [] // create header only
-      };
-
-      if (!payload.company_id || !payload.currency_id) {
-        alert("Company e Currency são obrigatórios.");
-        return false;
-      }
-
-      try {
-        creatingInvoice = true;
-        const created = await apiPost("/api/invoices", payload);
-        invoiceId = created?.id || null;
-
-        $("#uiInvoiceId").text(invoiceId || "-");
-        $("#invoiceNotCreatedBanner").hide();
-
-        return !!invoiceId;
-      } catch (e) {
-        console.error(e);
-        alert(e?.message || "Falha ao criar invoice");
-        return false;
-      } finally {
-        creatingInvoice = false;
-      }
-    }
-
-    async function saveLinesOnFinish() {
-      if (!invoiceId) {
-        alert("Invoice não criado ainda.");
-        return false;
-      }
-
-      if (!lines || lines.length === 0) {
-        alert("Adicione pelo menos uma linha.");
-        return false;
-      }
-
-      const payload = {
-        // allow user edits from step 1 too (keeps data consistent)
-        ...buildInvoiceHeaderPayload(),
-        ...buildBillingPayload(),
-        lines: buildLinesPayload()
-      };
-
-      try {
-        await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
-        alert("Invoice atualizado com linhas com sucesso!");
-        return true;
-      } catch (e) {
-        console.error(e);
-        alert(e?.message || "Falha ao salvar linhas do invoice");
-        return false;
-      }
-    }
-
-    // -------------------- Wizard init (same pattern as NewClient) --------------------
-    const form = $("#form");
-    form.validate({
-      errorPlacement: function (error, element) { element.before(error); },
-      rules: {}
-    });
-
-    form.steps({
-      bodyTag: "fieldset",
-      onStepChanging: async function (event, currentIndex, newIndex) {
-        // allow going back
-        if (currentIndex > newIndex) return true;
-
-        // validate visible fields
-        form.validate().settings.ignore = ":disabled,:hidden";
-        if (!form.valid()) return false;
-
-        // When leaving Billing Address step -> create invoice
-        // Step indexes: 0 Invoice, 1 Billing, 2 Lines
-        if (currentIndex === 1 && newIndex === 2) {
-          const ok = await createInvoiceIfNeeded();
-          if (!ok) return false;
-
-          $("#uiInvoiceId").text(invoiceId || "-");
-          renderLines();
-          return true;
-        }
-
-        // prevent entering Lines if invoice not created
-        if (newIndex === 2 && !invoiceId) {
-          $("#invoiceNotCreatedBanner").show();
-          return false;
-        }
-
-        return true;
-      },
-      onStepChanged: function (event, currentIndex, priorIndex) {
-        // hide banner when not needed
-        if (currentIndex !== 2) {
-          $("#invoiceNotCreatedBanner").hide();
-        }
-      },
-      onFinishing: async function () {
-        form.validate().settings.ignore = ":disabled";
-        if (!form.valid()) return false;
-
-        const ok = await saveLinesOnFinish();
-        return ok;
-      },
-      onFinished: function () {
-        // For now: stay on page. Later: redirect to InvoiceDetail.
-      }
-    });
-
-    // buttons
-    $("#btnAddProduct").on("click", openProductsPicker);
-    $("#btnAddManualLine").on("click", addManualLine);
-
-    // init
-    (async function init() {
-      try {
-        await Promise.all([loadCompanies(), loadCurrencies()]);
-        $("#uiInvoiceId").text("-");
-      } catch (e) {
-        console.error(e);
-        alert("Falha ao carregar companies/currencies.");
-      }
-    })();
-  })();
-</script>
-<% %>
+        })();
+      </script>
+      <% %>
