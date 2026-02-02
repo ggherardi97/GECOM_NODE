@@ -35,15 +35,15 @@
         <div class="row">
           <div class="col-sm-3">
             <div class="input-group mb-3">
-              <input type="text" class="form-control form-control-sm" id="searchinput" placeholder="Search">
+              <input type="text" class="form-control form-control-sm" id="searchinput" placeholder="Digite o nome da empresa...">
               <div class="input-group-append">
-                <button class="btn btn-sm btn-primary" type="button">Search</button>
+                <button class="btn btn-sm btn-primary" type="button">Buscar</button>
               </div>
             </div>
           </div>
 
           <div class="col-sm-9 m-b-xs">
-            <a type="button" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;">Novo Cliente</a>
+            <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;">Novo Cliente</a>
           </div>
         </div>
 
@@ -67,12 +67,12 @@
                   <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
                 </th>
                 <th>#</th>
-                <th>Company Name</th>
-                <th>Primary Contact</th>
-                <th>Phone</th>
-                <th>Sector</th>
-                <th>Number of Invoices</th>
-                <th>Date</th>
+                <th>Nome</th>
+                <th>Contato Principal</th>
+                <th>Telefone</th>
+                <th>Setor</th>
+                <th>Numero de invoices</th>
+                <th>Data de Criação</th>
                 <th>CNPJ</th>
               </tr>
             </thead>
@@ -515,6 +515,14 @@
 
   // -------------------- Init --------------------
   $(document).ready(function () {
+    if (!window.Auth || !window.Auth.requireLogin()) return;
+
+     const canAccess = window.__auth.isAdmin;
+      if (!canAccess) {
+        window.location.href = "/Default"; // ou "/Processos"
+        return;
+      }
+
     $("#pageName").text("Clientes");
     $("#subpageName").text("Clientes");
 

@@ -45,7 +45,21 @@ router.get("/processes", async (req, res) => {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
 
-    const response = await fetch(`${baseUrl}/processes`, {
+    // Forward query params (e.g. ?company_id=...)
+    const url = new URL(`${baseUrl}/processes`);
+    const query = req.query ?? {};
+    for (const [key, value] of Object.entries(query)) {
+      if (value == null) continue;
+
+      // support arrays: ?x=a&x=b
+      if (Array.isArray(value)) {
+        value.forEach((v) => url.searchParams.append(key, String(v)));
+      } else {
+        url.searchParams.set(key, String(value));
+      }
+    }
+
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -60,6 +74,7 @@ router.get("/processes", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 /* -------------------- GET /api/processes/:id -------------------- */
 router.get("/processes/:id", async (req, res) => {

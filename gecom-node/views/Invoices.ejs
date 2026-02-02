@@ -25,7 +25,7 @@
       <div class="ibox-title">
         <h5>Invoices</h5>
         <div class="ibox-tools">
-          <a href="/NewInvoice" class="btn btn-sm btn-primary">
+          <a href="/NewInvoice" name="btn_act_new" class="btn btn-sm btn-primary">
             Novo Invoice
           </a>
         </div>
@@ -103,7 +103,7 @@
       tr.className = "clicker";
 
       tr.onclick = () => {
-        window.location = `/InvoiceDetail?id=${i.id}`;
+        window.location = `/NewInvoice?id=${i.id}`;
       };
 
       tr.innerHTML = `

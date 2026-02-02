@@ -38,6 +38,7 @@
   <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
   <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
 
+<script src="/Assets/js/authContext.js"></script>
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
     <style>
       .dynamic-modal-overlay {
@@ -172,13 +173,13 @@
           </li>
           <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
           <li><a class="menuDivider">Services</a></li>
-          <li><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
+          <li id="clientTab"  style="display: none;"><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
           <li><a href="/Processos"><i class="fa fa-file"></i> <span class="nav-label">Processos</span></a></li>
           <li><a href="/MyDocuments"><i class="fa fa-folder"></i> <span class="nav-label">Meus Documentos</span></a></li>
            <li><a class="menuDivider">Sales</a></li>
             <!-- <li class="dropdown-divider"></li> -->
           <li><a href="/Invoices"><i class="fa fa-money"></i> <span class="nav-label">Invoices</span></a></li>
-          <li><a href="/Products"><i class="fa fa-cube"></i> <span class="nav-label">Produtos</span></a></li>
+          <li id="productTab" style="display: none;"><a href="/Products"><i class="fa fa-cube"></i> <span class="nav-label">Produtos</span></a></li>
         </ul>
       </div>
     </nav>
@@ -273,6 +274,7 @@
 
   <%- typeof script !=='undefined' ? script : '' %>
     <%- typeof scripts !=='undefined' ? scripts : '' %>
+
       <script>
         async function LogOut() {
           try {
@@ -531,7 +533,7 @@
         })();
       </script>
 
-      <script src="/Assets/js/globalSpinner.js"></script>
+      <script src="../Assets/js/globalSpinner.js"></script>
       <script>
         (function () {
           try {
@@ -544,8 +546,19 @@
             const el = document.getElementById("currentUserName");
             if (el && name) el.textContent = name;
 
-            if(user.role == "ADMIN"){
-                
+            if (window.__auth.isUser) {
+
+                //Tira permissão de create
+                $('a[name="btn_act_new"]').hide();
+                $('button[name="btn_act_new"]').hide();
+                $('input[name="btn_act_new"]').hide();
+            }          
+            else if (window.__auth.isManager) {
+              
+            }          
+            else if (window.__auth.isAdmin) {
+                $("#clientTab").show();
+                $("#productTab").show();              
             }
 
           } catch (e) {

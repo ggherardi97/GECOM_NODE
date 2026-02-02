@@ -274,9 +274,10 @@
                 if (meResp.ok && me && me.id) {
                     localStorage.setItem("currentUser", JSON.stringify(me));
                     localStorage.setItem("currentUserId", String(me.id));
+                    localStorage.setItem("companyId", String(me.company_id));
                 }
 
-                window.location.href = "/clientes";
+                window.location.href = "/Default";
             }
             catch (err) {
                 showModalMessage("Login", "Ocorreu um erro inesperado. Tente novamente.");

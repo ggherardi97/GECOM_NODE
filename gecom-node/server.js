@@ -28,11 +28,16 @@ app.use(expressLayouts);
 app.set('layout', 'layout'); 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+// BigInt-safe JSON helper for EJS (views)
+app.locals.safeJson = function safeJson(value) {
+  return JSON.stringify(value, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
+};
 
 /* ---------- Middlewares ---------- */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 
 /* ---------- Static files ---------- */
 app.use(express.static(path.join(__dirname, 'public')));
@@ -48,6 +53,7 @@ app.use('/api', invoicesApiRoutes);
 app.use('/api', productsApiRoutes);
 app.use('/api', currenciesApiRoutes);
 app.use('/api', companiesApiRoutes);
+app.use("/api", require("./routes/eventsApi"));
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes')); 

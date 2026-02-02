@@ -42,7 +42,7 @@
       <div class="ibox-title">
         <h5>Processos ativos</h5>
         <div class="ibox-tools">
-          <a type="button" class="btn btn-sm btn-primary" value="Novo Cliente" href="/NovoProcesso">Novo Processo</a>
+          <a type="button" class="btn btn-sm btn-primary" name="btn_act_new" value="Novo Cliente" href="/NovoProcesso">Novo Processo</a>
         </div>
       </div>
 
@@ -247,7 +247,15 @@
 
   // -------------------- API --------------------
   async function fetchProcesses() {
-    const resp = await fetch("/api/processes", {
+    const isAdmin = !!window.__auth?.isAdmin;
+    const companyId = localStorage.getItem("companyId");// window.__auth?.companyId || window.__auth?.user?.company_id || window.__auth?.user?.companyId || null;
+
+    let url = "/api/processes";
+    if (!isAdmin && companyId) {
+      url += `?company_id=${encodeURIComponent(String(companyId))}`;
+    }
+
+    const resp = await fetch(url, {
       method: "GET",
       headers: { Accept: "application/json" },
     });
