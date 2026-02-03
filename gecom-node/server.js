@@ -12,6 +12,8 @@ const cnpjApiRoutes = require('./routes/cnpjApi');
 const invoicesApiRoutes = require('./routes/invoicesApi');
 const productsApiRoutes = require('./routes/productsApi');
 const currenciesApiRoutes = require('./routes/currenciesApi');
+const processTypesApi = require("./routes/processTypesApi");
+
 
 console.log("invoicesApiRoutes typeof:", typeof invoicesApiRoutes);
 console.log("productsApiRoutes typeof:", typeof productsApiRoutes);
@@ -53,7 +55,11 @@ app.use('/api', invoicesApiRoutes);
 app.use('/api', productsApiRoutes);
 app.use('/api', currenciesApiRoutes);
 app.use('/api', companiesApiRoutes);
+app.use("/api", processTypesApi);
 app.use("/api", require("./routes/eventsApi"));
+app.use("/api", require("./routes/transportTypesApi"));
+app.use("/api", require("./routes/transportsApi"));
+app.use("/api", require("./routes/transportStatusesApi"));
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes')); 

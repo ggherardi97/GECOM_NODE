@@ -1,469 +1,983 @@
 <style>
-    .wizard-big.wizard > .content {
-        min-height: 375px !important;
-    }
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
 
-    .form-group > label {
-        display: inline-block;
-        margin-right: 6px;
-    }
+  .wizard-big.wizard > .content {
+    min-height: 420px !important;
+  }
 
-    .form-group > label.error,
-    .field-validation-error {
-        display: inline-block;
-        margin-left: 10px;
-        font-weight: normal;
-        color: #cc5965;
-        white-space: nowrap;
-        font-size: 12px;
-    }
+  .muted {
+    color: #888;
+    font-size: 12px;
+  }
+.select2-container {
+    background-color: white;
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
+    position: relative;
+    vertical-align: middle;
+    padding: 3px;
+    border: 1px solid #c0c0c0;
+}
+  .transport-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .transport-table th, .transport-table td {
+    vertical-align: middle !important;
+  }
+
+  .btn-xs2 {
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .readonly-select2 .select2-selection {
+    background: #eee !important;
+    cursor: not-allowed !important;
+  }
+
+  .select2-selection__clear{
+    padding-right: 10px;
+  }
 </style>
 
-<div id="wrapper-clientes">
-    <div id="page-wrapper-clientes" class="gray-bg">
-        <div class="row border-bottom">
-            <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0; display: none;">
-                <div class="navbar-header">
-                    <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i></a>
-                    <form role="search" class="navbar-form-custom" action="search_results.html">
-                        <div class="form-group">
-                            <input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search">
-                        </div>
-                    </form>
-                </div>
-            </nav>
+<% contentFor('headerLink') %>
+<link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+<link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
+<link href="../Assets/inspinia/css/plugins/select2/select2.min.css" rel="stylesheet">
+<link href="../Assets/inspinia/css/plugins/select2/select2-bootstrap.min.css" rel="stylesheet">
+<link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+<% %>
+
+<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0px;">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Novo Processo</h5>
+          <div class="ibox-tools"></div>
         </div>
 
-        <div class="wrapper wrapper-content animated fadeInRight">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ibox">
-                        <div class="ibox-title">
-                            <h5>Criação de processo</h5>
-                            <div class="ibox-tools"></div>
-                        </div>
+        <div class="ibox-content">
+          <p>Preencha as informações do processo e seus transportes.</p>
 
-                        <div class="ibox-content">
-                            <p>Preencha as informações do processo.</p>
-
-                            <form id="form" action="#" class="wizard-big">
-                                <!-- STEP 1 -->
-                                <h1>Detalhes</h1>
-                                <fieldset>
-                                    <div class="row">
-                                        <div class="col-lg-9">
-                                            <div class="row">
-                                                <div class="form-group col-lg-6">
-                                                    <label>Nº do Processo *</label>
-                                                    <input id="processnumber" name="processnumber" type="text" class="form-control required">
-                                                </div>
-
-                                                <div class="form-group col-lg-6">
-                                                    <label>Cliente *</label>
-                                                    <div class="input-group m-b">
-                                                        <input id="clientName" name="client" type="text" class="form-control required" autocomplete="off" />
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="form-group col-lg-6">
-                                                    <label>Tipo de Processo *</label>
-                                                    <select class="form-control m-b required" name="processtype" required>
-                                                        <option value="">Selecionar...</option>
-                                                        <option>Exportação</option>
-                                                        <option>Importação</option>
-                                                        <option>Nacional</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="form-group col-lg-6">
-                                                    <label>Contato do Cliente *</label>
-                                                    <div class="input-group m-b">
-                                                        <input id="clientContact" name="clientContact" type="text" class="form-control required" autocomplete="off" />
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="form-group col-lg-6">
-                                                    <label>Invoice Relacionado *</label>
-                                                    <input id="invoicenumber" name="invoicenumber" placeholder="Ex: INV-029842" type="text" class="form-control required">
-                                                </div>
-
-                                                <div class="form-group col-lg-6">
-                                                    <label>Previsão de Término (Entrega) *</label>
-                                                    <div class="input-group date">
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                        <input id="deliveryForecastDate" type="text" class="form-control datepicker" value="12/01/2026" autocomplete="off">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-3">
-                                            <div class="text-center">
-                                                <div style="margin-top: 20px">
-                                                    <i class="fa fa-sign-in" style="font-size: 180px; color: #e5e5e5"></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <!-- STEP 2 -->
-                                <h1>Transporte</h1>
-                                <fieldset>
-                                    <div class="row">
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label>Companhia de transporte *</label>
-                                                <input id="transportcompany" name="transportcompany" type="text" class="form-control required" required>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Contato</label>
-                                                <!-- added class phone-mask -->
-                                                <input id="transportContactPhone" type="text" autocomplete="off" class="form-control phone-mask" placeholder="(11) 99999-9999">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Tipo de Transporte *</label>
-                                                <select class="form-control m-b required" name="transporttype" required>
-                                                    <option value="">Selecionar...</option>
-                                                    <option>Aéreo</option>
-                                                    <option>Marítimo</option>
-                                                    <option>Terrestre</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label>Origem *</label>
-                                                <input type="text" autocomplete="off" placeholder="Digite o país de origem" class="form-control autocompleteCountry" required />
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Destino *</label>
-                                                <input type="text" autocomplete="off" placeholder="Digite o país de destino" class="form-control autocompleteCountry" required />
-                                            </div>
-                                        </div>
-
-                                        <div class="hr-line-dashed"></div>
-
-                                        <div class="col-lg-12">
-                                            <div class="row">
-                                                <div class="form-group col-lg-4">
-                                                    <label>Previsão de Embarque *</label>
-                                                    <div class="input-group date">
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                        <input id="embarkForecastDate" type="text" class="form-control datepicker" value="13/06/2025" autocomplete="off">
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group col-lg-4">
-                                                    <label>Tempo de Trânsito (dias) *</label>
-                                                    <input id="transitDays" type="number" min="0" step="1" autocomplete="off" class="form-control" required />
-                                                </div>
-
-                                                <div class="form-group col-lg-4">
-                                                    <label>Previsão Desembarque *</label>
-                                                    <div class="input-group date">
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                        <!-- readonly to prevent manual change -->
-                                                        <input id="landingForecastDate" type="text" class="form-control datepicker" value="13/06/2025" autocomplete="off" readonly>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </fieldset>
-
-                                <!-- STEP 3 -->
-                                <h1>Documentos</h1>
-                                <fieldset>
-                                    <h3>Adicione documentos do processo</h3>
-                                    <div class="ibox-content">
-                                        <form action="#" class="dropzone dz-clickable" id="dropzoneForm">
-                                            <div class="dz-default dz-message">
-                                                <span>
-                                                    <strong>Drop files here or click to upload. </strong><br>
-                                                    (This is just a demo dropzone. Selected files are not actually uploaded.)
-                                                </span>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </fieldset>
-                            </form>
-
-                        </div>
+          <form id="form" action="#" class="wizard-big" onsubmit="return false;">
+            <!-- STEP 1 -->
+            <h1>Detalhes</h1>
+            <fieldset>
+              <div class="row">
+                <div class="col-lg-9">
+                  <div class="row">
+                    <div class="form-group col-lg-6">
+                      <label>Nº do Processo *</label>
+                      <input id="process_number" type="text" class="form-control required" placeholder="Ex: PROC-000123">
                     </div>
-                </div>
-            </div>
-        </div>
 
+                    <div class="form-group col-lg-6">
+                      <label>Empresa *</label>
+                      <select id="company_id" class="form-control required"></select>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="form-group col-lg-6">
+                      <label>Invoice relacionado</label>
+                      <select id="invoice" class="form-control"></select>
+                      <div class="muted" id="invoiceHelp" style="margin-top:4px; display:none;">
+                        Selecione uma empresa para listar as invoices.
+                      </div>
+                    </div>
+
+                    <div class="form-group col-lg-6">
+                      <label>Previsão de Entrega</label>
+                      <div class="input-group date">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        <input id="ship_date" type="text" class="form-control datepicker" autocomplete="off">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="form-group col-lg-6">
+                      <label>Tipo de Processo</label>
+                      <select id="process_type_id" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group col-lg-6">
+                      <label>Contato do Cliente *</label>
+                      <select id="primary_contact_id" class="form-control required"></select>
+                      <div class="muted" id="contactHelp" style="margin-top:4px; display:none;">
+                        Selecione uma empresa para listar os contatos.
+                      </div>
+                    </div>
+                  </div>
+
+                  
+                </div>
+
+                <div class="col-lg-3">
+                  <div class="text-center">
+                    <div style="margin-top: 20px">
+                      <i class="fa fa-suitcase" style="font-size: 180px; color: #e5e5e5"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- STEP 2 -->
+            <h1>Transportes</h1>
+            <fieldset>
+              <div class="transport-toolbar">
+                <div>
+                  <strong>Transportes do processo</strong>
+                  <div class="muted">Adicione um ou mais transportes relacionados a este processo.</div>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-primary btn-xs2" id="btnAddTransport">
+                    <i class="fa fa-plus"></i> Adicionar transporte
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped transport-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width:160px;">Companhia *</th>
+                      <th style="min-width:140px;">Telefone</th>
+                      <th style="min-width:160px;">Origem *</th>
+                      <th style="min-width:160px;">Destino *</th>
+                      <th style="min-width:170px;">Tipo *</th>
+                      <th style="min-width:170px;">Status *</th>
+                      <th style="min-width:150px;">Previsão Embarque</th>
+                      <th style="min-width:150px;">Previsão Chegada</th>
+                      <th style="width:70px;" class="text-center">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transportsTbody"></tbody>
+                </table>
+              </div>
+
+              <div class="alert alert-warning" id="transportWarning" style="display:none; margin-top:10px;"></div>
+            </fieldset>
+
+            <!-- STEP 3 -->
+            <h1>Documentos</h1>
+            <fieldset>
+              <h3>Upload de documentos</h3>
+              <p class="muted">Nesta etapa vamos implementar depois. Por enquanto, apenas layout.</p>
+
+              <div class="ibox-content">
+               <div class="dropzone dz-clickable" id="dropzoneForm">
+  <div class="dz-default dz-message">
+    <span>
+      <strong>Arraste arquivos aqui ou clique para enviar.</strong><br>
+      (A implementação do upload será feita depois.)
+    </span>
+  </div>
+</div>
+              </div>
+            </fieldset>
+          </form>
+
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <% contentFor('scripts') %>
 <script src="../Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
-
-<!-- Jquery Validate -->
 <script src="../Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
 <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
-
-<!-- Typeahead -->
+<script src="../Assets/inspinia/js/plugins/select2/select2.full.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/datapicker/bootstrap-datepicker.js"></script>
 <script src="../Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
-
-<!-- DROPZONE -->
 <script src="../Assets/inspinia/js/plugins/dropzone/dropzone.js"></script>
 
-<!-- Data picker -->
-<script src="../Assets/inspinia/js/plugins/datapicker/bootstrap-datepicker.js"></script>
-
 <script>
-    // ---------- Dates ----------
-    function formatDateBr(date) {
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+    
+  async function onChangeCompany() {
+    debugger;
+    const companyId = String($(this).val() || "").trim();
+
+    try {
+      await loadInvoicesByCompany(companyId);
+      await loadUsersByCompany(companyId);
+
+      // refresh select2 after options change
+      initSelect2($("#invoice"), "Selecionar...", null);
+      initSelect2($("#primary_contact_id"), "Selecionar...", null);
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Falha ao carregar dados da empresa.");
     }
+  }
+  // =========================
+  // Events
+  // =========================
 
-    function parseDateBr(value) {
-        const text = (value || "").trim();
-        const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
-        if (!match) return null;
 
-        const day = Number(match[1]);
-        const month = Number(match[2]);
-        const year = Number(match[3]);
+(function () {
+  // =========================
+  // State
+  // =========================
+  const state = {
+    processId: null,
+    creating: false,
+    companies: [],
+    invoices: [],
+    processTypes: [],
+    users: [],
+    transportTypes: [],
+    transportStatuses: [],
+    companiesById: new Map(),
+    transportSeq: 0
+  };
 
-        const date = new Date(year, month - 1, day);
-        if (date.getFullYear() !== year || date.getMonth() !== (month - 1) || date.getDate() !== day) {
-            return null;
-        }
-        return date;
-    }
+  // =========================
+  // Helpers (no dependencies)
+  // =========================
+  function escapeHtml(value) {
+    if (value == null) return "";
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-    function ensureTodayIfEmpty($input) {
-        const currentValue = ($input.val() || "").trim();
-        if (!currentValue) {
-            $input.val(formatDateBr(new Date()));
-        }
-    }
+  async function readJsonSafe(resp) {
+    const text = await resp.text().catch(() => "");
+    if (!text) return {};
+    try { return JSON.parse(text); } catch { return { message: text }; }
+  }
 
-    function initDatePickers(scope) {
-        const $scope = scope ? $(scope) : $(document);
+  async function apiGet(url) {
+    const resp = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+    const data = await readJsonSafe(resp);
+    if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+    return data;
+  }
 
-        $scope.find(".datepicker").each(function () {
-            const $input = $(this);
-
-            if ($input.data("datepicker")) {
-                return;
-            }
-
-            ensureTodayIfEmpty($input);
-
-            $input.datepicker({
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true,
-                format: "dd/mm/yyyy",
-                container: "body"
-            });
-        });
-    }
-
-    // ---------- Phone mask (wizard-safe: delegation) ----------
-    function applyBrazilPhoneMask(rawValue) {
-        const digits = String(rawValue || "").replace(/\D/g, "").slice(0, 11);
-
-        const ddd = digits.slice(0, 2);
-        const isMobile = digits.length > 10;
-
-        const part1 = isMobile ? digits.slice(2, 7) : digits.slice(2, 6);
-        const part2 = isMobile ? digits.slice(7, 11) : digits.slice(6, 10);
-
-        if (!digits) return "";
-        if (digits.length <= 2) return `(${ddd}`;
-        if (digits.length <= 6) return `(${ddd}) ${digits.slice(2)}`;
-        if (digits.length <= 10) return `(${ddd}) ${part1}-${part2}`.replace(/-$/, "");
-        return `(${ddd}) ${part1}-${part2}`;
-    }
-
-    // works even if jQuery Steps moves/recreates DOM
-    $(document).on("input", "#transportContactPhone, .phone-mask", function () {
-        this.value = applyBrazilPhoneMask(this.value);
+  async function apiPost(url, payload) {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {})
     });
+    const data = await readJsonSafe(resp);
+    if (!resp.ok) throw new Error(data?.message || "Falha ao salvar.");
+    return data;
+  }
 
-    // ---------- Auto-calc landing date (wizard-safe: delegation) ----------
-    function recalcLandingDate() {
-        const embarkValue = $("#embarkForecastDate").val();
-        const daysValue = $("#transitDays").val();
+  function parseDateBr(value) {
+    const text = (value || "").trim();
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
+    if (!match) return null;
 
-        const embarkDate = parseDateBr(embarkValue);
-        const transitDays = Number(daysValue);
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    const year = Number(match[3]);
 
-        if (!embarkDate || Number.isNaN(transitDays)) {
-            return;
-        }
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== (month - 1) || date.getDate() !== day) return null;
+    return date;
+  }
 
-        const result = new Date(embarkDate);
-        result.setDate(result.getDate() + transitDays);
+  function toIsoZFromBr(value) {
+    const d = parseDateBr(value);
+    if (!d) return null;
+    // midnight UTC to avoid timezone surprises between Windows/Docker
+    const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0));
+    return utc.toISOString();
+  }
 
-        const formatted = formatDateBr(result);
+  function applyBrazilPhoneMask(rawValue) {
+    const digits = String(rawValue || "").replace(/\D/g, "").slice(0, 11);
+    const ddd = digits.slice(0, 2);
+    const isMobile = digits.length > 10;
 
-        const $landing = $("#landingForecastDate");
-        $landing.val(formatted);
+    const part1 = isMobile ? digits.slice(2, 7) : digits.slice(2, 6);
+    const part2 = isMobile ? digits.slice(7, 11) : digits.slice(6, 10);
 
-        if ($landing.data("datepicker")) {
-            $landing.datepicker("update", formatted);
-        }
+    if (!digits) return "";
+    if (digits.length <= 2) return `(${ddd}`;
+    if (digits.length <= 6) return `(${ddd}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${ddd}) ${part1}-${part2}`.replace(/-$/, "");
+    return `(${ddd}) ${part1}-${part2}`;
+  }
+
+  document.addEventListener("input", function (ev) {
+    const target = ev.target;
+    if (!target) return;
+    if (target.classList.contains("phone-mask")) {
+      target.value = applyBrazilPhoneMask(target.value);
+    }
+  }, true);
+
+  // =========================
+  // UI init
+  // =========================
+  function initDatePickers(scope) {
+    const $scope = scope ? $(scope) : $(document);
+
+    $scope.find(".datepicker").each(function () {
+      const $input = $(this);
+      if ($input.data("datepicker")) return;
+
+      $input.datepicker({
+        todayBtn: "linked",
+        keyboardNavigation: false,
+        forceParse: false,
+        calendarWeeks: true,
+        autoclose: true,
+        format: "dd/mm/yyyy",
+        container: "body"
+      });
+
+      if (!String($input.val() || "").trim()) {
+        // default today
+        const now = new Date();
+        const dd = String(now.getDate()).padStart(2, "0");
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const yyyy = now.getFullYear();
+        $input.val(`${dd}/${mm}/${yyyy}`);
+      }
+    });
+  }
+
+function initSelect2($el, placeholder, dropdownParent) {
+  if (!$el || !$el.length) return;
+  if (!$.fn.select2) return;
+
+  // If already initialized, destroy properly
+  if ($el.hasClass("select2-hidden-accessible") || $el.data("select2")) {
+    try { $el.select2("destroy"); } catch (_) { /* ignore */ }
+  }
+
+  // Remove any leftover containers that Select2 may have left behind
+  // (important when DOM is moved by jquery.steps or disabled toggling)
+  $el.siblings(".select2").remove();
+
+  $el.select2({
+    width: "100%",
+    theme: "bootstrap",
+    placeholder: placeholder || "Selecionar...",
+    allowClear: true,
+    minimumResultsForSearch: 0,
+    language: "pt-BR",
+    dropdownParent: dropdownParent || undefined
+  });
+}
+
+
+  function setSelectDisabled(selectId, disabled) {
+    const el = document.getElementById(selectId);
+    if (!el) return;
+    el.disabled = !!disabled;
+
+    const $el = $(el);
+    const $container = $el.next(".select2");
+    if ($container && $container.length) {
+      if (disabled) $container.addClass("readonly-select2");
+      else $container.removeClass("readonly-select2");
+    }
+  }
+
+  // =========================
+  // Load lists
+  // =========================
+async function loadCompanies() {
+  const data = await apiGet("/api/companies");
+  const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
+
+  state.companies = [];
+  state.companiesById = new Map();
+
+  list.forEach(c => {
+    const id = String(c?.id || "").trim();
+    const name = String(c?.company_name || c?.name || "").trim();
+    if (!id || !name) return;
+
+    state.companies.push({ id, name });
+
+    // Keep the full payload to reuse users, primaryUser, etc.
+    state.companiesById.set(id, c);
+  });
+
+  const $ddl = $("#company_id");
+  $ddl.empty().append(`<option value="">Selecionar...</option>`);
+  state.companies.forEach(c => $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`));
+}
+
+
+  async function loadProcessTypes() {
+    // Endpoint esperado: /api/process-types
+    const data = await apiGet("/api/process-types");
+    const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.process_types ?? []);
+    state.processTypes = list
+      .map(t => ({ id: String(t?.id || "").trim(), name: String(t?.name || "").trim() }))
+      .filter(x => x.id && x.name);
+
+    const $ddl = $("#process_type_id");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+    state.processTypes.forEach(t => $ddl.append(`<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`));
+  }
+
+  async function loadInvoicesByCompany(companyId) {
+    const $ddl = $("#invoice");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+
+    if (!companyId) {
+      state.invoices = [];
+      setSelectDisabled("invoice", true);
+      document.getElementById("invoiceHelp").style.display = "block";
+      return;
     }
 
-    // days typed/changed
-    $(document).on("input change", "#transitDays", function () {
-        recalcLandingDate();
+    document.getElementById("invoiceHelp").style.display = "none";
+    setSelectDisabled("invoice", false);
+
+    const data = await apiGet(`/api/invoices?company_id=${encodeURIComponent(companyId)}`);
+    const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.invoices ?? []);
+    state.invoices = list
+      .map(i => ({
+        id: String(i?.id || "").trim(),
+        invoice_number: String(i?.invoice_number || "").trim()
+      }))
+      .filter(x => x.id && x.invoice_number);
+
+    // process.invoice no Prisma é string -> vamos salvar o invoice_number
+    state.invoices.forEach(i => {
+      $ddl.append(`<option value="${escapeHtml(i.invoice_number)}">${escapeHtml(i.invoice_number)}</option>`);
     });
+  }
 
-    // embark typed
-    $(document).on("change", "#embarkForecastDate", function () {
-        recalcLandingDate();
+  async function loadUsersByCompany(companyId) {
+    const $ddl = $("#primary_contact_id");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+
+    if (!companyId) {
+      state.users = [];
+      setSelectDisabled("primary_contact_id", true);
+      document.getElementById("contactHelp").style.display = "block";
+      return;
+    }
+
+    document.getElementById("contactHelp").style.display = "none";
+    setSelectDisabled("primary_contact_id", false);
+
+    const data = await apiGet(`/api/users?company_id=${encodeURIComponent(companyId)}`);
+    const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.users ?? []);
+    state.users = list
+      .map(u => ({
+        id: String(u?.id || "").trim(),
+        name: String(u?.full_name || u?.name || "").trim(),
+        phone: String(u?.phonenumber || "").trim()
+      }))
+      .filter(x => x.id && x.name);
+
+    state.users.forEach(u => {
+      const label = u.phone ? `${u.name} (${u.phone})` : u.name;
+      $ddl.append(`<option value="${escapeHtml(u.id)}">${escapeHtml(label)}</option>`);
     });
+  }
 
-    // embark picked via bootstrap-datepicker
-    $(document).on("changeDate", "#embarkForecastDate", function () {
-        recalcLandingDate();
+  async function loadTransportTypes() {
+    const data = await apiGet("/api/transport-types");
+    const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.transport_types ?? []);
+    state.transportTypes = list
+      .map(t => ({ id: String(t?.id || "").trim(), name: String(t?.name || "").trim() }))
+      .filter(x => x.id && x.name);
+  }
+
+  async function loadTransportStatuses() {
+    // Endpoint esperado: /api/transport-statuses (vamos ajustar backend se ainda não existir)
+    try {
+      const data = await apiGet("/api/transport-statuses");
+      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.transport_statuses ?? []);
+      state.transportStatuses = list
+        .map(s => ({ id: String(s?.id || "").trim(), name: String(s?.name || "").trim() }))
+        .filter(x => x.id && x.name);
+    } catch (e) {
+      // não quebra a página, só avisa
+      state.transportStatuses = [];
+      const warn = document.getElementById("transportWarning");
+      warn.style.display = "block";
+      warn.innerHTML = "Aviso: não foi possível carregar os status de transporte. Confirme se existe o endpoint <strong>/api/transport-statuses</strong>.";
+    }
+  }
+
+  // =========================
+  // Transports rows (multi)
+  // =========================
+  function buildTransportRow(rowId) {
+    const typeOptions = [`<option value="">Selecionar...</option>`]
+      .concat(state.transportTypes.map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`))
+      .join("");
+
+    const statusOptions = [`<option value="">Selecionar...</option>`]
+      .concat(state.transportStatuses.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`))
+      .join("");
+
+    return `
+      <tr data-row-id="${escapeHtml(rowId)}">
+        <td>
+          <input type="text" class="form-control" id="${escapeHtml(rowId)}_company" placeholder="Ex: Maersk" />
+        </td>
+        <td>
+          <input type="text" class="form-control phone-mask" id="${escapeHtml(rowId)}_phone" placeholder="(11) 99999-9999" />
+        </td>
+        <td>
+          <input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_origin" placeholder="País de origem" autocomplete="off" />
+        </td>
+        <td>
+          <input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_destination" placeholder="País de destino" autocomplete="off" />
+        </td>
+        <td>
+          <select class="form-control transport-type" id="${escapeHtml(rowId)}_type">
+            ${typeOptions}
+          </select>
+        </td>
+        <td>
+          <select class="form-control transport-status" id="${escapeHtml(rowId)}_status">
+            ${statusOptions}
+          </select>
+        </td>
+        <td>
+          <input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_departure" autocomplete="off" />
+        </td>
+        <td>
+          <input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_arrival" autocomplete="off" />
+        </td>
+        <td class="text-center">
+          <button type="button" class="btn btn-danger btn-xs2 btn-remove-transport">
+            <i class="fa fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }
+
+  function addTransportRow() {
+    const tbody = document.getElementById("transportsTbody");
+    if (!tbody) return;
+
+    const rowId = `trow_${++state.transportSeq}`;
+    tbody.insertAdjacentHTML("beforeend", buildTransportRow(rowId));
+
+    // init plugins for the new row
+    const tr = tbody.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
+    if (!tr) return;
+
+    initDatePickers(tr);
+
+    // Select2 inside wizard content (safe to use body)
+    initSelect2($(tr).find("select.transport-type"), "Selecionar...", null);
+    initSelect2($(tr).find("select.transport-status"), "Selecionar...", null);
+
+    // Country typeahead (use list from existing layout if you already have it, else fallback)
+    const countries = (window.__countriesPtBr && Array.isArray(window.__countriesPtBr))
+      ? window.__countriesPtBr
+      : [
+          "Brasil","Estados Unidos","Portugal","China","Alemanha","França","Argentina","Chile","México","Japão","Itália","Espanha","Canadá","Reino Unido"
+        ];
+
+    $(tr).find(".autocompleteCountry").typeahead({ source: countries, autoSelect: true });
+  }
+
+  document.addEventListener("click", function (ev) {
+    const btn = ev.target && ev.target.closest(".btn-remove-transport");
+    if (!btn) return;
+
+    const tr = btn.closest("tr[data-row-id]");
+    if (tr) tr.remove();
+  }, true);
+
+  function readTransportRows() {
+    const tbody = document.getElementById("transportsTbody");
+    const rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-row-id]")) : [];
+
+    return rows.map(tr => {
+      const rowId = tr.getAttribute("data-row-id");
+      const transport_company = (document.getElementById(`${rowId}_company`)?.value || "").trim();
+      const contact_phone = (document.getElementById(`${rowId}_phone`)?.value || "").trim();
+      const origin = (document.getElementById(`${rowId}_origin`)?.value || "").trim();
+      const destination = (document.getElementById(`${rowId}_destination`)?.value || "").trim();
+      const transport_type_id = String(document.getElementById(`${rowId}_type`)?.value || "").trim();
+      const transport_status_id = String(document.getElementById(`${rowId}_status`)?.value || "").trim();
+
+      const departure_forecast = toIsoZFromBr(document.getElementById(`${rowId}_departure`)?.value || "");
+      const arrival_forecast = toIsoZFromBr(document.getElementById(`${rowId}_arrival`)?.value || "");
+
+      return {
+        transport_company,
+        contact_phone: contact_phone || null,
+        origin,
+        destination,
+        transport_type_id: transport_type_id || null,
+        transport_status_id: transport_status_id || null,
+        departure_forecast: departure_forecast || null,
+        arrival_forecast: arrival_forecast || null
+      };
     });
+  }
 
-    $(document).ready(function () {
-        $("#pageName").text("Novo Processo");
-        $("#subSecoundPageName").text("Novo Processo");
-        $("#subpageName").text("Processos");
-        $("#subpageName").attr("href", "Processos");
-        $("#path").show();
+  function validateTransportRows() {
+    const rows = readTransportRows();
+    if (!rows.length) return "Adicione pelo menos 1 transporte.";
 
-        Dropzone.options.dropzoneForm = {
-            paramName: "file",
-            maxFilesize: 2,
-            dictDefaultMessage: "<strong>Drop files here or click to upload. </strong></br> (This is just a demo dropzone. Selected files are not actually uploaded.)"
-        };
+    const invalid = rows.find(r => !r.transport_company || !r.origin || !r.destination || !r.transport_type_id || !r.transport_status_id);
+    if (invalid) return "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.";
+    return null;
+  }
 
-        // Cliente autocomplete (typeahead)
-        setTimeout(function () {
-            $("#clientName").typeahead({
-                source: [
-                    "GECOM", "Convert Solution", "IncaSol", "Cardenas", "Riplast"
-                ],
-                autoSelect: true
-            });
-        }, 200);
+  // =========================
+  // Create process + transports
+  // =========================
+  function buildProcessPayload() {
+    const companyId = String($("#company_id").val() || "").trim();
+    const contactId = String($("#primary_contact_id").val() || "").trim();
 
-        // Wizard
-        $("#wizard").steps();
+    return {
+      process_number: (document.getElementById("process_number")?.value || "").trim(),
+      status: 0,
+      company_id: companyId,
+      primary_contact_id: contactId,
+      invoice: String($("#invoice").val() || "").trim() || null,
+      ship_date: toIsoZFromBr(document.getElementById("ship_date")?.value || "") || null,
+      process_type_id: String($("#process_type_id").val() || "").trim() || null
+    };
+  }
 
-        $("#form").steps({
-            bodyTag: "fieldset",
+  async function ensureProcessCreated() {
+    if (state.processId) return state.processId;
+    if (state.creating) return null;
 
-            onInit: function () {
-                initDatePickers(this);
-                recalcLandingDate(); // initial calc
-            },
+    const payload = buildProcessPayload();
 
-            onStepChanging: function (event, currentIndex, newIndex) {
-                if (currentIndex > newIndex) {
-                    return true;
-                }
+    if (!payload.process_number) throw new Error("Nº do Processo é obrigatório.");
+    if (!payload.company_id) throw new Error("Empresa é obrigatória.");
+    if (!payload.primary_contact_id) throw new Error("Contato do Cliente é obrigatório.");
 
-                const form = $(this);
+    state.creating = true;
+    try {
+      const created = await apiPost("/api/processes", payload);
+      const id = created?.id ? String(created.id) : (created?.process_id ? String(created.process_id) : null);
+      if (!id) throw new Error("Processo criado, mas não retornou ID.");
+      state.processId = id;
+      return id;
+    } finally {
+      state.creating = false;
+    }
+  }
 
-                if (currentIndex < newIndex) {
-                    $(".body:eq(" + newIndex + ") label.error", form).remove();
-                    $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
-                }
+  async function createTransportsForProcess(processId) {
+    const rows = readTransportRows();
 
-                form.validate().settings.ignore = ":disabled,:hidden";
-                return form.valid();
-            },
+    for (const t of rows) {
+      const payload = {
+        transport_company: t.transport_company,
+        origin: t.origin,
+        destination: t.destination,
+        contact_phone: t.contact_phone,
+        transport_type_id: t.transport_type_id,
+        transport_status_id: t.transport_status_id,
+        departure_forecast: t.departure_forecast,
+        arrival_forecast: t.arrival_forecast,
+        process_id: processId
+      };
 
-            onStepChanged: function (event, currentIndex) {
-                const currentBody = $(this).find(".body").eq(currentIndex);
-                initDatePickers(currentBody);
+      await apiPost("/api/transports", payload);
+    }
+  }
 
-                // Transport step (index 1)
-                if (currentIndex === 1) {
-                    $(".autocompleteCountry").typeahead({
-                        source: [
-                            "Afeganistão", "África do Sul", "Albânia", "Alemanha", "Andorra", "Angola", "Antígua e Barbuda", "Arábia Saudita",
-                            "Argélia", "Argentina", "Armênia", "Austrália", "Áustria", "Azerbaijão", "Bahamas", "Bangladesh", "Barbados",
-                            "Bahrein", "Bélgica", "Belize", "Benin", "Bielorrússia", "Bolívia", "Bósnia e Herzegovina", "Botsuana",
-                            "Brasil", "Brunei", "Bulgária", "Burkina Faso", "Burundi", "Butão", "Cabo Verde", "Camarões", "Camboja",
-                            "Canadá", "Catar", "Cazaquistão", "Chade", "Chile", "China", "Chipre", "Colômbia", "Comores", "Congo",
-                            "Coreia do Norte", "Coreia do Sul", "Costa do Marfim", "Costa Rica", "Croácia", "Cuba", "Dinamarca", "Dominica",
-                            "Egito", "El Salvador", "Emirados Árabes Unidos", "Equador", "Eritreia", "Eslováquia", "Eslovênia", "Espanha",
-                            "Estados Unidos", "Estônia", "Eswatini", "Etiópia", "Fiji", "Filipinas", "Finlândia", "França", "Gabão", "Gâmbia",
-                            "Gana", "Geórgia", "Granada", "Grécia", "Guatemala", "Guiana", "Guiana Francesa", "Guiné", "Guiné-Bissau",
-                            "Guiné Equatorial", "Haiti", "Holanda", "Honduras", "Hungria", "Iêmen", "Ilhas Marshall", "Ilhas Salomão",
-                            "Índia", "Indonésia", "Irã", "Iraque", "Irlanda", "Islândia", "Israel", "Itália", "Jamaica", "Japão", "Jordânia",
-                            "Kiribati", "Kuwait", "Laos", "Lesoto", "Letônia", "Líbano", "Libéria", "Líbia", "Liechtenstein", "Lituânia",
-                            "Luxemburgo", "Macedônia do Norte", "Madagascar", "Malásia", "Maláui", "Maldivas", "Mali", "Malta", "Marrocos",
-                            "Maurício", "Mauritânia", "México", "Micronésia", "Moçambique", "Moldávia", "Mônaco", "Mongólia", "Montenegro",
-                            "Myanmar (Birmânia)", "Namíbia", "Nauru", "Nepal", "Nicarágua", "Níger", "Nigéria", "Noruega", "Nova Zelândia",
-                            "Omã", "Palau", "Palestina", "Panamá", "Papua-Nova Guiné", "Paquistão", "Paraguai", "Peru", "Polônia",
-                            "Portugal", "Quênia", "Quirguistão", "Reino Unido", "República Centro-Africana", "República Democrática do Congo",
-                            "República Dominicana", "República Tcheca", "Romênia", "Ruanda", "Rússia", "São Cristóvão e Nevis", "São Marino",
-                            "Santa Lúcia", "São Tomé e Príncipe", "São Vicente e Granadinas", "Seicheles", "Senegal", "Serra Leoa", "Sérvia",
-                            "Singapura", "Síria", "Somália", "Sri Lanka", "Sudão", "Sudão do Sul", "Suécia", "Suíça", "Suriname", "Tailândia",
-                            "Taiwan", "Tajiquistão", "Tanzânia", "Timor-Leste", "Togo", "Tonga", "Trinidad e Tobago", "Tunísia", "Turcomenistão",
-                            "Turquia", "Tuvalu", "Ucrânia", "Uganda", "Uruguai", "Uzbequistão", "Vanuatu", "Vaticano", "Venezuela",
-                            "Vietnã", "Zâmbia", "Zimbábue"
-                        ],
-                        autoSelect: true
-                    });
+  // =========================
+  // Wizard
+  // =========================
+  function installWizard() {
+    $("#form").steps({
+      bodyTag: "fieldset",
 
-                    recalcLandingDate();
-                }
-            },
-
-            onFinishing: function () {
-                const form = $(this);
-                form.validate().settings.ignore = ":disabled";
-                return form.valid();
-            },
-
-            onFinished: function () {
-                const form = $(this);
-                form.submit();
-                window.location = "Clientes";
-            }
-
-        }).validate({
-            errorPlacement: function (error, element) {
-                const $formGroup = element.closest(".form-group");
-                error.addClass("field-validation-error");
-
-                const $label = $formGroup.children("label").first();
-                if ($label.length) {
-                    error.insertAfter($label);
-                    return;
-                }
-
-                error.insertAfter(element);
-            }
-        });
-
-        // Safety init
+      onInit: function () {
         initDatePickers(document);
-        recalcLandingDate();
+
+        initSelect2($("#company_id"), "Pesquisar empresa...", null);
+        initSelect2($("#invoice"), "Selecionar...", null);
+        initSelect2($("#process_type_id"), "Selecionar...", null);
+        initSelect2($("#primary_contact_id"), "Selecionar...", null);
+
+        // invoice/contact disabled until company chosen
+        setSelectDisabled("invoice", true);
+        setSelectDisabled("primary_contact_id", true);
+        document.getElementById("invoiceHelp").style.display = "block";
+        document.getElementById("contactHelp").style.display = "block";
+
+        // at least 1 transport row by default
+        addTransportRow();
+      },
+
+      onStepChanging: function (event, currentIndex, newIndex) {
+        if (currentIndex > newIndex) return true;
+
+        // basic jQuery validate
+        const form = $(this);
+        if (currentIndex < newIndex) {
+          $(".body:eq(" + newIndex + ") label.error", form).remove();
+          $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+        }
+
+        form.validate().settings.ignore = ":disabled,:hidden";
+        if (!form.valid()) return false;
+
+        // custom validation for transports when going to step 3
+        if (currentIndex === 1 && newIndex === 2) {
+          const msg = validateTransportRows();
+          if (msg) { alert(msg); return false; }
+        }
+
+        return true;
+      },
+
+      onStepChanged: function (event, currentIndex) {
+        const currentBody = $(this).find(".body").eq(currentIndex);
+        initDatePickers(currentBody);
+      },
+
+      onFinishing: function () {
+        const form = $(this);
+        form.validate().settings.ignore = ":disabled";
+        if (!form.valid()) return false;
+
+        const msg = validateTransportRows();
+        if (msg) { alert(msg); return false; }
+
+        return true;
+      },
+
+      onFinished: async function () {
+        try {
+          const processId = await ensureProcessCreated();
+          if (!processId) return;
+
+          await createTransportsForProcess(processId);
+
+          window.location = `ProcessDetail?id=${encodeURIComponent(processId)}`;
+        } catch (e) {
+          console.error(e);
+          alert(e?.message || "Falha ao criar processo/transportes.");
+        }
+      }
+    }).validate({
+      errorPlacement: function (error, element) {
+        error.addClass("field-validation-error");
+        const $formGroup = element.closest(".form-group");
+        const $label = $formGroup.children("label").first();
+        if ($label.length) { error.insertAfter($label); return; }
+        error.insertAfter(element);
+      }
     });
+  }
+
+  // =========================
+  // Boot
+  // =========================
+  pageLoad();
+  async function pageLoad() {
+    $("#pageName").text("Novo Processo");
+    $("#subSecoundPageName").text("Novo Processo");
+    $("#subpageName").text("Processos");
+    $("#subpageName").attr("href", "Processos");
+    $("#path").show();
+bindCompanyChangeOnce();
+bindAddTransportOnce();
+
+    // Dropzone placeholder (Step 3) - no upload yet
+    Dropzone.autoDiscover = false;
+    try {
+      new Dropzone("#dropzoneForm", {
+        url: "/api/documents", // placeholder - we won't use now
+        autoProcessQueue: false,
+        clickable: true,
+        maxFilesize: 10,
+        dictDefaultMessage: "<strong>Arraste arquivos aqui ou clique para enviar.</strong></br>(A implementação do upload será feita depois.)"
+      });
+    } catch (e) {
+      // ignore if Dropzone not loaded
+      console.warn("Dropzone not initialized.", e);
+    }
+
+    // ✅ Always init wizard, even if some endpoints fail
+    const bootWarnings = [];
+
+    try {
+      await loadCompanies(); // Required
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Falha ao carregar empresas. Não é possível continuar.");
+      return;
+    }
+
+    try { await loadProcessTypes(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os tipos de processo."); }
+    try { await loadTransportTypes(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os tipos de transporte."); }
+    try { await loadTransportStatuses(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os status de transporte."); }
+
+    // Build selects (even if some lists are empty)
+
+    const $invoice = $("#invoice");
+    $invoice.empty().append(`<option value="">Selecionar...</option>`);
+    
+
+    
+
+    const $contact = $("#primary_contact_id");
+    $contact.empty().append(`<option value="">Selecionar...</option>`);
+    
+
+    initDatePickers(document);
+
+    // invoice/contact disabled until company chosen
+    setSelectDisabled("invoice", true);
+    setSelectDisabled("primary_contact_id", true);
+    document.getElementById("invoiceHelp").style.display = "block";
+    document.getElementById("contactHelp").style.display = "block";
+
+    // Show boot warnings (but do not block wizard)
+    if (bootWarnings.length) {
+      const warn = document.getElementById("transportWarning");
+      if (warn) {
+        warn.style.display = "block";
+        warn.innerHTML = bootWarnings.map(x => `• ${escapeHtml(x)}`).join("<br>");
+      }
+    }
+
+    // ✅ Initialize wizard no matter what
+    if (!$.fn.steps) {
+      console.error("jquery.steps plugin not loaded.");
+      alert("Erro: plugin do assistente (steps) não foi carregado. Verifique os scripts da página.");
+      return;
+    }
+
+    installWizard();
+  }
+
+function bindCompanyChangeOnce() {
+  if (window.__bindCompanyChangeDone) return;
+  window.__bindCompanyChangeDone = true;
+
+  // IMPORTANT: remove any previous handlers if the script was reloaded somehow
+  $(document).off("change.gecom", "#company_id");
+
+  $(document).on("change.gecom", "#company_id", function () {
+    const companyId = String($(this).val() || "").trim();
+    console.log("[company_id change]", companyId);
+    onCompanyChanged(companyId);
+  });
+}
+let __companyChangeSeq = 0;
+let __companyChangeInFlight = false;
+
+async function onCompanyChanged(companyId) {
+  const seq = ++__companyChangeSeq;
+
+  // Optional: block parallel loads; prevents duplicate requests when Select2 fires extra events
+  if (__companyChangeInFlight) return;
+  __companyChangeInFlight = true;
+
+  try {
+    // Reset selects (prevents duplicated options even if handler fires twice)
+    resetInvoicesSelect();
+    resetContactsSelect();
+
+    // Load invoices from API
+    await loadInvoicesByCompany(companyId);
+
+    // Load users from cache (see Fix 2 below) OR from API if you keep it
+    loadUsersFromCompanyCache(companyId);
+
+    // If a newer change happened while we were loading, don't re-render old state
+    if (seq !== __companyChangeSeq) return;
+
+    // Refresh Select2 UI
+    initSelect2($("#invoice"), "Selecionar...", null);
+    initSelect2($("#primary_contact_id"), "Selecionar...", null);
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Falha ao carregar dados da empresa.");
+  } finally {
+    __companyChangeInFlight = false;
+  }
+}
+
+function resetInvoicesSelect() {
+  const $ddl = $("#invoice");
+  $ddl.empty().append(`<option value="">Selecionar...</option>`);
+  setSelectDisabled("invoice", !String($("#company_id").val() || "").trim());
+  const help = document.getElementById("invoiceHelp");
+  if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
+}
+
+function resetContactsSelect() {
+  const $ddl = $("#primary_contact_id");
+  $ddl.empty().append(`<option value="">Selecionar...</option>`);
+  setSelectDisabled("primary_contact_id", !String($("#company_id").val() || "").trim());
+  const help = document.getElementById("contactHelp");
+  if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
+}
+function loadUsersFromCompanyCache(companyId) {
+  const $ddl = $("#primary_contact_id");
+  $ddl.empty().append(`<option value="">Selecionar...</option>`);
+
+  if (!companyId) {
+    setSelectDisabled("primary_contact_id", true);
+    const help = document.getElementById("contactHelp");
+    if (help) help.style.display = "block";
+    return;
+  }
+
+  const company = state.companiesById.get(companyId);
+  const users = Array.isArray(company?.users) ? company.users : [];
+
+  // You can filter ACTIVE only if you want:
+  const filtered = users.filter(u => String(u?.status || "").toUpperCase() === "ACTIVE");
+
+  filtered.forEach(u => {
+    const id = String(u?.id || "").trim();
+    const name = String(u?.full_name || "").trim();
+    const phone = String(u?.phonenumber || "").trim();
+    if (!id || !name) return;
+
+    const label = phone ? `${name} (${phone})` : name;
+    $ddl.append(`<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`);
+  });
+
+  setSelectDisabled("primary_contact_id", false);
+  const help = document.getElementById("contactHelp");
+  if (help) help.style.display = "none";
+}
+function bindAddTransportOnce() {
+  if (window.__bindAddTransportDone) return;
+  window.__bindAddTransportDone = true;
+
+  $(document).off("click.gecom", "#btnAddTransport");
+  $(document).on("click.gecom", "#btnAddTransport", function (e) {
+    e.preventDefault();
+    addTransportRow(); // works because it's inside the same IIFE scope
+  });
+}
+
+})();
 </script>
+<% %>

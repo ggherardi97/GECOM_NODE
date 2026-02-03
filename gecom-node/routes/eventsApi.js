@@ -55,4 +55,15 @@ router.get("/events/by-client/:clientId", (req, res, next) => {
 // Use it like: GET /api/events/search?process_id=...&type=...&status=...
 router.get("/events/search", createProxyHandler({ backendPath: "/events" }));
 
+// GET /api/events/related/:table/:id -> backend GET /events?related_table=...&related_id=...
+router.get("/events/related/:table/:id", (req, res, next) => {
+  const table = encodeURIComponent(req.params.table);
+  const id = encodeURIComponent(req.params.id);
+
+  const handler = createProxyHandler({
+    backendPath: `/events?related_table=${table}&related_id=${id}`,
+  });
+
+  return handler(req, res, next);
+});
 module.exports = router;
