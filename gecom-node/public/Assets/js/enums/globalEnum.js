@@ -1,0 +1,35 @@
+window.ProcessStatusEnum = {
+  0: {
+    value: 0,
+    label: "Rascunho",
+    cssClass: "label-default",
+  },
+  1: {
+    value: 1,
+    label: "Em andamento",
+    cssClass: "label-primary",
+  },
+  2: {
+    value: 2,
+    label: "Concluído",
+    cssClass: "label-success",
+  },
+
+  // helpers
+  getLabel(value) {
+    return this[value]?.label ?? `Status ${value}`;
+  },
+
+  getCssClass(value) {
+    return this[value]?.cssClass ?? "label-default";
+  },
+
+  toSelectOptions() {
+    return Object.values(this)
+      .filter(v => typeof v === "object")
+      .map(v => ({
+        value: v.value,
+        label: v.label,
+      }));
+  },
+};

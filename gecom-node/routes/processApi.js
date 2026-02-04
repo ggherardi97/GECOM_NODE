@@ -234,4 +234,38 @@ router.delete("/processes/:id", async (req, res) => {
   }
 });
 
+/* -------------------- PATCH /api/processes/:id -------------------- */
+router.patch("/processes/:id", async (req, res) => {
+  try {
+    const { id } = req.params ?? {};
+
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({
+        message: "Validation error. Missing or invalid path parameter.",
+        missing: ["id"]
+      });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/processes/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {})
+      },
+      body: JSON.stringify(req.body ?? {})
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("PATCH /api/processes/:id error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = router;

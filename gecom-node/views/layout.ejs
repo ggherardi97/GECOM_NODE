@@ -37,6 +37,7 @@
   <script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
   <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
   <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
+  <script src="/Assets/js/enums/globalEnum.js"></script>
 
 <script src="/Assets/js/authContext.js"></script>
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
@@ -607,7 +608,7 @@
 
       const cleanup = () => {
         btnSave.onclick = null;
-        btnClose.onclick = null;
+        btnClose.onclick = (message.includes("unauthorized")) ? window.location = "/" : null;
         btnClose.style.display = "";
         btnSave.textContent = "Save";
       };
@@ -665,7 +666,6 @@
 
   })();
 </script>
-
 
 </body>
 </html>

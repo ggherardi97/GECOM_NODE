@@ -1,578 +1,1346 @@
- <style>
-     .fa {
-         margin-right: 5px;
-     }
- </style>
- 
+<style>
+    .fa {
+        margin-right: 5px;
+    }
+</style>
+
 <% contentFor('headerLink') %>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<%  %>
-   <div class="row">
-      <div class="col-lg-10">
-          <div class="wrapper wrapper-content animated fadeInUp">
-              <div class="ibox">
-                  <div class="ibox-content">
-                      <div class="row">
-                          <div class="col-lg-12">
-                              <div class="m-b-md">
-                                  <a href="#" class="btn btn-white btn-xs float-right">Edit project</a>
-                                  <h2 id="projectName"></h2>
-                              </div>
+    <% %>
 
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-lg-6">
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Status:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1"><span class="label label-primary" id="state">Active</span></dd>
-                                  </div>
-                              </dl>
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Created by:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1" id="contactName">Alex Smith</dd>
-                                  </div>
-                              </dl>
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Invoice:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1">INV-09384</dd>
-                                  </div>
-                              </dl>
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Client:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1"><a href="#" class="text-navy" id="companyName">Zender Company</a> </dd>
-                                  </div>
-                              </dl>
-                             
-                          </div>
-                          <div class="col-lg-6" id="cluster_info">
+        <div class="row">
+            <div class="col-lg-10">
+                <div class="wrapper wrapper-content animated fadeInUp">
+                    <div class="ibox">
+                        <div class="ibox-content">
 
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Data Estimada de Entrega:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1">16.08.2014 12:15:57</dd>
-                                  </div>
-                              </dl>
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Início do Processo:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="mb-1">10.07.2014 23:36:57</dd>
-                                  </div>
-                              </dl>
-                              <dl class="row mb-0">
-                                  <div class="col-sm-4 text-sm-right">
-                                      <dt>Participants:</dt>
-                                  </div>
-                                  <div class="col-sm-8 text-sm-left">
-                                      <dd class="project-people mb-1">
-                                          <a href="">
-                                              <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a3.jpg"></a>
-                                          <a href="">
-                                              <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a1.jpg"></a>
-                                          <a href="">
-                                              <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a2.jpg"></a>
-                                          <a href="">
-                                              <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a4.jpg"></a>
-                                          <a href="">
-                                              <img alt="image" class="rounded-circle" src="../Assets/inspinia/img/a5.jpg"></a>
-                                      </dd>
-                                  </div>
-                              </dl>
-                          </div>
-                      </div>
-                      <div class="row">
-                          <div class="col-lg-12">
-                              <dl class="row mb-0">
-                                  <div class="col-sm-2 text-sm-right">
-                                      <dt>Completed:</dt>
-                                  </div>
-                                  <div class="col-sm-10 text-sm-left">
-                                      <dd>
-                                          <div class="progress m-b-1">
-                                              <div style="width: 60%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
-                                          </div>
-                                          <small>Project completed in <strong>60%</strong>. Remaining close the project, sign a contract and invoice.</small>
-                                      </dd>
-                                  </div>
-                              </dl>
-                          </div>
-                      </div>
-                      <div class="row m-t-sm">
-                          <div class="col-lg-12">
-                              <div class="panel blank-panel">
-                                  <div class="panel-heading">
-                                      <div class="panel-options">
-                                          <ul class="nav nav-tabs">
-                                              <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Timeline</a></li>
-                                              <li><a class="nav-link" href="#tab-2" data-toggle="tab">Histórico do Processo</a></li>
-                                              <li><a class="nav-link" href="#tab-3" onclick="loadMapLeft()" data-toggle="tab">Rastreamento</a></li>
-                                          </ul>
-                                      </div>
-                                  </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="m-b-md">
+                                        <a name="btn_act_new" href="javascript:void(0)"
+                                            class="btn btn-white btn-xs float-right" onclick="openEditProject()">Editar
+                                            projeto</a>
+                                        <h2 id="projectName">Processo</h2>
+                                    </div>
+                                </div>
+                            </div>
 
-                                  <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Status:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1"><span class="label label-primary" id="state">-</span></dd>
+                                        </div>
+                                    </dl>
 
-                                      <div class="tab-content">
-                                          <div class="tab-pane active" id="tab-1">
-                                              <div class="col-lg-12">
-                                                  <div class="ibox ">
-                                                      <div id="ibox-content">
+                                    <dl class="row mb-0" style="display: none;">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Criado por:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1" id="contactName">-</dd>
+                                        </div>
+                                    </dl>
 
-                                                          <div id="vertical-timeline" class="vertical-container dark-timeline center-orientation">
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon navy-bg">
-                                                                      <i class="fa fa-briefcase"></i>
-                                                                  </div>
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Invoice:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1" id="invoiceNumber">-</dd>
+                                        </div>
+                                    </dl>
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Meeting</h2>
-                                                                      <p>
-                                                                          Conference on the sales results for the previous year. Monica please examine sales trends in marketing and products. Below please find the current status of the sale.
-                                                                      </p>
-                                                                      <a href="#" class="btn btn-sm btn-primary">More info</a>
-                                                                      <span class="vertical-date">Today
-                                                                          <br>
-                                                                          <small>Dec 24</small>
-                                                                      </span>
-                                                                  </div>
-                                                              </div>
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Cliente:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1">
+                                                <a href="javascript:void(0)" class="text-navy" id="companyName">-</a>
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
 
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon blue-bg">
-                                                                      <i class="fa fa-file-text"></i>
-                                                                  </div>
+                                <div class="col-lg-6" id="cluster_info">
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Data Estimada de Entrega:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1" id="shipDateText">-</dd>
+                                        </div>
+                                    </dl>
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Send documents to Mike</h2>
-                                                                      <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since.</p>
-                                                                      <a href="#" class="btn btn-sm btn-success">Download document </a>
-                                                                      <span class="vertical-date">Today
-                                                                          <br>
-                                                                          <small>Dec 24</small>
-                                                                      </span>
-                                                                  </div>
-                                                              </div>
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt>Início do Processo:</dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1" id="createdOnText">-</dd>
+                                        </div>
+                                    </dl>
 
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon lazur-bg">
-                                                                      <i class="fa fa-coffee"></i>
-                                                                  </div>
+                                    <!-- Participants REMOVIDO -->
+                                </div>
+                            </div>
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Coffee Break</h2>
-                                                                      <p>Go to shop and find some products. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's. </p>
-                                                                      <a href="#" class="btn btn-sm btn-info">Read more</a>
-                                                                      <span class="vertical-date">Yesterday
-                                                                          <br>
-                                                                          <small>Dec 23</small></span>
-                                                                  </div>
-                                                              </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-2 text-sm-right">
+                                            <dt>Concluído:</dt>
+                                        </div>
+                                        <div class="col-sm-10 text-sm-left">
+                                            <dd>
+                                                <div class="progress m-b-1">
+                                                    <div id="completedBar" style="width: 0%;"
+                                                        class="progress-bar progress-bar-striped progress-bar-animated">
+                                                    </div>
+                                                </div>
+                                                <small>
+                                                    Projeto concluído em <strong id="completedPercentText">0%</strong>.
+                                                </small>
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
 
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon yellow-bg">
-                                                                      <i class="fa fa-phone"></i>
-                                                                  </div>
+                            <div class="row m-t-sm">
+                                <div class="col-lg-12">
+                                    <div class="panel blank-panel">
+                                        <div class="panel-heading">
+                                            <div class="panel-options">
+                                                <ul class="nav nav-tabs">
+                                                    <li><a class="nav-link active" href="#tab-1"
+                                                            data-toggle="tab">Timeline</a></li>
+                                                    <li id="history_timeline" style="display: none;"><a class="nav-link"
+                                                            href="#tab-2" data-toggle="tab">Histórico do Processo</a>
+                                                    </li>
+                                                    <li><a class="nav-link" href="#tab-3"
+                                                            data-toggle="tab">Transportes</a></li>
+                                                    <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
+                                                            data-toggle="tab">Rastreamento</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Phone with Jeronimo</h2>
-                                                                      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
-                                                                      <span class="vertical-date">Yesterday
-                                                                          <br>
-                                                                          <small>Dec 23</small></span>
-                                                                  </div>
-                                                              </div>
+                                        <div class="panel-body">
+                                            <div class="tab-content">
 
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon lazur-bg">
-                                                                      <i class="fa fa-user-md"></i>
-                                                                  </div>
+                                                <!-- Timeline -->
+                                                <div class="tab-pane active" id="tab-1">
+                                                    <div class="col-lg-12">
+                                                        <div class="ibox">
+                                                            <div id="ibox-content">
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Go to the doctor dr Smith</h2>
-                                                                      <p>Find some issue and go to doctor. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s. </p>
-                                                                      <span class="vertical-date">Yesterday
-                                                                          <br>
-                                                                          <small>Dec 23</small></span>
-                                                                  </div>
-                                                              </div>
+                                                                <!-- <div class="clearfix" style="margin-bottom: 10px;">
+                              <button name="btn_act_new" class="btn btn-sm btn-primary" onclick="openAddEventModal()">
+                                Adicionar evento
+                              </button>
+                            </div> -->
 
-                                                              <div class="vertical-timeline-block">
-                                                                  <div class="vertical-timeline-icon navy-bg">
-                                                                      <i class="fa fa-comments"></i>
-                                                                  </div>
+                                                                <div id="vertical-timeline"
+                                                                    class="vertical-container dark-timeline center-orientation">
+                                                                    <div class="vertical-timeline-block">
+                                                                        <div class="vertical-timeline-icon navy-bg">
+                                                                            <i class="fa fa-briefcase"></i>
+                                                                        </div>
+                                                                        <div class="vertical-timeline-content">
+                                                                            <h2>Carregando...</h2>
+                                                                            <p>Buscando eventos do processo.</p>
+                                                                            <span
+                                                                                class="vertical-date"><small>—</small></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
-                                                                  <div class="vertical-timeline-content">
-                                                                      <h2>Chat with Monica and Sandra</h2>
-                                                                      <p>Web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like). </p>
-                                                                      <span class="vertical-date">Yesterday
-                                                                          <br>
-                                                                          <small>Dec 23</small></span>
-                                                                  </div>
-                                                              </div>
-                                                          </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                      </div>
-                                                  </div>
-                                              </div>
+                                                <!-- Histórico -->
+                                                <div class="tab-pane" id="tab-2">
+                                                    <div class="panel-body" style="padding-top:0px;">
+                                                        
+                                                        <div class="row"><div class="col-lg-8">
+                                                            
+                                                        </div>
+                                                        <div class="clearfix col-lg-4" style="margin-bottom: 10px;text-align: end;">
+                                                            <button class="btn btn-sm btn-primary" name="btn_act_new"
+                                                                onclick="openAddEventModal()">
+                                                                Adicionar evento
+                                                            </button>
+                                                        </div>
+</div>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-striped table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 120px;">Status</th>
+                                                                        <th>Título</th>
+                                                                        <th style="width: 170px;">Começo</th>
+                                                                        <th style="width: 170px;">Fim</th>
+                                                                        <th>Descrição</th>
+                                                                        <th style="width: 90px;text-align: center;">
+                                                                            Ações</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="historyLines">
+                                                                    <tr>
+                                                                        <td colspan="6">Carregando...</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                          </div>
-                                          <div class="tab-pane" id="tab-2">
-                                              <div class="row" style="padding: 0 15px;">
-                                                  <div class="col-lg-9" style="margin-left: -15px;">
-                                                      <input type="button" class="btn btn-primary" value="< Voltar" style="display: none;" id="btnVoltar" onclick="changeView(false)" />
-                                                      <div class="btn-group">
-                                                          <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
-                                                          <ul class="dropdown-menu">
-                                                              <li><a class="dropdown-item" href="#">Adicionar Evento</a></li>
-                                                              <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
-                                                              <li><a class="dropdown-item" href="#">Link do Drive</a></li>
-                                                              <li class="dropdown-divider"></li>
-                                                              <li><a class="dropdown-item" href="#">Adicionar Comentário</a></li>
-                                                          </ul>
-                                                      </div>
-                                                  </div>
-                                                  <div class="col-lg-3">
-                                                      <div class="btn-group" style="margin: 0px 0 15px -15px;float: inline-end;">
-                                                          <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
-                                                          <button class="btn btn-white active">1</button>
-                                                          <button class="btn btn-white">2</button>
-                                                          <button class="btn btn-white">3</button>
-                                                          <button class="btn btn-white">4</button>
-                                                          <button type="button" class="btn btn-white"><i class="fa fa-chevron-right"></i></button>
-                                                      </div>
-                                                  </div>
-                                              </div>
-                                              <table class="table table-striped">
-                                                  <thead>
-                                                      <tr>
-                                                          <th>Status</th>
-                                                          <th>Title</th>
-                                                          <th>Start Time</th>
-                                                          <th>End Time</th>
-                                                          <th>Comments</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Completed</span>
-                                                          </td>
-                                                          <td>Create project in webapp
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable.
-                                                              </p>
-                                                          </td>
+                                                <!-- Transportes -->
+                                                <div class="tab-pane" id="tab-3">
+                                                    <div class="panel-body" style="padding-top:0px;">
+                                                        <div class="table-responsive">
+                                                            <div class="clearfix" style="margin-bottom: 10px;float:inline-end;">
+                                                                <button class="btn btn-sm btn-primary"
+                                                                    onclick="openAddTransportModal()">
+                                                                    Adicionar transporte
+                                                                </button>
+                                                            </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Accepted</span>
-                                                          </td>
-                                                          <td>Various versions
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-                                                              </p>
-                                                          </td>
+                                                            <table class="table table-striped table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                         <th>Empresa</th>
+    <th>Tipo</th>
+    <th>Status</th>
+    <th>Origem</th>
+    <th>Destino</th>
+    <th>Previsão Saída</th>
+    <th>Previsão Chegada</th>
+                                                                        <th style="width: 90px; text-align:center;">
+                                                                            Ações</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="transportsTbody">
+                                                                    <tr>
+                                                                        <td colspan="7">Carregando...</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
-                                                          </td>
-                                                          <td>There are many variations
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which
-                                                              </p>
-                                                          </td>
+                                                <div class="tab-pane" id="tab-4">
+                                                    <div id="map" style="height: 500px;"></div>
+                                                </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Reported</span>
-                                                          </td>
-                                                          <td>Latin words
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  Latin words, combined with a handful of model sentence structures
-                                                              </p>
-                                                          </td>
+                                            </div>
+                                        </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Accepted</span>
-                                                          </td>
-                                                          <td>The generated Lorem
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
-                                                              </p>
-                                                          </td>
+                                    </div>
+                                </div>
+                            </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
-                                                          </td>
-                                                          <td>The first line
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
-                                                              </p>
-                                                          </td>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Reported</span>
-                                                          </td>
-                                                          <td>The standard chunk
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.
-                                                              </p>
-                                                          </td>
+            <!-- Lateral (mantida como está no layout original) -->
+            <div class="col-lg-2">
+                <div class="wrapper wrapper-content project-manager">
+                    <h4>Descrição do Processo</h4>
+                    <img src="../Assets/inspinia/img/zender_logo.png" class="img-fluid">
+                    <p class="small">
+                        Importação de carros antigos. Esse processo em específico se destina a trazer 2 carros antigos
+                        da china ao brasil.
+                    </p>
+                    <p class="small font-bold">
+                        <span><i class="fa fa-circle text-warning"></i>Prioridade Alta</span>
+                    </p>
+                    <br />
+                    <br />
+                    <h4>Documentos do processo</h4>
+                    <small>Clique no documento para ver detalhes</small>
+                    <br />
+                    <br />
+                    <ul class="list-unstyled project-files">
+                        <li><a href="javascript:void(0)"><i class="fa fa-file"></i>Project_document.docx</a></li>
+                        <li><a href="javascript:void(0)"><i class="fa fa-file-picture-o"></i>Logo_zender_company.jpg</a>
+                        </li>
+                        <li><a href="javascript:void(0)"><i class="fa fa-stack-exchange"></i>Email_from_Alex.mln</a>
+                        </li>
+                        <li><a href="javascript:void(0)"><i class="fa fa-file"></i>Contract_20_11_2014.docx</a></li>
+                    </ul>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Completed</span>
-                                                          </td>
-                                                          <td>Lorem Ipsum is that
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable.
-                                                              </p>
-                                                          </td>
+                    <div class="m-t-md">
+                        <input type="button" class="btn btn-xs btn-primary" value="Adicionar Documentos"
+                            onclick="openLoadFile()" />
+                        <input type="file" style="display: none;" id="fileInput" />
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                                                      </tr>
-                                                      <tr>
-                                                          <td>
-                                                              <span class="label label-primary"><i class="fa fa-check"></i>Sent</span>
-                                                          </td>
-                                                          <td>Contrary to popular
-                                                          </td>
-                                                          <td>12.07.2014 10:10:1
-                                                          </td>
-                                                          <td>14.07.2014 10:16:36
-                                                          </td>
-                                                          <td>
-                                                              <p class="small">
-                                                                  Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical
-                                                              </p>
-                                                          </td>
+        <!-- Side Modal (mesmo padrão do ClientDetails) -->
+        <div id="sideModalOverlay"
+            style="position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:2050; display:none;"></div>
+        <div id="sideModal"
+            style="position:fixed; top:0; right:0; height:100%; width:520px; max-width:92vw; background:#fff; z-index:2060; transform:translateX(100%); transition:transform .18s ease; box-shadow:-10px 0 30px rgba(0,0,0,0.2); display:flex; flex-direction:column;">
+            <div
+                style="padding:16px 18px; border-bottom:1px solid #e7eaec; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                    <h3 id="sideModalTitle" style="margin:0; font-size:16px; font-weight:700;">Modal</h3>
+                    <div id="sideModalSubtitle" style="color:#888; font-size:12px;"></div>
+                </div>
+                <button class="btn btn-white btn-sm" id="sideModalClose"><i class="fa fa-times"></i></button>
+            </div>
+            <div id="sideModalBody" style="padding:16px 18px; overflow:auto; flex:1;"></div>
+            <div
+                style="padding:12px 18px; border-top:1px solid #e7eaec; display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-white" id="sideModalCancel">Cancelar</button>
+                <button class="btn btn-primary" id="sideModalOk">Salvar</button>
+            </div>
+        </div>
 
-                                                      </tr>
+        <% contentFor('scripts') %>
+            <!-- Jvectormap (mantido do layout original) -->
+            <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
+            <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+            <% %>
 
-                                                  </tbody>
-                                              </table>
+                <script>
+                    // =========================
+                    // State
+                    // =========================
+                    let processId = null;
+                    let processRaw = null;
+                    let transportStatusesCache = null;
+const transportStatusById = new Map(); // id -> object
+const transportTypeById = new Map();
 
-                                          </div>
-                                          <div class="tab-pane" id="tab-3">
-                                              <div id="map" style="height: 500px;"></div>
-                                          </div>
-                                      </div>
+const COUNTRIES = [
+  "Brasil",
+  "Argentina",
+  "Chile",
+  "Colômbia",
+  "México",
+  "Estados Unidos",
+  "Canadá",
+  "Portugal",
+  "Espanha",
+  "França",
+  "Alemanha",
+  "Itália",
+  "Reino Unido",
+  "Holanda",
+  "Bélgica",
+  "Suíça",
+  "Suécia",
+  "Noruega",
+  "Dinamarca",
+  "Polônia",
+  "Irlanda",
+  "China",
+  "Japão",
+  "Coreia do Sul",
+  "Índia",
+  "Emirados Árabes Unidos",
+  "Arábia Saudita",
+  "Turquia",
+  "Austrália",
+  "Nova Zelândia",
+  "África do Sul"
+];
 
-                                  </div>
 
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-      <div class="col-lg-2">
-          <div class="wrapper wrapper-content project-manager">
-              <h4>Descrição do Processo</h4>
-              <img src="../Assets/inspinia/img/zender_logo.png" class="img-fluid">
-              <p class="small">
-                  Importação de carros antigos.
-              </p>
-              <p class="small font-bold">
-                  <span><i class="fa fa-circle text-warning"></i>Prioridade Alta</span>
-              </p>
-             
-              <h5>Documentos do processo</h5>
-              <ul class="list-unstyled project-files">
-                  <li><a href=""><i class="fa fa-file"></i>Project_document.docx</a></li>
-                  <li><a href=""><i class="fa fa-file-picture-o"></i>Logo_zender_company.jpg</a></li>
-                  <li><a href=""><i class="fa fa-stack-exchange"></i>Email_from_Alex.mln</a></li>
-                  <li><a href=""><i class="fa fa-file"></i>Contract_20_11_2014.docx</a></li>
-              </ul>
-              <div class="m-t-md">
-                  <input type="button" class="btn btn-xs btn-primary" value="Adicionar Documentos" onclick="openLoadFile()" />
-                  <input type="file" style="display: none;" id="fileInput" />
+function normalizeArrayResponse(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.rows)) return data.rows;
+  if (Array.isArray(data?.items)) return data.items;
+  return [];
+}
 
-              </div>
-          </div>
-      </div>
+async function preloadTransportLookups() {
+  // Already loaded? skip
+  if (transportStatusesCache?.length && transportTypesCache?.length) return;
+
+  const [statusesRes, typesRes] = await Promise.all([
+    fetch("/api/transport-statuses", { headers: { Accept: "application/json" } }),
+    fetch("/api/transport-types", { headers: { Accept: "application/json" } }),
+  ]);
+
+  const statusesJson = await statusesRes.json().catch(() => ({}));
+  const typesJson = await typesRes.json().catch(() => ({}));
+
+  transportStatusesCache = normalizeArrayResponse(statusesJson);
+  transportTypesCache = normalizeArrayResponse(typesJson);
+
+  transportStatusById.clear();
+  transportTypeById.clear();
+
+  transportStatusesCache.forEach((s) => {
+    if (s?.id) transportStatusById.set(String(s.id), s);
+  });
+
+  transportTypesCache.forEach((t) => {
+    if (t?.id) transportTypeById.set(String(t.id), t);
+  });
+}
+
+function getTransportStatusName(id) {
+  const key = String(id || "");
+  return transportStatusById.get(key)?.name || key || "-";
+}
+
+function getTransportTypeName(id) {
+  const key = String(id || "");
+  return transportTypeById.get(key)?.name || key || "-";
+}
+
+function buildCountryOptions(selectedValue) {
+  const selected = String(selectedValue || "").trim();
+  return COUNTRIES
+    .map((c) => {
+      const isSelected = selected && c === selected ? "selected" : "";
+      return `<option value="${escapeHtml(c)}" ${isSelected}>${escapeHtml(c)}</option>`;
+    })
+    .join("");
+}
+
+function applyPhoneMask($input) {
+  if (!$input || !$input.length) return;
+
+  // If jQuery Mask Plugin exists
+  if (typeof $input.mask === "function") {
+    // BR: supports 10 or 11 digits (dynamic)
+    const behavior = function (val) {
+      const digits = String(val || "").replace(/\D/g, "");
+      return digits.length > 10 ? "(00) 00000-0000" : "(00) 0000-00009";
+    };
+
+    $input.mask(behavior, {
+      onKeyPress: function (val, e, field, options) {
+        field.mask(behavior.apply({}, arguments), options);
+      }
+    });
+
+    return;
+  }
+
+  // Fallback: keep only digits and format (very simple)
+  $input.on("input", function () {
+    const digits = this.value.replace(/\D/g, "").slice(0, 11);
+    let out = digits;
+
+    if (digits.length >= 2) out = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length > 6 && digits.length <= 10) {
+      out = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    } else if (digits.length > 6) {
+      out = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    }
+
+    this.value = out;
+  });
+}
+
+                    // =========================
+                    // Init
+                    // =========================
+                    $(document).ready(function () {
+                        $("#pageName").text("Detalhes do Processo");
+                        $("#subSecoundPageName").text("Detalhes do Processo");
+                        $("#subpageName").text("Processos");
+                        $("#subpageName").attr("href", "Processos");
+                        $("#path").show();
+
+                        if (window.__auth.isAdmin) {
+                            $("#history_timeline").show();
+                        }
+
+                        try {
+                            const url = new URL(window.location.href);
+                            processId = url.searchParams.get("id");
+
+                            if (!processId) {
+                                alert("Parâmetro ausente: id");
+                                return;
+                            }
+
+                            loadProcessDetail(processId);
+                            wireSideModal();
+                        } catch (e) {
+                            console.error("Init error:", e);
+                            alert("Erro ao iniciar a página.");
+                        }
+                    });
+
+                    async function loadProcessDetail(id) {
+                        try {
+                            const result = await $.ajax({
+                                url: `/api/processes/${encodeURIComponent(id)}`,
+                                method: "GET",
+                                dataType: "json"
+                            });
+
+                            // payload já vem com: transports[] e events[]
+                            processRaw = result;
+
+                            fillHeader(processRaw);
+                            renderTimeline(processRaw?.events || []);
+                            renderHistory(processRaw?.events || []);
+                            await preloadTransportLookups();
+                            renderTransports(processRaw?.transports || []);
+                        } catch (e) {
+                            console.error("loadProcessDetail error:", e);
+                            alert("Erro ao carregar dados do processo.");
+                        }
+                    }
+
+                    let transportTypesCache = null;
+                    async function getTransportStatuses() {
+                        if (transportStatusesCache) return transportStatusesCache;
+
+                        const data = await apiGet("/api/transport-statuses");
+                        transportStatusesCache = Array.isArray(data) ? data : (data?.data ?? data?.items ?? []);
+                        return transportStatusesCache;
+                    }
+
+                    async function getTransportTypes() {
+                        if (transportTypesCache) return transportTypesCache;
+
+                        const data = await apiGet("/api/transport-types");
+                        transportTypesCache = Array.isArray(data) ? data : (data?.data ?? data?.items ?? []);
+                        return transportTypesCache;
+                    }
+
+                    async function openAddTransportModal() {
+                        if (!processId) {
+                            alert("Processo não encontrado.");
+                            return;
+                        }
+
+                        const [statuses, types] = await Promise.all([
+                            getTransportStatuses(),
+                            getTransportTypes()
+                        ]);
+
+                        const statusOptions = (statuses || []).map(s => {
+                            const id = String(s?.id ?? "");
+                            const name = String(s?.name ?? s?.status_name ?? id);
+                            return `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`;
+                        }).join("");
+
+                        const typeOptions = (types || []).map(t => {
+                            const id = String(t?.id ?? "");
+                            const name = String(t?.name ?? t?.type_name ?? id);
+                            return `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`;
+                        }).join("");
+
+                  const html = `
+  <div class="form-group">
+    <label for="txtTransportCompany">Transportadora</label>
+    <input id="txtTransportCompany" class="form-control" />
   </div>
 
-<% contentFor('scripts') %>
-    <!-- Jvectormap -->
-    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
-    <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-<%  %>
+  <div class="form-group">
+    <label for="selOrigin">Origem</label>
+    <select id="selOrigin" class="form-control">
+      <option value="">Selecione...</option>
+      ${buildCountryOptions("")}
+    </select>
+  </div>
 
-   <script>
-     $(document).ready(function () {
-         $("#pageName").text("Detalhes do Processo");
-         $("#subSecoundPageName").text("Detalhes do Processo");
-         $("#subpageName").text("Processos");
-         $("#subpageName").attr("href", "Processos");
-         $("#path").show();
+  <div class="form-group">
+    <label for="selDestination">Destino</label>
+    <select id="selDestination" class="form-control">
+      <option value="">Selecione...</option>
+      ${buildCountryOptions("")}
+    </select>
+  </div>
 
-          var project = localStorage.getItem("selectedProject");
+  <div class="form-group">
+    <label for="txtContactPhone">Telefone de contato</label>
+    <input id="txtContactPhone" class="form-control" />
+  </div>
 
-          if(project != null){
-            let projectObject = JSON.parse(project);
+  <div class="form-group">
+    <label for="selTransportType">Tipo de transporte</label>
+    <select id="selTransportType" class="form-control">
+      <option value="">Selecione...</option>
+      ${typeOptions}
+    </select>
+  </div>
 
-            $("#projectName").text("Processo " + projectObject.ProjectName);
-            $("#companyName").text(projectObject.CompanyName);
+  <div class="form-group">
+    <label for="selTransportStatus">Status do transporte</label>
+    <select id="selTransportStatus" class="form-control">
+      <option value="">Selecione...</option>
+      ${statusOptions}
+    </select>
+  </div>
 
-            $("#contactName").text(projectObject.ContactName);
-            $("#state").text(projectObject.State);
-          }else
-            alert("Erro ao carregar dados do cliente!");
-     });
-     $(document).ready(function () {
+  <div class="form-group">
+    <label for="dtDeparture">Saída prevista</label>
+    <input id="dtDeparture" type="date" class="form-control" />
+  </div>
 
-         $('#loading-example-btn').click(function () {
-             btn = $(this);
-             simpleLoad(btn, true)
-
-             // Ajax example
-             //                $.ajax().always(function () {
-             //                    simpleLoad($(this), false)
-             //                });
-
-             simpleLoad(btn, false)
-         });
-
-     });
-
-     function openLoadFile() {
-         $("#fileInput").click();
-     }
-
-     function loadMapLeft() {
-         setTimeout(function () {
-             // Inicializa o mapa centralizado e com zoom inicial
-             var map = L.map('map').setView([0, 0], 2);
-
-             // Adiciona o mapa base (OpenStreetMap)
-             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                 maxZoom: 18,
-             }).addTo(map);
-
-             // Coordenadas dos pontos
-             var points = [
-                 {
-                     coords: [38.7169, -9.1399],
-                     name: 'Lisboa, Portugal'
-                 },
-                 {
-                     coords: [-33.9249, 18.4241],
-                     name: 'Cape Town, África do Sul'
-                 },
-                 {
-                     coords: [-22.9068, -43.1729],
-                     name: 'Rio de Janeiro, Brasil'
-                 }
-             ];
-
-             // Adiciona os markers no mapa
-             points.forEach(function (point) {
-                 L.marker(point.coords)
-                     .addTo(map)
-                     .bindPopup(`<b>${point.name}</b>`)
-                     .openPopup();
-             });
-
-             // Desenha a linha conectando os pontos
-             var latlngs = points.map(p => p.coords);
-
-             var polyline = L.polyline(latlngs, {
-                 color: 'red',
-                 weight: 3
-             }).addTo(map);
-
-             // Ajusta o zoom para caber todos os pontos e linhas
-             map.fitBounds(polyline.getBounds());
-         }, 500);
-     }
+  <div class="form-group">
+    <label for="dtArrival">Chegada prevista</label>
+    <input id="dtArrival" type="date" class="form-control" />
+  </div>
+`;
 
 
-     function simpleLoad(btn, state) {
-         if (state) {
-             btn.children().addClass('fa-spin');
-             btn.contents().last().replaceWith(" Loading");
-         } else {
-             setTimeout(function () {
-                 btn.children().removeClass('fa-spin');
-                 btn.contents().last().replaceWith(" Refresh");
-             }, 2000);
-         }
-     }
- </script>
+                       SideModal.open({
+  title: "Adicionar transporte",
+  okText: "Criar",
+  html,
+  onOk: async function () {
+    const payload = {
+      process_id: String(processId),
+      transport_company: String($("#txtTransportCompany").val() || "").trim() || null,
+      origin: $("#selOrigin").val() || null,
+      destination: $("#selDestination").val() || null,
+      contact_phone: String($("#txtContactPhone").val() || "").trim() || null,
+      transport_type_id: $("#selTransportType").val() || null,
+      transport_status_id: $("#selTransportStatus").val() || null,
+      departure_forecast: $("#dtDeparture").val()
+        ? new Date($("#dtDeparture").val() + "T00:00:00.000Z").toISOString()
+        : null,
+      arrival_forecast: $("#dtArrival").val()
+        ? new Date($("#dtArrival").val() + "T00:00:00.000Z").toISOString()
+        : null
+    };
+
+    await apiPost("/api/transports", payload);
+    await loadProcessDetail(processId);
+  }
+});
+setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
+
+                    }
+
+                    window.openAddTransportModal = openAddTransportModal;
+
+
+                    async function apiDelete(url) {
+                        const r = await fetch(url, {
+                            method: "DELETE",
+                            headers: { Accept: "application/json" }
+                        });
+
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+                    async function deleteTransport(transportId) {
+                        if (!transportId) return;
+
+                        const ok = await confirm("Deseja excluir este transporte?");
+                        if (!ok) return;
+
+                        await apiDelete(`/api/transports/${encodeURIComponent(String(transportId))}`);
+                        await loadProcessDetail(processId); // recarrega (1 GET)
+                    }
+
+                    window.deleteTransport = deleteTransport;
+
+                    async function deleteEvent(eventId) {
+                        if (!eventId) return;
+
+                        const ok = await confirm("Deseja excluir este evento?");
+                        if (!ok) return;
+
+                        await apiDelete(`/api/events/${encodeURIComponent(eventId)}`);
+                        await loadProcessDetail(processId);
+                    }
+                    window.deleteEvent = deleteEvent;
+
+                    async function apiDelete(url) {
+                        const r = await fetch(url, {
+                            method: "DELETE",
+                            headers: { Accept: "application/json" }
+                        });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+
+                    // =========================
+                    // Utils
+                    // =========================
+                    function escapeHtml(value) {
+                        if (value == null) return "";
+                        return String(value)
+                            .replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/\"/g, "&quot;")
+                            .replace(/'/g, "&#039;");
+                    }
+
+                    function clampPercent(v) {
+                        const n = Number(v ?? 0);
+                        if (Number.isNaN(n)) return 0;
+                        return Math.max(0, Math.min(100, Math.round(n)));
+                    }
+
+                    // Date-only formatter (dd/mm/yyyy) SEM bug de timezone
+                    function formatDateOnlyPtBR(iso) {
+                        if (!iso) return "-";
+                        const s = String(iso);
+                        if (s.length < 10) return "-";
+                        const ymd = s.slice(0, 10); // YYYY-MM-DD
+                        const parts = ymd.split("-");
+                        if (parts.length !== 3) return "-";
+                        const yyyy = parts[0];
+                        const mm = parts[1];
+                        const dd = parts[2];
+                        return `${dd}/${mm}/${yyyy}`;
+                    }
+
+                    function formatDateTimePtBR(iso) {
+                        if (!iso) return "—";
+                        const d = new Date(iso);
+                        if (Number.isNaN(d.getTime())) return "—";
+                        return d.toLocaleString("pt-BR");
+                    }
+
+                    function toDatetimeLocalValue(value) {
+                        if (!value) return "";
+                        const d = new Date(value);
+                        if (Number.isNaN(d.getTime())) return "";
+                        const pad = (n) => String(n).padStart(2, "0");
+                        const yyyy = d.getFullYear();
+                        const MM = pad(d.getMonth() + 1);
+                        const dd = pad(d.getDate());
+                        const hh = pad(d.getHours());
+                        const mm = pad(d.getMinutes());
+                        return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
+                    }
+
+                    function toDateValue(value) {
+                        if (!value) return "";
+                        const s = String(value);
+                        return s.slice(0, 10);
+                    }
+
+                    async function apiGet(url) {
+                        const r = await fetch(url, { headers: { Accept: "application/json" } });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+
+                    async function apiPost(url, body) {
+                        const r = await fetch(url, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", Accept: "application/json" },
+                            body: JSON.stringify(body ?? {})
+                        });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+
+                    async function apiPatch(url, body) {
+                        const r = await fetch(url, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json", Accept: "application/json" },
+                            body: JSON.stringify(body ?? {})
+                        });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+
+                    // =========================
+                    // Header bind
+                    // =========================
+                    function fillHeader(p) {
+                        const number = p?.process_number || "-";
+                        $("#projectName").text(`Processo ${number}`);
+
+                        const status = p?.status;
+                        $("#state")
+                            .text(ProcessStatusEnum.getLabel(status))
+                            .removeClass()
+                            .addClass(`label ${ProcessStatusEnum.getCssClass(status)}`);
+
+                        $("#contactName").text(p?.users?.full_name || "-");
+                        $("#invoiceNumber").text(p?.invoice || "-");
+                        $("#companyName").text(p?.companies?.company_name || "-");
+
+                        // ship_date -> Data Estimada de Entrega
+                        $("#shipDateText").text(formatDateOnlyPtBR(p?.ship_date));
+                        $("#createdOnText").text(formatDateOnlyPtBR(p?.created_on));
+
+                        const completed = clampPercent(p?.completed);
+                        $("#completedBar").css("width", `${completed}%`);
+                        $("#completedPercentText").text(`${completed}%`);
+                    }
+
+                    // =========================
+                    // Events render
+                    // =========================
+                    function typeToMeta(type) {
+                        const t = Number(type ?? 0);
+                        switch (t) {
+                            case 8: return { icon: "fa fa-briefcase", btn: null, label: "Informação", color: "#1ab394 !important" };
+                            case 1: return { icon: "fa fa-file-text", btn: { text: "Download documento" }, label: "Documento", color: "#1c84c6 !important" };
+                            case 2: return { icon: "fa fa-phone", btn: null, label: "Reunião / Telefonema", color: "#f8ac59 !important" };
+                            case 3: return { icon: "fa fa-coffee", btn: null, label: "Reunião presencial / Café", color: "#23c6c8 !important" };
+                            case 4: return { icon: "fa fa-plane", btn: null, label: "Informação - Aérea", color: "#e1bb00 !important" };
+                            case 5: return { icon: "fa fa-ship", btn: null, label: "Informação - Marítimo", color: "#445fad !important" };
+                            case 6: return { icon: "fa fa-truck", btn: null, label: "Informação - terrestre", color: "#a17f72 !important" };
+                            case 7: return { icon: "fa fa-check-circle-o", btn: null, label: "Processo finalizado", color: "#dc3545 !important" };
+                            case 9: return { icon: "fa fa-envelope-o", btn: null, label: "Email", color: "#1c84c6 !important" };
+                            default: return { icon: "fa fa-info-circle", btn: null, label: "Evento" };
+                        }
+                    }
+
+                    function renderTimeline(list) {
+                        const container = document.getElementById("vertical-timeline");
+                        if (!container) return;
+
+                        container.innerHTML = "";
+
+                        const rows = Array.isArray(list) ? list : [];
+                        if (rows.length === 0) {
+                            container.innerHTML = `
+        <div class="vertical-timeline-block">
+          <div class="vertical-timeline-icon navy-bg"><i class="fa fa-briefcase"></i></div>
+          <div class="vertical-timeline-content">
+            <h2>Nenhum evento</h2>
+            <p>Não há eventos cadastrados para este processo.</p>
+            <span class="vertical-date"><small>—</small></span>
+          </div>
+        </div>`;
+                            return;
+                        }
+
+                        // newest first
+                        const sorted = [...rows].sort((a, b) => new Date(b?.start_time ?? 0) - new Date(a?.start_time ?? 0));
+
+                        sorted.forEach((ev) => {
+                            const meta = typeToMeta(ev?.type);
+                            const title = escapeHtml(ev?.title || "Evento");
+                            const desc = escapeHtml(ev?.description || "");
+                            const start = ev?.start_time ? formatDateTimePtBR(ev.start_time) : "—";
+                            const end = ev?.end_time ? formatDateTimePtBR(ev.end_time) : null;
+
+                            // Documento: mostrar botão, mas por enquanto sem upload: se não existir URL, desabilita
+                            const docUrl = ev?.document_url || ev?.file_url || ev?.url || null;
+                            let btnHtml = "";
+                            if (meta.btn) {
+                                if (docUrl) {
+                                    btnHtml = `<a href="${escapeHtml(docUrl)}" target="_blank" class="btn btn-sm btn-success">${escapeHtml(meta.btn.text)}</a>`;
+                                } else {
+                                    btnHtml = `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" onclick="alert('Documento ainda não disponível para download.')">${escapeHtml(meta.btn.text)}</a>`;
+                                }
+                            }
+
+                            const block = document.createElement("div");
+                            block.className = "vertical-timeline-block";
+                            block.innerHTML = `
+        <div class="vertical-timeline-icon navy-bg" style='background-color: ${meta.color}'>
+          <i class="${escapeHtml(meta.icon)}"></i>
+        </div>
+        <div class="vertical-timeline-content">
+          <h2>${title}</h2>
+          ${desc ? `<p>${desc}</p>` : ""}
+          ${btnHtml}
+          <span class="vertical-date">
+            ${escapeHtml(meta.label)}<br>
+            <small>${escapeHtml(start)}${end ? ` — ${escapeHtml(end)}` : ""}</small>
+          </span>
+        </div>
+      `;
+                            container.appendChild(block);
+                        });
+                    }
+                    let transportsCache = [];
+                    function renderHistory(list) {
+                        const tbody = document.getElementById("historyLines");
+                        if (!tbody) return;
+
+                        tbody.innerHTML = "";
+
+                        const rows = Array.isArray(list) ? list : [];
+                        if (rows.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="6">Nenhum evento encontrado.</td></tr>`;
+                            return;
+                        }
+
+                        // newest first
+                        const sorted = [...rows].sort((a, b) => new Date(b?.start_time ?? 0) - new Date(a?.start_time ?? 0));
+
+                        sorted.forEach((ev) => {
+                            const isActive = Number(ev?.status ?? 0) === 0;
+                            const statusText = isActive ? "Ativo" : "Concluído";
+                            const statusClass = isActive ? "label-primary" : "label-success";
+
+                            const title = escapeHtml(ev?.title || "");
+                            const start = ev?.start_time ? escapeHtml(formatDateTimePtBR(ev.start_time)) : "—";
+                            const end = ev?.end_time ? escapeHtml(formatDateTimePtBR(ev.end_time)) : "—";
+                            const desc = escapeHtml(ev?.description || "");
+                            const eventId = String(ev?.id || "");
+
+                            const tr = document.createElement("tr");
+                            tr.innerHTML = `
+        <td><span class="label ${statusClass}">${statusText}</span></td>
+        <td>${title}</td>
+        <td>${start}</td>
+        <td>${end}</td>
+        <td><p class="small">${desc}</p></td>
+        <td style='text-align: center;' >
+          <button class="btn btn-xs btn-danger"onclick="deleteEvent('${escapeHtml(eventId)}')">
+            <i class="fa fa-trash" style='    margin-right: 0px !important;'></i>
+          </button>
+        </td>
+      `;
+                            tbody.appendChild(tr);
+                        });
+
+                    }
+
+function renderTransports(list) {
+  transportsCache = Array.isArray(list) ? list : [];
+  const tbody = document.getElementById("transportsTbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const rows = Array.isArray(list) ? list : [];
+  if (rows.length === 0) {
+    // Agora são 8 colunas (incluindo Tipo)
+    tbody.innerHTML = `<tr><td colspan="8">Nenhum transporte encontrado.</td></tr>`;
+    return;
+  }
+
+  rows.forEach((t) => {
+    const statusName = getTransportStatusName(t?.transport_status_id);
+    const typeName = getTransportTypeName(t?.transport_type_id);
+
+    const tr = document.createElement("tr");
+    tr.style.cursor = "pointer";
+
+    if (window.__auth.isAdmin) {
+      tr.addEventListener("click", function () {
+        openEditTransportModal(t);
+      });
+    }
+
+    tr.innerHTML = `
+      <td>${escapeHtml(t?.transport_company || "-")}</td>
+      <td>${escapeHtml(typeName || "-")}</td>
+      <td>${escapeHtml(t?.origin || "-")}</td>
+      <td>${escapeHtml(t?.destination || "-")}</td>
+      <td>${escapeHtml(statusName || "-")}</td>
+      <td>${escapeHtml(formatDateOnlyPtBR(t?.departure_forecast))}</td>
+      <td>${escapeHtml(formatDateOnlyPtBR(t?.arrival_forecast))}</td>
+
+      <td style="text-align:center; white-space:nowrap;">
+        <button class="btn btn-xs btn-info" title="Editar"
+          onclick="event.stopPropagation(); editTransportById('${escapeHtml(String(t?.id || ""))}')">
+          <i style='margin: 0px !important;' class="fa fa-pencil"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger" title="Excluir"
+          onclick="event.stopPropagation(); deleteTransport('${escapeHtml(String(t?.id || ""))}')">
+          <i style='margin: 0px !important;' class="fa fa-trash"></i>
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+                    function editTransportById(transportId) {
+                        const t = (transportsCache || []).find(x => String(x?.id) === String(transportId));
+                        if (!t) {
+                            alert("Transporte não encontrado.");
+                            return;
+                        }
+                        openEditTransportModal(t);
+                    }
+                    window.editTransportById = editTransportById;
+
+                    async function getTransportStatuses() {
+                        if (transportStatusesCache) return transportStatusesCache;
+                        const data = await apiGet("/api/transport-statuses"); // mesmo endpoint do NovoProcesso
+                        transportStatusesCache = Array.isArray(data) ? data : (data?.data ?? data?.items ?? []);
+                        return transportStatusesCache;
+                    }
+
+async function openEditTransportModal(t) {
+  const id = String(t?.id || "");
+  if (!id) return;
+
+  // Load lookups (cached)
+  const [statuses, types] = await Promise.all([
+    getTransportStatuses(),
+    getTransportTypes()
+  ]);
+
+  const currentStatusId = String(t?.transport_status_id || "");
+  const currentTypeId = String(t?.transport_type_id || "");
+
+  const statusOptions = (statuses || [])
+    .map((s) => {
+      const sid = String(s?.id ?? "");
+      const name = String(s?.name ?? s?.status_name ?? sid);
+      const selected = sid === currentStatusId ? "selected" : "";
+      return `<option value="${escapeHtml(sid)}" ${selected}>${escapeHtml(name)}</option>`;
+    })
+    .join("");
+
+  const typeOptions = (types || [])
+    .map((x) => {
+      const tid = String(x?.id ?? "");
+      const name = String(x?.name ?? x?.type_name ?? tid);
+      const selected = tid === currentTypeId ? "selected" : "";
+      return `<option value="${escapeHtml(tid)}" ${selected}>${escapeHtml(name)}</option>`;
+    })
+    .join("");
+
+  const html = `
+    <div class="form-group">
+      <label for="txtTransportCompany">Transportadora</label>
+      <input id="txtTransportCompany" class="form-control" value="${escapeHtml(t?.transport_company || "")}" />
+    </div>
+
+    <div class="form-group">
+      <label for="selOrigin">Origem</label>
+      <select id="selOrigin" class="form-control">
+        <option value="">Selecione...</option>
+        ${buildCountryOptions(t?.origin)}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="selDestination">Destino</label>
+      <select id="selDestination" class="form-control">
+        <option value="">Selecione...</option>
+        ${buildCountryOptions(t?.destination)}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="txtContactPhone">Telefone de contato</label>
+      <input id="txtContactPhone" class="form-control" value="${escapeHtml(t?.contact_phone || "")}" />
+    </div>
+
+    <div class="form-group">
+      <label for="selTransportType">Tipo de transporte</label>
+      <select id="selTransportType" class="form-control">
+        <option value="">Selecione...</option>
+        ${typeOptions}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="selTransportStatus">Status do transporte</label>
+      <select id="selTransportStatus" class="form-control">
+        <option value="">Selecione...</option>
+        ${statusOptions}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="dtDeparture">Saída prevista</label>
+      <input id="dtDeparture" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.departure_forecast))}" />
+    </div>
+
+    <div class="form-group">
+      <label for="dtArrival">Chegada prevista</label>
+      <input id="dtArrival" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.arrival_forecast))}" />
+    </div>
+  `;
+
+  SideModal.open({
+    title: "Editar transporte",
+    html,
+    onOk: async function () {
+      const payload = {
+        transport_company: String($("#txtTransportCompany").val() || "").trim() || null,
+        origin: $("#selOrigin").val() || null,
+        destination: $("#selDestination").val() || null,
+        contact_phone: String($("#txtContactPhone").val() || "").trim() || null,
+        transport_type_id: $("#selTransportType").val() || null,
+        transport_status_id: $("#selTransportStatus").val() || null,
+        departure_forecast: $("#dtDeparture").val()
+          ? new Date($("#dtDeparture").val() + "T00:00:00.000Z").toISOString()
+          : null,
+        arrival_forecast: $("#dtArrival").val()
+          ? new Date($("#dtArrival").val() + "T00:00:00.000Z").toISOString()
+          : null
+      };
+
+      await apiPatch(`/api/transports/${encodeURIComponent(id)}`, payload);
+      await loadProcessDetail(processId); // 1 GET refresh
+    }
+  });
+
+  // Apply phone mask after modal renders
+  setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
+}
+
+                    // =========================
+                    // Side modal: Edit process (PATCH)
+                    // =========================
+                    function openEditProject() {
+                        if (!processRaw) return;
+
+                        const completed = clampPercent(processRaw?.completed);
+                        const shipLocal = toDatetimeLocalValue(processRaw?.ship_date); // ✅ preenche com a data atual
+                        const status = Number(processRaw?.status ?? 0);
+
+                        const html = `
+      <div class="form-group">
+        <label for="txtCompleted">Concluído (0 a 100)</label>
+        <input id="txtCompleted" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(completed))}" />
+      </div>
+
+      <div class="form-group">
+        <label for="dtShip">Data estimada de entrega</label>
+        <input id="dtShip" type="datetime-local" class="form-control" value="${escapeHtml(shipLocal)}" />
+      </div>
+
+      <div class="form-group">
+        <label for="selStatus">Status</label>
+        <select id="selStatus" class="form-control">
+          <option value="0" ${status === 0 ? "selected" : ""}>Rascunho</option>
+          <option value="1" ${status === 1 ? "selected" : ""}>Em andamento</option>
+          <option value="2" ${status === 2 ? "selected" : ""}>Finalizado</option>
+        </select>
+      </div>
+    `;
+
+                        SideModal.open({
+                            title: "Editar projeto",
+                            html,
+                            onOk: async function () {
+                                const payload = {
+                                    completed: clampPercent($("#txtCompleted").val()),
+                                    status: Number($("#selStatus").val()),
+                                    ship_date: $("#dtShip").val() ? new Date($("#dtShip").val()).toISOString() : null
+                                };
+
+                                await apiPatch(`/api/processes/${encodeURIComponent(processId)}`, payload);
+                                await loadProcessDetail(processId); // 1 GET
+                            }
+                        });
+                    }
+                    window.openEditProject = openEditProject;
+
+                    // =========================
+                    // Side modal: Add event (POST)
+                    // =========================
+                    function openAddEventModal() {
+                        const html = `
+      <div class="form-group">
+        <label for="selEventType">Tipo</label>
+        <select id="selEventType" class="form-control">
+          <option value="1">1 - Documento</option>
+          <option value="2">2 - Reunião / Telefonema</option>
+          <option value="3">3 - Reunião presencial / Café</option>
+          <option value="4">4 - Info Aéreo</option>
+          <option value="5">5 - Info Marítimo</option>
+          <option value="6">6 - Info terrestre</option>
+          <option value="7">7 - Processo finalizado</option>
+          <option value="8">8 - Informação (Genérica)</option>
+          <option value="9">9 - Email</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="txtEventTitle">Título</label>
+        <input id="txtEventTitle" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="txtEventDescription">Descrição</label>
+        <textarea id="txtEventDescription" class="form-control" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="dtStart">Início</label>
+        <input id="dtStart" type="datetime-local" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="dtEnd">Fim</label>
+        <input id="dtEnd" type="datetime-local" class="form-control" />
+      </div>
+    `;
+
+                        SideModal.open({
+                            title: "Adicionar evento",
+                            okText: "Criar",
+                            html,
+                            onOk: async function () {
+                                const payload = {
+                                    related_table: "process",
+                                    related_id: String(processId),
+                                    type: Number($("#selEventType").val()),
+                                    title: String($("#txtEventTitle").val() || "").trim() || "(Sem título)",
+                                    description: String($("#txtEventDescription").val() || "").trim() || null,
+                                    start_time: $("#dtStart").val() ? new Date($("#dtStart").val()).toISOString() : new Date().toISOString(),
+                                    end_time: $("#dtEnd").val() ? new Date($("#dtEnd").val()).toISOString() : null
+                                };
+
+                                await apiPost("/api/events", payload);
+                                await loadProcessDetail(processId); // 1 GET
+                            }
+                        });
+                    }
+                    window.openAddEventModal = openAddEventModal;
+
+                    // =========================
+                    // SideModal helper
+                    // =========================
+                    const SideModal = (function () {
+                        const $overlay = $("#sideModalOverlay");
+                        const $modal = $("#sideModal");
+                        const $title = $("#sideModalTitle");
+                        const $subtitle = $("#sideModalSubtitle");
+                        const $body = $("#sideModalBody");
+                        const $btnOk = $("#sideModalOk");
+                        const $btnCancel = $("#sideModalCancel");
+                        const $btnClose = $("#sideModalClose");
+
+                        function close() {
+                            $modal.css("transform", "translateX(100%)");
+                            $overlay.hide();
+                            $body.html("");
+                            $title.text("Modal");
+                            $subtitle.text("");
+                            $btnOk.prop("disabled", false);
+                            $btnOk.off("click");
+                            $btnCancel.off("click");
+                            $btnClose.off("click");
+                            $overlay.off("click");
+                        }
+
+                        function open(opts) {
+                            const title = opts?.title ?? "Modal";
+                            const subtitle = opts?.subtitle ?? "";
+                            const html = opts?.html ?? "";
+                            const okText = opts?.okText ?? "Salvar";
+                            const cancelText = opts?.cancelText ?? "Cancelar";
+                            const onOk = opts?.onOk;
+
+                            $title.text(title);
+                            $subtitle.text(subtitle);
+                            $body.html(html);
+                            $btnOk.text(okText);
+                            $btnCancel.text(cancelText);
+
+                            $overlay.show();
+                            $modal.css("transform", "translateX(0)");
+
+                            $btnClose.on("click", function () { close(); });
+                            $btnCancel.on("click", function () { close(); });
+                            $overlay.on("click", function () { close(); });
+
+                            $btnOk.on("click", async function () {
+                                if (typeof onOk !== "function") { close(); return; }
+                                try {
+                                    $btnOk.prop("disabled", true);
+                                    await onOk();
+                                    close();
+                                } catch (e) {
+                                    console.error("SideModal onOk error:", e);
+                                    $btnOk.prop("disabled", false);
+                                    alert(e?.message || "Erro ao salvar.");
+                                }
+                            });
+                        }
+
+                        return { open, close };
+                    })();
+
+                    function wireSideModal() {
+                        // already wired via SideModal.open
+                    }
+
+
+                    // docs upload placeholder
+                    function openLoadFile() {
+                        alert("Upload de documentos será implementado depois.");
+                    }
+                    window.openLoadFile = openLoadFile;
+
+                </script>
+
+                <script>
+                    function loadMapLeft() {
+                        setTimeout(function () {
+                            // Inicializa o mapa centralizado e com zoom inicial
+                            var map = L.map('map').setView([0, 0], 2);
+
+                            // Adiciona o mapa base (OpenStreetMap)
+                            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                maxZoom: 18,
+                            }).addTo(map);
+
+                            // Coordenadas dos pontos
+                            var points = [
+                                {
+                                    coords: [38.7169, -9.1399],
+                                    name: 'Lisboa, Portugal'
+                                },
+                                {
+                                    coords: [-33.9249, 18.4241],
+                                    name: 'Cape Town, África do Sul'
+                                },
+                                {
+                                    coords: [-22.9068, -43.1729],
+                                    name: 'Rio de Janeiro, Brasil'
+                                }
+                            ];
+
+                            // Adiciona os markers no mapa
+                            points.forEach(function (point) {
+                                L.marker(point.coords)
+                                    .addTo(map)
+                                    .bindPopup(`<b>${point.name}</b>`)
+                                    .openPopup();
+                            });
+
+                            // Desenha a linha conectando os pontos
+                            var latlngs = points.map(p => p.coords);
+
+                            var polyline = L.polyline(latlngs, {
+                                color: 'red',
+                                weight: 3
+                            }).addTo(map);
+
+                            // Ajusta o zoom para caber todos os pontos e linhas
+                            map.fitBounds(polyline.getBounds());
+                        }, 500);
+                    }
+                </script>
