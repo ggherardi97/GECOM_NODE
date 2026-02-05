@@ -1,137 +1,197 @@
 ﻿// /Assets/js/functionalities/dynamicsModal.js
-// Global object to control the side modal
+// Global object to control the side modal (layout modal)
 
 (function (global, $) {
-    'use strict';
+  "use strict";
 
-    let onOkCallback = null;
-    let onCancelCallback = null;
+  let currentOptions = null;
 
-    // Cached DOM elements (will be set on init)
-    let $overlay;
-    let $modal;
-    let $title;
-    let $body;
-    let $btnOk;
-    let $btnCancel;
-    let $btnClose;
+  // Cached DOM elements (will be set on init)
+  let $overlay;
+  let $modal;
+  let $title;
+  let $body;
+  let $btnOk;
+  let $btnCancel;
+  let $btnClose;
 
-    function cacheElements() {
-        // Cache elements once DOM is ready
-        $overlay = $('#dynamicModalOverlay');
-        $modal = $('#dynamicModal');
-        $title = $('#dynamicModalTitle');
-        $body = $('#dynamicModalBody');
-        $btnOk = $('#dynamicModalOkBtn');
-        $btnCancel = $('#dynamicModalCancelBtn');
-        $btnClose = $('#dynamicModalCloseBtn');
+  function cacheElements() {
+    $overlay = $("#dynamicModalOverlay");
+    $modal = $("#dynamicModal");
+    $title = $("#dynamicModalTitle");
+    $body = $("#dynamicModalBody");
+    $btnOk = $("#dynamicModalOkBtn");
+    $btnCancel = $("#dynamicModalCancelBtn");
+    $btnClose = $("#dynamicModalCloseBtn");
+  }
+
+  function ensureReady() {
+    if (!$modal || !$modal.length) cacheElements();
+    return !!($modal && $modal.length);
+  }
+
+  async function safeCall(fn, ctx) {
+    if (typeof fn !== "function") return undefined;
+    return await fn(ctx);
+  }
+
+  function buildCtx() {
+    return {
+      overlay: $overlay,
+      modal: $modal,
+      root: $body, // IMPORTANT: scope for selectors
+    };
+  }
+
+  function close() {
+    if (!ensureReady()) return;
+
+    $overlay.hide();
+    $modal.hide();
+    $body.empty();
+    $title.empty();
+
+    currentOptions = null;
+
+    // Restore default labels (optional)
+    $btnOk.text("OK");
+    $btnCancel.text("Cancelar");
+    $btnCancel.show();
+    $btnOk.prop("disabled", false);
+  }
+
+  function wireEvents() {
+    cacheElements();
+
+    if (!$modal.length) {
+      console.warn("SideModal: modal elements not found in DOM.");
+      return;
     }
 
-    function wireEvents() {
-        cacheElements();
+    // OK button (supports async + keepOpen)
+    $btnOk.off("click.__sideModal").on("click.__sideModal", async function (ev) {
+      if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+      if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
 
-        if (!$modal.length) {
-            // Modal not present in DOM
-            console.warn('SideModal: modal elements not found in DOM.');
-            return;
-        }
+      if (!currentOptions) {
+        close();
+        return;
+      }
 
-        // OK button
-        $btnOk.on('click', function () {
-            if (typeof onOkCallback === 'function') {
-                onOkCallback();
-            }
-            close();
-        });
+      const ctx = buildCtx();
 
-        // Cancel button
-        $btnCancel.on('click', function () {
-            if (typeof onCancelCallback === 'function') {
-                onCancelCallback();
-            }
-            close();
-        });
+      try {
+        $btnOk.prop("disabled", true);
 
-        // Close (X) button
-        $btnClose.on('click', function () {
-            if (typeof onCancelCallback === 'function') {
-                onCancelCallback();
-            }
-            close();
-        });
+        // If onOk returns true => keep open
+        const keepOpen = await safeCall(currentOptions.onOk, ctx);
 
-        // Click on overlay closes as cancel
-        $overlay.on('click', function () {
-            if (typeof onCancelCallback === 'function') {
-                onCancelCallback();
-            }
-            close();
-        });
-
-        // Prevent scroll propagation
-        $modal.on('click', function (event) {
-            event.stopPropagation();
-        });
-    }
-
-    // Initialize once DOM is ready
-    $(function () {
-        wireEvents();
-        console.log('SideModal initialized');
+        if (!keepOpen) close();
+      } catch (err) {
+        // Do not close on error
+        console.error(err);
+        global.alert(err?.message || "Erro ao executar ação do modal.");
+      } finally {
+        $btnOk.prop("disabled", false);
+      }
     });
 
-    /**
-     * Open side modal
-     * @param {Object} options
-     * @param {string} options.title - Modal title
-     * @param {string} options.html - Inner HTML for the body
-     * @param {Function} [options.onOk] - Callback for OK
-     * @param {Function} [options.onCancel] - Callback for Cancel/Close
-     * @param {boolean} [options.showCancel=true] - Show or hide cancel button
-     */
-    function open(options) {
-        const opts = options || {};
-        onOkCallback = opts.onOk || null;
-        onCancelCallback = opts.onCancel || null;
+    // Cancel button
+    $btnCancel.off("click.__sideModal").on("click.__sideModal", async function (ev) {
+      if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+      if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
 
-        if (!$modal || !$modal.length) {
-            cacheElements();
-        }
+      const opts = currentOptions;
+      const ctx = buildCtx();
 
-        $title.text(opts.title || '');
-        $body.html(opts.html || '');
+      try {
+        await safeCall(opts?.onCancel, ctx);
+      } finally {
+        close();
+      }
+    });
 
-        // Show / hide cancel button
-        if (opts.showCancel === false) {
-            $btnCancel.hide();
-        } else {
-            $btnCancel.show();
-        }
+    // Close (X) button
+    $btnClose.off("click.__sideModal").on("click.__sideModal", async function () {
+      const opts = currentOptions;
+      const ctx = buildCtx();
 
-        $overlay.show();
-        $modal.show();
+      try {
+        await safeCall(opts?.onCancel, ctx);
+      } finally {
+        close();
+      }
+    });
+
+    // Click overlay closes as cancel
+    $overlay.off("click.__sideModal").on("click.__sideModal", async function () {
+      const opts = currentOptions;
+      const ctx = buildCtx();
+
+      try {
+        await safeCall(opts?.onCancel, ctx);
+      } finally {
+        close();
+      }
+    });
+
+    // Prevent scroll propagation
+    $modal.off("click.__sideModal").on("click.__sideModal", function (event) {
+      event.stopPropagation();
+    });
+  }
+
+  // Initialize once DOM is ready
+  $(function () {
+    wireEvents();
+  });
+
+  /**
+   * Open side modal
+   * @param {Object} options
+   * @param {string} options.title
+   * @param {string} options.html
+   * @param {Function} [options.onOk]      - can be async. return true => keep open
+   * @param {Function} [options.onCancel]  - can be async
+   * @param {Function} [options.onOpen]    - can be async (runs after html is set + modal shown)
+   * @param {string}   [options.okText]
+   * @param {string}   [options.cancelText]
+   * @param {boolean}  [options.showCancel=true]
+   */
+  async function open(options) {
+    if (!ensureReady()) {
+      global.alert("Modal global não encontrado no layout.");
+      return;
     }
 
-    /**
-     * Close side modal
-     */
-    function close() {
-        if (!$modal || !$modal.length) {
-            return;
-        }
+    const opts = options || {};
+    currentOptions = opts;
 
-        $overlay.hide();
-        $modal.hide();
-        $body.empty();
-        $title.empty();
-        onOkCallback = null;
-        onCancelCallback = null;
+    $title.text(opts.title || "");
+    $body.html(opts.html || "");
+
+    if (opts.okText) $btnOk.text(String(opts.okText));
+    if (opts.cancelText) $btnCancel.text(String(opts.cancelText));
+
+    if (opts.showCancel === false) $btnCancel.hide();
+    else $btnCancel.show();
+
+    $overlay.show();
+    $modal.show();
+
+    // Run onOpen after DOM is updated and visible
+    const ctx = buildCtx();
+    try {
+      await safeCall(opts.onOpen, ctx);
+    } catch (err) {
+      console.error(err);
+      global.alert(err?.message || "Erro ao abrir modal.");
     }
+  }
 
-    // Expose global API
-    global.SideModal = {
-        open: open,
-        close: close
-    };
-
+  // Expose global API
+  global.SideModal = {
+    open,
+    close,
+  };
 })(window, window.jQuery);

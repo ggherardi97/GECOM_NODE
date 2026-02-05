@@ -3,6 +3,29 @@
     padding: 15px 90px 20px 15px;
   }
 
+/* Select2 inside dynamic side modal (parent uses transform) */
+#dynamicModal .select2-container { width: 100% !important; }
+
+/* Make dropdown appear above overlay/modal */
+#dynamicModal .select2-container--open,
+#dynamicModal .select2-dropdown {
+  z-index: 1000005 !important;
+}
+.select2-container { width: 100% !important; }
+
+.select2-container--open,
+.select2-dropdown {
+  z-index: 1000005 !important;
+}/* Select2 dentro do SideModal */
+#sideModal .select2-container {
+  width: 100% !important;
+}
+
+/* dropdown acima do modal */
+#sideModal .select2-dropdown {
+  z-index: 3000 !important;
+}
+
   .table td,
   .table th {
     vertical-align: middle !important;
@@ -327,491 +350,531 @@
     <script src="../Assets/inspinia/js/plugins/select2/select2.full.min.js"></script>
     <script src="../Assets/inspinia/js/plugins/select2/i18n/pt-BR.js"></script>
 
-<% contentFor('scripts') %>
-   <script>
-  (function () {
-    // =========================
-    // State
-    // =========================
-    let invoiceId = null;
-    let creatingInvoice = false;
-
-    let companiesCache = [];
-    let currenciesCache = [];
-    let productsCache = [];
-    let lines = [];
-
-    // =========================
-    // Utils
-    // =========================
-    function escapeHtml(value) {
-      if (value == null) return "";
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function parseNumberSafe(value, fallback) {
-      const raw = String(value ?? "").trim();
-      if (!raw) return fallback ?? 0;
-
-      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
-
-      if (s.includes(".") && s.includes(",")) {
-        const normalized = s.replace(/\./g, "").replace(",", ".");
-        const n = Number(normalized);
-        return Number.isFinite(n) ? n : (fallback ?? 0);
-      }
-
-      if (s.includes(",") && !s.includes(".")) {
-        const normalized = s.replace(",", ".");
-        const n = Number(normalized);
-        return Number.isFinite(n) ? n : (fallback ?? 0);
-      }
-
-      const n = Number(s);
-      return Number.isFinite(n) ? n : (fallback ?? 0);
-    }
-
-    function money4(v) {
-      return parseNumberSafe(v, 0).toFixed(4);
-    }
-
-    function clamp01(v) {
-      const n = parseNumberSafe(v, 0);
-      return Math.max(0, Math.min(1, n));
-    }
-
-    // =========================
-    // Money mask (4 decimals)
-    // =========================
-    function bindMoneyMaskOnce(selector, decimals) {
-      const $el = $(selector);
-      if (!$el.length) return;
-      if ($el.data("money-mask")) return;
-      $el.data("money-mask", true);
-
-      const d = Number.isFinite(decimals) ? decimals : 4;
-
-      function normalize(val) {
-        const raw = String(val ?? "").trim();
-        if (!raw) return "";
-        const cleaned = raw.replace(/[^\d,.\-]/g, "");
-        if (cleaned.includes(".") && cleaned.includes(",")) {
-          return cleaned.replace(/\./g, "").replace(",", ".");
-        }
-        if (cleaned.includes(",") && !cleaned.includes(".")) {
-          return cleaned.replace(",", ".");
-        }
-        return cleaned;
-      }
-
-      $el.on("input", function () {
-        $(this).val(normalize($(this).val()));
-      });
-
-      $el.on("blur", function () {
-        const n = parseNumberSafe($(this).val(), 0);
-        $(this).val(n.toFixed(d));
-      });
-
-      $el.on("focus", function () {
-        const n = parseNumberSafe($(this).val(), 0);
-        $(this).val(n.toFixed(d));
-      });
-    }
-
-    // =========================
-    // API helpers
-    // =========================
-    async function readJsonSafe(response) {
-      const text = await response.text();
-      if (!text) return {};
-      try {
-        return JSON.parse(text);
-      } catch {
-        return { message: text };
-      }
-    }
-
-    async function apiGet(url) {
-      const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
-      const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-      return data;
-    }
-
-    async function apiPost(url, payload) {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(payload ?? {}),
-      });
-      const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-      return data;
-    }
-
-    async function apiPatch(url, payload) {
-      const resp = await fetch(url, {
-        method: "PATCH",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(payload ?? {}),
-      });
-      const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-      return data;
-    }
-
-    // =========================
-    // Global dynamic modal (layout)
-    // =========================
-    function openSideModal({ title, bodyHtml, okText, cancelText, onOk, onCancel }) {
-      const overlay = document.getElementById("dynamicModalOverlay");
-      const modal = document.getElementById("dynamicModal");
-      const titleEl = document.getElementById("dynamicModalTitle");
-      const bodyEl = document.getElementById("dynamicModalBody");
-      const btnClose = document.getElementById("dynamicModalCloseBtn");
-      const btnCancel = document.getElementById("dynamicModalCancelBtn");
-      const btnOk = document.getElementById("dynamicModalOkBtn");
-
-      if (!overlay || !modal || !titleEl || !bodyEl || !btnClose || !btnCancel || !btnOk) {
-        alert("Modal global não encontrado no layout.");
-        return;
-      }
-
-      titleEl.textContent = title || "";
-      bodyEl.innerHTML = bodyHtml || "";
-      btnOk.textContent = okText || "OK";
-      btnCancel.textContent = cancelText || "Cancelar";
-
-      const close = () => {
-        overlay.style.display = "none";
-        modal.style.display = "none";
-        btnOk.onclick = null;
-        btnCancel.onclick = null;
-        btnClose.onclick = null;
-      };
-
-      btnOk.onclick = async () => {
-        const keepOpen = (typeof onOk === "function") ? await onOk() : false;
-        if (!keepOpen) close();
-      };
-
-      btnCancel.onclick = () => {
-        if (typeof onCancel === "function") onCancel();
-        close();
-      };
-
-      btnClose.onclick = () => {
-        if (typeof onCancel === "function") onCancel();
-        close();
-      };
-
-      overlay.style.display = "block";
-      modal.style.display = "block";
-    }
-
-    // =========================
-    // Select2
-    // =========================
-    function initSelect2Company() {
-      if (!window.jQuery || !$.fn.select2) return;
-      const $el = $("#company_id");
-      if (!$el.length) return;
-
-      if ($el.data("select2")) $el.select2("destroy");
-
-      $el.select2({
-        width: "100%",
-        theme: "bootstrap",
-        placeholder: "Pesquisar empresa...",
-        allowClear: true,
-        minimumResultsForSearch: 0,
-        language: "pt-BR",
-      });
-    }
-
-    function initSelect2ProductInModal() {
-      if (!window.jQuery || !$.fn.select2) return;
-      const $el = $("#il_product_id");
-      if (!$el.length) return;
-
-      if ($el.data("select2")) $el.select2("destroy");
-
-      $el.select2({
-        width: "100%",
-        theme: "bootstrap",
-        placeholder: "Pesquisar produto...",
-        allowClear: true,
-        minimumResultsForSearch: 0,
-        language: "pt-BR",
-        dropdownParent: $("#dynamicModal"),
-      });
-    }
-
-    // =========================
-    // Load lists
-    // =========================
-    async function loadCompanies() {
-      const data = await apiGet("/api/companies");
-      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
-      companiesCache = list
-        .map((c) => ({
-          id: String(c?.id || "").trim(),
-          company_name: String(c?.company_name || c?.name || "").trim(),
-        }))
-        .filter((x) => x.id && x.company_name);
-
-      const $ddl = $("#company_id");
-      $ddl.empty().append(`<option value="">Selecionar...</option>`);
-      companiesCache.forEach((c) => {
-        $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.company_name)}</option>`);
-      });
-    }
-
-    async function loadCurrencies() {
-      const data = await apiGet("/api/currencies");
-      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.currencies ?? []);
-      currenciesCache = list
-        .map((c) => ({
-          id: String(c?.id || "").trim(),
-          name: String(c?.name || "").trim(),
-          symbol: String(c?.symbol || ""),
-          decimals: Number(c?.decimals ?? 2),
-        }))
-        .filter((x) => x.id && x.name);
-
-      const $ddl = $("#currency_id");
-      $ddl.empty().append(`<option value="">Selecionar...</option>`);
-      currenciesCache.forEach((c) => {
-        $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`);
-      });
-    }
-
-    function toProductModel(p) {
-      return {
-        id: String(p?.id || "").trim(),
-        name: String(p?.name || "").trim(),
-        description: String(p?.description || "").trim(),
-        unit: String(p?.unit || "").trim(),
-        defaultUnitPrice: parseNumberSafe(p?.default_unit_price, 0),
-        defaultTaxRate: clamp01(p?.default_tax_rate),
-        isActive: !!p?.is_active,
-      };
-    }
-
-    async function preloadProducts() {
-      const currencyId = String($("#currency_id").val() || "").trim();
-      if (!currencyId) {
-        productsCache = [];
-        return;
-      }
-
-      const qs = new URLSearchParams();
-      qs.set("currency_id", currencyId);
-      qs.set("is_active", "true");
-
-      const data = await apiGet(`/api/products?${qs.toString()}`);
-      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
-      productsCache = list.map(toProductModel).filter((p) => p.id && p.name);
-    }
-
-    function getProductById(productId) {
-      const id = String(productId || "").trim();
-      return productsCache.find((p) => p.id === id) || null;
-    }
-
-    // =========================
-    // Company change: auto fill billing
-    // =========================
-    async function onCompanyChanged(companyId) {
-      try {
-        const id = String(companyId || "").trim();
-        if (!id) return;
-
-        const company = await apiGet(`/api/companies/${encodeURIComponent(id)}`);
-
-        const street = String(company?.address_street || "").trim();
-        const number = String(company?.address_number || "").trim();
-        const line = String(company?.address_line || "").trim();
-        const line1 = line || [street, number].filter(Boolean).join(", ");
-
-        $("#billing_address_line1").val(line1);
-        $("#billing_address_line2").val("");
-        $("#billing_address_city").val(company?.address_city || "");
-        $("#billing_address_state").val(company?.address_state || "");
-        $("#billing_address_postal_code").val(company?.address_postalcode || "");
-        $("#billing_address_country").val(company?.address_country || "");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    $("#company_id").on("change", async function () {
-      const companyId = String($(this).val() || "").trim();
-      if (companyId) await onCompanyChanged(companyId);
-    });
-
-    // =========================
-    // Header payloads
-    // =========================
-    function buildInvoiceHeaderPayload() {
-      return {
-        company_id: String($("#company_id").val() || "").trim() || null,
-        currency_id: String($("#currency_id").val() || "").trim() || null,
-        quote_at: $("#quote_at").val() || null,
-        exchange_rate: $("#exchange_rate").val() || null,
-        status: parseNumberSafe($("#status").val(), 0),
-        discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
-        version: parseNumberSafe($("#version").val(), 1),
-        notes: $("#notes").val() || "",
-        terms: $("#terms").val() || "",
-      };
-    }
-
-    function buildBillingPayload() {
-      return {
-        billing_address_line1: $("#billing_address_line1").val() || "",
-        billing_address_line2: $("#billing_address_line2").val() || "",
-        billing_address_city: $("#billing_address_city").val() || "",
-        billing_address_state: $("#billing_address_state").val() || "",
-        billing_address_postal_code: $("#billing_address_postal_code").val() || "",
-        billing_address_country: $("#billing_address_country").val() || "",
-      };
-    }
-
-    function buildLinesPayload() {
-      return (lines || []).map((l) => ({
-        product_id: l.product_id || null,
-        description: l.description || "",
-        unit: l.unit || "",
-        unit_price: String(parseNumberSafe(l.unit_price, 0)),
-        quantity: String(parseNumberSafe(l.quantity, 1)),
-        tax_rate: String(clamp01(l.tax_rate)),
-        discount_percent: parseInt(String(l.discount_percent ?? 0), 10) || 0,
-      }));
-    }
-
-    // =========================
-    // Create invoice header if needed
-    // =========================
-    async function createInvoiceIfNeeded() {
-      if (invoiceId || creatingInvoice) return true;
-
-      const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
-
-      if (!payload.company_id || !payload.currency_id) {
-        alert("Empresa e Moeda são obrigatórios.");
-        return false;
-      }
-
-      try {
-        creatingInvoice = true;
-        const created = await apiPost("/api/invoices", payload);
-invoiceId = created?.id ? String(created.id) : null;
-
-        $("#uiInvoiceId").text(invoiceId || "-");
-        $("#invoiceNotCreatedBanner").hide();
-
-        $("#discount_percent").prop("readonly", false);
-
-        return !!invoiceId;
-      } catch (e) {
-        console.error(e);
-        alert(e?.message || "Falha ao criar a fatura.");
-        return false;
-      } finally {
-        creatingInvoice = false;
-      }
-    }
-
-    function setLinesEnabled(isEnabled) {
-      const area = document.getElementById("linesArea");
-      if (!area) return;
-      if (isEnabled) area.classList.remove("lines-disabled");
-      else area.classList.add("lines-disabled");
-    }
-
-    // =========================
-    // Calc line + totals
-    // =========================
-    function recalcLine(line) {
-      const qty = parseNumberSafe(line.quantity, 1);
-      const unitPrice = parseNumberSafe(line.unit_price, 0);
-      const taxRate = clamp01(line.tax_rate);
-      const discountPercent = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
-
-      const gross = qty * unitPrice;
-      const discountAmount = gross * (discountPercent / 100);
-      const taxableBase = Math.max(0, gross - discountAmount);
-      const taxAmount = taxableBase * taxRate;
-      const lineTotal = taxableBase + taxAmount;
-
-      line.quantity = qty;
-      line.unit_price = unitPrice;
-      line.tax_rate = taxRate;
-      line.discount_percent = discountPercent;
-
-      line.line_subtotal = gross;
-      line.discount_amount = discountAmount;
-      line.tax_amount = taxAmount;
-      line.line_total = lineTotal;
-
-      return line;
-    }
-
-    function computeTotals() {
-      // Always recalc lines first (keeps totals stable)
-      (lines || []).forEach(recalcLine);
-
-      let grossSubtotal = 0;
-      let taxTotal = 0;
-      let lineDiscountTotal = 0;
-
-      for (const l of (lines || [])) {
-        grossSubtotal += parseNumberSafe(l.line_subtotal, 0);
-        taxTotal += parseNumberSafe(l.tax_amount, 0);
-        lineDiscountTotal += parseNumberSafe(l.discount_amount, 0);
-      }
-
-      const headerDiscountPercent = Math.max(0, Math.min(100, parseNumberSafe($("#discount_percent").val(), 0)));
-      const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
-
-      const netBeforeHeader = Math.max(0, grossSubtotal - lineDiscountTotal);
-      const total = Math.max(0, (netBeforeHeader - headerDiscountAmount) + taxTotal);
-
-      $("#uiSubtotal").text(money4(grossSubtotal));
-      $("#uiDiscount").text(money4(headerDiscountAmount));
-      $("#uiTaxTotal").text(money4(taxTotal));
-      $("#uiTotal").text(money4(total));
-    }
-
-    $("#discount_percent").on("keyup change input", computeTotals);
-
-    // =========================
-    // Render grid
-    // =========================
-    function renderLines() {
-      const tbody = document.getElementById("linesTbody");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-
-      (lines || []).forEach(recalcLine);
-
-      if (!lines || lines.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
-        computeTotals();
-        return;
-      }
-
-      lines.forEach((l, idx) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
+    <% contentFor('scripts') %>
+      <script>
+        (function () {
+          // =========================
+          // State
+          // =========================
+          let invoiceId = null;
+          let creatingInvoice = false;
+
+          let companiesCache = [];
+          let currenciesCache = [];
+          let productsCache = [];
+          let lines = [];
+
+          // =========================
+          // Utils
+          // =========================
+          function escapeHtml(value) {
+            if (value == null) return "";
+            return String(value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+
+          function parseNumberSafe(value, fallback) {
+            const raw = String(value ?? "").trim();
+            if (!raw) return fallback ?? 0;
+
+            const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+            if (s.includes(".") && s.includes(",")) {
+              const normalized = s.replace(/\./g, "").replace(",", ".");
+              const n = Number(normalized);
+              return Number.isFinite(n) ? n : (fallback ?? 0);
+            }
+
+            if (s.includes(",") && !s.includes(".")) {
+              const normalized = s.replace(",", ".");
+              const n = Number(normalized);
+              return Number.isFinite(n) ? n : (fallback ?? 0);
+            }
+
+            const n = Number(s);
+            return Number.isFinite(n) ? n : (fallback ?? 0);
+          }
+
+          function money4(v) {
+            return parseNumberSafe(v, 0).toFixed(4);
+          }
+
+          function clamp01(v) {
+            const n = parseNumberSafe(v, 0);
+            return Math.max(0, Math.min(1, n));
+          }
+
+          function tryToDatetimeLocal(value) {
+            // Accepts ISO string or null. Returns "" or "YYYY-MM-DDTHH:mm"
+            const raw = String(value ?? "").trim();
+            if (!raw) return "";
+            const dt = new Date(raw);
+            if (Number.isNaN(dt.getTime())) return "";
+            const pad = (n) => String(n).padStart(2, "0");
+            return (
+              dt.getFullYear() +
+              "-" +
+              pad(dt.getMonth() + 1) +
+              "-" +
+              pad(dt.getDate()) +
+              "T" +
+              pad(dt.getHours()) +
+              ":" +
+              pad(dt.getMinutes())
+            );
+          }
+
+          // =========================
+          // Money mask (4 decimals)
+          // =========================
+          function bindMoneyMaskOnce(selector, decimals) {
+            const $el = $(selector);
+            if (!$el.length) return;
+            if ($el.data("money-mask")) return;
+            $el.data("money-mask", true);
+
+            const d = Number.isFinite(decimals) ? decimals : 4;
+
+            function normalize(val) {
+              const raw = String(val ?? "").trim();
+              if (!raw) return "";
+              const cleaned = raw.replace(/[^\d,.\-]/g, "");
+              if (cleaned.includes(".") && cleaned.includes(",")) {
+                return cleaned.replace(/\./g, "").replace(",", ".");
+              }
+              if (cleaned.includes(",") && !cleaned.includes(".")) {
+                return cleaned.replace(",", ".");
+              }
+              return cleaned;
+            }
+
+            $el.on("input", function () {
+              $(this).val(normalize($(this).val()));
+            });
+
+            $el.on("blur", function () {
+              const n = parseNumberSafe($(this).val(), 0);
+              $(this).val(n.toFixed(d));
+            });
+
+            $el.on("focus", function () {
+              const n = parseNumberSafe($(this).val(), 0);
+              $(this).val(n.toFixed(d));
+            });
+          }
+
+          // =========================
+          // API helpers
+          // =========================
+          async function readJsonSafe(response) {
+            const text = await response.text();
+            if (!text) return {};
+            try {
+              return JSON.parse(text);
+            } catch {
+              return { message: text };
+            }
+          }
+
+          async function apiGet(url) {
+            const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
+
+          async function apiPost(url, payload) {
+            const resp = await fetch(url, {
+              method: "POST",
+              headers: { Accept: "application/json", "Content-Type": "application/json" },
+              body: JSON.stringify(payload ?? {}),
+            });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
+
+          async function apiPatch(url, payload) {
+            const resp = await fetch(url, {
+              method: "PATCH",
+              headers: { Accept: "application/json", "Content-Type": "application/json" },
+              body: JSON.stringify(payload ?? {}),
+            });
+            const data = await readJsonSafe(resp);
+            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+            return data;
+          }
+
+          // =========================
+          // Global dynamic modal (layout)
+          // =========================
+function openSideModal({ title, bodyHtml, okText, cancelText, onOk, onCancel }) {
+  const overlay = document.getElementById("dynamicModalOverlay");
+  const modal = document.getElementById("dynamicModal");
+  const titleEl = document.getElementById("dynamicModalTitle");
+  const bodyEl = document.getElementById("dynamicModalBody");
+  const btnClose = document.getElementById("dynamicModalCloseBtn");
+  const btnCancel = document.getElementById("dynamicModalCancelBtn");
+  const btnOk = document.getElementById("dynamicModalOkBtn");
+
+  if (!overlay || !modal || !titleEl || !bodyEl || !btnClose || !btnCancel || !btnOk) {
+    alert("Modal global não encontrado no layout.");
+    return;
+  }
+
+  titleEl.textContent = title || "";
+  bodyEl.innerHTML = bodyHtml || "";
+  btnOk.textContent = okText || "OK";
+  btnCancel.textContent = cancelText || "Cancelar";
+
+  const close = () => {
+    overlay.style.display = "none";
+    modal.style.display = "none";
+    btnOk.onclick = null;
+    btnCancel.onclick = null;
+    btnClose.onclick = null;
+  };
+
+  // ✅ Important: we pass stable references to onOk/onCancel
+  const ctx = { overlay, modal, root: bodyEl };
+
+  btnOk.onclick = async (ev) => {
+    if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+    if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
+
+    const keepOpen = (typeof onOk === "function") ? await onOk(ctx) : false;
+    if (!keepOpen) close();
+  };
+
+  btnCancel.onclick = (ev) => {
+    if (ev && typeof ev.preventDefault === "function") ev.preventDefault();
+    if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
+
+    if (typeof onCancel === "function") onCancel(ctx);
+    close();
+  };
+
+  btnClose.onclick = () => {
+    if (typeof onCancel === "function") onCancel(ctx);
+    close();
+  };
+
+  overlay.style.display = "block";
+  modal.style.display = "block";
+}
+
+          // =========================
+          // Select2
+          // =========================
+          function initSelect2Company() {
+            if (!window.jQuery || !$.fn.select2) return;
+            const $el = $("#company_id");
+            if (!$el.length) return;
+
+            if ($el.data("select2")) $el.select2("destroy");
+
+            $el.select2({
+              width: "100%",
+              theme: "bootstrap",
+              placeholder: "Pesquisar empresa...",
+              allowClear: true,
+              minimumResultsForSearch: 0,
+              language: "pt-BR",
+            });
+          }
+
+function initSelect2ProductInModal() {
+  if (!window.jQuery || !$.fn.select2) return;
+
+  const $el = $("#il_product_id");
+  if (!$el.length) return;
+
+  if ($el.data("select2")) $el.select2("destroy");
+
+  $el.select2({
+    width: "100%",
+    theme: "bootstrap",
+    placeholder: "Pesquisar produto...",
+    allowClear: true,
+    minimumResultsForSearch: 0,
+    language: "pt-BR",
+
+    // ✅ Important: append dropdown to body to avoid wrong offsets inside fixed modal
+    dropdownParent: $(document.body)
+  });
+}
+
+
+          // =========================
+          // Load lists
+          // =========================
+          async function loadCompanies() {
+            const data = await apiGet("/api/companies");
+            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
+            companiesCache = list
+              .map((c) => ({
+                id: String(c?.id || "").trim(),
+                company_name: String(c?.company_name || c?.name || "").trim(),
+              }))
+              .filter((x) => x.id && x.company_name);
+
+            const $ddl = $("#company_id");
+            $ddl.empty().append(`<option value="">Selecionar...</option>`);
+            companiesCache.forEach((c) => {
+              $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.company_name)}</option>`);
+            });
+          }
+
+          async function loadCurrencies() {
+            const data = await apiGet("/api/currencies");
+            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.currencies ?? []);
+            currenciesCache = list
+              .map((c) => ({
+                id: String(c?.id || "").trim(),
+                name: String(c?.name || "").trim(),
+                symbol: String(c?.symbol || ""),
+                decimals: Number(c?.decimals ?? 2),
+              }))
+              .filter((x) => x.id && x.name);
+
+            const $ddl = $("#currency_id");
+            $ddl.empty().append(`<option value="">Selecionar...</option>`);
+            currenciesCache.forEach((c) => {
+              $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`);
+            });
+          }
+
+          function toProductModel(p) {
+            return {
+              id: String(p?.id || "").trim(),
+              name: String(p?.name || "").trim(),
+              description: String(p?.description || "").trim(),
+              unit: String(p?.unit || "").trim(),
+              defaultUnitPrice: parseNumberSafe(p?.default_unit_price, 0),
+              defaultTaxRate: clamp01(p?.default_tax_rate),
+              isActive: !!p?.is_active,
+            };
+          }
+
+          async function preloadProducts() {
+  // Read currency from UI
+  const currencyId = String($("#currency_id").val() || "").trim();
+
+  // If no currency, we cannot load products
+  if (!currencyId) {
+    productsCache = [];
+    return false;
+  }
+
+  const qs = new URLSearchParams();
+  qs.set("currency_id", currencyId);
+  qs.set("is_active", "true");
+
+  const data = await apiGet(`/api/products?${qs.toString()}`);
+  const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
+
+  productsCache = list.map(toProductModel).filter((p) => p.id && p.name);
+
+  return productsCache.length > 0;
+}
+
+
+          function getProductById(productId) {
+            const id = String(productId || "").trim();
+            return productsCache.find((p) => p.id === id) || null;
+          }
+
+          // =========================
+          // Company change: auto fill billing
+          // =========================
+          async function onCompanyChanged(companyId) {
+            try {
+              const id = String(companyId || "").trim();
+              if (!id) return;
+
+              const company = await apiGet(`/api/companies/${encodeURIComponent(id)}`);
+
+              const street = String(company?.address_street || "").trim();
+              const number = String(company?.address_number || "").trim();
+              const line = String(company?.address_line || "").trim();
+              const line1 = line || [street, number].filter(Boolean).join(", ");
+
+              $("#billing_address_line1").val(line1);
+              $("#billing_address_line2").val("");
+              $("#billing_address_city").val(company?.address_city || "");
+              $("#billing_address_state").val(company?.address_state || "");
+              $("#billing_address_postal_code").val(company?.address_postalcode || "");
+              $("#billing_address_country").val(company?.address_country || "");
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          $("#company_id").on("change", async function () {
+            const companyId = String($(this).val() || "").trim();
+            if (companyId) await onCompanyChanged(companyId);
+          });
+
+          // =========================
+          // Header payloads
+          // =========================
+          function buildInvoiceHeaderPayload() {
+            return {
+              company_id: String($("#company_id").val() || "").trim() || null,
+              currency_id: String($("#currency_id").val() || "").trim() || null,
+              quote_at: $("#quote_at").val() || null,
+              exchange_rate: $("#exchange_rate").val() || null,
+              status: parseNumberSafe($("#status").val(), 0),
+              discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
+              version: parseNumberSafe($("#version").val(), 1),
+              notes: $("#notes").val() || "",
+              terms: $("#terms").val() || "",
+            };
+          }
+
+          function buildBillingPayload() {
+            return {
+              billing_address_line1: $("#billing_address_line1").val() || "",
+              billing_address_line2: $("#billing_address_line2").val() || "",
+              billing_address_city: $("#billing_address_city").val() || "",
+              billing_address_state: $("#billing_address_state").val() || "",
+              billing_address_postal_code: $("#billing_address_postal_code").val() || "",
+              billing_address_country: $("#billing_address_country").val() || "",
+            };
+          }
+
+          function buildLinesPayload() {
+            return (lines || []).map((l) => ({
+              id: l.id || undefined, // ✅ keep id for update if backend supports
+              product_id: l.product_id || null,
+              description: l.description || "",
+              unit: l.unit || "",
+              unit_price: String(parseNumberSafe(l.unit_price, 0)),
+              quantity: String(parseNumberSafe(l.quantity, 1)),
+              tax_rate: String(clamp01(l.tax_rate)),
+              discount_percent: parseInt(String(l.discount_percent ?? 0), 10) || 0,
+            }));
+          }
+
+          // =========================
+          // Create invoice header if needed
+          // =========================
+          async function createInvoiceIfNeeded() {
+            if (invoiceId || creatingInvoice) return true;
+
+            const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
+
+            if (!payload.company_id || !payload.currency_id) {
+              alert("Empresa e Moeda são obrigatórios.");
+              return false;
+            }
+
+            try {
+              creatingInvoice = true;
+              const created = await apiPost("/api/invoices", payload);
+
+              invoiceId = created?.id ? String(created.id) : null;
+              $("#uiInvoiceId").text(invoiceId || "-");
+              $("#invoiceNotCreatedBanner").hide();
+
+              $("#discount_percent").prop("readonly", false);
+
+              return !!invoiceId;
+            } catch (e) {
+              console.error(e);
+              alert(e?.message || "Falha ao criar a fatura.");
+              return false;
+            } finally {
+              creatingInvoice = false;
+            }
+          }
+
+          function setLinesEnabled(isEnabled) {
+            const area = document.getElementById("linesArea");
+            if (!area) return;
+            if (isEnabled) area.classList.remove("lines-disabled");
+            else area.classList.add("lines-disabled");
+          }
+
+          // =========================
+          // Calc line + totals
+          // =========================
+          function recalcLine(line) {
+            const qty = parseNumberSafe(line.quantity, 1);
+            const unitPrice = parseNumberSafe(line.unit_price, 0);
+            const taxRate = clamp01(line.tax_rate);
+            const discountPercent = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
+
+            const gross = qty * unitPrice;
+            const discountAmount = gross * (discountPercent / 100);
+            const taxableBase = Math.max(0, gross - discountAmount);
+            const taxAmount = taxableBase * taxRate;
+            const lineTotal = taxableBase + taxAmount;
+
+            line.quantity = qty;
+            line.unit_price = unitPrice;
+            line.tax_rate = taxRate;
+            line.discount_percent = discountPercent;
+
+            line.line_subtotal = gross;
+            line.discount_amount = discountAmount;
+            line.tax_amount = taxAmount;
+            line.line_total = lineTotal;
+
+            return line;
+          }
+
+          function computeTotals() {
+            (lines || []).forEach(recalcLine);
+
+            let grossSubtotal = 0;
+            let taxTotal = 0;
+            let lineDiscountTotal = 0;
+
+            for (const l of (lines || [])) {
+              grossSubtotal += parseNumberSafe(l.line_subtotal, 0);
+              taxTotal += parseNumberSafe(l.tax_amount, 0);
+              lineDiscountTotal += parseNumberSafe(l.discount_amount, 0);
+            }
+
+            const headerDiscountPercent = Math.max(0, Math.min(100, parseNumberSafe($("#discount_percent").val(), 0)));
+            const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
+
+            const netBeforeHeader = Math.max(0, grossSubtotal - lineDiscountTotal);
+            const total = Math.max(0, (netBeforeHeader - headerDiscountAmount) + taxTotal);
+
+            $("#uiSubtotal").text(money4(grossSubtotal));
+            $("#uiDiscount").text(money4(headerDiscountAmount));
+            $("#uiTaxTotal").text(money4(taxTotal));
+            $("#uiTotal").text(money4(total));
+          }
+
+          $("#discount_percent").on("keyup change input", computeTotals);
+
+          // =========================
+          // Render grid
+          // =========================
+          function renderLines() {
+            const tbody = document.getElementById("linesTbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+
+            (lines || []).forEach(recalcLine);
+
+            if (!lines || lines.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
+              computeTotals();
+              return;
+            }
+
+            lines.forEach((l, idx) => {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
           <td>${escapeHtml(String(idx + 1))}</td>
           <td>${escapeHtml(l.product_name || "Manual")}</td>
           <td>${escapeHtml(l.description || "")}</td>
@@ -829,389 +892,529 @@ invoiceId = created?.id ? String(created.id) : null;
             </button>
           </td>
         `;
-        tbody.appendChild(tr);
-      });
+              tbody.appendChild(tr);
+            });
 
-      tbody.querySelectorAll("button[data-act]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const act = btn.getAttribute("data-act");
-          const idx = parseInt(btn.getAttribute("data-idx"), 10);
-          if (!Number.isFinite(idx)) return;
+            tbody.querySelectorAll("button[data-act]").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                const act = btn.getAttribute("data-act");
+                const idx = parseInt(btn.getAttribute("data-idx"), 10);
+                if (!Number.isFinite(idx)) return;
 
-          if (act === "del") {
-            lines.splice(idx, 1);
-            renderLines();
+                if (act === "del") {
+                  lines.splice(idx, 1);
+                  renderLines();
+                }
+
+                if (act === "edit") {
+                  openInvoiceLineModal({ mode: "edit", index: idx, requireProduct: false });
+                }
+              });
+            });
+
+            computeTotals();
           }
 
-          if (act === "edit") {
-              openInvoiceLineModal({ mode: "edit", index: idx, requireProduct: false });
+          // =========================
+          // Modal (Add/Edit line)
+          // =========================
+          function setupProductSelectOptions(existingProductId) {
+  const $productEl = $("#il_product_id");
+  if (!$productEl.length) return;
+
+  $productEl.empty().append(`<option value="">Selecionar...</option>`);
+
+  (productsCache || []).forEach((p) => {
+    $productEl.append(`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`);
+  });
+
+  if (existingProductId) {
+    $productEl.val(String(existingProductId));
+  } else {
+    $productEl.val("");
+  }
+}
+
+
+          function applyProductDefaultsToInputs(product) {
+            if (!product) return;
+
+            $("#il_unit").val(product.unit || "");
+            if (!String($("#il_description").val() || "").trim()) {
+              $("#il_description").val(product.description || "");
+            }
+
+            $("#il_unit_price").val(parseNumberSafe(product.defaultUnitPrice, 0).toFixed(4));
+            $("#il_tax_rate").val(clamp01(product.defaultTaxRate).toFixed(4));
           }
-        });
-      });
 
-      computeTotals();
-    }
+          function readSelectedProductIdFromModal() {
+            const bodyEl = document.getElementById("dynamicModalBody");
+            if (!bodyEl) return null;
 
-    // =========================
-    // Modal (Add/Edit line)
-    // =========================
-    function setupProductSelectOptions(existingProductId) {
-      const $productEl = $("#il_product_id");
-      if (!$productEl.length) return;
+            /** @type {HTMLSelectElement|null} */
+            const selectEl = bodyEl.querySelector("#il_product_id");
+            if (!selectEl) return null;
 
-      $productEl.empty().append(`<option value="">Selecionar...</option>`);
+            // 1) Raw select value
+            let raw = selectEl.value;
+            if (raw && String(raw).trim()) return String(raw).trim();
+
+            // 2) If Select2 exists, try via jQuery only within this element
+            const $el = $(selectEl);
+            if ($el.data("select2")) {
+              const data = $el.select2("data");
+              const id = data && data[0] && data[0].id ? String(data[0].id).trim() : "";
+              if (id) return id;
+            }
+
+            // 3) Selected option attribute fallback
+            const opt = selectEl.options && selectEl.selectedIndex >= 0 ? selectEl.options[selectEl.selectedIndex] : null;
+            const optVal = opt ? String(opt.value || "").trim() : "";
+            return optVal || null;
+          }
+
+function openInvoiceLineModal({ mode, index, requireProduct }) {
+  const isEdit = mode === "edit";
+  const existing = isEdit ? (lines[index] || null) : null;
+
+  const line = existing
+    ? { ...existing }
+    : {
+        id: null,
+        product_id: null,
+        product_name: "",
+        description: "",
+        unit: "",
+        unit_price: 0,
+        quantity: 1,
+        tax_rate: 0,
+        discount_percent: 0,
+        tax_amount: 0,
+        discount_amount: 0,
+        line_subtotal: 0,
+        line_total: 0,
+      };
+
+  recalcLine(line);
+
+  const html = `
+    <div class="form-group">
+      <label>Produto</label>
+      <select id="il_product_id" class="form-control"></select>
+      <div class="small text-muted" style="margin-top:6px;">Digite para pesquisar.</div>
+    </div>
+
+    <div class="form-group">
+      <label>Descrição</label>
+      <input id="il_description" type="text" class="form-control" value="${escapeHtml(line.description || "")}" />
+    </div>
+
+    <div class="row row-tight">
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Unidade</label>
+          <input id="il_unit" type="text" class="form-control" maxlength="50" value="${escapeHtml(line.unit || "")}" />
+        </div>
+      </div>
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Preço unitário</label>
+          <input id="il_unit_price" type="text" class="form-control money" value="${escapeHtml(money4(line.unit_price || 0))}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row row-tight">
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Quantidade</label>
+          <input id="il_quantity" type="text" class="form-control money" value="${escapeHtml(money4(line.quantity || 1))}" />
+        </div>
+      </div>
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Taxa de imposto (0..1)</label>
+          <input id="il_tax_rate" type="text" class="form-control money" value="${escapeHtml(money4(clamp01(line.tax_rate)))}" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row row-tight">
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Desconto % (linha)</label>
+          <input id="il_discount_percent" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(line.discount_percent || 0))}" />
+        </div>
+      </div>
+      <div class="col-xs-6">
+        <div class="form-group">
+          <label>Total da linha</label>
+          <input id="il_line_total" type="text" class="form-control" value="${escapeHtml(money4(line.line_total))}" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="small text-muted">Subtotal/Imposto/Total são calculados automaticamente.</div>
+  `;
+
+  window.SideModal.open({
+    title: isEdit ? "Editar linha" : "Adicionar linha",
+    okText: isEdit ? "Salvar" : "Adicionar",
+    cancelText: "Cancelar",
+    html,
+
+    onOpen: async function (ctx) {
+      const $root = ctx.root;
+
+      // masks
+      bindMoneyMaskOnce("#il_unit_price", 4);
+      bindMoneyMaskOnce("#il_quantity", 4);
+      bindMoneyMaskOnce("#il_tax_rate", 4);
+
+      // options
+      const $product = $root.find("#il_product_id");
+      $product.empty().append(`<option value="">Selecionar...</option>`);
       (productsCache || []).forEach((p) => {
-        $productEl.append(`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`);
+        $product.append(`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`);
       });
 
-      if (existingProductId) {
-        $productEl.val(String(existingProductId)).trigger("change.select2");
-      }
-    }
-
-    function applyProductDefaultsToInputs(product) {
-      if (!product) return;
-
-      $("#il_unit").val(product.unit || "");
-      if (!String($("#il_description").val() || "").trim()) {
-        $("#il_description").val(product.description || "");
+      if (isEdit && existing?.product_id) {
+        $product.val(String(existing.product_id));
       }
 
-      $("#il_unit_price").val(parseNumberSafe(product.defaultUnitPrice, 0).toFixed(4));
-      $("#il_tax_rate").val(clamp01(product.defaultTaxRate).toFixed(4));
-    }
-
-    function openInvoiceLineModal({ mode, index, requireProduct  }) {
-      const isEdit = mode === "edit";
-      const existing = isEdit ? (lines[index] || null) : null;
-
-      const line = existing
-        ? { ...existing }
-        : {
-            product_id: null,
-            product_name: "",
-            description: "",
-            unit: "",
-            unit_price: 0,
-            quantity: 1,
-            tax_rate: 0,
-            discount_percent: 0,
-            tax_amount: 0,
-            discount_amount: 0,
-            line_subtotal: 0,
-            line_total: 0,
-          };
-
-      recalcLine(line);
-
-      const bodyHtml = `
-        <div class="form-group">
-          <label>Produto</label>
-          <select id="il_product_id" class="form-control"></select>
-          <div class="small text-muted" style="margin-top:6px;">Digite para pesquisar.</div>
-        </div>
-
-        <div class="form-group">
-          <label>Descrição</label>
-          <input id="il_description" type="text" class="form-control" value="${escapeHtml(line.description || "")}" />
-        </div>
-
-        <div class="row row-tight">
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Unidade</label>
-              <input id="il_unit" type="text" class="form-control" maxlength="50" value="${escapeHtml(line.unit || "")}" />
-            </div>
-          </div>
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Preço unitário</label>
-              <input id="il_unit_price" type="text" class="form-control money" value="${escapeHtml(money4(line.unit_price || 0))}" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row row-tight">
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Quantidade</label>
-              <input id="il_quantity" type="text" class="form-control money" value="${escapeHtml(money4(line.quantity || 1))}" />
-            </div>
-          </div>
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Taxa de imposto (0..1)</label>
-              <input id="il_tax_rate" type="text" class="form-control money" value="${escapeHtml(money4(clamp01(line.tax_rate))) }" />
-            </div>
-          </div>
-        </div>
-
-        <div class="row row-tight">
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Desconto % (linha)</label>
-              <input id="il_discount_percent" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(line.discount_percent || 0))}" />
-            </div>
-          </div>
-          <div class="col-xs-6">
-            <div class="form-group">
-              <label>Total da linha</label>
-              <input id="il_line_total" type="text" class="form-control" value="${escapeHtml(money4(line.line_total))}" readonly />
-            </div>
-          </div>
-        </div>
-
-        <div class="small text-muted">Subtotal/Imposto/Total são calculados automaticamente.</div>
-      `;
-
-      openSideModal({
-        title: isEdit ? "Editar linha" : "Adicionar linha",
-        bodyHtml: bodyHtml,
-        okText: isEdit ? "Salvar" : "Adicionar",
-        cancelText: "Cancelar",
-        onOk: async () => {
-  const productId = String($("#il_product_id").val() || "").trim() || null;
-
-  // Se veio do botão "Adicionar produto", obriga seleção real no Select2
-  if (requireProduct && !productId) {
-    alert("Selecione um produto na lista (digitar não basta).");
-    return true; // mantém modal aberto
-  }
-
-  const prod = productId ? getProductById(productId) : null;
-
-  const updated = {
-    ...line,
-    product_id: productId,
-    product_name: prod?.name || (productId ? productId : "Manual"),
-    description: $("#il_description").val() || "",
-    unit: $("#il_unit").val() || "",
-    unit_price: parseNumberSafe($("#il_unit_price").val(), 0),
-    quantity: parseNumberSafe($("#il_quantity").val(), 1),
-    tax_rate: clamp01($("#il_tax_rate").val()),
-    discount_percent: parseNumberSafe($("#il_discount_percent").val(), 0),
-  };
-
-  // Se selecionou produto, mas inputs ainda estão vazios, aplica defaults também no OK
-  if (prod) {
-    if (!String(updated.unit || "").trim()) updated.unit = prod.unit || "";
-    if (!String(updated.description || "").trim()) updated.description = prod.description || "";
-    if (!parseNumberSafe(updated.unit_price, 0)) updated.unit_price = parseNumberSafe(prod.defaultUnitPrice, 0);
-    if (!parseNumberSafe(updated.tax_rate, 0)) updated.tax_rate = clamp01(prod.defaultTaxRate);
-  }
-
-  recalcLine(updated);
-
-  if (parseNumberSafe(updated.quantity, 0) <= 0) {
-    alert("Quantidade deve ser maior que 0.");
-    return true; // mantém modal aberto
-  }
-
-  if (isEdit) lines[index] = updated;
-  else lines.push(updated);
-
-  renderLines();
-  return false; // fecha modal
-},
+      // select2 inside modal
+      if ($product.data("select2")) $product.select2("destroy");
+      $product.select2({
+        width: "100%",
+        theme: "bootstrap",
+        placeholder: "Pesquisar produto...",
+        allowClear: true,
+        language: "pt-BR",
+    dropdownParent: $("#sideModal"),
       });
 
-      setTimeout(() => {
-        // Masks
-        bindMoneyMaskOnce("#il_unit_price", 4);
-        bindMoneyMaskOnce("#il_quantity", 4);
-        bindMoneyMaskOnce("#il_tax_rate", 4);
+      if (isEdit && existing?.product_id) {
+        $product.trigger("change");
+      }
 
-        // Fill products select + init select2
-        setupProductSelectOptions(isEdit ? existing?.product_id : null);
-        initSelect2ProductInModal();
+      function syncModalCalc() {
+        const tmp = {
+          ...line,
+          unit_price: parseNumberSafe($("#il_unit_price").val(), 0),
+          quantity: parseNumberSafe($("#il_quantity").val(), 1),
+          tax_rate: clamp01($("#il_tax_rate").val()),
+          discount_percent: parseNumberSafe($("#il_discount_percent").val(), 0),
+        };
+        recalcLine(tmp);
+        $("#il_line_total").val(money4(tmp.line_total));
+      }
 
-        // On product change: apply defaults ONLY when adding
-        $("#il_product_id")
-          .off("change.__prod")
-          .on("change.__prod", function () {
-            const pid = String($(this).val() || "").trim();
-            const p = pid ? getProductById(pid) : null;
-            if (!p) {
-              syncModalCalc();
-              return;
-            }
-
-            if (!isEdit) {
-              applyProductDefaultsToInputs(p);
-            } else {
-              // Edit: do not overwrite price/tax (only fill unit/desc if empty)
-              if (!String($("#il_unit").val() || "").trim()) $("#il_unit").val(p.unit || "");
-              if (!String($("#il_description").val() || "").trim()) $("#il_description").val(p.description || "");
-            }
-
-            syncModalCalc();
-          });
-
-        // If editing: force inputs to existing line values
-        if (isEdit && existing) {
-          $("#il_description").val(existing.description || "");
-          $("#il_unit").val(existing.unit || "");
-          $("#il_unit_price").val(parseNumberSafe(existing.unit_price, 0).toFixed(4));
-          $("#il_quantity").val(parseNumberSafe(existing.quantity, 1).toFixed(4));
-          $("#il_tax_rate").val(clamp01(existing.tax_rate).toFixed(4));
-          $("#il_discount_percent").val(parseNumberSafe(existing.discount_percent, 0));
-        }
-
-        function syncModalCalc() {
-          const tmp = {
-            ...line,
-            unit_price: parseNumberSafe($("#il_unit_price").val(), 0),
-            quantity: parseNumberSafe($("#il_quantity").val(), 1),
-            tax_rate: clamp01($("#il_tax_rate").val()),
-            discount_percent: parseNumberSafe($("#il_discount_percent").val(), 0),
-            description: $("#il_description").val() || "",
-            unit: $("#il_unit").val() || "",
-          };
-          recalcLine(tmp);
-          $("#il_line_total").val(money4(tmp.line_total));
-        }
-
-        $("#il_description, #il_unit, #il_unit_price, #il_quantity, #il_tax_rate, #il_discount_percent")
-          .off("keyup.__il change.__il input.__il")
-          .on("keyup.__il change.__il input.__il", syncModalCalc);
-
+      $product.off("change.__prod").on("change.__prod", function () {
+        const pid = String($(this).val() || "").trim();
+        const prod = pid ? getProductById(pid) : null;
+        if (prod && !isEdit) applyProductDefaultsToInputs(prod);
         syncModalCalc();
-      }, 50);
-    }
+      });
 
-    // =========================
-    // Save logic
-    // =========================
-    async function saveInvoice() {
-      const ok = await createInvoiceIfNeeded();
-      if (!ok) {
-        $("#invoiceNotCreatedBanner").show();
-        setLinesEnabled(false);
-        return false;
+      $("#il_description, #il_unit, #il_unit_price, #il_quantity, #il_tax_rate, #il_discount_percent")
+        .off("keyup.__il change.__il input.__il")
+        .on("keyup.__il change.__il input.__il", syncModalCalc);
+
+      // rehydrate edit values
+      if (isEdit && existing) {
+        $("#il_description").val(existing.description || "");
+        $("#il_unit").val(existing.unit || "");
+        $("#il_unit_price").val(parseNumberSafe(existing.unit_price, 0).toFixed(4));
+        $("#il_quantity").val(parseNumberSafe(existing.quantity, 1).toFixed(4));
+        $("#il_tax_rate").val(clamp01(existing.tax_rate).toFixed(4));
+        $("#il_discount_percent").val(parseNumberSafe(existing.discount_percent, 0));
       }
 
-      setLinesEnabled(true);
-      $("#invoiceNotCreatedBanner").hide();
-      $("#btnAddManualLine").prop("disabled", false);
-      $("#btnAddProduct").prop("disabled", false);
+      syncModalCalc();
+    },
 
-      const headerPayload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload() };
+    onOk: async function (ctx) {
+      const $root = ctx.root;
 
-      try {
-        if (!lines || lines.length === 0) {
-          await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, headerPayload);
-          alert("Cabeçalho salvo com sucesso.");
-          return true;
-        }
+      const productId = String($root.find("#il_product_id").val() || "").trim() || null;
 
-        const payload = { ...headerPayload, lines: buildLinesPayload() };
-        await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
+      if (requireProduct && !productId) {
+        alert("Selecione um produto na lista (digitar não basta).");
+        return true; // keep open
+      }
 
-        alert("Fatura salva com sucesso.");
+      const prod = productId ? getProductById(productId) : null;
+
+      const updated = {
+        ...line,
+        product_id: productId,
+        product_name: prod?.name || (productId ? productId : "Manual"),
+        description: String($root.find("#il_description").val() || ""),
+        unit: String($root.find("#il_unit").val() || ""),
+        unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
+        quantity: parseNumberSafe($root.find("#il_quantity").val(), 1),
+        tax_rate: clamp01($root.find("#il_tax_rate").val()),
+        discount_percent: parseNumberSafe($root.find("#il_discount_percent").val(), 0),
+      };
+
+      if (prod) {
+        if (!String(updated.unit || "").trim()) updated.unit = prod.unit || "";
+        if (!String(updated.description || "").trim()) updated.description = prod.description || "";
+        if (!parseNumberSafe(updated.unit_price, 0)) updated.unit_price = parseNumberSafe(prod.defaultUnitPrice, 0);
+        if (!parseNumberSafe(updated.tax_rate, 0)) updated.tax_rate = clamp01(prod.defaultTaxRate);
+      }
+
+      recalcLine(updated);
+
+      if (parseNumberSafe(updated.quantity, 0) <= 0) {
+        alert("Quantidade deve ser maior que 0.");
         return true;
-      } catch (e) {
-        console.error(e);
-        alert(e?.message || "Falha ao salvar a fatura.");
-        return false;
       }
-    }
 
-    // =========================
-    // Buttons / events
-    // =========================
-    $("#btnAddProduct").on("click", async function () {
+      if (isEdit) lines[index] = updated;
+      else lines.push(updated);
+
+      renderLines();
+      return false; // close
+    },
+  });
+}
+
+          // =========================
+          // Load existing invoice (Edit mode)
+          // =========================
+          function detectInvoiceIdFromUrl() {
+            const qs = new URLSearchParams(window.location.search || "");
+            const byQuery = String(qs.get("id") || qs.get("invoice_id") || "").trim();
+            if (byQuery) return byQuery;
+
+            const parts = String(window.location.pathname || "")
+              .split("/")
+              .map((p) => p.trim())
+              .filter(Boolean);
+
+            const last = parts[parts.length - 1] || "";
+            const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            return uuidLike.test(last) ? last : null;
+          }
+
+          function normalizeLineFromApi(l) {
+            const productId = l?.product_id ? String(l.product_id).trim() : null;
+            const prod = productId ? getProductById(productId) : null;
+
+            const normalized = {
+              id: l?.id ? String(l.id).trim() : null,
+              product_id: productId,
+              product_name: prod?.name || (productId ? productId : "Manual"),
+              description: String(l?.description ?? "").trim(),
+              unit: String(l?.unit ?? "").trim(),
+              unit_price: parseNumberSafe(l?.unit_price, 0),
+              quantity: parseNumberSafe(l?.quantity, 1),
+              tax_rate: clamp01(l?.tax_rate),
+              discount_percent: parseNumberSafe(l?.discount_percent, 0),
+              tax_amount: parseNumberSafe(l?.tax_amount, 0),
+              discount_amount: parseNumberSafe(l?.discount_amount, 0),
+              line_subtotal: parseNumberSafe(l?.line_subtotal, 0),
+              line_total: parseNumberSafe(l?.line_total, 0),
+            };
+
+            recalcLine(normalized);
+            return normalized;
+          }
+
+          async function loadInvoiceForEdit(id) {
+            const inv = await apiGet(`/api/invoices/${encodeURIComponent(id)}`);
+
+            invoiceId = String(inv?.id || id).trim();
+            $("#uiInvoiceId").text(inv?.invoice_number || invoiceId || "-");
+
+            $("#company_id").val(inv?.company_id || "").trigger("change");
+            $("#currency_id").val(inv?.currency_id || "").trigger("change");
+
+            $("#status").val(String(inv?.status ?? 0));
+            $("#version").val(parseNumberSafe(inv?.version, 1));
+
+            $("#quote_at").val(tryToDatetimeLocal(inv?.quote_at));
+            $("#exchange_rate").val(inv?.exchange_rate ?? "1");
+
+            $("#billing_address_line1").val(inv?.billing_address_line1 || "");
+            $("#billing_address_line2").val(inv?.billing_address_line2 || "");
+            $("#billing_address_city").val(inv?.billing_address_city || "");
+            $("#billing_address_state").val(inv?.billing_address_state || "");
+            $("#billing_address_postal_code").val(inv?.billing_address_postal_code || "");
+            $("#billing_address_country").val(inv?.billing_address_country || "");
+
+            $("#discount_percent").val(parseNumberSafe(inv?.discount_percent, 0));
+            $("#notes").val(inv?.notes || "");
+            $("#terms").val(inv?.terms || "");
+
+            // Ensure products loaded for currency before mapping names
+            await preloadProducts();
+
+            const apiLines = Array.isArray(inv?.invoice_lines) ? inv.invoice_lines : [];
+            lines = apiLines.map(normalizeLineFromApi);
+
+            $("#invoiceNotCreatedBanner").hide();
+            setLinesEnabled(true);
+
+            $("#btnAddManualLine").prop("disabled", false);
+            $("#btnAddProduct").prop("disabled", false);
+            $("#discount_percent").prop("readonly", false);
+
+            renderLines();
+            computeTotals();
+
+            return inv;
+          }
+
+          // =========================
+          // Save logic
+          // =========================
+          async function saveInvoice() {
+            const ok = await createInvoiceIfNeeded();
+            if (!ok) {
+              $("#invoiceNotCreatedBanner").show();
+              setLinesEnabled(false);
+              return false;
+            }
+
+            setLinesEnabled(true);
+            $("#invoiceNotCreatedBanner").hide();
+            $("#btnAddManualLine").prop("disabled", false);
+            $("#btnAddProduct").prop("disabled", false);
+
+            const headerPayload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload() };
+
+            try {
+              const payload = { ...headerPayload, lines: buildLinesPayload() };
+              await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
+
+              alert("Fatura salva com sucesso.");
+              return true;
+            } catch (e) {
+              console.error(e);
+              alert(e?.message || "Falha ao salvar a fatura.");
+              return false;
+            }
+          }
+
+          // =========================
+          // Buttons / events
+          // =========================
+$("#btnAddProduct").on("click", async function () {
   const ok = await createInvoiceIfNeeded();
   if (!ok) return;
 
   setLinesEnabled(true);
   $("#invoiceNotCreatedBanner").hide();
 
+  const currencyId = String($("#currency_id").val() || "").trim();
+  if (!currencyId) {
+    alert("Selecione uma moeda para carregar os produtos.");
+    return;
+  }
+
   try {
-    await preloadProducts();
+    const loaded = await preloadProducts();
+    if (!loaded) {
+      alert("Nenhum produto encontrado para a moeda selecionada.");
+      return;
+    }
   } catch (e) {
     console.error(e);
     productsCache = [];
+    alert("Falha ao carregar produtos para a moeda selecionada.");
+    return;
   }
 
-  // Produto obrigatório
+  // Product is required for this modal
   openInvoiceLineModal({ mode: "add", requireProduct: true });
 });
 
-$("#btnAddManualLine").on("click", async function () {
-  const ok = await createInvoiceIfNeeded();
-  if (!ok) return;
-
-  setLinesEnabled(true);
-  $("#invoiceNotCreatedBanner").hide();
-
-  // Produto opcional (linha manual)
-  openInvoiceLineModal({ mode: "add", requireProduct: false });
-});
 
 
-    $("#btnSaveHeader").on("click", async function () {
-      const ok = await createInvoiceIfNeeded();
-      if (!ok) {
-        $("#invoiceNotCreatedBanner").show();
-        setLinesEnabled(false);
-        return;
-      }
+          $("#btnAddManualLine").on("click", async function () {
+            const ok = await createInvoiceIfNeeded();
+            if (!ok) return;
 
-      setLinesEnabled(true);
-      $("#invoiceNotCreatedBanner").hide();
-      $("#btnAddManualLine").prop("disabled", false);
-      $("#btnAddProduct").prop("disabled", false);
+            setLinesEnabled(true);
+            $("#invoiceNotCreatedBanner").hide();
 
-      alert("Cabeçalho salvo com sucesso.");
-      renderLines();
-    });
+            openInvoiceLineModal({ mode: "add", requireProduct: false });
+          });
 
-    $("#btnSaveInvoice").on("click", async function () {
-      await saveInvoice();
-    });
+          $("#btnSaveHeader").on("click", async function () {
+            const ok = await createInvoiceIfNeeded();
+            if (!ok) {
+              $("#invoiceNotCreatedBanner").show();
+              setLinesEnabled(false);
+              return;
+            }
 
-    $("#currency_id").on("change", async function () {
-      try {
-        await preloadProducts();
-      } catch (e) {
-        console.error(e);
-        productsCache = [];
-      }
-    });
+            setLinesEnabled(true);
+            $("#invoiceNotCreatedBanner").hide();
+            $("#btnAddManualLine").prop("disabled", false);
+            $("#btnAddProduct").prop("disabled", false);
 
-    // =========================
-    // Init
-    // =========================
-    (async function init() {
-      try {
-        if ($("#pageName").length) {
-          $("#pageName").text("Faturas");
-          $("#subpageName").text("Faturas");
-          $("#path").show();
-          $("#subSecoundPageName").text("Formulários");
-          $("#subpath").show();
-          $("#subpathName").text("Nova Fatura");
-        }
+            alert("Cabeçalho salvo com sucesso.");
+            renderLines();
+          });
 
-        await Promise.all([loadCompanies(), loadCurrencies()]);
-        await preloadProducts();
+          $("#btnSaveInvoice").on("click", async function () {
+            await saveInvoice();
+          });
 
-        initSelect2Company();
+          $("#currency_id").on("change", async function () {
+            try {
+              await preloadProducts();
+            } catch (e) {
+              console.error(e);
+              productsCache = [];
+            }
+          });
 
-        $("#uiInvoiceId").text("-");
-        $("#invoiceNotCreatedBanner").show();
-        setLinesEnabled(false);
+          // =========================
+          // Init
+          // =========================
+          (async function init() {
+            try {
+              if ($("#pageName").length) {
+                $("#pageName").text("Faturas");
+                $("#subpageName").text("Faturas");
+                $("#path").show();
+                $("#subSecoundPageName").text("Formulários");
+                $("#subpath").show();
+                $("#subpathName").text("Nova Fatura");
+              }
 
-        $("#btnAddManualLine").prop("disabled", true);
-        $("#btnAddProduct").prop("disabled", true);
+              await Promise.all([loadCompanies(), loadCurrencies()]);
+              initSelect2Company();
 
-        renderLines();
-      } catch (e) {
-        console.error(e);
-        alert("Falha ao carregar dados iniciais.");
-      }
-    })();
-  })();
-</script>
+              $("#uiInvoiceId").text("-");
+              $("#invoiceNotCreatedBanner").show();
+              setLinesEnabled(false);
 
-<% %>
+              $("#btnAddManualLine").prop("disabled", true);
+              $("#btnAddProduct").prop("disabled", true);
+
+              renderLines();
+              computeTotals();
+
+              const existingId = detectInvoiceIdFromUrl();
+              if (existingId) {
+                $("#subpathName").text("Editar Fatura");
+                await loadInvoiceForEdit(existingId);
+              } else {
+                await preloadProducts();
+              }
+            } catch (e) {
+              console.error(e);
+              alert("Falha ao carregar dados iniciais.");
+            }
+          })();
+        })();
+      </script>
+
+
+      <% %>

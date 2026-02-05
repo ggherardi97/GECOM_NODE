@@ -25,19 +25,23 @@
   <link href="/Assets/inspinia/css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet" />
 
 
-  <!-- JS head -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="/Assets/inspinia/js/popper.min.js"></script>
-  <script src="/Assets/inspinia/js/bootstrap.min.js"></script>
-  <script src="/Assets/inspinia/js/jquery-3.1.1.min.js"></script>
-  <script src="/Assets/inspinia/js/inspinia.js"></script>
-  <script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-  <script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-  <script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
-  <script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
-  <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
-  <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
-  <script src="/Assets/js/enums/globalEnum.js"></script>
+<!-- JS head (fix: load order + single jQuery) -->
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/Assets/inspinia/js/popper.min.js"></script>
+<script src="/Assets/inspinia/js/bootstrap.min.js"></script>
+
+<script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+<script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+
+<script src="/Assets/inspinia/js/inspinia.js"></script>
+
+<script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
+<script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
+
+<script src="/Assets/js/functionalities/dynamicsModal.js"></script>
+<script src="/Assets/js/enums/globalEnum.js"></script>
+<script src="/Assets/js/authContext.js"></script>
 
 <script src="/Assets/js/authContext.js"></script>
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
@@ -608,7 +612,7 @@
 
       const cleanup = () => {
         btnSave.onclick = null;
-        btnClose.onclick = (message.includes("unauthorized")) ? window.location = "/" : null;
+        btnClose.onclick = (message.includes("unauthorized") || message.includes("Falha ao")) ? window.location = "/" : null;
         btnClose.style.display = "";
         btnSave.textContent = "Save";
       };
