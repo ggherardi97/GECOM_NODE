@@ -79,6 +79,7 @@ app.get('/NewProduct', (req, res) => res.render('NewProduct'));
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
 app.get('/LandingPage', (req, res) => res.render('LandingPage', { layout: false }));
+app.get('/InvoicesPrint', (req, res) => res.render('LandingPage', { layout: false }));
 
 /* ---------- 404 e erro genérico (opcional, mas útil) ---------- */
 app.use((req, res) => res.status(404).send('Not Found'));

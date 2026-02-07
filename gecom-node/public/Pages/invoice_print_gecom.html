@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GECOM | Invoice Print</title>
+
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+  <link href="css/animate.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
+  <style>
+    .muted { color: #777; }
+    .loading { padding: 20px; }
+    .mono { font-family: monospace; }
+  </style>
+</head>
+
+<body class="white-bg">
+  <div class="wrapper wrapper-content p-xl">
+    <div class="ibox-content p-xl">
+
+      <div id="loading" class="loading">
+        <i class="fa fa-spinner fa-spin"></i> Carregando invoice...
+      </div>
+
+      <div id="content" style="display:none;">
+        <div class="row">
+          <div class="col-sm-6">
+            <h5>De:</h5>
+            <address>
+              <strong id="fromName">-</strong><br>
+              <span id="fromAddr1">-</span><br>
+              <span id="fromAddr2"></span><br>
+              <abbr title="Telefone">T:</abbr> <span id="fromPhone">-</span>
+            </address>
+          </div>
+
+          <div class="col-sm-6 text-right">
+            <h4>Invoice</h4>
+            <h4 class="text-navy mono" id="invoiceNumber">-</h4>
+
+            <span>Para:</span>
+            <address>
+              <strong id="toName">-</strong><br>
+              <span id="toAddr1">-</span><br>
+              <span id="toAddr2"></span><br>
+              <abbr title="Telefone">T:</abbr> <span id="toPhone">-</span>
+            </address>
+
+            <p>
+              <span><strong>Data:</strong> <span id="invoiceDate">-</span></span><br />
+              <span><strong>Vencimento:</strong> <span id="dueDate">-</span></span>
+            </p>
+          </div>
+        </div>
+
+        <div class="table-responsive m-t">
+          <table class="table invoice-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th class="text-right">Qtd</th>
+                <th class="text-right">Preço Unit.</th>
+                <th class="text-right">Taxa</th>
+                <th class="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody id="linesTbody"></tbody>
+          </table>
+        </div>
+
+        <table class="table invoice-total">
+          <tbody>
+            <tr>
+              <td><strong>Sub Total :</strong></td>
+              <td class="text-right" id="uiSubtotal">-</td>
+            </tr>
+            <tr>
+              <td><strong>Tax :</strong></td>
+              <td class="text-right" id="uiTax">-</td>
+            </tr>
+            <tr>
+              <td><strong>Total :</strong></td>
+              <td class="text-right" id="uiTotal">-</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="well m-t">
+          <strong>Observações</strong>
+          <div id="uiNotes" class="muted" style="margin-top:6px;">-</div>
+        </div>
+      </div>
+
+      <div id="error" style="display:none;" class="alert alert-danger">
+        Falha ao carregar a invoice.
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/jquery-3.1.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.js"></script>
+  <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+  <script src="js/inspinia.js"></script>
+
+  <script>
+    (function () {
+      function qs(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      }
+
+      function escapeHtml(value) {
+        if (value == null) return "";
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function toNumber(value) {
+        const n = Number(String(value ?? "").replace(",", "."));
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function formatDate(value) {
+        if (!value) return "-";
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "-";
+        return d.toLocaleDateString("pt-BR");
+      }
+
+      function money(value, currencyCode) {
+        const n = toNumber(value);
+        try {
+          if (currencyCode) {
+            return new Intl.NumberFormat("pt-BR", { style: "currency", currency: currencyCode }).format(n);
+          }
+        } catch (e) { /* ignore */ }
+        return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+      }
+
+      async function loadInvoice(invoiceId) {
+        // IMPORTANT: call the portal API (same origin), so cookies are included and the server can forward auth
+        const resp = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          credentials: "include"
+        });
+
+        const text = await resp.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch (e) { }
+
+        if (!resp.ok) {
+          const msg = json?.message || json?.error || text || "Erro ao buscar invoice.";
+          throw new Error(msg);
+        }
+
+        return json;
+      }
+
+      function pick(obj, keys, fallback = null) {
+        for (const k of keys) {
+          const v = obj?.[k];
+          if (v !== undefined && v !== null && String(v).trim() !== "") return v;
+        }
+        return fallback;
+      }
+
+      function render(invoice) {
+        // Try to be flexible with backend shapes
+        const company = invoice?.company || invoice?.Company || null;
+        const currency = invoice?.currency || invoice?.Currency || null;
+
+        const currencyCode =
+          pick(currency, ["code", "iso_code", "currency_code"], null) ||
+          pick(invoice, ["currency_code", "currencyCode"], null);
+
+        const invoiceNumber =
+          pick(invoice, ["invoice_number", "number", "code"], null) ||
+          (invoice?.id ? `INV-${String(invoice.id).slice(0, 8).toUpperCase()}` : "INV");
+
+        $("#invoiceNumber").text(invoiceNumber);
+
+        // "From" (your company) - adjust later if you have issuer table
+        $("#fromName").text("GECOM");
+        $("#fromAddr1").text("-");
+        $("#fromAddr2").text("");
+        $("#fromPhone").text("-");
+
+        // "To" (customer/company)
+        $("#toName").text(pick(company, ["company_name", "name"], "-"));
+        const addr1 = [
+          pick(invoice, ["billing_address_line1"], ""),
+          pick(invoice, ["billing_address_line2"], "")
+        ].filter(Boolean).join(" - ");
+        const addr2 = [
+          pick(invoice, ["billing_address_city"], ""),
+          pick(invoice, ["billing_address_state"], ""),
+          pick(invoice, ["billing_address_postal_code"], ""),
+          pick(invoice, ["billing_address_country"], "")
+        ].filter(Boolean).join(" - ");
+
+        $("#toAddr1").html(escapeHtml(addr1 || "-"));
+        $("#toAddr2").html(escapeHtml(addr2 || ""));
+        $("#toPhone").text(pick(company, ["phonenumber", "phone", "telephone"], "-"));
+
+        $("#invoiceDate").text(formatDate(pick(invoice, ["created_at", "createdAt", "invoice_date", "date"], null)));
+        $("#dueDate").text(formatDate(pick(invoice, ["due_date", "dueDate"], null)));
+
+        const notes = pick(invoice, ["notes", "comment", "comments"], "");
+        $("#uiNotes").html(escapeHtml(notes || "-"));
+
+        const lines =
+          invoice?.lines ||
+          invoice?.invoice_lines ||
+          invoice?.items ||
+          [];
+
+        const tbody = document.getElementById("linesTbody");
+        tbody.innerHTML = "";
+
+        let subtotal = 0;
+        let taxTotal = 0;
+        let total = 0;
+
+        if (!Array.isArray(lines) || lines.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Nenhuma linha</td></tr>`;
+        } else {
+          for (const l of lines) {
+            const qty = toNumber(pick(l, ["quantity", "qty"], 0));
+            const unitPrice = toNumber(pick(l, ["unit_price", "unitPrice", "price"], 0));
+            const taxRate = toNumber(pick(l, ["tax_rate", "taxRate"], 0)); // expected 0..1 (same as your NewInvoice)
+            const desc = pick(l, ["description", "name", "product_name"], "Item");
+
+            const lineSubtotal = qty * unitPrice;
+            const lineTax = Math.max(0, lineSubtotal) * Math.max(0, taxRate);
+            const lineTotal = lineSubtotal + lineTax;
+
+            subtotal += lineSubtotal;
+            taxTotal += lineTax;
+            total += lineTotal;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>
+                <div><strong>${escapeHtml(desc)}</strong></div>
+              </td>
+              <td class="text-right">${escapeHtml(qty)}</td>
+              <td class="text-right">${escapeHtml(money(unitPrice, currencyCode))}</td>
+              <td class="text-right">${escapeHtml((taxRate * 100).toFixed(2))}%</td>
+              <td class="text-right">${escapeHtml(money(lineTotal, currencyCode))}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+
+        $("#uiSubtotal").text(money(subtotal, currencyCode));
+        $("#uiTax").text(money(taxTotal, currencyCode));
+        $("#uiTotal").text(money(total, currencyCode));
+      }
+
+      (async function init() {
+        const invoiceId = qs("invoiceId");
+        if (!invoiceId) {
+          $("#loading").hide();
+          $("#error").show().text("invoiceId não informado na URL.");
+          return;
+        }
+
+        try {
+          const invoice = await loadInvoice(invoiceId);
+          render(invoice);
+
+          $("#loading").hide();
+          $("#content").show();
+
+          // Print only after render
+          setTimeout(function () { window.print(); }, 300);
+        } catch (e) {
+          console.error(e);
+          $("#loading").hide();
+          $("#error").show().text(e?.message || "Falha ao carregar a invoice.");
+        }
+      })();
+    })();
+  </script>
+</body>
+
+</html>

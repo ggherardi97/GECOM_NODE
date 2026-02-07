@@ -28,6 +28,165 @@ async function readJsonSafe(response) {
   }
 }
 
+// ------------------------------
+// Print helpers (server-side)
+// ------------------------------
+function toNumber(value) {
+  const n = Number(String(value ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatDatePtBr(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("pt-BR");
+}
+
+function money(value, currencyCode) {
+  const n = toNumber(value);
+  try {
+    if (currencyCode) {
+      return new Intl.NumberFormat("pt-BR", { style: "currency", currency: currencyCode }).format(n);
+    }
+  } catch (e) {
+    // ignore invalid currency codes
+  }
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+}
+
+function qtyFmt(value) {
+  const n = toNumber(value);
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 4 }).format(n);
+}
+
+/**
+ * IMPORTANT:
+ * Your Nest backend returns relations as:
+ *   companies, currencies, invoice_lines
+ */
+function extractCurrencyCode(invoice) {
+  const currencies = invoice?.currencies || invoice?.currency || null;
+  return (
+    currencies?.code ||
+    currencies?.iso_code ||
+    currencies?.currency_code ||
+    invoice?.currency_code ||
+    null
+  );
+}
+
+// ------------------------------
+// ✅ PRINT (HTML) - renders EJS
+// Route will be available as: /api/invoices/:id/print (if app.use("/api", router))
+// ------------------------------
+router.get("/invoices/:id/print", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    if (!authHeader) {
+      return res.status(401).send("Não autenticado.");
+    }
+
+    const invoiceId = String(req.params.id || "").trim();
+    if (!invoiceId) {
+      return res.status(400).send("Invoice id inválido.");
+    }
+
+    const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(invoiceId)}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: authHeader,
+      },
+    });
+
+    const invoice = await readJsonSafe(response);
+    if (!response.ok) {
+      return res.status(response.status).send(invoice?.message || "Falha ao carregar invoice.");
+    }
+
+    const company = invoice?.companies || invoice?.company || null;
+    const currencyCode = extractCurrencyCode(invoice);
+
+    const apiLines = Array.isArray(invoice?.invoice_lines) ? invoice.invoice_lines : [];
+
+   let grossSubtotal = 0;
+let lineDiscountTotal = 0;
+let taxTotal = 0;
+
+// Header discount (%)
+const headerDiscountPercent = Math.max(0, Math.min(100, toNumber(invoice?.discount_percent)));
+
+const lines = apiLines.map((l) => {
+  const qty = toNumber(l?.quantity);
+  const unitPrice = toNumber(l?.unit_price);
+  const taxRate = Math.max(0, Math.min(1, toNumber(l?.tax_rate))); // 0..1
+  const lineDiscountPercent = Math.max(0, Math.min(100, toNumber(l?.discount_percent)));
+
+  const gross = qty * unitPrice;
+  const lineDiscountAmount = gross * (lineDiscountPercent / 100);
+  const taxableBase = Math.max(0, gross - lineDiscountAmount);
+  const lineTax = taxableBase * taxRate;
+  const lineTotal = taxableBase + lineTax;
+
+  grossSubtotal += gross;
+  lineDiscountTotal += lineDiscountAmount;
+  taxTotal += lineTax;
+
+  return {
+    product_name: l?.product_name || "Manual",
+    description: l?.description || "",
+    quantityFmt: qtyFmt(qty),
+    unitPriceFmt: money(unitPrice, currencyCode),
+    taxFmt: `${(taxRate * 100).toFixed(2)}%`,
+    totalFmt: money(lineTotal, currencyCode),
+  };
+});
+
+// Header discount amount is applied on GROSS subtotal (same as your NewInvoice)
+const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
+
+// Total = (grossSubtotal - line discounts - header discount) + taxes
+const total = Math.max(0, (grossSubtotal - lineDiscountTotal - headerDiscountAmount) + taxTotal);
+
+const totals = {
+  subtotalFmt: money(grossSubtotal, currencyCode),
+  discountFmt: money(headerDiscountAmount, currencyCode),
+  taxFmt: money(taxTotal, currencyCode),
+  totalFmt: money(total, currencyCode),
+};
+
+
+const viewModel = {
+  invoice,
+  company,
+  from: {
+    name: "GECOM",
+    addr1: "-",
+    addr2: "",
+    phone: "-",
+  },
+  invoiceDate: formatDatePtBr(invoice?.created_at || invoice?.invoice_date || invoice?.createdAt),
+  dueDate: formatDatePtBr(invoice?.due_at || invoice?.due_at),
+  lines,
+  totals, // ✅ usa o totals já calculado (subtotal, desconto, imposto, total)
+};
+
+
+
+    // This requires you to have views/InvoicesPrint.ejs created
+    return res.render("InvoicesPrint", {
+  ...viewModel,
+  layout: false, // ✅ disable master layout ONLY for this page
+});
+  } catch (error) {
+    console.error("GET /api/invoices/:id/print error:", error);
+    return res.status(500).send("Erro interno ao gerar impressão.");
+  }
+});
+
 // GET /api/invoices?company_id=&status=
 router.get("/invoices", async (req, res) => {
   try {
@@ -112,19 +271,15 @@ router.post("/invoices", async (req, res) => {
       body: data,
     });
 
-    // Se backend devolveu erro, repassa a msg real
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("POST /api/invoices error (BFF):", error);
-
-    // ✅ devolve erro real pra você ver no browser
     return res.status(500).json({
       message: error?.message || "Erro interno do servidor",
       stack: process.env.NODE_ENV === "production" ? undefined : String(error?.stack || ""),
     });
   }
 });
-
 
 // PATCH /api/invoices/:id
 router.patch("/invoices/:id", async (req, res) => {
@@ -165,9 +320,7 @@ router.delete("/invoices/:id", async (req, res) => {
 
     const data = await readJsonSafe(response);
 
-    // Se o backend retornar 204 (no content), devolve no content também
     if (response.status === 204) return res.status(204).send();
-
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("DELETE /api/invoices/:id error:", error);

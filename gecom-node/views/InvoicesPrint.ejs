@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice - Impressão</title>
+
+  <!-- Use absolute paths to avoid /Pages/... issues -->
+  <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/Assets/inspinia/font-awesome/css/font-awesome.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/animate.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/style.css" rel="stylesheet">
+
+  <style>
+    body.white-bg { background: #fff; }
+    .mono { font-family: monospace; }
+
+    /* Print only the invoice wrapper */
+    @media print {
+      .no-print { display: none !important; }
+      .print-area { box-shadow: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+
+<body class="white-bg">
+  <div class="wrapper wrapper-content p-xl print-area">
+    <div class="ibox-content p-xl">
+
+      <div class="no-print" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;">
+        <button class="btn btn-white" onclick="window.close()"><i class="fa fa-times"></i> Fechar</button>
+        <button class="btn btn-primary" onclick="window.print()"><i class="fa fa-print"></i> Imprimir</button>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6">
+          <h5>De:</h5>
+          <address>
+            <strong><%= from?.name || "GECOM" %></strong><br>
+            <%= from?.addr1 || "-" %><br>
+            <%= from?.addr2 || "" %>
+            <abbr title="Telefone">T:</abbr> <%= from?.phone || "-" %>
+          </address>
+        </div>
+
+        <div class="col-sm-6 text-right">
+          <h4>Invoice</h4>
+          <h4 class="text-navy mono"><%= invoice?.invoice_number || ("INV-" + String(invoice?.id || "").slice(0,8).toUpperCase()) %></h4>
+
+          <span>Para:</span>
+          <address>
+            <strong><%= company?.company_name || "-" %></strong><br>
+            <%= invoice?.billing_address_line1 || "-" %><br>
+            <%= invoice?.billing_address_line2 || "" %>
+            <abbr title="Telefone">T:</abbr> <%= company?.phone || "-" %>
+          </address>
+
+          <p>
+            <span><strong>Data:</strong> <%= invoiceDate || "-" %></span><br/>
+            <span><strong>Vencimento:</strong> <%= dueDate || "-" %></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="table-responsive m-t">
+        <table class="table invoice-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="text-right">Qtd</th>
+              <th class="text-right">Preço Unit.</th>
+              <th class="text-right">Imposto</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!lines || !lines.length) { %>
+              <tr><td colspan="5" class="text-center text-muted">Nenhuma linha</td></tr>
+            <% } else { %>
+              <% lines.forEach(function(l){ %>
+                <tr>
+                  <td>
+                    <div><strong><%= l.product_name || "Manual" %></strong></div>
+                    <small><%= l.description || "" %></small>
+                  </td>
+                  <td class="text-right"><%= l.quantityFmt %></td>
+                  <td class="text-right"><%= l.unitPriceFmt %></td>
+                  <td class="text-right"><%= l.taxFmt %></td>
+                  <td class="text-right"><%= l.totalFmt %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+     <table class="table invoice-total">
+  <tbody>
+    <tr>
+      <td><strong>Sub Total :</strong></td>
+      <td class="text-right"><%= totals.subtotalFmt %></td>
+    </tr>
+
+    <tr>
+      <td><strong>Desconto :</strong></td>
+      <td class="text-right"><%= totals.discountFmt %></td>
+    </tr>
+
+    <tr>
+      <td><strong>Impostos :</strong></td>
+      <td class="text-right"><%= totals.taxFmt %></td>
+    </tr>
+
+    <tr>
+      <td><strong>Total :</strong></td>
+      <td class="text-right"><%= totals.totalFmt %></td>
+    </tr>
+  </tbody>
+</table>
+
+
+      <div class="well m-t"><strong>Observações</strong>
+        <div style="margin-top:6px;"><%= invoice?.notes || "-" %></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-print
+    window.onload = function () { setTimeout(function(){ window.print(); }, 250); };
+  </script>
+</body>
+</html>

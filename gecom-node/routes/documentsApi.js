@@ -21,29 +21,61 @@ function getAuthHeader(req) {
 async function readJsonSafe(response) {
   const text = await response.text();
   if (!text) return {};
-  try { return JSON.parse(text); } catch { return { message: text }; }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
 }
 
-// GET /api/documents?account_id=&path=&related_table=&related_id=&item_type=&q=&take=&skip=
+/**
+ * Build a query string for listing documents.
+ * We support both parent_id and path for backward-compatibility:
+ * - If parent_id is provided, we send it as `path` to the backend (since your controller currently reads `path` as parent_id).
+ * - If only path is provided, we pass it through as-is.
+ */
+function buildDocumentsListQuery(req) {
+  const qs = new URLSearchParams();
+
+  // Preferred param: parent_id (folder navigation)
+  const parentId = req.query.parent_id;
+
+  // Backward compatibility param: path (your backend reads it and maps to parent_id)
+  const path = req.query.path;
+
+  // Keep current backend contract: it expects query param "path" but uses it as parent_id.
+  if (parentId !== undefined && String(parentId) !== "") {
+    qs.set("path", String(parentId));
+  } else if (path !== undefined && String(path) !== "") {
+    qs.set("path", String(path));
+  }
+
+  const allowed = ["account_id", "related_table", "related_id", "item_type", "q", "take", "skip"];
+  for (const key of allowed) {
+    if (req.query[key] !== undefined && String(req.query[key]) !== "") {
+      qs.set(key, String(req.query[key]));
+    }
+  }
+
+  return qs;
+}
+
+// -----------------------------------------------------------------------------// GET /api/documents?account_id=&parent_id=&path=&related_table=&related_id=&item_type=&q=&take=&skip=
+// -----------------------------------------------------------------------------
 router.get("/documents", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
 
-    const qs = new URLSearchParams();
-    const allowed = ["account_id", "path", "related_table", "related_id", "item_type", "q", "take", "skip"];
-    for (const key of allowed) {
-      if (req.query[key] !== undefined && req.query[key] !== "") qs.set(key, String(req.query[key]));
-    }
-
+    const qs = buildDocumentsListQuery(req);
     const url = `${baseUrl}/documents${qs.toString() ? `?${qs.toString()}` : ""}`;
 
     const response = await fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
@@ -54,7 +86,8 @@ router.get("/documents", async (req, res) => {
   }
 });
 
-// POST /api/documents -> backend POST /documents
+// -----------------------------------------------------------------------------// POST /api/documents -> backend POST /documents
+// -----------------------------------------------------------------------------
 router.post("/documents", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
@@ -65,9 +98,9 @@ router.post("/documents", async (req, res) => {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
-      body: JSON.stringify(req.body ?? {})
+      body: JSON.stringify(req.body ?? {}),
     });
 
     const data = await readJsonSafe(response);
@@ -78,7 +111,8 @@ router.post("/documents", async (req, res) => {
   }
 });
 
-// PATCH /api/documents/:id -> backend PATCH /documents/:id
+// -----------------------------------------------------------------------------// PATCH /api/documents/:id -> backend PATCH /documents/:id
+// -----------------------------------------------------------------------------
 router.patch("/documents/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
@@ -92,9 +126,9 @@ router.patch("/documents/:id", async (req, res) => {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
-      body: JSON.stringify(req.body ?? {})
+      body: JSON.stringify(req.body ?? {}),
     });
 
     const data = await readJsonSafe(response);
@@ -105,7 +139,8 @@ router.patch("/documents/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/documents/:id -> backend DELETE /documents/:id
+// -----------------------------------------------------------------------------// DELETE /api/documents/:id -> backend DELETE /documents/:id
+// -----------------------------------------------------------------------------
 router.delete("/documents/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
@@ -118,14 +153,112 @@ router.delete("/documents/:id", async (req, res) => {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("DELETE /api/documents/:id error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// -----------------------------------------------------------------------------// POST /api/documents/:id/presign-upload -> backend POST /documents/:id/presign-upload
+// Body example:
+// {
+//   "fileName": "Contrato.pdf",
+//   "contentType": "application/pdf",
+//   "size": 123456
+// }
+// -----------------------------------------------------------------------------
+router.post("/documents/:id/presign-upload", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ message: "Missing document id" });
+
+    const response = await fetch(`${baseUrl}/documents/${encodeURIComponent(id)}/presign-upload`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("POST /api/documents/:id/presign-upload error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// -----------------------------------------------------------------------------// GET /api/documents/:id/presign-download -> backend GET /documents/:id/presign-download
+// -----------------------------------------------------------------------------
+router.get("/documents/:id/presign-download", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ message: "Missing document id" });
+
+    const response = await fetch(`${baseUrl}/documents/${encodeURIComponent(id)}/presign-download`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/documents/:id/presign-download error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// -----------------------------------------------------------------------------// POST /api/documents/:id/complete-upload -> backend PATCH /documents/:id
+// Use this after the PUT to R2 succeeds, to mark upload_status as UPLOADED and/or save object_key, etag, etc.
+//
+// Body example:
+// {
+//   "upload_status": "UPLOADED",
+//   "object_key": "rel/processes/<id>/Contrato.pdf",
+//   "etag": "\"abc123\"",
+//   "mime_type": "application/pdf",
+//   "size_bytes": 123456
+// }
+// -----------------------------------------------------------------------------
+router.post("/documents/:id/complete-upload", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const id = String(req.params.id || "").trim();
+    if (!id) return res.status(400).json({ message: "Missing document id" });
+
+    const response = await fetch(`${baseUrl}/documents/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("POST /api/documents/:id/complete-upload error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
