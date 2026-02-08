@@ -1,413 +1,936 @@
-    <div class="row">
-        <div class="col-lg-3">
-            <div class="ibox ">
-                <div class="ibox-content">
-                    <div class="file-manager">
-                        <div class="row" style="margin: 0px;">
-                            <h5 class="tag-title">Filters</h5>
-                            <ul class="tag-list" style="padding: 0">
-                                <li><a href="">Despachantes</a></li>
-                                <li><a href="">Contratos</a></li>
-                                <li><a href="">Invoices</a></li>
-                                <li><a href="">Produtos</a></li>
-                                <li><a href="">GECOM</a></li>
-                                <li><a href="">Photography</a></li>
-                                <li><a href="">Film</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <div class="hr-line-dashed"></div>
-                            <h5>Folders</h5>
-                            <ul class="folder-list" style="padding: 0">
-                                <li><a><i class="fa fa-folder"></i>Despachante</a></li>
-                                <li><a><i class="fa fa-folder"></i>Invoices</a></li>
-                                <li><a><i class="fa fa-folder"></i>Imagens do produto</a></li>
-                            </ul>
-                            <br />
-                            <div class="clearfix"></div>
-                            <input type="button" class="btn btn-primary btn-block" value="Adicionar arquivos" onclick="fileInput.click()" />
-                            <input type="file" style="display: none;" id="fileInput" />
-                        </div>
-                    </div>
-                </div>
+<div class="row">
+  <!-- LEFT -->
+  <div class="col-lg-3">
+    <div class="ibox">
+      <div class="ibox-content">
+        <div class="file-manager">
+          <div class="row" style="margin:0;">
+            <h5 class="tag-title">Pastas</h5>
+
+            <div class="input-group" style="margin: 8px 0 12px 0;">
+              <input id="txtSearchLeft" type="text" class="form-control input-sm" placeholder="Buscar..." />
+              <span class="input-group-btn">
+                <button id="btnSearchLeft" class="btn btn-sm btn-primary" type="button">OK</button>
+              </span>
             </div>
+
+            <small class="text-muted">Pastas da raiz</small>
+            <ul id="leftFolders" class="folder-list" style="padding:0;margin-top:10px;">
+              <li class="text-muted">Carregando...</li>
+            </ul>
+          </div>
+
+          <div class="hr-line-dashed"></div>
+          <div class="clearfix"></div>
+
+          <button class="btn btn-primary btn-block" id="btnAddQuickUpload" type="button" name="btn_act_new">
+            <i class="fa fa-upload"></i> Upload rápido
+          </button>
+          <input type="file" style="display:none;" id="fileQuickInput" />
+
+          <div style="margin-top:10px;" class="text-muted">
+            <small>Você também pode usar o botão “Adicionar” no topo.</small>
+          </div>
         </div>
-        <div class="col-lg-9 animated fadeInRight">
-            <div class="row" style="padding: 15px 15px;">
-                <div class="col-lg-9" style="margin-left: -15px;">
-                    <input type="button" class="btn btn-primary" value="< Voltar" style="display:none;" id="btnVoltar" onclick="changeView(false)" />
-                    <div class="btn-group">
-                        <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Nova Pasta</a></li>
-                            <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
-                            <li><a class="dropdown-item" href="#">Link do Drive</a></li>
-                            <li class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Solicitar Acesso</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="btn-group" style="margin: 0px 0 15px -15px;">
-                        <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
-                        <button class="btn btn-white">1</button>
-                        <button class="btn btn-white  active">2</button>
-                        <button class="btn btn-white">3</button>
-                        <button class="btn btn-white">4</button>
-                        <button type="button" class="btn btn-white"><i class="fa fa-chevron-right"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row" id="raiz">
-                <div class="col-lg-12">
-                    <div class="file-box">
-                        <div class="file">
-                            <a href="#">
-                                <span class="corner"></span>
-                                <div class="icon">
-                                    <i class="fa fa-folder"></i>
-                                </div>
-                                <div class="file-name">
-                                    Despachante
-                                    <br />
-                                    <small>Added: Jan 11, 2014</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="file-box">
-                        <div class="file">
-                            <a href="#">
-                                <span class="corner"></span>
-                                <div class="icon">
-                                    <i class="fa fa-folder"></i>
-                                </div>
-                                <div class="file-name">
-                                    Invoices
-                                    <br />
-                                    <small>Added: Jan 11, 2014</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="file-box">
-                        <div class="file">
-                            <a href="#">
-                                <span class="corner"></span>
-                                <div class="icon">
-                                    <i class="fa fa-folder"></i>
-                                </div>
-                                <div class="file-name">
-                                    Imagens do produto
-                                    <br />
-                                    <small>Added: Jan 11, 2014</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="file-box">
-                        <div class="file">
-                            <a href="#">
-                                <span class="corner"></span>
-
-                                <div class="icon">
-                                    <i class="img-fluid fa fa-film"></i>
-                                </div>
-                                <div class="file-name">
-                                    Vídeo da carga.mpg4
-                                    <br />
-                                    <small>Added: Fab 18, 2014</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
-
-
-                </div>
-            </div>
-
-            <div class="row" id="details" style="display: none;">
-
-                <div class="file-box">
-                    <a href="#">
-                        <div class="file">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-bar-chart-o"></i>
-                            </div>
-                            <div class="file-name">
-                                Annual report 2014.xls
-                         <br />
-                                <small>Added: Fab 22, 2014</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-file"></i>
-                            </div>
-                            <div class="file-name">
-                                Document_2014.doc
-                         <br />
-                                <small>Added: Jan 11, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p1.jpg">
-                            </div>
-                            <div class="file-name">
-                                Italy street.jpg
-                         <br />
-                                <small>Added: Jan 6, 2014</small>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p2.jpg">
-                            </div>
-                            <div class="file-name">
-                                My feel.png
-                         <br />
-                                <small>Added: Jan 7, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-music"></i>
-                            </div>
-                            <div class="file-name">
-                                Michal Jackson.mp3
-                         <br />
-                                <small>Added: Jan 22, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p3.jpg">
-                            </div>
-                            <div class="file-name">
-                                Document_2014.doc
-                         <br />
-                                <small>Added: Fab 11, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="img-fluid fa fa-film"></i>
-                            </div>
-                            <div class="file-name">
-                                Monica's birthday.mpg4
-                         <br />
-                                <small>Added: Fab 18, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <a href="#">
-                        <div class="file">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-bar-chart-o"></i>
-                            </div>
-                            <div class="file-name">
-                                Annual report 2014.xls
-                         <br />
-                                <small>Added: Fab 22, 2014</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-file"></i>
-                            </div>
-                            <div class="file-name">
-                                Document_2014.doc
-                         <br />
-                                <small>Added: Jan 11, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p1.jpg">
-                            </div>
-                            <div class="file-name">
-                                Italy street.jpg
-                         <br />
-                                <small>Added: Jan 6, 2014</small>
-                            </div>
-                        </a>
-
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p2.jpg">
-                            </div>
-                            <div class="file-name">
-                                My feel.png
-                         <br />
-                                <small>Added: Jan 7, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-music"></i>
-                            </div>
-                            <div class="file-name">
-                                Michal Jackson.mp3
-                         <br />
-                                <small>Added: Jan 22, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="image">
-                                <img alt="image" class="img-fluid" src="../Assets/inspinia/img/p3.jpg">
-                            </div>
-                            <div class="file-name">
-                                Document_2014.doc
-                         <br />
-                                <small>Added: Fab 11, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <div class="file">
-                        <a href="#">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="img-fluid fa fa-film"></i>
-                            </div>
-                            <div class="file-name">
-                                Monica's birthday.mpg4
-                         <br />
-                                <small>Added: Fab 18, 2014</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="file-box">
-                    <a href="#">
-                        <div class="file">
-                            <span class="corner"></span>
-
-                            <div class="icon">
-                                <i class="fa fa-bar-chart-o"></i>
-                            </div>
-                            <div class="file-name">
-                                Annual report 2014.xls
-                         <br />
-                                <small>Added: Fab 22, 2014</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="col-lg-9 animated fadeInRight">
+    <!-- TOP BAR -->
+    <div class="row" style="padding: 15px 15px;">
+      <div class="col-lg-9" style="margin-left:-15px;">
+        <button type="button" class="btn btn-primary" id="btnBack" style="display:none;">
+          <i class="fa fa-arrow-left"></i> Voltar
+        </button>
+
+        <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
+          <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+            Adicionar <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" id="btnNewFolder"><i class="fa fa-folder"></i> Nova Pasta</a></li>
+            <li><a class="dropdown-item" href="#" id="btnUploadDoc"><i class="fa fa-upload"></i> Upload de Documento</a></li>
+            <li><a class="dropdown-item" href="#" id="btnNewLink"><i class="fa fa-link"></i> Link do Drive</a></li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn btn-white" id="btnOpenSelected" style="margin-left:8px; display:none;">
+          <i class="fa fa-external-link"></i> Abrir
+        </button>
+
+        <button type="button" class="btn btn-danger" id="btnDeleteSelected" style="margin-left:8px; display:none;">
+          <i class="fa fa-trash"></i> Excluir
+        </button>
+
+        <span id="currentFolderLabel" class="text-muted" style="margin-left:12px;"></span>
+        <span id="loadingBadge" class="label label-info" style="display:none;margin-left:10px;">Carregando...</span>
+      </div>
+
+      <div class="col-lg-3">
+        <div class="input-group" style="margin: 0px 0 15px -15px;">
+          <input id="txtSearch" type="text" class="form-control input-sm" placeholder="Buscar nesta pasta..." />
+          <span class="input-group-btn">
+            <button id="btnSearch" class="btn btn-sm btn-white" type="button"><i class="fa fa-search"></i></button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="row" id="itemsGrid">
+      <div class="col-lg-12 text-muted">Carregando...</div>
+    </div>
+  </div>
 </div>
+
+<style>
+  /* Drive-like selection */
+  .file-box .file { cursor: default; }
+  .file-box.is-selected .file {
+    outline: 2px solid rgba(26, 179, 148, 0.45);
+    box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.12);
+    border-radius: 4px;
+  }
+</style>
+
 <% contentFor('scripts') %>
-    
-    <script src="/Assets/inspinia/js/popper.min.js"></script>
-<%  %>
- <script>
-     $(document).ready(function () {
-         $("#pageName").text("Meus Documentos");
-         $("#subSecoundPageName").text("");
-         $("#subpageName").text("Meus Documentos");
-         $("#subpageName").attr("href", "MyDocuments");
-         $("#path").hide();
+<script>
+  (function () {
+    // ---------------------------
+    // Page headers + permissions
+    // ---------------------------
+    $(document).ready(function () {
+      $("#pageName").text("Meus Documentos");
+      $("#subSecoundPageName").text("");
+      $("#subpageName").text("Meus Documentos");
+      $("#subpageName").attr("href", "MyDocuments");
+      $("#path").hide();
 
-         let isRaiz = true;
-         $(".file-box").on("click", function () {
-             changeView(isRaiz);
+      // Permissions (igual layout)
+      if (window.__auth?.isUser) {
+        $('a[name="btn_act_new"]').hide();
+        $('button[name="btn_act_new"]').hide();
+        $('input[name="btn_act_new"]').hide();
+      } else if (window.__auth?.isManager) {
+        $('a[name="btn_act_new"]').hide();
+        $('button[name="btn_act_new"]').hide();
+        $('input[name="btn_act_new"]').hide();
+      } else if (window.__auth?.isAdmin) {
+        // ok
+      }
+    });
 
-         });
-     });
+    // ---------------------------
+    // Side modal (GLOBAL - robust)
+    // IMPORTANT: removes previous listeners by cloning buttons
+    // ---------------------------
+    function pickFirst(selectors) {
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      }
+      return null;
+    }
 
-     function changeView(isRaiz) {
-         if (isRaiz) {
-             $("#raiz").hide();
-             $("#details").show();
-             $("#btnVoltar").show();
-             isRaiz = false;
-         } else {
-             $("#raiz").show();
-             $("#details").hide();
-             $("#btnVoltar").hide();
-             isRaiz = true;
-         }
-     }
- </script>
+    function replaceWithClone(el) {
+      if (!el || !el.parentNode) return el;
+      const clone = el.cloneNode(true);
+      el.parentNode.replaceChild(clone, el);
+      return clone;
+    }
+
+    function openSideModal(opts) {
+      const overlay = pickFirst(["#dynamicModalOverlay", ".dynamic-modal-overlay"]);
+      const modal = pickFirst(["#dynamicModal", ".dynamic-modal"]);
+      const titleEl = pickFirst(["#dynamicModalTitle", ".dynamic-modal-title"]);
+      const bodyEl = pickFirst(["#dynamicModalBody", ".dynamic-modal-body"]);
+
+      let btnClose = pickFirst(["#dynamicModalCloseBtn", ".dynamic-modal-close"]);
+      let btnCancel = pickFirst(["#dynamicModalCancelBtn", ".dynamic-modal-cancel"]);
+      let btnOk = pickFirst(["#dynamicModalOkBtn", ".dynamic-modal-ok"]);
+
+      if (!overlay || !modal || !titleEl || !bodyEl || !btnOk) {
+        alert("Side modal global não encontrado no layout. Verifique IDs do dynamic modal.");
+        return;
+      }
+
+      // 🔥 Remove any old listeners that other scripts attached
+      btnOk = replaceWithClone(btnOk);
+      if (btnCancel) btnCancel = replaceWithClone(btnCancel);
+      if (btnClose) btnClose = replaceWithClone(btnClose);
+
+      titleEl.textContent = (opts?.title || "");
+      bodyEl.innerHTML = (opts?.bodyHtml || "");
+      if (btnCancel) btnCancel.textContent = (opts?.cancelText || "Cancelar");
+      btnOk.textContent = (opts?.okText || "OK");
+
+      function close() {
+        overlay.style.display = "none";
+        modal.style.display = "none";
+      }
+
+      btnOk.addEventListener("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const keepOpen = (typeof opts?.onOk === "function") ? await opts.onOk() : false;
+        if (!keepOpen) close();
+      }, true); // capture = true to beat other handlers
+
+      if (btnCancel) {
+        btnCancel.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (typeof opts?.onCancel === "function") opts.onCancel();
+          close();
+        }, true);
+      }
+
+      if (btnClose) {
+        btnClose.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (typeof opts?.onCancel === "function") opts.onCancel();
+          close();
+        }, true);
+      }
+
+      overlay.style.display = "block";
+      modal.style.display = "block";
+    }
+
+    // ---------------------------
+    // State
+    // ---------------------------
+    const state = {
+      currentParentId: null,     // null = root
+      navStack: [],              // { parentId, name }
+      selected: new Set(),       // ids
+      currentSearch: "",
+      lastLoadedItems: [],
+      lastClick: { id: null, ts: 0 },
+    };
+
+    // ---------------------------
+    // Helpers
+    // ---------------------------
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showLoading(flag) {
+      $("#loadingBadge").toggle(!!flag);
+    }
+
+    function isFolder(item) { return String(item?.item_type || "").toUpperCase() === "FOLDER"; }
+    function isLink(item)   { return String(item?.item_type || "").toUpperCase() === "LINK"; }
+    function isFile(item)   { return String(item?.item_type || "").toUpperCase() === "FILE"; }
+
+    function iconFor(item) {
+      if (isFolder(item)) return '<i class="fa fa-folder"></i>';
+      if (isLink(item)) return '<i class="fa fa-link"></i>';
+
+      const ext = String(item?.ext || "").toLowerCase();
+      const mime = String(item?.mime_type || "").toLowerCase();
+
+      if (mime.startsWith("image/")) return '<i class="fa fa-file-image-o"></i>';
+      if (mime.startsWith("video/")) return '<i class="fa fa-film"></i>';
+      if (mime.startsWith("audio/")) return '<i class="fa fa-music"></i>';
+      if (ext === "pdf") return '<i class="fa fa-file-pdf-o"></i>';
+      if (ext === "xls" || ext === "xlsx" || mime.includes("spreadsheet")) return '<i class="fa fa-bar-chart-o"></i>';
+      if (ext === "doc" || ext === "docx") return '<i class="fa fa-file-word-o"></i>';
+      return '<i class="fa fa-file"></i>';
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function getUserCompanyId() {
+      const id = window.__auth?.company_id || window.__auth?.companyId || null;
+      return id ? String(id) : null;
+    }
+
+    // Ainda sem multitenant: accountId pode não existir.
+    // Para criar/upload, tentamos vários fallbacks, e por último company_id.
+    function getAccountIdForCreate() {
+      const id =
+        window.__auth?.accountId ||
+        window.__auth?.account_id ||
+        window.__auth?.account?.id ||
+        window.__auth?.tenant_id ||
+        window.__auth?.admin_account_id ||
+        null;
+
+      if (id) return String(id);
+
+      const companyId = getUserCompanyId();
+      return companyId ? String(companyId) : null;
+    }
+
+    function updateTopActions() {
+      const count = state.selected.size;
+      $("#btnDeleteSelected").toggle(count > 0);
+      $("#btnOpenSelected").toggle(count === 1);
+      $("#btnBack").toggle(state.navStack.length > 0);
+
+      if (state.navStack.length === 0) {
+        $("#currentFolderLabel").text("");
+      } else {
+        const parts = state.navStack.map(x => x.name || "Pasta");
+        $("#currentFolderLabel").text(parts.join(" / "));
+      }
+    }
+
+    function buildListQuery() {
+      const qs = new URLSearchParams();
+
+      if (state.currentParentId === null) qs.set("parent_id", "null");
+      else qs.set("parent_id", state.currentParentId);
+
+      if (state.currentSearch && state.currentSearch.trim()) qs.set("q", state.currentSearch.trim());
+
+      qs.set("take", "500");
+      qs.set("skip", "0");
+
+      // ✅ Permissão: admin vê tudo, outros filtram por company
+      if (!window.__auth?.isAdmin) {
+        const companyId = getUserCompanyId();
+        qs.set("related_table", "company");
+        qs.set("related_id", companyId || "00000000-0000-0000-0000-000000000000");
+      }
+
+      return qs.toString();
+    }
+
+    // confirm compatível com override que retorna Promise
+    async function confirmAsync(message, options) {
+      try {
+        const result = window.confirm(message, options);
+        return await Promise.resolve(result);
+      } catch {
+        return false;
+      }
+    }
+
+    // ---------------------------
+    // API wrappers
+    // ---------------------------
+    async function readJsonSafe(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try { return JSON.parse(text); } catch { return { message: text }; }
+    }
+
+    async function apiGet(url) {
+      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao buscar dados");
+      return data;
+    }
+
+    async function apiPost(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao salvar");
+      return data;
+    }
+
+    async function apiDelete(url) {
+      const res = await fetch(url, { method: "DELETE", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao excluir");
+      return data;
+    }
+
+    // ---------------------------
+    // Selection + rendering
+    // ---------------------------
+    function clearSelection() {
+      state.selected.clear();
+      $("#itemsGrid .file-box").removeClass("is-selected");
+      updateTopActions();
+    }
+
+    function applySelectionClasses() {
+      $("#itemsGrid .file-box").removeClass("is-selected");
+      for (const selId of state.selected) {
+        $('#itemsGrid .file-box[data-id="' + selId + '"]').addClass("is-selected");
+      }
+      updateTopActions();
+    }
+
+    function setSelected(id, single) {
+      if (single) state.selected.clear();
+      state.selected.add(id);
+      applySelectionClasses();
+    }
+
+    function toggleSelected(id) {
+      if (state.selected.has(id)) state.selected.delete(id);
+      else state.selected.add(id);
+      applySelectionClasses();
+    }
+
+    function renderGrid(items) {
+      const $grid = $("#itemsGrid");
+      $grid.empty();
+
+      const list = Array.isArray(items) ? items : [];
+      state.lastLoadedItems = list;
+
+      if (list.length === 0) {
+        $grid.append('<div class="col-lg-12 text-muted">Nenhum item encontrado.</div>');
+        clearSelection();
+        return;
+      }
+
+      list.forEach(function (item) {
+        const id = item.id;
+        const name = escapeHtml(item.name || item.filename || "Sem nome");
+        const added = formatDate(item.created_at);
+        const iconHtml = iconFor(item);
+
+        $grid.append(`
+          <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
+            <div class="file">
+              <a href="javascript:void(0)" class="doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
+                <span class="corner"></span>
+                <div class="icon">${iconHtml}</div>
+                <div class="file-name">
+                  ${name}
+                  <br />
+                  <small>Adicionado: ${escapeHtml(added || "-")}</small>
+                </div>
+              </a>
+            </div>
+          </div>
+        `);
+      });
+
+      // click on empty area clears selection
+      $("#itemsGrid").off("click.bg").on("click.bg", function (e) {
+        if ($(e.target).closest(".file-box").length === 0) clearSelection();
+      });
+
+      // single click select, double click open
+      $(".doc-hit").off("click").on("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const id = String($(this).data("id"));
+        const now = Date.now();
+        const isDouble = (state.lastClick.id === id && (now - state.lastClick.ts) < 320);
+        state.lastClick = { id: id, ts: now };
+
+        const item = state.lastLoadedItems.find(x => x.id === id);
+        if (!item) return;
+
+        const multi = !!(e.ctrlKey || e.metaKey);
+
+        if (isDouble) {
+          await openItem(item);
+          return;
+        }
+
+        if (multi) toggleSelected(id);
+        else setSelected(id, true);
+      });
+
+      // keep selection if possible (optional)
+      applySelectionClasses();
+    }
+
+    async function openItem(item) {
+      if (!item) return;
+
+      if (isFolder(item)) {
+        state.navStack.push({ parentId: state.currentParentId, name: item.name || "Pasta" });
+        state.currentParentId = item.id;
+        await loadCurrentFolder();
+        return;
+      }
+
+      if (isLink(item)) {
+        const url = item.external_key || item.object_key || "";
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      // FILE
+      try {
+        showLoading(true);
+        const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
+        const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
+        if (!url) throw new Error("Não foi possível gerar o link de download.");
+        window.open(url, "_blank", "noopener,noreferrer");
+      } catch (err) {
+        alert(err?.message || "Erro ao baixar arquivo.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ---------------------------
+    // Left folders
+    // ---------------------------
+    async function loadLeftFolders() {
+      try {
+        const qs = new URLSearchParams();
+        qs.set("parent_id", "null");
+        qs.set("item_type", "FOLDER");
+        qs.set("take", "500");
+        qs.set("skip", "0");
+
+        if (!window.__auth?.isAdmin) {
+          const companyId = getUserCompanyId();
+          qs.set("related_table", "company");
+          qs.set("related_id", companyId || "00000000-0000-0000-0000-000000000000");
+        }
+
+        const q = ($("#txtSearchLeft").val() || "").trim();
+        if (q) qs.set("q", q);
+
+        const data = await apiGet("/api/documents?" + qs.toString());
+        const list = Array.isArray(data) ? data : [];
+
+        const $ul = $("#leftFolders");
+        $ul.empty();
+
+        if (list.length === 0) {
+          $ul.append('<li class="text-muted">Nenhuma pasta.</li>');
+          return;
+        }
+
+        list.forEach(function (f) {
+          $ul.append(`
+            <li>
+              <a href="javascript:void(0)" class="left-folder" data-id="${escapeHtml(f.id)}" data-name="${escapeHtml(f.name || "Pasta")}">
+                <i class="fa fa-folder"></i> ${escapeHtml(f.name || "Pasta")}
+              </a>
+            </li>
+          `);
+        });
+
+        $(".left-folder").off("click").on("click", async function (e) {
+          e.preventDefault();
+          const folderId = String($(this).data("id"));
+          const folderName = String($(this).data("name") || "Pasta");
+
+          state.navStack = [{ parentId: null, name: folderName }];
+          state.currentParentId = folderId;
+          await loadCurrentFolder();
+        });
+      } catch (e) {
+        $("#leftFolders").html('<li class="text-danger">Erro ao carregar pastas.</li>');
+      }
+    }
+
+    async function loadCurrentFolder() {
+      try {
+        updateTopActions();
+        showLoading(true);
+
+        const query = buildListQuery();
+        const data = await apiGet("/api/documents?" + query);
+
+        renderGrid(data);
+        clearSelection(); // reset selection on navigation/load
+        await loadLeftFolders();
+      } catch (e) {
+        $("#itemsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || "Erro ao carregar") + '</div>');
+      } finally {
+        updateTopActions();
+        showLoading(false);
+      }
+    }
+
+    // ---------------------------
+    // Upload flow
+    // ---------------------------
+    function getExtFromName(fileName) {
+      const n = String(fileName || "");
+      const idx = n.lastIndexOf(".");
+      if (idx <= 0 || idx >= n.length - 1) return null;
+      return n.substring(idx + 1).toLowerCase();
+    }
+
+    async function doUpload(file, accountId, displayNameRaw, progressCb) {
+      const fileName = file.name;
+      const displayName = displayNameRaw || fileName;
+      const mimeType = file.type || "application/octet-stream";
+      const ext = getExtFromName(fileName);
+
+      progressCb && progressCb(5, "Criando registro no banco...");
+
+      const createPayload = {
+        account_id: accountId,
+        parent_id: state.currentParentId,
+        item_type: "FILE",
+        name: displayName,
+        filename: fileName,
+        ext: ext,
+        mime_type: mimeType
+      };
+
+      if (!window.__auth?.isAdmin) {
+        createPayload.related_table = "company";
+        createPayload.related_id = getUserCompanyId();
+      }
+
+      const created = await apiPost("/api/documents", createPayload);
+      const docId = created?.id;
+      if (!docId) throw new Error("Falha ao criar registro do documento.");
+
+      progressCb && progressCb(20, "Gerando URL de upload...");
+
+      const presign = await apiPost("/api/documents/" + encodeURIComponent(docId) + "/presign-upload", {
+        fileName: fileName,
+        contentType: mimeType,
+        size: file.size
+      });
+
+      const putUrl = presign?.url;
+      const putHeaders = presign?.headers || { "Content-Type": mimeType };
+      const objectKey = presign?.object_key || presign?.key || null;
+
+      if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+
+      progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
+
+      const putRes = await fetch(putUrl, { method: "PUT", headers: putHeaders, body: file });
+      if (!putRes.ok) {
+        const t = await putRes.text().catch(() => "");
+        throw new Error(("Upload falhou (" + putRes.status + "). " + (t || "")).trim());
+      }
+
+      const etag = putRes.headers.get("etag") || presign?.etag || null;
+
+      progressCb && progressCb(85, "Finalizando (atualizando status no banco)...");
+
+      await apiPost("/api/documents/" + encodeURIComponent(docId) + "/complete-upload", {
+        upload_status: "UPLOADED",
+        object_key: objectKey,
+        etag: etag,
+        mime_type: mimeType,
+        size_bytes: file.size
+      });
+
+      progressCb && progressCb(100, "Concluído!");
+      return docId;
+    }
+
+    // ---------------------------
+    // Side modal forms
+    // ---------------------------
+    function openNewFolderSideModal() {
+      openSideModal({
+        title: "Nova Pasta",
+        okText: "Criar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="sm_folderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
+            <div id="sm_folderError" class="text-danger" style="margin-top:8px; display:none;"></div>
+          </div>
+        `,
+        onOk: async function () {
+          const name = ($("#sm_folderName").val() || "").trim();
+          $("#sm_folderError").hide().text("");
+
+          if (!name) {
+            $("#sm_folderError").show().text("Informe o nome da pasta.");
+            return true;
+          }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) {
+            $("#sm_folderError").show().text("Não foi possível identificar o account_id para criar.");
+            return true;
+          }
+
+          try {
+            showLoading(true);
+
+            const payload = {
+              account_id: accountId,
+              parent_id: state.currentParentId,
+              item_type: "FOLDER",
+              name: name,
+              filename: null,
+              upload_status: "NONE",
+              storage_provider: "NONE"
+            };
+
+            if (!window.__auth?.isAdmin) {
+              payload.related_table = "company";
+              payload.related_id = getUserCompanyId();
+            }
+
+            await apiPost("/api/documents", payload);
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#sm_folderError").show().text(e?.message || "Erro ao criar pasta.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+
+      setTimeout(function () { $("#sm_folderName").focus(); }, 150);
+    }
+
+    function openNewLinkSideModal() {
+      openSideModal({
+        title: "Link do Drive",
+        okText: "Salvar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="sm_linkName" type="text" class="form-control" maxlength="255" placeholder="Ex: Pasta do Google Drive" />
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input id="sm_linkUrl" type="text" class="form-control" maxlength="1000" placeholder="https://drive.google.com/..." />
+          </div>
+          <div id="sm_linkError" class="text-danger" style="display:none;"></div>
+        `,
+        onOk: async function () {
+          const name = ($("#sm_linkName").val() || "").trim();
+          const url = ($("#sm_linkUrl").val() || "").trim();
+          $("#sm_linkError").hide().text("");
+
+          if (!name) { $("#sm_linkError").show().text("Informe o nome."); return true; }
+          if (!url || !/^https?:\/\//i.test(url)) { $("#sm_linkError").show().text("Informe uma URL válida (http/https)."); return true; }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#sm_linkError").show().text("Não foi possível identificar o account_id para criar."); return true; }
+
+          try {
+            showLoading(true);
+
+            const payload = {
+              account_id: accountId,
+              parent_id: state.currentParentId,
+              item_type: "LINK",
+              name: name,
+              filename: null,
+              external_key: url,
+              upload_status: "NONE",
+              storage_provider: "NONE"
+            };
+
+            if (!window.__auth?.isAdmin) {
+              payload.related_table = "company";
+              payload.related_id = getUserCompanyId();
+            }
+
+            await apiPost("/api/documents", payload);
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#sm_linkError").show().text(e?.message || "Erro ao salvar link.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+
+      setTimeout(function () { $("#sm_linkName").focus(); }, 150);
+    }
+
+    function openUploadSideModal() {
+      openSideModal({
+        title: "Upload de Documento",
+        okText: "Enviar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="alert alert-info" style="margin-bottom:10px;">
+            Selecione um arquivo. Vamos: criar no BD → gerar URL → upload no R2 → finalizar no BD.
+          </div>
+
+          <div class="form-group">
+            <label>Arquivo</label>
+            <input id="sm_uploadFile" type="file" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label>Nome (opcional)</label>
+            <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
+              placeholder="Se vazio, usa o nome do arquivo" />
+          </div>
+
+          <div id="sm_uploadProgress" style="display:none;">
+            <div class="progress progress-striped active">
+              <div id="sm_uploadProgressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <small id="sm_uploadProgressText" class="text-muted"></small>
+          </div>
+
+          <div id="sm_uploadError" class="text-danger" style="display:none;"></div>
+        `,
+        onOk: async function () {
+          const input = document.getElementById("sm_uploadFile");
+          const file = input && input.files && input.files[0];
+          const displayNameRaw = ($("#sm_uploadDisplayName").val() || "").trim();
+          $("#sm_uploadError").hide().text("");
+
+          if (!file) { $("#sm_uploadError").show().text("Selecione um arquivo."); return true; }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#sm_uploadError").show().text("Não foi possível identificar o account_id para enviar."); return true; }
+
+          try {
+            showLoading(true);
+            $("#sm_uploadProgress").show();
+
+            await doUpload(file, accountId, displayNameRaw, function (pct, text) {
+              $("#sm_uploadProgressBar").css("width", String(Math.max(0, Math.min(100, pct || 0))) + "%");
+              $("#sm_uploadProgressText").text(text || "");
+            });
+
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#sm_uploadError").show().text(e?.message || "Erro no upload.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+    }
+
+    // ---------------------------
+    // Delete / Open selected
+    // ---------------------------
+    async function deleteSelected() {
+      if (state.selected.size === 0) return;
+
+      const ok = await confirmAsync("Confirma excluir " + state.selected.size + " item(ns)?", { danger: true, okText: "Excluir", cancelText: "Cancelar" });
+      if (!ok) return;
+
+      try {
+        showLoading(true);
+        const ids = Array.from(state.selected);
+        for (const id of ids) {
+          await apiDelete("/api/documents/" + encodeURIComponent(id));
+        }
+        await loadCurrentFolder();
+        await loadLeftFolders();
+      } catch (e) {
+        alert(e?.message || "Erro ao excluir.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function openSelected() {
+      if (state.selected.size !== 1) return;
+      const id = Array.from(state.selected)[0];
+      const item = state.lastLoadedItems.find(x => x.id === id);
+      if (!item) return;
+      await openItem(item);
+    }
+
+    // ---------------------------
+    // Wire UI
+    // ---------------------------
+    $(document).ready(async function () {
+      state.currentParentId = null;
+      state.navStack = [];
+      updateTopActions();
+
+      await loadCurrentFolder();
+      await loadLeftFolders();
+
+      $("#btnBack").on("click", async function () {
+        state.navStack.pop();
+        // move back by reloading root if empty
+        state.currentParentId = (state.navStack.length === 0) ? null : state.currentParentId;
+        // to be safe, just recompute by navigating to previous parent
+        // simplest: reload root if stack empty, else keep currentParentId handled by folder open
+        if (state.navStack.length === 0) state.currentParentId = null;
+        await loadCurrentFolder();
+      });
+
+      $("#btnNewFolder").on("click", function (e) { e.preventDefault(); openNewFolderSideModal(); });
+      $("#btnUploadDoc").on("click", function (e) { e.preventDefault(); openUploadSideModal(); });
+      $("#btnNewLink").on("click", function (e) { e.preventDefault(); openNewLinkSideModal(); });
+
+      $("#btnDeleteSelected").on("click", deleteSelected);
+      $("#btnOpenSelected").on("click", openSelected);
+
+      $("#btnSearch").on("click", async function () {
+        state.currentSearch = ($("#txtSearch").val() || "").trim();
+        await loadCurrentFolder();
+      });
+
+      $("#txtSearch").on("keydown", async function (e) {
+        if (e.key === "Enter") {
+          state.currentSearch = ($("#txtSearch").val() || "").trim();
+          await loadCurrentFolder();
+        }
+      });
+
+      $("#btnSearchLeft").on("click", loadLeftFolders);
+      $("#txtSearchLeft").on("keydown", function (e) {
+        if (e.key === "Enter") loadLeftFolders();
+      });
+
+      // Quick upload
+      $("#btnAddQuickUpload").on("click", function () {
+        const input = document.getElementById("fileQuickInput");
+        if (input) input.click();
+      });
+
+      $("#fileQuickInput").on("change", async function () {
+        const file = this.files && this.files[0];
+        this.value = "";
+        if (!file) return;
+
+        const accountId = getAccountIdForCreate();
+        if (!accountId) {
+          alert("Não foi possível identificar o account_id para enviar o arquivo.");
+          return;
+        }
+
+        try {
+          showLoading(true);
+          await doUpload(file, accountId, "", null);
+          await loadCurrentFolder();
+        } catch (e) {
+          alert(e?.message || "Erro no upload.");
+        } finally {
+          showLoading(false);
+        }
+      });
+
+      // Prevent dropdown page jump
+      $(".dropdown-item").on("click", function (e) { e.preventDefault(); });
+    });
+  })();
+</script>

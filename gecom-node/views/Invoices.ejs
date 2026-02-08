@@ -17,6 +17,30 @@
   .clicker {
     cursor: pointer;
   }
+
+  /* Bulk actions bar (igual clientes) */
+  .bulk-actions {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #f3f3f4;
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .bulk-actions .count {
+    font-weight: 600;
+  }
+
+  .bulk-actions .btn {
+    margin: 0;
+  }
+
+  /* Role-based UI */
+  .admin-only { }
+  .not-admin .admin-only { display: none !important; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top:25px;">
@@ -25,40 +49,73 @@
       <div class="ibox-title">
         <h5>Invoices</h5>
         <div class="ibox-tools">
-          <a href="/NewInvoice" name="btn_act_new" class="btn btn-sm btn-primary">
+          <a href="/NewInvoice" name="btn_act_new" class="btn btn-sm btn-primary admin-only" id="btnNewInvoice">
             Novo Invoice
           </a>
         </div>
       </div>
 
       <div class="ibox-content">
+
+        <!-- Bulk actions -->
+        <div id="bulkActions" class="bulk-actions admin-only">
+          <span class="count">Selecionados: <span id="selectedCount">0</span></span>
+
+          <button id="btnBulkSend" type="button" class="btn btn-success btn-sm">
+            <i class="fa fa-send"></i> Enviar ao cliente
+          </button>
+
+          <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
+            <i class="fa fa-trash"></i> Excluir
+          </button>
+
+          <button id="btnClearSelection" type="button" class="btn btn-white btn-sm">
+            Limpar seleção
+          </button>
+        </div>
+
         <div class="table-responsive">
           <table class="table table-striped" id="invoices">
             <thead>
               <!-- Filters -->
               <tr>
+                <th style="width:40px;" class="admin-only">
+                  <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
+                </th>
                 <th></th>
-                <th><input class="form-control input-sm" placeholder="Invoice #" /></th>
-                <th><input class="form-control input-sm" placeholder="Company" /></th>
-                <th><input class="form-control input-sm" placeholder="Status" /></th>
-                <th><input class="form-control input-sm" placeholder="Subtotal" /></th>
-                <th><input class="form-control input-sm" placeholder="Tax" /></th>
-                <th><input class="form-control input-sm" placeholder="Total" /></th>
-                <th><input class="form-control input-sm" placeholder="Issued" /></th>
-                <th><input class="form-control input-sm" placeholder="Due" /></th>
+                <th><input class="form-control input-sm" data-filter="invoice_number" placeholder="Nº do invoice" /></th>
+                <th><input class="form-control input-sm" data-filter="company" placeholder="Empresa" /></th>
+<th>
+  <select class="form-control input-sm" data-filter="status" id="statusFilter">
+    <option value="">Todos</option>
+    <option value="0" class="admin-only">Rascunho</option>
+    <option value="1">Ativo</option>
+    <option value="2">Expirado</option>
+    <option value="3">Faturado</option>
+    <option value="4">Pago</option>
+  </select>
+</th>
+
+
+                <th><input class="form-control input-sm" data-filter="subtotal" placeholder="Subtotal" /></th>
+                <th><input class="form-control input-sm" data-filter="tax_total" placeholder="Impostos" /></th>
+                <th><input class="form-control input-sm" data-filter="total" placeholder="Total" /></th>
+                <th><input class="form-control input-sm" data-filter="issued_at" placeholder="Emitida" /></th>
+                <th><input class="form-control input-sm" data-filter="due_at" placeholder="Vencimento" /></th>
               </tr>
 
               <!-- Headers -->
               <tr>
-                <th>#</th>
+                <th style="width:40px;" class="admin-only"></th>
+                <th style="width:60px;">#</th>
                 <th class="sortable" data-sort="invoice_number">Invoice <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="company">Company <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="subtotal">Subtotal <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="tax_total">Tax <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="tax_total">Impostos <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="total">Total <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="issued_at">Issued <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="due_at">Due <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="issued_at">Emitida <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="due_at">Vencimento <span class="sort-indicator"></span></th>
               </tr>
             </thead>
 
@@ -71,83 +128,625 @@
 </div>
 
 <script>
+  
+      $("#pageName").text("Invoices");
+      $("#subSecoundPageName").text("");
+      $("#subpageName").text("Meus Invoices");
+      $("#subpageName").attr("href", "Invoices");
+      $("#path").hide();
+  // --------------------
+  // Auth / Roles (from layout.ejs)
+  // --------------------
+  const auth = (window && window.__auth) ? window.__auth : {};
+  const authRole = String(auth.role || auth.userRole || "").toUpperCase();
+
+  const isAdmin =
+    auth.isAdmin === true ||
+    authRole === "ADMIN" ||
+    (Array.isArray(auth.roles) && auth.roles.map(r => String(r).toUpperCase()).includes("ADMIN"));
+
+  const companyId =
+    auth.companyId ||
+    auth.company_id ||
+    auth.company?.id ||
+    auth.company?.company_id ||
+    null;
+
+  // Apply a CSS flag on body to hide admin-only sections
+  (function applyRoleCss() {
+    const body = document.body;
+    if (!body) return;
+    if (!isAdmin) body.classList.add("not-admin");
+  })();
+(function hideDraftOptionForNonAdmin() {
+  if (isAdmin) return;
+  const statusEl = document.getElementById("statusFilter");
+  if (!statusEl) return;
+
+  // Remove option value="0" for non-admin
+  const opt = statusEl.querySelector('option[value="0"]');
+  if (opt) opt.remove();
+})();
+  // --------------------
+  // State
+  // --------------------
   let invoices = [];
+  let filteredInvoices = [];
   let sortState = { key: null, dir: "asc" };
+
+  const selectedInvoiceIds = new Set();
+  const filterState = {
+    invoice_number: "",
+    company: "",
+    status: isAdmin ? "" : "1",
+    subtotal: "",
+    tax_total: "",
+    total: "",
+    issued_at: "",
+    due_at: "",
+  };
+
+(function initStatusFilterDefault() {
+  const statusEl = document.getElementById("statusFilter");
+  if (!statusEl) return;
+
+  // Admin: default = Todos (mostra rascunho também)
+  // Non-admin: default = Ativo (mas mesmo assim nunca verá rascunho por regra)
+  statusEl.value = isAdmin ? "" : "1";
+})();
+  // --------------------
+  // Utils
+  // --------------------
+  function escapeHtml(value) {
+    if (value == null) return "";
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function toNumber(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return 0;
+    const normalized = raw
+      .replace(/\s+/g, "")
+      .replace(/[^\d,.\-]/g, "")
+      .replace(/\.(?=\d{3}(\D|$))/g, "")
+      .replace(",", ".");
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : 0;
+  }
 
   function formatDate(v) {
     if (!v) return "";
-    return new Date(v).toLocaleDateString("pt-BR");
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("pt-BR");
+  }
+
+  function extractCompanyName(inv) {
+    return (
+      inv?.companies?.company_name ||
+      inv?.company?.company_name ||
+      inv?.company_name ||
+      inv?.companyName ||
+      ""
+    );
+  }
+
+  function extractCurrency(inv) {
+    const rel = inv?.currencies || inv?.currency || null;
+    const code =
+      rel?.code ||
+      rel?.iso_code ||
+      rel?.currency_code ||
+      inv?.currency_code ||
+      inv?.currencyCode ||
+      null;
+
+    const symbol =
+      rel?.symbol ||
+      inv?.currency_symbol ||
+      inv?.currencySymbol ||
+      null;
+
+    const decimals = Number.isFinite(Number(rel?.decimals)) ? Number(rel.decimals) : 2;
+
+    return { code, symbol, decimals };
+  }
+
+  function formatMoney(value, inv) {
+    const n = toNumber(value);
+    const { code, symbol, decimals } = extractCurrency(inv);
+
+    if (code) {
+      try {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: code,
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        }).format(n);
+      } catch (e) {
+        // ignore invalid currency code
+      }
+    }
+
+    const num = new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(n);
+
+    if (symbol) return `${symbol} ${num}`;
+    return num;
   }
 
   function statusLabel(v) {
     switch (Number(v)) {
-      case 0: return "Draft";
-      case 1: return "Issued";
-      case 2: return "Overdue";
-      case 3: return "Paid";
-      default: return "Draft";
+      case 0: return "Rascunho";
+      case 1: return "Ativo";
+      case 2: return "Expirado";
+      case 3: return "Faturado";
+      case 4: return "Pago";
+      default: return "Rascunho";
     }
   }
 
+  function setBulkActionsVisible(isVisible) {
+    const bar = document.getElementById("bulkActions");
+    if (!bar) return;
+    bar.style.display = isVisible ? "flex" : "none";
+  }
+
+  function updateBulkUI() {
+    if (!isAdmin) return;
+
+    const countEl = document.getElementById("selectedCount");
+    if (countEl) countEl.textContent = String(selectedInvoiceIds.size);
+
+    setBulkActionsVisible(selectedInvoiceIds.size > 0);
+
+    const chkAll = document.getElementById("chkSelectAll");
+    if (chkAll) {
+      const rowChecks = document.querySelectorAll("input.invoice-check");
+      const total = rowChecks.length;
+      const checked = Array.from(rowChecks).filter((x) => x.checked).length;
+      chkAll.checked = total > 0 && checked === total;
+      chkAll.indeterminate = checked > 0 && checked < total;
+    }
+  }
+
+  async function runWithConcurrency(items, limit, worker) {
+    const queue = [...items];
+    const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (queue.length > 0) {
+        const item = queue.shift();
+        await worker(item);
+      }
+    });
+    await Promise.all(workers);
+  }
+
+  // --------------------
+  // API
+  // --------------------
   function fetchInvoices() {
-    return fetch("/api/invoices")
+    const qs = new URLSearchParams();
+
+    // Non-admin: filter by company_id == auth.company_id
+    if (!isAdmin && companyId) {
+      qs.set("company_id", String(companyId));
+      qs.set("status", 1); //Ativo por agora
+    }
+
+    const url = qs.toString() ? `/api/invoices?${qs.toString()}` : `/api/invoices`;
+
+    return fetch(url, { headers: { Accept: "application/json" } })
       .then(r => r.json());
   }
 
-  function renderTable(data) {
+  async function patchInvoiceStatus(invoiceId, status) {
+    const resp = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar status do invoice.");
+    return data;
+  }
+
+  async function deleteInvoiceById(invoiceId) {
+    const resp = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+    });
+
+    if (resp.status === 204) return {};
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "Falha ao excluir invoice.");
+    return data;
+  }
+
+  // --------------------
+  // Modal helpers (GlobalModal do layout)
+  // --------------------
+  function showConfirmModal(title, bodyHtml, confirmText, confirmBtnClass) {
+    const modalBtn = document.getElementById("modalButton");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const btnSave = document.getElementById("saveModal");
+    const btnClose = document.getElementById("closeModal");
+
+    if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+      const ok = confirm(title);
+      return Promise.resolve(ok);
+    }
+
+    modalTitle.textContent = title;
+    modalBody.innerHTML = bodyHtml;
+
+    btnSave.textContent = confirmText || "Confirmar";
+
+    btnSave.classList.remove("btn-primary", "btn-danger", "btn-success", "btn-warning");
+    btnSave.classList.add(confirmBtnClass || "btn-primary");
+
+    btnClose.textContent = "Cancelar";
+
+    return new Promise((resolve) => {
+      const cleanup = () => {
+        btnSave.onclick = null;
+        btnClose.onclick = null;
+
+        btnSave.classList.remove("btn-danger", "btn-success", "btn-warning");
+        btnSave.classList.add("btn-primary");
+        btnSave.textContent = "Save";
+        btnClose.textContent = "Close";
+      };
+
+      btnSave.onclick = () => { cleanup(); resolve(true); };
+      btnClose.onclick = () => { cleanup(); resolve(false); };
+
+      modalBtn.click();
+    });
+  }
+
+  // --------------------
+  // Mapping / normalize
+  // --------------------
+  function normalizeInvoice(inv) {
+    const companyName = extractCompanyName(inv);
+    return {
+      raw: inv,
+      id: String(inv?.id || ""),
+      company_id: String(inv?.company_id || inv?.companyId || ""),
+      invoice_number: inv?.invoice_number || inv?.invoiceNumber || "",
+      company: companyName,
+      status: Number(inv?.status ?? 0),
+      subtotal: inv?.subtotal ?? 0,
+      tax_total: inv?.tax_total ?? inv?.taxTotal ?? 0,
+      total: inv?.total ?? 0,
+      issued_at: inv?.issued_at ?? inv?.issuedAt ?? null,
+      due_at: inv?.due_at ?? inv?.dueAt ?? null,
+    };
+  }
+
+  // --------------------
+  // Filtering / Sorting
+  // --------------------
+  function applyFilters() {
+    const f = filterState;
+
+    const contains = (value, term) => {
+      const v = String(value ?? "").toLowerCase();
+      const t = String(term ?? "").toLowerCase().trim();
+      if (!t) return true;
+      return v.includes(t);
+    };
+
+    filteredInvoices = invoices.filter((x) => {
+      const inv = x.raw;
+      return (
+        contains(x.invoice_number, f.invoice_number) &&
+        contains(x.company, f.company) &&
+        (
+  !String(f.status || "").trim()
+    ? true
+    : Number(x.status) === Number(f.status)
+) &&
+        contains(formatMoney(x.subtotal, inv), f.subtotal) &&
+        contains(formatMoney(x.tax_total, inv), f.tax_total) &&
+        contains(formatMoney(x.total, inv), f.total) &&
+        contains(formatDate(x.issued_at), f.issued_at) &&
+        contains(formatDate(x.due_at), f.due_at)
+      );
+    });
+
+    if (sortState.key) {
+      sortData(sortState.key, true);
+      return;
+    }
+
+    renderTable(filteredInvoices);
+  }
+
+  function compareValues(a, b) {
+    if (a == null && b == null) return 0;
+    if (a == null) return -1;
+    if (b == null) return 1;
+
+    if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
+    if (typeof a === "number" && typeof b === "number") return a - b;
+
+    return String(a).localeCompare(String(b), "pt-BR", { numeric: true, sensitivity: "base" });
+  }
+
+  function sortData(key, silent) {
+    if (!silent) {
+      if (sortState.key === key) sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+      else { sortState.key = key; sortState.dir = "asc"; }
+    }
+
+    const dirFactor = sortState.dir === "asc" ? 1 : -1;
+
+    filteredInvoices.sort((a, b) => {
+      let av;
+      let bv;
+
+      if (key === "company") { av = a.company; bv = b.company; }
+      else if (key === "status") { av = a.status; bv = b.status; }
+      else if (key === "subtotal" || key === "tax_total" || key === "total") {
+        av = toNumber(a[key]); bv = toNumber(b[key]);
+      }
+      else if (key === "issued_at" || key === "due_at") {
+        av = a[key] ? new Date(a[key]) : null;
+        bv = b[key] ? new Date(b[key]) : null;
+      }
+      else {
+        av = a[key]; bv = b[key];
+      }
+
+      return compareValues(av, bv) * dirFactor;
+    });
+
+    renderTable(filteredInvoices);
+  }
+
+  // --------------------
+  // Render
+  // --------------------
+  function openInvoiceRow(rowId) {
+    if (isAdmin) {
+      window.location = `/NewInvoice?id=${encodeURIComponent(rowId)}`;
+      return;
+    }
+
+    const url = `/api/invoices/${encodeURIComponent(rowId)}/print`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  function renderTable(list) {
     const tbody = document.getElementById("invoiceLines");
     tbody.innerHTML = "";
 
-    data.forEach((i, idx) => {
+    if (!Array.isArray(list) || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">Nenhum invoice encontrado.</td></tr>`;
+      updateBulkUI();
+      return;
+    }
+
+    list.forEach((row, idx) => {
+      const inv = row.raw;
       const tr = document.createElement("tr");
       tr.className = "clicker";
 
-      tr.onclick = () => {
-        window.location = `/NewInvoice?id=${i.id}`;
-      };
+      tr.addEventListener("click", () => {
+        openInvoiceRow(row.id);
+      });
+
+      const isChecked = selectedInvoiceIds.has(String(row.id));
+
+      const adminFirstCol = isAdmin
+        ? `
+          <td class="admin-only">
+            <input
+              class="invoice-check"
+              type="checkbox"
+              data-id="${escapeHtml(String(row.id))}"
+              ${isChecked ? "checked" : ""}
+              title="Selecionar"
+            />
+          </td>
+        `
+        : "";
 
       tr.innerHTML = `
-        <td>${idx + 1}</td>
-        <td>${i.invoice_number}</td>
-        <td>${i.company_name || ""}</td>
-        <td>${statusLabel(i.status)}</td>
-        <td>${i.subtotal}</td>
-        <td>${i.tax_total}</td>
-        <td><strong>${i.total}</strong></td>
-        <td>${formatDate(i.issued_at)}</td>
-        <td>${formatDate(i.due_at)}</td>
+        ${adminFirstCol}
+        <td>${escapeHtml(idx + 1)}</td>
+        <td>${escapeHtml(row.invoice_number)}</td>
+        <td>${escapeHtml(row.company || "")}</td>
+        <td>${escapeHtml(statusLabel(row.status))}</td>
+        <td>${escapeHtml(formatMoney(row.subtotal, inv))}</td>
+        <td>${escapeHtml(formatMoney(row.tax_total, inv))}</td>
+        <td><strong>${escapeHtml(formatMoney(row.total, inv))}</strong></td>
+        <td>${escapeHtml(formatDate(row.issued_at))}</td>
+        <td>${escapeHtml(formatDate(row.due_at))}</td>
       `;
+
+      if (isAdmin) {
+        const chk = tr.querySelector("input.invoice-check");
+        chk.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const id = String(this.getAttribute("data-id") ?? "");
+          if (!id) return;
+
+          if (this.checked) selectedInvoiceIds.add(id);
+          else selectedInvoiceIds.delete(id);
+
+          updateBulkUI();
+        });
+      }
+
       tbody.appendChild(tr);
     });
+
+    updateBulkUI();
   }
 
-  function sortData(key) {
-    if (sortState.key === key) {
-      sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
-    } else {
-      sortState.key = key;
-      sortState.dir = "asc";
-    }
-
-    invoices.sort((a, b) => {
-      let av = a[key] ?? "";
-      let bv = b[key] ?? "";
-      if (av > bv) return sortState.dir === "asc" ? 1 : -1;
-      if (av < bv) return sortState.dir === "asc" ? -1 : 1;
-      return 0;
-    });
-
-    renderTable(invoices);
-  }
-
+  // --------------------
+  // Events
+  // --------------------
   document.querySelectorAll("th.sortable").forEach(th => {
-    th.addEventListener("click", () => {
-      sortData(th.dataset.sort);
-    });
+    th.addEventListener("click", () => sortData(th.dataset.sort));
   });
 
-  fetchInvoices().then(data => {
-    invoices = data?.data ?? data;
-    renderTable(invoices);
+  const chkSelectAll = document.getElementById("chkSelectAll");
+  if (chkSelectAll && isAdmin) {
+    chkSelectAll.addEventListener("click", function (e) {
+      e.stopPropagation();
+      const rows = document.querySelectorAll("input.invoice-check");
+      const shouldCheck = this.checked;
+
+      rows.forEach((c) => {
+        const id = String(c.getAttribute("data-id") ?? "");
+        if (!id) return;
+        c.checked = shouldCheck;
+        if (shouldCheck) selectedInvoiceIds.add(id);
+        else selectedInvoiceIds.delete(id);
+      });
+
+      updateBulkUI();
+    });
+  }
+
+document.querySelectorAll("thead [data-filter]").forEach((el) => {
+  const tag = String(el.tagName || "").toUpperCase();
+  const evt = tag === "SELECT" ? "change" : "input";
+
+  el.addEventListener(evt, function () {
+    const key = String(this.getAttribute("data-filter") || "");
+    if (!key) return;
+    filterState[key] = String(this.value || "");
+    applyFilters();
+  });
+});
+
+
+  const btnClear = document.getElementById("btnClearSelection");
+  if (btnClear && isAdmin) {
+    btnClear.addEventListener("click", function () {
+      selectedInvoiceIds.clear();
+      document.querySelectorAll("input.invoice-check").forEach((x) => x.checked = false);
+      const chkAll = document.getElementById("chkSelectAll");
+      if (chkAll) { chkAll.checked = false; chkAll.indeterminate = false; }
+      updateBulkUI();
+    });
+  }
+
+  const btnSend = document.getElementById("btnBulkSend");
+  if (btnSend && isAdmin) {
+    btnSend.addEventListener("click", async function () {
+      const ids = Array.from(selectedInvoiceIds);
+      if (ids.length === 0) return;
+
+      const ok = await showConfirmModal(
+        "Enviar invoices ao cliente",
+        `
+          <p>Você está prestes a atualizar <strong>${escapeHtml(ids.length)}</strong> invoice(s) para o status <strong>Ativo</strong>.</p>
+          <p>Deseja continuar?</p>
+        `,
+        "Enviar",
+        "btn-success"
+      );
+
+      if (!ok) return;
+
+      btnSend.disabled = true;
+
+      try {
+        await runWithConcurrency(ids, 5, async (id) => {
+          await patchInvoiceStatus(id, 1);
+        });
+
+        await loadInvoices(true);
+      } catch (err) {
+        console.error("bulk send error:", err);
+        alert(err?.message || "Falha ao enviar invoices.");
+      } finally {
+        btnSend.disabled = false;
+      }
+    });
+  }
+
+  const btnDelete = document.getElementById("btnBulkDelete");
+  if (btnDelete && isAdmin) {
+    btnDelete.addEventListener("click", async function () {
+      const ids = Array.from(selectedInvoiceIds);
+      if (ids.length === 0) return;
+
+      const ok = await showConfirmModal(
+        "Excluir invoices",
+        `
+          <p>Você está prestes a excluir <strong>${escapeHtml(ids.length)}</strong> invoice(s).</p>
+          <p class="text-danger">Esta ação não poderá ser desfeita.</p>
+          <p>Deseja continuar?</p>
+        `,
+        "Excluir",
+        "btn-danger"
+      );
+
+      if (!ok) return;
+
+      btnDelete.disabled = true;
+
+      try {
+        await runWithConcurrency(ids, 5, async (id) => {
+          await deleteInvoiceById(id);
+        });
+
+        await loadInvoices(true);
+      } catch (err) {
+        console.error("bulk delete error:", err);
+        alert(err?.message || "Falha ao excluir invoices.");
+      } finally {
+        btnDelete.disabled = false;
+      }
+    });
+  }
+
+  // --------------------
+  // Load
+  // --------------------
+  async function loadInvoices(keepFilters) {
+    const data = await fetchInvoices();
+
+    const rows = Array.isArray(data)
+      ? data
+      : (data?.data ?? data?.rows ?? data?.invoices ?? []);
+
+    invoices = rows.map(normalizeInvoice);
+// ✅ Non-admin: remove rascunhos (status 0)
+if (!isAdmin) {
+  invoices = invoices.filter((x) => Number(x.status) !== 0);
+}
+    filteredInvoices = [...invoices];
+
+    if (keepFilters) applyFilters();
+    else renderTable(filteredInvoices);
+
+    if (isAdmin) {
+      selectedInvoiceIds.clear();
+      const chkAll = document.getElementById("chkSelectAll");
+      if (chkAll) { chkAll.checked = false; chkAll.indeterminate = false; }
+      updateBulkUI();
+    }
+  }
+
+  loadInvoices(false).catch((err) => {
+    console.error("loadInvoices error:", err);
+    const tbody = document.getElementById("invoiceLines");
+    if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">${escapeHtml(err?.message || "Erro ao carregar invoices.")}</td></tr>`;
   });
 </script>

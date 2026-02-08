@@ -1,9 +1,5 @@
 <style>
-b, strong {
-    font-weight: bolder;
-    color: #808080;
-}
-
+  b, strong { font-weight: bolder; color: #808080; }
 
   .ibox-title h5 {
     display: inline-block;
@@ -13,58 +9,26 @@ b, strong {
     text-overflow: ellipsis;
     float: none;
     font-weight: 500;
-}
-  .ibox-title {
-    padding: 20px 90px 20px 15px;
   }
 
-  .table td,
-  .table th {
-    vertical-align: middle !important;
-  }
+  .ibox-title { padding: 20px 90px 20px 15px; }
 
-  .money {
-    font-family: monospace;
-  }
+  .table td, .table th { vertical-align: middle !important; }
 
-  .clicker {
-    cursor: pointer;
-  }
+  .money { font-family: monospace; }
+  .clicker { cursor: pointer; }
 
-  /* Better spacing */
-  .form-group {
-    margin-bottom: 14px;
-  }
+  .form-group { margin-bottom: 14px; }
 
-  .row-tight {
-    margin-left: -8px;
-    margin-right: -8px;
-  }
+  .row-tight { margin-left: -8px; margin-right: -8px; }
+  .row-tight>[class*="col-"] { padding-left: 8px; padding-right: 8px; }
 
-  .row-tight>[class*="col-"] {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
+  .panel-body { padding-top: 12px; }
 
-  .panel-body {
-    padding-top: 12px;
-  }
+  .invoice-panel { min-height: 560px; }
 
-  /* Dynamics-like layout helpers */
-  .invoice-panel {
-    min-height: 560px;
-  }
-
-  .lines-disabled {
-    opacity: .55;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .lines-banner {
-    display: none;
-    margin-bottom: 10px;
-  }
+  .lines-disabled { opacity: .55; pointer-events: none; user-select: none; }
+  .lines-banner { display: none; margin-bottom: 10px; }
 
   .header-actions {
     display: flex;
@@ -81,828 +45,902 @@ b, strong {
     flex-wrap: wrap;
   }
 
-  .line-actions .btn {
-    margin-right: 6px;
-  }
+  .line-actions .btn { margin-right: 6px; }
 
-  .small-muted {
-    font-size: 12px;
-    color: #777;
-  }
+  .small-muted { font-size: 12px; color: #777; }
 
-  /* Typeahead dropdown (Bootstrap 3) - melhora estética */
-  .typeahead.dropdown-menu {
-    max-height: 260px;
-    overflow-y: auto;
-  }
+  .typeahead.dropdown-menu { max-height: 260px; overflow-y: auto; }
 </style>
 
 <% contentFor('headerLink') %>
-  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-  <% %>
+<link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+<% %>
 
-    <div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0px;">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="ibox">
-            <div class="ibox-title">
-              <h5 id="invoiceTitle">-</h5>
-              <div class="ibox-tools">
-                  <button type="button" class="btn btn-white" id="btnGenerateInvoicePrint" disabled>
-    <i class="fa fa-file-pdf-o"></i> Gerar invoice
-  </button>
+<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0px;">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5 id="invoiceTitle">-</h5>
+          <div class="ibox-tools">
+            <button type="button" class="btn btn-white" id="btnGenerateInvoicePrint" disabled>
+              <i class="fa fa-file-pdf-o"></i> Gerar invoice
+            </button>
 
-  <button type="button" class="btn btn-success" id="btnSaveInvoice">
-    <i class="fa fa-check"></i> Salvar fatura
-  </button>
-              </div>
-            </div>
+            <button type="button" class="btn btn-danger" id="btnDeleteInvoice" disabled>
+              <i class="fa fa-trash"></i> Excluir fatura
+            </button>
 
-            <div class="ibox-content">
-              <form id="form" action="#" onsubmit="return false;">
+            <button type="button" class="btn btn-success" id="btnSaveInvoice">
+              <i class="fa fa-check"></i> Salvar fatura
+            </button>
+          </div>
+        </div>
 
-                <div class="row">
+        <div class="ibox-content">
+          <form id="form" action="#" onsubmit="return false;">
+            <div class="row">
 
-                  <!-- ===================== ESQUERDA: HEADER ===================== -->
-                  <div class="col-lg-4">
-                    <div class="panel panel-default invoice-panel">
-                      <div class="panel-heading">
-                        <strong>Dados da Fatura</strong>
-                      </div>
-                      <div class="panel-body">
+              <!-- ===================== ESQUERDA: HEADER ===================== -->
+              <div class="col-lg-4">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading">
+                    <strong>Dados da Fatura</strong>
+                  </div>
+                  <div class="panel-body">
 
+                    <div class="form-group">
+                      <label>Empresa *</label>
+                      <input id="company_name" type="text" class="form-control typeahead-company"
+                        placeholder="Pesquisar empresa..." autocomplete="off" />
+                      <input id="company_id" type="hidden" />
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Empresa *</label>
-
-                          <!-- visible autocomplete -->
-                          <input id="company_name" type="text" class="form-control typeahead-company"
-                            placeholder="Pesquisar empresa..." autocomplete="off" />
-
-                          <!-- hidden selected id -->
-                          <input id="company_id" type="hidden" />
-                        </div>
-
-                        <div class="row">
-                        <div class="col-lg-6"><div class="form-group">
                           <label>Moeda *</label>
                           <select id="currency_id" class="form-control"></select>
-                        </div></div>
+                        </div>
+                      </div>
 
-<div class="col-lg-6">
-                        <div class="form-group">
+                      <div class="col-lg-6">
+                         <div class="form-group">
+                          <label>Status</label>
+                          <select id="status" class="form-control">
+                            <option value="0" selected>Rascunho</option>
+                            <option value="1">Ativo</option>
+                            <option value="2">Expirado</option>
+                            <option value="3">Faturado</option>
+                            <option value="4">Pago</option>
+                          </select>
+                        </div>
+                        
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                       <div class="form-group">
                           <label>Data da Cotação</label>
                           <input id="quote_at" type="datetime-local" class="form-control" />
-                        </div></div>
                         </div>
+                      </div>
 
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Status</label>
-                              <select id="status" class="form-control">
-                                <option value="0" selected>Rascunho</option>
-                                <option value="1">Ativo</option>
-                                <option value="2">Expirado</option>
-                                <option value="3">Faturado</option>
-                                <option value="4">Pago</option>
-                              </select>
-                            </div>
-                          </div>
-
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Desconto %</label>
-                              <input id="discount_percent" type="number" min="0" max="100" class="form-control"
-                                value="0" readonly />
-                              <div class="small-muted" style="margin-top:4px;">
-                                *A porcentagem será calculada sob o total bruto (Subtotal)
-                              </div>
-                            </div>
-
-                            <div class="form-group" style="display:none;">
-                              <label>Taxa de câmbio</label>
-                              <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row row-tight" style="display:none;">
-                          <div class="col-lg-6"></div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Versão</label>
-                              <input id="version" type="number" min="1" class="form-control" value="1" />
-                            </div>
-                          </div>
-                        </div>
-
+                      <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Observações</label>
-                          <textarea id="notes" class="form-control" rows="3"></textarea>
+                          <label>Vencimento</label>
+                          <input id="due_at" type="date" class="form-control" />
                         </div>
+                        
 
                         <div class="form-group" style="display:none;">
-                          <label>Termos</label>
-                          <textarea id="terms" class="form-control" rows="3"></textarea>
+                          <label>Taxa de câmbio</label>
+                          <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
                         </div>
-</div>
-</div>
-                        <div class="panel panel-default invoice-panel">
-                      <div class="panel-heading">
-                        <strong>Endereço de Cobrança</strong>
                       </div>
-                      <div class="panel-body">
+                    </div>
 
-                        <div class="form-group" style="margin-top:10px;">
-                          <label>Linha 1</label>
-                          <input id="billing_address_line1" type="text" class="form-control" />
-                        </div>
-
+                    <!-- ✅ NOVO CAMPO: due_at -->
+                    <div class="row">
+                      <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Linha 2</label>
-                          <input id="billing_address_line2" type="text" class="form-control" />
-                        </div>
-
-                        <div class="row row-tight">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Cidade</label>
-                              <input id="billing_address_city" type="text" class="form-control" />
-                            </div>
-                          </div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Estado</label>
-                              <input id="billing_address_state" type="text" class="form-control" />
-                            </div>
+                          <label>Desconto %</label>
+                          <input id="discount_percent" type="number" min="0" max="100" class="form-control" value="0" readonly />
+                          <div class="small-muted" style="margin-top:4px;">
+                            *A porcentagem será calculada sob o total bruto (Subtotal)
                           </div>
                         </div>
+                      </div>
+                      <div class="col-lg-6"></div>
+                    </div>
 
-                        <div class="row row-tight">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>CEP</label>
-                              <input id="billing_address_postal_code" type="text" class="form-control" />
-                            </div>
-                          </div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>País</label>
-                              <input id="billing_address_country" type="text" class="form-control" />
-                            </div>
-                          </div>
+                    <div class="row row-tight" style="display:none;">
+                      <div class="col-lg-6"></div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Versão</label>
+                          <input id="version" type="number" min="1" class="form-control" value="1" />
                         </div>
-
-                        <!-- <div class="m-t-sm">
-                          <button type="button" class="btn btn-primary btn-block" id="btnSaveHeader">
-                            <i class="fa fa-save"></i> Salvar cabeçalho
-                          </button>
-                        </div> -->
-
                       </div>
                     </div>
+
+                    <div class="form-group">
+                      <label>Observações</label>
+                      <textarea id="notes" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group" style="display:none;">
+                      <label>Termos</label>
+                      <textarea id="terms" class="form-control" rows="3"></textarea>
+                    </div>
+
                   </div>
-
-                  <!-- ===================== DIREITA: LINES ===================== -->
-                  <div class="col-lg-8">
-                    <div class="panel panel-default invoice-panel">
-                      <div class="panel-heading">
-                        <div class="header-actions">
-                          <div class="left-actions">
-                            <button type="button" class="btn btn-primary" id="btnAddProduct" disabled="disabled">
-                              <i class="fa fa-plus"></i> Adicionar produto
-                            </button>
-
-                            <button type="button" class="btn btn-white" id="btnAddManualLine" disabled="disabled">
-                              <i class="fa fa-pencil"></i> Adicionar linha manual
-                            </button>
-                          </div>
-
-                          <span class="text-muted">
-                            ID da Fatura: <span id="uiInvoiceId">-</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div class="panel-body">
-                        <div id="invoiceNotCreatedBanner" class="alert alert-warning lines-banner">
-                          Salve o cabeçalho da fatura para liberar as linhas.
-                        </div>
-
-                        <div id="linesArea" class="lines-disabled">
-                          <div class="table-responsive">
-                            <table class="table table-striped table-bordered" id="linesTable">
-                              <thead>
-                                <tr>
-                                  <th style="width: 30px;">#</th>
-                                  <th style="width: 24%;">Produto</th>
-                                  <th style="width: 17%;">Descrição</th>
-                                  <th style="width:110px;">Unidade</th>
-                                  <th style="width:120px;">Preço</th>
-                                  <th style="width:90px;">Qtd</th>
-                                  <th style="width:120px;">Imposto</th>
-                                  <th style="width:140px;">Total linha</th>
-                                  <th style="width: 8%;">Ações</th>
-                                </tr>
-                              </thead>
-                              <tbody id="linesTbody"></tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-
-                    <div class="panel panel-default invoice-panel">
-                      <div class="panel-heading">
-                        <strong>Totalizadores</strong>
-                      </div>
-                      <div class="panel-body">
-                        <table class="table">
-                          <tr>
-                            <th>Subtotal</th>
-                            <td class="text-right money" id="uiSubtotal">0.0000</td>
-                          </tr>
-                          <tr>
-                            <th>Desconto</th>
-                            <td class="text-right money" id="uiDiscount">0.0000</td>
-                          </tr>
-                          <tr>
-                            <th>Impostos</th>
-                            <td class="text-right money" id="uiTaxTotal">0.0000</td>
-                          </tr>
-                          <tr>
-                            <th>Total</th>
-                            <td class="text-right money" id="uiTotal">0.0000</td>
-                          </tr>
-                        </table>
-
-                        <div class="help-block">
-                          <small class="text-muted">Os totalizadores são calculados a partir das linhas.</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- col-lg-3 (reservado) -->
-                  <div class="col-lg-3"></div>
-
                 </div>
-              </form>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading">
+                    <strong>Endereço de Cobrança</strong>
+                  </div>
+                  <div class="panel-body">
+
+                    <div class="form-group" style="margin-top:10px;">
+                      <label>Linha 1</label>
+                      <input id="billing_address_line1" type="text" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Linha 2</label>
+                      <input id="billing_address_line2" type="text" class="form-control" />
+                    </div>
+
+                    <div class="row row-tight">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Cidade</label>
+                          <input id="billing_address_city" type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Estado</label>
+                          <input id="billing_address_state" type="text" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row row-tight">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>CEP</label>
+                          <input id="billing_address_postal_code" type="text" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>País</label>
+                          <input id="billing_address_country" type="text" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- ===================== DIREITA: LINES ===================== -->
+              <div class="col-lg-8">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading">
+                    <div class="header-actions">
+                      <div class="left-actions">
+                        <button type="button" class="btn btn-primary" id="btnAddProduct" disabled="disabled">
+                          <i class="fa fa-plus"></i> Adicionar produto
+                        </button>
+
+                        <button type="button" class="btn btn-white" id="btnAddManualLine" disabled="disabled">
+                          <i class="fa fa-pencil"></i> Adicionar linha manual
+                        </button>
+                      </div>
+
+                      <span class="text-muted">
+                        ID da Fatura: <span id="uiInvoiceId">-</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="panel-body">
+                    <div id="invoiceNotCreatedBanner" class="alert alert-warning lines-banner">
+                      Salve o cabeçalho da fatura para liberar as linhas.
+                    </div>
+
+                    <div id="linesArea" class="lines-disabled">
+                      <div class="table-responsive">
+                        <table class="table table-striped table-bordered" id="linesTable">
+                          <thead>
+                            <tr>
+                              <th style="width: 30px;">#</th>
+                              <th style="width: 28%;">Produto</th>
+                              <th style="width:110px;">Unidade</th>
+                              <th style="width:130px;">Preço</th>
+                              <th style="width:90px;">Qtd</th>
+                              <th style="width:140px;">Desconto</th>
+                              <th style="width:120px;">Imposto</th>
+                              <th style="width:140px;">Total linha</th>
+                              <th style="width: 8%;">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody id="linesTbody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading">
+                    <strong>Totalizadores</strong>
+                  </div>
+                  <div class="panel-body">
+                    <table class="table">
+                      <tr>
+                        <th>Subtotal</th>
+                        <td class="text-right money" id="uiSubtotal">0,00</td>
+                      </tr>
+                      <tr>
+                        <th>Desconto (cabeçalho)</th>
+                        <td class="text-right money" id="uiDiscountHeader">0,00</td>
+                      </tr>
+                      <tr>
+                        <th>Descontos (linhas)</th>
+                        <td class="text-right money" id="uiDiscountLines">0,00</td>
+                      </tr>
+                      <tr>
+                        <th>Impostos</th>
+                        <td class="text-right money" id="uiTaxTotal">0,00</td>
+                      </tr>
+                      <tr>
+                        <th>Total</th>
+                        <td class="text-right money" id="uiTotal">0,00</td>
+                      </tr>
+                    </table>
+
+                    <div class="help-block">
+                      <small class="text-muted">Os totalizadores são calculados a partir das linhas.</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-3"></div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <% contentFor('scripts') %>
-      <script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+<% contentFor('scripts') %>
+<script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
 
-      <script>
-        (function () {
-          // =========================
-          // State
-          // =========================
-          let invoiceId = null;
-          let creatingInvoice = false;
+<script>
+  (function () {
+    // =========================
+    // State
+    // =========================
+    let invoiceId = null;
+    let creatingInvoice = false;
 
-          let companiesCache = [];
-          let currenciesCache = [];
-          let productsCache = [];
-          let lines = [];
+    let companiesCache = [];
+    let currenciesCache = [];
+    let productsCache = [];
+    let lines = [];
 
-          // Avoid clearing hidden ids on programmatic sets
-          let suppressCompanyClear = false;
+    let suppressCompanyClear = false;
 
-function setPrintEnabled() {
-  $("#btnGenerateInvoicePrint").prop("disabled", !invoiceId);
+    function setPrintEnabled() {
+      $("#btnGenerateInvoicePrint").prop("disabled", !invoiceId);
+      $("#btnDeleteInvoice").prop("disabled", !invoiceId);
+    }
+
+    // =========================
+    // Utils
+    // =========================
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function toIntSafe(value, fallback) {
+      const n = parseInt(String(value ?? "").trim(), 10);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function clamp01(v) {
+      const n = parseNumberSafe(v, 0);
+      return Math.max(0, Math.min(1, n));
+    }
+
+    function tryToDatetimeLocal(value) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return "";
+      const dt = new Date(raw);
+      if (Number.isNaN(dt.getTime())) return "";
+      const pad = (n) => String(n).padStart(2, "0");
+      return (
+        dt.getFullYear() + "-" +
+        pad(dt.getMonth() + 1) + "-" +
+        pad(dt.getDate()) + "T" +
+        pad(dt.getHours()) + ":" +
+        pad(dt.getMinutes())
+      );
+    }
+
+function tryToDateInput(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  const dt = new Date(raw);
+  if (Number.isNaN(dt.getTime())) return "";
+
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // Use UTC to avoid timezone shifting the day
+  return (
+    dt.getUTCFullYear() + "-" +
+    pad(dt.getUTCMonth() + 1) + "-" +
+    pad(dt.getUTCDate())
+  );
 }
-          // =========================
-          // Utils
-          // =========================
-          function escapeHtml(value) {
-            if (value == null) return "";
-            return String(value)
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/"/g, "&quot;")
-              .replace(/'/g, "&#039;");
-          }
-
-          function normalizeText(value) {
-            return String(value || "")
-              .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-              .toLowerCase()
-              .trim();
-          }
-
-          function parseNumberSafe(value, fallback) {
-            const raw = String(value ?? "").trim();
-            if (!raw) return fallback ?? 0;
-
-            const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
-
-            if (s.includes(".") && s.includes(",")) {
-              const normalized = s.replace(/\./g, "").replace(",", ".");
-              const n = Number(normalized);
-              return Number.isFinite(n) ? n : (fallback ?? 0);
-            }
-
-            if (s.includes(",") && !s.includes(".")) {
-              const normalized = s.replace(",", ".");
-              const n = Number(normalized);
-              return Number.isFinite(n) ? n : (fallback ?? 0);
-            }
-
-            const n = Number(s);
-            return Number.isFinite(n) ? n : (fallback ?? 0);
-          }
-
-          function money4(v) { return parseNumberSafe(v, 0).toFixed(4); }
-
-          function clamp01(v) {
-            const n = parseNumberSafe(v, 0);
-            return Math.max(0, Math.min(1, n));
-          }
-
-          function tryToDatetimeLocal(value) {
-            const raw = String(value ?? "").trim();
-            if (!raw) return "";
-            const dt = new Date(raw);
-            if (Number.isNaN(dt.getTime())) return "";
-            const pad = (n) => String(n).padStart(2, "0");
-            return (
-              dt.getFullYear() + "-" +
-              pad(dt.getMonth() + 1) + "-" +
-              pad(dt.getDate()) + "T" +
-              pad(dt.getHours()) + ":" +
-              pad(dt.getMinutes())
-            );
-          }
-
-          // =========================
-          // Money mask (4 decimals)
-          // =========================
-          function bindMoneyMaskOnce(selector, decimals) {
-            const $el = $(selector);
-            if (!$el.length) return;
-            if ($el.data("money-mask")) return;
-            $el.data("money-mask", true);
-
-            const d = Number.isFinite(decimals) ? decimals : 4;
-
-            function normalize(val) {
-              const raw = String(val ?? "").trim();
-              if (!raw) return "";
-              const cleaned = raw.replace(/[^\d,.\-]/g, "");
-              if (cleaned.includes(".") && cleaned.includes(",")) {
-                return cleaned.replace(/\./g, "").replace(",", ".");
-              }
-              if (cleaned.includes(",") && !cleaned.includes(".")) {
-                return cleaned.replace(",", ".");
-              }
-              return cleaned;
-            }
-
-            $el.on("input", function () { $(this).val(normalize($(this).val())); });
-            $el.on("blur", function () {
-              const n = parseNumberSafe($(this).val(), 0);
-              $(this).val(n.toFixed(d));
-            });
-            $el.on("focus", function () {
-              const n = parseNumberSafe($(this).val(), 0);
-              $(this).val(n.toFixed(d));
-            });
-          }
-
-          // =========================
-          // API helpers
-          // =========================
-          async function readJsonSafe(response) {
-            const text = await response.text();
-            if (!text) return {};
-            try { return JSON.parse(text); }
-            catch { return { message: text }; }
-          }
-
-          async function apiGet(url) {
-            const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
-            const data = await readJsonSafe(resp);
-            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-            return data;
-          }
-
-          async function apiPost(url, payload) {
-            const resp = await fetch(url, {
-              method: "POST",
-              headers: { Accept: "application/json", "Content-Type": "application/json" },
-              body: JSON.stringify(payload ?? {}),
-            });
-            const data = await readJsonSafe(resp);
-            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-            return data;
-          }
-
-          async function apiPatch(url, payload) {
-            const resp = await fetch(url, {
-              method: "PATCH",
-              headers: { Accept: "application/json", "Content-Type": "application/json" },
-              body: JSON.stringify(payload ?? {}),
-            });
-            const data = await readJsonSafe(resp);
-            if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
-            return data;
-          }
-
-          // =========================
-          // Typeahead: Company
-          // =========================
-          function initTypeaheadCompany() {
-            const $input = $("#company_name");
-            if (!$input.length || !$.fn.typeahead) return;
-
-            const items = (companiesCache || []).map((c) => ({
-              id: c.id,
-              name: c.company_name,
-              _norm: normalizeText(c.company_name),
-            }));
-
-            try { $input.typeahead("destroy"); } catch { /* ignore */ }
-            $input.off(".companyTa");
-
-            $input.typeahead({
-              source: items,
-              autoSelect: true,
-              minLength: 0,
-              displayText: function (item) { return item.name; },
-              matcher: function (item) {
-                const q = normalizeText(this.query);
-                if (!q) return true;
-                return item._norm.includes(q);
-              },
-              afterSelect: function (item) {
-                suppressCompanyClear = true;
-                $("#company_id").val(item.id);
-                $("#company_name").val(item.name);
-                suppressCompanyClear = false;
-
-                onCompanyChanged(item.id).catch(console.error);
-
-                // ✅ Force close dropdown
-                setTimeout(() => {
-                  try { $input.typeahead("hide"); } catch (e) { /* ignore */ }
-                  $input.blur();
-                }, 0);
-              }
-            });
-
-            $input.on("input.companyTa", function () {
-              if (suppressCompanyClear) return;
-              $("#company_id").val("");
-            });
-
-            $input.on("focus.companyTa", function () {
-              const hasText = String($(this).val() || "").trim().length > 0;
-              if (!hasText) $(this).typeahead("lookup");
-            });
-          }
-
-          function setCompanyById(companyId) {
-            const id = String(companyId || "").trim();
-            if (!id) {
-              suppressCompanyClear = true;
-              $("#company_id").val("");
-              $("#company_name").val("");
-              suppressCompanyClear = false;
-              return;
-            }
-
-            const c = (companiesCache || []).find(x => String(x.id) === id);
-
-            suppressCompanyClear = true;
-            $("#company_id").val(id);
-            $("#company_name").val(c ? c.company_name : "");
-            suppressCompanyClear = false;
-          }
-
-          // =========================
-          // Load lists
-          // =========================
-          async function loadCompanies() {
-            const data = await apiGet("/api/companies");
-            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
-            companiesCache = list
-              .map((c) => ({
-                id: String(c?.id || "").trim(),
-                company_name: String(c?.company_name || c?.name || "").trim(),
-              }))
-              .filter((x) => x.id && x.company_name);
-
-            initTypeaheadCompany();
-          }
-
-          async function loadCurrencies() {
-            const data = await apiGet("/api/currencies");
-            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.currencies ?? []);
-            currenciesCache = list
-              .map((c) => ({
-                id: String(c?.id || "").trim(),
-                name: String(c?.name || "").trim(),
-                symbol: String(c?.symbol || ""),
-                decimals: Number(c?.decimals ?? 2),
-              }))
-              .filter((x) => x.id && x.name);
-
-            const $ddl = $("#currency_id");
-            $ddl.empty().append(`<option value="">Selecionar...</option>`);
-            currenciesCache.forEach((c) => {
-              $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`);
-            });
-          }
-
-          function toProductModel(p) {
-            return {
-              id: String(p?.id || "").trim(),
-              name: String(p?.name || "").trim(),
-              description: String(p?.description || "").trim(),
-              unit: String(p?.unit || "").trim(),
-              defaultUnitPrice: parseNumberSafe(p?.default_unit_price, 0),
-              defaultTaxRate: clamp01(p?.default_tax_rate),
-              isActive: !!p?.is_active,
-            };
-          }
-
-          async function preloadProducts() {
-            const currencyId = String($("#currency_id").val() || "").trim();
-            if (!currencyId) { productsCache = []; return false; }
-
-            const qs = new URLSearchParams();
-            qs.set("currency_id", currencyId);
-            qs.set("is_active", "true");
-
-            const data = await apiGet(`/api/products?${qs.toString()}`);
-            const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
-            productsCache = list.map(toProductModel).filter((p) => p.id && p.name);
-
-            return productsCache.length > 0;
-          }
-
-          function getProductById(productId) {
-            const id = String(productId || "").trim();
-            return productsCache.find((p) => p.id === id) || null;
-          }
-
-          // =========================
-          // Company change: auto fill billing
-          // =========================
-          async function onCompanyChanged(companyId) {
-            try {
-              const id = String(companyId || "").trim();
-              if (!id) return;
-
-              const company = await apiGet(`/api/companies/${encodeURIComponent(id)}`);
-
-              const street = String(company?.address_street || "").trim();
-              const number = String(company?.address_number || "").trim();
-              const line = String(company?.address_line || "").trim();
-              const line1 = line || [street, number].filter(Boolean).join(", ");
-
-              $("#billing_address_line1").val(line1);
-              $("#billing_address_line2").val("");
-              $("#billing_address_city").val(company?.address_city || "");
-              $("#billing_address_state").val(company?.address_state || "");
-              $("#billing_address_postal_code").val(company?.address_postalcode || "");
-              $("#billing_address_country").val(company?.address_country || "");
-            } catch (e) {
-              console.error(e);
-            }
-          }
-
-          // =========================
-          // Header payloads
-          // =========================
-          function buildInvoiceHeaderPayload() {
-            return {
-              company_id: String($("#company_id").val() || "").trim() || null,
-              currency_id: String($("#currency_id").val() || "").trim() || null,
-              quote_at: $("#quote_at").val() || null,
-              exchange_rate: $("#exchange_rate").val() || null,
-              status: parseNumberSafe($("#status").val(), 0),
-              discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
-              version: parseNumberSafe($("#version").val(), 1),
-              notes: $("#notes").val() || "",
-              terms: $("#terms").val() || "",
-            };
-          }
-
-          function buildBillingPayload() {
-            return {
-              billing_address_line1: $("#billing_address_line1").val() || "",
-              billing_address_line2: $("#billing_address_line2").val() || "",
-              billing_address_city: $("#billing_address_city").val() || "",
-              billing_address_state: $("#billing_address_state").val() || "",
-              billing_address_postal_code: $("#billing_address_postal_code").val() || "",
-              billing_address_country: $("#billing_address_country").val() || "",
-            };
-          }
-
-          function buildLinesPayload() {
-            return (lines || []).map((l) => ({
-              //id: l.id || undefined,
-              product_id: l.product_id || null,
-              description: l.description || "",
-              unit: l.unit || "",
-              unit_price: String(parseNumberSafe(l.unit_price, 0)),
-              quantity: String(parseNumberSafe(l.quantity, 1)),
-              tax_rate: String(clamp01(l.tax_rate)),
-              discount_percent: parseInt(String(l.discount_percent ?? 0), 10) || 0,
-            }));
-          }
-
-          // =========================
-          // Create invoice header if needed
-          // =========================
-          async function createInvoiceIfNeeded() {
-            if (invoiceId || creatingInvoice) return true;
-
-            const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
-
-            if (!payload.company_id || !payload.currency_id) {
-              alert("Empresa e Moeda são obrigatórios.");
-              return false;
-            }
-
-            try {
-              creatingInvoice = true;
-              const created = await apiPost("/api/invoices", payload);
-
-              invoiceId = created?.id ? String(created.id) : null;
-              setPrintEnabled();
-              $("#uiInvoiceId").text(invoiceId || "-");
-              $("#invoiceTitle").text(invoiceId || "Criação de Fatura");
-              $("#invoiceNotCreatedBanner").hide();
-
-              $("#discount_percent").prop("readonly", false);
-
-              return !!invoiceId;
-            } catch (e) {
-              console.error(e);
-              alert(e?.message || "Falha ao criar a fatura.");
-              return false;
-            } finally {
-              creatingInvoice = false;
-            }
-          }
-
-          function setLinesEnabled(isEnabled) {
-            const area = document.getElementById("linesArea");
-            if (!area) return;
-            if (isEnabled) area.classList.remove("lines-disabled");
-            else area.classList.add("lines-disabled");
-          }
-
-          // =========================
-          // Calc line + totals
-          // =========================
-          function recalcLine(line) {
-            const qty = parseNumberSafe(line.quantity, 1);
-            const unitPrice = parseNumberSafe(line.unit_price, 0);
-            const taxRate = clamp01(line.tax_rate);
-            const discountPercent = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
-
-            const gross = qty * unitPrice;
-            const discountAmount = gross * (discountPercent / 100);
-            const taxableBase = Math.max(0, gross - discountAmount);
-            const taxAmount = taxableBase * taxRate;
-            const lineTotal = taxableBase + taxAmount;
-
-            line.quantity = qty;
-            line.unit_price = unitPrice;
-            line.tax_rate = taxRate;
-            line.discount_percent = discountPercent;
-
-            line.line_subtotal = gross;
-            line.discount_amount = discountAmount;
-            line.tax_amount = taxAmount;
-            line.line_total = lineTotal;
-
-            return line;
-          }
-
-          function computeTotals() {
-            (lines || []).forEach(recalcLine);
-
-            let grossSubtotal = 0;
-            let taxTotal = 0;
-            let lineDiscountTotal = 0;
-
-            for (const l of (lines || [])) {
-              grossSubtotal += parseNumberSafe(l.line_subtotal, 0);
-              taxTotal += parseNumberSafe(l.tax_amount, 0);
-              lineDiscountTotal += parseNumberSafe(l.discount_amount, 0);
-            }
-
-            const headerDiscountPercent = Math.max(0, Math.min(100, parseNumberSafe($("#discount_percent").val(), 0)));
-            const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
-
-            const netBeforeHeader = Math.max(0, grossSubtotal - lineDiscountTotal);
-            const total = Math.max(0, (netBeforeHeader - headerDiscountAmount) + taxTotal);
-
-            $("#uiSubtotal").text(money4(grossSubtotal));
-            $("#uiDiscount").text(money4(headerDiscountAmount));
-            $("#uiTaxTotal").text(money4(taxTotal));
-            $("#uiTotal").text(money4(total));
-          }
-
-          $("#discount_percent").on("keyup change input", computeTotals);
-
-          // =========================
-          // Render grid
-          // =========================
-          function renderLines() {
-            const tbody = document.getElementById("linesTbody");
-            if (!tbody) return;
-
-            tbody.innerHTML = "";
-
-            (lines || []).forEach(recalcLine);
-
-            if (!lines || lines.length === 0) {
-              tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
-              computeTotals();
-              return;
-            }
-
-            lines.forEach((l, idx) => {
-              const tr = document.createElement("tr");
-              tr.innerHTML = `
+
+    function getSelectedCurrency() {
+      const currencyId = String($("#currency_id").val() || "").trim();
+      if (!currencyId) return null;
+      return (currenciesCache || []).find(c => String(c.id) === currencyId) || null;
+    }
+
+    function resolveCurrencyCode(cur) {
+      if (!cur) return null;
+      const code = String(cur.code || cur.iso_code || cur.currency_code || "").trim();
+      if (code) return code;
+
+      const sym = String(cur.symbol || "").trim();
+      if (sym === "R$") return "BRL";
+      if (sym === "$") return "USD";
+      if (sym === "€") return "EUR";
+
+      return null;
+    }
+
+    function formatMoney(value) {
+      const cur = getSelectedCurrency();
+      const code = resolveCurrencyCode(cur);
+      const decimals = Number.isFinite(cur?.decimals) ? cur.decimals : 2;
+
+      const n = parseNumberSafe(value, 0);
+
+      try {
+        if (code) {
+          return new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: code,
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+          }).format(n);
+        }
+      } catch (e) { /* ignore */ }
+
+      // fallback: pt-BR number + symbol
+      const sym = String(cur?.symbol || "").trim();
+      const num = new Intl.NumberFormat("pt-BR", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(n);
+
+      return sym ? (sym + " " + num) : num;
+    }
+
+    // =========================
+    // Money mask for currency inputs (pt-BR user typing -> normalized numeric)
+    // =========================
+    function bindMoneyMaskOnce(selector) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("money-mask")) return;
+      $el.data("money-mask", true);
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        const cleaned = raw.replace(/[^\d,.\-]/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      $el.on("input", function () { $(this).val(normalize($(this).val())); });
+    }
+
+    // =========================
+    // API helpers
+    // =========================
+    async function readJsonSafe(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try { return JSON.parse(text); }
+      catch { return { message: text }; }
+    }
+
+    async function apiGet(url) {
+      const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+      const data = await readJsonSafe(resp);
+      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      return data;
+    }
+
+    async function apiPost(url, payload) {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(payload ?? {}),
+      });
+      const data = await readJsonSafe(resp);
+      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      return data;
+    }
+
+    async function apiPatch(url, payload) {
+      const resp = await fetch(url, {
+        method: "PATCH",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(payload ?? {}),
+      });
+      const data = await readJsonSafe(resp);
+      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      return data;
+    }
+
+    async function apiDelete(url) {
+      const resp = await fetch(url, { method: "DELETE", headers: { Accept: "application/json" } });
+      if (resp.status === 204) return {};
+      const data = await readJsonSafe(resp);
+      if (!resp.ok) throw new Error(data?.message || "Falha ao excluir.");
+      return data;
+    }
+
+    // =========================
+    // Typeahead: Company
+    // =========================
+    function initTypeaheadCompany() {
+      const $input = $("#company_name");
+      if (!$input.length || !$.fn.typeahead) return;
+
+      const items = (companiesCache || []).map((c) => ({
+        id: c.id,
+        name: c.company_name,
+        _norm: normalizeText(c.company_name),
+      }));
+
+      try { $input.typeahead("destroy"); } catch { /* ignore */ }
+      $input.off(".companyTa");
+
+      $input.typeahead({
+        source: items,
+        autoSelect: true,
+        minLength: 0,
+        displayText: function (item) { return item.name; },
+        matcher: function (item) {
+          const q = normalizeText(this.query);
+          if (!q) return true;
+          return item._norm.includes(q);
+        },
+        afterSelect: function (item) {
+          suppressCompanyClear = true;
+          $("#company_id").val(item.id);
+          $("#company_name").val(item.name);
+          suppressCompanyClear = false;
+
+          onCompanyChanged(item.id).catch(console.error);
+
+          setTimeout(() => {
+            try { $input.typeahead("hide"); } catch (e) { /* ignore */ }
+            $input.blur();
+          }, 0);
+        }
+      });
+
+      $input.on("input.companyTa", function () {
+        if (suppressCompanyClear) return;
+        $("#company_id").val("");
+      });
+
+      $input.on("focus.companyTa", function () {
+        const hasText = String($(this).val() || "").trim().length > 0;
+        if (!hasText) $(this).typeahead("lookup");
+      });
+    }
+
+    function setCompanyById(companyId) {
+      const id = String(companyId || "").trim();
+      if (!id) {
+        suppressCompanyClear = true;
+        $("#company_id").val("");
+        $("#company_name").val("");
+        suppressCompanyClear = false;
+        return;
+      }
+
+      const c = (companiesCache || []).find(x => String(x.id) === id);
+
+      suppressCompanyClear = true;
+      $("#company_id").val(id);
+      $("#company_name").val(c ? c.company_name : "");
+      suppressCompanyClear = false;
+    }
+
+    // =========================
+    // Load lists
+    // =========================
+    async function loadCompanies() {
+      const data = await apiGet("/api/companies");
+      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
+      companiesCache = list
+        .map((c) => ({
+          id: String(c?.id || "").trim(),
+          company_name: String(c?.company_name || c?.name || "").trim(),
+        }))
+        .filter((x) => x.id && x.company_name);
+
+      initTypeaheadCompany();
+    }
+
+    async function loadCurrencies() {
+      const data = await apiGet("/api/currencies");
+      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.currencies ?? []);
+      currenciesCache = list
+        .map((c) => ({
+          id: String(c?.id || "").trim(),
+          name: String(c?.name || "").trim(),
+          symbol: String(c?.symbol || ""),
+          decimals: Number(c?.decimals ?? 2),
+          code: String(c?.code || c?.iso_code || c?.currency_code || "").trim(), // ✅ pra Intl currency
+        }))
+        .filter((x) => x.id && x.name);
+
+      const $ddl = $("#currency_id");
+      $ddl.empty().append(`<option value="">Selecionar...</option>`);
+      currenciesCache.forEach((c) => {
+        $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`);
+      });
+    }
+
+    function toProductModel(p) {
+      return {
+        id: String(p?.id || "").trim(),
+        name: String(p?.name || "").trim(),
+        description: String(p?.description || "").trim(),
+        unit: String(p?.unit || "").trim(),
+        defaultUnitPrice: parseNumberSafe(p?.default_unit_price, 0),
+        defaultTaxRate: clamp01(p?.default_tax_rate),
+        isActive: !!p?.is_active,
+      };
+    }
+
+    async function preloadProducts() {
+      const currencyId = String($("#currency_id").val() || "").trim();
+      if (!currencyId) { productsCache = []; return false; }
+
+      const qs = new URLSearchParams();
+      qs.set("currency_id", currencyId);
+      qs.set("is_active", "true");
+
+      const data = await apiGet(`/api/products?${qs.toString()}`);
+      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.products ?? []);
+      productsCache = list.map(toProductModel).filter((p) => p.id && p.name);
+
+      return productsCache.length > 0;
+    }
+
+    function getProductById(productId) {
+      const id = String(productId || "").trim();
+      return productsCache.find((p) => p.id === id) || null;
+    }
+
+    // =========================
+    // Company change: auto fill billing
+    // =========================
+    async function onCompanyChanged(companyId) {
+      try {
+        const id = String(companyId || "").trim();
+        if (!id) return;
+
+        const company = await apiGet(`/api/companies/${encodeURIComponent(id)}`);
+
+        const street = String(company?.address_street || "").trim();
+        const number = String(company?.address_number || "").trim();
+        const line = String(company?.address_line || "").trim();
+        const line1 = line || [street, number].filter(Boolean).join(", ");
+
+        $("#billing_address_line1").val(line1);
+        $("#billing_address_line2").val("");
+        $("#billing_address_city").val(company?.address_city || "");
+        $("#billing_address_state").val(company?.address_state || "");
+        $("#billing_address_postal_code").val(company?.address_postalcode || company?.address_postal_code || "");
+        $("#billing_address_country").val(company?.address_country || "");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // =========================
+    // Header payloads
+    // =========================
+    function buildInvoiceHeaderPayload() {
+      return {
+        company_id: String($("#company_id").val() || "").trim() || null,
+        currency_id: String($("#currency_id").val() || "").trim() || null,
+        quote_at: $("#quote_at").val() || null,
+        due_at: dateInputToIsoUtc($("#due_at").val()),
+        exchange_rate: $("#exchange_rate").val() || null,
+        status: parseNumberSafe($("#status").val(), 0),
+        discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
+        version: parseNumberSafe($("#version").val(), 1),
+        notes: $("#notes").val() || "",
+        terms: $("#terms").val() || "",
+      };
+    }
+
+    function buildBillingPayload() {
+      return {
+        billing_address_line1: $("#billing_address_line1").val() || "",
+        billing_address_line2: $("#billing_address_line2").val() || "",
+        billing_address_city: $("#billing_address_city").val() || "",
+        billing_address_state: $("#billing_address_state").val() || "",
+        billing_address_postal_code: $("#billing_address_postal_code").val() || "",
+        billing_address_country: $("#billing_address_country").val() || "",
+      };
+    }
+
+    function buildLinesPayload() {
+      return (lines || []).map((l) => ({
+        product_id: l.product_id || null,
+        description: l.description || "",
+        unit: l.unit || "",
+        unit_price: String(parseNumberSafe(l.unit_price, 0)),
+        quantity: String(toIntSafe(l.quantity, 1)), // ✅ int
+        tax_rate: String(clamp01(l.tax_rate)),
+        discount_amount: String(Math.max(0, parseNumberSafe(l.discount_amount, 0))), // ✅ valor
+      }));
+    }
+
+    // =========================
+    // Create invoice header if needed
+    // =========================
+    async function createInvoiceIfNeeded() {
+      if (invoiceId || creatingInvoice) return true;
+
+      const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
+
+      if (!payload.company_id || !payload.currency_id) {
+        alert("Empresa e Moeda são obrigatórios.");
+        return false;
+      }
+
+      try {
+        creatingInvoice = true;
+        const created = await apiPost("/api/invoices", payload);
+
+        invoiceId = created?.id ? String(created.id) : null;
+        setPrintEnabled();
+
+        $("#uiInvoiceId").text(invoiceId || "-");
+        $("#invoiceTitle").text(invoiceId || "Criação de Fatura");
+        $("#invoiceNotCreatedBanner").hide();
+
+        $("#discount_percent").prop("readonly", false);
+
+        return !!invoiceId;
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Falha ao criar a fatura.");
+        return false;
+      } finally {
+        creatingInvoice = false;
+      }
+    }
+
+    function setLinesEnabled(isEnabled) {
+      const area = document.getElementById("linesArea");
+      if (!area) return;
+      if (isEnabled) area.classList.remove("lines-disabled");
+      else area.classList.add("lines-disabled");
+    }
+
+    // =========================
+    // Calc line + totals
+    // discount_amount is a VALUE (currency), not percent
+    // =========================
+    function recalcLine(line) {
+      const qty = toIntSafe(line.quantity, 1);
+      const unitPrice = parseNumberSafe(line.unit_price, 0);
+      const taxRate = clamp01(line.tax_rate);
+
+      const gross = qty * unitPrice;
+
+      let discountAmount = Math.max(0, parseNumberSafe(line.discount_amount, 0));
+      if (discountAmount > gross) discountAmount = gross;
+
+      const taxableBase = Math.max(0, gross - discountAmount);
+      const taxAmount = taxableBase * taxRate;
+      const lineTotal = taxableBase + taxAmount;
+
+      line.quantity = qty;
+      line.unit_price = unitPrice;
+      line.tax_rate = taxRate;
+
+      line.line_subtotal = gross;
+      line.discount_amount = discountAmount;
+      line.tax_amount = taxAmount;
+      line.line_total = lineTotal;
+
+      return line;
+    }
+
+    function computeTotals() {
+      (lines || []).forEach(recalcLine);
+
+      let grossSubtotal = 0;
+      let taxTotal = 0;
+      let lineDiscountTotal = 0;
+
+      for (const l of (lines || [])) {
+        grossSubtotal += parseNumberSafe(l.line_subtotal, 0);
+        taxTotal += parseNumberSafe(l.tax_amount, 0);
+        lineDiscountTotal += parseNumberSafe(l.discount_amount, 0);
+      }
+
+      const headerDiscountPercent = Math.max(0, Math.min(100, parseNumberSafe($("#discount_percent").val(), 0)));
+      const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
+
+      const total = Math.max(0, (grossSubtotal - lineDiscountTotal - headerDiscountAmount) + taxTotal);
+
+      $("#uiSubtotal").text(formatMoney(grossSubtotal));
+      $("#uiDiscountHeader").text(formatMoney(headerDiscountAmount));
+      $("#uiDiscountLines").text(formatMoney(lineDiscountTotal));
+      $("#uiTaxTotal").text(formatMoney(taxTotal));
+      $("#uiTotal").text(formatMoney(total));
+    }
+
+    $("#discount_percent").on("keyup change input", computeTotals);
+    $("#currency_id").on("change", computeTotals);
+
+    // =========================
+    // Render grid
+    // =========================
+    function renderLines() {
+      const tbody = document.getElementById("linesTbody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+      (lines || []).forEach(recalcLine);
+
+      if (!lines || lines.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
+        computeTotals();
+        return;
+      }
+
+      lines.forEach((l, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
           <td>${escapeHtml(String(idx + 1))}</td>
-          <td>${escapeHtml(l.product_name || "Manual")}</td>
-          <td>${escapeHtml(l.description || "")}</td>
+          <td>
+            <div><strong>${escapeHtml(l.product_name || "Manual")}</strong></div>
+            <small class="text-muted">${escapeHtml(l.description || "")}</small>
+          </td>
           <td>${escapeHtml(l.unit || "")}</td>
-          <td class="text-right">${money4(l.unit_price || 0)}</td>
-          <td class="text-right">${money4(l.quantity || 0)}</td>
-          <td class="text-right">${money4(l.tax_amount || 0)}</td>
-          <td class="text-right">${money4(l.line_total || 0)}</td>
+          <td class="text-right">${escapeHtml(formatMoney(l.unit_price || 0))}</td>
+          <td class="text-right">${escapeHtml(String(toIntSafe(l.quantity, 0)))}</td>
+          <td class="text-right">${escapeHtml(formatMoney(l.discount_amount || 0))}</td>
+          <td class="text-right">${escapeHtml(formatMoney(l.tax_amount || 0))}</td>
+          <td class="text-right">${escapeHtml(formatMoney(l.line_total || 0))}</td>
           <td>
             <button type="button" class="btn btn-white btn-xs" data-act="edit" data-idx="${idx}">
-              <i class="fa fa-pencil"></i> 
+              <i class="fa fa-pencil"></i>
             </button>
             <button type="button" class="btn btn-danger btn-xs" data-act="del" data-idx="${idx}">
-              <i class="fa fa-trash"></i> 
+              <i class="fa fa-trash"></i>
             </button>
           </td>
         `;
-              tbody.appendChild(tr);
-            });
+        tbody.appendChild(tr);
+      });
 
-            tbody.querySelectorAll("button[data-act]").forEach((btn) => {
-              btn.addEventListener("click", () => {
-                const act = btn.getAttribute("data-act");
-                const idx = parseInt(btn.getAttribute("data-idx"), 10);
-                if (!Number.isFinite(idx)) return;
+      tbody.querySelectorAll("button[data-act]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const act = btn.getAttribute("data-act");
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          if (!Number.isFinite(idx)) return;
 
-                if (act === "del") {
-                  lines.splice(idx, 1);
-                  renderLines();
-                }
-
-                if (act === "edit") {
-                  openInvoiceLineModal({ mode: "edit", index: idx, requireProduct: false });
-                }
-              });
-            });
-
-            computeTotals();
+          if (act === "del") {
+            lines.splice(idx, 1);
+            renderLines();
           }
 
-          // =========================
-          // Modal (Add/Edit line) with Typeahead Product
-          // =========================
-          function openInvoiceLineModal({ mode, index, requireProduct }) {
-            const isEdit = mode === "edit";
-            const existing = isEdit ? (lines[index] || null) : null;
+          if (act === "edit") {
+            openInvoiceLineModal({ mode: "edit", index: idx, requireProduct: false });
+          }
+        });
+      });
 
-            const line = existing ? { ...existing } : {
-              id: null,
-              product_id: null,
-              product_name: "",
-              description: "",
-              unit: "",
-              unit_price: 0,
-              quantity: 1,
-              tax_rate: 0,
-              discount_percent: 0,
-              tax_amount: 0,
-              discount_amount: 0,
-              line_subtotal: 0,
-              line_total: 0,
-            };
+      computeTotals();
+    }
 
-            recalcLine(line);
+    // =========================
+    // Modal (Add/Edit line) with Typeahead Product
+    // =========================
+    function openInvoiceLineModal({ mode, index, requireProduct }) {
+      const isEdit = mode === "edit";
+      const existing = isEdit ? (lines[index] || null) : null;
 
-            const html = `
+      const line = existing ? { ...existing } : {
+        id: null,
+        product_id: null,
+        product_name: "",
+        description: "",
+        unit: "",
+        unit_price: 0,
+        quantity: 1,
+        tax_rate: 0,
+        discount_amount: 0, // ✅ valor
+        tax_amount: 0,
+        line_subtotal: 0,
+        line_total: 0,
+      };
+
+      recalcLine(line);
+
+      const html = `
         <div class="form-group">
           <label>Produto</label>
 
@@ -934,7 +972,7 @@ function setPrintEnabled() {
           <div class="col-xs-6">
             <div class="form-group">
               <label>Preço unitário</label>
-              <input id="il_unit_price" type="text" class="form-control money" value="${escapeHtml(money4(line.unit_price || 0))}" />
+              <input id="il_unit_price" type="text" class="form-control money" value="${escapeHtml(String(parseNumberSafe(line.unit_price, 0)))}" />
             </div>
           </div>
         </div>
@@ -943,13 +981,14 @@ function setPrintEnabled() {
           <div class="col-xs-6">
             <div class="form-group">
               <label>Quantidade</label>
-              <input id="il_quantity" type="number" class="form-control money" value="${(line.quantity || 1)}" />
+              <input id="il_quantity" type="number" step="1" min="1" class="form-control" value="${escapeHtml(String(toIntSafe(line.quantity, 1)))}" />
+              <div class="small text-muted" style="margin-top:4px;">*Somente inteiro</div>
             </div>
           </div>
           <div class="col-xs-6">
             <div class="form-group">
               <label>Taxa de imposto (0..1)</label>
-              <input id="il_tax_rate" type="text" class="form-control money" value="${escapeHtml(money4(clamp01(line.tax_rate)))}" />
+              <input id="il_tax_rate" type="text" class="form-control money" value="${escapeHtml(String(clamp01(line.tax_rate)))}" />
             </div>
           </div>
         </div>
@@ -957,14 +996,14 @@ function setPrintEnabled() {
         <div class="row row-tight">
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Desconto % (linha)</label>
-              <input id="il_discount_percent" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(line.discount_percent || 0))}" />
+              <label>Desconto (valor)</label>
+              <input id="il_discount_amount" type="text" class="form-control money" value="${escapeHtml(String(parseNumberSafe(line.discount_amount, 0)))}" />
             </div>
           </div>
           <div class="col-xs-6">
             <div class="form-group">
               <label>Total da linha</label>
-              <input id="il_line_total" type="text" class="form-control" value="${escapeHtml(money4(line.line_total))}" readonly />
+              <input id="il_line_total" type="text" class="form-control" value="${escapeHtml(formatMoney(line.line_total))}" readonly />
             </div>
           </div>
         </div>
@@ -972,411 +1011,416 @@ function setPrintEnabled() {
         <div class="small text-muted">Subtotal/Imposto/Total são calculados automaticamente.</div>
       `;
 
-            window.SideModal.open({
-              title: isEdit ? "Editar linha" : "Adicionar linha",
-              okText: isEdit ? "Salvar" : "Adicionar",
-              cancelText: "Cancelar",
-              html,
+      window.SideModal.open({
+        title: isEdit ? "Editar linha" : "Adicionar linha",
+        okText: isEdit ? "Salvar" : "Adicionar",
+        cancelText: "Cancelar",
+        html,
 
-              onOpen: async function (ctx) {
-                const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
-                const $root = $(rootEl);
+        onOpen: async function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
 
-                // Masks
-                bindMoneyMaskOnce($root.find("#il_unit_price"), 4);
-                bindMoneyMaskOnce($root.find("#il_quantity"), 4);
-                bindMoneyMaskOnce($root.find("#il_tax_rate"), 4);
+          // normalize numeric typing
+          bindMoneyMaskOnce($root.find("#il_unit_price"));
+          bindMoneyMaskOnce($root.find("#il_tax_rate"));
+          bindMoneyMaskOnce($root.find("#il_discount_amount"));
 
-                function syncModalCalc() {
-                  const tmp = {
-                    ...line,
-                    unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
-                    quantity: parseNumberSafe($root.find("#il_quantity").val(), 1),
-                    tax_rate: clamp01($root.find("#il_tax_rate").val()),
-                    discount_percent: parseNumberSafe($root.find("#il_discount_percent").val(), 0),
-                  };
-
-                  recalcLine(tmp);
-                  $root.find("#il_line_total").val(money4(tmp.line_total));
-                }
-
-                // Typeahead products
-                const $prodName = $root.find("#il_product_name");
-                const $prodId = $root.find("#il_product_id");
-
-                const items = (productsCache || []).map((p) => ({
-                  id: p.id,
-                  name: p.name,
-                  unit: p.unit,
-                  description: p.description,
-                  defaultUnitPrice: p.defaultUnitPrice,
-                  defaultTaxRate: p.defaultTaxRate,
-                  _norm: normalizeText(p.name),
-                }));
-
-                try { $prodName.typeahead("destroy"); } catch { /* ignore */ }
-                $prodName.off(".prodTa");
-
-                $prodName.typeahead({
-                  source: items,
-                  autoSelect: true,
-                  minLength: 0,
-                  displayText: function (item) { return item.name; },
-                  matcher: function (item) {
-                    const q = normalizeText(this.query);
-                    if (!q) return true;
-                    return item._norm.includes(q);
-                  },
-                  afterSelect: function (item) {
-                    $prodId.val(item.id);
-
-                    // Apply defaults only when adding
-                    if (!isEdit) {
-                      $root.find("#il_unit").val(item.unit || "");
-                      if (!String($root.find("#il_description").val() || "").trim()) {
-                        $root.find("#il_description").val(item.description || "");
-                      }
-                      $root.find("#il_unit_price").val(parseNumberSafe(item.defaultUnitPrice, 0).toFixed(4));
-                      $root.find("#il_tax_rate").val(clamp01(item.defaultTaxRate).toFixed(4));
-                    }
-
-                    syncModalCalc();
-
-                    // ✅ Force close dropdown
-                    setTimeout(() => {
-                      try { $prodName.typeahead("hide"); } catch (e) { /* ignore */ }
-                      $prodName.blur();
-                    }, 0);
-                  }
-                });
-
-                $prodName.on("input.prodTa", function () {
-                  $prodId.val("");
-                  syncModalCalc();
-                });
-
-                $prodName.on("focus.prodTa", function () {
-                  const hasText = String($(this).val() || "").trim().length > 0;
-                  if (!hasText) $(this).typeahead("lookup");
-                });
-
-
-                // Fill values when editing
-                if (isEdit && existing) {
-                  if (existing.product_id) {
-                    const prod = getProductById(existing.product_id);
-                    $prodId.val(existing.product_id);
-                    $prodName.val(prod ? prod.name : "");
-                  }
-
-                  $root.find("#il_description").val(existing.description || "");
-                  $root.find("#il_unit").val(existing.unit || "");
-                  $root.find("#il_unit_price").val(parseNumberSafe(existing.unit_price, 0).toFixed(4));
-                  $root.find("#il_quantity").val(parseNumberSafe(existing.quantity, 1).toFixed(4));
-                  $root.find("#il_tax_rate").val(clamp01(existing.tax_rate).toFixed(4));
-                  $root.find("#il_discount_percent").val(parseNumberSafe(existing.discount_percent, 0));
-                }
-
-                $root
-                  .find("#il_description, #il_unit, #il_unit_price, #il_quantity, #il_tax_rate, #il_discount_percent")
-                  .off("keyup.__il change.__il input.__il")
-                  .on("keyup.__il change.__il input.__il", syncModalCalc);
-
-                syncModalCalc();
-              },
-
-              onOk: async function (ctx) {
-                const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
-                const $root = $(rootEl);
-
-                const productId = String($root.find("#il_product_id").val() || "").trim() || null;
-                const typedName = String($root.find("#il_product_name").val() || "").trim();
-
-                if (requireProduct && (!productId || !typedName)) {
-                  alert("Selecione um produto na lista (digitar não basta).");
-                  return true;
-                }
-
-                const prod = productId ? getProductById(productId) : null;
-
-                const updated = {
-                  ...line,
-                  product_id: productId,
-                  product_name: prod?.name || (typedName || (productId ? productId : "Manual")),
-                  description: String($root.find("#il_description").val() || ""),
-                  unit: String($root.find("#il_unit").val() || ""),
-                  unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
-                  quantity: parseNumberSafe($root.find("#il_quantity").val(), 1),
-                  tax_rate: clamp01($root.find("#il_tax_rate").val()),
-                  discount_percent: parseNumberSafe($root.find("#il_discount_percent").val(), 0),
-                };
-
-                if (prod) {
-                  if (!String(updated.unit || "").trim()) updated.unit = prod.unit || "";
-                  if (!String(updated.description || "").trim()) updated.description = prod.description || "";
-                  if (!parseNumberSafe(updated.unit_price, 0)) updated.unit_price = parseNumberSafe(prod.defaultUnitPrice, 0);
-                  if (!parseNumberSafe(updated.tax_rate, 0)) updated.tax_rate = clamp01(prod.defaultTaxRate);
-                }
-
-                recalcLine(updated);
-
-                if (parseNumberSafe(updated.quantity, 0) <= 0) {
-                  alert("Quantidade deve ser maior que 0.");
-                  return true;
-                }
-
-                if (isEdit) lines[index] = updated;
-                else lines.push(updated);
-
-                renderLines();
-                return false;
-              },
-            });
-          }
-
-          // =========================
-          // Load existing invoice (Edit mode)
-          // =========================
-          function detectInvoiceIdFromUrl() {
-            const qs = new URLSearchParams(window.location.search || "");
-            const byQuery = String(qs.get("id") || qs.get("invoice_id") || "").trim();
-            if (byQuery) return byQuery;
-
-            const parts = String(window.location.pathname || "")
-              .split("/")
-              .map((p) => p.trim())
-              .filter(Boolean);
-
-            const last = parts[parts.length - 1] || "";
-            const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            return uuidLike.test(last) ? last : null;
-          }
-
-          function normalizeLineFromApi(l) {
-            const productId = l?.product_id ? String(l.product_id).trim() : null;
-            const prod = productId ? getProductById(productId) : null;
-
-            const normalized = {
-              id: l?.id ? String(l.id).trim() : null,
-              product_id: productId,
-              product_name: prod?.name || (productId ? productId : "Manual"),
-              description: String(l?.description ?? "").trim(),
-              unit: String(l?.unit ?? "").trim(),
-              unit_price: parseNumberSafe(l?.unit_price, 0),
-              quantity: parseNumberSafe(l?.quantity, 1),
-              tax_rate: clamp01(l?.tax_rate),
-              discount_percent: parseNumberSafe(l?.discount_percent, 0),
-              tax_amount: parseNumberSafe(l?.tax_amount, 0),
-              discount_amount: parseNumberSafe(l?.discount_amount, 0),
-              line_subtotal: parseNumberSafe(l?.line_subtotal, 0),
-              line_total: parseNumberSafe(l?.line_total, 0),
+          function syncModalCalc() {
+            const tmp = {
+              ...line,
+              unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
+              quantity: toIntSafe($root.find("#il_quantity").val(), 1),
+              tax_rate: clamp01($root.find("#il_tax_rate").val()),
+              discount_amount: parseNumberSafe($root.find("#il_discount_amount").val(), 0),
             };
 
-            recalcLine(normalized);
-            return normalized;
+            recalcLine(tmp);
+            $root.find("#il_line_total").val(formatMoney(tmp.line_total));
           }
 
-          async function loadInvoiceForEdit(id) {
-            const inv = await apiGet(`/api/invoices/${encodeURIComponent(id)}`);
+          const $prodName = $root.find("#il_product_name");
+          const $prodId = $root.find("#il_product_id");
 
-            invoiceId = String(inv?.id || id).trim();
-            $("#uiInvoiceId").text(inv?.invoice_number || invoiceId || "-");
-            $("#invoiceTitle").text(inv?.invoice_number || invoiceId || "-");
+          const items = (productsCache || []).map((p) => ({
+            id: p.id,
+            name: p.name,
+            unit: p.unit,
+            description: p.description,
+            defaultUnitPrice: p.defaultUnitPrice,
+            defaultTaxRate: p.defaultTaxRate,
+            _norm: normalizeText(p.name),
+          }));
 
-            // Company (typeahead)
-            setCompanyById(inv?.company_id || "");
-            if (inv?.company_id) {
-              onCompanyChanged(inv.company_id).catch(console.error);
+          try { $prodName.typeahead("destroy"); } catch { /* ignore */ }
+          $prodName.off(".prodTa");
+
+          $prodName.typeahead({
+            source: items,
+            autoSelect: true,
+            minLength: 0,
+            displayText: function (item) { return item.name; },
+            matcher: function (item) {
+              const q = normalizeText(this.query);
+              if (!q) return true;
+              return item._norm.includes(q);
+            },
+            afterSelect: function (item) {
+              $prodId.val(item.id);
+
+              if (!isEdit) {
+                $root.find("#il_unit").val(item.unit || "");
+                if (!String($root.find("#il_description").val() || "").trim()) {
+                  $root.find("#il_description").val(item.description || "");
+                }
+                $root.find("#il_unit_price").val(String(parseNumberSafe(item.defaultUnitPrice, 0)));
+                $root.find("#il_tax_rate").val(String(clamp01(item.defaultTaxRate)));
+              }
+
+              syncModalCalc();
+
+              setTimeout(() => {
+                try { $prodName.typeahead("hide"); } catch (e) { /* ignore */ }
+                $prodName.blur();
+              }, 0);
+            }
+          });
+
+          $prodName.on("input.prodTa", function () {
+            $prodId.val("");
+            syncModalCalc();
+          });
+
+          $prodName.on("focus.prodTa", function () {
+            const hasText = String($(this).val() || "").trim().length > 0;
+            if (!hasText) $(this).typeahead("lookup");
+          });
+
+          if (isEdit && existing) {
+            if (existing.product_id) {
+              const prod = getProductById(existing.product_id);
+              $prodId.val(existing.product_id);
+              $prodName.val(prod ? prod.name : "");
             }
 
-            // Currency
-            $("#currency_id").val(inv?.currency_id || "").trigger("change");
-
-            $("#status").val(String(inv?.status ?? 0));
-            $("#version").val(parseNumberSafe(inv?.version, 1));
-
-            $("#quote_at").val(tryToDatetimeLocal(inv?.quote_at));
-            $("#exchange_rate").val(inv?.exchange_rate ?? "1");
-
-            $("#billing_address_line1").val(inv?.billing_address_line1 || "");
-            $("#billing_address_line2").val(inv?.billing_address_line2 || "");
-            $("#billing_address_city").val(inv?.billing_address_city || "");
-            $("#billing_address_state").val(inv?.billing_address_state || "");
-            $("#billing_address_postal_code").val(inv?.billing_address_postal_code || "");
-            $("#billing_address_country").val(inv?.billing_address_country || "");
-
-            $("#discount_percent").val(parseNumberSafe(inv?.discount_percent, 0));
-            $("#notes").val(inv?.notes || "");
-            $("#terms").val(inv?.terms || "");
-
-            // Ensure products loaded for currency before mapping names
-            await preloadProducts();
-
-            const apiLines = Array.isArray(inv?.invoice_lines) ? inv.invoice_lines : [];
-            lines = apiLines.map(normalizeLineFromApi);
-
-            $("#invoiceNotCreatedBanner").hide();
-            setLinesEnabled(true);
-
-            $("#btnAddManualLine").prop("disabled", false);
-            $("#btnAddProduct").prop("disabled", false);
-            $("#discount_percent").prop("readonly", false);
-
-            renderLines();
-            computeTotals();
-
-setPrintEnabled();
-            return inv;
+            $root.find("#il_description").val(existing.description || "");
+            $root.find("#il_unit").val(existing.unit || "");
+            $root.find("#il_unit_price").val(String(parseNumberSafe(existing.unit_price, 0)));
+            $root.find("#il_quantity").val(String(toIntSafe(existing.quantity, 1)));
+            $root.find("#il_tax_rate").val(String(clamp01(existing.tax_rate)));
+            $root.find("#il_discount_amount").val(String(parseNumberSafe(existing.discount_amount, 0)));
           }
 
-          // =========================
-          // Save logic
-          // =========================
-          async function saveInvoice() {
-            const ok = await createInvoiceIfNeeded();
-            if (!ok) {
-              $("#invoiceNotCreatedBanner").show();
-              setLinesEnabled(false);
-              return false;
-            }
+          $root
+            .find("#il_description, #il_unit, #il_unit_price, #il_quantity, #il_tax_rate, #il_discount_amount")
+            .off("keyup.__il change.__il input.__il")
+            .on("keyup.__il change.__il input.__il", syncModalCalc);
 
-            setLinesEnabled(true);
-            $("#invoiceNotCreatedBanner").hide();
-            $("#btnAddManualLine").prop("disabled", false);
-            $("#btnAddProduct").prop("disabled", false);
+          syncModalCalc();
+        },
 
-            const headerPayload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload() };
+        onOk: async function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
 
-            try {
-              const payload = { ...headerPayload, lines: buildLinesPayload() };
-              await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
+          const productId = String($root.find("#il_product_id").val() || "").trim() || null;
+          const typedName = String($root.find("#il_product_name").val() || "").trim();
 
-              alert("Fatura salva com sucesso.");
-              return true;
-            } catch (e) {
-              console.error(e);
-              alert(e?.message || "Falha ao salvar a fatura.");
-              return false;
-            }
+          if (requireProduct && (!productId || !typedName)) {
+            alert("Selecione um produto na lista (digitar não basta).");
+            return true;
           }
 
-          // =========================
-          // Buttons / events
-          // =========================
-          $("#btnAddProduct").on("click", async function () {
-            const ok = await createInvoiceIfNeeded();
-            if (!ok) return;
+          const prod = productId ? getProductById(productId) : null;
 
-            setLinesEnabled(true);
-            $("#invoiceNotCreatedBanner").hide();
+          const updated = {
+            ...line,
+            product_id: productId,
+            product_name: prod?.name || (typedName || (productId ? productId : "Manual")),
+            description: String($root.find("#il_description").val() || ""),
+            unit: String($root.find("#il_unit").val() || ""),
+            unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
+            quantity: toIntSafe($root.find("#il_quantity").val(), 1),
+            tax_rate: clamp01($root.find("#il_tax_rate").val()),
+            discount_amount: Math.max(0, parseNumberSafe($root.find("#il_discount_amount").val(), 0)),
+          };
 
-            const currencyId = String($("#currency_id").val() || "").trim();
-            if (!currencyId) {
-              alert("Selecione uma moeda para carregar os produtos.");
-              return;
-            }
+          if (prod) {
+            if (!String(updated.unit || "").trim()) updated.unit = prod.unit || "";
+            if (!String(updated.description || "").trim()) updated.description = prod.description || "";
+            if (!parseNumberSafe(updated.unit_price, 0)) updated.unit_price = parseNumberSafe(prod.defaultUnitPrice, 0);
+            if (!parseNumberSafe(updated.tax_rate, 0)) updated.tax_rate = clamp01(prod.defaultTaxRate);
+          }
 
-            try {
-              const loaded = await preloadProducts();
-              if (!loaded) {
-                alert("Nenhum produto encontrado para a moeda selecionada.");
-                return;
-              }
-            } catch (e) {
-              console.error(e);
-              productsCache = [];
-              alert("Falha ao carregar produtos para a moeda selecionada.");
-              return;
-            }
+          recalcLine(updated);
 
-            openInvoiceLineModal({ mode: "add", requireProduct: true });
-          });
+          if (toIntSafe(updated.quantity, 0) <= 0) {
+            alert("Quantidade deve ser maior que 0.");
+            return true;
+          }
 
-          $("#btnAddManualLine").on("click", async function () {
-            const ok = await createInvoiceIfNeeded();
-            if (!ok) return;
+          if (isEdit) lines[index] = updated;
+          else lines.push(updated);
 
-            setLinesEnabled(true);
-            $("#invoiceNotCreatedBanner").hide();
+          renderLines();
+          return false;
+        },
+      });
+    }
 
-            openInvoiceLineModal({ mode: "add", requireProduct: false });
-          });
+    // =========================
+    // Load existing invoice (Edit mode)
+    // =========================
+    function detectInvoiceIdFromUrl() {
+      const qs = new URLSearchParams(window.location.search || "");
+      const byQuery = String(qs.get("id") || qs.get("invoice_id") || "").trim();
+      if (byQuery) return byQuery;
 
-          $("#btnSaveHeader").on("click", async function () {
-            const ok = await createInvoiceIfNeeded();
-            if (!ok) {
-              $("#invoiceNotCreatedBanner").show();
-              setLinesEnabled(false);
-              return;
-            }
+      const parts = String(window.location.pathname || "")
+        .split("/")
+        .map((p) => p.trim())
+        .filter(Boolean);
 
-            setLinesEnabled(true);
-            $("#invoiceNotCreatedBanner").hide();
-            $("#btnAddManualLine").prop("disabled", false);
-            $("#btnAddProduct").prop("disabled", false);
+      const last = parts[parts.length - 1] || "";
+      const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidLike.test(last) ? last : null;
+    }
 
-            alert("Cabeçalho salvo com sucesso.");
-            renderLines();
-          });
+    function normalizeLineFromApi(l) {
+      const productId = l?.product_id ? String(l.product_id).trim() : null;
+      const prod = productId ? getProductById(productId) : null;
 
-          $("#btnSaveInvoice").on("click", async function () {
-            await saveInvoice();
-          });
+      const normalized = {
+        id: l?.id ? String(l.id).trim() : null,
+        product_id: productId,
+        product_name: prod?.name || (productId ? productId : "Manual"),
+        description: String(l?.description ?? "").trim(),
+        unit: String(l?.unit ?? "").trim(),
+        unit_price: parseNumberSafe(l?.unit_price, 0),
+        quantity: toIntSafe(l?.quantity, 1),
+        tax_rate: clamp01(l?.tax_rate),
+        discount_amount: parseNumberSafe(l?.discount_amount, 0),
+        tax_amount: parseNumberSafe(l?.tax_amount, 0),
+        line_subtotal: parseNumberSafe(l?.line_subtotal, 0),
+        line_total: parseNumberSafe(l?.line_total, 0),
+      };
 
-$("#btnGenerateInvoicePrint").on("click", async function () {
-  // Guarantee the invoice exists and is saved before printing
-  const saved = await saveInvoice();
-  if (!saved || !invoiceId) return;
+      recalcLine(normalized);
+      return normalized;
+    }
 
-  const url = `/api/invoices/${encodeURIComponent(invoiceId)}/print`;
-  window.open(url, "_blank", "noopener,noreferrer");
-});
+    async function loadInvoiceForEdit(id) {
+      const inv = await apiGet(`/api/invoices/${encodeURIComponent(id)}`);
 
+      invoiceId = String(inv?.id || id).trim();
+      $("#uiInvoiceId").text(inv?.invoice_number || invoiceId || "-");
+      $("#invoiceTitle").text(inv?.invoice_number || invoiceId || "-");
 
-          $("#currency_id").on("change", async function () {
-            try { await preloadProducts(); }
-            catch (e) { console.error(e); productsCache = []; }
-          });
+      setCompanyById(inv?.company_id || "");
+      if (inv?.company_id) {
+        onCompanyChanged(inv.company_id).catch(console.error);
+      }
 
-          // =========================
-          // Init
-          // =========================
-          (async function init() {
-            try {
-              if ($("#pageName").length) {
-                $("#pageName").text("Faturas");
-                $("#subpageName").text("Faturas");
-                $("#path").show();
-                $("#subSecoundPageName").text("Formulários");
-                $("#subpath").show();
-                $("#subpathName").text("Nova Fatura");
-              }
+      $("#currency_id").val(inv?.currency_id || "").trigger("change");
 
-              await Promise.all([loadCompanies(), loadCurrencies()]);
+      $("#status").val(String(inv?.status ?? 0));
+      $("#version").val(parseNumberSafe(inv?.version, 1));
 
-              $("#uiInvoiceId").text("-");
-              setPrintEnabled();
-              $("#invoiceNotCreatedBanner").show();
-              setLinesEnabled(false);
+      $("#quote_at").val(tryToDatetimeLocal(inv?.quote_at));
+      $("#due_at").val(tryToDateInput(inv?.due_at)); // ✅ novo
 
-              $("#btnAddManualLine").prop("disabled", true);
-              $("#btnAddProduct").prop("disabled", true);
+      $("#exchange_rate").val(inv?.exchange_rate ?? "1");
 
-              renderLines();
-              computeTotals();
+      $("#billing_address_line1").val(inv?.billing_address_line1 || "");
+      $("#billing_address_line2").val(inv?.billing_address_line2 || "");
+      $("#billing_address_city").val(inv?.billing_address_city || "");
+      $("#billing_address_state").val(inv?.billing_address_state || "");
+      $("#billing_address_postal_code").val(inv?.billing_address_postal_code || "");
+      $("#billing_address_country").val(inv?.billing_address_country || "");
 
-              const existingId = detectInvoiceIdFromUrl();
-              if (existingId) {
-                $("#subpathName").text("Editar Fatura");
-                await loadInvoiceForEdit(existingId);
-              } else {
-                await preloadProducts();
-              }
-            } catch (e) {
-              console.error(e);
-              alert("Falha ao carregar dados iniciais.");
-            }
-          })();
-        })();
-      </script>
-      <% %>
+      $("#discount_percent").val(parseNumberSafe(inv?.discount_percent, 0));
+      $("#notes").val(inv?.notes || "");
+      $("#terms").val(inv?.terms || "");
+
+      await preloadProducts();
+
+      const apiLines = Array.isArray(inv?.invoice_lines) ? inv.invoice_lines : [];
+      lines = apiLines.map(normalizeLineFromApi);
+
+      $("#invoiceNotCreatedBanner").hide();
+      setLinesEnabled(true);
+
+      $("#btnAddManualLine").prop("disabled", false);
+      $("#btnAddProduct").prop("disabled", false);
+      $("#discount_percent").prop("readonly", false);
+
+      renderLines();
+      computeTotals();
+
+      setPrintEnabled();
+      return inv;
+    }
+
+    // =========================
+    // Save logic
+    // =========================
+    async function saveInvoice() {
+      const ok = await createInvoiceIfNeeded();
+      if (!ok) {
+        $("#invoiceNotCreatedBanner").show();
+        setLinesEnabled(false);
+        return false;
+      }
+
+      setLinesEnabled(true);
+      $("#invoiceNotCreatedBanner").hide();
+      $("#btnAddManualLine").prop("disabled", false);
+      $("#btnAddProduct").prop("disabled", false);
+
+      const headerPayload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload() };
+
+      try {
+        const payload = { ...headerPayload, lines: buildLinesPayload() };
+        await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
+
+        // alert("Fatura salva com sucesso.");
+        return true;
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Falha ao salvar a fatura.");
+        return false;
+      }
+    }
+
+    // =========================
+    // Buttons / events
+    // =========================
+    $("#btnAddProduct").on("click", async function () {
+      const ok = await createInvoiceIfNeeded();
+      if (!ok) return;
+
+      setLinesEnabled(true);
+      $("#invoiceNotCreatedBanner").hide();
+
+      const currencyId = String($("#currency_id").val() || "").trim();
+      if (!currencyId) {
+        alert("Selecione uma moeda para carregar os produtos.");
+        return;
+      }
+
+      try {
+        const loaded = await preloadProducts();
+        if (!loaded) {
+          alert("Nenhum produto encontrado para a moeda selecionada.");
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+        productsCache = [];
+        alert("Falha ao carregar produtos para a moeda selecionada.");
+        return;
+      }
+
+      openInvoiceLineModal({ mode: "add", requireProduct: true });
+    });
+
+    $("#btnAddManualLine").on("click", async function () {
+      const ok = await createInvoiceIfNeeded();
+      if (!ok) return;
+
+      setLinesEnabled(true);
+      $("#invoiceNotCreatedBanner").hide();
+
+      openInvoiceLineModal({ mode: "add", requireProduct: false });
+    });
+
+    $("#btnSaveInvoice").on("click", async function () {
+      await saveInvoice();
+    });
+
+    $("#btnGenerateInvoicePrint").on("click", async function () {
+      const saved = await saveInvoice();
+      if (!saved || !invoiceId) return;
+
+      const url = `/api/invoices/${encodeURIComponent(invoiceId)}/print`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+
+    $("#btnDeleteInvoice").on("click", async function () {
+      if (!invoiceId) return;
+
+      const ok = await confirm("Tem certeza que deseja excluir esta fatura?", { title: "Excluir fatura", danger: true });
+      if (!ok) return;
+
+      try {
+        await apiDelete(`/api/invoices/${encodeURIComponent(invoiceId)}`);
+        alert("Fatura excluída com sucesso.");
+        window.location.href = "/Invoices";
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Falha ao excluir a fatura.");
+      }
+    });
+
+    $("#currency_id").on("change", async function () {
+      try { await preloadProducts(); }
+      catch (e) { console.error(e); productsCache = []; }
+      computeTotals();
+      renderLines();
+    });
+
+    // =========================
+    // Init
+    // =========================
+    (async function init() {
+      try {
+        if ($("#pageName").length) {
+          $("#pageName").text("Faturas");
+          $("#subpageName").text("Faturas");
+          $("#path").show();
+          $("#subSecoundPageName").text("Formulários");
+          $("#subpath").show();
+          $("#subpathName").text("Nova Fatura");
+        }
+
+        await Promise.all([loadCompanies(), loadCurrencies()]);
+
+        $("#uiInvoiceId").text("-");
+        setPrintEnabled();
+        $("#invoiceNotCreatedBanner").show();
+        setLinesEnabled(false);
+
+        $("#btnAddManualLine").prop("disabled", true);
+        $("#btnAddProduct").prop("disabled", true);
+
+        renderLines();
+        computeTotals();
+
+        const existingId = detectInvoiceIdFromUrl();
+        if (existingId) {
+          $("#subpathName").text("Editar Fatura");
+          await loadInvoiceForEdit(existingId);
+        } else {
+          await preloadProducts();
+          $("#invoiceTitle").text("Criação de Fatura");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Falha ao carregar dados iniciais.");
+      }
+    })();
+  })();
+
+  function dateInputToIsoUtc(dateInputValue) {
+  const s = String(dateInputValue || "").trim(); // "YYYY-MM-DD"
+  if (!s) return null;
+
+  const [y, m, d] = s.split("-").map((x) => parseInt(x, 10));
+  if (!y || !m || !d) return null;
+
+  // Local midnight -> ISO (UTC)
+  const localMidnight = new Date(y, m - 1, d, 0, 0, 0, 0);
+  return localMidnight.toISOString();
+}
+</script>
+<% %>

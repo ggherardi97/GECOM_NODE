@@ -57,6 +57,7 @@ app.use('/api', currenciesApiRoutes);
 app.use('/api', companiesApiRoutes);
 app.use("/api", processTypesApi);
 app.use("/api", require("./routes/eventsApi"));
+app.use("/api", require("./routes/documentsApi"));
 app.use("/api", require("./routes/transportTypesApi"));
 app.use("/api", require("./routes/transportsApi"));
 app.use("/api", require("./routes/transportStatusesApi"));
@@ -75,7 +76,9 @@ app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
 app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 app.get('/NewProduct', (req, res) => res.render('NewProduct'));
-
+app.get("/Profile", (req, res) => {
+  res.render("Profile");
+});
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
 app.get('/LandingPage', (req, res) => res.render('LandingPage', { layout: false }));

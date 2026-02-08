@@ -44,6 +44,45 @@ async function readJsonSafe(response) {
   }
 }
 
+/* -------------------- GET /api/users (list/filter) -------------------- */
+/**
+ * Forwards to BACKEND: GET {BACKEND}/users?...
+ * Supports filters like:
+ * - /api/users?company_id=...
+ * - /api/users?email=...
+ * - /api/users?search=...
+ */
+router.get("/users", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(req.query ?? {})) {
+      if (v == null) continue;
+      const s = String(v).trim();
+      if (!s) continue;
+      qs.set(k, s);
+    }
+
+    const url = qs.toString() ? `${baseUrl}/users?${qs.toString()}` : `${baseUrl}/users`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/users error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 /* -------------------- GET /api/users/:id -------------------- */
 router.get("/users/:id", async (req, res) => {
   try {
@@ -78,7 +117,7 @@ router.get("/users/:id", async (req, res) => {
 /* -------------------- POST /api/users -------------------- */
 router.post("/users", async (req, res) => {
   try {
-    const { full_name, email, password, role, status, phonenumber, first_access, company_id } = req.body ?? {};
+    const { full_name, email, password, role, status, phonenumber, first_access, company_id, profile_picture } = req.body ?? {};
 
     const missing = [];
     if (!isNonEmptyString(full_name)) missing.push("full_name");
@@ -105,6 +144,9 @@ router.post("/users", async (req, res) => {
 
     // ✅ allow link user -> company (N users -> 1 company)
     if (isNonEmptyString(company_id)) payload.company_id = String(company_id).trim();
+
+    // ✅ profile picture (optional)
+    if (isNonEmptyString(profile_picture)) payload.profile_picture = String(profile_picture);
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
@@ -153,10 +195,13 @@ router.patch("/users/:id", async (req, res) => {
     // ✅ allow update membership
     if (isNonEmptyString(body.company_id)) payload.company_id = String(body.company_id).trim();
 
+    // ✅ profile picture (base64/dataURL)
+    if (hasOwn(body, "profile_picture")) payload.profile_picture = body.profile_picture == null ? null : String(body.profile_picture);
+
     if (Object.keys(payload).length === 0) {
       return res.status(400).json({
         message: "Validation error. No valid fields to update.",
-        allowed: ["full_name", "email", "role", "status", "phonenumber", "first_access", "password", "company_id"],
+        allowed: ["full_name", "email", "role", "status", "phonenumber", "first_access", "password", "company_id", "profile_picture"],
       });
     }
 
@@ -212,20 +257,9 @@ router.delete("/users/:id", async (req, res) => {
   }
 });
 
-async function readJsonSafe(response) {
-  const text = await response.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { message: text };
-  }
-}
-
 router.get("/users/by-email", async (req, res) => {
   try {
     const email = String(req.query?.email || "").trim();
-    console.log("[BFF] req.query =", req.query);
 
     if (!isNonEmptyString(email)) {
       return res.status(400).json({
@@ -310,6 +344,5 @@ router.get("/auth/me", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = router;
