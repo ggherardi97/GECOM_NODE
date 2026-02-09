@@ -1,434 +1,259 @@
+<style>
+  .ibox-title { padding: 15px 60px 8px 15px; }
 
-    <style>
-        .ibox-title {
-            padding: 15px 60px 8px 15px;
-        }
-    </style>
+  .truncate {
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .table-actions a { margin-right: 8px; }
+  .sortable { cursor: pointer; user-select: none; }
+  .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+
+  /* Tooltip bonito (bootstrap) */
+  .dash-tip { cursor: help; }
+  .tooltip { opacity: 1 !important; }
+  .tooltip-inner{
+    max-width: 320px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.25;
+    background: #1f2937;
+    color: #fff;
+    border-radius: 6px;
+    text-align: left;
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  }
+  .tooltip.bottom .tooltip-arrow { border-bottom-color: #1f2937; }
+  .tooltip.top .tooltip-arrow { border-top-color: #1f2937; }
+
+  /* Chart maior */
+  .dash-chart-wrap { height: 280px; }
+  #lineChart { width: 100% !important; height: 100% !important; }
+
+  /* Cards em andamento clicáveis */
+  .dash-clicker { cursor: pointer; }
+</style>
 
 <div class="wrapper wrapper-content">
-    <div class="row">
-        <div class="col-lg-2">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <span class="label label-success float-right">Monthly</span>
-                    <h5>Faturamento</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">20,200</h1>
-                    <div class="stat-percent font-bold text-success">98% <i class="fa fa-bolt"></i></div>
-                    <small>Total views</small>
-                </div>
-            </div>
+  <div class="row">
+    <div class="col-lg-2">
+      <div class="ibox">
+        <div class="ibox-title">
+          <span
+            id="lblMonthly"
+            class="label label-success float-right dash-tip"
+            data-toggle="tooltip"
+            data-container="body"
+            data-placement="bottom"
+            title="Somatório do valor total das invoices com quote_at dentro do mês atual."
+          >Monthly</span>
+          <h5>Faturamento</h5>
         </div>
-        <div class="col-lg-2">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <span class="label label-info float-right">Annual</span>
-                    <h5>Faturamento</h5>
-                </div>
-                <div class="ibox-content">
-                    <h1 class="no-margins">300,800</h1>
-                    <div class="stat-percent font-bold text-info">20% <i class="fa fa-level-up"></i></div>
-                    <small>New orders</small>
-                </div>
-            </div>
+        <div class="ibox-content">
+          <h1 id="monthlyRevenue" class="no-margins">-</h1>
+          <div class="stat-percent font-bold text-success">
+            <span id="monthlyDelta">-</span> <i class="fa fa-bolt"></i>
+          </div>
+          <small>Faturamento no mês</small>
         </div>
-
-        <div class="col-lg-4">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <span class="label label-primary float-right">Today</span>
-                    <h5>Visitas ao site</h5>
-                </div>
-                <div class="ibox-content">
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h1 class="no-margins">406,42</h1>
-                            <div class="font-bold text-navy">44% <i class="fa fa-level-up"></i><small>Rapid pace</small></div>
-                        </div>
-                        <div class="col-md-6">
-                            <h1 class="no-margins">206,12</h1>
-                            <div class="font-bold text-navy">22% <i class="fa fa-level-up"></i><small>Slow pace</small></div>
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Monthly income</h5>
-                    <div class="ibox-tools">
-                        <span class="label label-primary">Updated 12.2015</span>
-                    </div>
-                </div>
-                <div class="ibox-content no-padding">
-                    <div class="flot-chart m-t-lg" style="height: 55px;">
-                        <div class="flot-chart-content" id="flot-chart1"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="ibox ">
-                <div class="ibox-content">
-                    <div>
-                        <span class="float-right text-right">
-                            <small>Número de processos finalizados no: <strong>Brasil</strong></small>
-                            <br />
-                            Todos processos: 162,862
-                        </span>
-                        <h3 class="font-bold no-margins">Processos de importação finalizados 
-                        </h3>
-                        <small>Importação/Exportação.</small>
-                    </div>
-
-                    <div class="m-t-sm">
-
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div>
-                                    <canvas id="lineChart" height="114"></canvas>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <ul class="stat-list m-t-lg">
-                                    <li>
-                                        <h2 class="no-margins">2,346</h2>
-                                        <small>Total de importações no período</small>
-                                        <div class="progress progress-mini">
-                                            <div class="progress-bar" style="width: 48%;"></div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <h2 class="no-margins ">4,422</h2>
-                                        <small>Total de exportações no período</small>
-                                        <div class="progress progress-mini">
-                                            <div class="progress-bar" style="width: 60%;"></div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="m-t-md">
-                        <small class="float-right">
-                            <i class="fa fa-clock-o"></i>
-                            Update on 16.07.2015
-                        </small>
-                        <small>
-                            <strong>Analysis of sales:</strong> The value has been changed over time, and last month reached a level over $50,000.
-                        </small>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Processos em andamento</h5>
-                </div>
-                <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-4">
-                            <small class="stats-label">Nº INV</small>
-                            <h4>INV-321.80</h4>
-                        </div>
-
-                        <div class="col-4">
-                            <small class="stats-label">% Estágio</small>
-                            <h4>46.11%</h4>
-                        </div>
-                        <div class="col-4">
-                            <small class="stats-label">Status</small>
-                            <h4>
-                                <span class="label label-success">No Prazo</span></h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-4">
-                            <small class="stats-label">Nº INV</small>
-                            <h4>INV-321.10</h4>
-                        </div>
-
-                        <div class="col-4">
-                            <small class="stats-label">% Estágio</small>
-                            <h4>92.43%</h4>
-                        </div>
-                        <div class="col-4">
-                            <small class="stats-label">Status</small>
-                            <h4>
-                                <span class="label label-warning">Atrasado</span></h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-4">
-                            <small class="stats-label">Nº INV</small>
-                            <h4>INV-547.20</h4>
-                        </div>
-
-                        <div class="col-4">
-                            <small class="stats-label">% Estágio</small>
-                            <h4>50.23%</h4>
-                        </div>
-                        <div class="col-4">
-                            <small class="stats-label">Status</small>
-                            <h4>
-                                <span class="label label-error">Cancelado</span></h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+      </div>
     </div>
 
-    <div class="row">
-
-        <div class="col-lg-12">
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Clientes ativos</h5>
-                    <div class="ibox-tools">
-                        <a class="collapse-link">
-                            <i class="fa fa-chevron-up"></i>
-                        </a>
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <i class="fa fa-wrench"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-user">
-                            <li><a href="#" class="dropdown-item">Config option 1</a>
-                            </li>
-                            <li><a href="#" class="dropdown-item">Config option 2</a>
-                            </li>
-                        </ul>
-                        <a class="close-link">
-                            <i class="fa fa-times"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="ibox-content">
-                    <div class="row">
-                        <div class="col-sm-9 m-b-xs">
-                            <div data-toggle="buttons" class="btn-group btn-group-toggle">
-                                <label class="btn btn-sm btn-white">
-                                    <input type="radio" id="option1" name="options">
-                                    Day
-                                </label>
-                                <label class="btn btn-sm btn-white active">
-                                    <input type="radio" id="option2" name="options">
-                                    Week
-                                </label>
-                                <label class="btn btn-sm btn-white">
-                                    <input type="radio" id="option3" name="options">
-                                    Month
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control form-control-sm" placeholder="Search">
-                                <div class="input-group-append">
-                                    <button class="btn btn-sm btn-primary" type="button">Search</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-
-                                    <th>#</th>
-                                    <th>Project </th>
-                                    <th>Name </th>
-                                    <th>Phone </th>
-                                    <th>Company </th>
-                                    <th>Completed </th>
-                                    <th>Task</th>
-                                    <th>Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Project <small>This is example of project</small></td>
-                                    <td>Patrick Smith</td>
-                                    <td>0800 051213</td>
-                                    <td>Inceptos Hymenaeos Ltd</td>
-                                    <td><span class="pie">0.52/1.561</span></td>
-                                    <td>20%</td>
-                                    <td>Jul 14, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Alpha project</td>
-                                    <td>Alice Jackson</td>
-                                    <td>0500 780909</td>
-                                    <td>Nec Euismod In Company</td>
-                                    <td><span class="pie">6,9</span></td>
-                                    <td>40%</td>
-                                    <td>Jul 16, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Betha project</td>
-                                    <td>John Smith</td>
-                                    <td>0800 1111</td>
-                                    <td>Erat Volutpat</td>
-                                    <td><span class="pie">3,1</span></td>
-                                    <td>75%</td>
-                                    <td>Jul 18, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Gamma project</td>
-                                    <td>Anna Jordan</td>
-                                    <td>(016977) 0648</td>
-                                    <td>Tellus Ltd</td>
-                                    <td><span class="pie">4,9</span></td>
-                                    <td>18%</td>
-                                    <td>Jul 22, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Alpha project</td>
-                                    <td>Alice Jackson</td>
-                                    <td>0500 780909</td>
-                                    <td>Nec Euismod In Company</td>
-                                    <td><span class="pie">6,9</span></td>
-                                    <td>40%</td>
-                                    <td>Jul 16, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Project <small>This is example of project</small></td>
-                                    <td>Patrick Smith</td>
-                                    <td>0800 051213</td>
-                                    <td>Inceptos Hymenaeos Ltd</td>
-                                    <td><span class="pie">0.52/1.561</span></td>
-                                    <td>20%</td>
-                                    <td>Jul 14, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Gamma project</td>
-                                    <td>Anna Jordan</td>
-                                    <td>(016977) 0648</td>
-                                    <td>Tellus Ltd</td>
-                                    <td><span class="pie">4,9</span></td>
-                                    <td>18%</td>
-                                    <td>Jul 22, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Project <small>This is example of project</small></td>
-                                    <td>Patrick Smith</td>
-                                    <td>0800 051213</td>
-                                    <td>Inceptos Hymenaeos Ltd</td>
-                                    <td><span class="pie">0.52/1.561</span></td>
-                                    <td>20%</td>
-                                    <td>Jul 14, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Alpha project</td>
-                                    <td>Alice Jackson</td>
-                                    <td>0500 780909</td>
-                                    <td>Nec Euismod In Company</td>
-                                    <td><span class="pie">6,9</span></td>
-                                    <td>40%</td>
-                                    <td>Jul 16, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>Betha project</td>
-                                    <td>John Smith</td>
-                                    <td>0800 1111</td>
-                                    <td>Erat Volutpat</td>
-                                    <td><span class="pie">3,1</span></td>
-                                    <td>75%</td>
-                                    <td>Jul 18, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Gamma project</td>
-                                    <td>Anna Jordan</td>
-                                    <td>(016977) 0648</td>
-                                    <td>Tellus Ltd</td>
-                                    <td><span class="pie">4,9</span></td>
-                                    <td>18%</td>
-                                    <td>Jul 22, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>Alpha project</td>
-                                    <td>Alice Jackson</td>
-                                    <td>0500 780909</td>
-                                    <td>Nec Euismod In Company</td>
-                                    <td><span class="pie">6,9</span></td>
-                                    <td>40%</td>
-                                    <td>Jul 16, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Project <small>This is example of project</small></td>
-                                    <td>Patrick Smith</td>
-                                    <td>0800 051213</td>
-                                    <td>Inceptos Hymenaeos Ltd</td>
-                                    <td><span class="pie">0.52/1.561</span></td>
-                                    <td>20%</td>
-                                    <td>Jul 14, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>Gamma project</td>
-                                    <td>Anna Jordan</td>
-                                    <td>(016977) 0648</td>
-                                    <td>Tellus Ltd</td>
-                                    <td><span class="pie">4,9</span></td>
-                                    <td>18%</td>
-                                    <td>Jul 22, 2013</td>
-                                    <td><a href="#"><i class="fa fa-check text-navy"></i></a></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            </div>
+    <div class="col-lg-2">
+      <div class="ibox">
+        <div class="ibox-title">
+          <span
+            id="lblAnnual"
+            class="label label-info float-right dash-tip"
+            data-toggle="tooltip"
+            data-container="body"
+            data-placement="bottom"
+            title="Somatório do valor total das invoices com quote_at dentro do ano atual."
+          >Annual</span>
+          <h5>Faturamento</h5>
         </div>
-
+        <div class="ibox-content">
+          <h1 id="annualRevenue" class="no-margins">-</h1>
+          <div class="stat-percent font-bold text-info">
+            <span id="annualDelta">-</span> <i class="fa fa-level-up"></i>
+          </div>
+          <small>Faturamento no ano</small>
+        </div>
+      </div>
     </div>
 
+    <!-- Visitas ao site (fixo) -->
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-title">
+          <span class="label label-primary float-right">Today</span>
+          <h5>Visitas ao site</h5>
+        </div>
+        <div class="ibox-content">
+          <div class="row">
+            <div class="col-md-6">
+              <h1 class="no-margins">406,42</h1>
+              <div class="font-bold text-navy">44% <i class="fa fa-level-up"></i><small>Rapid pace</small></div>
+            </div>
+            <div class="col-md-6">
+              <h1 class="no-margins">206,12</h1>
+              <div class="font-bold text-navy">22% <i class="fa fa-level-up"></i><small>Slow pace</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- Sparkline (mantive) -->
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Monthly income</h5>
+          <div class="ibox-tools">
+            <span class="label label-primary">Updated</span>
+          </div>
+        </div>
+        <div class="ibox-content no-padding">
+          <div class="flot-chart m-t-lg" style="height: 55px;">
+            <div class="flot-chart-content" id="flot-chart1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico principal -->
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="ibox">
+        <div class="ibox-content">
+          <div>
+            <span class="float-right text-right">
+              <small>Total de invoices no período: <strong id="totalInvoicesInPeriod">-</strong></small>
+              <br />
+              <small>Total de processos no período: <strong id="totalProcessesInPeriod">-</strong></small>
+            </span>
+            <h3 class="font-bold no-margins">Faturamento Anual</h3>
+            <small>Baseado no quote_at (fallback: created_at).</small>
+          </div>
+
+          <div class="m-t-sm">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="dash-chart-wrap">
+                  <canvas id="lineChart"></canvas>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <ul class="stat-list m-t-lg">
+                  <li>
+                    <h2 id="yearRevenueTotal" class="no-margins">-</h2>
+                    <small>Total de faturamento no período</small>
+                    <div class="progress progress-mini">
+                      <div id="yearRevenueProgress" class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                  </li>
+                  <li>
+                    <h2 id="yearEstimatedTotal" class="no-margins">-</h2>
+                    <small>Total estimado no período (30k/mês)</small>
+                    <div class="progress progress-mini">
+                      <div id="yearEstimatedProgress" class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-t-md">
+            <small class="float-right">
+              <i class="fa fa-clock-o"></i>
+              Update em <span id="lastUpdateAt">-</span>
+            </small>
+            <small>
+              <strong>Obs:</strong> Se você quiser performance top, o ideal é criar endpoints agregados no backend (sum/group-by).
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processos em andamento -->
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Processos em andamento</h5>
+        </div>
+
+        <div id="inProgressContainer">
+          <div class="ibox-content"><small>Carregando...</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de Processos (no lugar dos clientes) -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Processos</h5>
+        </div>
+
+        <div class="ibox-content">
+          <div class="row">
+            <div class="col-sm-9 m-b-xs">
+              <div class="btn-group">
+                <button id="btnReloadProcesses" class="btn btn-sm btn-white" type="button">
+                  <i class="fa fa-refresh"></i> Recarregar
+                </button>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="input-group mb-3">
+                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="Search">
+                <div class="input-group-append">
+                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button">Search</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="process_number">Processo <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="completed">Completed <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="updated_at">Atualizado <span class="sort-indicator"></span></th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="processesTbody">
+                <tr><td colspan="6">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row m-t-sm">
+            <div class="col-sm-6">
+              <small id="processesCount">-</small>
+            </div>
+            <div class="col-sm-6 text-right">
+              <button id="prevPage" class="btn btn-sm btn-white" type="button">Anterior</button>
+              <button id="nextPage" class="btn btn-sm btn-white" type="button">Próximo</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <% contentFor('scripts') %>
@@ -445,7 +270,6 @@
 
 <script src="../Assets/inspinia/js/inspinia.js"></script>
 <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
-
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
 
 <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
@@ -455,76 +279,505 @@
 <script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
 
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
-<%  %>
-
-<!-- Scripts -->
 
 <script>
-    $(document).ready(function () {
-        $("#pageName").text("Home");
-        $("#subpageName").text("Home");
+  // redirect global (pra onclick no html)
+  function redirectToProcessDetail(id) {
+    if (!id) return;
+    window.location = "ProcessDetail?id=" + encodeURIComponent(String(id));
+  }
 
-        var d1 = [[1262304000000, 6], [1264982400000, 3057], [1267401600000, 20434], [1270080000000, 31982], [1272672000000, 26602], [1275350400000, 27826], [1277942400000, 24302], [1280620800000, 24237], [1283299200000, 21004], [1285891200000, 12144], [1288569600000, 10577], [1291161600000, 10295]];
-        var d2 = [[1262304000000, 5], [1264982400000, 200], [1267401600000, 1605], [1270080000000, 6129], [1272672000000, 11643], [1275350400000, 19055], [1277942400000, 30062], [1280620800000, 39197], [1283299200000, 37000], [1285891200000, 27000], [1288569600000, 21000], [1291161600000, 17000]];
+  $(document).ready(function () {
+    $("#pageName").text("Home");
+    $("#subpageName").text("Home");
 
-        var data1 = [
-            { label: "Data 1", data: d1, color: '#17a084' },
-            { label: "Data 2", data: d2, color: '#127e68' }
-        ];
-        $.plot($("#flot-chart1"), data1, {
-            xaxis: {
-                tickDecimals: 0
-            },
-            series: {
-                lines: {
-                    show: true,
-                    fill: true,
-                    fillColor: {
-                        colors: [{ opacity: 1 }, { opacity: 1 }]
-                    }
-                },
-                points: {
-                    width: 0.1,
-                    show: false
-                }
-            },
-            grid: {
-                show: false,
-                borderWidth: 0
-            },
-            legend: {
-                show: false
-            }
+    // tooltips (bonito)
+    if ($.fn.tooltip) {
+      $('[data-toggle="tooltip"]').tooltip({
+        trigger: "hover",
+        boundary: "window",
+        delay: { show: 120, hide: 50 }
+      });
+    }
+
+    // Sparkline demo (mantive teu flot como está)
+    var d1 = [[1262304000000, 6], [1264982400000, 3057], [1267401600000, 20434], [1270080000000, 31982], [1272672000000, 26602], [1275350400000, 27826], [1277942400000, 24302], [1280620800000, 24237], [1283299200000, 21004], [1285891200000, 12144], [1288569600000, 10577], [1291161600000, 10295]];
+    var d2 = [[1262304000000, 5], [1264982400000, 200], [1267401600000, 1605], [1270080000000, 6129], [1272672000000, 11643], [1275350400000, 19055], [1277942400000, 30062], [1280620800000, 39197], [1283299200000, 37000], [1285891200000, 27000], [1288569600000, 21000], [1291161600000, 17000]];
+    var data1 = [{ label: "Data 1", data: d1 }, { label: "Data 2", data: d2 }];
+    $.plot($("#flot-chart1"), data1, {
+      xaxis: { tickDecimals: 0 },
+      series: {
+        lines: { show: true, fill: true, fillColor: { colors: [{ opacity: 1 }, { opacity: 1 }] } },
+        points: { width: 0.1, show: false }
+      },
+      grid: { show: false, borderWidth: 0 },
+      legend: { show: false }
+    });
+
+    // -------------------- Helpers --------------------
+    function toNumber(value) {
+      var n = Number(String(value ?? "").replace(",", "."));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function moneyCurrencyPtBr(value, currencyCode) {
+      var n = toNumber(value);
+      try {
+        if (currencyCode) {
+          return new Intl.NumberFormat("pt-BR", { style: "currency", currency: currencyCode }).format(n);
+        }
+      } catch (e) { }
+      return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+    }
+
+    function formatDateTimePtBr(value) {
+      if (!value) return "-";
+      var d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleString("pt-BR");
+    }
+
+    function moneyAxisTick(v) {
+      return moneyCurrencyPtBr(v, "BRL").replace(",00", "");
+    }
+
+    function pickInvoiceDate(inv) {
+      return inv?.quote_at || inv?.quoteAt || inv?.created_at || inv?.createdAt || null;
+    }
+
+    function pickInvoiceTotal(inv) {
+      // prefere total vindo pronto (se existir)
+      return (
+        inv?.total ??
+        inv?.total_amount ??
+        inv?.amount_total ??
+        inv?.grand_total ??
+        inv?.total_value ??
+        inv?.value ??
+        0
+      );
+    }
+
+    // Status: se vier texto, usa; se vier número, mapeia.
+    function normalizeProcessStatus(p) {
+      var text = p?.status_name || p?.statusName || p?.status_text || p?.statusText || null;
+      if (text && String(text).trim().length > 0) return String(text);
+
+      var s = p?.status;
+      var sn = Number(s);
+      if (!Number.isFinite(sn)) return "-";
+
+      // mapeamento básico (ajusta depois se teu backend tiver enums diferentes)
+      if (sn === 0) return "No Prazo";
+      if (sn === 1) return "Próximo do Prazo";
+      if (sn === 2) return "Atrasado";
+      if (sn === 3) return "Cancelado";
+      if (sn === 4) return "Encerrado";
+      return String(sn);
+    }
+
+    function statusClassFromLabel(label) {
+      var s = String(label || "").toLowerCase();
+      if (s.includes("no prazo") || s.includes("andamento") || s.includes("ativo")) return "label label-success";
+      if (s.includes("próximo")) return "label label-warning";
+      if (s.includes("atras")) return "label label-warning";
+      if (s.includes("cancel")) return "label label-error";
+      if (s.includes("encerr") || s.includes("finaliz") || s.includes("conclu")) return "label label-primary";
+      return "label label-primary";
+    }
+
+    function pickProcessNumber(p) {
+      return p?.process_number || p?.processNumber || p?.number || p?.code || p?.id || "-";
+    }
+
+    function pickProcessCompanyName(p) {
+      return p?.companies?.company_name || p?.company?.company_name || p?.company_name || p?.companyName || "-";
+    }
+
+    function pickProcessUpdatedAt(p) {
+      return p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_at || p?.createdAt || null;
+    }
+
+    function pickProcessCreatedAt(p) {
+      return p?.created_at || p?.createdAt || null;
+    }
+
+    function pickProcessId(p) {
+      // prioriza id real
+      return p?.id || p?.process_id || p?.processId || null;
+    }
+
+    function pickProcessCompletedPercent(p) {
+      // ✅ CORRIGIDO: prioriza p.completed (mais comum no backend)
+      var v =
+        p?.completed ??
+        p?.completed_percent ??
+        p?.completedPercent ??
+        p?.progress_percent ??
+        p?.progressPercent ??
+        p?.completion_percent ??
+        p?.completionPercent ??
+        null;
+
+      if (v == null) return null;
+
+      var n = toNumber(v);
+
+      // se vier 0..1, vira %
+      if (n > 0 && n <= 1) n = n * 100;
+
+      n = Math.max(0, Math.min(100, n));
+      return n;
+    }
+
+    async function fetchJson(url) {
+      var res = await fetch(url, { headers: { "Accept": "application/json" } });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
+      return data;
+    }
+
+    // -------------------- Data load --------------------
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth();
+
+    var yearStart = new Date(year, 0, 1, 0, 0, 0, 0);
+    var yearEnd = new Date(year + 1, 0, 1, 0, 0, 0, 0);
+
+    var monthStart = new Date(year, month, 1, 0, 0, 0, 0);
+    var monthEnd = new Date(year, month + 1, 1, 0, 0, 0, 0);
+
+    var monthsPt = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+    var chart = null;
+
+    // grid state
+    var allProcesses = [];
+    var viewProcesses = [];
+    var sortState = { key: "updated_at", dir: "desc" };
+    var pageSize = 10;
+    var pageIndex = 0;
+
+    function setSortIndicator() {
+      $(".sortable .sort-indicator").text("");
+      var th = $('.sortable[data-sort="' + sortState.key + '"]');
+      th.find(".sort-indicator").text(sortState.dir === "asc" ? "▲" : "▼");
+    }
+
+    function applySort(items) {
+      var key = sortState.key;
+      var dir = sortState.dir === "asc" ? 1 : -1;
+
+      function getValue(p) {
+        if (key === "process_number") return String(pickProcessNumber(p) || "");
+        if (key === "company") return String(pickProcessCompanyName(p) || "");
+        if (key === "status") return String(normalizeProcessStatus(p) || "");
+        if (key === "completed") return pickProcessCompletedPercent(p) ?? -1;
+        if (key === "updated_at") return new Date(pickProcessUpdatedAt(p) || 0).getTime();
+        return "";
+      }
+
+      return items.slice().sort(function (a, b) {
+        var av = getValue(a);
+        var bv = getValue(b);
+
+        if (typeof av === "number" && typeof bv === "number") return (av - bv) * dir;
+        return String(av).localeCompare(String(bv), "pt-BR") * dir;
+      });
+    }
+
+    function applyFilter(items) {
+      var q = String($("#processSearch").val() || "").trim().toLowerCase();
+      if (!q) return items;
+
+      return items.filter(function (p) {
+        var text = [
+          pickProcessNumber(p),
+          pickProcessCompanyName(p),
+          normalizeProcessStatus(p)
+        ].join(" ").toLowerCase();
+
+        return text.includes(q);
+      });
+    }
+
+    function renderProcessesTable() {
+      var filtered = applyFilter(allProcesses);
+      var sorted = applySort(filtered);
+      viewProcesses = sorted;
+
+      var total = viewProcesses.length;
+      var start = pageIndex * pageSize;
+      var end = Math.min(total, start + pageSize);
+      var pageItems = viewProcesses.slice(start, end);
+
+      $("#processesCount").text("Mostrando " + (total ? (start + 1) : 0) + "–" + end + " de " + total);
+
+      var $tbody = $("#processesTbody");
+      $tbody.empty();
+
+      if (!pageItems.length) {
+        $tbody.append('<tr><td colspan="6">Nenhum processo encontrado.</td></tr>');
+        return;
+      }
+
+      pageItems.forEach(function (p) {
+        var number = pickProcessNumber(p);
+        var company = pickProcessCompanyName(p);
+
+        var statusLabel = normalizeProcessStatus(p);
+        var statusClass = statusClassFromLabel(statusLabel);
+
+        var completed = pickProcessCompletedPercent(p);
+        var completedText = completed == null ? "-" : (completed.toFixed(2) + "%");
+
+        var updatedAt = formatDateTimePtBr(pickProcessUpdatedAt(p));
+        var pid = pickProcessId(p);
+
+        var row = `
+          <tr class="dash-clicker" onclick="${pid ? `redirectToProcessDetail('${String(pid).replace(/'/g, "\\'")}')` : ""}">
+            <td class="truncate" title="${String(number).replace(/"/g, "&quot;")}">${number}</td>
+            <td class="truncate" title="${String(company).replace(/"/g, "&quot;")}">${company}</td>
+            <td>${completedText}</td>
+            <td><span class="${statusClass}">${statusLabel}</span></td>
+            <td>${updatedAt}</td>
+            <td class="table-actions">
+              ${pid ? `<a href="ProcessDetail?id=${encodeURIComponent(pid)}" title="Abrir"><i class="fa fa-external-link text-navy"></i></a>` : "-"}
+            </td>
+          </tr>
+        `;
+        $tbody.append(row);
+      });
+    }
+
+    function renderInProgress(processes) {
+      var items = Array.isArray(processes) ? processes.slice() : [];
+
+      // pega top 3 mais recentes (em geral são os “mais relevantes”)
+      items.sort(function (a, b) {
+        return new Date(pickProcessUpdatedAt(b) || 0).getTime() - new Date(pickProcessUpdatedAt(a) || 0).getTime();
+      });
+
+      items = items.slice(0, 3);
+
+      var $wrap = $("#inProgressContainer");
+      $wrap.empty();
+
+      if (!items.length) {
+        $wrap.append('<div class="ibox-content"><small>Nenhum processo encontrado.</small></div>');
+        return;
+      }
+
+      items.forEach(function (p) {
+        var number = pickProcessNumber(p);
+        var completed = pickProcessCompletedPercent(p);
+        var completedText = completed == null ? "-" : (completed.toFixed(2) + "%");
+
+        var statusLabel = normalizeProcessStatus(p);
+        var cls = statusClassFromLabel(statusLabel);
+
+        var pid = pickProcessId(p);
+
+        var block = `
+          <div class="ibox-content dash-clicker" ${pid ? `onclick="redirectToProcessDetail('${String(pid).replace(/'/g, "\\'")}')"` : ""}>
+            <div class="row">
+              <div class="col-4">
+                <small class="stats-label">Processo</small>
+                <h4 class="truncate" title="${String(number).replace(/"/g, "&quot;")}">${number}</h4>
+              </div>
+              <div class="col-4">
+                <small class="stats-label">% Estágio</small>
+                <h4>${completedText}</h4>
+              </div>
+              <div class="col-4">
+                <small class="stats-label">Status</small>
+                <h4><span class="${cls}">${statusLabel}</span></h4>
+              </div>
+            </div>
+          </div>
+        `;
+        $wrap.append(block);
+      });
+    }
+
+    async function loadDashboard() {
+      try {
+        $("#lastUpdateAt").text(formatDateTimePtBr(new Date()));
+
+        // --------- INVOICES ---------
+        var invoicesResp = await fetchJson("/api/invoices");
+        var invoices = Array.isArray(invoicesResp) ? invoicesResp : (invoicesResp?.data || invoicesResp?.items || []);
+
+        var invoicesMonth = [];
+        var invoicesYear = [];
+
+        invoices.forEach(function (inv) {
+          var dtRaw = pickInvoiceDate(inv);
+          if (!dtRaw) return;
+
+          var dt = new Date(dtRaw);
+          if (Number.isNaN(dt.getTime())) return;
+
+          if (dt >= monthStart && dt < monthEnd) invoicesMonth.push(inv);
+          if (dt >= yearStart && dt < yearEnd) invoicesYear.push(inv);
+        });
+
+        var monthSum = invoicesMonth.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
+        var yearSum = invoicesYear.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
+
+        $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSum, "BRL"));
+        $("#annualRevenue").text(moneyCurrencyPtBr(yearSum, "BRL"));
+
+        var estimatedMonthly = 30000;
+        var deltaMonth = estimatedMonthly > 0 ? ((monthSum / estimatedMonthly) * 100) : 0;
+        $("#monthlyDelta").text((deltaMonth || 0).toFixed(0) + "%");
+
+        var estimatedYear = 30000 * 12;
+        var deltaYear = estimatedYear > 0 ? ((yearSum / estimatedYear) * 100) : 0;
+        $("#annualDelta").text((deltaYear || 0).toFixed(0) + "%");
+
+        // chart data
+        var actualByMonth = new Array(12).fill(0);
+        var estimatedByMonth = new Array(12).fill(30000);
+
+        invoicesYear.forEach(function (inv) {
+          var dt = new Date(pickInvoiceDate(inv));
+          if (Number.isNaN(dt.getTime())) return;
+          var m = dt.getMonth();
+          actualByMonth[m] += toNumber(pickInvoiceTotal(inv));
         });
 
         var lineData = {
-            labels: ["January", "February", "March", "April", "May", "June", "July"],
-            datasets: [
-                {
-                    label: "Example dataset",
-                    backgroundColor: "rgba(26,179,148,0.5)",
-                    borderColor: "rgba(26,179,148,0.7)",
-                    pointBackgroundColor: "rgba(26,179,148,1)",
-                    pointBorderColor: "#fff",
-                    data: [48, 48, 60, 39, 56, 37, 30]
-                },
-                {
-                    label: "Example dataset",
-                    backgroundColor: "rgba(220,220,220,0.5)",
-                    borderColor: "rgba(220,220,220,1)",
-                    pointBackgroundColor: "rgba(220,220,220,1)",
-                    pointBorderColor: "#fff",
-                    data: [65, 59, 40, 51, 36, 25, 40]
-                }
-            ]
+          labels: monthsPt,
+          datasets: [
+            {
+              label: "Faturamento (Real)",
+              backgroundColor: "rgba(26,179,148,0.10)",
+              borderColor: "rgba(26,179,148,0.90)",
+              pointBackgroundColor: "rgba(26,179,148,1)",
+              pointBorderColor: "#fff",
+              data: actualByMonth
+            },
+            {
+              label: "Estimado (30.000/mês)",
+              backgroundColor: "rgba(220,220,220,0.15)",
+              borderColor: "rgba(220,220,220,1)",
+              pointBackgroundColor: "rgba(220,220,220,1)",
+              pointBorderColor: "#fff",
+              data: estimatedByMonth
+            }
+          ]
         };
 
+        // ✅ eixo Y 10k em 10k + tooltip R$
         var lineOptions = {
-            responsive: true
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                stepSize: 10000,
+                callback: function (value) { return moneyAxisTick(value); }
+              }
+            }]
+          },
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem) {
+                return moneyCurrencyPtBr(tooltipItem.yLabel, "BRL");
+              }
+            }
+          }
         };
 
         var ctx = document.getElementById("lineChart").getContext("2d");
-        new Chart(ctx, { type: 'line', data: lineData, options: lineOptions });
-    });
-</script>
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
 
+        $("#totalInvoicesInPeriod").text(String(invoicesYear.length));
+        $("#yearRevenueTotal").text(moneyCurrencyPtBr(yearSum, "BRL"));
+        $("#yearEstimatedTotal").text(moneyCurrencyPtBr(estimatedYear, "BRL"));
+
+        var prog = estimatedYear > 0 ? Math.max(0, Math.min(100, (yearSum / estimatedYear) * 100)) : 0;
+        $("#yearRevenueProgress").css("width", prog.toFixed(0) + "%");
+        $("#yearEstimatedProgress").css("width", "100%");
+
+        // --------- PROCESSES ---------
+        var processesResp = await fetchJson("/api/processes");
+        var processes = Array.isArray(processesResp) ? processesResp : (processesResp?.data || processesResp?.items || []);
+
+        var processesYear = processes.filter(function (p) {
+          var dtRaw = pickProcessCreatedAt(p);
+          if (!dtRaw) return false;
+          var dt = new Date(dtRaw);
+          if (Number.isNaN(dt.getTime())) return false;
+          return dt >= yearStart && dt < yearEnd;
+        });
+
+        $("#totalProcessesInPeriod").text(String(processesYear.length));
+
+        renderInProgress(processes);
+
+        allProcesses = processes.slice();
+        pageIndex = 0;
+        setSortIndicator();
+        renderProcessesTable();
+
+      } catch (e) {
+        console.error("Dashboard load error:", e);
+        $("#monthlyRevenue").text("Erro");
+        $("#annualRevenue").text("Erro");
+        $("#processesTbody").html('<tr><td colspan="6">Erro ao carregar dados.</td></tr>');
+        $("#inProgressContainer").html('<div class="ibox-content"><small>Erro ao carregar processos.</small></div>');
+      }
+    }
+
+    // -------------------- UI events --------------------
+    $(document).on("click", ".sortable", function () {
+      var key = $(this).data("sort");
+      if (!key) return;
+
+      if (sortState.key === key) {
+        sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
+      } else {
+        sortState.key = key;
+        sortState.dir = (key === "updated_at") ? "desc" : "asc";
+      }
+
+      pageIndex = 0;
+      setSortIndicator();
+      renderProcessesTable();
+    });
+
+    $("#btnReloadProcesses").on("click", function () { loadDashboard(); });
+
+    $("#btnSearch").on("click", function () {
+      pageIndex = 0;
+      renderProcessesTable();
+    });
+
+    $("#processSearch").on("keyup", function (e) {
+      if (e.key === "Enter") {
+        pageIndex = 0;
+        renderProcessesTable();
+      }
+    });
+
+    $("#prevPage").on("click", function () {
+      if (pageIndex > 0) pageIndex--;
+      renderProcessesTable();
+    });
+
+    $("#nextPage").on("click", function () {
+      var total = viewProcesses.length;
+      var maxPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+      if (pageIndex < maxPage) pageIndex++;
+      renderProcessesTable();
+    });
+
+    setSortIndicator();
+    loadDashboard();
+  });
+</script>

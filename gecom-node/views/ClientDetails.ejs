@@ -1,3 +1,32 @@
+<style>
+  .img-fluid {
+    max-width: 80% !important;
+    height: auto;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  /* Contact card actions */
+  .contact-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0 0 0;
+  }
+
+  .contact-actions .btn {
+    min-width: 44px;
+  }
+
+  /* Header project total */
+  .projects-total-strong {
+    font-family: monospace;
+  }
+</style>
+
 <div class="row">
   <div class="col-lg-12">
     <div class="wrapper wrapper-content animated fadeInUp">
@@ -5,17 +34,17 @@
         <div class="ibox-content">
 
           <!-- #region Header Client -->
-
           <div class="row">
             <div class="col-lg-12">
               <div class="m-b-md">
-                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right" name="btn_act_new">Edite os
-                  detalhes do cliente</a>
+                <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right" name="btn_act_new">
+                  Edite os detalhes do cliente
+                </a>
                 <h2 id="companyName"></h2>
               </div>
-
             </div>
           </div>
+
           <div class="row">
             <div class="col-lg-6">
               <dl class="row mb-0">
@@ -23,10 +52,12 @@
                   <dt>Status:</dt>
                 </div>
                 <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1"><span class="label label-primary" id="statusLabel"></span>
+                  <dd class="mb-1">
+                    <span class="label label-primary" id="statusLabel"></span>
                   </dd>
                 </div>
               </dl>
+
               <dl class="row mb-0">
                 <div class="col-sm-4 text-sm-right">
                   <dt>Porte:</dt>
@@ -35,6 +66,7 @@
                   <dd class="mb-1" id="size">Médio</dd>
                 </div>
               </dl>
+
               <dl class="row mb-0">
                 <div class="col-sm-4 text-sm-right">
                   <dt>Setor:</dt>
@@ -43,18 +75,20 @@
                   <dd class="mb-1" id="sector"></dd>
                 </div>
               </dl>
+
               <dl class="row mb-0">
                 <div class="col-sm-4 text-sm-right">
                   <dt>Nome Fantasia:</dt>
                 </div>
                 <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1"><a href="#" class="text-navy" id="fantasyName"></a>
+                  <dd class="mb-1">
+                    <a href="#" class="text-navy" id="fantasyName"></a>
                   </dd>
                 </div>
               </dl>
             </div>
-            <div class="col-lg-6" id="cluster_info">
 
+            <div class="col-lg-6" id="cluster_info">
               <dl class="row mb-0">
                 <div class="col-sm-4 text-sm-right">
                   <dt>Telefone:</dt>
@@ -63,6 +97,7 @@
                   <dd class="mb-1" id="phone"></dd>
                 </div>
               </dl>
+
               <dl class="row mb-0">
                 <div class="col-sm-4 text-sm-right">
                   <dt>Email:</dt>
@@ -73,6 +108,7 @@
               </dl>
             </div>
           </div>
+
           <div class="row">
             <div class="col-lg-12">
               <dl class="row mb-0">
@@ -82,15 +118,23 @@
                 <div class="col-sm-10 text-sm-left">
                   <dd>
                     <div class="progress m-b-1">
-                      <div style="width: 60%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                      <div
+                        id="projectsTotalBar"
+                        style="width: 0%;"
+                        class="progress-bar progress-bar-striped progress-bar-animated"
+                        title="Total de invoices"
+                      ></div>
                     </div>
-                    <small>Valor total de <strong>R$ 750.000,00</strong>.</small>
+
+                    <small id="projectsTotalText">
+                      Valor total de <strong class="projects-total-strong" id="projectsTotalValue">R$ 0,00</strong>.
+                      <span class="text-muted">(meta: <strong>R$ 1.000.000,00</strong>)</span>
+                    </small>
                   </dd>
                 </div>
               </dl>
             </div>
           </div>
-
           <!-- #endregion -->
 
           <div class="row m-t-sm">
@@ -99,36 +143,35 @@
                 <div class="panel-heading">
                   <div class="panel-options">
                     <ul class="nav nav-tabs">
-                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a>
-                      </li>
+                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a></li>
                       <li><a class="nav-link" href="#tab-2" data-toggle="tab">Documentos</a></li>
                     </ul>
                   </div>
                 </div>
 
                 <div class="panel-body">
-
                   <div class="tab-content">
                     <div class="tab-pane active" id="tab-1">
                       <div class="col-lg-12">
                         <div class="wrapper wrapper-content animated fadeInRight">
+
                           <div class="row" style="margin-bottom: 10px;">
-  <div class="col-lg-12 text-right">
-    <button name="btn_act_new" type="button" class="btn btn-primary btn-sm" onclick="callNewContact()">
-      <i class="fa fa-plus"></i> Novo contato
-    </button>
-  </div>
-</div>
+                            <div class="col-lg-12 text-right">
+                              <button name="btn_act_new" type="button" class="btn btn-primary btn-sm" onclick="callNewContact()">
+                                <i class="fa fa-plus"></i> Novo contato
+                              </button>
+                            </div>
+                          </div>
 
                           <div class="row" id="contactsContainer">
                             <!-- Contacts will be rendered here -->
                           </div>
+
                         </div>
                       </div>
                     </div>
 
                     <div class="tab-pane" id="tab-2">
-
                       <div class="wrapper wrapper-content animated fadeInRight">
                         <div class="row">
                           <div class="col-lg-12 animated fadeInRight">
@@ -136,21 +179,19 @@
                               <div class="col-lg-9" style="margin-left: -15px;">
                                 <input type="button" class="btn btn-primary" value="< Voltar" style="display: none;"
                                   id="btnVoltar" onclick="changeView(false)" />
+
                                 <div class="btn-group">
                                   <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
                                   <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a>
-                                    </li>
-                                    <li><a class="dropdown-item" onclick="fileInput.click()">Upload de
-                                        Documento</a></li>
-                                    <li><a class="dropdown-item" href="#">Link do
-                                        Drive</a></li>
+                                    <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a></li>
+                                    <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
+                                    <li><a class="dropdown-item" href="#">Link do Drive</a></li>
                                     <li class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#">Solicitar
-                                        Acesso</a></li>
+                                    <li><a class="dropdown-item" href="#">Solicitar Acesso</a></li>
                                   </ul>
                                 </div>
                               </div>
+
                               <div class="col-lg-3">
                                 <div class="btn-group" style="margin: 0px 0 15px -15px;">
                                   <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
@@ -162,6 +203,7 @@
                                 </div>
                               </div>
                             </div>
+
                             <div class="row">
                               <div class="col-lg-12">
                                 <!-- (documentos mock) -->
@@ -181,23 +223,24 @@
                                 <!-- ... resto do mock mantido como no seu original ... -->
                               </div>
                             </div>
+
                           </div>
                         </div>
                       </div>
+                    </div><!-- tab-2 -->
 
-                    </div>
-                  </div>
+                  </div><!-- tab-content -->
+                </div><!-- panel-body -->
 
-                </div>
-
-              </div>
+              </div><!-- panel -->
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
+        </div><!-- ibox-content -->
+      </div><!-- ibox -->
+    </div><!-- wrapper -->
+  </div><!-- col -->
+</div><!-- row -->
 
 <script>
   (function () {
@@ -285,13 +328,10 @@
 
     function isValidEmail(email) {
       const v = String(email ?? "").trim();
-      // simple & safe enough for UI validation
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     }
 
     function generateTempPassword() {
-      // Strong-ish temp password (copy/paste safe)
-      // Ex: Tmp@5nhdi548dl49
       const letters = "abcdefghijklmnopqrstuvwxyz";
       const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       const digits = "0123456789";
@@ -311,6 +351,64 @@
       const vm = window.__companyViewModel ?? safeJsonParse(localStorage.getItem("selectedClient"));
       const selectedClientId = localStorage.getItem("selectedClientId");
       return String(vm?.Id ?? selectedClientId ?? "").trim();
+    }
+
+    function toNumber(value) {
+      const n = Number(String(value ?? "").replace(",", "."));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function moneyPtBr(value) {
+      const n = toNumber(value);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // -------------------- GlobalModal (layout) confirm helpers --------------------
+    function openGlobalConfirm(options) {
+      const title = String(options?.title || "Confirmar");
+      const bodyHtml = String(options?.bodyHtml || "<p>Confirmar ação?</p>");
+      const okText = String(options?.okText || "Confirmar");
+      const okClass = String(options?.okClass || "btn-primary");
+
+      const modalBtn = document.getElementById("modalButton");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalBody = document.getElementById("modalBody");
+      const btnSave = document.getElementById("saveModal");
+      const btnClose = document.getElementById("closeModal");
+
+      // Fallback
+      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+        return Promise.resolve(confirm(title));
+      }
+
+      modalTitle.textContent = title;
+      modalBody.innerHTML = bodyHtml;
+
+      const originalSaveText = btnSave.textContent;
+      const originalCloseText = btnClose.textContent;
+
+      btnSave.classList.remove("btn-danger", "btn-warning", "btn-primary", "btn-success", "btn-info", "btn-default");
+      btnSave.classList.add(okClass);
+
+      btnSave.textContent = okText;
+      btnClose.textContent = "Cancelar";
+
+      return new Promise((resolve) => {
+        const cleanup = () => {
+          btnSave.onclick = null;
+          btnClose.onclick = null;
+
+          btnSave.classList.remove(okClass);
+          btnSave.classList.add("btn-primary");
+          btnSave.textContent = originalSaveText || "Save";
+          btnClose.textContent = originalCloseText || "Close";
+        };
+
+        btnSave.onclick = () => { cleanup(); resolve(true); };
+        btnClose.onclick = () => { cleanup(); resolve(false); };
+
+        modalBtn.click();
+      });
     }
 
     // -------------------- API: Companies --------------------
@@ -356,6 +454,19 @@
       return data;
     }
 
+    async function deleteUserById(userId) {
+      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json" }
+      });
+
+      if (resp.status === 204) return true;
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao remover usuário.");
+      return true;
+    }
+
     async function createUser(payload) {
       const resp = await fetch(`/api/users`, {
         method: "POST",
@@ -369,6 +480,26 @@
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(data?.message || "Falha ao criar usuário.");
       return data;
+    }
+
+    // -------------------- API: Invoices (sum totals) --------------------
+    async function fetchInvoicesByCompany(companyId) {
+      const qs = new URLSearchParams();
+      qs.set("company_id", String(companyId || "").trim());
+
+      const resp = await fetch(`/api/invoices?${qs.toString()}`, {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao carregar invoices da empresa.");
+
+      const list = Array.isArray(data)
+        ? data
+        : (data?.data ?? data?.rows ?? data?.invoices ?? []);
+
+      return Array.isArray(list) ? list : [];
     }
 
     // -------------------- Mapping --------------------
@@ -416,6 +547,54 @@
       setText("#statusLabel", vm?.Status ?? "Active");
     }
 
+    // -------------------- Invoices total -> progress --------------------
+    function setProjectsTotalUi(totalValue) {
+      const total = Math.max(0, toNumber(totalValue));
+
+      // ✅ meta fixa: 1 milhão
+      const goal = 1000000;
+      const pct = goal > 0 ? Math.min(100, (total / goal) * 100) : 0;
+
+      const bar = document.getElementById("projectsTotalBar");
+      if (bar) {
+        bar.style.width = `${pct.toFixed(2)}%`;
+        bar.setAttribute("aria-valuenow", String(total));
+        bar.setAttribute("aria-valuemin", "0");
+        bar.setAttribute("aria-valuemax", String(goal));
+        bar.title = `Total de invoices: R$ ${moneyPtBr(total)} / Meta: R$ ${moneyPtBr(goal)}`;
+      }
+
+      const val = document.getElementById("projectsTotalValue");
+      if (val) val.textContent = `R$ ${moneyPtBr(total)}`;
+    }
+
+    async function loadInvoicesTotal(companyId) {
+      try {
+        if (!isNonEmptyString(companyId)) {
+          setProjectsTotalUi(0);
+          return;
+        }
+
+        const invoices = await fetchInvoicesByCompany(companyId);
+
+        let sum = 0;
+        for (const inv of invoices) {
+          const v =
+            inv?.total ??
+            inv?.grand_total ??
+            inv?.total_amount ??
+            0;
+
+          sum += toNumber(v);
+        }
+
+        setProjectsTotalUi(sum);
+      } catch (e) {
+        console.error("loadInvoicesTotal error:", e);
+        setProjectsTotalUi(0);
+      }
+    }
+
     // -------------------- Contacts rendering --------------------
     function renderContacts(contacts) {
       const container = document.querySelector("#contactsContainer");
@@ -430,7 +609,7 @@
 
       contacts.forEach((c, index) => {
         const col = document.createElement("div");
-        col.className = "col-lg-4";
+        col.className = "col-lg-3";
 
         col.innerHTML = `
           <div class="contact-box" onclick="onContactClick(${index});">
@@ -441,13 +620,36 @@
                   <div class="m-t-xs font-bold">${escapeHtml(c.role ?? "")}</div>
                 </div>
               </div>
+
               <div class="col-8">
                 <h3><strong>${escapeHtml(c.fullName)}</strong></h3>
                 ${c.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(c.email)}</p>` : ""}
                 ${c.phone ? `<p><i class="fa fa-phone"></i> ${escapeHtml(c.phone)}</p>` : ""}
                 <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(c.status ?? ""))}</p>
+
               </div>
             </a>
+            <div class="row" style="display: block; width: 100%;text-align: center;">              
+                <div class="contact-actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    title="Editar"
+                    onclick="event.stopPropagation(); onContactEdit(${index});"
+                  >
+                    <i class="fa fa-pencil"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    title="Excluir"
+                    onclick="event.stopPropagation(); onContactDelete(${index});"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
           </div>
         `;
 
@@ -551,6 +753,42 @@
 
     window.onContactClick = onContactClick;
 
+    // -------------------- Edit + Delete buttons --------------------
+    function onContactEdit(index) {
+      // ✅ sem confirm: abre direto o side modal
+      onContactClick(index);
+    }
+
+    async function onContactDelete(index) {
+      const contacts = window.__contacts ?? [];
+      const c = contacts[index];
+      if (!c || !c.id) return;
+
+      const ok = await openGlobalConfirm({
+        title: "Excluir contato",
+        bodyHtml: `
+          <p>Você está prestes a excluir o contato <strong>${escapeHtml(c.fullName || "-")}</strong>.</p>
+          <p class="text-danger" style="margin-bottom:0;">Esta ação não poderá ser desfeita.</p>
+        `,
+        okText: "Excluir",
+        okClass: "btn-danger"
+      });
+
+      if (!ok) return;
+
+      try {
+        await deleteUserById(c.id);
+        localStorage.removeItem("selectedClient");
+        location.reload();
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Erro ao excluir contato.");
+      }
+    }
+
+    window.onContactEdit = onContactEdit;
+    window.onContactDelete = onContactDelete;
+
     // -------------------- Side modal: New Contact (POST) --------------------
     function callNewContact() {
       const companyId = getCurrentCompanyId();
@@ -619,7 +857,6 @@
               return;
             }
 
-            // Always send a temp password (keeps backend happy if password is required)
             const tempPassword = generateTempPassword();
 
             const payload = {
@@ -756,11 +993,9 @@
         return;
       }
 
-      // 1) Fill from cache
       const cached = safeJsonParse(rawClient);
       if (cached) fillClientHeader(cached);
 
-      // 2) Fetch source-of-truth by id
       if (selectedClientId) {
         try {
           const company = await fetchCompanyById(selectedClientId);
@@ -775,10 +1010,15 @@
 
           const contacts = mapCompanyUsersToContacts(company);
           renderContacts(contacts);
+
+          await loadInvoicesTotal(selectedClientId);
         } catch (err) {
           console.error("Failed to fetch company by id:", err);
           if (!cached) alert("Erro ao carregar dados do cliente via API.");
+          setProjectsTotalUi(0);
         }
+      } else {
+        setProjectsTotalUi(0);
       }
     }
 
@@ -789,4 +1029,3 @@
     }
   })();
 </script>
-

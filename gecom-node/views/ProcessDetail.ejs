@@ -780,7 +780,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                     // =========================
                     function fillHeader(p) {
                         const number = p?.process_number || "-";
-                        $("#projectName").text(`Processo ${number}`);
+                        $("#projectName").text(`${number}`);
 
                         const status = p?.status;
                         $("#state")
