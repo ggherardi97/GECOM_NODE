@@ -172,62 +172,60 @@
                     </div>
 
                     <div class="tab-pane" id="tab-2">
-                      <div class="wrapper wrapper-content animated fadeInRight">
-                        <div class="row">
-                          <div class="col-lg-12 animated fadeInRight">
-                            <div class="row" style="padding: 0 15px;">
-                              <div class="col-lg-9" style="margin-left: -15px;">
-                                <input type="button" class="btn btn-primary" value="< Voltar" style="display: none;"
-                                  id="btnVoltar" onclick="changeView(false)" />
+  <div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+      <div class="col-lg-12 animated fadeInRight">
 
-                                <div class="btn-group">
-                                  <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Adicionar</button>
-                                  <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" onclick="callNewFolder()">Nova Pasta</a></li>
-                                    <li><a class="dropdown-item" onclick="fileInput.click()">Upload de Documento</a></li>
-                                    <li><a class="dropdown-item" href="#">Link do Drive</a></li>
-                                    <li class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="#">Solicitar Acesso</a></li>
-                                  </ul>
-                                </div>
-                              </div>
+        <!-- TOP BAR (mini MyDocuments - right only) -->
+        <div class="row" style="padding: 0 15px;">
+          <div class="col-lg-9" style="margin-left:-15px;">
+            <button type="button" class="btn btn-primary" id="cd_btnDocsBack" style="display:none;">
+              <i class="fa fa-arrow-left"></i> Voltar
+            </button>
 
-                              <div class="col-lg-3">
-                                <div class="btn-group" style="margin: 0px 0 15px -15px;">
-                                  <button type="button" class="btn btn-white"><i class="fa fa-chevron-left"></i></button>
-                                  <button class="btn btn-white">1</button>
-                                  <button class="btn btn-white  active">2</button>
-                                  <button class="btn btn-white">3</button>
-                                  <button class="btn btn-white">4</button>
-                                  <button type="button" class="btn btn-white"><i class="fa fa-chevron-right"></i></button>
-                                </div>
-                              </div>
-                            </div>
+            <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
+              <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                Adicionar
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" id="cd_btnDocsNewFolder"><i class="fa fa-folder"></i> Nova Pasta</a></li>
+                <li><a class="dropdown-item" href="#" id="cd_btnDocsUpload"><i class="fa fa-upload"></i> Upload de Documento</a></li>
+                <li><a class="dropdown-item" href="#" id="cd_btnDocsNewLink"><i class="fa fa-link"></i> Link do Drive</a></li>
+              </ul>
+            </div>
 
-                            <div class="row">
-                              <div class="col-lg-12">
-                                <!-- (documentos mock) -->
-                                <div class="file-box">
-                                  <div class="file">
-                                    <a href="#">
-                                      <span class="corner"></span>
-                                      <div class="icon"><i class="fa fa-folder"></i></div>
-                                      <div class="file-name">
-                                        Despachante
-                                        <br />
-                                        <small>Added: Jan 11, 2014</small>
-                                      </div>
-                                    </a>
-                                  </div>
-                                </div>
-                                <!-- ... resto do mock mantido como no seu original ... -->
-                              </div>
-                            </div>
+            <button type="button" class="btn btn-white" id="cd_btnDocsOpenSelected" style="margin-left:8px; display:none;">
+              <i class="fa fa-external-link"></i> Abrir
+            </button>
 
-                          </div>
-                        </div>
-                      </div>
-                    </div><!-- tab-2 -->
+            <button type="button" class="btn btn-danger" id="cd_btnDocsDeleteSelected" style="margin-left:8px; display:none;">
+              <i class="fa fa-trash"></i> Excluir
+            </button>
+
+            <span id="cd_currentDocsFolderLabel" class="text-muted" style="margin-left:12px;"></span>
+            <span id="cd_docsLoadingBadge" class="label label-info" style="display:none;margin-left:10px;">Carregando...</span>
+          </div>
+
+          <div class="col-lg-3">
+            <div class="input-group" style="margin: 0px 0 15px -15px;">
+              <input id="cd_txtDocsSearch" type="text" class="form-control input-sm" placeholder="Buscar nesta pasta..." />
+              <span class="input-group-btn">
+                <button id="cd_btnDocsSearch" class="btn btn-sm btn-white" type="button"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRID -->
+        <div class="row" id="cd_itemsDocsGrid" style="padding: 0 15px;">
+          <div class="col-lg-12 text-muted">Carregando...</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- tab-2 -->
 
                   </div><!-- tab-content -->
                 </div><!-- panel-body -->
@@ -1029,3 +1027,813 @@
     }
   })();
 </script>
+
+<style>
+  /* ClientDetails Documents mini grid selection */
+  #cd_itemsDocsGrid .file-box .file { cursor: default; }
+  #cd_itemsDocsGrid .file-box.is-selected .file {
+    outline: 2px solid rgba(26, 179, 148, 0.45);
+    box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.12);
+    border-radius: 4px;
+  }
+
+  #cd_itemsDocsGrid .file-box .select-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #d5d5d5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    cursor: pointer;
+  }
+  #cd_itemsDocsGrid .file-box .select-badge i {
+    font-size: 14px;
+    color: #1ab394;
+  }
+  #cd_itemsDocsGrid .file-box.is-selected .select-badge { display:flex; }
+  #cd_itemsDocsGrid .file-box:hover .select-badge { display:flex; opacity:.75; }
+  #cd_itemsDocsGrid .file-box.is-selected:hover .select-badge { opacity:1; }
+</style>
+
+<script>
+  (function () {
+    // ---------------------------
+    // Mini MyDocuments inside ClientDetails (Tab Documentos)
+    // ---------------------------
+
+    // ---------- helpers ----------
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function debounce(fn, waitMs) {
+      let t = null;
+      return function () {
+        const args = arguments;
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(null, args), waitMs);
+      };
+    }
+
+    function showLoading(flag) {
+      $("#cd_docsLoadingBadge").toggle(!!flag);
+    }
+
+    function isFolder(item) { return String(item?.item_type || "").toUpperCase() === "FOLDER"; }
+    function isLink(item)   { return String(item?.item_type || "").toUpperCase() === "LINK"; }
+    function isFile(item)   { return String(item?.item_type || "").toUpperCase() === "FILE"; }
+
+    function isDriveLink(item) {
+      const sp = String(item?.storage_provider || "").toUpperCase();
+      const it = String(item?.item_type || "").toUpperCase();
+      return sp === "DRIVE" || it === "DRIVE";
+    }
+
+    function iconFor(item) {
+      if (isFolder(item)) return '<i class="fa fa-folder"></i>';
+      if (isLink(item)) {
+        if (isDriveLink(item)) return '<i class="fa fa-google"></i>';
+        return '<i class="fa fa-link"></i>';
+      }
+
+      const ext = String(item?.ext || "").toLowerCase();
+      const mime = String(item?.mime_type || "").toLowerCase();
+
+      if (mime.startsWith("image/")) return '<i class="fa fa-file-image-o"></i>';
+      if (mime.startsWith("video/")) return '<i class="fa fa-film"></i>';
+      if (mime.startsWith("audio/")) return '<i class="fa fa-music"></i>';
+      if (ext === "pdf") return '<i class="fa fa-file-pdf-o"></i>';
+      if (ext === "xls" || ext === "xlsx" || mime.includes("spreadsheet")) return '<i class="fa fa-bar-chart-o"></i>';
+      if (ext === "doc" || ext === "docx") return '<i class="fa fa-file-word-o"></i>';
+      return '<i class="fa fa-file"></i>';
+    }
+
+    function getClientId() {
+      const selectedClientId = localStorage.getItem("selectedClientId");
+      if (selectedClientId && String(selectedClientId).trim()) return String(selectedClientId).trim();
+
+      try {
+        const raw = localStorage.getItem("selectedClient");
+        if (raw) {
+          const vm = JSON.parse(raw);
+          if (vm?.Id) return String(vm.Id).trim();
+        }
+      } catch { }
+
+      return "";
+    }
+
+    // still uses same fallback logic from MyDocuments
+    function getUserCompanyId() {
+      const id = window.__auth?.company_id || window.__auth?.companyId || null;
+      return id ? String(id) : null;
+    }
+
+    function getAccountIdForCreate() {
+      const id =
+        window.__auth?.accountId ||
+        window.__auth?.account_id ||
+        window.__auth?.account?.id ||
+        window.__auth?.tenant_id ||
+        window.__auth?.admin_account_id ||
+        null;
+
+      if (id) return String(id);
+
+      const companyId = getUserCompanyId();
+      return companyId ? String(companyId) : null;
+    }
+
+    async function readJsonSafe(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try { return JSON.parse(text); } catch { return { message: text }; }
+    }
+
+    async function apiGet(url) {
+      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao buscar dados");
+      return data;
+    }
+
+    async function apiPost(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao salvar");
+      return data;
+    }
+
+    async function apiDelete(url) {
+      const res = await fetch(url, { method: "DELETE", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao excluir");
+      return data;
+    }
+
+    // ---------- Side modal robust (layout dynamic modal) ----------
+    function pickFirst(selectors) {
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      }
+      return null;
+    }
+    function replaceWithClone(el) {
+      if (!el || !el.parentNode) return el;
+      const clone = el.cloneNode(true);
+      el.parentNode.replaceChild(clone, el);
+      return clone;
+    }
+    function openSideModal(opts) {
+      const overlay = pickFirst(["#dynamicModalOverlay", ".dynamic-modal-overlay"]);
+      const modal = pickFirst(["#dynamicModal", ".dynamic-modal"]);
+      const titleEl = pickFirst(["#dynamicModalTitle", ".dynamic-modal-title"]);
+      const bodyEl = pickFirst(["#dynamicModalBody", ".dynamic-modal-body"]);
+
+      let btnClose = pickFirst(["#dynamicModalCloseBtn", ".dynamic-modal-close"]);
+      let btnCancel = pickFirst(["#dynamicModalCancelBtn", ".dynamic-modal-cancel"]);
+      let btnOk = pickFirst(["#dynamicModalOkBtn", ".dynamic-modal-ok"]);
+
+      if (!overlay || !modal || !titleEl || !bodyEl || !btnOk) {
+        alert("Side modal global não encontrado no layout. Verifique IDs do dynamic modal.");
+        return;
+      }
+
+      btnOk = replaceWithClone(btnOk);
+      if (btnCancel) btnCancel = replaceWithClone(btnCancel);
+      if (btnClose) btnClose = replaceWithClone(btnClose);
+
+      titleEl.textContent = (opts?.title || "");
+      bodyEl.innerHTML = (opts?.bodyHtml || "");
+      if (btnCancel) btnCancel.textContent = (opts?.cancelText || "Cancelar");
+      btnOk.textContent = (opts?.okText || "OK");
+
+      function close() {
+        overlay.style.display = "none";
+        modal.style.display = "none";
+      }
+
+      btnOk.addEventListener("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const keepOpen = (typeof opts?.onOk === "function") ? await opts.onOk() : false;
+        if (!keepOpen) close();
+      }, true);
+
+      if (btnCancel) {
+        btnCancel.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (typeof opts?.onCancel === "function") opts.onCancel();
+          close();
+        }, true);
+      }
+
+      if (btnClose) {
+        btnClose.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (typeof opts?.onCancel === "function") opts.onCancel();
+          close();
+        }, true);
+      }
+
+      overlay.style.display = "block";
+      modal.style.display = "block";
+    }
+
+    // ---------- state ----------
+    const docsState = {
+      initialized: false,
+      currentParentId: null,
+      navStack: [],
+      selected: new Set(),
+      currentSearch: "",
+      lastLoadedItems: [],
+      lastClick: { id: null, ts: 0 },
+    };
+
+    function updateTopActions() {
+      const count = docsState.selected.size;
+      $("#cd_btnDocsDeleteSelected").toggle(count > 0);
+      $("#cd_btnDocsOpenSelected").toggle(count === 1);
+      $("#cd_btnDocsBack").toggle(docsState.navStack.length > 0);
+
+      if (docsState.navStack.length === 0) {
+        $("#cd_currentDocsFolderLabel").text("");
+      } else {
+        const parts = docsState.navStack.map(x => x.name || "Pasta");
+        $("#cd_currentDocsFolderLabel").text(parts.join(" / "));
+      }
+    }
+
+    function clearSelection() {
+      docsState.selected.clear();
+      $("#cd_itemsDocsGrid .file-box").removeClass("is-selected");
+      updateTopActions();
+    }
+
+    function applySelectionClasses() {
+      $("#cd_itemsDocsGrid .file-box").removeClass("is-selected");
+      for (const selId of docsState.selected) {
+        $('#cd_itemsDocsGrid .file-box[data-id="' + selId + '"]').addClass("is-selected");
+      }
+      updateTopActions();
+    }
+
+    function setSelected(id, single) {
+      if (single) docsState.selected.clear();
+      docsState.selected.add(id);
+      applySelectionClasses();
+    }
+
+    function toggleSelected(id) {
+      if (docsState.selected.has(id)) docsState.selected.delete(id);
+      else docsState.selected.add(id);
+      applySelectionClasses();
+    }
+
+    function buildListQuery() {
+      const qs = new URLSearchParams();
+
+      if (docsState.currentParentId === null) qs.set("parent_id", "null");
+      else qs.set("parent_id", docsState.currentParentId);
+
+      if (docsState.currentSearch && docsState.currentSearch.trim()) qs.set("q", docsState.currentSearch.trim());
+
+      qs.set("take", "500");
+      qs.set("skip", "0");
+
+      // ✅ ALWAYS filter by the client on the page
+      const clientId = getClientId();
+      qs.set("related_table", "company");
+      qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
+
+      return qs.toString();
+    }
+
+    function renderGrid(items) {
+      const $grid = $("#cd_itemsDocsGrid");
+      $grid.empty();
+
+      const list = Array.isArray(items) ? items : [];
+      docsState.lastLoadedItems = list;
+
+      if (list.length === 0) {
+        $grid.append('<div class="col-lg-12 text-muted">Nenhum item encontrado.</div>');
+        clearSelection();
+        return;
+      }
+
+      list.forEach(function (item) {
+        const id = item.id;
+        const name = escapeHtml(item.name || item.filename || "Sem nome");
+        const added = formatDate(item.created_at);
+        const iconHtml = iconFor(item);
+
+        $grid.append(`
+          <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
+            <div class="select-badge" title="Selecionar"><i class="fa fa-check"></i></div>
+
+            <div class="file">
+              <a href="javascript:void(0)" class="cd-doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
+                <span class="corner"></span>
+                <div class="icon">${iconHtml}</div>
+                <div class="file-name">
+                  ${name}
+                  <br />
+                  <small>Adicionado: ${escapeHtml(added || "-")}</small>
+                </div>
+              </a>
+            </div>
+          </div>
+        `);
+      });
+
+      // click outside clears selection
+      $("#cd_itemsDocsGrid").off("click.bg").on("click.bg", function (e) {
+        if ($(e.target).closest(".file-box").length === 0) clearSelection();
+      });
+
+      // badge click toggles selection
+      $("#cd_itemsDocsGrid .select-badge").off("click.sel").on("click.sel", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = String($(this).closest(".file-box").data("id"));
+        if (!id) return;
+        toggleSelected(id);
+      });
+
+      // single click select, double click open
+      $(".cd-doc-hit").off("click").on("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const id = String($(this).data("id"));
+        const now = Date.now();
+        const isDouble = (docsState.lastClick.id === id && (now - docsState.lastClick.ts) < 320);
+        docsState.lastClick = { id: id, ts: now };
+
+        const item = docsState.lastLoadedItems.find(x => x.id === id);
+        if (!item) return;
+
+        const multi = !!(e.ctrlKey || e.metaKey) || docsState.selected.size > 0;
+
+        if (isDouble) { await openItem(item); return; }
+
+        if (multi) toggleSelected(id);
+        else setSelected(id, true);
+      });
+
+      applySelectionClasses();
+    }
+
+    async function loadCurrentFolder() {
+      try {
+        updateTopActions();
+        showLoading(true);
+
+        const query = buildListQuery();
+        const data = await apiGet("/api/documents?" + query);
+
+        renderGrid(data);
+        clearSelection();
+      } catch (e) {
+        $("#cd_itemsDocsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || "Erro ao carregar") + '</div>');
+      } finally {
+        updateTopActions();
+        showLoading(false);
+      }
+    }
+
+    async function openItem(item) {
+      if (!item) return;
+
+      if (isFolder(item)) {
+        docsState.navStack.push({ parentId: docsState.currentParentId, name: item.name || "Pasta" });
+        docsState.currentParentId = item.id;
+        await loadCurrentFolder();
+        return;
+      }
+
+      if (isLink(item)) {
+        const url = isDriveLink(item)
+          ? (item.object_key || item.external_key || "")
+          : (item.external_key || item.object_key || "");
+
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      // FILE
+      try {
+        showLoading(true);
+        const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
+        const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
+        if (!url) throw new Error("Não foi possível gerar o link de download.");
+        window.open(url, "_blank", "noopener,noreferrer");
+      } catch (err) {
+        alert(err?.message || "Erro ao baixar arquivo.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ---------- create folder/link/upload ----------
+    function getExtFromName(fileName) {
+      const n = String(fileName || "");
+      const idx = n.lastIndexOf(".");
+      if (idx <= 0 || idx >= n.length - 1) return null;
+      return n.substring(idx + 1).toLowerCase();
+    }
+
+    async function doUpload(file, accountId, displayNameRaw, progressCb) {
+      const fileName = file.name;
+      const displayName = displayNameRaw || fileName;
+      const mimeType = file.type || "application/octet-stream";
+      const ext = getExtFromName(fileName);
+
+      const clientId = getClientId();
+      if (!clientId) throw new Error("Não foi possível identificar o cliente para vincular os documentos.");
+
+      progressCb && progressCb(5, "Criando registro no banco...");
+
+      const createPayload = {
+        account_id: accountId,
+        parent_id: docsState.currentParentId,
+        item_type: "FILE",
+        name: displayName,
+        filename: fileName,
+        ext: ext,
+        mime_type: mimeType,
+
+        // ✅ linked to the current client
+        related_table: "company",
+        related_id: clientId
+      };
+
+      const created = await apiPost("/api/documents", createPayload);
+      const docId = created?.id;
+      if (!docId) throw new Error("Falha ao criar registro do documento.");
+
+      progressCb && progressCb(20, "Gerando URL de upload...");
+
+      const presign = await apiPost("/api/documents/" + encodeURIComponent(docId) + "/presign-upload", {
+        fileName: fileName,
+        contentType: mimeType,
+        size: file.size
+      });
+
+      const putUrl = presign?.url;
+      const putHeaders = presign?.headers || { "Content-Type": mimeType };
+      const objectKey = presign?.object_key || presign?.key || null;
+
+      if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+
+      progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
+
+      const putRes = await fetch(putUrl, { method: "PUT", headers: putHeaders, body: file });
+      if (!putRes.ok) {
+        const t = await putRes.text().catch(() => "");
+        throw new Error(("Upload falhou (" + putRes.status + "). " + (t || "")).trim());
+      }
+
+      const etag = putRes.headers.get("etag") || presign?.etag || null;
+
+      progressCb && progressCb(85, "Finalizando...");
+
+      await apiPost("/api/documents/" + encodeURIComponent(docId) + "/complete-upload", {
+        upload_status: "UPLOADED",
+        object_key: objectKey,
+        etag: etag,
+        mime_type: mimeType,
+        size_bytes: file.size
+      });
+
+      progressCb && progressCb(100, "Concluído!");
+      return docId;
+    }
+
+    function openNewFolderSideModal() {
+      openSideModal({
+        title: "Nova Pasta",
+        okText: "Criar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="cd_sm_folderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
+            <div id="cd_sm_folderError" class="text-danger" style="margin-top:8px; display:none;"></div>
+          </div>
+        `,
+        onOk: async function () {
+          const name = ($("#cd_sm_folderName").val() || "").trim();
+          $("#cd_sm_folderError").hide().text("");
+
+          if (!name) { $("#cd_sm_folderError").show().text("Informe o nome da pasta."); return true; }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#cd_sm_folderError").show().text("Não foi possível identificar o account_id para criar."); return true; }
+
+          const clientId = getClientId();
+          if (!clientId) { $("#cd_sm_folderError").show().text("Não foi possível identificar o cliente."); return true; }
+
+          try {
+            showLoading(true);
+
+            const payload = {
+              account_id: accountId,
+              parent_id: docsState.currentParentId,
+              item_type: "FOLDER",
+              name: name,
+              filename: null,
+              storage_provider: "NONE",
+
+              // ✅ linked to the current client
+              related_table: "company",
+              related_id: clientId
+            };
+
+            await apiPost("/api/documents", payload);
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#cd_sm_folderError").show().text(e?.message || "Erro ao criar pasta.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+
+      setTimeout(function () { $("#cd_sm_folderName").focus(); }, 150);
+    }
+
+    function openNewLinkSideModal() {
+      openSideModal({
+        title: "Link do Drive",
+        okText: "Salvar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="cd_sm_linkName" type="text" class="form-control" maxlength="255" placeholder="Ex: Pasta do Google Drive" />
+          </div>
+          <div class="form-group">
+            <label>URL</label>
+            <input id="cd_sm_linkUrl" type="text" class="form-control" maxlength="1000" placeholder="https://drive.google.com/..." />
+            <small class="text-muted">O link será salvo no campo <strong>object_key</strong>.</small>
+          </div>
+          <div id="cd_sm_linkError" class="text-danger" style="display:none;"></div>
+        `,
+        onOk: async function () {
+          const name = ($("#cd_sm_linkName").val() || "").trim();
+          const url = ($("#cd_sm_linkUrl").val() || "").trim();
+          $("#cd_sm_linkError").hide().text("");
+
+          if (!name) { $("#cd_sm_linkError").show().text("Informe o nome."); return true; }
+          if (!url || !/^https?:\/\//i.test(url)) { $("#cd_sm_linkError").show().text("Informe uma URL válida (http/https)."); return true; }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#cd_sm_linkError").show().text("Não foi possível identificar o account_id."); return true; }
+
+          const clientId = getClientId();
+          if (!clientId) { $("#cd_sm_linkError").show().text("Não foi possível identificar o cliente."); return true; }
+
+          try {
+            showLoading(true);
+
+            const payload = {
+              account_id: accountId,
+              parent_id: docsState.currentParentId,
+              item_type: "LINK",
+              name: name,
+              filename: null,
+
+              // ✅ requested: save link in object_key
+              object_key: url,
+
+              // mark as Drive link for UI behavior
+              storage_provider: "DRIVE",
+
+              // ✅ linked to the current client
+              related_table: "company",
+              related_id: clientId
+            };
+
+            await apiPost("/api/documents", payload);
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#cd_sm_linkError").show().text(e?.message || "Erro ao salvar link.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+
+      setTimeout(function () { $("#cd_sm_linkName").focus(); }, 150);
+    }
+
+    function openUploadSideModal() {
+      openSideModal({
+        title: "Upload de Documento",
+        okText: "Enviar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          <div class="alert alert-info" style="margin-bottom:10px;">
+            Selecione apenas um arquivo.
+          </div>
+
+          <div class="form-group">
+            <label>Arquivo</label>
+            <input id="cd_sm_uploadFile" type="file" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="cd_sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
+              placeholder="Vamos preencher automaticamente com o nome do arquivo" />
+            <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
+          </div>
+
+          <div id="cd_sm_uploadProgress" style="display:none;">
+            <div class="progress progress-striped active">
+              <div id="cd_sm_uploadProgressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <small id="cd_sm_uploadProgressText" class="text-muted"></small>
+          </div>
+
+          <div id="cd_sm_uploadError" class="text-danger" style="display:none;"></div>
+        `,
+        onOk: async function () {
+          const input = document.getElementById("cd_sm_uploadFile");
+          const file = input && input.files && input.files[0];
+          const displayNameRaw = ($("#cd_sm_uploadDisplayName").val() || "").trim();
+          $("#cd_sm_uploadError").hide().text("");
+
+          if (!file) { $("#cd_sm_uploadError").show().text("Selecione um arquivo."); return true; }
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#cd_sm_uploadError").show().text("Não foi possível identificar o account_id."); return true; }
+
+          try {
+            showLoading(true);
+            $("#cd_sm_uploadProgress").show();
+
+            await doUpload(file, accountId, displayNameRaw, function (pct, text) {
+              $("#cd_sm_uploadProgressBar").css("width", String(Math.max(0, Math.min(100, pct || 0))) + "%");
+              $("#cd_sm_uploadProgressText").text(text || "");
+            });
+
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#cd_sm_uploadError").show().text(e?.message || "Erro no upload.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+
+      // auto-fill name on file select
+      setTimeout(function () {
+        const $file = $("#cd_sm_uploadFile");
+        const $name = $("#cd_sm_uploadDisplayName");
+
+        $file.off("change.__autoname").on("change.__autoname", function () {
+          const f = this.files && this.files[0];
+          if (!f) return;
+          $name.val(f.name || "");
+          try { $name.focus(); } catch {}
+        });
+      }, 50);
+    }
+
+    async function deleteSelected() {
+      if (docsState.selected.size === 0) return;
+
+      // use native confirm to avoid interfering with your other modal system
+      const ok = confirm("Confirma excluir " + docsState.selected.size + " item(ns)?");
+      if (!ok) return;
+
+      try {
+        showLoading(true);
+        const ids = Array.from(docsState.selected);
+        for (const id of ids) {
+          await apiDelete("/api/documents/" + encodeURIComponent(id));
+        }
+        await loadCurrentFolder();
+      } catch (e) {
+        alert(e?.message || "Erro ao excluir.");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function openSelected() {
+      if (docsState.selected.size !== 1) return;
+      const id = Array.from(docsState.selected)[0];
+      const item = docsState.lastLoadedItems.find(x => x.id === id);
+      if (!item) return;
+      await openItem(item);
+    }
+
+    // ---------- init on tab show ----------
+    const runSearchDebounced = debounce(async function () {
+      docsState.currentSearch = ($("#cd_txtDocsSearch").val() || "").trim();
+      await loadCurrentFolder();
+    }, 280);
+
+    async function initDocsTabOnce() {
+      if (docsState.initialized) return;
+      docsState.initialized = true;
+
+      // Only admin can add (UI already hidden by name="btn_act_new", but keep safe)
+      if (!window.__auth?.isAdmin) {
+        $('a[name="btn_act_new"]').hide();
+        $('button[name="btn_act_new"]').hide();
+      }
+
+      docsState.currentParentId = null;
+      docsState.navStack = [];
+      docsState.selected.clear();
+      docsState.currentSearch = "";
+      updateTopActions();
+
+      // wire buttons
+      $("#cd_btnDocsBack").on("click", async function () {
+        const last = docsState.navStack.pop();
+        docsState.currentParentId = last?.parentId ?? null;
+        await loadCurrentFolder();
+      });
+
+      $("#cd_btnDocsNewFolder").on("click", function (e) { e.preventDefault(); openNewFolderSideModal(); });
+      $("#cd_btnDocsUpload").on("click", function (e) { e.preventDefault(); openUploadSideModal(); });
+      $("#cd_btnDocsNewLink").on("click", function (e) { e.preventDefault(); openNewLinkSideModal(); });
+
+      $("#cd_btnDocsDeleteSelected").on("click", deleteSelected);
+      $("#cd_btnDocsOpenSelected").on("click", openSelected);
+
+      $("#cd_btnDocsSearch").on("click", async function () {
+        docsState.currentSearch = ($("#cd_txtDocsSearch").val() || "").trim();
+        await loadCurrentFolder();
+      });
+
+      $("#cd_txtDocsSearch").on("input keyup", function () {
+        runSearchDebounced();
+      });
+
+      $("#cd_txtDocsSearch").on("keydown", async function (e) {
+        if (e.key === "Enter") {
+          docsState.currentSearch = ($("#cd_txtDocsSearch").val() || "").trim();
+          await loadCurrentFolder();
+        }
+      });
+
+      // prevent dropdown jump
+      $(".dropdown-item").on("click", function (e) { e.preventDefault(); });
+
+      // first load
+      await loadCurrentFolder();
+    }
+
+    $(document).ready(function () {
+      // init when user opens the tab
+      $('a[href="#tab-2"]').on("shown.bs.tab", function () {
+        initDocsTabOnce();
+      });
+    });
+  })();
+</script>
+

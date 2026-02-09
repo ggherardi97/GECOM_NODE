@@ -92,6 +92,38 @@
     box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.12);
     border-radius: 4px;
   }
+
+  /* NEW: selection check badge (top-left) */
+  .file-box .select-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #d5d5d5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    cursor: pointer;
+  }
+  .file-box .select-badge i {
+    font-size: 14px;
+    color: #1ab394; /* inspinia green */
+  }
+  .file-box.is-selected .select-badge {
+    display: flex;
+  }
+  /* show hint on hover so user learns it exists */
+  .file-box:hover .select-badge {
+    display: flex;
+    opacity: .75;
+  }
+  .file-box.is-selected:hover .select-badge {
+    opacity: 1;
+  }
 </style>
 
 <% contentFor('scripts') %>
@@ -236,9 +268,19 @@
     function isLink(item)   { return String(item?.item_type || "").toUpperCase() === "LINK"; }
     function isFile(item)   { return String(item?.item_type || "").toUpperCase() === "FILE"; }
 
+    // NEW: identify drive link (either by storage_provider or item_type if you decide to add later)
+    function isDriveLink(item) {
+      const sp = String(item?.storage_provider || "").toUpperCase();
+      const it = String(item?.item_type || "").toUpperCase();
+      return sp === "DRIVE" || it === "DRIVE";
+    }
+
     function iconFor(item) {
       if (isFolder(item)) return '<i class="fa fa-folder"></i>';
-      if (isLink(item)) return '<i class="fa fa-link"></i>';
+      if (isLink(item)) {
+        if (isDriveLink(item)) return '<i class="fa fa-google"></i>';
+        return '<i class="fa fa-link"></i>';
+      }
 
       const ext = String(item?.ext || "").toLowerCase();
       const mime = String(item?.mime_type || "").toLowerCase();
@@ -410,6 +452,11 @@
 
         $grid.append(`
           <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
+            <!-- NEW: selection badge (click to toggle multi selection) -->
+            <div class="select-badge" title="Selecionar">
+              <i class="fa fa-check"></i>
+            </div>
+
             <div class="file">
               <a href="javascript:void(0)" class="doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
                 <span class="corner"></span>
@@ -430,6 +477,15 @@
         if ($(e.target).closest(".file-box").length === 0) clearSelection();
       });
 
+      // NEW: badge click toggles selection (no Ctrl needed)
+      $("#itemsGrid .select-badge").off("click.sel").on("click.sel", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = String($(this).closest(".file-box").data("id"));
+        if (!id) return;
+        toggleSelected(id);
+      });
+
       // single click select, double click open
       $(".doc-hit").off("click").on("click", async function (e) {
         e.preventDefault();
@@ -443,7 +499,8 @@
         const item = state.lastLoadedItems.find(x => x.id === id);
         if (!item) return;
 
-        const multi = !!(e.ctrlKey || e.metaKey);
+        // Keep Ctrl behavior too, but now: if user already has selection, clicking other items adds to selection
+        const multi = !!(e.ctrlKey || e.metaKey) || state.selected.size > 0;
 
         if (isDouble) {
           await openItem(item);
@@ -454,7 +511,6 @@
         else setSelected(id, true);
       });
 
-      // keep selection if possible (optional)
       applySelectionClasses();
     }
 
@@ -469,7 +525,11 @@
       }
 
       if (isLink(item)) {
-        const url = item.external_key || item.object_key || "";
+        // NEW: Drive link uses object_key
+        const url = isDriveLink(item)
+          ? (item.object_key || item.external_key || "")
+          : (item.external_key || item.object_key || "");
+
         if (url) window.open(url, "_blank", "noopener,noreferrer");
         return;
       }
@@ -676,7 +736,6 @@
               item_type: "FOLDER",
               name: name,
               filename: null,
-             // upload_status: "NONE",
               storage_provider: "NONE"
             };
 
@@ -700,6 +759,7 @@
       setTimeout(function () { $("#sm_folderName").focus(); }, 150);
     }
 
+    // NEW: Drive link -> create record only (object_key)
     function openNewLinkSideModal() {
       openSideModal({
         title: "Link do Drive",
@@ -713,6 +773,7 @@
           <div class="form-group">
             <label>URL</label>
             <input id="sm_linkUrl" type="text" class="form-control" maxlength="1000" placeholder="https://drive.google.com/..." />
+            <small class="text-muted">O link será salvo no campo <strong>object_key</strong>.</small>
           </div>
           <div id="sm_linkError" class="text-danger" style="display:none;"></div>
         `,
@@ -736,9 +797,12 @@
               item_type: "LINK",
               name: name,
               filename: null,
-              external_key: url,
-             // upload_status: "NONE",
-              storage_provider: "NONE"
+
+              // ✅ requested: save link in object_key
+              object_key: url,
+
+              // mark as Drive link for UI behavior
+              storage_provider: "DRIVE"
             };
 
             if (!window.__auth?.isAdmin) {
@@ -768,7 +832,7 @@
         cancelText: "Cancelar",
         bodyHtml: `
           <div class="alert alert-info" style="margin-bottom:10px;">
-            Selecione um arquivo. Vamos: criar no BD → gerar URL → upload no R2 → finalizar no BD.
+            Selecione apenas um arquivo.
           </div>
 
           <div class="form-group">
@@ -777,9 +841,10 @@
           </div>
 
           <div class="form-group">
-            <label>Nome (opcional)</label>
+            <label>Nome</label>
             <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
-              placeholder="Se vazio, usa o nome do arquivo" />
+              placeholder="Vamos preencher automaticamente com o nome do arquivo" />
+            <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
           </div>
 
           <div id="sm_uploadProgress" style="display:none;">
@@ -821,6 +886,24 @@
           }
         }
       });
+
+      // NEW: auto-fill "Nome" when user picks file
+      setTimeout(function () {
+        const $file = $("#sm_uploadFile");
+        const $name = $("#sm_uploadDisplayName");
+
+        $file.off("change.__autoname").on("change.__autoname", function () {
+          const f = this.files && this.files[0];
+          if (!f) return;
+
+          // always set to filename (user can edit after)
+          $name.val(f.name || "");
+          try { $name.focus(); } catch {}
+        });
+
+        // focus file input first
+        try { document.getElementById("sm_uploadFile")?.focus(); } catch {}
+      }, 50);
     }
 
     // ---------------------------
@@ -856,6 +939,27 @@
     }
 
     // ---------------------------
+    // Search-as-you-type (debounce)
+    // ---------------------------
+    function debounce(fn, waitMs) {
+      let t = null;
+      return function () {
+        const args = arguments;
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(null, args), waitMs);
+      };
+    }
+
+    const runRightSearchDebounced = debounce(async function () {
+      state.currentSearch = ($("#txtSearch").val() || "").trim();
+      await loadCurrentFolder();
+    }, 280);
+
+    const runLeftSearchDebounced = debounce(async function () {
+      await loadLeftFolders();
+    }, 280);
+
+    // ---------------------------
     // Wire UI
     // ---------------------------
     $(document).ready(async function () {
@@ -868,10 +972,6 @@
 
       $("#btnBack").on("click", async function () {
         state.navStack.pop();
-        // move back by reloading root if empty
-        state.currentParentId = (state.navStack.length === 0) ? null : state.currentParentId;
-        // to be safe, just recompute by navigating to previous parent
-        // simplest: reload root if stack empty, else keep currentParentId handled by folder open
         if (state.navStack.length === 0) state.currentParentId = null;
         await loadCurrentFolder();
       });
@@ -883,9 +983,14 @@
       $("#btnDeleteSelected").on("click", deleteSelected);
       $("#btnOpenSelected").on("click", openSelected);
 
+      // RIGHT search: trigger while typing (and keep Enter + button)
       $("#btnSearch").on("click", async function () {
         state.currentSearch = ($("#txtSearch").val() || "").trim();
         await loadCurrentFolder();
+      });
+
+      $("#txtSearch").on("input keyup", function () {
+        runRightSearchDebounced();
       });
 
       $("#txtSearch").on("keydown", async function (e) {
@@ -895,7 +1000,13 @@
         }
       });
 
+      // LEFT search: trigger while typing (and keep Enter + button)
       $("#btnSearchLeft").on("click", loadLeftFolders);
+
+      $("#txtSearchLeft").on("input keyup", function () {
+        runLeftSearchDebounced();
+      });
+
       $("#txtSearchLeft").on("keydown", function (e) {
         if (e.key === "Enter") loadLeftFolders();
       });
@@ -933,3 +1044,4 @@
     });
   })();
 </script>
+

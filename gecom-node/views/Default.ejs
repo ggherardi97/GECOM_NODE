@@ -12,44 +12,27 @@
   .sortable { cursor: pointer; user-select: none; }
   .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
 
-  /* Tooltip bonito (bootstrap) */
-  .dash-tip { cursor: help; }
-  .tooltip { opacity: 1 !important; }
-  .tooltip-inner{
-    max-width: 320px;
-    padding: 8px 10px;
-    font-size: 12px;
-    line-height: 1.25;
-    background: #1f2937;
-    color: #fff;
-    border-radius: 6px;
-    text-align: left;
-    box-shadow: 0 10px 24px rgba(0,0,0,.18);
-  }
-  .tooltip.bottom .tooltip-arrow { border-bottom-color: #1f2937; }
-  .tooltip.top .tooltip-arrow { border-top-color: #1f2937; }
-
   /* Chart maior */
-  .dash-chart-wrap { height: 280px; }
+  .dash-chart-wrap { height: 320px; }
   #lineChart { width: 100% !important; height: 100% !important; }
 
   /* Cards em andamento clicáveis */
   .dash-clicker { cursor: pointer; }
+
+  /* Lista top 5 */
+  .dash-inprogress-list {
+    max-height: 220px;
+    overflow: auto;
+  }
 </style>
 
 <div class="wrapper wrapper-content">
+  <!-- ROW 1: Cards + Processos em andamento (top 5) -->
   <div class="row">
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span
-            id="lblMonthly"
-            class="label label-success float-right dash-tip"
-            data-toggle="tooltip"
-            data-container="body"
-            data-placement="bottom"
-            title="Somatório do valor total das invoices com quote_at dentro do mês atual."
-          >Monthly</span>
+          <span id="lblMonthly" class="label label-success float-right">Monthly</span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -65,14 +48,7 @@
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span
-            id="lblAnnual"
-            class="label label-info float-right dash-tip"
-            data-toggle="tooltip"
-            data-container="body"
-            data-placement="bottom"
-            title="Somatório do valor total das invoices com quote_at dentro do ano atual."
-          >Annual</span>
+          <span id="lblAnnual" class="label label-info float-right">Annual</span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -107,27 +83,23 @@
       </div>
     </div>
 
-    <!-- Sparkline (mantive) -->
+    <!-- Processos em andamento (top 5) -->
     <div class="col-lg-4">
       <div class="ibox">
         <div class="ibox-title">
-          <h5>Monthly income</h5>
-          <div class="ibox-tools">
-            <span class="label label-primary">Updated</span>
-          </div>
+          <h5>Processos em andamento</h5>
         </div>
-        <div class="ibox-content no-padding">
-          <div class="flot-chart m-t-lg" style="height: 55px;">
-            <div class="flot-chart-content" id="flot-chart1"></div>
-          </div>
+
+        <div id="inProgressContainer" class="dash-inprogress-list">
+          <div class="ibox-content"><small>Carregando...</small></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Gráfico principal -->
+  <!-- ROW 2: Gráfico principal -->
   <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
       <div class="ibox">
         <div class="ibox-content">
           <div>
@@ -137,21 +109,21 @@
               <small>Total de processos no período: <strong id="totalProcessesInPeriod">-</strong></small>
             </span>
             <h3 class="font-bold no-margins">Faturamento Anual</h3>
-            <small>Baseado no quote_at (fallback: created_at).</small>
+            <small>Ativos (status 0) / Pagos (status 4) / Estimado (30k/mês).</small>
           </div>
 
           <div class="m-t-sm">
             <div class="row">
-              <div class="col-md-8">
+              <div class="col-md-9">
                 <div class="dash-chart-wrap">
                   <canvas id="lineChart"></canvas>
                 </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <ul class="stat-list m-t-lg">
                   <li>
                     <h2 id="yearRevenueTotal" class="no-margins">-</h2>
-                    <small>Total de faturamento no período</small>
+                    <small>Total (todas invoices) no período</small>
                     <div class="progress progress-mini">
                       <div id="yearRevenueProgress" class="progress-bar" style="width: 0%;"></div>
                     </div>
@@ -174,28 +146,15 @@
               Update em <span id="lastUpdateAt">-</span>
             </small>
             <small>
-              <strong>Obs:</strong> Se você quiser performance top, o ideal é criar endpoints agregados no backend (sum/group-by).
+              <strong>Obs:</strong> Ideal ter endpoints agregados no backend (sum/group-by) quando crescer.
             </small>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Processos em andamento -->
-    <div class="col-lg-4">
-      <div class="ibox">
-        <div class="ibox-title">
-          <h5>Processos em andamento</h5>
-        </div>
-
-        <div id="inProgressContainer">
-          <div class="ibox-content"><small>Carregando...</small></div>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <!-- Grid de Processos (no lugar dos clientes) -->
+  <!-- ROW 3: Grid de Processos -->
   <div class="row">
     <div class="col-lg-12">
       <div class="ibox">
@@ -230,7 +189,7 @@
                   <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
                   <th class="sortable" data-sort="completed">Completed <span class="sort-indicator"></span></th>
                   <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="updated_at">Atualizado <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="invoice">Invoice <span class="sort-indicator"></span></th>
                   <th>Ação</th>
                 </tr>
               </thead>
@@ -257,26 +216,13 @@
 </div>
 
 <% contentFor('scripts') %>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.tooltip.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.spline.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.resize.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.pie.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/jquery.flot.symbol.js"></script>
-<script src="../Assets/inspinia/js/plugins/flot/curvedLines.js"></script>
-
+<!-- Peity -->
 <script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
 <script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
 
 <script src="../Assets/inspinia/js/inspinia.js"></script>
 <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
-
-<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
-<script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-
-<script src="../Assets/inspinia/js/plugins/sparkline/jquery.sparkline.min.js"></script>
-<script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
 
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
 
@@ -290,29 +236,6 @@
   $(document).ready(function () {
     $("#pageName").text("Home");
     $("#subpageName").text("Home");
-
-    // tooltips (bonito)
-    if ($.fn.tooltip) {
-      $('[data-toggle="tooltip"]').tooltip({
-        trigger: "hover",
-        boundary: "window",
-        delay: { show: 120, hide: 50 }
-      });
-    }
-
-    // Sparkline demo (mantive teu flot como está)
-    var d1 = [[1262304000000, 6], [1264982400000, 3057], [1267401600000, 20434], [1270080000000, 31982], [1272672000000, 26602], [1275350400000, 27826], [1277942400000, 24302], [1280620800000, 24237], [1283299200000, 21004], [1285891200000, 12144], [1288569600000, 10577], [1291161600000, 10295]];
-    var d2 = [[1262304000000, 5], [1264982400000, 200], [1267401600000, 1605], [1270080000000, 6129], [1272672000000, 11643], [1275350400000, 19055], [1277942400000, 30062], [1280620800000, 39197], [1283299200000, 37000], [1285891200000, 27000], [1288569600000, 21000], [1291161600000, 17000]];
-    var data1 = [{ label: "Data 1", data: d1 }, { label: "Data 2", data: d2 }];
-    $.plot($("#flot-chart1"), data1, {
-      xaxis: { tickDecimals: 0 },
-      series: {
-        lines: { show: true, fill: true, fillColor: { colors: [{ opacity: 1 }, { opacity: 1 }] } },
-        points: { width: 0.1, show: false }
-      },
-      grid: { show: false, borderWidth: 0 },
-      legend: { show: false }
-    });
 
     // -------------------- Helpers --------------------
     function toNumber(value) {
@@ -337,8 +260,8 @@
       return d.toLocaleString("pt-BR");
     }
 
-    function moneyAxisTick(v) {
-      return moneyCurrencyPtBr(v, "BRL").replace(",00", "");
+    function applyPeity() {
+      try { $(".pie").peity("pie"); } catch (e) { /* ignore */ }
     }
 
     function pickInvoiceDate(inv) {
@@ -346,7 +269,6 @@
     }
 
     function pickInvoiceTotal(inv) {
-      // prefere total vindo pronto (se existir)
       return (
         inv?.total ??
         inv?.total_amount ??
@@ -358,7 +280,14 @@
       );
     }
 
-    // Status: se vier texto, usa; se vier número, mapeia.
+    function pickInvoiceStatus(inv) {
+      // tenta achar status em campos comuns
+      var s = inv?.status ?? inv?.invoice_status ?? inv?.invoiceStatus ?? inv?.state ?? inv?.statecode ?? null;
+      var n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    // Status do processo
     function normalizeProcessStatus(p) {
       var text = p?.status_name || p?.statusName || p?.status_text || p?.statusText || null;
       if (text && String(text).trim().length > 0) return String(text);
@@ -367,22 +296,21 @@
       var sn = Number(s);
       if (!Number.isFinite(sn)) return "-";
 
-      // mapeamento básico (ajusta depois se teu backend tiver enums diferentes)
       if (sn === 0) return "No Prazo";
-      if (sn === 1) return "Próximo do Prazo";
+      if (sn === 1) return "Próximo do prazo";
       if (sn === 2) return "Atrasado";
-      if (sn === 3) return "Cancelado";
-      if (sn === 4) return "Encerrado";
+      if (sn === 3) return "Encerrado";
+      if (sn === 4) return "Cancelado";
       return String(sn);
     }
 
     function statusClassFromLabel(label) {
       var s = String(label || "").toLowerCase();
-      if (s.includes("no prazo") || s.includes("andamento") || s.includes("ativo")) return "label label-success";
+      if (s.includes("no prazo")) return "label label-success";
       if (s.includes("próximo")) return "label label-warning";
-      if (s.includes("atras")) return "label label-warning";
+      if (s.includes("atras")) return "label label-error";
+      if (s.includes("encerr")) return "label label-danger";
       if (s.includes("cancel")) return "label label-error";
-      if (s.includes("encerr") || s.includes("finaliz") || s.includes("conclu")) return "label label-primary";
       return "label label-primary";
     }
 
@@ -394,21 +322,37 @@
       return p?.companies?.company_name || p?.company?.company_name || p?.company_name || p?.companyName || "-";
     }
 
-    function pickProcessUpdatedAt(p) {
-      return p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_at || p?.createdAt || null;
+    function pickProcessId(p) {
+      return p?.id || p?.process_id || p?.processId || null;
+    }
+
+    function pickProcessInvoice(p) {
+      var v =
+        p?.invoice ??
+        p?.invoice_number ??
+        p?.invoiceNumber ??
+        p?.invoice_seq ??
+        p?.invoiceSeq ??
+        p?.invoices?.invoice_number ??
+        p?.invoices?.invoiceNumber ??
+        p?.related_invoice?.invoice_number ??
+        p?.relatedInvoice?.invoice_number ??
+        null;
+
+      if (v == null) return "-";
+      var s = String(v).trim();
+      return s.length ? s : "-";
     }
 
     function pickProcessCreatedAt(p) {
       return p?.created_at || p?.createdAt || null;
     }
 
-    function pickProcessId(p) {
-      // prioriza id real
-      return p?.id || p?.process_id || p?.processId || null;
+    function pickProcessUpdatedAt(p) {
+      return p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_at || p?.createdAt || null;
     }
 
     function pickProcessCompletedPercent(p) {
-      // ✅ CORRIGIDO: prioriza p.completed (mais comum no backend)
       var v =
         p?.completed ??
         p?.completed_percent ??
@@ -422,10 +366,7 @@
       if (v == null) return null;
 
       var n = toNumber(v);
-
-      // se vier 0..1, vira %
       if (n > 0 && n <= 1) n = n * 100;
-
       n = Math.max(0, Math.min(100, n));
       return n;
     }
@@ -437,7 +378,7 @@
       return data;
     }
 
-    // -------------------- Data load --------------------
+    // -------------------- Dates --------------------
     var now = new Date();
     var year = now.getFullYear();
     var month = now.getMonth();
@@ -452,10 +393,10 @@
 
     var chart = null;
 
-    // grid state
+    // -------------------- Grid state --------------------
     var allProcesses = [];
     var viewProcesses = [];
-    var sortState = { key: "updated_at", dir: "desc" };
+    var sortState = { key: "process_number", dir: "asc" };
     var pageSize = 10;
     var pageIndex = 0;
 
@@ -473,8 +414,8 @@
         if (key === "process_number") return String(pickProcessNumber(p) || "");
         if (key === "company") return String(pickProcessCompanyName(p) || "");
         if (key === "status") return String(normalizeProcessStatus(p) || "");
+        if (key === "invoice") return String(pickProcessInvoice(p) || "");
         if (key === "completed") return pickProcessCompletedPercent(p) ?? -1;
-        if (key === "updated_at") return new Date(pickProcessUpdatedAt(p) || 0).getTime();
         return "";
       }
 
@@ -495,7 +436,8 @@
         var text = [
           pickProcessNumber(p),
           pickProcessCompanyName(p),
-          normalizeProcessStatus(p)
+          normalizeProcessStatus(p),
+          pickProcessInvoice(p)
         ].join(" ").toLowerCase();
 
         return text.includes(q);
@@ -530,42 +472,61 @@
         var statusClass = statusClassFromLabel(statusLabel);
 
         var completed = pickProcessCompletedPercent(p);
-        var completedText = completed == null ? "-" : (completed.toFixed(2) + "%");
+        var completedNumber = completed == null ? 0 : completed;
+        var pieValue = completed == null ? "0/100" : (completedNumber.toFixed(2) + "/100");
 
-        var updatedAt = formatDateTimePtBr(pickProcessUpdatedAt(p));
+        var invoice = pickProcessInvoice(p);
+
         var pid = pickProcessId(p);
 
         var row = `
           <tr class="dash-clicker" onclick="${pid ? `redirectToProcessDetail('${String(pid).replace(/'/g, "\\'")}')` : ""}">
-            <td class="truncate" title="${String(number).replace(/"/g, "&quot;")}">${number}</td>
-            <td class="truncate" title="${String(company).replace(/"/g, "&quot;")}">${company}</td>
-            <td>${completedText}</td>
+            <td class="truncate">${number}</td>
+            <td class="truncate">${company}</td>
+            <td>
+              <span class="pie">${pieValue}</span>
+              <span class="sr-only">${completed == null ? "-" : (completedNumber.toFixed(2) + "%")}</span>
+            </td>
             <td><span class="${statusClass}">${statusLabel}</span></td>
-            <td>${updatedAt}</td>
+            <td class="truncate">${invoice}</td>
             <td class="table-actions">
-              ${pid ? `<a href="ProcessDetail?id=${encodeURIComponent(pid)}" title="Abrir"><i class="fa fa-external-link text-navy"></i></a>` : "-"}
+              ${pid ? `<a href="ProcessDetail?id=${encodeURIComponent(pid)}"><i class="fa fa-external-link text-navy"></i></a>` : "-"}
             </td>
           </tr>
         `;
         $tbody.append(row);
       });
+
+      applyPeity();
     }
 
     function renderInProgress(processes) {
       var items = Array.isArray(processes) ? processes.slice() : [];
 
-      // pega top 3 mais recentes (em geral são os “mais relevantes”)
+      // heurística: excluir finalizados/cancelados
+      function isInProgress(p) {
+        var statusLabel = normalizeProcessStatus(p).toLowerCase();
+        if (!statusLabel) return true;
+        if (statusLabel.includes("cancel")) return false;
+        if (statusLabel.includes("encerr") || statusLabel.includes("finaliz") || statusLabel.includes("conclu")) return false;
+        return true;
+      }
+
+      items = items.filter(isInProgress);
+
+      // ordena por updated_at desc
       items.sort(function (a, b) {
         return new Date(pickProcessUpdatedAt(b) || 0).getTime() - new Date(pickProcessUpdatedAt(a) || 0).getTime();
       });
 
-      items = items.slice(0, 3);
+      // TOP 5
+      items = items.slice(0, 5);
 
       var $wrap = $("#inProgressContainer");
       $wrap.empty();
 
       if (!items.length) {
-        $wrap.append('<div class="ibox-content"><small>Nenhum processo encontrado.</small></div>');
+        $wrap.append('<div class="ibox-content"><small>Nenhum processo em andamento.</small></div>');
         return;
       }
 
@@ -584,7 +545,7 @@
             <div class="row">
               <div class="col-4">
                 <small class="stats-label">Processo</small>
-                <h4 class="truncate" title="${String(number).replace(/"/g, "&quot;")}">${number}</h4>
+                <h4 class="truncate">${number}</h4>
               </div>
               <div class="col-4">
                 <small class="stats-label">% Estágio</small>
@@ -623,72 +584,81 @@
           if (dt >= yearStart && dt < yearEnd) invoicesYear.push(inv);
         });
 
-        var monthSum = invoicesMonth.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
-        var yearSum = invoicesYear.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
+        // cards: todos
+        var monthSumAll = invoicesMonth.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
+        var yearSumAll = invoicesYear.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
 
-        $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSum, "BRL"));
-        $("#annualRevenue").text(moneyCurrencyPtBr(yearSum, "BRL"));
+        $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSumAll, "BRL"));
+        $("#annualRevenue").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
 
         var estimatedMonthly = 30000;
-        var deltaMonth = estimatedMonthly > 0 ? ((monthSum / estimatedMonthly) * 100) : 0;
+        var estimatedYear = 30000 * 12;
+
+        var deltaMonth = estimatedMonthly > 0 ? ((monthSumAll / estimatedMonthly) * 100) : 0;
         $("#monthlyDelta").text((deltaMonth || 0).toFixed(0) + "%");
 
-        var estimatedYear = 30000 * 12;
-        var deltaYear = estimatedYear > 0 ? ((yearSum / estimatedYear) * 100) : 0;
+        var deltaYear = estimatedYear > 0 ? ((yearSumAll / estimatedYear) * 100) : 0;
         $("#annualDelta").text((deltaYear || 0).toFixed(0) + "%");
 
-        // chart data
-        var actualByMonth = new Array(12).fill(0);
+        // chart: estimado (30k) + ativos (status 0) + pagos (status 4)
         var estimatedByMonth = new Array(12).fill(30000);
+        var activeByMonth = new Array(12).fill(0);
+        var paidByMonth = new Array(12).fill(0);
 
         invoicesYear.forEach(function (inv) {
           var dt = new Date(pickInvoiceDate(inv));
           if (Number.isNaN(dt.getTime())) return;
+
           var m = dt.getMonth();
-          actualByMonth[m] += toNumber(pickInvoiceTotal(inv));
+          var total = toNumber(pickInvoiceTotal(inv));
+          var st = pickInvoiceStatus(inv);
+
+          if (st === 0) activeByMonth[m] += total;      // Ativos
+          if (st === 4) paidByMonth[m] += total;        // Pagos
         });
 
         var lineData = {
           labels: monthsPt,
           datasets: [
             {
-              label: "Faturamento (Real)",
-              backgroundColor: "rgba(26,179,148,0.10)",
-              borderColor: "rgba(26,179,148,0.90)",
-              pointBackgroundColor: "rgba(26,179,148,1)",
-              pointBorderColor: "#fff",
-              data: actualByMonth
-            },
-            {
               label: "Estimado (30.000/mês)",
-              backgroundColor: "rgba(220,220,220,0.15)",
-              borderColor: "rgba(220,220,220,1)",
-              pointBackgroundColor: "rgba(220,220,220,1)",
+              backgroundColor: "rgba(220,220,220,0.10)",
+              borderColor: "rgba(170,170,170,1)",
+              pointBackgroundColor: "rgba(170,170,170,1)",
               pointBorderColor: "#fff",
               data: estimatedByMonth
+            },
+            {
+              label: "Invoices Ativos (status 0)",
+              backgroundColor: "rgba(26,179,148,0.10)",
+              borderColor: "rgba(26,179,148,1)", /* verde */
+              pointBackgroundColor: "rgba(26,179,148,1)",
+              pointBorderColor: "#fff",
+              data: activeByMonth
+            },
+            {
+              label: "Invoices Pagos (status 4)",
+              backgroundColor: "rgba(220,38,38,0.08)",
+              borderColor: "rgba(220,38,38,1)", /* vermelho */
+              pointBackgroundColor: "rgba(220,38,38,1)",
+              pointBorderColor: "#fff",
+              data: paidByMonth
             }
           ]
         };
 
-        // ✅ eixo Y 10k em 10k + tooltip R$
         var lineOptions = {
           responsive: true,
           maintainAspectRatio: false,
+          tooltips: { enabled: false },   // remove tooltips do gráfico
+          hover: { mode: null },          // evita hover highlight
           scales: {
             yAxes: [{
               ticks: {
                 beginAtZero: true,
-                stepSize: 10000,
-                callback: function (value) { return moneyAxisTick(value); }
+                stepSize: 10000
               }
             }]
-          },
-          tooltips: {
-            callbacks: {
-              label: function (tooltipItem) {
-                return moneyCurrencyPtBr(tooltipItem.yLabel, "BRL");
-              }
-            }
           }
         };
 
@@ -697,10 +667,10 @@
         chart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
 
         $("#totalInvoicesInPeriod").text(String(invoicesYear.length));
-        $("#yearRevenueTotal").text(moneyCurrencyPtBr(yearSum, "BRL"));
+        $("#yearRevenueTotal").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
         $("#yearEstimatedTotal").text(moneyCurrencyPtBr(estimatedYear, "BRL"));
 
-        var prog = estimatedYear > 0 ? Math.max(0, Math.min(100, (yearSum / estimatedYear) * 100)) : 0;
+        var prog = estimatedYear > 0 ? Math.max(0, Math.min(100, (yearSumAll / estimatedYear) * 100)) : 0;
         $("#yearRevenueProgress").css("width", prog.toFixed(0) + "%");
         $("#yearEstimatedProgress").css("width", "100%");
 
@@ -743,7 +713,7 @@
         sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
       } else {
         sortState.key = key;
-        sortState.dir = (key === "updated_at") ? "desc" : "asc";
+        sortState.dir = (key === "completed") ? "desc" : "asc";
       }
 
       pageIndex = 0;
