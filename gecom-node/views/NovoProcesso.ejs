@@ -11,7 +11,8 @@
     color: #888;
     font-size: 12px;
   }
-.select2-container {
+
+  .select2-container {
     background-color: white;
     box-sizing: border-box;
     display: inline-block;
@@ -20,7 +21,8 @@
     vertical-align: middle;
     padding: 3px;
     border: 1px solid #c0c0c0;
-}
+  }
+
   .transport-toolbar {
     display: flex;
     align-items: center;
@@ -48,6 +50,28 @@
   .select2-selection__clear{
     padding-right: 10px;
   }
+
+  /* ✅ Fix: typeahead dropdown position/z-index inside wizard/table */
+  .typeahead.dropdown-menu {
+    z-index: 999999 !important;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  /* ✅ Dropzone usability */
+  #dropzoneForm {
+    min-height: 160px;
+    cursor: pointer;
+  }
+
+  .dz-message .btn {
+    margin-top: 10px;
+  }
+
+  /* List of files */
+  .proc-doc-row {
+    margin-bottom: 8px;
+  }
 </style>
 
 <% contentFor('headerLink') %>
@@ -56,6 +80,10 @@
 <link href="../Assets/inspinia/css/plugins/select2/select2.min.css" rel="stylesheet">
 <link href="../Assets/inspinia/css/plugins/select2/select2-bootstrap.min.css" rel="stylesheet">
 <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+<!-- ✅ Dropzone CSS (sem isso o clique/drag costuma ficar “esquisito”) -->
+<link href="../Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
+<link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
 <% %>
 
 <div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0px;">
@@ -120,8 +148,6 @@
                       </div>
                     </div>
                   </div>
-
-                  
                 </div>
 
                 <div class="col-lg-3">
@@ -173,19 +199,46 @@
 
             <!-- STEP 3 -->
             <h1>Documentos</h1>
-            <fieldset>
+            <fieldset style="overflow: auto;">
               <h3>Upload de documentos</h3>
-              <p class="muted">Nesta etapa vamos implementar depois. Por enquanto, apenas layout.</p>
+              <p class="muted">Anexe até <strong>5 arquivos</strong>. O upload será feito ao finalizar.</p>
 
-              <div class="ibox-content">
-               <div class="dropzone dz-clickable" id="dropzoneForm">
-  <div class="dz-default dz-message">
-    <span>
-      <strong>Arraste arquivos aqui ou clique para enviar.</strong><br>
-      (A implementação do upload será feita depois.)
-    </span>
-  </div>
-</div>
+              <div class="row">
+                <div class="col-lg-6">
+                  <button type="button" class="btn btn-primary" id="btnPickProcDocs">
+                    <i class="fa fa-paperclip"></i> Selecionar arquivos
+                  </button>
+                  <div class="muted" style="margin-top:6px;">Você também pode arrastar os arquivos para a área abaixo.</div>
+                </div>
+
+                <div class="col-lg-6">
+                  <div id="procDocUploadProgress" style="display:none; margin-top: 6px;">
+                    <div class="progress progress-striped active" style="margin-bottom:6px;">
+                      <div id="procDocUploadProgressBar" class="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <small id="procDocUploadProgressText" class="text-muted"></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ibox-content" style="padding:0; margin-top:12px;">
+                <div class="dropzone dz-clickable" id="dropzoneForm" style="display: none;">
+                  <div class="dz-default dz-message">
+                    <span>
+                      <strong>Arraste arquivos aqui</strong><br>
+                      <span class="muted">Máximo 5 arquivos.</span><br>
+                      <span class="muted">Você poderá renomear cada arquivo abaixo antes de finalizar.</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lista de arquivos + nomes -->
+              <div id="procDocFilesList" style="margin-top:12px; display:none;">
+                <div class="small text-muted" style="margin-bottom:6px;">
+                  Ajuste o nome de cada arquivo (nome no sistema).
+                </div>
+                <div id="procDocFilesListInner"></div>
               </div>
             </fieldset>
           </form>
@@ -206,28 +259,6 @@
 <script src="../Assets/inspinia/js/plugins/dropzone/dropzone.js"></script>
 
 <script>
-    
-  async function onChangeCompany() {
-    debugger;
-    const companyId = String($(this).val() || "").trim();
-
-    try {
-      await loadInvoicesByCompany(companyId);
-      await loadUsersByCompany(companyId);
-
-      // refresh select2 after options change
-      initSelect2($("#invoice"), "Selecionar...", null);
-      initSelect2($("#primary_contact_id"), "Selecionar...", null);
-    } catch (e) {
-      console.error(e);
-      alert(e?.message || "Falha ao carregar dados da empresa.");
-    }
-  }
-  // =========================
-  // Events
-  // =========================
-
-
 (function () {
   // =========================
   // State
@@ -242,11 +273,16 @@
     transportTypes: [],
     transportStatuses: [],
     companiesById: new Map(),
-    transportSeq: 0
+    transportSeq: 0,
+
+    // Step 3 (documents)
+    __procDzInitialized: false,
+    procDocDz: null,
+    procDocFilesUi: new Map(), // key: fileKey => { file, $row, $nameInput }
   };
 
   // =========================
-  // Helpers (no dependencies)
+  // Helpers
   // =========================
   function escapeHtml(value) {
     if (value == null) return "";
@@ -299,7 +335,6 @@
   function toIsoZFromBr(value) {
     const d = parseDateBr(value);
     if (!d) return null;
-    // midnight UTC to avoid timezone surprises between Windows/Docker
     const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0));
     return utc.toISOString();
   }
@@ -348,7 +383,6 @@
       });
 
       if (!String($input.val() || "").trim()) {
-        // default today
         const now = new Date();
         const dd = String(now.getDate()).padStart(2, "0");
         const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -358,30 +392,25 @@
     });
   }
 
-function initSelect2($el, placeholder, dropdownParent) {
-  if (!$el || !$el.length) return;
-  if (!$.fn.select2) return;
+  function initSelect2($el, placeholder, dropdownParent) {
+    if (!$el || !$el.length) return;
+    if (!$.fn.select2) return;
 
-  // If already initialized, destroy properly
-  if ($el.hasClass("select2-hidden-accessible") || $el.data("select2")) {
-    try { $el.select2("destroy"); } catch (_) { /* ignore */ }
+    if ($el.hasClass("select2-hidden-accessible") || $el.data("select2")) {
+      try { $el.select2("destroy"); } catch (_) { }
+    }
+    $el.siblings(".select2").remove();
+
+    $el.select2({
+      width: "100%",
+      theme: "bootstrap",
+      placeholder: placeholder || "Selecionar...",
+      allowClear: true,
+      minimumResultsForSearch: 0,
+      language: "pt-BR",
+      dropdownParent: dropdownParent || undefined
+    });
   }
-
-  // Remove any leftover containers that Select2 may have left behind
-  // (important when DOM is moved by jquery.steps or disabled toggling)
-  $el.siblings(".select2").remove();
-
-  $el.select2({
-    width: "100%",
-    theme: "bootstrap",
-    placeholder: placeholder || "Selecionar...",
-    allowClear: true,
-    minimumResultsForSearch: 0,
-    language: "pt-BR",
-    dropdownParent: dropdownParent || undefined
-  });
-}
-
 
   function setSelectDisabled(selectId, disabled) {
     const el = document.getElementById(selectId);
@@ -397,34 +426,52 @@ function initSelect2($el, placeholder, dropdownParent) {
   }
 
   // =========================
+  // Auth helpers
+  // =========================
+  function getUserCompanyId() {
+    const id = window.__auth?.company_id || window.__auth?.companyId || null;
+    return id ? String(id) : null;
+  }
+
+  function getAccountIdForCreate() {
+    const id =
+      window.__auth?.accountId ||
+      window.__auth?.account_id ||
+      window.__auth?.account?.id ||
+      window.__auth?.tenant_id ||
+      window.__auth?.admin_account_id ||
+      null;
+
+    if (id) return String(id);
+
+    const companyId = getUserCompanyId();
+    return companyId ? String(companyId) : null;
+  }
+
+  // =========================
   // Load lists
   // =========================
-async function loadCompanies() {
-  const data = await apiGet("/api/companies");
-  const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
+  async function loadCompanies() {
+    const data = await apiGet("/api/companies");
+    const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
 
-  state.companies = [];
-  state.companiesById = new Map();
+    state.companies = [];
+    state.companiesById = new Map();
 
-  list.forEach(c => {
-    const id = String(c?.id || "").trim();
-    const name = String(c?.company_name || c?.name || "").trim();
-    if (!id || !name) return;
+    list.forEach(c => {
+      const id = String(c?.id || "").trim();
+      const name = String(c?.company_name || c?.name || "").trim();
+      if (!id || !name) return;
+      state.companies.push({ id, name });
+      state.companiesById.set(id, c);
+    });
 
-    state.companies.push({ id, name });
-
-    // Keep the full payload to reuse users, primaryUser, etc.
-    state.companiesById.set(id, c);
-  });
-
-  const $ddl = $("#company_id");
-  $ddl.empty().append(`<option value="">Selecionar...</option>`);
-  state.companies.forEach(c => $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`));
-}
-
+    const $ddl = $("#company_id");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+    state.companies.forEach(c => $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`));
+  }
 
   async function loadProcessTypes() {
-    // Endpoint esperado: /api/process-types
     const data = await apiGet("/api/process-types");
     const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.process_types ?? []);
     state.processTypes = list
@@ -459,7 +506,6 @@ async function loadCompanies() {
       }))
       .filter(x => x.id && x.invoice_number);
 
-    // process.invoice no Prisma é string -> vamos salvar o invoice_number
     state.invoices.forEach(i => {
       $ddl.append(`<option value="${escapeHtml(i.invoice_number)}">${escapeHtml(i.invoice_number)}</option>`);
     });
@@ -504,7 +550,6 @@ async function loadCompanies() {
   }
 
   async function loadTransportStatuses() {
-    // Endpoint esperado: /api/transport-statuses (vamos ajustar backend se ainda não existir)
     try {
       const data = await apiGet("/api/transport-statuses");
       const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.transport_statuses ?? []);
@@ -512,7 +557,6 @@ async function loadCompanies() {
         .map(s => ({ id: String(s?.id || "").trim(), name: String(s?.name || "").trim() }))
         .filter(x => x.id && x.name);
     } catch (e) {
-      // não quebra a página, só avisa
       state.transportStatuses = [];
       const warn = document.getElementById("transportWarning");
       warn.style.display = "block";
@@ -521,8 +565,33 @@ async function loadCompanies() {
   }
 
   // =========================
-  // Transports rows (multi)
+  // Transports rows
   // =========================
+  function initCountriesTypeahead(scope) {
+    const $scope = scope ? $(scope) : $(document);
+
+    const countries = (window.__countriesPtBr && Array.isArray(window.__countriesPtBr))
+      ? window.__countriesPtBr
+      : ["Brasil","Estados Unidos","Portugal","China","Alemanha","França","Argentina","Chile","México","Japão","Itália","Espanha","Canadá","Reino Unido"];
+
+    $scope.find(".autocompleteCountry").each(function () {
+      const $input = $(this);
+
+      // ✅ destroy/re-init safe
+      try {
+        const ta = $input.data("typeahead");
+        if (ta && ta.destroy) ta.destroy();
+      } catch (_) {}
+
+      // ✅ main fix: fitToElement keeps dropdown aligned with the input
+      $input.typeahead({
+        source: countries,
+        autoSelect: true,
+        fitToElement: true
+      });
+    });
+  }
+
   function buildTransportRow(rowId) {
     const typeOptions = [`<option value="">Selecionar...</option>`]
       .concat(state.transportTypes.map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`))
@@ -534,38 +603,20 @@ async function loadCompanies() {
 
     return `
       <tr data-row-id="${escapeHtml(rowId)}">
+        <td><input type="text" class="form-control" id="${escapeHtml(rowId)}_company" placeholder="Ex: Maersk" /></td>
+        <td><input type="text" class="form-control phone-mask" id="${escapeHtml(rowId)}_phone" placeholder="(11) 99999-9999" /></td>
+        <td><input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_origin" placeholder="País de origem" autocomplete="off" /></td>
+        <td><input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_destination" placeholder="País de destino" autocomplete="off" /></td>
         <td>
-          <input type="text" class="form-control" id="${escapeHtml(rowId)}_company" placeholder="Ex: Maersk" />
+          <select class="form-control transport-type" id="${escapeHtml(rowId)}_type">${typeOptions}</select>
         </td>
         <td>
-          <input type="text" class="form-control phone-mask" id="${escapeHtml(rowId)}_phone" placeholder="(11) 99999-9999" />
+          <select class="form-control transport-status" id="${escapeHtml(rowId)}_status">${statusOptions}</select>
         </td>
-        <td>
-          <input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_origin" placeholder="País de origem" autocomplete="off" />
-        </td>
-        <td>
-          <input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_destination" placeholder="País de destino" autocomplete="off" />
-        </td>
-        <td>
-          <select class="form-control transport-type" id="${escapeHtml(rowId)}_type">
-            ${typeOptions}
-          </select>
-        </td>
-        <td>
-          <select class="form-control transport-status" id="${escapeHtml(rowId)}_status">
-            ${statusOptions}
-          </select>
-        </td>
-        <td>
-          <input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_departure" autocomplete="off" />
-        </td>
-        <td>
-          <input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_arrival" autocomplete="off" />
-        </td>
+        <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_departure" autocomplete="off" /></td>
+        <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_arrival" autocomplete="off" /></td>
         <td class="text-center">
-          <button type="button" class="btn btn-danger btn-xs2 btn-remove-transport">
-            <i class="fa fa-trash"></i>
-          </button>
+          <button type="button" class="btn btn-danger btn-xs2 btn-remove-transport"><i class="fa fa-trash"></i></button>
         </td>
       </tr>
     `;
@@ -578,30 +629,20 @@ async function loadCompanies() {
     const rowId = `trow_${++state.transportSeq}`;
     tbody.insertAdjacentHTML("beforeend", buildTransportRow(rowId));
 
-    // init plugins for the new row
     const tr = tbody.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
     if (!tr) return;
 
     initDatePickers(tr);
-
-    // Select2 inside wizard content (safe to use body)
     initSelect2($(tr).find("select.transport-type"), "Selecionar...", null);
     initSelect2($(tr).find("select.transport-status"), "Selecionar...", null);
 
-    // Country typeahead (use list from existing layout if you already have it, else fallback)
-    const countries = (window.__countriesPtBr && Array.isArray(window.__countriesPtBr))
-      ? window.__countriesPtBr
-      : [
-          "Brasil","Estados Unidos","Portugal","China","Alemanha","França","Argentina","Chile","México","Japão","Itália","Espanha","Canadá","Reino Unido"
-        ];
-
-    $(tr).find(".autocompleteCountry").typeahead({ source: countries, autoSelect: true });
+    // ✅ typeahead align fix per row
+    initCountriesTypeahead(tr);
   }
 
   document.addEventListener("click", function (ev) {
     const btn = ev.target && ev.target.closest(".btn-remove-transport");
     if (!btn) return;
-
     const tr = btn.closest("tr[data-row-id]");
     if (tr) tr.remove();
   }, true);
@@ -638,7 +679,6 @@ async function loadCompanies() {
   function validateTransportRows() {
     const rows = readTransportRows();
     if (!rows.length) return "Adicione pelo menos 1 transporte.";
-
     const invalid = rows.find(r => !r.transport_company || !r.origin || !r.destination || !r.transport_type_id || !r.transport_status_id);
     if (invalid) return "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.";
     return null;
@@ -650,7 +690,6 @@ async function loadCompanies() {
   function buildProcessPayload() {
     const companyId = String($("#company_id").val() || "").trim();
     const contactId = String($("#primary_contact_id").val() || "").trim();
-    const number = (document.getElementById("process_number")?.value || "").trim();
 
     return {
       status: 0,
@@ -667,7 +706,6 @@ async function loadCompanies() {
     if (state.creating) return null;
 
     const payload = buildProcessPayload();
-
     if (!payload.company_id) throw new Error("Empresa é obrigatória.");
     if (!payload.primary_contact_id) throw new Error("Contato do Cliente é obrigatório.");
 
@@ -685,9 +723,8 @@ async function loadCompanies() {
 
   async function createTransportsForProcess(processId) {
     const rows = readTransportRows();
-
     for (const t of rows) {
-      const payload = {
+      await apiPost("/api/transports", {
         transport_company: t.transport_company,
         origin: t.origin,
         destination: t.destination,
@@ -697,9 +734,285 @@ async function loadCompanies() {
         departure_forecast: t.departure_forecast,
         arrival_forecast: t.arrival_forecast,
         process_id: processId
-      };
+      });
+    }
+  }
 
-      await apiPost("/api/transports", payload);
+  // =========================
+  // Step 3 - Documents upload (MULTI up to 5)
+  // =========================
+  function showProcDocProgress(flag, pct, text) {
+    $("#procDocUploadProgress").toggle(!!flag);
+    if (pct != null) $("#procDocUploadProgressBar").css("width", String(Math.max(0, Math.min(100, pct))) + "%");
+    if (text != null) $("#procDocUploadProgressText").text(String(text || ""));
+  }
+
+  function getExtFromName(fileName) {
+    const n = String(fileName || "");
+    const idx = n.lastIndexOf(".");
+    if (idx <= 0 || idx >= n.length - 1) return null;
+    return n.substring(idx + 1).toLowerCase();
+  }
+
+  function getFileKey(file) {
+    const uuid = file?.upload?.uuid;
+    if (uuid) return String(uuid);
+    return `${String(file?.name || "file")}__${String(file?.size || 0)}__${String(file?.lastModified || 0)}`;
+  }
+
+  function defaultDisplayNameFor(file) {
+    return String(file?.name || "").trim() || "Arquivo";
+  }
+
+  function showFilesList(flag) {
+    $("#procDocFilesList").toggle(!!flag);
+  }
+
+  function addOrUpdateFileRow(file) {
+    const key = getFileKey(file);
+    if (state.procDocFilesUi.has(key)) return;
+
+    showFilesList(true);
+
+    const sizeMb = ((file?.size || 0) / (1024 * 1024)).toFixed(2);
+
+    const row = document.createElement("div");
+    row.className = "well well-sm proc-doc-row";
+    row.setAttribute("data-file-key", key);
+
+    row.innerHTML = `
+      <div class="row" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="flex: 1 1 260px; min-width:220px;">
+          <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${escapeHtml(file?.name || "Arquivo")}
+          </div>
+          <div class="small text-muted">Tamanho: ${escapeHtml(sizeMb)} MB</div>
+        </div>
+
+        <div style="flex: 2 1 340px; min-width:260px;">
+          <label class="small" style="margin:0 0 4px 0;">Nome do arquivo (no sistema)</label>
+          <input type="text" class="form-control input-sm proc-doc-display" maxlength="255" value="${escapeHtml(defaultDisplayNameFor(file))}" />
+        </div>
+      </div>
+    `;
+
+    document.getElementById("procDocFilesListInner").appendChild(row);
+
+    const $row = $(row);
+    const $nameInput = $row.find("input.proc-doc-display");
+
+    state.procDocFilesUi.set(key, { file, $row, $nameInput });
+  }
+
+  function removeFileRow(file) {
+    const key = getFileKey(file);
+    const entry = state.procDocFilesUi.get(key);
+    if (entry?.$row?.length) entry.$row.remove();
+    state.procDocFilesUi.delete(key);
+
+    if (state.procDocFilesUi.size === 0) showFilesList(false);
+  }
+
+  function getSelectedProcDocFiles() {
+    const dz = state.procDocDz;
+    if (!dz || !Array.isArray(dz.files)) return [];
+    return dz.files.filter(f => !f?.status || f.status !== "error");
+  }
+
+  function getDisplayNameForFile(file) {
+    const key = getFileKey(file);
+    const entry = state.procDocFilesUi.get(key);
+    const perFileName = entry?.$nameInput?.length ? String(entry.$nameInput.val() || "").trim() : "";
+    return perFileName || defaultDisplayNameFor(file);
+  }
+
+  async function getProcessById(processId) {
+    const candidates = [
+      `/api/processes/${encodeURIComponent(processId)}`,
+      `/api/processes?id=${encodeURIComponent(processId)}`,
+      `/api/processes/findById?id=${encodeURIComponent(processId)}`
+    ];
+
+    let lastErr = null;
+    for (const url of candidates) {
+      try {
+        const data = await apiGet(url);
+        if (data && typeof data === "object") {
+          if (data.id || data.process_number) return data;
+          if (data.data && (data.data.id || data.data.process_number)) return data.data;
+          if (Array.isArray(data) && data[0]) return data[0];
+        }
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("Não foi possível obter os dados do processo.");
+  }
+
+  async function ensureProcessFolder(processId, accountId) {
+    const process = await getProcessById(processId);
+    const processNumber = String(process?.process_number || process?.processNumber || process?.number || "").trim();
+    const folderName = processNumber || `Processo ${processId}`;
+
+    const created = await apiPost("/api/documents", {
+      account_id: accountId,
+      parent_id: null,
+      item_type: "FOLDER",
+      name: folderName,
+      filename: null,
+      storage_provider: "NONE",
+      related_table: "process",
+      related_id: processId
+    });
+
+    const folderId = created?.id ? String(created.id) : null;
+    if (!folderId) throw new Error("Pasta do processo criada, mas não retornou ID.");
+    return { folderId, folderName };
+  }
+
+  async function uploadOneFileToDocumentsApi({ file, accountId, parentFolderId, relatedId, displayName }) {
+    const fileName = file.name;
+    const mimeType = file.type || "application/octet-stream";
+    const ext = getExtFromName(fileName);
+
+    const created = await apiPost("/api/documents", {
+      account_id: accountId,
+      parent_id: parentFolderId,
+      item_type: "FILE",
+      name: displayName,
+      filename: fileName,
+      ext: ext,
+      mime_type: mimeType,
+      related_table: "process",
+      related_id: relatedId
+    });
+
+    const docId = created?.id ? String(created.id) : null;
+    if (!docId) throw new Error("Falha ao criar registro do documento.");
+
+    const presign = await apiPost("/api/documents/" + encodeURIComponent(docId) + "/presign-upload", {
+      fileName: fileName,
+      contentType: mimeType,
+      size: file.size
+    });
+
+    const putUrl = presign?.url;
+    const putHeaders = presign?.headers || { "Content-Type": mimeType };
+    const objectKey = presign?.object_key || presign?.key || null;
+    if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+
+    const putRes = await fetch(putUrl, { method: "PUT", headers: putHeaders, body: file });
+    if (!putRes.ok) {
+      const t = await putRes.text().catch(() => "");
+      throw new Error(("Upload falhou (" + putRes.status + "). " + (t || "")).trim());
+    }
+
+    const etag = putRes.headers.get("etag") || presign?.etag || null;
+
+    await apiPost("/api/documents/" + encodeURIComponent(docId) + "/complete-upload", {
+      upload_status: "UPLOADED",
+      object_key: objectKey,
+      etag: etag,
+      mime_type: mimeType,
+      size_bytes: file.size
+    });
+
+    return docId;
+  }
+
+  async function uploadDocumentsForProcessIfAny(processId) {
+    const files = getSelectedProcDocFiles();
+    if (!files.length) return;
+
+    if (files.length > 5) throw new Error("Máximo 5 arquivos.");
+
+    const accountId = getAccountIdForCreate();
+    if (!accountId) throw new Error("Não foi possível identificar o account_id para anexar documentos.");
+
+    showProcDocProgress(true, 2, "Criando pasta do processo...");
+    const { folderId, folderName } = await ensureProcessFolder(processId, accountId);
+
+    const total = files.length;
+    let done = 0;
+
+    for (const file of files) {
+      done += 1;
+      const displayName = getDisplayNameForFile(file);
+
+      showProcDocProgress(true, Math.min(90, Math.round(((done - 1) / total) * 100)), `Enviando ${done}/${total}: ${file.name}`);
+      await uploadOneFileToDocumentsApi({
+        file,
+        accountId,
+        parentFolderId: folderId,
+        relatedId: processId,
+        displayName
+      });
+
+      showProcDocProgress(true, Math.min(95, Math.round((done / total) * 100)), `Concluído ${done}/${total} (pasta: ${folderName})`);
+    }
+
+    showProcDocProgress(true, 100, `Upload concluído (${total} arquivo(s)).`);
+  }
+
+  // ✅ Dropzone init (fix click + button)
+  function initProcessDocumentsDropzone() {
+    try {
+      if (!window.Dropzone) return;
+      if (state.__procDzInitialized) return;
+      state.__procDzInitialized = true;
+
+      const dz = new Dropzone("#dropzoneForm", {
+        url: "/api/documents",
+        autoProcessQueue: false,
+        maxFilesize: 10, // MB per file
+        maxFiles: 5,
+        addRemoveLinks: true,
+        parallelUploads: 1,
+        uploadMultiple: false,
+
+        // ✅ Most important: make clickable reliable in wizard
+        clickable: ["#btnPickProcDocs", "#dropzoneForm"],
+
+        // Prevent weird invisible overlay issues
+        createImageThumbnails: false,
+
+        dictDefaultMessage: "<strong>Arraste arquivos aqui</strong><br><span class='muted'>Máximo 5 arquivos.</span>",
+      });
+
+      state.procDocDz = dz;
+
+      dz.on("addedfile", function (file) {
+        const files = getSelectedProcDocFiles();
+        if (files.length > 5) {
+          dz.removeFile(file);
+          alert("Máximo 5 arquivos.");
+          return;
+        }
+
+        addOrUpdateFileRow(file);
+        showProcDocProgress(false, 0, "");
+      });
+
+      dz.on("removedfile", function (file) {
+        removeFileRow(file);
+        showProcDocProgress(false, 0, "");
+      });
+
+      dz.on("error", function (_file, message) {
+        console.warn("Dropzone error:", message);
+      });
+
+      // ✅ Extra: ensure button triggers file picker even if Dropzone click fails in some browsers
+      $(document).off("click.gecom", "#btnPickProcDocs");
+      $(document).on("click.gecom", "#btnPickProcDocs", function (e) {
+        e.preventDefault();
+        try {
+          dz.hiddenFileInput && dz.hiddenFileInput.click();
+        } catch (_) { /* ignore */ }
+      });
+
+    } catch (e) {
+      console.warn("Dropzone not initialized.", e);
     }
   }
 
@@ -718,20 +1031,17 @@ async function loadCompanies() {
         initSelect2($("#process_type_id"), "Selecionar...", null);
         initSelect2($("#primary_contact_id"), "Selecionar...", null);
 
-        // invoice/contact disabled until company chosen
         setSelectDisabled("invoice", true);
         setSelectDisabled("primary_contact_id", true);
         document.getElementById("invoiceHelp").style.display = "block";
         document.getElementById("contactHelp").style.display = "block";
 
-        // at least 1 transport row by default
         addTransportRow();
       },
 
       onStepChanging: function (event, currentIndex, newIndex) {
         if (currentIndex > newIndex) return true;
 
-        // basic jQuery validate
         const form = $(this);
         if (currentIndex < newIndex) {
           $(".body:eq(" + newIndex + ") label.error", form).remove();
@@ -741,11 +1051,13 @@ async function loadCompanies() {
         form.validate().settings.ignore = ":disabled,:hidden";
         if (!form.valid()) return false;
 
-        // custom validation for transports when going to step 3
         if (currentIndex === 1 && newIndex === 2) {
           const msg = validateTransportRows();
           if (msg) { alert(msg); return false; }
         }
+
+        const files = getSelectedProcDocFiles();
+        if (files.length > 5) { alert("Máximo 5 arquivos."); return false; }
 
         return true;
       },
@@ -753,6 +1065,9 @@ async function loadCompanies() {
       onStepChanged: function (event, currentIndex) {
         const currentBody = $(this).find(".body").eq(currentIndex);
         initDatePickers(currentBody);
+
+        // ✅ keep typeahead aligned even when wizard changes layout
+        initCountriesTypeahead(currentBody);
       },
 
       onFinishing: function () {
@@ -763,6 +1078,9 @@ async function loadCompanies() {
         const msg = validateTransportRows();
         if (msg) { alert(msg); return false; }
 
+        const files = getSelectedProcDocFiles();
+        if (files.length > 5) { alert("Máximo 5 arquivos."); return false; }
+
         return true;
       },
 
@@ -772,11 +1090,12 @@ async function loadCompanies() {
           if (!processId) return;
 
           await createTransportsForProcess(processId);
+          await uploadDocumentsForProcessIfAny(processId);
 
           window.location = `ProcessDetail?id=${encodeURIComponent(processId)}`;
         } catch (e) {
           console.error(e);
-          alert(e?.message || "Falha ao criar processo/transportes.");
+          alert(e?.message || "Falha ao criar processo/transportes/documentos.");
         }
       }
     }).validate({
@@ -791,6 +1110,104 @@ async function loadCompanies() {
   }
 
   // =========================
+  // Company change wiring
+  // =========================
+  function bindCompanyChangeOnce() {
+    if (window.__bindCompanyChangeDone) return;
+    window.__bindCompanyChangeDone = true;
+
+    $(document).off("change.gecom", "#company_id");
+    $(document).on("change.gecom", "#company_id", function () {
+      const companyId = String($(this).val() || "").trim();
+      onCompanyChanged(companyId);
+    });
+  }
+
+  let __companyChangeSeq = 0;
+  let __companyChangeInFlight = false;
+
+  async function onCompanyChanged(companyId) {
+    const seq = ++__companyChangeSeq;
+    if (__companyChangeInFlight) return;
+    __companyChangeInFlight = true;
+
+    try {
+      resetInvoicesSelect();
+      resetContactsSelect();
+
+      await loadInvoicesByCompany(companyId);
+      loadUsersFromCompanyCache(companyId);
+
+      if (seq !== __companyChangeSeq) return;
+
+      initSelect2($("#invoice"), "Selecionar...", null);
+      initSelect2($("#primary_contact_id"), "Selecionar...", null);
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || "Falha ao carregar dados da empresa.");
+    } finally {
+      __companyChangeInFlight = false;
+    }
+  }
+
+  function resetInvoicesSelect() {
+    const $ddl = $("#invoice");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+    setSelectDisabled("invoice", !String($("#company_id").val() || "").trim());
+    const help = document.getElementById("invoiceHelp");
+    if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
+  }
+
+  function resetContactsSelect() {
+    const $ddl = $("#primary_contact_id");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+    setSelectDisabled("primary_contact_id", !String($("#company_id").val() || "").trim());
+    const help = document.getElementById("contactHelp");
+    if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
+  }
+
+  function loadUsersFromCompanyCache(companyId) {
+    const $ddl = $("#primary_contact_id");
+    $ddl.empty().append(`<option value="">Selecionar...</option>`);
+
+    if (!companyId) {
+      setSelectDisabled("primary_contact_id", true);
+      const help = document.getElementById("contactHelp");
+      if (help) help.style.display = "block";
+      return;
+    }
+
+    const company = state.companiesById.get(companyId);
+    const users = Array.isArray(company?.users) ? company.users : [];
+    const filtered = users.filter(u => String(u?.status || "").toUpperCase() === "ACTIVE");
+
+    filtered.forEach(u => {
+      const id = String(u?.id || "").trim();
+      const name = String(u?.full_name || "").trim();
+      const phone = String(u?.phonenumber || "").trim();
+      if (!id || !name) return;
+
+      const label = phone ? `${name} (${phone})` : name;
+      $ddl.append(`<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`);
+    });
+
+    setSelectDisabled("primary_contact_id", false);
+    const help = document.getElementById("contactHelp");
+    if (help) help.style.display = "none";
+  }
+
+  function bindAddTransportOnce() {
+    if (window.__bindAddTransportDone) return;
+    window.__bindAddTransportDone = true;
+
+    $(document).off("click.gecom", "#btnAddTransport");
+    $(document).on("click.gecom", "#btnAddTransport", function (e) {
+      e.preventDefault();
+      addTransportRow();
+    });
+  }
+
+  // =========================
   // Boot
   // =========================
   pageLoad();
@@ -800,29 +1217,18 @@ async function loadCompanies() {
     $("#subpageName").text("Processos");
     $("#subpageName").attr("href", "Processos");
     $("#path").show();
-bindCompanyChangeOnce();
-bindAddTransportOnce();
 
-    // Dropzone placeholder (Step 3) - no upload yet
+    bindCompanyChangeOnce();
+    bindAddTransportOnce();
+
+    // ✅ Dropzone
     Dropzone.autoDiscover = false;
-    try {
-      new Dropzone("#dropzoneForm", {
-        url: "/api/documents", // placeholder - we won't use now
-        autoProcessQueue: false,
-        clickable: true,
-        maxFilesize: 10,
-        dictDefaultMessage: "<strong>Arraste arquivos aqui ou clique para enviar.</strong></br>(A implementação do upload será feita depois.)"
-      });
-    } catch (e) {
-      // ignore if Dropzone not loaded
-      console.warn("Dropzone not initialized.", e);
-    }
+    initProcessDocumentsDropzone();
 
-    // ✅ Always init wizard, even if some endpoints fail
     const bootWarnings = [];
 
     try {
-      await loadCompanies(); // Required
+      await loadCompanies();
     } catch (e) {
       console.error(e);
       alert(e?.message || "Falha ao carregar empresas. Não é possível continuar.");
@@ -833,27 +1239,17 @@ bindAddTransportOnce();
     try { await loadTransportTypes(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os tipos de transporte."); }
     try { await loadTransportStatuses(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os status de transporte."); }
 
-    // Build selects (even if some lists are empty)
-
-    const $invoice = $("#invoice");
-    $invoice.empty().append(`<option value="">Selecionar...</option>`);
-    
-
-    
-
-    const $contact = $("#primary_contact_id");
-    $contact.empty().append(`<option value="">Selecionar...</option>`);
-    
+    $("#invoice").empty().append(`<option value="">Selecionar...</option>`);
+    $("#primary_contact_id").empty().append(`<option value="">Selecionar...</option>`);
 
     initDatePickers(document);
+    initCountriesTypeahead(document);
 
-    // invoice/contact disabled until company chosen
     setSelectDisabled("invoice", true);
     setSelectDisabled("primary_contact_id", true);
     document.getElementById("invoiceHelp").style.display = "block";
     document.getElementById("contactHelp").style.display = "block";
 
-    // Show boot warnings (but do not block wizard)
     if (bootWarnings.length) {
       const warn = document.getElementById("transportWarning");
       if (warn) {
@@ -862,7 +1258,6 @@ bindAddTransportOnce();
       }
     }
 
-    // ✅ Initialize wizard no matter what
     if (!$.fn.steps) {
       console.error("jquery.steps plugin not loaded.");
       alert("Erro: plugin do assistente (steps) não foi carregado. Verifique os scripts da página.");
@@ -871,112 +1266,6 @@ bindAddTransportOnce();
 
     installWizard();
   }
-
-function bindCompanyChangeOnce() {
-  if (window.__bindCompanyChangeDone) return;
-  window.__bindCompanyChangeDone = true;
-
-  // IMPORTANT: remove any previous handlers if the script was reloaded somehow
-  $(document).off("change.gecom", "#company_id");
-
-  $(document).on("change.gecom", "#company_id", function () {
-    const companyId = String($(this).val() || "").trim();
-    console.log("[company_id change]", companyId);
-    onCompanyChanged(companyId);
-  });
-}
-let __companyChangeSeq = 0;
-let __companyChangeInFlight = false;
-
-async function onCompanyChanged(companyId) {
-  const seq = ++__companyChangeSeq;
-
-  // Optional: block parallel loads; prevents duplicate requests when Select2 fires extra events
-  if (__companyChangeInFlight) return;
-  __companyChangeInFlight = true;
-
-  try {
-    // Reset selects (prevents duplicated options even if handler fires twice)
-    resetInvoicesSelect();
-    resetContactsSelect();
-
-    // Load invoices from API
-    await loadInvoicesByCompany(companyId);
-
-    // Load users from cache (see Fix 2 below) OR from API if you keep it
-    loadUsersFromCompanyCache(companyId);
-
-    // If a newer change happened while we were loading, don't re-render old state
-    if (seq !== __companyChangeSeq) return;
-
-    // Refresh Select2 UI
-    initSelect2($("#invoice"), "Selecionar...", null);
-    initSelect2($("#primary_contact_id"), "Selecionar...", null);
-  } catch (e) {
-    console.error(e);
-    alert(e?.message || "Falha ao carregar dados da empresa.");
-  } finally {
-    __companyChangeInFlight = false;
-  }
-}
-
-function resetInvoicesSelect() {
-  const $ddl = $("#invoice");
-  $ddl.empty().append(`<option value="">Selecionar...</option>`);
-  setSelectDisabled("invoice", !String($("#company_id").val() || "").trim());
-  const help = document.getElementById("invoiceHelp");
-  if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
-}
-
-function resetContactsSelect() {
-  const $ddl = $("#primary_contact_id");
-  $ddl.empty().append(`<option value="">Selecionar...</option>`);
-  setSelectDisabled("primary_contact_id", !String($("#company_id").val() || "").trim());
-  const help = document.getElementById("contactHelp");
-  if (help) help.style.display = String($("#company_id").val() || "").trim() ? "none" : "block";
-}
-function loadUsersFromCompanyCache(companyId) {
-  const $ddl = $("#primary_contact_id");
-  $ddl.empty().append(`<option value="">Selecionar...</option>`);
-
-  if (!companyId) {
-    setSelectDisabled("primary_contact_id", true);
-    const help = document.getElementById("contactHelp");
-    if (help) help.style.display = "block";
-    return;
-  }
-
-  const company = state.companiesById.get(companyId);
-  const users = Array.isArray(company?.users) ? company.users : [];
-
-  // You can filter ACTIVE only if you want:
-  const filtered = users.filter(u => String(u?.status || "").toUpperCase() === "ACTIVE");
-
-  filtered.forEach(u => {
-    const id = String(u?.id || "").trim();
-    const name = String(u?.full_name || "").trim();
-    const phone = String(u?.phonenumber || "").trim();
-    if (!id || !name) return;
-
-    const label = phone ? `${name} (${phone})` : name;
-    $ddl.append(`<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`);
-  });
-
-  setSelectDisabled("primary_contact_id", false);
-  const help = document.getElementById("contactHelp");
-  if (help) help.style.display = "none";
-}
-function bindAddTransportOnce() {
-  if (window.__bindAddTransportDone) return;
-  window.__bindAddTransportDone = true;
-
-  $(document).off("click.gecom", "#btnAddTransport");
-  $(document).on("click.gecom", "#btnAddTransport", function (e) {
-    e.preventDefault();
-    addTransportRow(); // works because it's inside the same IIFE scope
-  });
-}
-
 })();
 </script>
 <% %>

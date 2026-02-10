@@ -1,7 +1,7 @@
 <div class="row">
   <!-- LEFT -->
   <div class="col-lg-3">
-    <div class="ibox">
+    <div class="ibox" style="margin-top: 15px;">
       <div class="ibox-content">
         <div class="file-manager">
           <div class="row" style="margin:0;">
@@ -14,7 +14,7 @@
               </span>
             </div>
 
-            <ul id="leftFolders" class="folder-list" style="padding:0;margin-top:10px;">
+            <ul id="leftFolders" class="folder-list" style="width: 100%;padding:0;margin-top:10px;">
               <li class="text-muted">Carregando...</li>
             </ul>
           </div>
@@ -92,7 +92,27 @@
     box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.12);
     border-radius: 4px;
   }
+  .related-badge {
+    display: inline-block;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    padding: 2px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    vertical-align: middle;
+  }
 
+  /* inspinia "primary" */
+  .related-badge.label-primary {
+    margin-top: 5px;
+    background: none;
+    color: #808080;
+  }
+
+  .related-badge i {
+    margin-right: 5px;
+  }
   /* NEW: selection check badge (top-left) */
   .file-box .select-badge {
     position: absolute;
@@ -127,6 +147,8 @@
 </style>
 
 <% contentFor('scripts') %>
+<script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+
 <script>
   (function () {
     // ---------------------------
@@ -209,7 +231,7 @@
 
         const keepOpen = (typeof opts?.onOk === "function") ? await opts.onOk() : false;
         if (!keepOpen) close();
-      }, true); // capture = true to beat other handlers
+      }, true);
 
       if (btnCancel) {
         btnCancel.addEventListener("click", function (e) {
@@ -233,6 +255,13 @@
 
       overlay.style.display = "block";
       modal.style.display = "block";
+
+      // Optional hook
+      if (typeof opts?.onOpen === "function") {
+        setTimeout(() => {
+          try { opts.onOpen(); } catch { /* ignore */ }
+        }, 0);
+      }
     }
 
     // ---------------------------
@@ -265,10 +294,9 @@
     }
 
     function isFolder(item) { return String(item?.item_type || "").toUpperCase() === "FOLDER"; }
-    function isLink(item)   { return String(item?.item_type || "").toUpperCase() === "LINK"; }
-    function isFile(item)   { return String(item?.item_type || "").toUpperCase() === "FILE"; }
+    function isLink(item) { return String(item?.item_type || "").toUpperCase() === "LINK"; }
+    function isFile(item) { return String(item?.item_type || "").toUpperCase() === "FILE"; }
 
-    // NEW: identify drive link (either by storage_provider or item_type if you decide to add later)
     function isDriveLink(item) {
       const sp = String(item?.storage_provider || "").toUpperCase();
       const it = String(item?.item_type || "").toUpperCase();
@@ -301,13 +329,20 @@
       return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
     }
 
+    function normalizeText(value) {
+      const s = String(value ?? "").toLowerCase().trim();
+      try {
+        return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      } catch {
+        return s;
+      }
+    }
+
     function getUserCompanyId() {
       const id = window.__auth?.company_id || window.__auth?.companyId || null;
       return id ? String(id) : null;
     }
 
-    // Ainda sem multitenant: accountId pode não existir.
-    // Para criar/upload, tentamos vários fallbacks, e por último company_id.
     function getAccountIdForCreate() {
       const id =
         window.__auth?.accountId ||
@@ -321,6 +356,10 @@
 
       const companyId = getUserCompanyId();
       return companyId ? String(companyId) : null;
+    }
+
+    function isAdminRoot() {
+      return !!window.__auth?.isAdmin && state.currentParentId === null;
     }
 
     function updateTopActions() {
@@ -358,7 +397,6 @@
       return qs.toString();
     }
 
-    // confirm compatível com override que retorna Promise
     async function confirmAsync(message, options) {
       try {
         const result = window.confirm(message, options);
@@ -403,6 +441,150 @@
     }
 
     // ---------------------------
+    // Companies cache + typeahead
+    // ---------------------------
+    let companiesCache = null; // [{id,name,_norm}]
+    let companiesLoading = false;
+
+    async function loadCompaniesOnce() {
+      if (companiesCache && Array.isArray(companiesCache) && companiesCache.length > 0) return companiesCache;
+      if (companiesLoading) {
+        // cheap wait loop
+        for (let i = 0; i < 20; i++) {
+          await new Promise(r => setTimeout(r, 150));
+          if (companiesCache) return companiesCache;
+        }
+      }
+
+      companiesLoading = true;
+      try {
+        // tenta padrões comuns do backend
+        const data = await apiGet("/api/companies");
+        const list =
+          Array.isArray(data) ? data :
+          (Array.isArray(data?.data) ? data.data :
+          (Array.isArray(data?.rows) ? data.rows :
+          (Array.isArray(data?.companies) ? data.companies : [])));
+
+        const mapped = (Array.isArray(list) ? list : [])
+          .map((c) => ({
+            id: String(c.id ?? c.company_id ?? c.companyId ?? "").trim(),
+            name: String(c.company_name ?? c.companyName ?? c.name ?? "").trim(),
+          }))
+          .filter(x => x.id && x.name)
+          .map((x) => ({ ...x, _norm: normalizeText(x.name) }));
+
+        companiesCache = mapped;
+        return companiesCache;
+      } finally {
+        companiesLoading = false;
+      }
+    }
+
+    function destroyTypeaheadSafe($input) {
+      try { $input.typeahead("destroy"); } catch { /* ignore */ }
+    }
+
+    async function bindCompanyTypeahead({ $nameInput, $idInput, $errorEl }) {
+      const items = await loadCompaniesOnce();
+
+      destroyTypeaheadSafe($nameInput);
+      $nameInput.off(".cmpTa");
+
+      $nameInput.typeahead({
+        source: items,
+        autoSelect: true,
+        minLength: 0,
+        displayText: function (item) { return item.name; },
+        matcher: function (item) {
+          const q = normalizeText(this.query);
+          if (!q) return true;
+          return item._norm.includes(q);
+        },
+        afterSelect: function (item) {
+          $idInput.val(item.id);
+          if ($errorEl) $errorEl.hide().text("");
+
+          setTimeout(() => {
+            try { $nameInput.typeahead("hide"); } catch { /* ignore */ }
+            $nameInput.blur();
+          }, 0);
+        }
+      });
+
+      $nameInput.on("input.cmpTa", function () {
+        $idInput.val("");
+      });
+
+      $nameInput.on("focus.cmpTa", function () {
+        const hasText = String($(this).val() || "").trim().length > 0;
+        if (!hasText) $(this).typeahead("lookup");
+      });
+    }
+
+    function readRelatedFromModal() {
+      // admin/root => must pick company in modal
+      const relatedId = String($("#sm_related_company_id").val() || "").trim() || null;
+      const relatedName = String($("#sm_related_company_name").val() || "").trim();
+
+      return {
+        relatedTable: relatedId ? "company" : null,
+        relatedId,
+        relatedName
+      };
+    }
+
+    function requireRelatedCompanyIfAdminRoot(errorSelector) {
+      if (!isAdminRoot()) return { ok: true, related: null };
+
+      const r = readRelatedFromModal();
+      if (!r.relatedId) {
+        if (errorSelector) $(errorSelector).show().text("Selecione um cliente relacionado (digitar não basta).");
+        return { ok: false, related: null };
+      }
+
+      return { ok: true, related: { related_table: "company", related_id: r.relatedId } };
+    }
+
+    function renderRelatedCompanyFieldHtml() {
+      return `
+        <div id="sm_relatedWrap" class="form-group" style="display:none;">
+          <label>Cliente relacionado</label>
+          <input
+            id="sm_related_company_name"
+            type="text"
+            class="form-control"
+            placeholder="Pesquisar cliente..."
+            autocomplete="off"
+          />
+          <input id="sm_related_company_id" type="hidden" />
+          <div class="small text-muted" style="margin-top:6px;">Digite para pesquisar e selecione na lista.</div>
+        </div>
+      `;
+    }
+
+    async function ensureRelatedFieldWired(errorSelector) {
+      if (!isAdminRoot()) {
+        $("#sm_relatedWrap").hide();
+        $("#sm_related_company_name").val("");
+        $("#sm_related_company_id").val("");
+        return;
+      }
+
+      $("#sm_relatedWrap").show();
+
+      const $name = $("#sm_related_company_name");
+      const $id = $("#sm_related_company_id");
+      const $err = errorSelector ? $(errorSelector) : null;
+
+      try {
+        await bindCompanyTypeahead({ $nameInput: $name, $idInput: $id, $errorEl: $err });
+      } catch (e) {
+        if ($err) $err.show().text(e?.message || "Erro ao carregar lista de clientes.");
+      }
+    }
+
+    // ---------------------------
     // Selection + rendering
     // ---------------------------
     function clearSelection() {
@@ -443,41 +625,65 @@
         clearSelection();
         return;
       }
+list.forEach(function (item) {
+  const id = item.id;
+  const name = escapeHtml(item.name || item.filename || "Sem nome");
+  const added = formatDate(item.created_at);
+  const iconHtml = iconFor(item);
 
-      list.forEach(function (item) {
-        const id = item.id;
-        const name = escapeHtml(item.name || item.filename || "Sem nome");
-        const added = formatDate(item.created_at);
-        const iconHtml = iconFor(item);
+  // ✅ NEW: show related badge ONLY in root
+  const isRoot = state.currentParentId === null;
 
-        $grid.append(`
-          <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
-            <!-- NEW: selection badge (click to toggle multi selection) -->
-            <div class="select-badge" title="Selecionar">
-              <i class="fa fa-check"></i>
-            </div>
+  const relatedTable = String(item?.related_table || "").trim().toLowerCase();
+  const relatedName = String(item?.related_name || "").trim();
 
-            <div class="file">
-              <a href="javascript:void(0)" class="doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
-                <span class="corner"></span>
-                <div class="icon">${iconHtml}</div>
-                <div class="file-name">
-                  ${name}
-                  <br />
-                  <small>Adicionado: ${escapeHtml(added || "-")}</small>
-                </div>
-              </a>
-            </div>
+  function relatedIcon(table) {
+    if (table === "company") return "fa-building";
+    if (table === "process") return "fa-briefcase";
+    return "fa-link";
+  }
+
+  function relatedLabelPrefix(table) {
+    if (table === "company") return "Cliente";
+    if (table === "process") return "Processo";
+    return "Relacionado";
+  }
+
+  const relatedHtml =
+    isRoot && relatedName
+      ? `<span class="related-badge label label-primary" style='width: 95%;
+    overflow: hidden;' title="${escapeHtml(relatedLabelPrefix(relatedTable))}">
+           <i class="fa ${relatedIcon(relatedTable)}"></i>${escapeHtml(relatedName)}
+         </span>`
+      : "";
+
+  $grid.append(`
+    <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
+      <div class="select-badge" title="Selecionar">
+        <i class="fa fa-check"></i>
+      </div>
+
+      <div class="file">
+        <a href="javascript:void(0)" class="doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
+          <span class="corner"></span>
+          <div class="icon">${iconHtml}</div>
+          <div class="file-name" style="    color: #505050;">
+            ${name}
+            <br />
+            ${relatedHtml}
+            <small>Adicionado: ${escapeHtml(added || "-")}</small>
           </div>
-        `);
-      });
+        </a>
+      </div>
+    </div>
+  `);
+});
 
-      // click on empty area clears selection
+
       $("#itemsGrid").off("click.bg").on("click.bg", function (e) {
         if ($(e.target).closest(".file-box").length === 0) clearSelection();
       });
 
-      // NEW: badge click toggles selection (no Ctrl needed)
       $("#itemsGrid .select-badge").off("click.sel").on("click.sel", function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -486,7 +692,6 @@
         toggleSelected(id);
       });
 
-      // single click select, double click open
       $(".doc-hit").off("click").on("click", async function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -499,7 +704,6 @@
         const item = state.lastLoadedItems.find(x => x.id === id);
         if (!item) return;
 
-        // Keep Ctrl behavior too, but now: if user already has selection, clicking other items adds to selection
         const multi = !!(e.ctrlKey || e.metaKey) || state.selected.size > 0;
 
         if (isDouble) {
@@ -525,7 +729,6 @@
       }
 
       if (isLink(item)) {
-        // NEW: Drive link uses object_key
         const url = isDriveLink(item)
           ? (item.object_key || item.external_key || "")
           : (item.external_key || item.object_key || "");
@@ -534,7 +737,6 @@
         return;
       }
 
-      // FILE
       try {
         showLoading(true);
         const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
@@ -612,7 +814,7 @@
         const data = await apiGet("/api/documents?" + query);
 
         renderGrid(data);
-        clearSelection(); // reset selection on navigation/load
+        clearSelection();
         await loadLeftFolders();
       } catch (e) {
         $("#itemsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || "Erro ao carregar") + '</div>');
@@ -632,7 +834,7 @@
       return n.substring(idx + 1).toLowerCase();
     }
 
-    async function doUpload(file, accountId, displayNameRaw, progressCb) {
+    async function doUpload(file, accountId, displayNameRaw, progressCb, relatedOverride) {
       const fileName = file.name;
       const displayName = displayNameRaw || fileName;
       const mimeType = file.type || "application/octet-stream";
@@ -650,7 +852,11 @@
         mime_type: mimeType
       };
 
-      if (!window.__auth?.isAdmin) {
+      // ✅ new: admin root can override related company
+      if (relatedOverride?.related_table && relatedOverride?.related_id) {
+        createPayload.related_table = relatedOverride.related_table;
+        createPayload.related_id = relatedOverride.related_id;
+      } else if (!window.__auth?.isAdmin) {
         createPayload.related_table = "company";
         createPayload.related_id = getUserCompanyId();
       }
@@ -706,12 +912,18 @@
         okText: "Criar",
         cancelText: "Cancelar",
         bodyHtml: `
+          ${renderRelatedCompanyFieldHtml()}
+
           <div class="form-group">
             <label>Nome</label>
             <input id="sm_folderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
             <div id="sm_folderError" class="text-danger" style="margin-top:8px; display:none;"></div>
           </div>
         `,
+        onOpen: async function () {
+          await ensureRelatedFieldWired("#sm_folderError");
+          setTimeout(function () { $("#sm_folderName").focus(); }, 120);
+        },
         onOk: async function () {
           const name = ($("#sm_folderName").val() || "").trim();
           $("#sm_folderError").hide().text("");
@@ -727,6 +939,10 @@
             return true;
           }
 
+          // ✅ admin root must select related company
+          const relCheck = requireRelatedCompanyIfAdminRoot("#sm_folderError");
+          if (!relCheck.ok) return true;
+
           try {
             showLoading(true);
 
@@ -739,7 +955,10 @@
               storage_provider: "NONE"
             };
 
-            if (!window.__auth?.isAdmin) {
+            if (relCheck.related) {
+              payload.related_table = relCheck.related.related_table;
+              payload.related_id = relCheck.related.related_id;
+            } else if (!window.__auth?.isAdmin) {
               payload.related_table = "company";
               payload.related_id = getUserCompanyId();
             }
@@ -755,17 +974,16 @@
           }
         }
       });
-
-      setTimeout(function () { $("#sm_folderName").focus(); }, 150);
     }
 
-    // NEW: Drive link -> create record only (object_key)
     function openNewLinkSideModal() {
       openSideModal({
         title: "Link do Drive",
         okText: "Salvar",
         cancelText: "Cancelar",
         bodyHtml: `
+          ${renderRelatedCompanyFieldHtml()}
+
           <div class="form-group">
             <label>Nome</label>
             <input id="sm_linkName" type="text" class="form-control" maxlength="255" placeholder="Ex: Pasta do Google Drive" />
@@ -777,6 +995,10 @@
           </div>
           <div id="sm_linkError" class="text-danger" style="display:none;"></div>
         `,
+        onOpen: async function () {
+          await ensureRelatedFieldWired("#sm_linkError");
+          setTimeout(function () { $("#sm_linkName").focus(); }, 120);
+        },
         onOk: async function () {
           const name = ($("#sm_linkName").val() || "").trim();
           const url = ($("#sm_linkUrl").val() || "").trim();
@@ -788,6 +1010,10 @@
           const accountId = getAccountIdForCreate();
           if (!accountId) { $("#sm_linkError").show().text("Não foi possível identificar o account_id para criar."); return true; }
 
+          // ✅ admin root must select related company
+          const relCheck = requireRelatedCompanyIfAdminRoot("#sm_linkError");
+          if (!relCheck.ok) return true;
+
           try {
             showLoading(true);
 
@@ -797,15 +1023,14 @@
               item_type: "LINK",
               name: name,
               filename: null,
-
-              // ✅ requested: save link in object_key
               object_key: url,
-
-              // mark as Drive link for UI behavior
               storage_provider: "DRIVE"
             };
 
-            if (!window.__auth?.isAdmin) {
+            if (relCheck.related) {
+              payload.related_table = relCheck.related.related_table;
+              payload.related_id = relCheck.related.related_id;
+            } else if (!window.__auth?.isAdmin) {
               payload.related_table = "company";
               payload.related_id = getUserCompanyId();
             }
@@ -821,8 +1046,6 @@
           }
         }
       });
-
-      setTimeout(function () { $("#sm_linkName").focus(); }, 150);
     }
 
     function openUploadSideModal() {
@@ -831,6 +1054,8 @@
         okText: "Enviar",
         cancelText: "Cancelar",
         bodyHtml: `
+          ${renderRelatedCompanyFieldHtml()}
+
           <div class="alert alert-info" style="margin-bottom:10px;">
             Selecione apenas um arquivo.
           </div>
@@ -856,6 +1081,24 @@
 
           <div id="sm_uploadError" class="text-danger" style="display:none;"></div>
         `,
+        onOpen: async function () {
+          await ensureRelatedFieldWired("#sm_uploadError");
+
+          // auto-fill name when file is picked
+          setTimeout(function () {
+            const $file = $("#sm_uploadFile");
+            const $name = $("#sm_uploadDisplayName");
+
+            $file.off("change.__autoname").on("change.__autoname", function () {
+              const f = this.files && this.files[0];
+              if (!f) return;
+              $name.val(f.name || "");
+              try { $name.focus(); } catch {}
+            });
+
+            try { document.getElementById("sm_uploadFile")?.focus(); } catch {}
+          }, 30);
+        },
         onOk: async function () {
           const input = document.getElementById("sm_uploadFile");
           const file = input && input.files && input.files[0];
@@ -867,6 +1110,10 @@
           const accountId = getAccountIdForCreate();
           if (!accountId) { $("#sm_uploadError").show().text("Não foi possível identificar o account_id para enviar."); return true; }
 
+          // ✅ admin root must select related company
+          const relCheck = requireRelatedCompanyIfAdminRoot("#sm_uploadError");
+          if (!relCheck.ok) return true;
+
           try {
             showLoading(true);
             $("#sm_uploadProgress").show();
@@ -874,7 +1121,7 @@
             await doUpload(file, accountId, displayNameRaw, function (pct, text) {
               $("#sm_uploadProgressBar").css("width", String(Math.max(0, Math.min(100, pct || 0))) + "%");
               $("#sm_uploadProgressText").text(text || "");
-            });
+            }, relCheck.related);
 
             await loadCurrentFolder();
             return false;
@@ -886,24 +1133,6 @@
           }
         }
       });
-
-      // NEW: auto-fill "Nome" when user picks file
-      setTimeout(function () {
-        const $file = $("#sm_uploadFile");
-        const $name = $("#sm_uploadDisplayName");
-
-        $file.off("change.__autoname").on("change.__autoname", function () {
-          const f = this.files && this.files[0];
-          if (!f) return;
-
-          // always set to filename (user can edit after)
-          $name.val(f.name || "");
-          try { $name.focus(); } catch {}
-        });
-
-        // focus file input first
-        try { document.getElementById("sm_uploadFile")?.focus(); } catch {}
-      }, 50);
     }
 
     // ---------------------------
@@ -960,6 +1189,49 @@
     }, 280);
 
     // ---------------------------
+    // Quick upload (admin root asks company)
+    // ---------------------------
+    function openQuickUploadCompanyPicker(file) {
+      openSideModal({
+        title: "Upload rápido - selecionar cliente",
+        okText: "Enviar",
+        cancelText: "Cancelar",
+        bodyHtml: `
+          ${renderRelatedCompanyFieldHtml()}
+          <div class="form-group">
+            <label>Arquivo</label>
+            <input class="form-control" value="${escapeHtml(file?.name || "")}" readonly />
+          </div>
+          <div id="sm_quickError" class="text-danger" style="display:none;"></div>
+        `,
+        onOpen: async function () {
+          await ensureRelatedFieldWired("#sm_quickError");
+        },
+        onOk: async function () {
+          $("#sm_quickError").hide().text("");
+
+          const accountId = getAccountIdForCreate();
+          if (!accountId) { $("#sm_quickError").show().text("Não foi possível identificar o account_id para enviar."); return true; }
+
+          const relCheck = requireRelatedCompanyIfAdminRoot("#sm_quickError");
+          if (!relCheck.ok) return true;
+
+          try {
+            showLoading(true);
+            await doUpload(file, accountId, "", null, relCheck.related);
+            await loadCurrentFolder();
+            return false;
+          } catch (e) {
+            $("#sm_quickError").show().text(e?.message || "Erro no upload.");
+            return true;
+          } finally {
+            showLoading(false);
+          }
+        }
+      });
+    }
+
+    // ---------------------------
     // Wire UI
     // ---------------------------
     $(document).ready(async function () {
@@ -983,7 +1255,6 @@
       $("#btnDeleteSelected").on("click", deleteSelected);
       $("#btnOpenSelected").on("click", openSelected);
 
-      // RIGHT search: trigger while typing (and keep Enter + button)
       $("#btnSearch").on("click", async function () {
         state.currentSearch = ($("#txtSearch").val() || "").trim();
         await loadCurrentFolder();
@@ -1000,7 +1271,6 @@
         }
       });
 
-      // LEFT search: trigger while typing (and keep Enter + button)
       $("#btnSearchLeft").on("click", loadLeftFolders);
 
       $("#txtSearchLeft").on("input keyup", function () {
@@ -1022,6 +1292,12 @@
         this.value = "";
         if (!file) return;
 
+        // ✅ admin root must pick company for quick upload too
+        if (isAdminRoot()) {
+          openQuickUploadCompanyPicker(file);
+          return;
+        }
+
         const accountId = getAccountIdForCreate();
         if (!accountId) {
           alert("Não foi possível identificar o account_id para enviar o arquivo.");
@@ -1030,7 +1306,7 @@
 
         try {
           showLoading(true);
-          await doUpload(file, accountId, "", null);
+          await doUpload(file, accountId, "", null, null);
           await loadCurrentFolder();
         } catch (e) {
           alert(e?.message || "Erro no upload.");
@@ -1039,9 +1315,9 @@
         }
       });
 
-      // Prevent dropdown page jump
       $(".dropdown-item").on("click", function (e) { e.preventDefault(); });
     });
   })();
 </script>
+
 

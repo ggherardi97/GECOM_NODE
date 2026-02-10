@@ -85,22 +85,23 @@
                 <th></th>
                 <th><input class="form-control input-sm" data-filter="invoice_number" placeholder="Nº do invoice" /></th>
                 <th><input class="form-control input-sm" data-filter="company" placeholder="Empresa" /></th>
-<th>
-  <select class="form-control input-sm" data-filter="status" id="statusFilter">
-    <option value="">Todos</option>
-    <option value="0" class="admin-only">Rascunho</option>
-    <option value="1">Ativo</option>
-    <option value="2">Expirado</option>
-    <option value="3">Faturado</option>
-    <option value="4">Pago</option>
-  </select>
-</th>
-
+                <th>
+                  <select class="form-control input-sm" data-filter="status" id="statusFilter">
+                    <option value="">Todos</option>
+                    <option value="0" class="admin-only">Rascunho</option>
+                    <option value="1">Ativo</option>
+                    <option value="2">Expirado</option>
+                    <option value="3">Faturado</option>
+                    <option value="4">Pago</option>
+                  </select>
+                </th>
 
                 <th><input class="form-control input-sm" data-filter="subtotal" placeholder="Subtotal" /></th>
+                <!-- ✅ NEW: desconto antes de impostos -->
+                <th><input class="form-control input-sm" data-filter="discount_amount" placeholder="Desconto" /></th>
                 <th><input class="form-control input-sm" data-filter="tax_total" placeholder="Impostos" /></th>
                 <th><input class="form-control input-sm" data-filter="total" placeholder="Total" /></th>
-                <th><input class="form-control input-sm" data-filter="issued_at" placeholder="Emitida" /></th>
+                <!-- ✅ REMOVED: issued_at (Emitida) -->
                 <th><input class="form-control input-sm" data-filter="due_at" placeholder="Vencimento" /></th>
               </tr>
 
@@ -112,9 +113,11 @@
                 <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="subtotal">Subtotal <span class="sort-indicator"></span></th>
+                <!-- ✅ NEW -->
+                <th class="sortable" data-sort="discount_amount">Desconto <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="tax_total">Impostos <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="total">Total <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="issued_at">Emitida <span class="sort-indicator"></span></th>
+                <!-- ✅ REMOVED -->
                 <th class="sortable" data-sort="due_at">Vencimento <span class="sort-indicator"></span></th>
               </tr>
             </thead>
@@ -128,12 +131,13 @@
 </div>
 
 <script>
-  
+
       $("#pageName").text("Invoices");
       $("#subSecoundPageName").text("");
       $("#subpageName").text("Meus Invoices");
       $("#subpageName").attr("href", "Invoices");
       $("#path").hide();
+
   // --------------------
   // Auth / Roles (from layout.ejs)
   // --------------------
@@ -158,15 +162,17 @@
     if (!body) return;
     if (!isAdmin) body.classList.add("not-admin");
   })();
-(function hideDraftOptionForNonAdmin() {
-  if (isAdmin) return;
-  const statusEl = document.getElementById("statusFilter");
-  if (!statusEl) return;
 
-  // Remove option value="0" for non-admin
-  const opt = statusEl.querySelector('option[value="0"]');
-  if (opt) opt.remove();
-})();
+  (function hideDraftOptionForNonAdmin() {
+    if (isAdmin) return;
+    const statusEl = document.getElementById("statusFilter");
+    if (!statusEl) return;
+
+    // Remove option value="0" for non-admin
+    const opt = statusEl.querySelector('option[value="0"]');
+    if (opt) opt.remove();
+  })();
+
   // --------------------
   // State
   // --------------------
@@ -180,20 +186,21 @@
     company: "",
     status: isAdmin ? "" : "1",
     subtotal: "",
+    discount_amount: "", // ✅ NEW
     tax_total: "",
     total: "",
-    issued_at: "",
     due_at: "",
   };
 
-(function initStatusFilterDefault() {
-  const statusEl = document.getElementById("statusFilter");
-  if (!statusEl) return;
+  (function initStatusFilterDefault() {
+    const statusEl = document.getElementById("statusFilter");
+    if (!statusEl) return;
 
-  // Admin: default = Todos (mostra rascunho também)
-  // Non-admin: default = Ativo (mas mesmo assim nunca verá rascunho por regra)
-  statusEl.value = isAdmin ? "" : "1";
-})();
+    // Admin: default = Todos (mostra rascunho também)
+    // Non-admin: default = Ativo (mas mesmo assim nunca verá rascunho por regra)
+    statusEl.value = isAdmin ? "" : "1";
+  })();
+
   // --------------------
   // Utils
   // --------------------
@@ -426,9 +433,10 @@
       company: companyName,
       status: Number(inv?.status ?? 0),
       subtotal: inv?.subtotal ?? 0,
+      discount_amount: inv?.discount_amount ?? inv?.discountAmount ?? 0, // ✅ NEW
       tax_total: inv?.tax_total ?? inv?.taxTotal ?? 0,
       total: inv?.total ?? 0,
-      issued_at: inv?.issued_at ?? inv?.issuedAt ?? null,
+      // issued_at removido da UI (mas pode continuar existindo no payload sem problema)
       due_at: inv?.due_at ?? inv?.dueAt ?? null,
     };
   }
@@ -452,14 +460,14 @@
         contains(x.invoice_number, f.invoice_number) &&
         contains(x.company, f.company) &&
         (
-  !String(f.status || "").trim()
-    ? true
-    : Number(x.status) === Number(f.status)
-) &&
+          !String(f.status || "").trim()
+            ? true
+            : Number(x.status) === Number(f.status)
+        ) &&
         contains(formatMoney(x.subtotal, inv), f.subtotal) &&
+        contains(formatMoney(x.discount_amount, inv), f.discount_amount) &&  // ✅ NEW
         contains(formatMoney(x.tax_total, inv), f.tax_total) &&
         contains(formatMoney(x.total, inv), f.total) &&
-        contains(formatDate(x.issued_at), f.issued_at) &&
         contains(formatDate(x.due_at), f.due_at)
       );
     });
@@ -497,10 +505,10 @@
 
       if (key === "company") { av = a.company; bv = b.company; }
       else if (key === "status") { av = a.status; bv = b.status; }
-      else if (key === "subtotal" || key === "tax_total" || key === "total") {
+      else if (key === "subtotal" || key === "discount_amount" || key === "tax_total" || key === "total") { // ✅ NEW
         av = toNumber(a[key]); bv = toNumber(b[key]);
       }
-      else if (key === "issued_at" || key === "due_at") {
+      else if (key === "due_at") {
         av = a[key] ? new Date(a[key]) : null;
         bv = b[key] ? new Date(b[key]) : null;
       }
@@ -569,9 +577,9 @@
         <td>${escapeHtml(row.company || "")}</td>
         <td>${escapeHtml(statusLabel(row.status))}</td>
         <td>${escapeHtml(formatMoney(row.subtotal, inv))}</td>
+        <td>${escapeHtml(formatMoney(row.discount_amount, inv))}</td> <!-- ✅ NEW -->
         <td>${escapeHtml(formatMoney(row.tax_total, inv))}</td>
         <td><strong>${escapeHtml(formatMoney(row.total, inv))}</strong></td>
-        <td>${escapeHtml(formatDate(row.issued_at))}</td>
         <td>${escapeHtml(formatDate(row.due_at))}</td>
       `;
 
@@ -621,18 +629,17 @@
     });
   }
 
-document.querySelectorAll("thead [data-filter]").forEach((el) => {
-  const tag = String(el.tagName || "").toUpperCase();
-  const evt = tag === "SELECT" ? "change" : "input";
+  document.querySelectorAll("thead [data-filter]").forEach((el) => {
+    const tag = String(el.tagName || "").toUpperCase();
+    const evt = tag === "SELECT" ? "change" : "input";
 
-  el.addEventListener(evt, function () {
-    const key = String(this.getAttribute("data-filter") || "");
-    if (!key) return;
-    filterState[key] = String(this.value || "");
-    applyFilters();
+    el.addEventListener(evt, function () {
+      const key = String(this.getAttribute("data-filter") || "");
+      if (!key) return;
+      filterState[key] = String(this.value || "");
+      applyFilters();
+    });
   });
-});
-
 
   const btnClear = document.getElementById("btnClearSelection");
   if (btnClear && isAdmin) {
@@ -727,10 +734,12 @@ document.querySelectorAll("thead [data-filter]").forEach((el) => {
       : (data?.data ?? data?.rows ?? data?.invoices ?? []);
 
     invoices = rows.map(normalizeInvoice);
-// ✅ Non-admin: remove rascunhos (status 0)
-if (!isAdmin) {
-  invoices = invoices.filter((x) => Number(x.status) !== 0);
-}
+
+    // ✅ Non-admin: remove rascunhos (status 0)
+    if (!isAdmin) {
+      invoices = invoices.filter((x) => Number(x.status) !== 0);
+    }
+
     filteredInvoices = [...invoices];
 
     if (keepFilters) applyFilters();

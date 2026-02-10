@@ -1,3 +1,56 @@
+<style>
+  .img-fluid {
+    max-width: 80% !important;
+    height: auto;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  /* Contact card actions (icons like ClientDetail) */
+  .user-card-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 3;
+  }
+
+  .user-card-actions .action-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #e7eaec;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .12s ease-in-out;
+  }
+
+  .user-card-actions .action-icon:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+
+  .user-avatar-round {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e7eaec;
+    background: #fff;
+  }
+
+  .user-card {
+    position: relative;
+  }
+</style>
+
 <div class="row">
   <div class="col-lg-12">
     <div class="wrapper wrapper-content animated fadeInUp">
@@ -11,7 +64,7 @@
                 <a onclick="openEditMyProfile()" class="btn btn-white btn-xs float-right" style="margin-left:8px;">
                   Editar meus dados
                 </a>
-                <a onclick="openChangePassword()" class="btn btn-primary btn-xs float-right">
+                <a onclick="openChangePassword()" style="color:#fff;" class="btn btn-primary btn-xs float-right">
                   Trocar senha
                 </a>
 
@@ -67,7 +120,7 @@
                             <div class="row">
                               <div class="col-4">
                                 <div class="text-center">
-                                  <img id="myAvatar" alt="image" class="rounded-circle m-t-xs img-fluid" src="/Assets/inspinia/img/user.png" style="max-width:96px;">
+                                  <img id="myAvatar" alt="image" class="user-avatar-round m-t-xs" src="/Assets/inspinia/img/user.png">
                                   <div class="m-t-xs font-bold" id="myRoleBadge"></div>
                                 </div>
                               </div>
@@ -115,7 +168,7 @@
 
 <script>
   (function () {
-    // -------------------- Utils --------------------
+    // -------------------- Utils (English comments only) --------------------
     function escapeHtml(value) {
       if (value == null) return "";
       return String(value)
@@ -171,17 +224,68 @@
       return r === "ADMIN" || r === "MANAGER";
     }
 
-    function pickUserAvatar(user) {
-      // Aceita base64/dataURL no profile_picture
-      const pic = user?.profile_picture;
-      if (isNonEmptyString(pic)) return String(pic);
+    // Default avatar only. The actual picture is loaded via /api/users/:id/profile-picture (cached).
+    function pickUserAvatar() {
       return "/Assets/inspinia/img/user.png";
     }
 
+    function showApiError(err, fallbackMessage) {
+      const msg = err?.message || fallbackMessage || "Erro inesperado.";
+      console.error(err);
+      alert(msg);
+    }
+
+    // -------------------- Profile picture cache (localStorage) --------------------
+    const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
+    const PROFILE_CACHE_KEY = "gecom.profilePictureCache";
+    const PROFILE_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
+
+    function safeJsonParse(raw) {
+      try { return JSON.parse(raw); } catch { return null; }
+    }
+
+    function getCachedProfilePicture(userId) {
+      const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+      if (!raw) return null;
+
+      const cache = safeJsonParse(raw);
+      if (!cache) return null;
+
+      if (String(cache.userId || "") !== String(userId || "")) return null;
+
+      const savedAt = Number(cache.savedAt || 0);
+      if (!savedAt || (Date.now() - savedAt) > PROFILE_CACHE_TTL_MS) return null;
+
+      const value = String(cache.value || "");
+      return value ? value : null;
+    }
+
+    function setCachedProfilePicture(userId, dataUrl) {
+      try {
+        if (!dataUrl) return;
+        localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({
+          userId: String(userId),
+          value: String(dataUrl),
+          savedAt: Date.now()
+        }));
+      } catch (e) {
+        // If storage is full, just ignore cache
+        console.warn("Failed to cache profile picture:", e);
+      }
+    }
+
+    function clearCachedProfilePicture() {
+      try { localStorage.removeItem(PROFILE_CACHE_KEY); } catch {}
+    }
+
     // -------------------- API --------------------
+    async function safeJson(resp) {
+      return await resp.json().catch(() => ({}));
+    }
+
     async function fetchMe() {
       const resp = await fetch(`/api/auth/me`, { method: "GET", headers: { Accept: "application/json" } });
-      const data = await resp.json().catch(() => ({}));
+      const data = await safeJson(resp);
       if (!resp.ok) throw new Error(data?.message || "Falha ao carregar /auth/me");
       return data;
     }
@@ -191,7 +295,7 @@
         method: "GET",
         headers: { Accept: "application/json" }
       });
-      const data = await resp.json().catch(() => ({}));
+      const data = await safeJson(resp);
       if (!resp.ok) throw new Error(data?.message || "Falha ao carregar empresa.");
       return data;
     }
@@ -201,23 +305,44 @@
         method: "GET",
         headers: { Accept: "application/json" }
       });
-      const data = await resp.json().catch(() => ({}));
+      const data = await safeJson(resp);
       if (!resp.ok) throw new Error(data?.message || "Falha ao carregar usuários da empresa.");
 
-      // backend pode retornar array direto OU {data:[]}
       if (Array.isArray(data)) return data;
       return data?.data ?? data?.rows ?? data?.users ?? [];
     }
 
     async function patchUserById(userId, patchBody) {
-      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+      // PATCH (preferred) with PUT fallback (common backend mismatch)
+      const url = `/api/users/${encodeURIComponent(userId)}`;
+      const body = JSON.stringify(patchBody ?? {});
+
+      // Try PATCH
+      let resp = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(patchBody ?? {})
+        body
       });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar usuário.");
-      return data;
+
+      if (resp.ok) return await safeJson(resp);
+
+      const dataPatch = await safeJson(resp);
+      const statusPatch = resp.status;
+
+      // Fallback to PUT if method not allowed or route mismatch
+      if (statusPatch === 404 || statusPatch === 405) {
+        resp = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body
+        });
+
+        const dataPut = await safeJson(resp);
+        if (!resp.ok) throw new Error(dataPut?.message || dataPatch?.message || "Falha ao atualizar usuário.");
+        return dataPut;
+      }
+
+      throw new Error(dataPatch?.message || "Falha ao atualizar usuário.");
     }
 
     async function createUser(payload) {
@@ -226,7 +351,7 @@
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload ?? {})
       });
-      const data = await resp.json().catch(() => ({}));
+      const data = await safeJson(resp);
       if (!resp.ok) throw new Error(data?.message || "Falha ao criar usuário.");
       return data;
     }
@@ -236,9 +361,58 @@
         method: "DELETE",
         headers: { Accept: "application/json" }
       });
-      const data = await resp.json().catch(() => ({}));
+      const data = await safeJson(resp);
       if (!resp.ok) throw new Error(data?.message || "Falha ao deletar usuário.");
       return data;
+    }
+
+    // Dedicated endpoint for picture
+async function fetchProfilePicture(userId) {
+  const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
+    method: "GET",
+    headers: { Accept: "application/json" }
+  });
+
+  const data = await safeJson(resp);
+  if (!resp.ok) return null;
+
+  const base64 = data?.profile_picture;
+  if (typeof base64 !== "string" || base64.trim().length === 0) return null;
+
+  // Backend returns raw base64 (no prefix). Convert to dataURL for <img>.
+  return `data:image/png;base64,${base64}`;
+}
+async function saveMyProfilePicture(base64OrDataUrl) {
+  const resp = await fetch(`/api/users/me/profile-picture`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ base64: String(base64OrDataUrl ?? "") })
+  });
+
+  const data = await safeJson(resp);
+  if (!resp.ok) throw new Error(data?.message || "Falha ao salvar foto de perfil.");
+  return data;
+}
+
+
+    async function applyMyProfilePicture(userId) {
+      if (!userId) return;
+
+      // 1) Cache first
+      const cached = getCachedProfilePicture(userId);
+      if (cached) {
+        $("#myAvatar").attr("src", cached);
+        return;
+      }
+
+      // 2) API then cache
+      const pic = await fetchProfilePicture(userId);
+      if (pic) {
+        $("#myAvatar").attr("src", pic);
+        setCachedProfilePicture(userId, pic);
+      } else {
+        $("#myAvatar").attr("src", DEFAULT_AVATAR);
+      }
     }
 
     // -------------------- Password strength --------------------
@@ -257,7 +431,6 @@
       else if (points >= 4) label = "Boa";
       else if (points >= 3) label = "Média";
 
-      // 0..100 (simples e estável)
       const percent = Math.min(100, Math.max(0, Math.round((points / 5) * 100)));
       return { points, percent, label, lengthOk, hasUpper, hasLower, hasDigit, hasSymbol };
     }
@@ -296,7 +469,8 @@
       const companyName = company?.company_name ?? company?.name ?? "-";
       $("#myCompanyName").text(companyName);
 
-      $("#myAvatar").attr("src", pickUserAvatar(me));
+      // Do NOT use me.profile_picture here (performance). Default now; picture loaded async + cached.
+      $("#myAvatar").attr("src", DEFAULT_AVATAR);
     }
 
     function renderCompanyUsers(users, me) {
@@ -310,36 +484,53 @@
         return;
       }
 
+      window.__companyUsers = users;
+
+      const canManage = canManageCompanyUsers(me?.role);
       const cards = users.map((u, index) => {
         const role = u?.role ?? "USER";
         const status = u?.status ?? "ACTIVE";
         const isMe = String(u?.id ?? "") === String(me?.id ?? "");
         const avatar = pickUserAvatar(u);
 
+        // Show pencil/trash like ClientDetail (only if manager/admin)
+        const actionsHtml = canManage ? `
+          <div class="user-card-actions">
+            <span class="action-icon" title="Editar" onclick="onEditCompanyUser(${index}); event.stopPropagation();">
+              <i class="fa fa-pencil"></i>
+            </span>
+            <span class="action-icon" title="${isMe ? "Você não pode deletar seu próprio usuário" : "Deletar"}"
+                  style="${isMe ? "opacity:.35; cursor:not-allowed;" : ""}"
+                  onclick="${isMe ? "event.stopPropagation();" : `onDeleteCompanyUser(${index}); event.stopPropagation();`}">
+              <i class="fa fa-trash text-danger"></i>
+            </span>
+          </div>
+        ` : "";
+
         return `
           <div class="col-lg-4">
-            <div class="contact-box" style="cursor:pointer;" onclick="onCompanyUserClick(${index});">
-              <a class="row">
+            <div class="contact-box user-card" style="cursor:default;">
+              ${actionsHtml}
+              <div class="row">
                 <div class="col-4">
                   <div class="text-center">
-                    <img alt="image" class="rounded-circle m-t-xs img-fluid" src="${escapeHtml(avatar)}">
+                    <img alt="image" class="user-avatar-round m-t-xs" src="${escapeHtml(avatar)}">
                     <div class="m-t-xs font-bold">${escapeHtml(getRoleDisplay(role))}${isMe ? " (Você)" : ""}</div>
                   </div>
                 </div>
                 <div class="col-8">
-                  <h3><strong>${escapeHtml(u?.full_name ?? u?.fullName ?? "-")}</strong></h3>
+                  <h3 style="margin-top:6px;"><strong>${escapeHtml(u?.full_name ?? u?.fullName ?? "-")}</strong></h3>
                   ${u?.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(u.email)}</p>` : ""}
                   ${u?.phonenumber ? `<p><i class="fa fa-phone"></i> ${escapeHtml(u.phonenumber)}</p>` : ""}
                   <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(status))}</p>
                 </div>
-              </a>
+              </div>
             </div>
           </div>
         `;
       }).join("");
 
       container.innerHTML = cards;
-      window.__companyUsers = users;
     }
 
     // -------------------- Side modals --------------------
@@ -348,10 +539,13 @@
         const me = window.__me;
         if (!me?.id) return;
 
+        const cachedPic = getCachedProfilePicture(me.id);
+
         const original = {
           fullName: normalizeString(me?.full_name ?? me?.fullName ?? ""),
           phone: normalizePhone(me?.phonenumber ?? me?.phone ?? ""),
-          profilePicture: normalizeString(me?.profile_picture ?? "")
+          // Do NOT pull from me.profile_picture (it should not be in payload). Use cache if present.
+          profilePicture: normalizeString(cachedPic ?? "")
         };
 
         const html = `
@@ -368,10 +562,10 @@
           <div class="form-group">
             <label>Foto de perfil</label>
             <div style="display:flex; gap:12px; align-items:center;">
-              <img id="imgPreview" src="${escapeHtml(pickUserAvatar(me))}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e7eaec;" />
+              <img id="imgPreview" src="${escapeHtml(original.profilePicture || DEFAULT_AVATAR)}" style="width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid #e7eaec;" />
               <div style="flex:1;">
                 <input type="file" id="fileProfilePic" accept="image/*" class="form-control" />
-                <small class="text-muted">Máximo 5MB. Será salvo em <code>profile_picture</code> (base64/dataURL).</small>
+                <small class="text-muted">Máximo 5MB.</small>
               </div>
             </div>
           </div>
@@ -406,17 +600,37 @@
 
               if (!diff.hasChanges) return;
 
-              await patchUserById(me.id, diff.payload);
-              location.reload();
+             // 1) Update name/phone via users/:id
+const payloadWithoutPic = { ...diff.payload };
+delete payloadWithoutPic.profile_picture;
+
+if (Object.keys(payloadWithoutPic).length > 0) {
+  await patchUserById(me.id, payloadWithoutPic);
+}
+
+// 2) Update picture via dedicated endpoint
+if (Object.prototype.hasOwnProperty.call(diff.payload, "profile_picture")) {
+  const newPic = diff.payload.profile_picture;
+
+  await saveMyProfilePicture(newPic);
+
+  if (typeof newPic === "string" && newPic.trim().length > 0) {
+    setCachedProfilePicture(me.id, newPic);
+  } else {
+    clearCachedProfilePicture();
+  }
+}
+
+location.reload();
+
             } catch (err) {
-              console.error(err);
-              alert(err?.message || "Erro ao salvar seu perfil.");
+              showApiError(err, "Erro ao salvar seu perfil.");
             }
           },
           onCancel: function () {}
         });
 
-        // bind upload after modal render
+        // Bind upload after modal render
         setTimeout(() => {
           const input = document.getElementById("fileProfilePic");
           if (!input) return;
@@ -437,7 +651,6 @@
               const result = e.target && e.target.result ? String(e.target.result) : "";
               if (!result) return;
 
-              // salva dataURL em profile_picture (backend pode normalizar depois)
               $("#hidProfilePic").val(result);
               $("#imgPreview").attr("src", result);
             };
@@ -446,8 +659,7 @@
         }, 50);
 
       } catch (err) {
-        console.error(err);
-        alert(err?.message || "Erro ao abrir edição do perfil.");
+        showApiError(err, "Erro ao abrir edição do perfil.");
       }
     }
     window.openEditMyProfile = openEditMyProfile;
@@ -508,8 +720,7 @@
               await patchUserById(me.id, { password: p1 });
               alert("Senha atualizada com sucesso.");
             } catch (err) {
-              console.error(err);
-              alert(err?.message || "Erro ao trocar senha.");
+              showApiError(err, "Erro ao trocar senha.");
             }
           },
           onCancel: function () {}
@@ -534,8 +745,7 @@
         }, 50);
 
       } catch (err) {
-        console.error(err);
-        alert(err?.message || "Erro ao abrir troca de senha.");
+        showApiError(err, "Erro ao abrir troca de senha.");
       }
     }
     window.openChangePassword = openChangePassword;
@@ -630,21 +840,19 @@
 
               location.reload();
             } catch (err) {
-              console.error(err);
-              alert(err?.message || "Erro ao criar usuário.");
+              showApiError(err, "Erro ao criar usuário.");
             }
           },
           onCancel: function () {}
         });
 
       } catch (err) {
-        console.error(err);
-        alert(err?.message || "Erro ao abrir criação de usuário.");
+        showApiError(err, "Erro ao abrir criação de usuário.");
       }
     }
     window.openNewCompanyUser = openNewCompanyUser;
 
-    function onCompanyUserClick(index) {
+    async function onEditCompanyUser(index) {
       const me = window.__me;
       const users = window.__companyUsers ?? [];
       const u = users[index];
@@ -691,12 +899,9 @@
           </select>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <small class="text-muted">${String(u?.id) === String(me?.id) ? "Você não pode deletar seu próprio usuário." : ""}</small>
-          <button id="btnDeleteUser" type="button" class="btn btn-danger btn-sm" ${String(u?.id) === String(me?.id) ? "disabled" : ""}>
-            <i class="fa fa-trash"></i> Deletar usuário
-          </button>
-        </div>
+        <small class="text-muted">
+          Dica: para foto do usuário, use "Editar meus dados" logado nesse usuário (por enquanto).
+        </small>
       `;
 
       SideModal.open({
@@ -738,38 +943,39 @@
             await patchUserById(u.id, diff.payload);
             location.reload();
           } catch (err) {
-            console.error(err);
-            alert(err?.message || "Erro ao salvar usuário.");
+            showApiError(err, "Erro ao salvar usuário.");
           }
         },
         onCancel: function () {}
       });
-
-      setTimeout(() => {
-        const btn = document.getElementById("btnDeleteUser");
-        if (!btn) return;
-
-        btn.addEventListener("click", async function () {
-          try {
-            if (String(u?.id) === String(me?.id)) return;
-
-            const ok = confirm(`Tem certeza que deseja deletar o usuário "${u?.full_name ?? u?.email ?? u?.id}"?`);
-            if (!ok) return;
-
-            await deleteUserById(u.id);
-            location.reload();
-          } catch (err) {
-            console.error(err);
-            alert(err?.message || "Erro ao deletar usuário.");
-          }
-        });
-      }, 50);
     }
-    window.onCompanyUserClick = onCompanyUserClick;
+    window.onEditCompanyUser = onEditCompanyUser;
+
+    async function onDeleteCompanyUser(index) {
+      const me = window.__me;
+      const users = window.__companyUsers ?? [];
+      const u = users[index];
+      if (!u?.id) return;
+
+      if (String(u.id) === String(me?.id)) {
+        alert("Você não pode deletar seu próprio usuário.");
+        return;
+      }
+
+      const ok = confirm(`Tem certeza que deseja deletar o usuário "${u?.full_name ?? u?.email ?? u?.id}"?`);
+      if (!ok) return;
+
+      try {
+        await deleteUserById(u.id);
+        location.reload();
+      } catch (err) {
+        showApiError(err, "Erro ao deletar usuário.");
+      }
+    }
+    window.onDeleteCompanyUser = onDeleteCompanyUser;
 
     // -------------------- Init --------------------
     async function init() {
-      // breadcrumb (se seu layout usa esses ids)
       try {
         $("#pageName").text("Meu Perfil");
         $("#subSecoundPageName").text("Meu Perfil");
@@ -784,14 +990,16 @@
       const role = me?.role ?? "USER";
       const allowCompanyTab = canManageCompanyUsers(role);
 
-      // carrega empresa pra mostrar nome
       let company = null;
       const companyId = me?.company_id;
       if (isNonEmptyString(companyId)) {
-        try { company = await fetchCompanyById(companyId); } catch (e) { /* ignora */ }
+        try { company = await fetchCompanyById(companyId); } catch (e) {}
       }
 
       fillMeHeader(me, company);
+
+      // Apply profile picture asynchronously (cache-first)
+      applyMyProfilePicture(me?.id);
 
       if (allowCompanyTab && isNonEmptyString(companyId)) {
         document.getElementById("tabUsersLi").style.display = "";
@@ -800,7 +1008,6 @@
         const users = await fetchUsersByCompany(companyId);
         renderCompanyUsers(users, me);
       } else {
-        // esconde botão/aba
         document.getElementById("tabUsersLi").style.display = "none";
       }
     }
@@ -812,3 +1019,4 @@
     }
   })();
 </script>
+

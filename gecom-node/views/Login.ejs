@@ -121,6 +121,9 @@
         function changeView(id) {
             $("#loginForm, #acessNumberForm, #forgotPassword, #resetPassword").hide();
             $(id).show();
+      localStorage.removeItem("gecom.profilePictureCache");
+      // opcional: também zera o currentUser antigo
+      localStorage.removeItem("currentUser");
 
             // Pequena melhoria: focar no campo principal da tela
             if (id === "#loginForm") {

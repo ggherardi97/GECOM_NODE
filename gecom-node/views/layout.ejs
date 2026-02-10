@@ -162,8 +162,9 @@
           <li class="nav-header text-center">
             <div class="dropdown profile-element">
               <span>
-                <img alt="image" class="rounded-circle" style="width: 80px;"
-                  src="/Assets/inspinia/img/user.png">
+                <img id="currentUserAvatar" alt="image" class="rounded-circle" style="width: 75px;"
+  src="">
+
               </span>
               <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
@@ -175,7 +176,7 @@
                 <li><a onclick="LogOut()">Sair</a></li>
               </ul>
             </div>
-            <div class="logo-element">GC</div>
+            <div class="logo-element">G+</div>
           </li>
           <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
           <li><a class="menuDivider" style="padding-top:20px;">Services</a></li>
@@ -202,7 +203,7 @@
         </nav>
       </div>
 
-      <div class="row wrapper border-bottom white-bg page-heading">
+      <div id="masterHeader" class="row wrapper border-bottom white-bg page-heading">
         <div class="col-lg-10">
           <h2 id="pageName"></h2>
           <ol class="breadcrumb">
@@ -291,6 +292,8 @@
               }
             });
 
+    localStorage.removeItem("gecom.profilePictureCache");
+    localStorage.removeItem("currentUser");
             window.location.href = "/";
           }
           catch (err) {
@@ -452,7 +455,7 @@
             if (!url) return false;
 
             // auth endpoints
-            if (url.includes("/auth/refresh") || url.includes("/auth/logout")) return true;
+            if (url.includes("/auth/refresh") || url.includes("/profile-picture") || url.includes("/auth/logout")) return true;
 
             // static assets (avoid noisy spinner)
             const lower = url.toLowerCase();
@@ -572,6 +575,101 @@
           }
         })();
       </script>
+
+<script>
+  (function () {
+    // English comments only
+    const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
+    const CACHE_KEY = "gecom.profilePictureCache"; // single cache entry for current user
+    const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
+
+    function safeJsonParse(raw) {
+      try { return JSON.parse(raw); } catch { return null; }
+    }
+
+    function getCurrentUserFromStorage() {
+      const raw = localStorage.getItem("currentUser");
+      if (!raw) return null;
+      return safeJsonParse(raw);
+    }
+
+    function getCachedPicture(userId) {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+
+      const cache = safeJsonParse(raw);
+      if (!cache) return null;
+
+      if (String(cache.userId || "") !== String(userId || "")) return null;
+
+      const savedAt = Number(cache.savedAt || 0);
+      if (!savedAt || (Date.now() - savedAt) > CACHE_TTL_MS) return null;
+
+      const value = String(cache.value || "");
+      if (!value) return null;
+
+      return value;
+    }
+
+    function setCachedPicture(userId, dataUrl) {
+      try {
+        if (!dataUrl) return;
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          userId: String(userId),
+          value: String(dataUrl),
+          savedAt: Date.now()
+        }));
+      } catch (e) {
+        // If storage is full, just ignore cache
+        console.warn("Failed to cache profile picture:", e);
+      }
+    }
+
+    async function loadPictureFromApi(userId) {
+      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) return null;
+
+      const pic = data?.profile_picture;
+      return (typeof pic === "string" && pic.trim().length > 0) ? pic : null;
+    }
+
+    async function applyAvatar() {
+      const user = getCurrentUserFromStorage();
+      const userId = user?.id;
+      const img = document.getElementById("currentUserAvatar");
+      if (!img || !userId) return;
+
+      // 1) Try cache first
+      const cached = getCachedPicture(userId);
+      if (cached) {
+        img.src = cached;
+        return;
+      }
+
+      // 2) Fetch from API, then cache
+      const pic = await loadPictureFromApi(userId);
+      if (pic) {
+        img.src = pic;
+        setCachedPicture(userId, pic);
+      } else {
+        img.src = DEFAULT_AVATAR;
+      }
+    }
+
+    // Run after DOM ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", applyAvatar);
+    } else {
+      applyAvatar();
+    }
+  })();
+</script>
+
 
       <!-- Esse script altera o alert nativo do navegador para nosso modal -->
 <script>

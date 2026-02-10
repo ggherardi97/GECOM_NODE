@@ -25,6 +25,22 @@
   .projects-total-strong {
     font-family: monospace;
   }
+
+  /* Logo */
+  #company_logo {
+    width: 100%;
+    padding: 20px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    min-height: 120px;
+  }
+
+  .logo-muted {
+    font-size: 12px;
+    color: #888;
+  }
 </style>
 
 <div class="row">
@@ -46,93 +62,103 @@
           </div>
 
           <div class="row">
-            <div class="col-lg-6">
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Status:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1">
-                    <span class="label label-primary" id="statusLabel"></span>
-                  </dd>
-                </div>
-              </dl>
-
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Porte:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1" id="size">Médio</dd>
-                </div>
-              </dl>
-
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Setor:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1" id="sector"></dd>
-                </div>
-              </dl>
-
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Nome Fantasia:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1">
-                    <a href="#" class="text-navy" id="fantasyName"></a>
-                  </dd>
-                </div>
-              </dl>
-            </div>
-
-            <div class="col-lg-6" id="cluster_info">
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Telefone:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1" id="phone"></dd>
-                </div>
-              </dl>
-
-              <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right">
-                  <dt>Email:</dt>
-                </div>
-                <div class="col-sm-8 text-sm-left">
-                  <dd class="mb-1" id="email"></dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-lg-12">
-              <dl class="row mb-0">
-                <div class="col-sm-2 text-sm-right">
-                  <dt>Valor total de projetos:</dt>
-                </div>
-                <div class="col-sm-10 text-sm-left">
-                  <dd>
-                    <div class="progress m-b-1">
-                      <div
-                        id="projectsTotalBar"
-                        style="width: 0%;"
-                        class="progress-bar progress-bar-striped progress-bar-animated"
-                        title="Total de invoices"
-                      ></div>
+            <div class="col-lg-10">
+              <div class="row">
+                <div class="col-lg-6">
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Status:</dt>
                     </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1">
+                        <span class="label label-primary" id="statusLabel"></span>
+                      </dd>
+                    </div>
+                  </dl>
 
-                    <small id="projectsTotalText">
-                      Valor total de <strong class="projects-total-strong" id="projectsTotalValue">R$ 0,00</strong>.
-                      <span class="text-muted">(meta: <strong>R$ 1.000.000,00</strong>)</span>
-                    </small>
-                  </dd>
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Porte:</dt>
+                    </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1" id="size">Médio</dd>
+                    </div>
+                  </dl>
+
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Setor:</dt>
+                    </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1" id="sector"></dd>
+                    </div>
+                  </dl>
+
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Nome Fantasia:</dt>
+                    </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1">
+                        <a href="#" class="text-navy" id="fantasyName"></a>
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
-              </dl>
+
+                <div class="col-lg-6" id="cluster_info">
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Telefone:</dt>
+                    </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1" id="phone"></dd>
+                    </div>
+                  </dl>
+
+                  <dl class="row mb-0">
+                    <div class="col-sm-4 text-sm-right">
+                      <dt>Email:</dt>
+                    </div>
+                    <div class="col-sm-8 text-sm-left">
+                      <dd class="mb-1" id="email"></dd>
+                    </div>
+                  </dl>
+                </div>
+
+              </div>
+
+              <div class="row">
+                <div class="col-lg-12">
+                  <dl class="row mb-0">
+                    <div class="col-sm-2 text-sm-right">
+                      <dt>Valor total de projetos:</dt>
+                    </div>
+                    <div class="col-sm-10 text-sm-left">
+                      <dd>
+                        <div class="progress m-b-1">
+                          <div id="projectsTotalBar" style="width: 0%;"
+                            class="progress-bar progress-bar-striped progress-bar-animated" title="Total de invoices">
+                          </div>
+                        </div>
+
+                        <small id="projectsTotalText">
+                          Valor total de <strong class="projects-total-strong" id="projectsTotalValue">R$ 0,00</strong>.
+                          <span class="text-muted">(meta: <strong>R$ 1.000.000,00</strong>)</span>
+                        </small>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="col-lg-2">
+              <img id="company_logo" src="../Assets/inspinia/img/zender_logo.png" alt="Logo do cliente">
+              <div class="logo-muted" style="padding:0 20px 10px 20px;">
+                * Edite o logo em “Edite os detalhes do cliente”.
+              </div>
             </div>
           </div>
           <!-- #endregion -->
@@ -157,7 +183,8 @@
 
                           <div class="row" style="margin-bottom: 10px;">
                             <div class="col-lg-12 text-right">
-                              <button name="btn_act_new" type="button" class="btn btn-primary btn-sm" onclick="callNewContact()">
+                              <button name="btn_act_new" type="button" class="btn btn-primary btn-sm"
+                                onclick="callNewContact()">
                                 <i class="fa fa-plus"></i> Novo contato
                               </button>
                             </div>
@@ -172,60 +199,69 @@
                     </div>
 
                     <div class="tab-pane" id="tab-2">
-  <div class="wrapper wrapper-content animated fadeInRight">
-    <div class="row">
-      <div class="col-lg-12 animated fadeInRight">
+                      <div class="wrapper wrapper-content animated fadeInRight">
+                        <div class="row">
+                          <div class="col-lg-12 animated fadeInRight">
 
-        <!-- TOP BAR (mini MyDocuments - right only) -->
-        <div class="row" style="padding: 0 15px;">
-          <div class="col-lg-9" style="margin-left:-15px;">
-            <button type="button" class="btn btn-primary" id="cd_btnDocsBack" style="display:none;">
-              <i class="fa fa-arrow-left"></i> Voltar
-            </button>
+                            <!-- TOP BAR (mini MyDocuments - right only) -->
+                            <div class="row" style="padding: 0 15px;">
+                              <div class="col-lg-9" style="margin-left:-15px;">
+                                <button type="button" class="btn btn-primary" id="cd_btnDocsBack" style="display:none;">
+                                  <i class="fa fa-arrow-left"></i> Voltar
+                                </button>
 
-            <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
-              <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-                Adicionar
-              </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" id="cd_btnDocsNewFolder"><i class="fa fa-folder"></i> Nova Pasta</a></li>
-                <li><a class="dropdown-item" href="#" id="cd_btnDocsUpload"><i class="fa fa-upload"></i> Upload de Documento</a></li>
-                <li><a class="dropdown-item" href="#" id="cd_btnDocsNewLink"><i class="fa fa-link"></i> Link do Drive</a></li>
-              </ul>
-            </div>
+                                <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
+                                  <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                                    Adicionar
+                                  </button>
+                                  <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" id="cd_btnDocsNewFolder"><i
+                                          class="fa fa-folder"></i> Nova Pasta</a></li>
+                                    <li><a class="dropdown-item" href="#" id="cd_btnDocsUpload"><i
+                                          class="fa fa-upload"></i> Upload de Documento</a></li>
+                                    <li><a class="dropdown-item" href="#" id="cd_btnDocsNewLink"><i
+                                          class="fa fa-link"></i> Link do Drive</a></li>
+                                  </ul>
+                                </div>
 
-            <button type="button" class="btn btn-white" id="cd_btnDocsOpenSelected" style="margin-left:8px; display:none;">
-              <i class="fa fa-external-link"></i> Abrir
-            </button>
+                                <button type="button" class="btn btn-white" id="cd_btnDocsOpenSelected"
+                                  style="margin-left:8px; display:none;">
+                                  <i class="fa fa-external-link"></i> Abrir
+                                </button>
 
-            <button type="button" class="btn btn-danger" id="cd_btnDocsDeleteSelected" style="margin-left:8px; display:none;">
-              <i class="fa fa-trash"></i> Excluir
-            </button>
+                                <button type="button" class="btn btn-danger" id="cd_btnDocsDeleteSelected"
+                                  style="margin-left:8px; display:none;">
+                                  <i class="fa fa-trash"></i> Excluir
+                                </button>
 
-            <span id="cd_currentDocsFolderLabel" class="text-muted" style="margin-left:12px;"></span>
-            <span id="cd_docsLoadingBadge" class="label label-info" style="display:none;margin-left:10px;">Carregando...</span>
-          </div>
+                                <span id="cd_currentDocsFolderLabel" class="text-muted"
+                                  style="margin-left:12px;"></span>
+                                <span id="cd_docsLoadingBadge" class="label label-info"
+                                  style="display:none;margin-left:10px;">Carregando...</span>
+                              </div>
 
-          <div class="col-lg-3">
-            <div class="input-group" style="margin: 0px 0 15px -15px;">
-              <input id="cd_txtDocsSearch" type="text" class="form-control input-sm" placeholder="Buscar nesta pasta..." />
-              <span class="input-group-btn">
-                <button id="cd_btnDocsSearch" class="btn btn-sm btn-white" type="button"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-          </div>
-        </div>
+                              <div class="col-lg-3">
+                                <div class="input-group" style="margin: 0px 0 15px -15px;">
+                                  <input id="cd_txtDocsSearch" type="text" class="form-control input-sm"
+                                    placeholder="Buscar nesta pasta..." />
+                                  <span class="input-group-btn">
+                                    <button id="cd_btnDocsSearch" class="btn btn-sm btn-white" type="button"><i
+                                        class="fa fa-search"></i></button>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
 
-        <!-- GRID -->
-        <div class="row" id="cd_itemsDocsGrid" style="padding: 0 15px;">
-          <div class="col-lg-12 text-muted">Carregando...</div>
-        </div>
+                            <!-- GRID -->
+                            <div class="row" id="cd_itemsDocsGrid" style="padding: 0 15px;">
+                              <div class="col-lg-12 text-muted">Carregando...</div>
+                            </div>
 
-      </div>
-    </div>
-  </div>
-</div>
-<!-- tab-2 -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- tab-2 -->
 
                   </div><!-- tab-content -->
                 </div><!-- panel-body -->
@@ -242,6 +278,9 @@
 
 <script>
   (function () {
+    // If your backend uses another field name for the logo, change it here:
+    const COMPANY_LOGO_FIELD = "company_picture"; // e.g. "logo", "company_logo", "profile_picture"
+
     // -------------------- DOM helpers --------------------
     function setText(selector, value) {
       const el = document.querySelector(selector);
@@ -303,6 +342,15 @@
       return String(value ?? "").trim();
     }
 
+    function isNonEmptyString(value) {
+      return typeof value === "string" && value.trim().length > 0;
+    }
+
+    function isValidEmail(email) {
+      const v = String(email ?? "").trim();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
     function buildPatchOnlyChanged(originalObj, currentObj, fields) {
       const payload = {};
       let hasChanges = false;
@@ -318,15 +366,6 @@
       }
 
       return { hasChanges, payload };
-    }
-
-    function isNonEmptyString(value) {
-      return typeof value === "string" && value.trim().length > 0;
-    }
-
-    function isValidEmail(email) {
-      const v = String(email ?? "").trim();
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     }
 
     function generateTempPassword() {
@@ -359,6 +398,47 @@
     function moneyPtBr(value) {
       const n = toNumber(value);
       return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function getCompanyLogoFromCompany(company) {
+      // Try common shapes:
+      const candidates = [
+        company?.logo_base64,
+        company?.logo,
+        company?.company_logo,
+        company?.profile_picture,
+        company?.logo_url,
+        company?.logoUrl,
+        company?.company_logo_url
+      ].filter(Boolean);
+
+      const raw = candidates[0];
+      if (!raw) return null;
+
+      const s = String(raw).trim();
+      if (!s) return null;
+
+      // If already data URL:
+      if (/^data:image\//i.test(s)) return s;
+
+      // If looks like URL:
+      if (/^https?:\/\//i.test(s) || s.startsWith("/")) return s;
+
+      // Otherwise treat as base64 png by default
+      return "data:image/png;base64," + s;
+    }
+
+    function setCompanyLogoOnHeader(logoDataUrlOrUrl) {
+      const img = document.getElementById("company_logo");
+      if (!img) return;
+
+      if (logoDataUrlOrUrl) {
+        img.src = logoDataUrlOrUrl;
+        return;
+      }
+
+      // fallback image
+      img.src = "../Assets/inspinia/img/zender_logo.png";
     }
 
     // -------------------- GlobalModal (layout) confirm helpers --------------------
@@ -516,7 +596,8 @@
         Sector: company.sector ?? "Geral",
         Size: company.category ?? company.porte ?? "-",
         Status: company.status ?? "Active",
-        Email: company.email ?? primaryUser?.email ?? ""
+        Email: company.email ?? primaryUser?.email ?? "",
+        Logo: getCompanyLogoFromCompany(company)
       };
     }
 
@@ -543,13 +624,12 @@
       setText("#sector", vm?.Sector ?? "Geral");
       setText("#size", vm?.Size ?? "-");
       setText("#statusLabel", vm?.Status ?? "Active");
+      setCompanyLogoOnHeader(vm?.Logo || null);
     }
 
     // -------------------- Invoices total -> progress --------------------
     function setProjectsTotalUi(totalValue) {
       const total = Math.max(0, toNumber(totalValue));
-
-      // ✅ meta fixa: 1 milhão
       const goal = 1000000;
       const pct = goal > 0 ? Math.min(100, (total / goal) * 100) : 0;
 
@@ -577,12 +657,7 @@
 
         let sum = 0;
         for (const inv of invoices) {
-          const v =
-            inv?.total ??
-            inv?.grand_total ??
-            inv?.total_amount ??
-            0;
-
+          const v = inv?.total ?? inv?.grand_total ?? inv?.total_amount ?? 0;
           sum += toNumber(v);
         }
 
@@ -624,30 +699,22 @@
                 ${c.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(c.email)}</p>` : ""}
                 ${c.phone ? `<p><i class="fa fa-phone"></i> ${escapeHtml(c.phone)}</p>` : ""}
                 <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(c.status ?? ""))}</p>
-
               </div>
             </a>
-            <div class="row" style="display: block; width: 100%;text-align: center;">              
-                <div class="contact-actions">
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-sm"
-                    title="Editar"
-                    onclick="event.stopPropagation(); onContactEdit(${index});"
-                  >
-                    <i class="fa fa-pencil"></i>
-                  </button>
 
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    title="Excluir"
-                    onclick="event.stopPropagation(); onContactDelete(${index});"
-                  >
-                    <i class="fa fa-trash"></i>
-                  </button>
-                </div>
+            <div class="row" style="display:block;width:100%;text-align:center;">
+              <div class="contact-actions">
+                <button type="button" class="btn btn-primary btn-sm" title="Editar"
+                  onclick="event.stopPropagation(); onContactEdit(${index});">
+                  <i class="fa fa-pencil"></i>
+                </button>
+
+                <button type="button" class="btn btn-danger btn-sm" title="Excluir"
+                  onclick="event.stopPropagation(); onContactDelete(${index});">
+                  <i class="fa fa-trash"></i>
+                </button>
               </div>
+            </div>
           </div>
         `;
 
@@ -718,12 +785,7 @@
             };
 
             const diff = buildPatchOnlyChanged(
-              {
-                fullName: original.fullName,
-                email: original.email,
-                phone: original.phone,
-                status: original.status
-              },
+              { fullName: original.fullName, email: original.email, phone: original.phone, status: original.status },
               current,
               [
                 { key: "fullName", read: () => current.fullName, normalize: normalizeString, write: (p, v) => { p.full_name = v; } },
@@ -751,9 +813,7 @@
 
     window.onContactClick = onContactClick;
 
-    // -------------------- Edit + Delete buttons --------------------
     function onContactEdit(index) {
-      // ✅ sem confirm: abre direto o side modal
       onContactClick(index);
     }
 
@@ -845,15 +905,8 @@
             const role = normalizeString($("#selNewRole").val()) || "USER";
             const sendAccess = $("#chkSendAccess").is(":checked") === true;
 
-            if (!isNonEmptyString(fullName)) {
-              alert("Informe o Nome.");
-              return;
-            }
-
-            if (!isNonEmptyString(email) || !isValidEmail(email)) {
-              alert("Informe um Email válido.");
-              return;
-            }
+            if (!isNonEmptyString(fullName)) { alert("Informe o Nome."); return; }
+            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email válido."); return; }
 
             const tempPassword = generateTempPassword();
 
@@ -884,21 +937,35 @@
 
     window.callNewContact = callNewContact;
 
-    // -------------------- Side modal: Edit Company (PATCH) --------------------
+    // -------------------- Logo helpers --------------------
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Falha ao ler o arquivo."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function isImageFile(file) {
+      const type = String(file?.type || "").toLowerCase();
+      return type.startsWith("image/");
+    }
+
+    // -------------------- Side modal: Edit Company (PATCH) + LOGO --------------------
     function callEditDetails() {
       const vm = window.__companyViewModel ?? safeJsonParse(localStorage.getItem("selectedClient"));
-
-      if (!vm?.Id) {
-        alert("Cliente inválido (Id não encontrado).");
-        return;
-      }
+      if (!vm?.Id) { alert("Cliente inválido (Id não encontrado)."); return; }
 
       const original = {
         companyName: normalizeString(vm.CompanyName),
         phone: normalizeString(vm.Phone),
         sector: normalizeString(vm.Sector),
-        size: normalizeString(vm.Size)
+        size: normalizeString(vm.Size),
+        logo: vm.Logo || "" // data url or url
       };
+
+      const currentLogo = original.logo ? original.logo : "../Assets/inspinia/img/zender_logo.png";
 
       const html = `
         <div class="form-group">
@@ -926,6 +993,29 @@
           <input id="txtEmail" class="form-control" value="${escapeHtml(vm.Email ?? "")}" readonly />
           <small class="text-muted">O email vem do usuário principal (tabela Users).</small>
         </div>
+
+        <hr style="margin: 15px 0;" />
+
+        <div class="form-group">
+          <label>Logo do Cliente</label>
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <img id="cd_logoPreview" src="${escapeHtml(currentLogo)}"
+              style="width:120px;height:120px;object-fit:contain;border:1px solid #e7eaec;border-radius:6px;background:#fff;padding:6px;" />
+            <div style="flex:1;">
+              <input id="cd_logoFile" type="file" class="form-control" accept="image/*" />
+              <small class="text-muted">
+                PNG/JPG/SVG. Máximo 5MB. O logo será salvo em <strong>${escapeHtml(COMPANY_LOGO_FIELD)}</strong>.
+              </small>
+              <div id="cd_logoError" class="text-danger" style="margin-top:8px; display:none;"></div>
+
+              <div style="margin-top:10px; display:flex; gap:8px;">
+                <button type="button" class="btn btn-white btn-sm" id="cd_btnLogoRemove">
+                  <i class="fa fa-times"></i> Remover logo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       `;
 
       SideModal.open({
@@ -934,11 +1024,13 @@
 
         onOk: async function () {
           try {
+            $("#cd_logoError").hide().text("");
+
             const current = {
               companyName: $("#txtCompanyName").val(),
               phone: $("#txtPhone").val(),
               sector: $("#txtSector").val(),
-              size: $("#txtSize").val()
+              size: $("#txtSize").val(),
             };
 
             const diff = buildPatchOnlyChanged(
@@ -957,11 +1049,57 @@
               ]
             );
 
-            if (!diff.hasChanges) return;
+            // Logo change detection
+            const removeLogo = $("#cd_btnLogoRemove").data("remove") === true;
+            const fileInput = document.getElementById("cd_logoFile");
+            const file = fileInput && fileInput.files && fileInput.files[0];
 
-            await patchCompanyById(vm.Id, diff.payload);
+            let logoChanged = false;
+            let newLogoDataUrl = null;
 
-            localStorage.removeItem("selectedClient");
+            if (removeLogo) {
+              logoChanged = true;
+              newLogoDataUrl = "";
+            } else if (file) {
+              if (!isImageFile(file)) {
+                $("#cd_logoError").show().text("Selecione um arquivo de imagem.");
+                return;
+              }
+              const maxBytes = 5 * 1024 * 1024;
+              if (file.size > maxBytes) {
+                $("#cd_logoError").show().text("Imagem maior que 5MB. Reduza o tamanho do arquivo.");
+                return;
+              }
+              newLogoDataUrl = await readFileAsDataUrl(file);
+              logoChanged = true;
+            }
+
+            const payload = diff.payload || {};
+            let hasAnything = diff.hasChanges;
+
+            if (logoChanged) {
+              payload[COMPANY_LOGO_FIELD] = newLogoDataUrl; // data URL or empty string to remove
+              hasAnything = true;
+            }
+
+            if (!hasAnything) return;
+
+            await patchCompanyById(vm.Id, payload);
+
+            // Update local VM and header UI immediately
+            const updatedVm = Object.assign({}, vm, {
+              CompanyName: normalizeString(current.companyName),
+              Phone: normalizeString(current.phone),
+              Sector: normalizeString(current.sector),
+              Size: normalizeString(current.size),
+              Logo: logoChanged ? (newLogoDataUrl ? newLogoDataUrl : null) : (vm.Logo || null)
+            });
+
+            window.__companyViewModel = updatedVm;
+            localStorage.setItem("selectedClient", JSON.stringify(updatedVm));
+            fillClientHeader(updatedVm);
+
+            // Keep it simple/consistent with your current approach:
             location.reload();
           } catch (err) {
             console.error(err);
@@ -971,6 +1109,41 @@
 
         onCancel: function () { }
       });
+
+      // Wire preview & remove
+      setTimeout(function () {
+        $("#cd_btnLogoRemove").off("click.__rm").on("click.__rm", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          $("#cd_logoFile").val("");
+          $("#cd_logoPreview").attr("src", "../Assets/inspinia/img/zender_logo.png");
+          $("#cd_btnLogoRemove").data("remove", true);
+        });
+
+        $("#cd_logoFile").off("change.__preview").on("change.__preview", function () {
+          $("#cd_btnLogoRemove").data("remove", false);
+          $("#cd_logoError").hide().text("");
+
+          const f = this.files && this.files[0];
+          if (!f) return;
+
+          if (!isImageFile(f)) {
+            $("#cd_logoError").show().text("Selecione um arquivo de imagem.");
+            $(this).val("");
+            return;
+          }
+
+          const maxBytes = 5 * 1024 * 1024;
+          if (f.size > maxBytes) {
+            $("#cd_logoError").show().text("Imagem maior que 5MB. Reduza o tamanho do arquivo.");
+            $(this).val("");
+            return;
+          }
+
+          const url = URL.createObjectURL(f);
+          $("#cd_logoPreview").attr("src", url);
+        });
+      }, 50);
     }
 
     window.callEditDetails = callEditDetails;
@@ -997,7 +1170,6 @@
       if (selectedClientId) {
         try {
           const company = await fetchCompanyById(selectedClientId);
-
           window.__companyRaw = company;
 
           const vm = mapCompanyToViewModel(company);
@@ -1014,6 +1186,7 @@
           console.error("Failed to fetch company by id:", err);
           if (!cached) alert("Erro ao carregar dados do cliente via API.");
           setProjectsTotalUi(0);
+          setCompanyLogoOnHeader(null);
         }
       } else {
         setProjectsTotalUi(0);
@@ -1030,7 +1203,10 @@
 
 <style>
   /* ClientDetails Documents mini grid selection */
-  #cd_itemsDocsGrid .file-box .file { cursor: default; }
+  #cd_itemsDocsGrid .file-box .file {
+    cursor: default;
+  }
+
   #cd_itemsDocsGrid .file-box.is-selected .file {
     outline: 2px solid rgba(26, 179, 148, 0.45);
     box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.12);
@@ -1044,7 +1220,7 @@
     width: 22px;
     height: 22px;
     border-radius: 4px;
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid #d5d5d5;
     display: none;
     align-items: center;
@@ -1052,13 +1228,24 @@
     z-index: 5;
     cursor: pointer;
   }
+
   #cd_itemsDocsGrid .file-box .select-badge i {
     font-size: 14px;
     color: #1ab394;
   }
-  #cd_itemsDocsGrid .file-box.is-selected .select-badge { display:flex; }
-  #cd_itemsDocsGrid .file-box:hover .select-badge { display:flex; opacity:.75; }
-  #cd_itemsDocsGrid .file-box.is-selected:hover .select-badge { opacity:1; }
+
+  #cd_itemsDocsGrid .file-box.is-selected .select-badge {
+    display: flex;
+  }
+
+  #cd_itemsDocsGrid .file-box:hover .select-badge {
+    display: flex;
+    opacity: .75;
+  }
+
+  #cd_itemsDocsGrid .file-box.is-selected:hover .select-badge {
+    opacity: 1;
+  }
 </style>
 
 <script>
@@ -1067,7 +1254,6 @@
     // Mini MyDocuments inside ClientDetails (Tab Documentos)
     // ---------------------------
 
-    // ---------- helpers ----------
     function escapeHtml(value) {
       if (value == null) return "";
       return String(value)
@@ -1099,8 +1285,8 @@
     }
 
     function isFolder(item) { return String(item?.item_type || "").toUpperCase() === "FOLDER"; }
-    function isLink(item)   { return String(item?.item_type || "").toUpperCase() === "LINK"; }
-    function isFile(item)   { return String(item?.item_type || "").toUpperCase() === "FILE"; }
+    function isLink(item) { return String(item?.item_type || "").toUpperCase() === "LINK"; }
+    function isFile(item) { return String(item?.item_type || "").toUpperCase() === "FILE"; }
 
     function isDriveLink(item) {
       const sp = String(item?.storage_provider || "").toUpperCase();
@@ -1142,7 +1328,6 @@
       return "";
     }
 
-    // still uses same fallback logic from MyDocuments
     function getUserCompanyId() {
       const id = window.__auth?.company_id || window.__auth?.companyId || null;
       return id ? String(id) : null;
@@ -1194,7 +1379,6 @@
       return data;
     }
 
-    // ---------- Side modal robust (layout dynamic modal) ----------
     function pickFirst(selectors) {
       for (const sel of selectors) {
         const el = document.querySelector(sel);
@@ -1270,7 +1454,6 @@
       modal.style.display = "block";
     }
 
-    // ---------- state ----------
     const docsState = {
       initialized: false,
       currentParentId: null,
@@ -1332,7 +1515,6 @@
       qs.set("take", "500");
       qs.set("skip", "0");
 
-      // ✅ ALWAYS filter by the client on the page
       const clientId = getClientId();
       qs.set("related_table", "company");
       qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
@@ -1378,12 +1560,10 @@
         `);
       });
 
-      // click outside clears selection
       $("#cd_itemsDocsGrid").off("click.bg").on("click.bg", function (e) {
         if ($(e.target).closest(".file-box").length === 0) clearSelection();
       });
 
-      // badge click toggles selection
       $("#cd_itemsDocsGrid .select-badge").off("click.sel").on("click.sel", function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -1392,7 +1572,6 @@
         toggleSelected(id);
       });
 
-      // single click select, double click open
       $(".cd-doc-hit").off("click").on("click", async function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -1453,7 +1632,6 @@
         return;
       }
 
-      // FILE
       try {
         showLoading(true);
         const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
@@ -1467,7 +1645,6 @@
       }
     }
 
-    // ---------- create folder/link/upload ----------
     function getExtFromName(fileName) {
       const n = String(fileName || "");
       const idx = n.lastIndexOf(".");
@@ -1494,8 +1671,6 @@
         filename: fileName,
         ext: ext,
         mime_type: mimeType,
-
-        // ✅ linked to the current client
         related_table: "company",
         related_id: clientId
       };
@@ -1576,8 +1751,6 @@
               name: name,
               filename: null,
               storage_provider: "NONE",
-
-              // ✅ linked to the current client
               related_table: "company",
               related_id: clientId
             };
@@ -1637,14 +1810,8 @@
               item_type: "LINK",
               name: name,
               filename: null,
-
-              // ✅ requested: save link in object_key
               object_key: url,
-
-              // mark as Drive link for UI behavior
               storage_provider: "DRIVE",
-
-              // ✅ linked to the current client
               related_table: "company",
               related_id: clientId
             };
@@ -1726,7 +1893,6 @@
         }
       });
 
-      // auto-fill name on file select
       setTimeout(function () {
         const $file = $("#cd_sm_uploadFile");
         const $name = $("#cd_sm_uploadDisplayName");
@@ -1735,7 +1901,7 @@
           const f = this.files && this.files[0];
           if (!f) return;
           $name.val(f.name || "");
-          try { $name.focus(); } catch {}
+          try { $name.focus(); } catch { }
         });
       }, 50);
     }
@@ -1743,7 +1909,6 @@
     async function deleteSelected() {
       if (docsState.selected.size === 0) return;
 
-      // use native confirm to avoid interfering with your other modal system
       const ok = confirm("Confirma excluir " + docsState.selected.size + " item(ns)?");
       if (!ok) return;
 
@@ -1769,7 +1934,6 @@
       await openItem(item);
     }
 
-    // ---------- init on tab show ----------
     const runSearchDebounced = debounce(async function () {
       docsState.currentSearch = ($("#cd_txtDocsSearch").val() || "").trim();
       await loadCurrentFolder();
@@ -1779,7 +1943,6 @@
       if (docsState.initialized) return;
       docsState.initialized = true;
 
-      // Only admin can add (UI already hidden by name="btn_act_new", but keep safe)
       if (!window.__auth?.isAdmin) {
         $('a[name="btn_act_new"]').hide();
         $('button[name="btn_act_new"]').hide();
@@ -1791,7 +1954,6 @@
       docsState.currentSearch = "";
       updateTopActions();
 
-      // wire buttons
       $("#cd_btnDocsBack").on("click", async function () {
         const last = docsState.navStack.pop();
         docsState.currentParentId = last?.parentId ?? null;
@@ -1821,19 +1983,15 @@
         }
       });
 
-      // prevent dropdown jump
       $(".dropdown-item").on("click", function (e) { e.preventDefault(); });
 
-      // first load
       await loadCurrentFolder();
     }
 
     $(document).ready(function () {
-      // init when user opens the tab
       $('a[href="#tab-2"]').on("shown.bs.tab", function () {
         initDocsTabOnce();
       });
     });
   })();
 </script>
-

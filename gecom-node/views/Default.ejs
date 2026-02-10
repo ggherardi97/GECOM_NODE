@@ -12,27 +12,93 @@
   .sortable { cursor: pointer; user-select: none; }
   .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
 
-  /* Chart maior */
+  /* Chart */
   .dash-chart-wrap { height: 320px; }
   #lineChart { width: 100% !important; height: 100% !important; }
 
-  /* Cards em andamento clicáveis */
-  .dash-clicker { cursor: pointer; }
+  /* Doughnut */
+  .dash-doughnut-wrap {
+    height: 320px;
+    display: block;
+    position: relative;
+  }
+  #processStatusChart {
+    width: 100% !important;
+    height: 320px !important;
+    display: block;
+  }
 
-  /* Lista top 5 */
+  .dash-empty-chart {
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Cards clicáveis */
+  .dash-clicker {
+    padding: 5px 20px;
+    cursor: pointer;
+  }
+
+  /* Lista */
   .dash-inprogress-list {
     max-height: 220px;
     overflow: auto;
   }
+
+  /* Filter bar */
+  .dash-filterbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  .dash-filterbar label {
+    margin: 0;
+    font-weight: 600;
+    font-size: 12px;
+    color: #666;
+  }
+  .dash-filterbar .form-control {
+    height: 30px;
+    padding: 3px 10px;
+  }
 </style>
 
 <div class="wrapper wrapper-content">
-  <!-- ROW 1: Cards + Processos em andamento (top 5) -->
+
+  <!-- FILTER BAR -->
+  <div class="row">
+    <div class="col-lg-9">
+<div class="dash-filterbar" style="float: inline-start;">
+        <label for="yearFilter">Dashboards:</label>
+        <select id="yearFilter" class="form-control input-sm" style="width: 250px;">
+          <option value="0" selected>Faturamento / Processos</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="dash-filterbar">
+        <label for="yearFilter">Ano:</label>
+        <select id="yearFilter" class="form-control input-sm" style="width: 120px;">
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Cards + Processos próximos do prazo (top 2) -->
   <div class="row">
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span id="lblMonthly" class="label label-success float-right">Monthly</span>
+          <span class="label label-success float-right">Mensal</span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -48,7 +114,7 @@
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span id="lblAnnual" class="label label-info float-right">Annual</span>
+          <span class="label label-info float-right">Anual</span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -61,45 +127,57 @@
       </div>
     </div>
 
-    <!-- Visitas ao site (fixo) -->
-    <div class="col-lg-4">
+    <!-- Média mensal -->
+    <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span class="label label-primary float-right">Today</span>
-          <h5>Visitas ao site</h5>
+          <span class="label label-primary float-right">Ano</span>
+          <h5>Média mensal</h5>
         </div>
         <div class="ibox-content">
-          <div class="row">
-            <div class="col-md-6">
-              <h1 class="no-margins">406,42</h1>
-              <div class="font-bold text-navy">44% <i class="fa fa-level-up"></i><small>Rapid pace</small></div>
-            </div>
-            <div class="col-md-6">
-              <h1 class="no-margins">206,12</h1>
-              <div class="font-bold text-navy">22% <i class="fa fa-level-up"></i><small>Slow pace</small></div>
-            </div>
+          <h1 id="avgMonthlyRevenue" class="no-margins">-</h1>
+          <div class="stat-percent font-bold text-navy">
+            <span id="avgMonthlyHint">-</span> <i class="fa fa-line-chart"></i>
           </div>
+          <small>Média do faturamento do ano (÷ 12)</small>
         </div>
       </div>
     </div>
 
-    <!-- Processos em andamento (top 5) -->
+    <!-- Melhor mês -->
+    <div class="col-lg-2">
+      <div class="ibox">
+        <div class="ibox-title">
+          <span class="label label-warning float-right">Ano</span>
+          <h5>Melhor mês</h5>
+        </div>
+        <div class="ibox-content">
+          <h2 id="bestMonthName" class="no-margins">-</h2>
+          <div class="stat-percent font-bold text-warning">
+            <span id="bestMonthRevenue">-</span> <i class="fa fa-trophy"></i>
+          </div>
+          <small>Mês com maior faturamento</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processos próximos do prazo (top 2) -->
     <div class="col-lg-4">
       <div class="ibox">
         <div class="ibox-title">
-          <h5>Processos em andamento</h5>
+          <h5>Processos próximos do prazo</h5>
         </div>
 
-        <div id="inProgressContainer" class="dash-inprogress-list">
+        <div id="nearDueContainer" class="dash-inprogress-list">
           <div class="ibox-content"><small>Carregando...</small></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ROW 2: Gráfico principal -->
+  <!-- ROW 2: Line (col-lg-8) + Doughnut (col-lg-4) -->
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-8">
       <div class="ibox">
         <div class="ibox-content">
           <div>
@@ -108,46 +186,44 @@
               <br />
               <small>Total de processos no período: <strong id="totalProcessesInPeriod">-</strong></small>
             </span>
-            <h3 class="font-bold no-margins">Faturamento Anual</h3>
+            <h3 class="font-bold no-margins">Faturamento anual</h3>
             <small>Ativos (status 0) / Pagos (status 4) / Estimado (30k/mês).</small>
           </div>
 
           <div class="m-t-sm">
-            <div class="row">
-              <div class="col-md-9">
-                <div class="dash-chart-wrap">
-                  <canvas id="lineChart"></canvas>
-                </div>
-              </div>
-              <div class="col-md-3">
-                <ul class="stat-list m-t-lg">
-                  <li>
-                    <h2 id="yearRevenueTotal" class="no-margins">-</h2>
-                    <small>Total (todas invoices) no período</small>
-                    <div class="progress progress-mini">
-                      <div id="yearRevenueProgress" class="progress-bar" style="width: 0%;"></div>
-                    </div>
-                  </li>
-                  <li>
-                    <h2 id="yearEstimatedTotal" class="no-margins">-</h2>
-                    <small>Total estimado no período (30k/mês)</small>
-                    <div class="progress progress-mini">
-                      <div id="yearEstimatedProgress" class="progress-bar" style="width: 0%;"></div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+            <div class="dash-chart-wrap">
+              <canvas id="lineChart"></canvas>
             </div>
           </div>
 
           <div class="m-t-md">
             <small class="float-right">
               <i class="fa fa-clock-o"></i>
-              Update em <span id="lastUpdateAt">-</span>
+              Atualizado em <span id="lastUpdateAt">-</span>
             </small>
             <small>
               <strong>Obs:</strong> Ideal ter endpoints agregados no backend (sum/group-by) quando crescer.
             </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doughnut: Processos por status -->
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5>Processos por status</h5>
+        </div>
+        <div class="ibox-content">
+          <div class="dash-doughnut-wrap">
+            <canvas id="processStatusChart"></canvas>
+            <div id="processStatusEmpty" class="dash-empty-chart" style="display:none;">
+              Sem processos no período para exibir.
+            </div>
+          </div>
+          <div class="text-center m-t-sm">
+            <small>Quantidade de processos no ano por status.</small>
           </div>
         </div>
       </div>
@@ -173,9 +249,9 @@
             </div>
             <div class="col-sm-3">
               <div class="input-group mb-3">
-                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="Search">
+                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="Buscar">
                 <div class="input-group-append">
-                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button">Search</button>
+                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button">Buscar</button>
                 </div>
               </div>
             </div>
@@ -187,7 +263,7 @@
                 <tr>
                   <th class="sortable" data-sort="process_number">Processo <span class="sort-indicator"></span></th>
                   <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="completed">Completed <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="completed">Concluído <span class="sort-indicator"></span></th>
                   <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
                   <th class="sortable" data-sort="invoice">Invoice <span class="sort-indicator"></span></th>
                   <th>Ação</th>
@@ -216,7 +292,6 @@
 </div>
 
 <% contentFor('scripts') %>
-<!-- Peity -->
 <script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
 <script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
 
@@ -227,15 +302,15 @@
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
 
 <script>
-  // redirect global (pra onclick no html)
   function redirectToProcessDetail(id) {
     if (!id) return;
     window.location = "ProcessDetail?id=" + encodeURIComponent(String(id));
   }
 
   $(document).ready(function () {
-    $("#pageName").text("Home");
-    $("#subpageName").text("Home");
+    $("#masterHeader").hide();
+    $("#pageName").text("Dashboard");
+    $("#subpageName").text("Dashboard");
 
     // -------------------- Helpers --------------------
     function toNumber(value) {
@@ -260,12 +335,19 @@
       return d.toLocaleString("pt-BR");
     }
 
+    function formatDatePtBr(value) {
+      if (!value) return "-";
+      var d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR");
+    }
+
     function applyPeity() {
-      try { $(".pie").peity("pie"); } catch (e) { /* ignore */ }
+      try { $(".pie").peity("pie"); } catch (e) { }
     }
 
     function pickInvoiceDate(inv) {
-      return inv?.quote_at || inv?.quoteAt || inv?.created_at || inv?.createdAt || null;
+      return inv?.quote_at || inv?.quoteAt || inv?.created_at || inv?.createdAt || inv?.created_on || inv?.createdOn || null;
     }
 
     function pickInvoiceTotal(inv) {
@@ -281,37 +363,35 @@
     }
 
     function pickInvoiceStatus(inv) {
-      // tenta achar status em campos comuns
       var s = inv?.status ?? inv?.invoice_status ?? inv?.invoiceStatus ?? inv?.state ?? inv?.statecode ?? null;
+      if (s == null) return null;
       var n = Number(s);
       return Number.isFinite(n) ? n : null;
     }
 
-    // Status do processo
-    function normalizeProcessStatus(p) {
-      var text = p?.status_name || p?.statusName || p?.status_text || p?.statusText || null;
-      if (text && String(text).trim().length > 0) return String(text);
-
-      var s = p?.status;
-      var sn = Number(s);
-      if (!Number.isFinite(sn)) return "-";
-
-      if (sn === 0) return "No Prazo";
-      if (sn === 1) return "Próximo do prazo";
-      if (sn === 2) return "Atrasado";
-      if (sn === 3) return "Encerrado";
-      if (sn === 4) return "Cancelado";
-      return String(sn);
+    // -------- Process Status (usa window.ProcessStatusEnum) --------
+    function getProcessStatusValue(p) {
+      var v = p?.status;
+      var n = Number(v);
+      return Number.isFinite(n) ? n : null;
     }
 
-    function statusClassFromLabel(label) {
-      var s = String(label || "").toLowerCase();
-      if (s.includes("no prazo")) return "label label-success";
-      if (s.includes("próximo")) return "label label-warning";
-      if (s.includes("atras")) return "label label-error";
-      if (s.includes("encerr")) return "label label-danger";
-      if (s.includes("cancel")) return "label label-error";
-      return "label label-primary";
+    function getProcessStatusLabel(p) {
+      var v = getProcessStatusValue(p);
+      if (v == null) return "-";
+      if (window.ProcessStatusEnum?.getLabel) return window.ProcessStatusEnum.getLabel(v);
+      return "Status " + v;
+    }
+
+    function getProcessStatusCssFull(p) {
+      var v = getProcessStatusValue(p);
+
+      var cssClass = "label-default";
+      if (v != null && window.ProcessStatusEnum?.getCssClass) {
+        cssClass = window.ProcessStatusEnum.getCssClass(v) || "label-default";
+      }
+
+      return "label " + cssClass;
     }
 
     function pickProcessNumber(p) {
@@ -345,12 +425,26 @@
     }
 
     function pickProcessCreatedAt(p) {
-      return p?.created_at || p?.createdAt || null;
+      return p?.created_on || p?.createdOn || p?.created_at || p?.createdAt || null;
     }
 
     function pickProcessUpdatedAt(p) {
-      return p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_at || p?.createdAt || null;
+      return p?.updated_on || p?.updatedOn || p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_on || p?.createdOn || null;
     }
+
+    // Used for "Próximo do prazo" ordering (best effort)
+   function pickProcessDueAt(p) {
+  return (
+    p?.ship_date || p?.shipDate ||
+    p?.due_at || p?.dueAt ||
+    p?.deadline_at || p?.deadlineAt ||
+    p?.due_date || p?.dueDate ||
+    p?.expected_at || p?.expectedAt ||
+    p?.eta_at || p?.etaAt ||
+    null
+  );
+}
+
 
     function pickProcessCompletedPercent(p) {
       var v =
@@ -378,20 +472,30 @@
       return data;
     }
 
-    // -------------------- Dates --------------------
+    // -------------------- Time/Filters --------------------
     var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth();
+    var currentYear = now.getFullYear();
+    var currentMonth = now.getMonth();
+    var selectedYear = currentYear;
 
-    var yearStart = new Date(year, 0, 1, 0, 0, 0, 0);
-    var yearEnd = new Date(year + 1, 0, 1, 0, 0, 0, 0);
+    // init filter default
+    $("#yearFilter").val(String(selectedYear));
 
-    var monthStart = new Date(year, month, 1, 0, 0, 0, 0);
-    var monthEnd = new Date(year, month + 1, 1, 0, 0, 0, 0);
+    function computeRanges() {
+      var yearStart = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
+      var yearEnd = new Date(selectedYear + 1, 0, 1, 0, 0, 0, 0);
+
+      // "Mensal": month index from *current month*, but inside selected year
+      var monthStart = new Date(selectedYear, currentMonth, 1, 0, 0, 0, 0);
+      var monthEnd = new Date(selectedYear, currentMonth + 1, 1, 0, 0, 0, 0);
+
+      return { yearStart: yearStart, yearEnd: yearEnd, monthStart: monthStart, monthEnd: monthEnd };
+    }
 
     var monthsPt = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
-    var chart = null;
+    var lineChart = null;
+    var doughnutChart = null;
 
     // -------------------- Grid state --------------------
     var allProcesses = [];
@@ -413,7 +517,7 @@
       function getValue(p) {
         if (key === "process_number") return String(pickProcessNumber(p) || "");
         if (key === "company") return String(pickProcessCompanyName(p) || "");
-        if (key === "status") return String(normalizeProcessStatus(p) || "");
+        if (key === "status") return String(getProcessStatusLabel(p) || "");
         if (key === "invoice") return String(pickProcessInvoice(p) || "");
         if (key === "completed") return pickProcessCompletedPercent(p) ?? -1;
         return "";
@@ -436,7 +540,7 @@
         var text = [
           pickProcessNumber(p),
           pickProcessCompanyName(p),
-          normalizeProcessStatus(p),
+          getProcessStatusLabel(p),
           pickProcessInvoice(p)
         ].join(" ").toLowerCase();
 
@@ -468,15 +572,14 @@
         var number = pickProcessNumber(p);
         var company = pickProcessCompanyName(p);
 
-        var statusLabel = normalizeProcessStatus(p);
-        var statusClass = statusClassFromLabel(statusLabel);
+        var statusLabel = getProcessStatusLabel(p);
+        var statusClass = getProcessStatusCssFull(p);
 
         var completed = pickProcessCompletedPercent(p);
         var completedNumber = completed == null ? 0 : completed;
         var pieValue = completed == null ? "0/100" : (completedNumber.toFixed(2) + "/100");
 
         var invoice = pickProcessInvoice(p);
-
         var pid = pickProcessId(p);
 
         var row = `
@@ -490,7 +593,7 @@
             <td><span class="${statusClass}">${statusLabel}</span></td>
             <td class="truncate">${invoice}</td>
             <td class="table-actions">
-              ${pid ? `<a href="ProcessDetail?id=${encodeURIComponent(pid)}"><i class="fa fa-external-link text-navy"></i></a>` : "-"}
+              ${pid ? `<a href="ProcessDetail?id=${encodeURIComponent(pid)}" title="Abrir"><i class="fa fa-external-link text-navy"></i></a>` : "-"}
             </td>
           </tr>
         `;
@@ -500,58 +603,58 @@
       applyPeity();
     }
 
-    function renderInProgress(processes) {
-      var items = Array.isArray(processes) ? processes.slice() : [];
+    // TOP 2 - Próximo do prazo (status 2)
+    function renderNearDue(processesInSelectedYear) {
+      var items = Array.isArray(processesInSelectedYear) ? processesInSelectedYear.slice() : [];
 
-      // heurística: excluir finalizados/cancelados
-      function isInProgress(p) {
-        var statusLabel = normalizeProcessStatus(p).toLowerCase();
-        if (!statusLabel) return true;
-        if (statusLabel.includes("cancel")) return false;
-        if (statusLabel.includes("encerr") || statusLabel.includes("finaliz") || statusLabel.includes("conclu")) return false;
-        return true;
-      }
-
-      items = items.filter(isInProgress);
-
-      // ordena por updated_at desc
-      items.sort(function (a, b) {
-        return new Date(pickProcessUpdatedAt(b) || 0).getTime() - new Date(pickProcessUpdatedAt(a) || 0).getTime();
+      items = items.filter(function (p) {
+        var v = getProcessStatusValue(p);
+        return v === 2; // Próximo do prazo
       });
 
-      // TOP 5
-      items = items.slice(0, 5);
+      items.sort(function (a, b) {
+        var ad = new Date(pickProcessDueAt(a) || pickProcessUpdatedAt(a) || 0).getTime();
+        var bd = new Date(pickProcessDueAt(b) || pickProcessUpdatedAt(b) || 0).getTime();
 
-      var $wrap = $("#inProgressContainer");
+        // smaller first (closest due date first)
+        return ad - bd;
+      });
+
+      items = items.slice(0, 2);
+
+      var $wrap = $("#nearDueContainer");
       $wrap.empty();
 
       if (!items.length) {
-        $wrap.append('<div class="ibox-content"><small>Nenhum processo em andamento.</small></div>');
+        $wrap.append('<div class="ibox-content"><small>Nenhum processo próximo do prazo no período.</small></div>');
         return;
       }
 
       items.forEach(function (p) {
         var number = pickProcessNumber(p);
-        var completed = pickProcessCompletedPercent(p);
-        var completedText = completed == null ? "-" : (completed.toFixed(2) + "%");
+        var company = pickProcessCompanyName(p);
 
-        var statusLabel = normalizeProcessStatus(p);
-        var cls = statusClassFromLabel(statusLabel);
+        var dueAt = pickProcessDueAt(p);
+        var dueText = dueAt ? formatDatePtBr(dueAt) : "-";
+
+        var statusLabel = getProcessStatusLabel(p);
+        var cls = getProcessStatusCssFull(p);
 
         var pid = pickProcessId(p);
 
         var block = `
           <div class="ibox-content dash-clicker" ${pid ? `onclick="redirectToProcessDetail('${String(pid).replace(/'/g, "\\'")}')"` : ""}>
             <div class="row">
-              <div class="col-4">
+              <div class="col-5">
                 <small class="stats-label">Processo</small>
                 <h4 class="truncate">${number}</h4>
+                <small class="truncate text-muted">${company}</small>
               </div>
               <div class="col-4">
-                <small class="stats-label">% Estágio</small>
-                <h4>${completedText}</h4>
+                <small class="stats-label">Prazo</small>
+                <h4>${dueText}</h4>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <small class="stats-label">Status</small>
                 <h4><span class="${cls}">${statusLabel}</span></h4>
               </div>
@@ -562,13 +665,107 @@
       });
     }
 
+    function pickProcessDateForYearFilter(p) {
+      return pickProcessCreatedAt(p) || pickProcessUpdatedAt(p) || null;
+    }
+
+    function renderProcessStatusDoughnut(processesYear) {
+      var $empty = $("#processStatusEmpty");
+      var canvas = document.getElementById("processStatusChart");
+      if (!canvas) return;
+
+      var list = Array.isArray(processesYear) ? processesYear : [];
+
+      if (!list.length) {
+        if (doughnutChart) { doughnutChart.destroy(); doughnutChart = null; }
+        $(canvas).hide();
+        $empty.show();
+        return;
+      }
+
+      $empty.hide();
+      $(canvas).show();
+
+      var counts = {};
+      list.forEach(function (p) {
+        var label = getProcessStatusLabel(p);
+        if (!label || label === "-") label = "Sem status";
+        counts[label] = (counts[label] || 0) + 1;
+      });
+
+      var labels = Object.keys(counts);
+      var values = labels.map(function (k) { return counts[k]; });
+
+      var palette = [
+        "rgba(26,179,148,0.85)",
+        "rgba(23,162,184,0.85)",
+        "rgba(0,123,255,0.85)",
+        "rgba(220,53,69,0.85)",
+        "rgba(255,193,7,0.90)",
+        "rgba(108,117,125,0.85)",
+        "rgba(111,66,193,0.85)",
+        "rgba(253,126,20,0.85)"
+      ];
+
+      var bg = labels.map(function (_, i) { return palette[i % palette.length]; });
+      var border = labels.map(function (_, i) { return palette[i % palette.length].replace("0.85", "1").replace("0.90", "1"); });
+
+      var ctx = canvas.getContext("2d");
+      if (doughnutChart) doughnutChart.destroy();
+
+      doughnutChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: bg,
+            borderColor: border,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: { display: true, position: "bottom" },
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem, data) {
+                var label = data.labels[tooltipItem.index] || "";
+                var value = data.datasets[0].data[tooltipItem.index] || 0;
+                return label + ": " + value;
+              }
+            }
+          }
+        }
+      });
+    }
+
+    var INVOICE_STATUS = {
+      rascunho: 0,
+      ativo: 1,
+      faturado: 3,
+      pago: 4
+    };
+
     async function loadDashboard() {
       try {
         $("#lastUpdateAt").text(formatDateTimePtBr(new Date()));
 
+        var ranges = computeRanges();
+        var yearStart = ranges.yearStart;
+        var yearEnd = ranges.yearEnd;
+        var monthStart = ranges.monthStart;
+        var monthEnd = ranges.monthEnd;
+
         // --------- INVOICES ---------
         var invoicesResp = await fetchJson("/api/invoices");
-        var invoices = Array.isArray(invoicesResp) ? invoicesResp : (invoicesResp?.data || invoicesResp?.items || []);
+        var invoicesRaw = Array.isArray(invoicesResp) ? invoicesResp : (invoicesResp?.data || invoicesResp?.items || []);
+
+        var invoices = invoicesRaw.filter(function (inv) {
+          var st = pickInvoiceStatus(inv);
+          return st !== INVOICE_STATUS.faturado;
+        });
 
         var invoicesMonth = [];
         var invoicesYear = [];
@@ -584,7 +781,6 @@
           if (dt >= yearStart && dt < yearEnd) invoicesYear.push(inv);
         });
 
-        // cards: todos
         var monthSumAll = invoicesMonth.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
         var yearSumAll = invoicesYear.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
 
@@ -600,7 +796,33 @@
         var deltaYear = estimatedYear > 0 ? ((yearSumAll / estimatedYear) * 100) : 0;
         $("#annualDelta").text((deltaYear || 0).toFixed(0) + "%");
 
-        // chart: estimado (30k) + ativos (status 0) + pagos (status 4)
+        // Média mensal do ano
+        var avgMonthly = yearSumAll / 12;
+        $("#avgMonthlyRevenue").text(moneyCurrencyPtBr(avgMonthly, "BRL"));
+        $("#avgMonthlyHint").text("Ano ÷ 12");
+
+        // Melhor mês do ano
+        var totalsByMonthAll = new Array(12).fill(0);
+        invoicesYear.forEach(function (inv) {
+          var dt = new Date(pickInvoiceDate(inv));
+          if (Number.isNaN(dt.getTime())) return;
+          var m = dt.getMonth();
+          totalsByMonthAll[m] += toNumber(pickInvoiceTotal(inv));
+        });
+
+        var bestMonthIndex = 0;
+        var bestMonthValue = totalsByMonthAll[0] || 0;
+        for (var i = 1; i < 12; i++) {
+          if ((totalsByMonthAll[i] || 0) > bestMonthValue) {
+            bestMonthValue = totalsByMonthAll[i] || 0;
+            bestMonthIndex = i;
+          }
+        }
+
+        $("#bestMonthName").text(monthsPt[bestMonthIndex] || "-");
+        $("#bestMonthRevenue").text(moneyCurrencyPtBr(bestMonthValue, "BRL"));
+
+        // --------- CHART (linha): estimado + ativo + pago ---------
         var estimatedByMonth = new Array(12).fill(30000);
         var activeByMonth = new Array(12).fill(0);
         var paidByMonth = new Array(12).fill(0);
@@ -613,8 +835,8 @@
           var total = toNumber(pickInvoiceTotal(inv));
           var st = pickInvoiceStatus(inv);
 
-          if (st === 0) activeByMonth[m] += total;      // Ativos
-          if (st === 4) paidByMonth[m] += total;        // Pagos
+          if (st === INVOICE_STATUS.ativo) activeByMonth[m] += total;
+          if (st === INVOICE_STATUS.pago) paidByMonth[m] += total;
         });
 
         var lineData = {
@@ -629,17 +851,17 @@
               data: estimatedByMonth
             },
             {
-              label: "Invoices Ativos (status 0)",
+              label: "Invoices ativas (status 1)",
               backgroundColor: "rgba(26,179,148,0.10)",
-              borderColor: "rgba(26,179,148,1)", /* verde */
+              borderColor: "rgba(26,179,148,1)",
               pointBackgroundColor: "rgba(26,179,148,1)",
               pointBorderColor: "#fff",
               data: activeByMonth
             },
             {
-              label: "Invoices Pagos (status 4)",
+              label: "Invoices pagas (status 4)",
               backgroundColor: "rgba(220,38,38,0.08)",
-              borderColor: "rgba(220,38,38,1)", /* vermelho */
+              borderColor: "rgba(220,38,38,1)",
               pointBackgroundColor: "rgba(220,38,38,1)",
               pointBorderColor: "#fff",
               data: paidByMonth
@@ -650,57 +872,70 @@
         var lineOptions = {
           responsive: true,
           maintainAspectRatio: false,
-          tooltips: { enabled: false },   // remove tooltips do gráfico
-          hover: { mode: null },          // evita hover highlight
+          tooltips: {
+            enabled: true,
+            callbacks: {
+              label: function (tooltipItem, data) {
+                var dsLabel = data?.datasets?.[tooltipItem.datasetIndex]?.label || "";
+                return dsLabel + ": " + moneyCurrencyPtBr(tooltipItem.yLabel, "BRL");
+              }
+            }
+          },
           scales: {
             yAxes: [{
               ticks: {
                 beginAtZero: true,
-                stepSize: 10000
+                stepSize: 10000,
+                callback: function (value) {
+                  try { return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value); }
+                  catch (e) { return String(value); }
+                }
               }
             }]
           }
         };
 
         var ctx = document.getElementById("lineChart").getContext("2d");
-        if (chart) chart.destroy();
-        chart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
+        if (lineChart) lineChart.destroy();
+        lineChart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
 
         $("#totalInvoicesInPeriod").text(String(invoicesYear.length));
-        $("#yearRevenueTotal").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
-        $("#yearEstimatedTotal").text(moneyCurrencyPtBr(estimatedYear, "BRL"));
-
-        var prog = estimatedYear > 0 ? Math.max(0, Math.min(100, (yearSumAll / estimatedYear) * 100)) : 0;
-        $("#yearRevenueProgress").css("width", prog.toFixed(0) + "%");
-        $("#yearEstimatedProgress").css("width", "100%");
 
         // --------- PROCESSES ---------
         var processesResp = await fetchJson("/api/processes");
         var processes = Array.isArray(processesResp) ? processesResp : (processesResp?.data || processesResp?.items || []);
 
         var processesYear = processes.filter(function (p) {
-          var dtRaw = pickProcessCreatedAt(p);
+          var dtRaw = pickProcessDateForYearFilter(p);
           if (!dtRaw) return false;
+
           var dt = new Date(dtRaw);
           if (Number.isNaN(dt.getTime())) return false;
+
           return dt >= yearStart && dt < yearEnd;
         });
 
         $("#totalProcessesInPeriod").text(String(processesYear.length));
 
-        renderInProgress(processes);
+        // Right card (Top 2) + Doughnut are based on selected year
+        renderNearDue(processesYear);
+        renderProcessStatusDoughnut(processesYear);
 
+        // Grid remains all processes (as your original behavior)
         allProcesses = processes.slice();
         pageIndex = 0;
         setSortIndicator();
         renderProcessesTable();
 
       } catch (e) {
-        console.error("Dashboard load error:", e);
+        console.error("Erro ao carregar dashboard:", e);
         $("#monthlyRevenue").text("Erro");
         $("#annualRevenue").text("Erro");
+        $("#avgMonthlyRevenue").text("Erro");
+        $("#bestMonthName").text("-");
+        $("#bestMonthRevenue").text("Erro");
         $("#processesTbody").html('<tr><td colspan="6">Erro ao carregar dados.</td></tr>');
-        $("#inProgressContainer").html('<div class="ibox-content"><small>Erro ao carregar processos.</small></div>');
+        $("#nearDueContainer").html('<div class="ibox-content"><small>Erro ao carregar processos.</small></div>');
       }
     }
 
@@ -745,6 +980,13 @@
       var maxPage = Math.max(0, Math.ceil(total / pageSize) - 1);
       if (pageIndex < maxPage) pageIndex++;
       renderProcessesTable();
+    });
+
+    // Year filter
+    $("#yearFilter").on("change", function () {
+      var v = Number($(this).val());
+      if (Number.isFinite(v)) selectedYear = v;
+      loadDashboard();
     });
 
     setSortIndicator();

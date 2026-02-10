@@ -344,5 +344,146 @@ router.get("/auth/me", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+/* -------------------- GET /api/users/:id/profile-picture -------------------- */
+/**
+ * Forwards to BACKEND: GET {BACKEND}/users/:id/profile-picture
+ * Returns only the profile picture (base64/dataURL) to keep pages fast.
+ */
+router.get("/users/:id/profile-picture", async (req, res) => {
+  try {
+    const { id } = req.params ?? {};
+
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({
+        message: "Validation error. Missing or invalid path parameter.",
+        missing: ["id"],
+      });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/${encodeURIComponent(id)}/profile-picture`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/users/:id/profile-picture error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+/* -------------------- GET /api/users/me/profile-picture -------------------- */
+router.get("/users/me/profile-picture", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/me/profile-picture`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/users/me/profile-picture error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* -------------------- PATCH /api/users/me/profile-picture -------------------- */
+router.patch("/users/me/profile-picture", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const base64 = body.base64 == null ? "" : String(body.base64);
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/me/profile-picture`, {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({ base64 }),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("PATCH /api/users/me/profile-picture error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* -------------------- GET /api/users/:id/profile-picture -------------------- */
+router.get("/users/:id/profile-picture", async (req, res) => {
+  try {
+    const { id } = req.params ?? {};
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({ message: "Validation error. Missing id." });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/${encodeURIComponent(id)}/profile-picture`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/users/:id/profile-picture error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* -------------------- PATCH /api/users/:id/profile-picture -------------------- */
+router.patch("/users/:id/profile-picture", async (req, res) => {
+  try {
+    const { id } = req.params ?? {};
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({ message: "Validation error. Missing id." });
+    }
+
+    const body = req.body ?? {};
+    const base64 = body.base64 == null ? "" : String(body.base64);
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/${encodeURIComponent(id)}/profile-picture`, {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({ base64 }),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("PATCH /api/users/:id/profile-picture error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 module.exports = router;

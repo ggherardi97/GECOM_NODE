@@ -93,13 +93,10 @@
                 <th><input type="text" class="form-control input-sm" placeholder="Filter by Task" /></th>
                 <th><input type="text" class="form-control input-sm" placeholder="Filter by Date" /></th>
                 <th>
-                  <select id="actionFilter" class="form-control input-sm">
-                    <option value="">Todos</option>
-                    <option value="No Prazo">No Prazo</option>
-                    <option value="Próximo do prazo">Próximo do prazo</option>
-                    <option value="Atrasado">Atrasado</option>
-                    <option value="Encerrado">Encerrado</option>
-                  </select>
+                 <select id="actionFilter" class="form-control input-sm">
+  <option value="">Todos</option>
+</select>
+
                 </th>
               </tr>
 
@@ -340,31 +337,25 @@
   }
 
   // -------------------- Status (FIXED mapping) --------------------
-  // 0 - No Prazo
-  // 1 - Próximo do prazo
-  // 2 - Atrasado
-  // 3 - Encerrado
-  function statusToLabel(statusValue) {
-    const s = Number(statusValue);
-    if (Number.isNaN(s)) return "No Prazo";
+// -------------------- Status (source of truth: ProcessStatusEnum) --------------------
+function getStatusValueFromApi(value) {
+  // normalize: backend might send string "1" or number 1
+  const n = Number(value);
+  return Number.isNaN(n) ? 0 : n;
+}
 
-    switch (s) {
-      case 0: return "No Prazo";
-      case 1: return "Próximo do prazo";
-      case 2: return "Atrasado";
-      case 3: return "Encerrado";
-      default: return "No Prazo";
-    }
-  }
+function getStatusLabel(statusValue) {
+  const s = getStatusValueFromApi(statusValue);
+  return window.ProcessStatusEnum?.getLabel(s) ?? `Status ${s}`;
+}
 
-  function labelClass(labelText) {
-    const v = String(labelText || "").toLowerCase();
-    if (v.includes("no prazo")) return "label label-success";
-    if (v.includes("próximo")) return "label label-warning";
-    if (v.includes("atras")) return "label label-error";
-    if (v.includes("encerr")) return "label label-danger";
-    return "label label-primary";
-  }
+function getStatusCssClass(statusValue) {
+  const s = getStatusValueFromApi(statusValue);
+  const enumCss = window.ProcessStatusEnum?.getCssClass(s) ?? "label-default";
+  // your enum returns "label-success"/"label-danger"... but in this page we need full "label label-*"
+  return enumCss.includes("label ") ? enumCss : `label ${enumCss}`;
+}
+
 
   // -------------------- Mapping --------------------
   function mapApiToRow(p, index) {
@@ -373,7 +364,7 @@
     const process_number = p?.process_number ?? p?.processNumber ?? "";
     const invoice = p?.invoice ?? "";
     const ship_date = p?.ship_date ?? p?.shipDate ?? p?.created_on ?? p?.createdAt ?? p?.created_at ?? "";
-    const status = p?.status;
+    const status = getStatusValueFromApi(p?.status);
 
     const completedRaw = p?.completed;
     const completedNumber = Math.max(0, Math.min(100, toNumber(completedRaw))); // clamp 0..100
@@ -381,7 +372,7 @@
     const company_id = p?.company_id ?? p?.companyId ?? "";
     const primary_contact_id = p?.primary_contact_id ?? p?.primaryContactId ?? "";
 
-    const actionText = statusToLabel(status);
+    const actionText =  getStatusLabel(status);
 
     return {
       Id: String(id),
@@ -403,7 +394,7 @@
 
       CompanyId: isNonEmptyString(company_id) ? String(company_id) : "",
       PrimaryContactId: isNonEmptyString(primary_contact_id) ? String(primary_contact_id) : "",
-
+StatusValue: status,
       CompanyName: "",
       ContactName: "",
       Phone: "",
@@ -502,6 +493,7 @@
       const tr = document.createElement("tr");
       tr.className = "clicker";
       tr.setAttribute("data-process-id", String(p.Id));
+tr.setAttribute("data-status", String(p.StatusValue));
 
       tr.addEventListener("click", function () {
         redirectToProcess(p.Id);
@@ -534,7 +526,7 @@
         </td>
         <td>${escapeHtml(p.Task)}</td>
         <td>${escapeHtml(formatDatePtBR(p.Date))}</td>
-        <td><span class="${escapeHtml(labelClass(p.ActionText))}">${escapeHtml(p.ActionText)}</span></td>
+        <td><span class="${escapeHtml(getStatusCssClass(p.StatusValue))}">${escapeHtml(getStatusLabel(p.StatusValue))}</span></td>
       `;
 
       // Prevent redirect when clicking checkbox
@@ -725,7 +717,8 @@
 
   function applyCurrentFilters() {
     const table = $("#process");
-    const actionSelected = String($("#actionFilter").val() || "").toLowerCase();
+    const actionSelectedRaw = $("#actionFilter").val();
+const actionSelected = actionSelectedRaw !== "" && actionSelectedRaw != null ? Number(actionSelectedRaw) : null;
 
     // Column filter inputs are in header row 1 (filters row)
     const filterInputs = $("#process thead tr:nth-child(1) input");
@@ -759,14 +752,28 @@
       });
 
       // Action dropdown filter (td 9)
-      if (visible && actionSelected) {
-        const actionText = String($row.find("td").eq(9).text() || "").toLowerCase();
-        if (actionText.indexOf(actionSelected) === -1) visible = false;
-      }
+if (visible && actionSelected != null && !Number.isNaN(actionSelected)) {
+  const rowStatus = Number($row.attr("data-status"));
+  if (Number.isNaN(rowStatus) || rowStatus !== actionSelected) visible = false;
+}
+
 
       $row.toggle(visible);
     });
   }
+function fillStatusFilter() {
+  const sel = document.getElementById("actionFilter");
+  if (!sel) return;
+
+  // keep the first option "Todos"
+  const options = window.ProcessStatusEnum?.toSelectOptions?.() ?? [];
+  options.forEach((o) => {
+    const opt = document.createElement("option");
+    opt.value = String(o.value);   // numeric string
+    opt.textContent = o.label;
+    sel.appendChild(opt);
+  });
+}
 
   // -------------------- Load --------------------
   async function loadProcesses() {
@@ -817,6 +824,7 @@
 
     bindBulkEvents();
     bindSorting();
+    fillStatusFilter();
     installColumnFilters();
     loadProcesses();
   });

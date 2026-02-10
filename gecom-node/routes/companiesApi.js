@@ -92,6 +92,41 @@ router.get("/companies/:id", async (req, res) => {
   }
 });
 
+router.get('/companies/:id/logo', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Ajuste para a URL real do Nest (3000)
+    const resp = await fetch(`${baseUrl}/companies/${encodeURIComponent(id)}/logo`, {
+      method: 'GET',
+      headers: {
+        // repassa cookies para manter auth
+        cookie: req.headers.cookie || '',
+      },
+    });
+
+    if (resp.status === 204) {
+      return res.status(204).send();
+    }
+
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      return res.status(resp.status).send(txt || 'Failed to fetch logo');
+    }
+
+    const contentType = resp.headers.get('content-type') || 'image/png';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', resp.headers.get('cache-control') || 'private, max-age=300');
+
+    const arrayBuffer = await resp.arrayBuffer();
+    return res.status(200).send(Buffer.from(arrayBuffer));
+  } catch (err) {
+    console.error('GET /api/companies/:id/logo error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 /* -------------------- POST /companies -------------------- */
 router.post("/companies", async (req, res) => {
   try {

@@ -945,12 +945,15 @@ function renderTransports(list) {
 
     const tr = document.createElement("tr");
     tr.style.cursor = "pointer";
+    let disabled = "";
 
     if (window.__auth.isAdmin) {
       tr.addEventListener("click", function () {
         openEditTransportModal(t);
+    disabled = "disabled='disabled'";
       });
     }
+
 
     tr.innerHTML = `
       <td>${escapeHtml(t?.transport_company || "-")}</td>
@@ -962,12 +965,12 @@ function renderTransports(list) {
       <td>${escapeHtml(formatDateOnlyPtBR(t?.arrival_forecast))}</td>
 
       <td style="text-align:center; white-space:nowrap;">
-        <button class="btn btn-xs btn-info" title="Editar"
+        <button ${disabled} class="btn btn-xs btn-info" title="Editar"
           onclick="event.stopPropagation(); editTransportById('${escapeHtml(String(t?.id || ""))}')">
           <i style='margin: 0px !important;' class="fa fa-pencil"></i>
         </button>
 
-        <button class="btn btn-xs btn-danger" title="Excluir"
+        <button ${disabled} class="btn btn-xs btn-danger" title="Excluir"
           onclick="event.stopPropagation(); deleteTransport('${escapeHtml(String(t?.id || ""))}')">
           <i style='margin: 0px !important;' class="fa fa-trash"></i>
         </button>
@@ -1134,7 +1137,9 @@ async function openEditTransportModal(t) {
         <select id="selStatus" class="form-control">
           <option value="0" ${status === 0 ? "selected" : ""}>Rascunho</option>
           <option value="1" ${status === 1 ? "selected" : ""}>Em andamento</option>
-          <option value="2" ${status === 2 ? "selected" : ""}>Finalizado</option>
+          <option value="2" ${status === 2 ? "selected" : ""}>Próximo do prazo</option>
+          <option value="3" ${status === 3 ? "selected" : ""}>Atrasado</option>
+          <option value="4" ${status === 4 ? "selected" : ""}>Finalizado</option>
         </select>
       </div>
     `;
