@@ -43,7 +43,6 @@
 <script src="/Assets/js/enums/globalEnum.js"></script>
 <script src="/Assets/js/authContext.js"></script>
 
-<script src="/Assets/js/authContext.js"></script>
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
     <style>
        body.mini-navbar .menuDivider { display: none !important; }
@@ -139,6 +138,14 @@
       .menuDivider:hover{
           background-color: unset !important;
       }
+
+      .rounded-circle{
+        width: 65px !important;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+      }
     </style>
 </head>
 
@@ -198,7 +205,7 @@
             <a class="navbar-minimalize minimalize-styl-2 btn btn-primary" href="#"><i class="fa fa-bars"></i></a>
           </div>
           <ul class="nav navbar-top-links navbar-right">
-            <li><a href="/"><i class="fa fa-sign-out"></i> Sair</a></li>
+            <li><a href="#" onclick="LogOut()"><i class="fa fa-sign-out"></i> Sair</a></li>
           </ul>
         </nav>
       </div>
@@ -301,248 +308,316 @@
           }
         }
       </script>
-      <script>
-        (function () {
-          // Prevent double-installation
-          if (window.__authFetchInterceptorInstalled) return;
-          window.__authFetchInterceptorInstalled = true;
 
-          // ---------------- Global Spinner (counter-based) ----------------
-          const spinnerOverlay = document.getElementById("globalSpinner");
-          const spinnerText = document.getElementById("globalSpinnerText");
+<!-- Loader com global spin e validação de sessão -->
+<script>
+  (function () {
+    // Prevent double-installation
+    if (window.__authFetchInterceptorInstalled) return;
+    window.__authFetchInterceptorInstalled = true;
 
-          let pendingCount = 0;
-          let hideTimer = null;
+    // ---------------- Global Spinner (counter-based) ----------------
+    const spinnerOverlay = document.getElementById("globalSpinner");
+    const spinnerText = document.getElementById("globalSpinnerText");
 
-          function spinnerRender() {
-            if (!spinnerOverlay) return;
+    let pendingCount = 0;
+    let hideTimer = null;
 
-            if (pendingCount > 0) {
-              if (hideTimer) clearTimeout(hideTimer);
-              spinnerOverlay.classList.add("is-visible");
-              spinnerOverlay.setAttribute("aria-hidden", "false");
-              return;
-            }
+    function spinnerRender() {
+      if (!spinnerOverlay) return;
 
-            // Small delay avoids flicker for very fast requests
-            hideTimer = setTimeout(() => {
-              spinnerOverlay.classList.remove("is-visible");
-              spinnerOverlay.setAttribute("aria-hidden", "true");
-              if (spinnerText) {
-                spinnerText.style.display = "none";
-                spinnerText.textContent = "";
-              }
-            }, 150);
-          }
+      if (pendingCount > 0) {
+        if (hideTimer) clearTimeout(hideTimer);
+        spinnerOverlay.classList.add("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "false");
+        return;
+      }
 
-          function spinnerShow(message) {
-            pendingCount++;
-            if (spinnerText && message) {
-              spinnerText.textContent = String(message);
-              spinnerText.style.display = "block";
-            }
-            spinnerRender();
-          }
+      // Small delay avoids flicker for very fast requests
+      hideTimer = setTimeout(() => {
+        spinnerOverlay.classList.remove("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "true");
+        if (spinnerText) {
+          spinnerText.style.display = "none";
+          spinnerText.textContent = "";
+        }
+      }, 150);
+    }
 
-          function spinnerHide() {
-            pendingCount = Math.max(0, pendingCount - 1);
-            spinnerRender();
-          }
+    function spinnerShow(message) {
+      pendingCount++;
+      if (spinnerText && message) {
+        spinnerText.textContent = String(message);
+        spinnerText.style.display = "block";
+      }
+      spinnerRender();
+    }
 
-          function spinnerReset() {
-            pendingCount = 0;
-            spinnerRender();
-          }
+    function spinnerHide() {
+      pendingCount = Math.max(0, pendingCount - 1);
+      spinnerRender();
+    }
 
-          async function spinnerWrap(promiseOrFn, message) {
-            spinnerShow(message);
-            try {
-              const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
-              return await p;
-            } finally {
-              spinnerHide();
-            }
-          }
+    function spinnerReset() {
+      pendingCount = 0;
+      spinnerRender();
+    }
 
-          window.GECOM = window.GECOM || {};
-          window.GECOM.spinner = { show: spinnerShow, hide: spinnerHide, reset: spinnerReset, wrap: spinnerWrap };
+    async function spinnerWrap(promiseOrFn, message) {
+      spinnerShow(message);
+      try {
+        const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
+        return await p;
+      } finally {
+        spinnerHide();
+      }
+    }
 
-          // ---------------- Session expired modal (Bootstrap GlobalModal) ----------------
-          function openSessionExpiredModal() {
-            // GlobalModal elements from layout (Bootstrap)
-            const modalBtn = document.getElementById("modalButton");
-            const modalTitle = document.getElementById("modalTitle");
-            const modalBody = document.getElementById("modalBody");
-            const btnSave = document.getElementById("saveModal");
-            const btnClose = document.getElementById("closeModal");
+    window.GECOM = window.GECOM || {};
+    window.GECOM.spinner = { show: spinnerShow, hide: spinnerHide, reset: spinnerReset, wrap: spinnerWrap };
 
-            // Fallback if modal not found
-            if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-              alert("Sua sessão expirou. Faça login novamente.");
-              window.location.href = "/";
-              return;
-            }
+    // ---------------- Session expired modal (Bootstrap GlobalModal) ----------------
+    function openSessionExpiredModal() {
+      // Avoid opening multiple times
+      if (window.__gecomSessionExpiredShown) return;
+      window.__gecomSessionExpiredShown = true;
 
-            modalTitle.textContent = "Sessão expirada";
-            modalBody.innerHTML = `
-    <p>Sua sessão expirou ou você perdeu autorização.</p>
-    <p>Você precisa fazer login novamente.</p>
-  `;
+      const modalBtn = document.getElementById("modalButton");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalBody = document.getElementById("modalBody");
+      const btnSave = document.getElementById("saveModal");
+      const btnClose = document.getElementById("closeModal");
 
-            // Configure buttons
-            btnSave.textContent = "Ir para Login";
-            btnSave.classList.remove("btn-danger");
-            btnSave.classList.add("btn-primary");
+      // Fallback if modal not found
+      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+        alert("Sua sessão expirou. Faça login novamente.");
+        window.location.href = "/";
+        return;
+      }
 
-            btnClose.textContent = "Fechar";
+      modalTitle.textContent = "Sessão expirada";
+      modalBody.innerHTML = `
+        <p>Sua sessão expirou ou você perdeu autorização.</p>
+        <p>Você precisa fazer login novamente.</p>
+      `;
 
-            const cleanup = () => {
-              btnSave.onclick = null;
-              btnClose.onclick = null;
+      btnSave.textContent = "Ir para Login";
+      btnSave.classList.remove("btn-danger");
+      btnSave.classList.add("btn-primary");
 
-              // Restore defaults (match your layout defaults)
-              btnSave.textContent = "Save";
-              btnClose.textContent = "Close";
-              btnSave.classList.remove("btn-danger");
-              btnSave.classList.add("btn-primary");
-            };
+      btnClose.textContent = "Fechar";
 
-            const goToLogin = () => {
-              cleanup();
-              window.location.href = "/";
-            };
+      const cleanup = () => {
+        btnSave.onclick = null;
+        btnClose.onclick = null;
 
-            btnSave.onclick = goToLogin;
-            btnClose.onclick = () => {
-              cleanup();
-              // If the user closes, still redirect (session expired = must login)
-              window.location.href = "/";
-            };
+        // Restore defaults
+        btnSave.textContent = "Save";
+        btnClose.textContent = "Close";
+        btnSave.classList.remove("btn-danger");
+        btnSave.classList.add("btn-primary");
+      };
 
-            // Open modal by clicking hidden button (your current pattern)
-            modalBtn.click();
-          }
+      const goToLogin = () => {
+        cleanup();
+        window.location.href = "/";
+      };
 
-          // ---------------- Refresh flow (single-flight) ----------------
-          let refreshPromise = null;
+      btnSave.onclick = goToLogin;
+      btnClose.onclick = goToLogin;
 
-          async function refreshAccessToken() {
-            if (refreshPromise) return refreshPromise;
+      modalBtn.click();
+    }
 
-            refreshPromise = (async () => {
-              const resp = await fetch("/auth/refresh", {
-                method: "POST",
-                headers: { "Accept": "application/json" },
-                credentials: "same-origin"
-              });
+    // ---------------- Refresh flow (single-flight) ----------------
+    // Note: keep this only for the 401 interceptor. Do NOT use it as a periodic ping.
+    let refreshPromise = null;
 
-              if (!resp.ok) {
-                throw new Error("Refresh failed");
-              }
+    async function refreshAccessToken() {
+      if (refreshPromise) return refreshPromise;
 
-              return true;
-            })();
+      refreshPromise = (async () => {
+        const resp = await fetch("/auth/refresh", {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+          cache: "no-store"
+        });
 
-            try {
-              return await refreshPromise;
-            } finally {
-              refreshPromise = null;
-            }
-          }
+        if (!resp.ok) throw new Error("Refresh failed");
+        return true;
+      })();
 
-          // ---------------- Helpers: decide when to show spinner ----------------
-          function shouldIgnoreSpinner(url) {
-            if (!url) return false;
+      try {
+        return await refreshPromise;
+      } finally {
+        refreshPromise = null;
+      }
+    }
 
-            // auth endpoints
-            if (url.includes("/auth/refresh") || url.includes("/profile-picture") || url.includes("/auth/logout")) return true;
+    // ---------------- Helpers: decide when to show spinner ----------------
+    function shouldIgnoreSpinner(url) {
+      if (!url) return false;
 
-            // static assets (avoid noisy spinner)
-            const lower = url.toLowerCase();
-            if (
-              lower.includes("/assets/") ||
-              lower.endsWith(".css") ||
-              lower.endsWith(".js") ||
-              lower.endsWith(".png") ||
-              lower.endsWith(".jpg") ||
-              lower.endsWith(".jpeg") ||
-              lower.endsWith(".svg") ||
-              lower.endsWith(".gif") ||
-              lower.endsWith(".webp") ||
-              lower.endsWith(".ico") ||
-              lower.endsWith(".woff") ||
-              lower.endsWith(".woff2") ||
-              lower.endsWith(".ttf") ||
-              lower.endsWith(".map")
-            ) return true;
+      // auth endpoints + profile picture + session ping endpoint
+      if (
+        url.includes("/auth/refresh") ||
+        url.includes("/auth/logout") ||
+        url.includes("/profile-picture") ||
+        url.includes("/api/currencies")
+      ) return true;
 
-            return false;
-          }
+      // static assets (avoid noisy spinner)
+      const lower = url.toLowerCase();
+      if (
+        lower.includes("/assets/") ||
+        lower.endsWith(".css") ||
+        lower.endsWith(".js") ||
+        lower.endsWith(".png") ||
+        lower.endsWith(".jpg") ||
+        lower.endsWith(".jpeg") ||
+        lower.endsWith(".svg") ||
+        lower.endsWith(".gif") ||
+        lower.endsWith(".webp") ||
+        lower.endsWith(".ico") ||
+        lower.endsWith(".woff") ||
+        lower.endsWith(".woff2") ||
+        lower.endsWith(".ttf") ||
+        lower.endsWith(".map")
+      ) return true;
 
-          // ---------------- jQuery Ajax global hook ----------------
-          // Covers $.ajax / $.get / $.post etc.
-          if (window.jQuery) {
-            jQuery(document).ajaxStart(function () {
-              spinnerShow();
-            });
+      return false;
+    }
 
-            jQuery(document).ajaxStop(function () {
-              spinnerReset();
-            });
-          }
+    // ---------------- jQuery Ajax global hook ----------------
+    if (window.jQuery) {
+      jQuery(document).ajaxStart(function () {
+        spinnerShow();
+      });
 
-          // ---------------- Fetch interceptor ----------------
-          const originalFetch = window.fetch.bind(window);
+      jQuery(document).ajaxStop(function () {
+        spinnerReset();
+      });
+    }
 
-          window.fetch = async function (input, init) {
-            const requestUrl = typeof input === "string" ? input : (input && input.url) || "";
+    // ---------------- Fetch interceptor ----------------
+    const originalFetch = window.fetch.bind(window);
 
-            // Avoid infinite loops: never intercept refresh/logout itself
-            const isAuthRefresh = requestUrl.includes("/auth/refresh");
-            const isAuthLogout = requestUrl.includes("/auth/logout");
-            if (isAuthRefresh || isAuthLogout) {
-              return originalFetch(input, init);
-            }
+    window.fetch = async function (input, init) {
+      const requestUrl = typeof input === "string" ? input : (input && input.url) || "";
 
-            // Ensure cookies are sent (important if your auth is cookie-based)
-            const safeInit = init ? { ...init } : {};
-            if (!safeInit.credentials) safeInit.credentials = "same-origin";
+      // Avoid infinite loops: never intercept refresh/logout itself
+      const isAuthRefresh = requestUrl.includes("/auth/refresh");
+      const isAuthLogout = requestUrl.includes("/auth/logout");
+      if (isAuthRefresh || isAuthLogout) {
+        return originalFetch(input, init);
+      }
 
-            const ignoreSpinner = shouldIgnoreSpinner(requestUrl);
-            if (!ignoreSpinner) spinnerShow();
+      // Ensure cookies are sent (important if your auth is cookie-based)
+      const safeInit = init ? { ...init } : {};
+      if (!safeInit.credentials) safeInit.credentials = "same-origin";
 
-            try {
-              let response = await originalFetch(input, safeInit);
+      const ignoreSpinner = shouldIgnoreSpinner(requestUrl);
+      if (!ignoreSpinner) spinnerShow();
 
-              // If not 401, return normally
-              if (response.status !== 401) return response;
+      try {
+        let response = await originalFetch(input, safeInit);
 
-              // Try refresh once
-              try {
-                await refreshAccessToken();
-              } catch (e) {
-                console.warn("Token refresh failed:", e);
-                openSessionExpiredModal();
-                return response;
-              }
+        // If not 401, return normally
+        if (response.status !== 401) return response;
 
-              // Retry original request once after refresh
-              response = await originalFetch(input, safeInit);
+        // Try refresh once
+        try {
+          await refreshAccessToken();
+        } catch (e) {
+          console.warn("Token refresh failed:", e);
+          openSessionExpiredModal();
+          return response;
+        }
 
-              // If still unauthorized, show modal
-              if (response.status === 401) {
-                openSessionExpiredModal();
-              }
+        // Retry original request once after refresh
+        response = await originalFetch(input, safeInit);
 
-              return response;
-            } finally {
-              if (!ignoreSpinner) spinnerHide();
-            }
-          };
-        })();
-      </script>
+        // If still unauthorized, show modal
+        if (response.status === 401) {
+          openSessionExpiredModal();
+        }
+
+        return response;
+      } finally {
+        if (!ignoreSpinner) spinnerHide();
+      }
+    };
+
+    // ---------------- Periodic auth check (every ~5 minutes) ----------------
+    // Uses a lightweight authenticated GET instead of /auth/refresh.
+    const SESSION_PING_MS = 1000 * 60 * 5; // 5 minutes
+    const SESSION_PING_URL = "/api/currencies?is_active=1";
+
+    let sessionPingTimer = null;
+
+    function hasCurrentUser() {
+      try {
+        const raw = localStorage.getItem("currentUser");
+        if (!raw) return false;
+        const obj = JSON.parse(raw);
+        return !!obj?.id;
+      } catch {
+        return false;
+      }
+    }
+
+    async function sessionPing() {
+      // Do not ping before login is fully established
+      if (!hasCurrentUser()) return;
+
+      try {
+        const resp = await originalFetch(SESSION_PING_URL, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
+        // If unauthorized/forbidden => session expired
+        if (resp.status === 401 || resp.status === 403) {
+          console.warn("Session ping unauthorized:", resp.status);
+          openSessionExpiredModal();
+          return;
+        }
+
+        // If server error/network issues => do not force logout
+        if (!resp.ok) {
+          console.warn("Session ping non-ok:", resp.status);
+        }
+      } catch (e) {
+        console.warn("Session ping failed (network):", e);
+      }
+    }
+
+    function startSessionPing() {
+      if (sessionPingTimer) clearInterval(sessionPingTimer);
+
+      // First ping after load (avoid racing login)
+      setTimeout(sessionPing, 30 * 1000);
+
+      sessionPingTimer = setInterval(() => {
+        if (document.visibilityState === "visible") sessionPing();
+      }, SESSION_PING_MS);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") sessionPing();
+    });
+
+    startSessionPing();
+  })();
+</script>
+
 
       <script src="../Assets/js/globalSpinner.js"></script>
+     
+      <!-- Script de permissões -->
       <script>
         (function () {
           try {
@@ -576,6 +651,7 @@
         })();
       </script>
 
+<!-- Esse script aplica foto de perfil -->
 <script>
   (function () {
     // English comments only
@@ -634,7 +710,7 @@
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) return null;
 
-      const pic = data?.profile_picture;
+      const pic = data?.base64;
       return (typeof pic === "string" && pic.trim().length > 0) ? pic : null;
     }
 
@@ -671,7 +747,7 @@
 </script>
 
 
-      <!-- Esse script altera o alert nativo do navegador para nosso modal -->
+<!-- Esse script altera o alert nativo do navegador para nosso modal -->
 <script>
   (function () {
     if (window.__gecomDialogOverridden) return;

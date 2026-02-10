@@ -196,6 +196,7 @@ router.get("/invoices", async (req, res) => {
     const qs = new URLSearchParams();
     if (req.query.company_id) qs.set("company_id", String(req.query.company_id));
     if (req.query.status) qs.set("status", String(req.query.status));
+if (req.query.fields) qs.set("fields", String(req.query.fields));
 
     const response = await fetch(`${baseUrl}/invoices?${qs.toString()}`, {
       method: "GET",

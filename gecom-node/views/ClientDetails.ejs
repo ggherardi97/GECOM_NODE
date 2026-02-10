@@ -28,7 +28,8 @@
 
   /* Logo */
   #company_logo {
-    width: 100%;
+    width: 60%;
+    max-height: 50%;
     padding: 20px;
     object-fit: contain;
     background: #fff;
@@ -154,7 +155,7 @@
 
             </div>
 
-            <div class="col-lg-2">
+            <div class="col-lg-2" style="text-align: center;">
               <img id="company_logo" src="../Assets/inspinia/img/zender_logo.png" alt="Logo do cliente">
               <div class="logo-muted" style="padding:0 20px 10px 20px;">
                 * Edite o logo em “Edite os detalhes do cliente”.
@@ -279,7 +280,8 @@
 <script>
   (function () {
     // If your backend uses another field name for the logo, change it here:
-    const COMPANY_LOGO_FIELD = "company_picture"; // e.g. "logo", "company_logo", "profile_picture"
+    const COMPANY_LOGO_FIELD = "company_picture"; // must match backend DTO/patch handling
+    const DEFAULT_LOGO = "../Assets/inspinia/img/zender_logo.png";
 
     // -------------------- DOM helpers --------------------
     function setText(selector, value) {
@@ -400,45 +402,48 @@
       return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function getCompanyLogoFromCompany(company) {
-      // Try common shapes:
-      const candidates = [
-        company?.logo_base64,
-        company?.logo,
-        company?.company_logo,
-        company?.profile_picture,
-        company?.logo_url,
-        company?.logoUrl,
-        company?.company_logo_url
-      ].filter(Boolean);
+    // -------------------- Company Logo (NEW: dedicated endpoint) --------------------
+    async function fetchCompanyLogoObjectUrl(companyId) {
+      try {
+        if (!isNonEmptyString(companyId)) return null;
 
-      const raw = candidates[0];
-      if (!raw) return null;
+        const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}/logo`, {
+          method: "GET",
+          headers: { Accept: "image/*" },
+          cache: "no-store"
+        });
 
-      const s = String(raw).trim();
-      if (!s) return null;
+        if (resp.status === 204) return null;
+        if (!resp.ok) return null;
 
-      // If already data URL:
-      if (/^data:image\//i.test(s)) return s;
+        const blob = await resp.blob();
+        if (!blob || blob.size === 0) return null;
 
-      // If looks like URL:
-      if (/^https?:\/\//i.test(s) || s.startsWith("/")) return s;
-
-      // Otherwise treat as base64 png by default
-      return "data:image/png;base64," + s;
+        return URL.createObjectURL(blob);
+      } catch (e) {
+        console.warn("fetchCompanyLogoObjectUrl failed:", e);
+        return null;
+      }
     }
 
-    function setCompanyLogoOnHeader(logoDataUrlOrUrl) {
+    function setCompanyLogoOnHeader(src) {
       const img = document.getElementById("company_logo");
       if (!img) return;
 
-      if (logoDataUrlOrUrl) {
-        img.src = logoDataUrlOrUrl;
+      // Cleanup previous objectURL to avoid leaks
+      if (window.__companyLogoObjectUrl && window.__companyLogoObjectUrl.startsWith("blob:")) {
+        try { URL.revokeObjectURL(window.__companyLogoObjectUrl); } catch { }
+      }
+
+      if (src) {
+        img.src = src;
+        if (String(src).startsWith("blob:")) window.__companyLogoObjectUrl = src;
+        else window.__companyLogoObjectUrl = null;
         return;
       }
 
-      // fallback image
-      img.src = "../Assets/inspinia/img/zender_logo.png";
+      img.src = DEFAULT_LOGO;
+      window.__companyLogoObjectUrl = null;
     }
 
     // -------------------- GlobalModal (layout) confirm helpers --------------------
@@ -564,6 +569,7 @@
     async function fetchInvoicesByCompany(companyId) {
       const qs = new URLSearchParams();
       qs.set("company_id", String(companyId || "").trim());
+      qs.set("fields", "summary");
 
       const resp = await fetch(`/api/invoices?${qs.toString()}`, {
         method: "GET",
@@ -597,7 +603,8 @@
         Size: company.category ?? company.porte ?? "-",
         Status: company.status ?? "Active",
         Email: company.email ?? primaryUser?.email ?? "",
-        Logo: getCompanyLogoFromCompany(company)
+        // Logo will be loaded from /api/companies/:id/logo (dedicated endpoint)
+        Logo: null
       };
     }
 
@@ -657,7 +664,7 @@
 
         let sum = 0;
         for (const inv of invoices) {
-          const v = inv?.total ?? inv?.grand_total ?? inv?.total_amount ?? 0;
+          const v = inv?.total ?? inv?.total_amount ?? 0;
           sum += toNumber(v);
         }
 
@@ -937,7 +944,7 @@
 
     window.callNewContact = callNewContact;
 
-    // -------------------- Logo helpers --------------------
+    // -------------------- Logo helpers (upload) --------------------
     function readFileAsDataUrl(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -962,10 +969,10 @@
         phone: normalizeString(vm.Phone),
         sector: normalizeString(vm.Sector),
         size: normalizeString(vm.Size),
-        logo: vm.Logo || "" // data url or url
+        logo: vm.Logo || "" // data url or blob url
       };
 
-      const currentLogo = original.logo ? original.logo : "../Assets/inspinia/img/zender_logo.png";
+      const currentLogo = original.logo ? original.logo : DEFAULT_LOGO;
 
       const html = `
         <div class="form-group">
@@ -1086,7 +1093,7 @@
 
             await patchCompanyById(vm.Id, payload);
 
-            // Update local VM and header UI immediately
+            // Update local VM and header UI immediately (use DataURL for instant preview)
             const updatedVm = Object.assign({}, vm, {
               CompanyName: normalizeString(current.companyName),
               Phone: normalizeString(current.phone),
@@ -1099,7 +1106,7 @@
             localStorage.setItem("selectedClient", JSON.stringify(updatedVm));
             fillClientHeader(updatedVm);
 
-            // Keep it simple/consistent with your current approach:
+            // Keep consistent with your current approach:
             location.reload();
           } catch (err) {
             console.error(err);
@@ -1116,7 +1123,7 @@
           e.preventDefault();
           e.stopPropagation();
           $("#cd_logoFile").val("");
-          $("#cd_logoPreview").attr("src", "../Assets/inspinia/img/zender_logo.png");
+          $("#cd_logoPreview").attr("src", DEFAULT_LOGO);
           $("#cd_btnLogoRemove").data("remove", true);
         });
 
@@ -1164,8 +1171,25 @@
         return;
       }
 
+      // Start with cached VM (fast paint)
       const cached = safeJsonParse(rawClient);
-      if (cached) fillClientHeader(cached);
+      if (cached) {
+        fillClientHeader(cached);
+
+        // Try fetching logo even for cached render (if we have id)
+        const cachedId = String(cached?.Id || "").trim();
+        if (isNonEmptyString(cachedId)) {
+          const cachedLogo = await fetchCompanyLogoObjectUrl(cachedId);
+          if (cachedLogo) {
+            cached.Logo = cachedLogo;
+            window.__companyViewModel = cached;
+            localStorage.setItem("selectedClient", JSON.stringify(cached));
+            fillClientHeader(cached);
+          } else {
+            setCompanyLogoOnHeader(null);
+          }
+        }
+      }
 
       if (selectedClientId) {
         try {
@@ -1173,6 +1197,11 @@
           window.__companyRaw = company;
 
           const vm = mapCompanyToViewModel(company);
+
+          // NEW: load logo from dedicated endpoint
+          const logoObjectUrl = await fetchCompanyLogoObjectUrl(selectedClientId);
+          vm.Logo = logoObjectUrl;
+
           window.__companyViewModel = vm;
 
           localStorage.setItem("selectedClient", JSON.stringify(vm));
@@ -1200,6 +1229,7 @@
     }
   })();
 </script>
+
 
 <style>
   /* ClientDetails Documents mini grid selection */
@@ -1504,23 +1534,37 @@
       applySelectionClasses();
     }
 
-    function buildListQuery() {
-      const qs = new URLSearchParams();
+   function buildListQuery() {
+  const qs = new URLSearchParams();
 
-      if (docsState.currentParentId === null) qs.set("parent_id", "null");
-      else qs.set("parent_id", docsState.currentParentId);
+  // parent_id
+  if (docsState.currentParentId === null) qs.set("parent_id", "null");
+  else qs.set("parent_id", docsState.currentParentId);
 
-      if (docsState.currentSearch && docsState.currentSearch.trim()) qs.set("q", docsState.currentSearch.trim());
+  // search
+  if (docsState.currentSearch && docsState.currentSearch.trim()) {
+    qs.set("q", docsState.currentSearch.trim());
+  }
 
-      qs.set("take", "500");
-      qs.set("skip", "0");
+  qs.set("take", "500");
+  qs.set("skip", "0");
 
-      const clientId = getClientId();
-      qs.set("related_table", "company");
-      qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
+  const clientId = getClientId();
 
-      return qs.toString();
-    }
+  /**
+   * IMPORTANT:
+   * Only filter by related_table/related_id on ROOT listing (parent_id = null).
+   * Inside folders, we should rely on parent_id only, because children may not
+   * have related_table/related_id populated (they inherit the scope from the parent).
+   */
+  if (docsState.currentParentId === null) {
+    qs.set("related_table", "company");
+    qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
+  }
+
+  return qs.toString();
+}
+
 
     function renderGrid(items) {
       const $grid = $("#cd_itemsDocsGrid");

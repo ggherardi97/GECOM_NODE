@@ -65,13 +65,13 @@
               <!-- Filters row -->
               <tr>
                 <th style="width:60px;"></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Code" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Name" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Brand" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Unit" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Currency" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Price" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Tax" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Código" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Nome" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Brand" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Unidade" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Moeda" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Preço" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Imposto" /></th>
 
                 <!-- ✅ Active column filter: picklist -->
                 <th>
@@ -91,19 +91,19 @@
               <!-- Header row -->
               <tr>
                 <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="product_code">Code <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="name">Name <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="product_code">Código <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="name" style="    width: 24%;">Nome <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort-key="brand">Brand <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="unit">Unit <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="currency_text">Currency <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="unit">Unidade <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="currency_text">Moeda <span class="sort-indicator"></span></th>
 
                 <!-- NOTE: sorting uses displayed value (string). If you want numeric sort, I can adjust to use hidden numeric -->
-                <th class="sortable" data-sort-key="default_unit_price">Default Price <span
+                <th class="sortable" data-sort-key="default_unit_price">Preço <span
                     class="sort-indicator"></span></th>
 
-                <th class="sortable" data-sort-key="default_tax_rate">Tax Rate <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="is_active_text">Active <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="created_at_text">Created <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="default_tax_rate">Imposto <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text">Criado em <span class="sort-indicator"></span></th>
               </tr>
             </thead>
 
@@ -246,7 +246,7 @@
           default_unit_price: formattedPrice,
 
           default_tax_rate: String(p.default_tax_rate ?? "0"),
-          is_active_text: p.is_active ? "Yes" : "No",
+          is_active_text: p.is_active ? "Ativo" : "Inativo",
           created_at_text: formatDatePtBR(p.created_at),
         };
       }

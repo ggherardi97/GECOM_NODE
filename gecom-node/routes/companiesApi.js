@@ -49,8 +49,8 @@ router.get("/companies", async (req, res) => {
       method: "GET",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
@@ -69,7 +69,7 @@ router.get("/companies/:id", async (req, res) => {
     if (!isNonEmptyString(id)) {
       return res.status(400).json({
         message: "Validation error. Missing or invalid path parameter.",
-        missing: ["id"]
+        missing: ["id"],
       });
     }
 
@@ -80,8 +80,8 @@ router.get("/companies/:id", async (req, res) => {
       method: "GET",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
@@ -92,16 +92,32 @@ router.get("/companies/:id", async (req, res) => {
   }
 });
 
-router.get('/companies/:id/logo', async (req, res) => {
+/* -------------------- GET /companies/:id/logo -------------------- */
+/**
+ * Proxy binário do logo vindo do Nest:
+ * Backend (Nest): GET /companies/:id/logo  -> retorna imagem (bytes) ou 204
+ * Front (Express): GET /api/companies/:id/logo -> repassa bytes pro browser
+ */
+router.get("/companies/:id/logo", async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params ?? {};
 
-    // Ajuste para a URL real do Nest (3000)
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({
+        message: "Validation error. Missing or invalid path parameter.",
+        missing: ["id"],
+      });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
     const resp = await fetch(`${baseUrl}/companies/${encodeURIComponent(id)}/logo`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        // repassa cookies para manter auth
-        cookie: req.headers.cookie || '',
+        ...(authHeader ? { Authorization: authHeader } : {}),
+        // opcional: repassar cookie também (caso seu backend leia cookie em algum cenário)
+        ...(req.headers.cookie ? { cookie: req.headers.cookie } : {}),
       },
     });
 
@@ -110,22 +126,24 @@ router.get('/companies/:id/logo', async (req, res) => {
     }
 
     if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      return res.status(resp.status).send(txt || 'Failed to fetch logo');
+      const txt = await resp.text().catch(() => "");
+      return res.status(resp.status).send(txt || "Failed to fetch logo");
     }
 
-    const contentType = resp.headers.get('content-type') || 'image/png';
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', resp.headers.get('cache-control') || 'private, max-age=300');
+    // content-type pode vir do backend; fallback
+    const contentType = resp.headers.get("content-type") || "image/png";
+    res.setHeader("Content-Type", contentType);
+
+    // cache leve (ajuste se quiser)
+    res.setHeader("Cache-Control", resp.headers.get("cache-control") || "private, max-age=300");
 
     const arrayBuffer = await resp.arrayBuffer();
     return res.status(200).send(Buffer.from(arrayBuffer));
   } catch (err) {
-    console.error('GET /api/companies/:id/logo error:', err);
-    return res.status(500).json({ message: 'Internal server error' });
+    console.error("GET /api/companies/:id/logo error:", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 /* -------------------- POST /companies -------------------- */
 router.post("/companies", async (req, res) => {
@@ -137,9 +155,9 @@ router.post("/companies", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
-      body: JSON.stringify(req.body ?? {})
+      body: JSON.stringify(req.body ?? {}),
     });
 
     const data = await readJsonSafe(response);
@@ -158,7 +176,7 @@ router.patch("/companies/:id", async (req, res) => {
     if (!isNonEmptyString(id)) {
       return res.status(400).json({
         message: "Validation error. Missing or invalid path parameter.",
-        missing: ["id"]
+        missing: ["id"],
       });
     }
 
@@ -170,9 +188,9 @@ router.patch("/companies/:id", async (req, res) => {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
-      body: JSON.stringify(req.body ?? {})
+      body: JSON.stringify(req.body ?? {}),
     });
 
     const data = await readJsonSafe(response);
@@ -184,7 +202,6 @@ router.patch("/companies/:id", async (req, res) => {
 });
 
 /* -------------------- DELETE /companies/:id -------------------- */
-// Soft delete a company (marks as deleted)
 router.delete("/companies/:id", async (req, res) => {
   try {
     const { id } = req.params ?? {};
@@ -192,7 +209,7 @@ router.delete("/companies/:id", async (req, res) => {
     if (!isNonEmptyString(id)) {
       return res.status(400).json({
         message: "Validation error. Missing or invalid path parameter.",
-        missing: ["id"]
+        missing: ["id"],
       });
     }
 
@@ -203,13 +220,11 @@ router.delete("/companies/:id", async (req, res) => {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        ...(authHeader ? { Authorization: authHeader } : {})
-      }
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
     });
 
     const data = await readJsonSafe(response);
-
-    // If backend returns 204 No Content, keep it as empty object
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("DELETE /api/companies/:id error:", error);

@@ -126,7 +126,7 @@
                                                     <li><a class="nav-link" href="#tab-3"
                                                             data-toggle="tab">Transportes</a></li>
                                                     <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
-                                                            data-toggle="tab">Rastreamento</a></li>
+                                                            data-toggle="tab">Trajetória</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -269,23 +269,24 @@
                     <br />
                     <br />
                     <h4>Documentos do processo</h4>
-                    <small>Clique no documento para ver detalhes</small>
-                    <br />
-                    <br />
-                    <ul class="list-unstyled project-files">
-                        <li><a href="javascript:void(0)"><i class="fa fa-file"></i>Project_document.docx</a></li>
-                        <li><a href="javascript:void(0)"><i class="fa fa-file-picture-o"></i>Logo_zender_company.jpg</a>
-                        </li>
-                        <li><a href="javascript:void(0)"><i class="fa fa-stack-exchange"></i>Email_from_Alex.mln</a>
-                        </li>
-                        <li><a href="javascript:void(0)"><i class="fa fa-file"></i>Contract_20_11_2014.docx</a></li>
-                    </ul>
+<small id="processDocsHint" class="text-muted">Carregando documentos...</small>
+<br />
+<br />
 
-                    <div class="m-t-md">
-                        <input type="button" class="btn btn-xs btn-primary" name="btn_act_new" value="Adicionar Documentos"
-                            onclick="openLoadFile()" />
-                        <input type="file" style="display: none;" id="fileInput" />
-                    </div>
+<div id="processDocsFolderHeader" style="display:none; margin-bottom:8px;">
+  <i class="fa fa-folder-open"></i>
+  <strong id="processDocsFolderName"></strong>
+</div>
+
+<ul class="list-unstyled project-files" id="processDocsList">
+  <li class="text-muted">Carregando...</li>
+</ul>
+
+<div class="m-t-md">
+  <button type="button" class="btn btn-xs btn-primary" name="btn_act_new" onclick="openProcessUploadSideModal()">
+    <i class="fa fa-upload"></i> Adicionar Documentos
+  </button>
+</div>
                 </div>
             </div>
         </div>
@@ -500,7 +501,9 @@ function applyPhoneMask($input) {
                             renderHistory(processRaw?.events || []);
                             await preloadTransportLookups();
                             renderTransports(processRaw?.transports || []);
-                        } catch (e) {
+                        
+                            await loadProcessDocuments();
+} catch (e) {
                             console.error("loadProcessDetail error:", e);
                             alert("Erro ao carregar dados do processo.");
                         }
@@ -927,6 +930,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 
 function renderTransports(list) {
   transportsCache = Array.isArray(list) ? list : [];
+  window.transportsCache = transportsCache;
   const tbody = document.getElementById("transportsTbody");
   if (!tbody) return;
 
@@ -1293,59 +1297,464 @@ async function openEditTransportModal(t) {
                     }
 
 
-                    // docs upload placeholder
-                    function openLoadFile() {
-                        alert("Upload de documentos será implementado depois.");
-                    }
-                    window.openLoadFile = openLoadFile;
+                    // =========================
+// Process documents (sidebar)
+// =========================
+let processDocsFolder = null; // folder doc item
+let processDocsItems = [];    // child items
+
+function getAccountIdForCreate() {
+  const id =
+    window.__auth?.accountId ||
+    window.__auth?.account_id ||
+    window.__auth?.account?.id ||
+    window.__auth?.tenant_id ||
+    window.__auth?.admin_account_id ||
+    null;
+
+  if (id) return String(id);
+
+  const companyId = window.__auth?.company_id || window.__auth?.companyId || null;
+  return companyId ? String(companyId) : null;
+}
+
+function isFolderDoc(item) {
+  return String(item?.item_type || "").toUpperCase() === "FOLDER";
+}
+function isLinkDoc(item) {
+  return String(item?.item_type || "").toUpperCase() === "LINK";
+}
+function iconForDoc(item) {
+  if (isFolderDoc(item)) return '<i class="fa fa-folder"></i>';
+
+  if (isLinkDoc(item)) return '<i class="fa fa-link"></i>';
+
+  const ext = String(item?.ext || "").toLowerCase();
+  const mime = String(item?.mime_type || "").toLowerCase();
+
+  if (mime.startsWith("image/")) return '<i class="fa fa-file-image-o"></i>';
+  if (mime.startsWith("video/")) return '<i class="fa fa-film"></i>';
+  if (mime.startsWith("audio/")) return '<i class="fa fa-music"></i>';
+  if (ext === "pdf") return '<i class="fa fa-file-pdf-o"></i>';
+  if (ext === "xls" || ext === "xlsx" || mime.includes("spreadsheet")) return '<i class="fa fa-bar-chart-o"></i>';
+  if (ext === "doc" || ext === "docx") return '<i class="fa fa-file-word-o"></i>';
+  return '<i class="fa fa-file"></i>';
+}
+
+async function loadProcessDocuments() {
+  if (!processId) return;
+
+  const $hint = $("#processDocsHint");
+  const $folderHeader = $("#processDocsFolderHeader");
+  const $folderName = $("#processDocsFolderName");
+  const $list = $("#processDocsList");
+
+  try {
+    $hint.text("Carregando documentos...");
+    $list.html('<li class="text-muted">Carregando...</li>');
+    $folderHeader.hide();
+    processDocsFolder = null;
+    processDocsItems = [];
+
+    // 1) Find folder of this process (usually root folder with process name)
+    const folderRes = await apiGet(`/api/documents?parent_id=null&item_type=FOLDER&related_table=process&related_id=${encodeURIComponent(String(processId))}`);
+    const folders = normalizeArrayResponse(folderRes);
+
+    // If backend returns an object with array props, normalizeArrayResponse handles it.
+    processDocsFolder = folders.length ? folders[0] : null;
+
+    if (!processDocsFolder) {
+      $hint.text("Nenhuma pasta encontrada para este processo.");
+      $list.html('<li class="text-muted">Nenhum documento encontrado.</li>');
+      return;
+    }
+
+    $folderName.text(processDocsFolder?.name || "Pasta do processo");
+    $folderHeader.show();
+
+    // 2) Load children (files/links) from that folder
+    const childrenRes = await apiGet(`/api/documents?parent_id=${encodeURIComponent(String(processDocsFolder.id))}`);
+    const children = normalizeArrayResponse(childrenRes);
+
+    processDocsItems = (children || []).filter((x) => String(x?.item_type || "").toUpperCase() !== "FOLDER");
+
+    renderProcessDocuments();
+    $hint.text("Clique no documento para abrir.");
+  } catch (e) {
+    console.error("loadProcessDocuments error:", e);
+    $hint.text("Erro ao carregar documentos.");
+    $list.html('<li class="text-danger">Erro ao carregar documentos.</li>');
+  }
+}
+
+function renderProcessDocuments() {
+  const $list = $("#processDocsList");
+
+  if (!processDocsFolder) {
+    $list.html('<li class="text-muted">Nenhum documento encontrado.</li>');
+    return;
+  }
+
+  if (!processDocsItems.length) {
+    $list.html('<li class="text-muted">Nenhum arquivo nesta pasta.</li>');
+    return;
+  }
+
+  const html = processDocsItems.map((d) => {
+    const id = String(d?.id || "");
+    const name = escapeHtml(d?.name || d?.filename || "Sem nome");
+    const icon = iconForDoc(d);
+    return `<li><a href="javascript:void(0)" onclick="openProcessDocById('${escapeHtml(id)}')">${icon}${name}</a></li>`;
+  }).join("");
+
+  $list.html(html);
+}
+
+async function openProcessDocById(id) {
+  const item = (processDocsItems || []).find((x) => String(x?.id) === String(id));
+  if (!item) return;
+
+  // LINK: open directly
+  if (isLinkDoc(item)) {
+    const url = item?.object_key || item?.external_key || "";
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  // FILE: presign download and open
+  try {
+    window.GECOM?.spinner?.show("Abrindo documento...");
+    const dl = await apiGet("/api/documents/" + encodeURIComponent(String(item.id)) + "/presign-download");
+    const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
+    if (!url) throw new Error("Não foi possível gerar o link de download.");
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch (e) {
+    alert(e?.message || "Erro ao abrir documento.");
+  } finally {
+    window.GECOM?.spinner?.hide();
+  }
+}
+window.openProcessDocById = openProcessDocById;
+
+// ---------------------------
+// Upload flow (same contract as MyDocuments)
+// ---------------------------
+function getExtFromName(fileName) {
+  const n = String(fileName || "");
+  const idx = n.lastIndexOf(".");
+  if (idx <= 0 || idx >= n.length - 1) return null;
+  return n.substring(idx + 1).toLowerCase();
+}
+
+async function ensureProcessFolderExists() {
+  if (processDocsFolder?.id) return processDocsFolder;
+
+  // Try reload first
+  await loadProcessDocuments();
+  if (processDocsFolder?.id) return processDocsFolder;
+
+  const accountId = getAccountIdForCreate();
+  if (!accountId) throw new Error("Não foi possível identificar o account_id para criar documento.");
+
+  const processName = String(processRaw?.name || $("#projectName").text() || "Processo").trim();
+
+  const createdFolder = await apiPost("/api/documents", {
+    account_id: accountId,
+    parent_id: null,
+    item_type: "FOLDER",
+    name: processName,
+    filename: null,
+    storage_provider: "R2",
+    related_table: "process",
+    related_id: String(processId)
+  });
+
+  processDocsFolder = createdFolder;
+  return processDocsFolder;
+}
+
+async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
+  const folder = await ensureProcessFolderExists();
+  const accountId = getAccountIdForCreate();
+  if (!accountId) throw new Error("Não foi possível identificar o account_id para enviar.");
+
+  const fileName = file.name;
+  const displayName = displayNameRaw || fileName;
+  const mimeType = file.type || "application/octet-stream";
+  const ext = getExtFromName(fileName);
+
+  progressCb && progressCb(5, "Criando registro no banco...");
+
+  const created = await apiPost("/api/documents", {
+    account_id: accountId,
+    parent_id: String(folder.id),
+    item_type: "FILE",
+    name: displayName,
+    filename: fileName,
+    ext: ext,
+    mime_type: mimeType,
+    related_table: "process",
+    related_id: String(processId)
+  });
+
+  const docId = created?.id;
+  if (!docId) throw new Error("Falha ao criar registro do documento.");
+
+  progressCb && progressCb(20, "Gerando URL de upload...");
+
+  const presign = await apiPost("/api/documents/" + encodeURIComponent(String(docId)) + "/presign-upload", {
+    fileName: fileName,
+    contentType: mimeType,
+    size: file.size
+  });
+
+  const putUrl = presign?.url;
+  const putHeaders = presign?.headers || { "Content-Type": mimeType };
+  const objectKey = presign?.object_key || presign?.key || null;
+
+  if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+
+  progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
+
+  const putRes = await fetch(putUrl, { method: "PUT", headers: putHeaders, body: file });
+  if (!putRes.ok) {
+    const t = await putRes.text().catch(() => "");
+    throw new Error(("Upload falhou (" + putRes.status + "). " + (t || "")).trim());
+  }
+
+  const etag = putRes.headers.get("etag") || presign?.etag || null;
+
+  progressCb && progressCb(85, "Finalizando...");
+
+  await apiPost("/api/documents/" + encodeURIComponent(String(docId)) + "/complete-upload", {
+    upload_status: "UPLOADED",
+    object_key: objectKey,
+    etag: etag,
+    mime_type: mimeType,
+    size_bytes: file.size
+  });
+
+  progressCb && progressCb(100, "Concluído!");
+  return docId;
+}
+
+function openProcessUploadSideModal() {
+  SideModal.open({
+    title: "Upload de Documento",
+    okText: "Enviar",
+    html: `
+      <div class="alert alert-info" style="margin-bottom:10px;">
+        Selecione apenas um arquivo.
+      </div>
+
+      <div class="form-group">
+        <label>Arquivo</label>
+        <input id="sm_uploadFile" type="file" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Nome</label>
+        <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
+          placeholder="Vamos preencher automaticamente com o nome do arquivo" />
+        <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
+      </div>
+
+      <div id="sm_uploadProgress" style="display:none;">
+        <div class="progress progress-striped active">
+          <div id="sm_uploadProgressBar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <small id="sm_uploadProgressText" class="text-muted"></small>
+      </div>
+
+      <div id="sm_uploadError" class="text-danger" style="display:none;"></div>
+    `,
+    onOk: async function () {
+      const input = document.getElementById("sm_uploadFile");
+      const file = input && input.files && input.files[0];
+      const displayNameRaw = ($("#sm_uploadDisplayName").val() || "").trim();
+      $("#sm_uploadError").hide().text("");
+
+      if (!file) { $("#sm_uploadError").show().text("Selecione um arquivo."); return true; }
+
+      try {
+        window.GECOM?.spinner?.show("Enviando documento...");
+        $("#sm_uploadProgress").show();
+
+        await doUploadToProcessFolder(file, displayNameRaw, function (pct, text) {
+          $("#sm_uploadProgressBar").css("width", String(Math.max(0, Math.min(100, pct || 0))) + "%");
+          $("#sm_uploadProgressText").text(text || "");
+        });
+
+        // refresh sidebar
+        await loadProcessDocuments();
+        return false;
+      } catch (e) {
+        $("#sm_uploadError").show().text(e?.message || "Erro no upload.");
+        return true;
+      } finally {
+        window.GECOM?.spinner?.hide();
+      }
+    }
+  });
+
+  // auto-fill name
+  setTimeout(function () {
+    const $file = $("#sm_uploadFile");
+    const $name = $("#sm_uploadDisplayName");
+
+    $file.off("change.__autoname").on("change.__autoname", function () {
+      const f = this.files && this.files[0];
+      if (!f) return;
+      $name.val(f.name || "");
+      try { $name.focus(); } catch {}
+    });
+  }, 30);
+}
+window.openProcessUploadSideModal = openProcessUploadSideModal;
 
                 </script>
 
                 <script>
                     function loadMapLeft() {
-                        setTimeout(function () {
-                            // Inicializa o mapa centralizado e com zoom inicial
-                            var map = L.map('map').setView([0, 0], 2);
+  setTimeout(function () {
+    // Reuse same map instance (avoid "Map container is already initialized")
+    if (window.__trackingMap) {
+      try { window.__trackingMap.remove(); } catch { /* ignore */ }
+      window.__trackingMap = null;
+    }
 
-                            // Adiciona o mapa base (OpenStreetMap)
-                            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                maxZoom: 18,
-                            }).addTo(map);
+    const mapEl = document.getElementById("map");
+    if (!mapEl) return;
 
-                            // Coordenadas dos pontos
-                            var points = [
-                                {
-                                    coords: [38.7169, -9.1399],
-                                    name: 'Lisboa, Portugal'
-                                },
-                                {
-                                    coords: [-33.9249, 18.4241],
-                                    name: 'Cape Town, África do Sul'
-                                },
-                                {
-                                    coords: [-22.9068, -43.1729],
-                                    name: 'Rio de Janeiro, Brasil'
-                                }
-                            ];
+    // Leaflet map
+    const map = L.map("map").setView([0, 0], 2);
+    window.__trackingMap = map;
 
-                            // Adiciona os markers no mapa
-                            points.forEach(function (point) {
-                                L.marker(point.coords)
-                                    .addTo(map)
-                                    .bindPopup(`<b>${point.name}</b>`)
-                                    .openPopup();
-                            });
+    // Base tiles
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
 
-                            // Desenha a linha conectando os pontos
-                            var latlngs = points.map(p => p.coords);
+    // Country "average" coordinates (enough for v1)
+    // Tip: if you want global coverage, you can fetch lat/lng from a Countries API and cache it (see notes in chat).
+    const COUNTRY_COORDS = {
+      "Brasil": [-14.2350, -51.9253],
+      "Brazil": [-14.2350, -51.9253],
+      "China": [35.8617, 104.1954],
+      "Índia": [20.5937, 78.9629],
+      "India": [20.5937, 78.9629],
+      "Portugal": [39.3999, -8.2245],
+      "África do Sul": [-30.5595, 22.9375],
+      "South Africa": [-30.5595, 22.9375],
+      "Argentina": [-38.4161, -63.6167],
+      "Chile": [-35.6751, -71.5430],
+      "Colômbia": [4.5709, -74.2973],
+      "Colombia": [4.5709, -74.2973],
+      "México": [23.6345, -102.5528],
+      "Mexico": [23.6345, -102.5528],
+      "Estados Unidos": [37.0902, -95.7129],
+      "United States": [37.0902, -95.7129],
+      "Canadá": [56.1304, -106.3468],
+      "Canada": [56.1304, -106.3468],
+      "Espanha": [40.4637, -3.7492],
+      "Spain": [40.4637, -3.7492],
+      "França": [46.2276, 2.2137],
+      "France": [46.2276, 2.2137],
+      "Alemanha": [51.1657, 10.4515],
+      "Germany": [51.1657, 10.4515],
+      "Itália": [41.8719, 12.5674],
+      "Italy": [41.8719, 12.5674],
+      "Reino Unido": [55.3781, -3.4360],
+      "United Kingdom": [55.3781, -3.4360],
+      "Holanda": [52.1326, 5.2913],
+      "Netherlands": [52.1326, 5.2913],
+      "Bélgica": [50.5039, 4.4699],
+      "Belgium": [50.5039, 4.4699],
+      "Suíça": [46.8182, 8.2275],
+      "Switzerland": [46.8182, 8.2275],
+      "Japão": [36.2048, 138.2529],
+      "Japan": [36.2048, 138.2529],
+      "Coreia do Sul": [35.9078, 127.7669],
+      "South Korea": [35.9078, 127.7669],
+      "Emirados Árabes Unidos": [23.4241, 53.8478],
+      "United Arab Emirates": [23.4241, 53.8478],
+      "Austrália": [-25.2744, 133.7751],
+      "Australia": [-25.2744, 133.7751],
+      "Nova Zelândia": [-40.9006, 174.8860],
+      "New Zealand": [-40.9006, 174.8860]
+    };
 
-                            var polyline = L.polyline(latlngs, {
-                                color: 'red',
-                                weight: 3
-                            }).addTo(map);
+    function getCoords(countryName) {
+      const key = String(countryName || "").trim();
+      return COUNTRY_COORDS[key] || null;
+    }
+function getTransportLineColor(transportType) {
+  if (!transportType) return '#999';
 
-                            // Ajusta o zoom para caber todos os pontos e linhas
-                            map.fitBounds(polyline.getBounds());
-                        }, 500);
-                    }
-                </script>
+  const type = transportType.toLowerCase();
+
+  switch (type) {
+    case 'maritimo':
+    case 'marítimo':
+    case 'sea':
+    case 'ocean':
+      return '#1c84c6'; // azul
+
+    case 'aereo':
+    case 'aéreo':
+    case 'air':
+      return '#1ab394'; // verde
+
+    case 'terrestre':
+    case 'road':
+    case 'land':
+      return '#8b5a2b'; // marrom
+
+    default:
+      return '#999'; // fallback cinza
+  }
+}
+
+    const transports = Array.isArray(window.transportsCache) ? window.transportsCache : [];
+    const routes = transports
+      .map(t => ({
+        origin: String(t?.origin || "").trim(),
+        destination: String(t?.destination || "").trim(),
+        status: String(getTransportStatusName(t?.transport_status_id) || "").trim()
+      }))
+      .filter(r => r.origin && r.destination);
+
+    if (!routes.length) {
+      map.setView([0, 0], 2);
+      return;
+    }
+
+    const allLatLngs = [];
+    routes.forEach((r) => {
+      const o = getCoords(r.origin);
+      const d = getCoords(r.destination);
+
+      // If we don't know the coords, skip the route (v1).
+      // You can improve this later by geocoding/countries-api.
+      if (!o || !d) return;
+
+      // Markers
+      const oMarker = L.marker(o).addTo(map).bindPopup(`<b>${escapeHtml(r.origin)}</b>`);
+      const dMarker = L.marker(d).addTo(map).bindPopup(`<b>${escapeHtml(r.destination)}</b>`);
+
+      // Route line
+      const latlngs = [o, d];
+      const line = L.polyline(latlngs, { weight: 3 }).addTo(map);
+      line.bindPopup(`<b>${escapeHtml(r.origin)} → ${escapeHtml(r.destination)}</b><br/><small>Status: ${escapeHtml(r.status || "-")}</small>`);
+
+      allLatLngs.push(...latlngs);
+    });
+
+    if (allLatLngs.length) {
+      map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] });
+    } else {
+      map.setView([0, 0], 2);
+    }
+  }, 500);
+}</script>

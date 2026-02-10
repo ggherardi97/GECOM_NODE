@@ -348,7 +348,7 @@
       qs.set("status", 1); //Ativo por agora
     }
 
-    const url = qs.toString() ? `/api/invoices?${qs.toString()}` : `/api/invoices`;
+    const url = qs.toString() ? `/api/invoices?fields=header&${qs.toString()}` : `/api/invoices?fields=header`;
 
     return fetch(url, { headers: { Accept: "application/json" } })
       .then(r => r.json());
@@ -727,7 +727,12 @@
   // Load
   // --------------------
   async function loadInvoices(keepFilters) {
+    const spinnerOverlay = document.getElementById("globalSpinner");
+        spinnerOverlay.classList.add("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "false");
     const data = await fetchInvoices();
+        spinnerOverlay.classList.remove("is-visible");
+        spinnerOverlay.setAttribute("aria-hidden", "true");
 
     const rows = Array.isArray(data)
       ? data

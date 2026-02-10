@@ -376,7 +376,7 @@ async function fetchProfilePicture(userId) {
   const data = await safeJson(resp);
   if (!resp.ok) return null;
 
-  const base64 = data?.profile_picture;
+  const base64 = data?.base64;
   if (typeof base64 !== "string" || base64.trim().length === 0) return null;
 
   // Backend returns raw base64 (no prefix). Convert to dataURL for <img>.

@@ -85,13 +85,13 @@
               <tr>
                 <th style="width:40px;"></th>
                 <th></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Project" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Name" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Phone" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Company" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Completed" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Task" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filter by Date" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Processo" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Contato Principal" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Telefone" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Empresa" /></th>
+                <th><input type="text" disabled class="form-control input-sm" placeholder="Estagio (%)" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Invoice" /></th>
+                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Data" /></th>
                 <th>
                  <select id="actionFilter" class="form-control input-sm">
   <option value="">Todos</option>
@@ -106,14 +106,14 @@
                   <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
                 </th>
                 <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ProjectName">Project <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ContactName">Name <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="Phone">Phone <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="CompanyName">Company <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="CompletedNumber">Completed <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="Task">Task <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="DateValue">Date <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ActionText">Action <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ProjectName">Processo <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ContactName" style="width: 15%;">Contato Principal <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Phone">Telefone <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompanyName" style="width: 27%;">Empresa <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompletedNumber">Estagio (%) <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Task">Invoice <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="DateValue">Data <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ActionText">Status <span class="sort-indicator"></span></th>
               </tr>
             </thead>
 
@@ -162,13 +162,7 @@
 <script>
   // -------------------- Global state --------------------
   let processes = [];
-
-  const userCache = new Map();     // userId -> { full_name, phonenumber }
-  const companyCache = new Map();  // companyId -> { company_name }
-
   const selectedProcessIds = new Set();
-
-  // Sorting state
   const sortState = { key: null, dir: "asc" };
 
   // -------------------- Utils --------------------
@@ -232,7 +226,6 @@
   }
 
   function applyPeity() {
-    // Re-apply after rendering
     if (window.jQuery) {
       try {
         $(".pie").peity("pie");
@@ -245,42 +238,16 @@
   // -------------------- API --------------------
   async function fetchProcesses() {
     const isAdmin = !!window.__auth?.isAdmin;
-    const companyId = localStorage.getItem("companyId");// window.__auth?.companyId || window.__auth?.user?.company_id || window.__auth?.user?.companyId || null;
+    const companyId = localStorage.getItem("companyId");
 
-    let url = "/api/processes";
+    let url = "/api/processes?fields=dashboard";
     if (!isAdmin && companyId) {
-      url += `?company_id=${encodeURIComponent(String(companyId))}`;
+      url += `&company_id=${encodeURIComponent(String(companyId))}`;
     }
 
-    const resp = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
-
+    const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) throw new Error(data?.message || "Falha ao carregar processos.");
-    return data;
-  }
-
-  async function fetchUserById(userId) {
-    const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
-
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) return null;
-    return data;
-  }
-
-  async function fetchCompanyById(companyId) {
-    const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
-
-    const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) return null;
     return data;
   }
 
@@ -306,56 +273,22 @@
     await Promise.all(workers);
   }
 
-  async function preloadUsers(userIds) {
-    const unique = [...new Set(userIds.filter(isNonEmptyString))];
-    const toFetch = unique.filter((id) => !userCache.has(id));
-    if (toFetch.length === 0) return;
-
-    await runWithConcurrency(toFetch, 5, async (id) => {
-      const u = await fetchUserById(id);
-      const full_name = u?.full_name ?? u?.fullName ?? u?.name ?? "";
-      const phonenumber = u?.phonenumber ?? u?.phone ?? u?.phone_number ?? "";
-      userCache.set(id, {
-        full_name: isNonEmptyString(full_name) ? String(full_name).trim() : "",
-        phonenumber: isNonEmptyString(phonenumber) ? String(phonenumber).trim() : "",
-      });
-    });
+  // -------------------- Status (source of truth: ProcessStatusEnum) --------------------
+  function getStatusValueFromApi(value) {
+    const n = Number(value);
+    return Number.isNaN(n) ? 0 : n;
   }
 
-  async function preloadCompanies(companyIds) {
-    const unique = [...new Set(companyIds.filter(isNonEmptyString))];
-    const toFetch = unique.filter((id) => !companyCache.has(id));
-    if (toFetch.length === 0) return;
-
-    await runWithConcurrency(toFetch, 5, async (id) => {
-      const c = await fetchCompanyById(id);
-      const company_name = c?.company_name ?? c?.companyName ?? c?.name ?? "";
-      companyCache.set(id, {
-        company_name: isNonEmptyString(company_name) ? String(company_name).trim() : "",
-      });
-    });
+  function getStatusLabel(statusValue) {
+    const s = getStatusValueFromApi(statusValue);
+    return window.ProcessStatusEnum?.getLabel(s) ?? `Status ${s}`;
   }
 
-  // -------------------- Status (FIXED mapping) --------------------
-// -------------------- Status (source of truth: ProcessStatusEnum) --------------------
-function getStatusValueFromApi(value) {
-  // normalize: backend might send string "1" or number 1
-  const n = Number(value);
-  return Number.isNaN(n) ? 0 : n;
-}
-
-function getStatusLabel(statusValue) {
-  const s = getStatusValueFromApi(statusValue);
-  return window.ProcessStatusEnum?.getLabel(s) ?? `Status ${s}`;
-}
-
-function getStatusCssClass(statusValue) {
-  const s = getStatusValueFromApi(statusValue);
-  const enumCss = window.ProcessStatusEnum?.getCssClass(s) ?? "label-default";
-  // your enum returns "label-success"/"label-danger"... but in this page we need full "label label-*"
-  return enumCss.includes("label ") ? enumCss : `label ${enumCss}`;
-}
-
+  function getStatusCssClass(statusValue) {
+    const s = getStatusValueFromApi(statusValue);
+    const enumCss = window.ProcessStatusEnum?.getCssClass(s) ?? "label-default";
+    return enumCss.includes("label ") ? enumCss : `label ${enumCss}`;
+  }
 
   // -------------------- Mapping --------------------
   function mapApiToRow(p, index) {
@@ -366,13 +299,13 @@ function getStatusCssClass(statusValue) {
     const ship_date = p?.ship_date ?? p?.shipDate ?? p?.created_on ?? p?.createdAt ?? p?.created_at ?? "";
     const status = getStatusValueFromApi(p?.status);
 
-    const completedRaw = p?.completed;
-    const completedNumber = Math.max(0, Math.min(100, toNumber(completedRaw))); // clamp 0..100
+    const completedNumber = Math.max(0, Math.min(100, toNumber(p?.completed)));
 
-    const company_id = p?.company_id ?? p?.companyId ?? "";
-    const primary_contact_id = p?.primary_contact_id ?? p?.primaryContactId ?? "";
+    // Expanded relations (backend)
+    const companyName = p?.companies?.company_name ?? "";
+    const contactName = p?.users?.full_name ?? "";
+const contactPhone = p?.users?.phonenumber ?? "";
 
-    const actionText =  getStatusLabel(status);
 
     return {
       Id: String(id),
@@ -383,23 +316,16 @@ function getStatusCssClass(statusValue) {
 
       Task: isNonEmptyString(invoice) ? String(invoice) : "",
 
-      // Keep both display date and numeric date for sorting
       Date: ship_date,
       DateValue: parseDateValue(ship_date),
 
-      // Completed numeric + display pie text
       CompletedNumber: completedNumber,
+      StatusValue: status,
 
-      ActionText: actionText,
+      CompanyName: isNonEmptyString(companyName) ? String(companyName).trim() : "",
+      ContactName: isNonEmptyString(contactName) ? String(contactName).trim() : "",
+      Phone: isNonEmptyString(contactPhone) ? String(contactPhone).trim() : "",
 
-      CompanyId: isNonEmptyString(company_id) ? String(company_id) : "",
-      PrimaryContactId: isNonEmptyString(primary_contact_id) ? String(primary_contact_id) : "",
-StatusValue: status,
-      CompanyName: "",
-      ContactName: "",
-      Phone: "",
-
-      // for sorting row number
       rowNumber: index + 1,
     };
   }
@@ -417,14 +343,12 @@ StatusValue: status,
     const dir = sortState.dir;
 
     const sorted = [...list].sort((a, b) => {
-      // numeric keys
       if (key === "CompletedNumber" || key === "DateValue" || key === "rowNumber") {
         const av = Number(a[key] ?? 0);
         const bv = Number(b[key] ?? 0);
         return av - bv;
       }
 
-      // default string compare
       const av = normalizeForCompare(a[key]);
       const bv = normalizeForCompare(b[key]);
       if (av < bv) return -1;
@@ -443,11 +367,8 @@ StatusValue: status,
       if (!indicator) return;
 
       const key = th.getAttribute("data-sort-key");
-      if (key && key === sortState.key) {
-        indicator.textContent = sortState.dir === "asc" ? "▲" : "▼";
-      } else {
-        indicator.textContent = "";
-      }
+      if (key && key === sortState.key) indicator.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      else indicator.textContent = "";
     });
   }
 
@@ -460,9 +381,8 @@ StatusValue: status,
         const key = this.getAttribute("data-sort-key");
         if (!key) return;
 
-        if (sortState.key === key) {
-          sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
-        } else {
+        if (sortState.key === key) sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+        else {
           sortState.key = key;
           sortState.dir = "asc";
         }
@@ -493,16 +413,13 @@ StatusValue: status,
       const tr = document.createElement("tr");
       tr.className = "clicker";
       tr.setAttribute("data-process-id", String(p.Id));
-tr.setAttribute("data-status", String(p.StatusValue));
+      tr.setAttribute("data-status", String(p.StatusValue));
 
       tr.addEventListener("click", function () {
         redirectToProcess(p.Id);
       });
 
       const isChecked = selectedProcessIds.has(String(p.Id));
-
-      // Completed as mini pie:
-      // Use "X/100" so Peity renders a proper slice.
       const pieValue = `${p.CompletedNumber}/100`;
 
       tr.innerHTML = `
@@ -529,7 +446,6 @@ tr.setAttribute("data-status", String(p.StatusValue));
         <td><span class="${escapeHtml(getStatusCssClass(p.StatusValue))}">${escapeHtml(getStatusLabel(p.StatusValue))}</span></td>
       `;
 
-      // Prevent redirect when clicking checkbox
       const chk = tr.querySelector("input.process-check");
       chk.addEventListener("click", function (e) {
         e.stopPropagation();
@@ -566,9 +482,7 @@ tr.setAttribute("data-status", String(p.StatusValue));
 
   // -------------------- Bulk delete (GlobalModal) --------------------
   function showBulkDeleteConfirm(selectedIds) {
-    if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
-      return Promise.resolve(false);
-    }
+    if (!Array.isArray(selectedIds) || selectedIds.length === 0) return Promise.resolve(false);
 
     const qty = selectedIds.length;
 
@@ -671,7 +585,6 @@ tr.setAttribute("data-status", String(p.StatusValue));
   }
 
   function clearSelection() {
-    // FIX: do not touch filters/rows state; just clear selection and re-render
     selectedProcessIds.clear();
     renderProcessTable(processes);
     applyCurrentFilters();
@@ -704,7 +617,7 @@ tr.setAttribute("data-status", String(p.StatusValue));
     if (btnClear) btnClear.addEventListener("click", clearSelection);
   }
 
-  // -------------------- Filters (same behavior, with safe apply) --------------------
+  // -------------------- Filters --------------------
   function installColumnFilters() {
     $("#process thead input").on("keyup change", function () {
       applyCurrentFilters();
@@ -718,62 +631,46 @@ tr.setAttribute("data-status", String(p.StatusValue));
   function applyCurrentFilters() {
     const table = $("#process");
     const actionSelectedRaw = $("#actionFilter").val();
-const actionSelected = actionSelectedRaw !== "" && actionSelectedRaw != null ? Number(actionSelectedRaw) : null;
+    const actionSelected = actionSelectedRaw !== "" && actionSelectedRaw != null ? Number(actionSelectedRaw) : null;
 
-    // Column filter inputs are in header row 1 (filters row)
     const filterInputs = $("#process thead tr:nth-child(1) input");
 
     table.find("tbody tr").each(function () {
       const $row = $(this);
       let visible = true;
 
-      // Apply text inputs per column:
-      // Row columns:
-      // 0 chk, 1 #, 2 Project, 3 Name, 4 Phone, 5 Company, 6 Completed, 7 Task, 8 Date, 9 Action
       filterInputs.each(function (i) {
         const value = String($(this).val() || "").toLowerCase();
         if (!value) return;
 
-        // filter row columns start at index 2 in header but our inputs list includes only inputs in those ths
-        // We placed inputs in columns: Project(2), Name(3), Phone(4), Company(5), Completed(6), Task(7), Date(8)
-        // input index mapping:
-        // 0 Project => td 2
-        // 1 Name    => td 3
-        // 2 Phone   => td 4
-        // 3 Company => td 5
-        // 4 Completed => td 6
-        // 5 Task => td 7
-        // 6 Date => td 8
-        const map = [2,3,4,5,6,7,8];
+        const map = [2, 3, 4, 5, 6, 7, 8];
         const tdIndex = map[i];
 
         const cellText = String($row.find("td").eq(tdIndex).text() || "").toLowerCase();
         if (cellText.indexOf(value) === -1) visible = false;
       });
 
-      // Action dropdown filter (td 9)
-if (visible && actionSelected != null && !Number.isNaN(actionSelected)) {
-  const rowStatus = Number($row.attr("data-status"));
-  if (Number.isNaN(rowStatus) || rowStatus !== actionSelected) visible = false;
-}
-
+      if (visible && actionSelected != null && !Number.isNaN(actionSelected)) {
+        const rowStatus = Number($row.attr("data-status"));
+        if (Number.isNaN(rowStatus) || rowStatus !== actionSelected) visible = false;
+      }
 
       $row.toggle(visible);
     });
   }
-function fillStatusFilter() {
-  const sel = document.getElementById("actionFilter");
-  if (!sel) return;
 
-  // keep the first option "Todos"
-  const options = window.ProcessStatusEnum?.toSelectOptions?.() ?? [];
-  options.forEach((o) => {
-    const opt = document.createElement("option");
-    opt.value = String(o.value);   // numeric string
-    opt.textContent = o.label;
-    sel.appendChild(opt);
-  });
-}
+  function fillStatusFilter() {
+    const sel = document.getElementById("actionFilter");
+    if (!sel) return;
+
+    const options = window.ProcessStatusEnum?.toSelectOptions?.() ?? [];
+    options.forEach((o) => {
+      const opt = document.createElement("option");
+      opt.value = String(o.value);
+      opt.textContent = o.label;
+      sel.appendChild(opt);
+    });
+  }
 
   // -------------------- Load --------------------
   async function loadProcesses() {
@@ -785,25 +682,6 @@ function fillStatusFilter() {
         : (apiData.data ?? apiData.rows ?? apiData.processes ?? [apiData]);
 
       processes = rows.map(mapApiToRow);
-
-      const userIds = processes.map((x) => x.PrimaryContactId);
-      const companyIds = processes.map((x) => x.CompanyId);
-
-      await preloadUsers(userIds);
-      await preloadCompanies(companyIds);
-
-      for (const p of processes) {
-        if (p.PrimaryContactId && userCache.has(p.PrimaryContactId)) {
-          const u = userCache.get(p.PrimaryContactId);
-          p.ContactName = u?.full_name || p.ContactName || "";
-          p.Phone = u?.phonenumber || p.Phone || "";
-        }
-
-        if (p.CompanyId && companyCache.has(p.CompanyId)) {
-          const c = companyCache.get(p.CompanyId);
-          p.CompanyName = c?.company_name || p.CompanyName || "";
-        }
-      }
 
       updateSortIndicators();
       renderProcessTable(processes);
@@ -829,3 +707,5 @@ function fillStatusFilter() {
     loadProcesses();
   });
 </script>
+
+

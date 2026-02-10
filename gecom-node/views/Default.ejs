@@ -76,8 +76,8 @@
   <div class="row">
     <div class="col-lg-9">
 <div class="dash-filterbar" style="float: inline-start;">
-        <label for="yearFilter">Dashboards:</label>
-        <select id="yearFilter" class="form-control input-sm" style="width: 250px;">
+        <label for="yearFilter">Dashboard:</label>
+        <select class="form-control input-sm" style="width: 250px;">
           <option value="0" selected>Faturamento / Processos</option>
         </select>
       </div>
@@ -347,19 +347,11 @@
     }
 
     function pickInvoiceDate(inv) {
-      return inv?.quote_at || inv?.quoteAt || inv?.created_at || inv?.createdAt || inv?.created_on || inv?.createdOn || null;
+      return inv?.quote_at || inv?.created_at || null;
     }
 
     function pickInvoiceTotal(inv) {
-      return (
-        inv?.total ??
-        inv?.total_amount ??
-        inv?.amount_total ??
-        inv?.grand_total ??
-        inv?.total_value ??
-        inv?.value ??
-        0
-      );
+      return inv?.total ?? 0;
     }
 
     function pickInvoiceStatus(inv) {
@@ -433,18 +425,17 @@
     }
 
     // Used for "Próximo do prazo" ordering (best effort)
-   function pickProcessDueAt(p) {
-  return (
-    p?.ship_date || p?.shipDate ||
-    p?.due_at || p?.dueAt ||
-    p?.deadline_at || p?.deadlineAt ||
-    p?.due_date || p?.dueDate ||
-    p?.expected_at || p?.expectedAt ||
-    p?.eta_at || p?.etaAt ||
-    null
-  );
-}
-
+    function pickProcessDueAt(p) {
+      return (
+        p?.ship_date || p?.shipDate ||
+        p?.due_at || p?.dueAt ||
+        p?.deadline_at || p?.deadlineAt ||
+        p?.due_date || p?.dueDate ||
+        p?.expected_at || p?.expectedAt ||
+        p?.eta_at || p?.etaAt ||
+        null
+      );
+    }
 
     function pickProcessCompletedPercent(p) {
       var v =
@@ -478,14 +469,12 @@
     var currentMonth = now.getMonth();
     var selectedYear = currentYear;
 
-    // init filter default
     $("#yearFilter").val(String(selectedYear));
 
     function computeRanges() {
       var yearStart = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
       var yearEnd = new Date(selectedYear + 1, 0, 1, 0, 0, 0, 0);
 
-      // "Mensal": month index from *current month*, but inside selected year
       var monthStart = new Date(selectedYear, currentMonth, 1, 0, 0, 0, 0);
       var monthEnd = new Date(selectedYear, currentMonth + 1, 1, 0, 0, 0, 0);
 
@@ -609,14 +598,12 @@
 
       items = items.filter(function (p) {
         var v = getProcessStatusValue(p);
-        return v === 2; // Próximo do prazo
+        return v === 2;
       });
 
       items.sort(function (a, b) {
         var ad = new Date(pickProcessDueAt(a) || pickProcessUpdatedAt(a) || 0).getTime();
         var bd = new Date(pickProcessDueAt(b) || pickProcessUpdatedAt(b) || 0).getTime();
-
-        // smaller first (closest due date first)
         return ad - bd;
       });
 
@@ -758,17 +745,34 @@
         var monthStart = ranges.monthStart;
         var monthEnd = ranges.monthEnd;
 
+        // ✅ Load invoices + processes in parallel
+        var results = await Promise.all([
+          fetchJson("/api/invoices?fields=summary"),
+          fetchJson("/api/processes?fields=dashboard")
+        ]);
+
+        var invoicesResp = results[0];
+        var processesResp = results[1];
+
         // --------- INVOICES ---------
-        var invoicesResp = await fetchJson("/api/invoices");
         var invoicesRaw = Array.isArray(invoicesResp) ? invoicesResp : (invoicesResp?.data || invoicesResp?.items || []);
 
+        // Filter out "faturado"
         var invoices = invoicesRaw.filter(function (inv) {
           var st = pickInvoiceStatus(inv);
           return st !== INVOICE_STATUS.faturado;
         });
 
+        // Single pass: month/year arrays + sums + monthly buckets
         var invoicesMonth = [];
         var invoicesYear = [];
+
+        var totalsByMonthAll = new Array(12).fill(0);
+        var activeByMonth = new Array(12).fill(0);
+        var paidByMonth = new Array(12).fill(0);
+
+        var monthSumAll = 0;
+        var yearSumAll = 0;
 
         invoices.forEach(function (inv) {
           var dtRaw = pickInvoiceDate(inv);
@@ -777,12 +781,27 @@
           var dt = new Date(dtRaw);
           if (Number.isNaN(dt.getTime())) return;
 
-          if (dt >= monthStart && dt < monthEnd) invoicesMonth.push(inv);
-          if (dt >= yearStart && dt < yearEnd) invoicesYear.push(inv);
-        });
+          var total = toNumber(pickInvoiceTotal(inv));
+          var st = pickInvoiceStatus(inv);
 
-        var monthSumAll = invoicesMonth.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
-        var yearSumAll = invoicesYear.reduce(function (acc, inv) { return acc + toNumber(pickInvoiceTotal(inv)); }, 0);
+          // month
+          if (dt >= monthStart && dt < monthEnd) {
+            invoicesMonth.push(inv);
+            monthSumAll += total;
+          }
+
+          // year
+          if (dt >= yearStart && dt < yearEnd) {
+            invoicesYear.push(inv);
+            yearSumAll += total;
+
+            var m = dt.getMonth();
+            totalsByMonthAll[m] += total;
+
+            if (st === INVOICE_STATUS.ativo) activeByMonth[m] += total;
+            if (st === INVOICE_STATUS.pago) paidByMonth[m] += total;
+          }
+        });
 
         $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSumAll, "BRL"));
         $("#annualRevenue").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
@@ -796,20 +815,11 @@
         var deltaYear = estimatedYear > 0 ? ((yearSumAll / estimatedYear) * 100) : 0;
         $("#annualDelta").text((deltaYear || 0).toFixed(0) + "%");
 
-        // Média mensal do ano
         var avgMonthly = yearSumAll / 12;
         $("#avgMonthlyRevenue").text(moneyCurrencyPtBr(avgMonthly, "BRL"));
         $("#avgMonthlyHint").text("Ano ÷ 12");
 
-        // Melhor mês do ano
-        var totalsByMonthAll = new Array(12).fill(0);
-        invoicesYear.forEach(function (inv) {
-          var dt = new Date(pickInvoiceDate(inv));
-          if (Number.isNaN(dt.getTime())) return;
-          var m = dt.getMonth();
-          totalsByMonthAll[m] += toNumber(pickInvoiceTotal(inv));
-        });
-
+        // Best month
         var bestMonthIndex = 0;
         var bestMonthValue = totalsByMonthAll[0] || 0;
         for (var i = 1; i < 12; i++) {
@@ -822,22 +832,8 @@
         $("#bestMonthName").text(monthsPt[bestMonthIndex] || "-");
         $("#bestMonthRevenue").text(moneyCurrencyPtBr(bestMonthValue, "BRL"));
 
-        // --------- CHART (linha): estimado + ativo + pago ---------
+        // Chart
         var estimatedByMonth = new Array(12).fill(30000);
-        var activeByMonth = new Array(12).fill(0);
-        var paidByMonth = new Array(12).fill(0);
-
-        invoicesYear.forEach(function (inv) {
-          var dt = new Date(pickInvoiceDate(inv));
-          if (Number.isNaN(dt.getTime())) return;
-
-          var m = dt.getMonth();
-          var total = toNumber(pickInvoiceTotal(inv));
-          var st = pickInvoiceStatus(inv);
-
-          if (st === INVOICE_STATUS.ativo) activeByMonth[m] += total;
-          if (st === INVOICE_STATUS.pago) paidByMonth[m] += total;
-        });
 
         var lineData = {
           labels: monthsPt,
@@ -895,14 +891,16 @@
           }
         };
 
-        var ctx = document.getElementById("lineChart").getContext("2d");
-        if (lineChart) lineChart.destroy();
-        lineChart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
+        var canvasLine = document.getElementById("lineChart");
+        if (canvasLine) {
+          var ctx = canvasLine.getContext("2d");
+          if (lineChart) lineChart.destroy();
+          lineChart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
+        }
 
         $("#totalInvoicesInPeriod").text(String(invoicesYear.length));
 
         // --------- PROCESSES ---------
-        var processesResp = await fetchJson("/api/processes");
         var processes = Array.isArray(processesResp) ? processesResp : (processesResp?.data || processesResp?.items || []);
 
         var processesYear = processes.filter(function (p) {
@@ -917,11 +915,9 @@
 
         $("#totalProcessesInPeriod").text(String(processesYear.length));
 
-        // Right card (Top 2) + Doughnut are based on selected year
         renderNearDue(processesYear);
         renderProcessStatusDoughnut(processesYear);
 
-        // Grid remains all processes (as your original behavior)
         allProcesses = processes.slice();
         pageIndex = 0;
         setSortIndicator();
@@ -982,7 +978,6 @@
       renderProcessesTable();
     });
 
-    // Year filter
     $("#yearFilter").on("change", function () {
       var v = Number($(this).val());
       if (Number.isFinite(v)) selectedYear = v;
@@ -993,3 +988,4 @@
     loadDashboard();
   });
 </script>
+
