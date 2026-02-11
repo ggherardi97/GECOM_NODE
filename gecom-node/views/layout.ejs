@@ -186,7 +186,7 @@
               </a>
 
               <ul class="dropdown-menu animated fadeInRight m-t-xs">
-                <li><a href="/Profile" data-i18n="page.layout.menu.profile">Perfil</a></li>
+                <li id="profilePage"><a href="/Profile" data-i18n="page.layout.menu.profile">Perfil</a></li>
                 <li class="divider"></li>
                 <li><a onclick="LogOut()" data-i18n="page.layout.menu.logout">Sair</a></li>
               </ul>
@@ -910,10 +910,12 @@
             if (window.__auth.isUser) {
               $('a[name="btn_act_new"]').hide();
               $('button[name="btn_act_new"]').hide();
-              $('input[name="btn_act_new"]').hide();
+              $('button[name="btn_act_new_manager"]').hide();
+              $('#profilePage"]').hide();
+              $('input[name="btn_act_new"]').hide();//
             }
             else if (window.__auth.isManager) {
-
+              $('button[name="btn_act_new_manager"]').hide();
             }
             else if (window.__auth.isAdmin) {
               $("#clientTab").show();

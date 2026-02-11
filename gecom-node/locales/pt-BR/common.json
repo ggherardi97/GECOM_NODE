@@ -776,7 +776,9 @@
         "newProduct": {
           "pageTitle": "Novo Produto",
           "actions": {
-            "back": "Voltar"
+            "back": "Voltar",
+        "create": "Criar",
+        "creating": "Criando..."
           },
           "tabs": {
             "info": "Informações",
@@ -789,8 +791,41 @@
             "defaultPriceRequired": "Preço padrão *",
             "defaultTax": "Imposto padrão (0..1)",
             "unitExample": "pacote, serviço, caixa...",
-            "productDescription": "Descrição do produto"
-          }
+            "productDescription": "Descrição do produto",
+        "productNameRequired": "Nome do produto *",
+        "brand": "Marca",
+        "unit": "Unidade",
+        "status": "Status",
+        "statusActive": "Ativo",
+        "statusInactive": "Inativo",
+        "currencyRequired": "Moeda *"
+          },
+           "subtitle": "Preencha os campos e clique em Criar.",
+      "breadcrumbs": {
+        "pageName": "Produtos",
+        "subpageName": "Novo Produto"
+      },
+      "placeholders": {
+        "productName": "Nome do produto",
+        "productCodeExample": "Ex: SRV-CONT-001",
+        "brand": "Marca",
+        "defaultPrice": "0,00",
+        "defaultTaxExample": "Ex: 0,15"
+      },
+      "hints": {
+        "taxExample": "Use 0,15 para 15%."
+      },
+      "messages": {
+        "requestFail": "Request failed",
+        "nameRequired": "Nome do produto é obrigatório.",
+        "productCodeRequired": "Código do produto é obrigatório.",
+        "currencyRequired": "Moeda é obrigatória.",
+        "defaultPriceInvalid": "Preço padrão inválido.",
+        "defaultTaxInvalid": "Imposto padrão inválido.",
+        "createSuccess": "Produto criado com sucesso.",
+        "createFail": "Falha ao criar o produto.",
+        "loadCurrenciesFail": "Falha ao carregar moedas."
+      }
         },
 
         "productDetail": {
