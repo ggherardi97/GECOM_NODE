@@ -25,7 +25,7 @@
   <div class="col-lg-12">
     <div class="ibox">
       <div class="ibox-title">
-        <h5>Clientes ativos</h5>
+        <h5><%= t('page.clients.pageTitle') %></th></h5>
         <div class="ibox-tools">
           <!-- ferramentas removidas -->
         </div>
@@ -35,26 +35,30 @@
         <div class="row">
           <div class="col-sm-3">
             <div class="input-group mb-3">
-              <input type="text" class="form-control form-control-sm" id="searchinput" placeholder="Digite o nome da empresa...">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                id="searchinput"
+                placeholder="<%= t('page.clients.placeholders.searchCompanyName') %>">
               <div class="input-group-append">
-                <button class="btn btn-sm btn-primary" type="button">Buscar</button>
+                <button class="btn btn-sm btn-primary" type="button"><%= t('page.clients.toolbar.search') %></button>
               </div>
             </div>
           </div>
 
           <div class="col-sm-9 m-b-xs">
-            <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;">Novo Cliente</a>
+            <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;"><%= t('page.clients.toolbar.newClient') %></a>
           </div>
         </div>
 
         <!-- Bulk actions (shown only when selection exists) -->
         <div id="bulkActions" class="bulk-actions">
-          <span class="count">Selecionados: <span id="selectedCount">0</span></span>
+          <span class="count"><%= t('page.clients.toolbar.selecionados') %>: <span id="selectedCount">0</span></span>
           <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
-            <i class="fa fa-trash"></i> Remover
+            <i class="fa fa-trash"></i> <%= t('page.clients.toolbar.remove') %>
           </button>
           <button id="btnClearSelection" type="button" class="btn btn-white btn-sm">
-            Limpar seleção
+            <%= t('page.clients.toolbar.clearSelection') %>
           </button>
         </div>
 
@@ -64,16 +68,16 @@
               <tr>
                 <!-- NEW: selection column -->
                 <th style="width:40px;">
-                  <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
+                  <input id="chkSelectAll" type="checkbox" title="<%= t('page.clients.bulk.selectAll') %>">
                 </th>
                 <th>#</th>
-                <th>Nome</th>
-                <th>Contato Principal</th>
-                <th>Telefone</th>
-                <th>Setor</th>
-                <th>Numero de invoices</th>
-                <th>Data de Criação</th>
-                <th>CNPJ</th>
+                <th><%= t('page.clients.columns.name') %></th>
+                <th><%= t('page.clients.columns.contatoPrincipal') %></th>
+                <th><%= t('page.clients.columns.phone') %></th>
+                <th><%= t('page.clients.columns.setor') %></th>
+                <th><%= t('page.clients.columns.ninvoices') %></th>
+                <th><%= t('page.clients.columns.createdAt') %></th>
+                <th><%= t('page.clients.columns.cnpj') %></th>
               </tr>
             </thead>
             <tbody id="lines"></tbody>
@@ -175,7 +179,7 @@
 
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
-      const msg = data?.message || "Falha ao carregar companies.";
+      const msg = data?.message || "<%= t('page.clients.messages.loadFail') %>";
       throw new Error(msg);
     }
     return data;
@@ -200,7 +204,7 @@
 
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) {
-      throw new Error(data?.message || "Falha ao remover company.");
+      throw new Error(data?.message || "<%= t('page.clients.messages.deleteFailSingle') %>");
     }
     return data;
   }
@@ -252,7 +256,7 @@
 
       CreatedOn: company.created_on ?? company.createdAt ?? company.created_at ?? "",
       CompanyNumber: company.company_number ?? "",
-      Sector: sector && String(sector).trim() ? String(sector).trim() : "Geral",
+      Sector: sector && String(sector).trim() ? String(sector).trim() : "<%= t('page.clients.defaults.sector') %>",
       NumberOfInvoices: company.number_of_invoices ?? "",
     };
   }
@@ -265,7 +269,7 @@
     tbody.innerHTML = "";
 
     if (!list || list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9">Nenhum cliente encontrado.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9"><%= t('page.clients.messages.noneFound') %></td></tr>`;
       return;
     }
 
@@ -287,7 +291,7 @@
             type="checkbox"
             data-id="${escapeHtml(String(c.Id))}"
             ${isChecked ? "checked" : ""}
-            title="Selecionar"
+            title="<%= t('page.clients.ui.select') %>"
           />
         </td>
         <td>${escapeHtml(idx + 1)}</td>
@@ -344,7 +348,7 @@
       console.error("loadCompanies error:", err);
       const tbody = document.querySelector("#lines");
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="9">${escapeHtml(err.message || "Erro ao carregar clientes.")}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9">${escapeHtml(err.message || "<%= t('page.clients.messages.loadUnexpected') %>")}</td></tr>`;
       }
     }
   }
@@ -379,23 +383,23 @@
 
     // Fallback if modal not found
     if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-      const ok = confirm(`Remover ${qty} cliente(s)?`);
+      const ok = confirm(`<%= t('page.clients.modalRemove.confirmFallbackPrefix') %> ${qty} <%= t('page.clients.modalRemove.confirmFallbackSuffix') %>`);
       return Promise.resolve(ok);
     }
 
-    modalTitle.textContent = "Remover clientes";
+    modalTitle.textContent = "<%= t('page.clients.modalRemove.title') %>";
     modalBody.innerHTML = `
-      <p>Você está prestes a remover <strong>${escapeHtml(qty)}</strong> cliente(s).</p>
-      <p class="text-danger">Esta ação não poderá ser desfeita.</p>
-      <p>Deseja continuar?</p>
+      <p><%= t('page.clients.modalRemove.line1') %> <strong>${escapeHtml(qty)}</strong></p>
+      <p class="text-danger"><%= t('page.clients.modalRemove.line2') %></p>
+      <p><%= t('page.clients.modalRemove.confirm') %></p>
     `;
 
     // Make "Save" look like delete
-    btnSave.textContent = "Remover";
+    btnSave.textContent = "<%= t('page.clients.toolbar.remove') %>";
     btnSave.classList.remove("btn-primary");
     btnSave.classList.add("btn-danger");
 
-    btnClose.textContent = "Cancelar";
+    btnClose.textContent = "<%= t('page.layout.modal.cancel') %>";
 
     return new Promise((resolve) => {
       const cleanup = () => {
@@ -405,8 +409,8 @@
         // restore default styles/text
         btnSave.classList.remove("btn-danger");
         btnSave.classList.add("btn-primary");
-        btnSave.textContent = "Save";
-        btnClose.textContent = "Close";
+        btnSave.textContent = "<%= t('page.layout.modal.save') %>";
+        btnClose.textContent = "<%= t('page.layout.modal.close') %>";
       };
 
       btnSave.onclick = () => {
@@ -435,7 +439,7 @@
     const oldText = btn ? btn.innerHTML : "";
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Removendo...`;
+      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> <%= t('page.clients.ui.removing') %>...`;
     }
 
     try {
@@ -447,13 +451,13 @@
         try {
           await deleteCompanyById(id);
         } catch (e) {
-          failures.push({ id, message: e?.message || "Erro ao remover." });
+          failures.push({ id, message: e?.message || "<%= t('page.clients.messages.deleteFail') %>" });
         }
       });
 
       if (failures.length > 0) {
         console.warn("Bulk delete failures:", failures);
-        alert(`Alguns clientes não puderam ser removidos (${failures.length}). Veja o console para detalhes.`);
+        alert(`<%= t('page.clients.messages.bulkSomeFailedPrefix') %> (${failures.length}). <%= t('page.clients.messages.bulkSomeFailedSuffix') %>`);
       }
 
       // Remove deleted rows from local list (only those successful)
@@ -469,11 +473,11 @@
       renderCompaniesTable(clients);
     } catch (err) {
       console.error("executeBulkDelete error:", err);
-      alert(err?.message || "Erro ao remover clientes.");
+      alert(err?.message || "<%= t('page.clients.messages.bulkUnexpected') %>");
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = oldText || `<i class="fa fa-trash"></i> Remover`;
+        btn.innerHTML = oldText || `<i class="fa fa-trash"></i> <%= t('page.clients.toolbar.remove') %>`;
       }
       updateBulkUI();
     }
@@ -524,8 +528,8 @@
         return;
       }
 
-    $("#pageName").text("Clientes");
-    $("#subpageName").text("Clientes");
+    $("#pageName").text("<%= t('page.clients.pageTitle') %>");
+    $("#subpageName").text("<%= t('page.clients.pageTitle') %>");
 
     bindBulkEvents();
     loadCompanies();

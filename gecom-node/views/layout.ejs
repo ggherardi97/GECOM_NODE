@@ -25,27 +25,35 @@
   <link href="/Assets/inspinia/css/plugins/morris/morris-0.4.3.min.css" rel="stylesheet" />
 
 
-<!-- JS head (fix: load order + single jQuery) -->
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/Assets/inspinia/js/popper.min.js"></script>
-<script src="/Assets/inspinia/js/bootstrap.min.js"></script>
+  <!-- JS head (fix: load order + single jQuery) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/Assets/inspinia/js/popper.min.js"></script>
+  <script src="/Assets/inspinia/js/bootstrap.min.js"></script>
 
-<script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
-<script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-<script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+  <script src="/Assets/inspinia/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 
-<script src="/Assets/inspinia/js/inspinia.js"></script>
+  <script src="/Assets/inspinia/js/inspinia.js"></script>
 
-<script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
-<script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/validate/jquery.validate.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/steps/jquery.steps.min.js"></script>
 
-<script src="/Assets/js/functionalities/dynamicsModal.js"></script>
-<script src="/Assets/js/enums/globalEnum.js"></script>
-<script src="/Assets/js/authContext.js"></script>
+  <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
+  <script src="/Assets/js/enums/globalEnum.js"></script>
+  <script src="/Assets/js/authContext.js"></script>
+
+  <!-- i18next -->
+  <!-- <script src="/Assets/inspinia/js/plugins/i18next/i18next.min.js"></script> -->
+  <script src="https://unpkg.com/i18next@23.12.2/i18next.min.js"></script>
+
 
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
     <style>
-       body.mini-navbar .menuDivider { display: none !important; }
+      body.mini-navbar .menuDivider {
+        display: none !important;
+      }
+
       .dynamic-modal-overlay {
         display: none;
         position: fixed;
@@ -128,23 +136,23 @@
         color: #333;
       }
 
-      .menuDivider{
+      .menuDivider {
         width: 100%;
-    text-align: left;
-    color: white !important;
-    padding-bottom: 5px !important;
+        text-align: left;
+        color: white !important;
+        padding-bottom: 5px !important;
       }
 
-      .menuDivider:hover{
-          background-color: unset !important;
+      .menuDivider:hover {
+        background-color: unset !important;
       }
 
-      .rounded-circle{
+      .rounded-circle {
         width: 65px !important;
-    height: 65px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center;
+        height: 65px;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center;
       }
     </style>
 </head>
@@ -169,31 +177,78 @@
           <li class="nav-header text-center">
             <div class="dropdown profile-element">
               <span>
-                <img id="currentUserAvatar" alt="image" class="rounded-circle" style="width: 75px;"
-  src="">
-
+                <img id="currentUserAvatar" alt="image" class="rounded-circle" style="width: 75px;" src="">
               </span>
+
               <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
                 <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
               </a>
+
               <ul class="dropdown-menu animated fadeInRight m-t-xs">
-                <li><a href="/Profile">Perfil</a></li>
+                <li><a href="/Profile" data-i18n="page.layout.menu.profile">Perfil</a></li>
                 <li class="divider"></li>
-                <li><a onclick="LogOut()">Sair</a></li>
+                <li><a onclick="LogOut()" data-i18n="page.layout.menu.logout">Sair</a></li>
               </ul>
             </div>
             <div class="logo-element">G+</div>
           </li>
-          <li><a href="/Default"><i class="fa fa-home"></i> <span class="nav-label">Dashboard</span></a></li>
+
+          <li>
+            <a href="/Default">
+              <i class="fa fa-home"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.dashboard">Dashboard</span>
+            </a>
+          </li>
+
           <li><a class="menuDivider" style="padding-top:20px;">Services</a></li>
-          <li id="clientTab"  style="display: none;"><a href="/Clientes"><i class="fa fa-users"></i> <span class="nav-label">Clientes</span></a></li>
-          <li><a href="/Processos"><i class="fa fa-file"></i> <span class="nav-label">Processos</span></a></li>
-          <li><a href="/MyDocuments"><i class="fa fa-folder"></i> <span class="nav-label">Meus Documentos</span></a></li>
-           <li><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
-            <!-- <li class="dropdown-divider"></li> -->
-          <li><a href="/Invoices"><i class="fa fa-money"></i> <span class="nav-label">Invoices</span></a></li>
-          <li id="productTab" style="display: none;"><a href="/Products"><i class="fa fa-cube"></i> <span class="nav-label">Produtos</span></a></li>
+
+          <li id="clientTab" style="display: none;">
+            <a href="/Clientes">
+              <i class="fa fa-users"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="/Processos">
+              <i class="fa fa-file"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="/MyDocuments">
+              <i class="fa fa-folder"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.myDocuments">Meus Documentos</span>
+            </a>
+          </li>
+
+          <li><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+
+          <li>
+            <a href="/Invoices">
+              <i class="fa fa-money"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li id="productTab" style="display: none;">
+            <a href="/Products">
+              <i class="fa fa-cube"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+            </a>
+          </li>
+
+          <!-- ✅ opcional: botões simples pra testar troca de idioma -->
+          <!--
+          <li style="padding:10px 20px;">
+            <button class="btn btn-xs btn-white" onclick="setLanguage('pt-BR')">PT</button>
+            <button class="btn btn-xs btn-white" onclick="setLanguage('en')">EN</button>
+            <button class="btn btn-xs btn-white" onclick="setLanguage('es')">ES</button>
+          </li>
+          -->
+
         </ul>
       </div>
     </nav>
@@ -204,11 +259,30 @@
           <div class="navbar-header">
             <a class="navbar-minimalize minimalize-styl-2 btn btn-primary" href="#"><i class="fa fa-bars"></i></a>
           </div>
+
           <ul class="nav navbar-top-links navbar-right">
-            <li><a href="#" onclick="LogOut()"><i class="fa fa-sign-out"></i> Sair</a></li>
+            <!-- Language selector -->
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                🌎 <span id="langLabel">PT</span> <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu dropdown-user">
+                <li><a href="#" onclick="return window.GECOM_LANG.go('pt-BR');">🇧🇷 Português</a></li>
+                <li><a href="#" onclick="return window.GECOM_LANG.go('en');">🇺🇸 English</a></li>
+                <li><a href="#" onclick="return window.GECOM_LANG.go('es');">🇪🇸 Español</a></li>
+              </ul>
+            </li>
+
+            <li>
+              <a href="#" onclick="LogOut()">
+                <i class="fa fa-sign-out"></i>
+                <span data-i18n="page.layout.menu.logout">Sair</span>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
+
 
       <div id="masterHeader" class="row wrapper border-bottom white-bg page-heading">
         <div class="col-lg-10">
@@ -233,8 +307,8 @@
 
         <!-- Footer -->
         <div class="footer">
-          <div class="float-right">Sistema GECOM</div>
-          <div><strong>Copyright</strong> GECOM &copy;</div>
+          <div class="float-right" data-i18n="page.layout.appTitle">Sistema GECOM</div>
+          <div><strong>Copyright</strong> <span data-i18n="page.layout.footer.copyright">GECOM ©</span></div>
         </div>
     </div>
   </div>
@@ -253,10 +327,10 @@
     </div>
 
     <div class="dynamic-modal-footer">
-      <button type="button" id="dynamicModalCancelBtn" class="btn btn-default">
-        Cancel
+      <button type="button" id="dynamicModalCancelBtn" class="btn btn-default" data-i18n="page.layout.modal.cancel">
+        Cancelar
       </button>
-      <button type="button" id="dynamicModalOkBtn" class="btn btn-primary">
+      <button type="button" id="dynamicModalOkBtn" class="btn btn-primary" data-i18n="page.layout.modal.ok">
         OK
       </button>
     </div>
@@ -266,21 +340,23 @@
     data-target="#GlobalModal">
     Large Modal
   </button>
-  <div class="modal inmodal fade" id="GlobalModal" tabindex="-1" role="dialog" aria-hidden="true">
+
+  <div class="modal inmodal fade" id="GlobalModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 9999999999 !important;">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
               class="sr-only">Close</span></button>
           <h4 class="modal-title" id="modalTitle"></h4>
-          <!-- <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small> -->
         </div>
-        <div class="modal-body" id="modalBody">
 
-        </div>
+        <div class="modal-body" id="modalBody"></div>
+
         <div class="modal-footer">
-          <button id="saveModal" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
-          <button id="closeModal" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+          <button id="saveModal" type="button" class="btn btn-primary" data-dismiss="modal"
+            data-i18n="page.layout.modal.save">Salvar</button>
+          <button id="closeModal" type="button" class="btn btn-white" data-dismiss="modal"
+            data-i18n="page.layout.modal.close">Fechar</button>
         </div>
       </div>
     </div>
@@ -292,331 +368,532 @@
       <script>
         async function LogOut() {
           try {
-            const response = await fetch("/auth/logout", {
+            await fetch("/auth/logout", {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              }
+              headers: { "Content-Type": "application/json" }
             });
 
-    localStorage.removeItem("gecom.profilePictureCache");
-    localStorage.removeItem("currentUser");
+            localStorage.removeItem("gecom.profilePictureCache");
+            localStorage.removeItem("currentUser");
             window.location.href = "/";
           }
           catch (err) {
-            alert("Unexpected error");
+            // uses i18next if ready, otherwise fallback
+            var msg = (window.t ? window.t("page.layout.modal.close", { defaultValue: "Unexpected error" }) : "Unexpected error");
+            alert(msg);
           }
         }
       </script>
 
-<!-- Loader com global spin e validação de sessão -->
+      <!-- Mudança de idioma -->
 <script>
   (function () {
     // Prevent double-installation
-    if (window.__authFetchInterceptorInstalled) return;
-    window.__authFetchInterceptorInstalled = true;
+    if (window.GECOM_LANG) return;
 
-    // ---------------- Global Spinner (counter-based) ----------------
-    const spinnerOverlay = document.getElementById("globalSpinner");
-    const spinnerText = document.getElementById("globalSpinnerText");
+    var SUPPORTED = ["pt-BR", "en", "es"];
+    var DEFAULT_LANG = "pt-BR";
 
-    let pendingCount = 0;
-    let hideTimer = null;
-
-    function spinnerRender() {
-      if (!spinnerOverlay) return;
-
-      if (pendingCount > 0) {
-        if (hideTimer) clearTimeout(hideTimer);
-        spinnerOverlay.classList.add("is-visible");
-        spinnerOverlay.setAttribute("aria-hidden", "false");
-        return;
-      }
-
-      // Small delay avoids flicker for very fast requests
-      hideTimer = setTimeout(() => {
-        spinnerOverlay.classList.remove("is-visible");
-        spinnerOverlay.setAttribute("aria-hidden", "true");
-        if (spinnerText) {
-          spinnerText.style.display = "none";
-          spinnerText.textContent = "";
-        }
-      }, 150);
+    // Where your translation JSON files live:
+    // Create these files:
+    //   /Assets/i18n/pt-BR.json
+    //   /Assets/i18n/en.json
+    //   /Assets/i18n/es.json
+    function getI18nUrl(lang) {
+      return "/locales/" + encodeURIComponent(lang) + "/common.json";
     }
 
-    function spinnerShow(message) {
-      pendingCount++;
-      if (spinnerText && message) {
-        spinnerText.textContent = String(message);
-        spinnerText.style.display = "block";
-      }
-      spinnerRender();
+    function normalize(raw) {
+      var v = String(raw || "").trim();
+      if (!v) return null;
+      v = v.replace("_", "-");
+      var lower = v.toLowerCase();
+      if (lower === "pt" || lower === "pt-br") return "pt-BR";
+      if (lower === "en") return "en";
+      if (lower === "es") return "es";
+      return v;
     }
 
-    function spinnerHide() {
-      pendingCount = Math.max(0, pendingCount - 1);
-      spinnerRender();
-    }
-
-    function spinnerReset() {
-      pendingCount = 0;
-      spinnerRender();
-    }
-
-    async function spinnerWrap(promiseOrFn, message) {
-      spinnerShow(message);
+    function getCookie(name) {
       try {
-        const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
-        return await p;
-      } finally {
-        spinnerHide();
-      }
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(";").shift());
+        return null;
+      } catch { return null; }
     }
 
-    window.GECOM = window.GECOM || {};
-    window.GECOM.spinner = { show: spinnerShow, hide: spinnerHide, reset: spinnerReset, wrap: spinnerWrap };
-
-    // ---------------- Session expired modal (Bootstrap GlobalModal) ----------------
-    function openSessionExpiredModal() {
-      // Avoid opening multiple times
-      if (window.__gecomSessionExpiredShown) return;
-      window.__gecomSessionExpiredShown = true;
-
-      const modalBtn = document.getElementById("modalButton");
-      const modalTitle = document.getElementById("modalTitle");
-      const modalBody = document.getElementById("modalBody");
-      const btnSave = document.getElementById("saveModal");
-      const btnClose = document.getElementById("closeModal");
-
-      // Fallback if modal not found
-      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-        alert("Sua sessão expirou. Faça login novamente.");
-        window.location.href = "/";
-        return;
-      }
-
-      modalTitle.textContent = "Sessão expirada";
-      modalBody.innerHTML = `
-        <p>Sua sessão expirou ou você perdeu autorização.</p>
-        <p>Você precisa fazer login novamente.</p>
-      `;
-
-      btnSave.textContent = "Ir para Login";
-      btnSave.classList.remove("btn-danger");
-      btnSave.classList.add("btn-primary");
-
-      btnClose.textContent = "Fechar";
-
-      const cleanup = () => {
-        btnSave.onclick = null;
-        btnClose.onclick = null;
-
-        // Restore defaults
-        btnSave.textContent = "Save";
-        btnClose.textContent = "Close";
-        btnSave.classList.remove("btn-danger");
-        btnSave.classList.add("btn-primary");
-      };
-
-      const goToLogin = () => {
-        cleanup();
-        window.location.href = "/";
-      };
-
-      btnSave.onclick = goToLogin;
-      btnClose.onclick = goToLogin;
-
-      modalBtn.click();
-    }
-
-    // ---------------- Refresh flow (single-flight) ----------------
-    // Note: keep this only for the 401 interceptor. Do NOT use it as a periodic ping.
-    let refreshPromise = null;
-
-    async function refreshAccessToken() {
-      if (refreshPromise) return refreshPromise;
-
-      refreshPromise = (async () => {
-        const resp = await fetch("/auth/refresh", {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          credentials: "same-origin",
-          cache: "no-store"
-        });
-
-        if (!resp.ok) throw new Error("Refresh failed");
-        return true;
-      })();
-
+    function setCookie(name, value) {
       try {
-        return await refreshPromise;
-      } finally {
-        refreshPromise = null;
-      }
+        document.cookie = name + "=" + encodeURIComponent(value) + "; path=/; SameSite=Lax";
+      } catch { }
     }
 
-    // ---------------- Helpers: decide when to show spinner ----------------
-    function shouldIgnoreSpinner(url) {
-      if (!url) return false;
-
-      // auth endpoints + profile picture + session ping endpoint
-      if (
-        url.includes("/auth/refresh") ||
-        url.includes("/auth/logout") ||
-        url.includes("/profile-picture") ||
-        url.includes("/api/currencies")
-      ) return true;
-
-      // static assets (avoid noisy spinner)
-      const lower = url.toLowerCase();
-      if (
-        lower.includes("/assets/") ||
-        lower.endsWith(".css") ||
-        lower.endsWith(".js") ||
-        lower.endsWith(".png") ||
-        lower.endsWith(".jpg") ||
-        lower.endsWith(".jpeg") ||
-        lower.endsWith(".svg") ||
-        lower.endsWith(".gif") ||
-        lower.endsWith(".webp") ||
-        lower.endsWith(".ico") ||
-        lower.endsWith(".woff") ||
-        lower.endsWith(".woff2") ||
-        lower.endsWith(".ttf") ||
-        lower.endsWith(".map")
-      ) return true;
-
-      return false;
-    }
-
-    // ---------------- jQuery Ajax global hook ----------------
-    if (window.jQuery) {
-      jQuery(document).ajaxStart(function () {
-        spinnerShow();
-      });
-
-      jQuery(document).ajaxStop(function () {
-        spinnerReset();
-      });
-    }
-
-    // ---------------- Fetch interceptor ----------------
-    const originalFetch = window.fetch.bind(window);
-
-    window.fetch = async function (input, init) {
-      const requestUrl = typeof input === "string" ? input : (input && input.url) || "";
-
-      // Avoid infinite loops: never intercept refresh/logout itself
-      const isAuthRefresh = requestUrl.includes("/auth/refresh");
-      const isAuthLogout = requestUrl.includes("/auth/logout");
-      if (isAuthRefresh || isAuthLogout) {
-        return originalFetch(input, init);
-      }
-
-      // Ensure cookies are sent (important if your auth is cookie-based)
-      const safeInit = init ? { ...init } : {};
-      if (!safeInit.credentials) safeInit.credentials = "same-origin";
-
-      const ignoreSpinner = shouldIgnoreSpinner(requestUrl);
-      if (!ignoreSpinner) spinnerShow();
-
+    function getLangFromUrl() {
       try {
-        let response = await originalFetch(input, safeInit);
+        var u = new URL(window.location.href);
+        return normalize(u.searchParams.get("lang"));
+      } catch { return null; }
+    }
 
-        // If not 401, return normally
-        if (response.status !== 401) return response;
-
-        // Try refresh once
-        try {
-          await refreshAccessToken();
-        } catch (e) {
-          console.warn("Token refresh failed:", e);
-          openSessionExpiredModal();
-          return response;
-        }
-
-        // Retry original request once after refresh
-        response = await originalFetch(input, safeInit);
-
-        // If still unauthorized, show modal
-        if (response.status === 401) {
-          openSessionExpiredModal();
-        }
-
-        return response;
-      } finally {
-        if (!ignoreSpinner) spinnerHide();
-      }
-    };
-
-    // ---------------- Periodic auth check (every ~5 minutes) ----------------
-    // Uses a lightweight authenticated GET instead of /auth/refresh.
-    const SESSION_PING_MS = 1000 * 60 * 5; // 5 minutes
-    const SESSION_PING_URL = "/api/currencies?is_active=1";
-
-    let sessionPingTimer = null;
-
-    function hasCurrentUser() {
+    function setLangOnCurrentUrl(lang) {
       try {
-        const raw = localStorage.getItem("currentUser");
-        if (!raw) return false;
-        const obj = JSON.parse(raw);
-        return !!obj?.id;
+        var u = new URL(window.location.href);
+        u.searchParams.set("lang", lang);
+        window.location.href = u.pathname + u.search + u.hash;
       } catch {
-        return false;
+        window.location.search = "?lang=" + encodeURIComponent(lang);
       }
     }
 
-    async function sessionPing() {
-      // Do not ping before login is fully established
-      if (!hasCurrentUser()) return;
+    function updateLabel(lang) {
+      var el = document.getElementById("langLabel");
+      if (!el) return;
+      var v = String(lang || "").toUpperCase();
+      if (v === "PT-BR") v = "PT";
+      el.textContent = v;
+    }
 
+    function shouldRewriteHref(href) {
+      if (!href) return false;
+      if (href.startsWith("#")) return false;
+      if (href.startsWith("javascript:")) return false;
+      if (href.startsWith("mailto:")) return false;
+      if (href.startsWith("tel:")) return false;
+      if (href.startsWith("/auth/")) return false;
+      return true;
+    }
+
+    function withLangParam(href, lang) {
       try {
-        const resp = await originalFetch(SESSION_PING_URL, {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          credentials: "same-origin",
-          cache: "no-store"
-        });
+        var abs = new URL(href, window.location.origin);
+        if (abs.origin !== window.location.origin) return href;
+        abs.searchParams.set("lang", lang);
+        return abs.pathname + abs.search + abs.hash;
+      } catch {
+        return href;
+      }
+    }
 
-        // If unauthorized/forbidden => session expired
-        if (resp.status === 401 || resp.status === 403) {
-          console.warn("Session ping unauthorized:", resp.status);
-          openSessionExpiredModal();
+    function rewriteLinks(lang) {
+      try {
+        document.querySelectorAll("a[href]").forEach(function (a) {
+          if (a.getAttribute("data-toggle")) return; // dropdown toggles
+          var href = a.getAttribute("href");
+          if (!shouldRewriteHref(href)) return;
+          a.setAttribute("href", withLangParam(href, lang));
+        });
+      } catch { }
+    }
+
+    // ---------- i18next load + apply ----------
+    async function loadTranslations(lang) {
+      // You can also inject translations via window.__I18N_RESOURCES if you want
+      // window.__I18N_RESOURCES = { "pt-BR": {...}, "en": {...}, "es": {...} }
+      try {
+        if (window.__I18N_RESOURCES && window.__I18N_RESOURCES[lang]) {
+          return window.__I18N_RESOURCES[lang];
+        }
+      } catch { }
+
+      var url = getI18nUrl(lang);
+      var resp = await fetch(url, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
+      if (!resp.ok) throw new Error("Failed to load i18n: " + url + " (" + resp.status + ")");
+      return await resp.json();
+    }
+
+    function applyI18nToDom() {
+      if (!window.i18next || typeof window.i18next.t !== "function") return;
+
+      // Expose window.t for your existing code (alerts, modals, etc.)
+      window.t = function (key, options) {
+        try { return window.i18next.t(key, options || {}); } catch { return (options && options.defaultValue) ? options.defaultValue : key; }
+      };
+
+      // Apply to elements with data-i18n="some.key"
+      document.querySelectorAll("[data-i18n]").forEach(function (el) {
+        var key = el.getAttribute("data-i18n");
+        if (!key) return;
+
+        // Optional: allow attribute translations:
+        // <input data-i18n="page.x.y" data-i18n-attr="placeholder">
+        var attr = el.getAttribute("data-i18n-attr");
+        var value = window.t(key, { defaultValue: el.textContent });
+
+        if (attr) {
+          el.setAttribute(attr, value);
           return;
         }
 
-        // If server error/network issues => do not force logout
-        if (!resp.ok) {
-          console.warn("Session ping non-ok:", resp.status);
-        }
-      } catch (e) {
-        console.warn("Session ping failed (network):", e);
+        // Default: textContent
+        el.textContent = value;
+      });
+    }
+
+    async function initI18n(lang) {
+      if (!window.i18next) {
+        console.warn("i18next not loaded.");
+        return;
       }
+
+      document.documentElement.setAttribute("lang", lang);
+
+      var resources = await loadTranslations(lang);
+
+      await window.i18next.init({
+        lng: lang,
+        fallbackLng: DEFAULT_LANG,
+        resources: (function () {
+          var pack = {};
+          pack[lang] = { translation: resources };
+          return pack;
+        })(),
+        interpolation: { escapeValue: false }
+      });
+
+      applyI18nToDom();
     }
 
-    function startSessionPing() {
-      if (sessionPingTimer) clearInterval(sessionPingTimer);
+    // Decide language (URL wins, then cookie, then default)
+    var lang = getLangFromUrl() || normalize(getCookie("gecom_lang")) || DEFAULT_LANG;
+    if (!SUPPORTED.includes(lang)) lang = DEFAULT_LANG;
 
-      // First ping after load (avoid racing login)
-      setTimeout(sessionPing, 30 * 1000);
+    // Persist and apply "lang UI"
+    setCookie("gecom_lang", lang);
+    updateLabel(lang);
+    rewriteLinks(lang);
 
-      sessionPingTimer = setInterval(() => {
-        if (document.visibilityState === "visible") sessionPing();
-      }, SESSION_PING_MS);
-    }
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") sessionPing();
+    // Init i18next + apply translations
+    initI18n(lang).catch(function (e) {
+      console.warn("i18n init failed:", e);
+      // Still keep UI consistent even if JSON missing
     });
 
-    startSessionPing();
+    // Expose API for the dropdown
+    window.GECOM_LANG = {
+      current: function () { return lang; },
+      go: function (lng) {
+        var next = normalize(lng) || DEFAULT_LANG;
+        if (!SUPPORTED.includes(next)) next = DEFAULT_LANG;
+        setCookie("gecom_lang", next);
+        setLangOnCurrentUrl(next);
+        return false;
+      },
+      rerender: function () {
+        // In case you inject HTML dynamically and want to re-apply translations
+        try { applyI18nToDom(); } catch { }
+      }
+    };
+
+    // Keep links updated if DOM changes
+    try {
+      var target = document.getElementById("page-wrapper") || document.body;
+      if (target && window.MutationObserver) {
+        var tmr = null;
+        var obs = new MutationObserver(function () {
+          if (tmr) clearTimeout(tmr);
+          tmr = setTimeout(function () {
+            rewriteLinks(lang);
+            applyI18nToDom();
+          }, 50);
+        });
+        obs.observe(target, { childList: true, subtree: true });
+      }
+    } catch { }
   })();
 </script>
 
 
+      <!-- Loader com global spin e validação de sessão -->
+      <script>
+        (function () {
+          // Prevent double-installation
+          if (window.__authFetchInterceptorInstalled) return;
+          window.__authFetchInterceptorInstalled = true;
+
+          // ---------------- Global Spinner (counter-based) ----------------
+          const spinnerOverlay = document.getElementById("globalSpinner");
+          const spinnerText = document.getElementById("globalSpinnerText");
+
+          let pendingCount = 0;
+          let hideTimer = null;
+
+          function spinnerRender() {
+            if (!spinnerOverlay) return;
+
+            if (pendingCount > 0) {
+              if (hideTimer) clearTimeout(hideTimer);
+              spinnerOverlay.classList.add("is-visible");
+              spinnerOverlay.setAttribute("aria-hidden", "false");
+              return;
+            }
+
+            // Small delay avoids flicker for very fast requests
+            hideTimer = setTimeout(() => {
+              spinnerOverlay.classList.remove("is-visible");
+              spinnerOverlay.setAttribute("aria-hidden", "true");
+              if (spinnerText) {
+                spinnerText.style.display = "none";
+                spinnerText.textContent = "";
+              }
+            }, 150);
+          }
+
+          function spinnerShow(message) {
+            pendingCount++;
+            if (spinnerText && message) {
+              spinnerText.textContent = String(message);
+              spinnerText.style.display = "block";
+            }
+            spinnerRender();
+          }
+
+          function spinnerHide() {
+            pendingCount = Math.max(0, pendingCount - 1);
+            spinnerRender();
+          }
+
+          function spinnerReset() {
+            pendingCount = 0;
+            spinnerRender();
+          }
+
+          async function spinnerWrap(promiseOrFn, message) {
+            spinnerShow(message);
+            try {
+              const p = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
+              return await p;
+            } finally {
+              spinnerHide();
+            }
+          }
+
+          window.GECOM = window.GECOM || {};
+          window.GECOM.spinner = { show: spinnerShow, hide: spinnerHide, reset: spinnerReset, wrap: spinnerWrap };
+
+          // ---------------- Session expired modal (Bootstrap GlobalModal) ----------------
+          function openSessionExpiredModal() {
+            // Avoid opening multiple times
+            if (window.__gecomSessionExpiredShown) return;
+            window.__gecomSessionExpiredShown = true;
+
+            const modalBtn = document.getElementById("modalButton");
+            const modalTitle = document.getElementById("modalTitle");
+            const modalBody = document.getElementById("modalBody");
+            const btnSave = document.getElementById("saveModal");
+            const btnClose = document.getElementById("closeModal");
+
+            // Fallback if modal not found
+            if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+              alert("Sua sessão expirou. Faça login novamente.");
+              window.location.href = "/";
+              return;
+            }
+
+            var title = window.t ? window.t("page.layout.session.expiredTitle", { defaultValue: "Sessão expirada" }) : "Sessão expirada";
+            var line1 = window.t ? window.t("page.layout.session.expiredBody", { defaultValue: "Sua sessão expirou ou você perdeu autorização." }) : "Sua sessão expirou ou você perdeu autorização.";
+            var line2 = window.t ? window.t("page.layout.session.expiredBody2", { defaultValue: "Você precisa fazer login novamente." }) : "Você precisa fazer login novamente.";
+            var goLogin = window.t ? window.t("page.layout.session.goToLogin", { defaultValue: "Ir para Login" }) : "Ir para Login";
+
+            modalTitle.textContent = title;
+            modalBody.innerHTML = `<p>${line1}</p><p>${line2}</p>`;
+
+            btnSave.textContent = goLogin;
+            btnSave.classList.remove("btn-danger");
+            btnSave.classList.add("btn-primary");
+
+            btnClose.textContent = window.t ? window.t("page.layout.modal.close", { defaultValue: "Fechar" }) : "Fechar";
+
+            const cleanup = () => {
+              btnSave.onclick = null;
+              btnClose.onclick = null;
+
+              // Restore defaults (translated)
+              btnSave.textContent = window.t ? window.t("page.layout.modal.save", { defaultValue: "Salvar" }) : "Save";
+              btnClose.textContent = window.t ? window.t("page.layout.modal.close", { defaultValue: "Fechar" }) : "Close";
+              btnSave.classList.remove("btn-danger");
+              btnSave.classList.add("btn-primary");
+            };
+
+            const goToLogin = () => {
+              cleanup();
+              window.location.href = "/";
+            };
+
+            btnSave.onclick = goToLogin;
+            btnClose.onclick = goToLogin;
+
+            modalBtn.click();
+          }
+
+          // ---------------- Refresh flow (single-flight) ----------------
+          let refreshPromise = null;
+
+          async function refreshAccessToken() {
+            if (refreshPromise) return refreshPromise;
+
+            refreshPromise = (async () => {
+              const resp = await fetch("/auth/refresh", {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                credentials: "same-origin",
+                cache: "no-store"
+              });
+
+              if (!resp.ok) throw new Error("Refresh failed");
+              return true;
+            })();
+
+            try {
+              return await refreshPromise;
+            } finally {
+              refreshPromise = null;
+            }
+          }
+
+          // ---------------- Helpers: decide when to show spinner ----------------
+          function shouldIgnoreSpinner(url) {
+            if (!url) return false;
+
+            if (
+              url.includes("/auth/refresh") ||
+              url.includes("/auth/logout") ||
+              url.includes("/profile-picture") ||
+              url.includes("/api/currencies")
+            ) return true;
+
+            const lower = url.toLowerCase();
+            if (
+              lower.includes("/assets/") ||
+              lower.endsWith(".css") ||
+              lower.endsWith(".js") ||
+              lower.endsWith(".png") ||
+              lower.endsWith(".jpg") ||
+              lower.endsWith(".jpeg") ||
+              lower.endsWith(".svg") ||
+              lower.endsWith(".gif") ||
+              lower.endsWith(".webp") ||
+              lower.endsWith(".ico") ||
+              lower.endsWith(".woff") ||
+              lower.endsWith(".woff2") ||
+              lower.endsWith(".ttf") ||
+              lower.endsWith(".map")
+            ) return true;
+
+            return false;
+          }
+
+          // ---------------- jQuery Ajax global hook ----------------
+          if (window.jQuery) {
+            jQuery(document).ajaxStart(function () { spinnerShow(); });
+            jQuery(document).ajaxStop(function () { spinnerReset(); });
+          }
+
+          // ---------------- Fetch interceptor ----------------
+          const originalFetch = window.fetch.bind(window);
+
+          window.fetch = async function (input, init) {
+            const requestUrl = typeof input === "string" ? input : (input && input.url) || "";
+
+            const isAuthRefresh = requestUrl.includes("/auth/refresh");
+            const isAuthLogout = requestUrl.includes("/auth/logout");
+            if (isAuthRefresh || isAuthLogout) {
+              return originalFetch(input, init);
+            }
+
+            const safeInit = init ? { ...init } : {};
+            if (!safeInit.credentials) safeInit.credentials = "same-origin";
+
+            const ignoreSpinner = shouldIgnoreSpinner(requestUrl);
+            if (!ignoreSpinner) spinnerShow();
+
+            try {
+              let response = await originalFetch(input, safeInit);
+
+              if (response.status !== 401) return response;
+
+              try {
+                await refreshAccessToken();
+              } catch (e) {
+                console.warn("Token refresh failed:", e);
+                openSessionExpiredModal();
+                return response;
+              }
+
+              response = await originalFetch(input, safeInit);
+
+              if (response.status === 401) {
+                openSessionExpiredModal();
+              }
+
+              return response;
+            } finally {
+              if (!ignoreSpinner) spinnerHide();
+            }
+          };
+
+          // ---------------- Periodic auth check (every ~5 minutes) ----------------
+          const SESSION_PING_MS = 1000 * 60 * 5; // 5 minutes
+          const SESSION_PING_URL = "/api/currencies?is_active=1";
+
+          let sessionPingTimer = null;
+
+          function hasCurrentUser() {
+            try {
+              const raw = localStorage.getItem("currentUser");
+              if (!raw) return false;
+              const obj = JSON.parse(raw);
+              return !!obj?.id;
+            } catch {
+              return false;
+            }
+          }
+
+          async function sessionPing() {
+            if (!hasCurrentUser()) return;
+
+            try {
+              const resp = await originalFetch(SESSION_PING_URL, {
+                method: "GET",
+                headers: { Accept: "application/json" },
+                credentials: "same-origin",
+                cache: "no-store"
+              });
+
+              if (resp.status === 401 || resp.status === 403) {
+                console.warn("Session ping unauthorized:", resp.status);
+                openSessionExpiredModal();
+                return;
+              }
+
+              if (!resp.ok) {
+                console.warn("Session ping non-ok:", resp.status);
+              }
+            } catch (e) {
+              console.warn("Session ping failed (network):", e);
+            }
+          }
+
+          function startSessionPing() {
+            if (sessionPingTimer) clearInterval(sessionPingTimer);
+
+            setTimeout(sessionPing, 30 * 1000);
+
+            sessionPingTimer = setInterval(() => {
+              if (document.visibilityState === "visible") sessionPing();
+            }, SESSION_PING_MS);
+          }
+
+          document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") sessionPing();
+          });
+
+          startSessionPing();
+        })();
+      </script>
+
       <script src="../Assets/js/globalSpinner.js"></script>
-     
+
       <!-- Script de permissões -->
       <script>
         (function () {
@@ -631,18 +908,16 @@
             if (el && name) el.textContent = name;
 
             if (window.__auth.isUser) {
-
-                //Tira permissão de create
-                $('a[name="btn_act_new"]').hide();
-                $('button[name="btn_act_new"]').hide();
-                $('input[name="btn_act_new"]').hide();
-            }          
+              $('a[name="btn_act_new"]').hide();
+              $('button[name="btn_act_new"]').hide();
+              $('input[name="btn_act_new"]').hide();
+            }
             else if (window.__auth.isManager) {
-              
-            }          
+
+            }
             else if (window.__auth.isAdmin) {
-                $("#clientTab").show();
-                $("#productTab").show();              
+              $("#clientTab").show();
+              $("#productTab").show();
             }
 
           } catch (e) {
@@ -651,200 +926,213 @@
         })();
       </script>
 
-<!-- Esse script aplica foto de perfil -->
-<script>
-  (function () {
-    // English comments only
-    const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
-    const CACHE_KEY = "gecom.profilePictureCache"; // single cache entry for current user
-    const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
+      <!-- Esse script aplica foto de perfil -->
+      <script>
+        (function () {
+          // English comments only
+          const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
+          const CACHE_KEY = "gecom.profilePictureCache"; // single cache entry for current user
+          const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
 
-    function safeJsonParse(raw) {
-      try { return JSON.parse(raw); } catch { return null; }
-    }
+          function safeJsonParse(raw) {
+            try { return JSON.parse(raw); } catch { return null; }
+          }
 
-    function getCurrentUserFromStorage() {
-      const raw = localStorage.getItem("currentUser");
-      if (!raw) return null;
-      return safeJsonParse(raw);
-    }
+          function getCurrentUserFromStorage() {
+            const raw = localStorage.getItem("currentUser");
+            if (!raw) return null;
+            return safeJsonParse(raw);
+          }
 
-    function getCachedPicture(userId) {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
+          function getCachedPicture(userId) {
+            const raw = localStorage.getItem(CACHE_KEY);
+            if (!raw) return null;
 
-      const cache = safeJsonParse(raw);
-      if (!cache) return null;
+            const cache = safeJsonParse(raw);
+            if (!cache) return null;
 
-      if (String(cache.userId || "") !== String(userId || "")) return null;
+            if (String(cache.userId || "") !== String(userId || "")) return null;
 
-      const savedAt = Number(cache.savedAt || 0);
-      if (!savedAt || (Date.now() - savedAt) > CACHE_TTL_MS) return null;
+            const savedAt = Number(cache.savedAt || 0);
+            if (!savedAt || (Date.now() - savedAt) > CACHE_TTL_MS) return null;
 
-      const value = String(cache.value || "");
-      if (!value) return null;
+            const value = String(cache.value || "");
+            if (!value) return null;
 
-      return value;
-    }
+            return value;
+          }
 
-    function setCachedPicture(userId, dataUrl) {
-      try {
-        if (!dataUrl) return;
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          userId: String(userId),
-          value: String(dataUrl),
-          savedAt: Date.now()
-        }));
-      } catch (e) {
-        // If storage is full, just ignore cache
-        console.warn("Failed to cache profile picture:", e);
-      }
-    }
+          function setCachedPicture(userId, dataUrl) {
+            try {
+              if (!dataUrl) return;
+              localStorage.setItem(CACHE_KEY, JSON.stringify({
+                userId: String(userId),
+                value: String(dataUrl),
+                savedAt: Date.now()
+              }));
+            } catch (e) {
+              console.warn("Failed to cache profile picture:", e);
+            }
+          }
 
-    async function loadPictureFromApi(userId) {
-      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
-        method: "GET",
-        headers: { Accept: "application/json" }
-      });
+          async function loadPictureFromApi(userId) {
+            const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
+              method: "GET",
+              headers: { Accept: "application/json" }
+            });
 
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok) return null;
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok) return null;
 
-      const pic = data?.base64;
-      return (typeof pic === "string" && pic.trim().length > 0) ? pic : null;
-    }
+            const pic = data?.base64;
+            return (typeof pic === "string" && pic.trim().length > 0) ? pic : null;
+          }
 
-    async function applyAvatar() {
-      const user = getCurrentUserFromStorage();
-      const userId = user?.id;
-      const img = document.getElementById("currentUserAvatar");
-      if (!img || !userId) return;
+          function setUserAvatar(imgElementId, avatarValue) {
+            const img = document.getElementById(imgElementId);
+            if (!img) return;
 
-      // 1) Try cache first
-      const cached = getCachedPicture(userId);
-      if (cached) {
-        img.src = cached;
-        return;
-      }
+            const raw = (avatarValue ?? "").toString().trim();
+            if (!raw) return;
 
-      // 2) Fetch from API, then cache
-      const pic = await loadPictureFromApi(userId);
-      if (pic) {
-        img.src = pic;
-        setCachedPicture(userId, pic);
-      } else {
-        img.src = DEFAULT_AVATAR;
-      }
-    }
+            // If it's already a URL or already a data URI, use as-is
+            if (raw.startsWith("data:image/") || raw.startsWith("http://") || raw.startsWith("https://")) {
+              img.src = raw;
+              setCachedPicture(userId, raw);
+              return;
+            }
 
-    // Run after DOM ready
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", applyAvatar);
-    } else {
-      applyAvatar();
-    }
-  })();
-</script>
+            // If it's base64 only, assume PNG (because your string starts with iVBOR...)
+            // Remove accidental prefix if it came as "base64,xxxxx"
+            const base64 = raw.includes("base64,") ? raw.split("base64,").pop().trim() : raw;
 
+            img.src = `data:image/png;base64,${base64}`;            
+              setCachedPicture(userId, `data:image/png;base64,${base64}`);
+          }
+          async function applyAvatar() {
+            const user = getCurrentUserFromStorage();
+            const userId = user?.id;
+            const img = document.getElementById("currentUserAvatar");
+            if (!img || !userId) return;
 
-<!-- Esse script altera o alert nativo do navegador para nosso modal -->
-<script>
-  (function () {
-    if (window.__gecomDialogOverridden) return;
-    window.__gecomDialogOverridden = true;
+            const cached = getCachedPicture(userId);
+            if (cached) {
+              setUserAvatar("currentUserAvatar", cached);
+              return;
+            }
 
-    const originalAlert = window.alert;
-    const originalConfirm = window.confirm;
+            const pic = await loadPictureFromApi(userId);
+            if (pic) {
+              setUserAvatar("currentUserAvatar", pic);
+            } else {
+              img.src = DEFAULT_AVATAR;
+            }
+          }
 
-    function getModalElements() {
-      return {
-        modalBtn: document.getElementById("modalButton"),
-        modalTitle: document.getElementById("modalTitle"),
-        modalBody: document.getElementById("modalBody"),
-        btnSave: document.getElementById("saveModal"),
-        btnClose: document.getElementById("closeModal"),
-      };
-    }
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", applyAvatar);
+          } else {
+            applyAvatar();
+          }
+        })();
+      </script>
 
-    /* =========================
-       ALERT (fire-and-forget)
-       ========================= */
-    window.alert = function (message, options) {
-      const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
+      <!-- Esse script altera o alert nativo do navegador para nosso modal -->
+      <script>
+        (function () {
+          if (window.__gecomDialogOverridden) return;
+          window.__gecomDialogOverridden = true;
 
-      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-        originalAlert(message);
-        return;
-      }
+          const originalAlert = window.alert;
+          const originalConfirm = window.confirm;
 
-      const opts = options || {};
-      modalTitle.textContent = opts.title || "Aviso";
-      modalBody.innerHTML = `<p>${String(message || "")}</p>`;
+          function getModalElements() {
+            return {
+              modalBtn: document.getElementById("modalButton"),
+              modalTitle: document.getElementById("modalTitle"),
+              modalBody: document.getElementById("modalBody"),
+              btnSave: document.getElementById("saveModal"),
+              btnClose: document.getElementById("closeModal"),
+            };
+          }
 
-      btnSave.textContent = opts.okText || "OK";
-      btnSave.className = "btn btn-primary";
-      btnClose.style.display = "none";
+          function tt(key, fallback) {
+            try {
+              if (window.t) return window.t(key, { defaultValue: fallback });
+              return fallback;
+            } catch {
+              return fallback;
+            }
+          }
 
-      const cleanup = () => {
-        btnSave.onclick = null;
-        btnClose.onclick = (message.includes("unauthorized") || message.includes("Falha ao")) ? window.location = "/" : null;
-        btnClose.style.display = "";
-        btnSave.textContent = "Save";
-      };
+          /* =========================
+             ALERT (fire-and-forget)
+             ========================= */
+          window.alert = function (message, options) {
+            const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
 
-      btnSave.onclick = () => cleanup();
+            if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+              originalAlert(message);
+              return;
+            }
 
-      modalBtn.click();
-    };
+            const opts = options || {};
+            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "Aviso");
+            modalBody.innerHTML = `<p>${String(message || "")}</p>`;
 
-    /* =========================
-       CONFIRM (Promise<boolean>)
-       ========================= */
-    window.confirm = function (message, options) {
-      const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
+            btnSave.textContent = opts.okText || tt("page.layout.modal.ok", "OK");
+            btnSave.className = "btn btn-primary";
+            btnClose.style.display = "none";
 
-      // Fallback se modal não existir
-      if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-        return Promise.resolve(originalConfirm(message));
-      }
+            const cleanup = () => {
+              btnSave.onclick = null;
+              btnClose.style.display = "";
+              btnSave.textContent = tt("page.layout.modal.save", "Salvar");
+            };
 
-      const opts = options || {};
+            btnSave.onclick = () => cleanup();
+            modalBtn.click();
+          };
 
-      modalTitle.textContent = opts.title || "Confirmação";
-      modalBody.innerHTML = `<p>${String(message || "")}</p>`;
+          /* =========================
+             CONFIRM (Promise<boolean>)
+             ========================= */
+          window.confirm = function (message, options) {
+            const { modalBtn, modalTitle, modalBody, btnSave, btnClose } = getModalElements();
 
-      btnSave.textContent = opts.okText || "Confirmar";
-      btnClose.textContent = opts.cancelText || "Cancelar";
+            if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
+              return Promise.resolve(originalConfirm(message));
+            }
 
-      btnSave.className = opts.danger
-        ? "btn btn-danger"
-        : "btn btn-primary";
+            const opts = options || {};
 
-      return new Promise((resolve) => {
-        const cleanup = () => {
-          btnSave.onclick = null;
-          btnClose.onclick = null;
-          btnSave.className = "btn btn-primary";
-          btnSave.textContent = "Save";
-          btnClose.textContent = "Close";
-        };
+            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "Confirmação");
+            modalBody.innerHTML = `<p>${String(message || "")}</p>`;
 
-        btnSave.onclick = () => {
-          cleanup();
-          resolve(true);
-        };
+            btnSave.textContent = opts.okText || tt("page.clientDetails.globalModal.confirmOk", "Confirmar");
+            btnClose.textContent = opts.cancelText || tt("page.clientDetails.globalModal.cancel", "Cancelar");
 
-        btnClose.onclick = () => {
-          cleanup();
-          resolve(false);
-        };
+            btnSave.className = opts.danger ? "btn btn-danger" : "btn btn-primary";
 
-        modalBtn.click();
-      });
-    };
+            return new Promise((resolve) => {
+              const cleanup = () => {
+                btnSave.onclick = null;
+                btnClose.onclick = null;
+                btnSave.className = "btn btn-primary";
+                btnSave.textContent = tt("page.layout.modal.save", "Salvar");
+                btnClose.textContent = tt("page.layout.modal.close", "Fechar");
+              };
 
-  })();
-</script>
+              btnSave.onclick = () => { cleanup(); resolve(true); };
+              btnClose.onclick = () => { cleanup(); resolve(false); };
+
+              modalBtn.click();
+            });
+          };
+
+        })();
+      </script>
 
 </body>
+
 </html>

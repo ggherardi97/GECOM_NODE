@@ -47,10 +47,10 @@
   <div class="col-lg-12">
     <div class="ibox">
       <div class="ibox-title">
-        <h5>Invoices</h5>
+        <h5><%= t('page.invoices.pageTitle') %></h5>
         <div class="ibox-tools">
           <a href="/NewInvoice" name="btn_act_new" class="btn btn-sm btn-primary admin-only" id="btnNewInvoice">
-            Novo Invoice
+            <%= t('page.invoices.toolbar.newInvoice') %>
           </a>
         </div>
       </div>
@@ -59,18 +59,18 @@
 
         <!-- Bulk actions -->
         <div id="bulkActions" class="bulk-actions admin-only">
-          <span class="count">Selecionados: <span id="selectedCount">0</span></span>
+          <span class="count"><%= t('page.invoices.toolbar.selected') %> <span id="selectedCount">0</span></span>
 
           <button id="btnBulkSend" type="button" class="btn btn-success btn-sm">
-            <i class="fa fa-send"></i> Enviar ao cliente
+            <i class="fa fa-send"></i> <%= t('page.invoices.toolbar.sendToClient') %>
           </button>
 
           <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
-            <i class="fa fa-trash"></i> Excluir
+            <i class="fa fa-trash"></i> <%= t('page.invoices.toolbar.delete') %>
           </button>
 
           <button id="btnClearSelection" type="button" class="btn btn-white btn-sm">
-            Limpar seleção
+            <%= t('page.invoices.toolbar.clearSelection') %>
           </button>
         </div>
 
@@ -80,45 +80,45 @@
               <!-- Filters -->
               <tr>
                 <th style="width:40px;" class="admin-only">
-                  <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
+                  <input id="chkSelectAll" type="checkbox" title="<%= t('page.invoices.bulk.selectAll') %>">
                 </th>
                 <th></th>
-                <th><input class="form-control input-sm" data-filter="invoice_number" placeholder="Nº do invoice" /></th>
-                <th><input class="form-control input-sm" data-filter="company" placeholder="Empresa" /></th>
+                <th><input class="form-control input-sm" data-filter="invoice_number" placeholder="<%= t('page.invoices.filters.invoiceNumber') %>" /></th>
+                <th><input class="form-control input-sm" data-filter="company" placeholder="<%= t('page.invoices.filters.company') %>" /></th>
                 <th>
                   <select class="form-control input-sm" data-filter="status" id="statusFilter">
-                    <option value="">Todos</option>
-                    <option value="0" class="admin-only">Rascunho</option>
-                    <option value="1">Ativo</option>
-                    <option value="2">Expirado</option>
-                    <option value="3">Faturado</option>
-                    <option value="4">Pago</option>
+                    <option value=""><%= t('page.invoices.filters.all') %></option>
+                    <option value="0" class="admin-only"><%= t('page.invoices.status.draft') %></option>
+                    <option value="1"><%= t('page.invoices.status.active') %></option>
+                    <option value="2"><%= t('page.invoices.status.expired') %></option>
+                    <option value="3"><%= t('page.invoices.status.billed') %></option>
+                    <option value="4"><%= t('page.invoices.status.paid') %></option>
                   </select>
                 </th>
 
-                <th><input class="form-control input-sm" data-filter="subtotal" placeholder="Subtotal" /></th>
+                <th><input class="form-control input-sm" data-filter="subtotal" placeholder="<%= t('page.invoices.columns.subtotal') %>" /></th>
                 <!-- ✅ NEW: desconto antes de impostos -->
-                <th><input class="form-control input-sm" data-filter="discount_amount" placeholder="Desconto" /></th>
-                <th><input class="form-control input-sm" data-filter="tax_total" placeholder="Impostos" /></th>
-                <th><input class="form-control input-sm" data-filter="total" placeholder="Total" /></th>
+                <th><input class="form-control input-sm" data-filter="discount_amount" placeholder="<%= t('page.invoices.columns.discount') %>" /></th>
+                <th><input class="form-control input-sm" data-filter="tax_total" placeholder="<%= t('page.invoices.columns.taxes') %>" /></th>
+                <th><input class="form-control input-sm" data-filter="total" placeholder="<%= t('page.invoices.columns.total') %>" /></th>
                 <!-- ✅ REMOVED: issued_at (Emitida) -->
-                <th><input class="form-control input-sm" data-filter="due_at" placeholder="Vencimento" /></th>
+                <th><input class="form-control input-sm" data-filter="due_at" placeholder="<%= t('page.invoices.columns.dueDate') %>" /></th>
               </tr>
 
               <!-- Headers -->
               <tr>
                 <th style="width:40px;" class="admin-only"></th>
                 <th style="width:60px;">#</th>
-                <th class="sortable" data-sort="invoice_number">Invoice <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="subtotal">Subtotal <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="invoice_number"><%= t('page.invoices.columns.invoice') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="company"><%= t('page.invoices.columns.company') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="status"><%= t('page.invoices.columns.status') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="subtotal"><%= t('page.invoices.columns.subtotal') %> <span class="sort-indicator"></span></th>
                 <!-- ✅ NEW -->
-                <th class="sortable" data-sort="discount_amount">Desconto <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="tax_total">Impostos <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort="total">Total <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="discount_amount"><%= t('page.invoices.columns.discount') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="tax_total"><%= t('page.invoices.columns.taxes') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="total"><%= t('page.invoices.columns.total') %> <span class="sort-indicator"></span></th>
                 <!-- ✅ REMOVED -->
-                <th class="sortable" data-sort="due_at">Vencimento <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="due_at"><%= t('page.invoices.columns.dueDate') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
 
@@ -132,9 +132,9 @@
 
 <script>
 
-      $("#pageName").text("Invoices");
+      $("#pageName").text("<%= t('page.invoices.pageTitle') %>");
       $("#subSecoundPageName").text("");
-      $("#subpageName").text("Meus Invoices");
+      $("#subpageName").text("<%= t('page.invoices.pageTitle') %>");
       $("#subpageName").attr("href", "Invoices");
       $("#path").hide();
 
@@ -292,12 +292,12 @@
 
   function statusLabel(v) {
     switch (Number(v)) {
-      case 0: return "Rascunho";
-      case 1: return "Ativo";
-      case 2: return "Expirado";
-      case 3: return "Faturado";
-      case 4: return "Pago";
-      default: return "Rascunho";
+      case 0: return "<%= t('page.invoices.status.draft') %>";
+      case 1: return "<%= t('page.invoices.status.active') %>";
+      case 2: return "<%= t('page.invoices.status.expired') %>";
+      case 3: return "<%= t('page.invoices.status.billed') %>";
+      case 4: return "<%= t('page.invoices.status.paid') %>";
+      default: return "<%= t('page.invoices.status.draft') %>";
     }
   }
 
@@ -361,7 +361,7 @@
       body: JSON.stringify({ status }),
     });
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(data?.message || "Falha ao atualizar status do invoice.");
+    if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.updateStatusFailed') %>");
     return data;
   }
 
@@ -373,7 +373,7 @@
 
     if (resp.status === 204) return {};
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(data?.message || "Falha ao excluir invoice.");
+    if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.deleteFailed') %>");
     return data;
   }
 
@@ -395,12 +395,12 @@
     modalTitle.textContent = title;
     modalBody.innerHTML = bodyHtml;
 
-    btnSave.textContent = confirmText || "Confirmar";
+    btnSave.textContent = confirmText || "<%= t('page.invoices.modal.confirm') %>";
 
     btnSave.classList.remove("btn-primary", "btn-danger", "btn-success", "btn-warning");
     btnSave.classList.add(confirmBtnClass || "btn-primary");
 
-    btnClose.textContent = "Cancelar";
+    btnClose.textContent = "<%= t('page.invoices.modal.cancel') %>";
 
     return new Promise((resolve) => {
       const cleanup = () => {
@@ -409,8 +409,8 @@
 
         btnSave.classList.remove("btn-danger", "btn-success", "btn-warning");
         btnSave.classList.add("btn-primary");
-        btnSave.textContent = "Save";
-        btnClose.textContent = "Close";
+        btnSave.textContent = "<%= t('page.invoices.modal.save') %>";
+        btnClose.textContent = "<%= t('page.invoices.modal.close') %>";
       };
 
       btnSave.onclick = () => { cleanup(); resolve(true); };
@@ -540,7 +540,7 @@
     tbody.innerHTML = "";
 
     if (!Array.isArray(list) || list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">Nenhum invoice encontrado.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><%= t('page.invoices.empty.noResults') %></td></tr>`;
       updateBulkUI();
       return;
     }
@@ -564,7 +564,7 @@
               type="checkbox"
               data-id="${escapeHtml(String(row.id))}"
               ${isChecked ? "checked" : ""}
-              title="Selecionar"
+              title="<%= t('page.invoices.bulk.selectOne') %>"
             />
           </td>
         `
@@ -659,12 +659,12 @@
       if (ids.length === 0) return;
 
       const ok = await showConfirmModal(
-        "Enviar invoices ao cliente",
+        "<%= t('page.invoices.bulkSend.title') %>",
         `
-          <p>Você está prestes a atualizar <strong>${escapeHtml(ids.length)}</strong> invoice(s) para o status <strong>Ativo</strong>.</p>
-          <p>Deseja continuar?</p>
+          <p><%= t('page.invoices.bulkSend.bodyTextFirst') %> <strong>${escapeHtml(ids.length)}</strong> <%= t('page.invoices.bulkSend.bodyLine2') %> <strong><%= t('page.invoices.status.active') %></strong>.</p>
+          <p><%= t('page.invoices.bulkSend.confirmQuestion') %></p>
         `,
-        "Enviar",
+        "<%= t('page.invoices.bulkSend.confirmButton') %>",
         "btn-success"
       );
 
@@ -680,7 +680,7 @@
         await loadInvoices(true);
       } catch (err) {
         console.error("bulk send error:", err);
-        alert(err?.message || "Falha ao enviar invoices.");
+        alert(err?.message || "<%= t('page.invoices.errors.bulkSendFailed') %>");
       } finally {
         btnSend.disabled = false;
       }
@@ -694,13 +694,13 @@
       if (ids.length === 0) return;
 
       const ok = await showConfirmModal(
-        "Excluir invoices",
+        "<%= t('page.invoices.bulkDelete.title') %>",
         `
-          <p>Você está prestes a excluir <strong>${escapeHtml(ids.length)}</strong> invoice(s).</p>
-          <p class="text-danger">Esta ação não poderá ser desfeita.</p>
-          <p>Deseja continuar?</p>
+          <p><%= t('page.invoices.bulkDelete.bodyTextFirst') %> <strong>${escapeHtml(ids.length)}</strong> <%= t('page.invoices.bulkDelete.bodyLine2') %></p>
+          <p class="text-danger"><%= t('page.invoices.bulkDelete.warning') %></p>
+          <p><%= t('page.invoices.bulkDelete.confirmQuestion') %></p>
         `,
-        "Excluir",
+        "<%= t('page.invoices.bulkDelete.confirmButton') %>",
         "btn-danger"
       );
 
@@ -716,7 +716,7 @@
         await loadInvoices(true);
       } catch (err) {
         console.error("bulk delete error:", err);
-        alert(err?.message || "Falha ao excluir invoices.");
+        alert(err?.message || "<%= t('page.invoices.errors.bulkDeleteFailed') %>");
       } finally {
         btnDelete.disabled = false;
       }
@@ -761,6 +761,6 @@
   loadInvoices(false).catch((err) => {
     console.error("loadInvoices error:", err);
     const tbody = document.getElementById("invoiceLines");
-    if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">${escapeHtml(err?.message || "Erro ao carregar invoices.")}</td></tr>`;
+    if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">${escapeHtml(err?.message || "<%= t('page.invoices.errors.loadFailed') %>")}</td></tr>`;
   });
 </script>

@@ -28,9 +28,9 @@
   <div class="col-lg-12">
     <div class="ibox ">
       <div class="ibox-title">
-        <h5>Produtos</h5>
+        <h5><%= t('page.products.pageTitle') %></h5>
         <div class="ibox-tools">
-          <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="/NewProduct">Novo Produto</a>
+          <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="/NewProduct"><%= t('page.products.header.newProduct') %></a>
         </div>
       </div>
 
@@ -52,9 +52,9 @@
 
           <div class="col-sm-3" style="display:none;">
             <select id="activeFilter" class="form-control input-sm">
-              <option value="">Todos</option>
-              <option value="true" selected>Ativos</option>
-              <option value="false">Inativos</option>
+              <option value=""><%= t('page.products.filters.all') %></option>
+              <option value="true" selected><%= t('page.products.filters.activePlural') %></option>
+              <option value="false"><%= t('page.products.filters.inactivePlural') %></option>
             </select>
           </div>
         </div>
@@ -76,9 +76,9 @@
                 <!-- ✅ Active column filter: picklist -->
                 <th>
                   <select id="activeColumnFilter" class="form-control input-sm">
-                    <option value="">Todos</option>
-                    <option value="yes">Ativo</option>
-                    <option value="no">Inativo</option>
+                    <option value=""><%= t('page.products.filters.all') %></option>
+                    <option value="yes"><%= t('page.products.filters.active') %></option>
+                    <option value="no"><%= t('page.products.filters.inactive') %></option>
                   </select>
                 </th>
 
@@ -90,20 +90,20 @@
 
               <!-- Header row -->
               <tr>
-                <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="product_code">Código <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="name" style="    width: 24%;">Nome <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="brand">Brand <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="unit">Unidade <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="currency_text">Moeda <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="rowNumber"><%= t('page.products.columns.number') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="product_code"><%= t('page.products.columns.code') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="name" style="    width: 24%;"><%= t('page.products.columns.name') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="brand"><%= t('page.products.columns.brand') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="unit"><%= t('page.products.columns.unit') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="currency_text"><%= t('page.products.columns.currency') %> <span class="sort-indicator"></span></th>
 
                 <!-- NOTE: sorting uses displayed value (string). If you want numeric sort, I can adjust to use hidden numeric -->
-                <th class="sortable" data-sort-key="default_unit_price">Preço <span
+                <th class="sortable" data-sort-key="default_unit_price"><%= t('page.products.columns.price') %> <span
                     class="sort-indicator"></span></th>
 
-                <th class="sortable" data-sort-key="default_tax_rate">Imposto <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="is_active_text">Status <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="created_at_text">Criado em <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="default_tax_rate"><%= t('page.products.columns.tax') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text"><%= t('page.products.columns.status') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text"><%= t('page.products.columns.createdAt') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
 
@@ -131,13 +131,23 @@
         window.location = `/ProductDetail?id=${encodeURIComponent(productId)}`;
       }
     (function () {
+
+      // ✅ Inject translations into JS (no global t() needed)
+      const I18N = {
+        pageTitle: "<%- String(t('page.products.pageTitle')).replace(/"/g, '\\"') %>",
+        statusActive: "<%- String(t('page.products.filters.active')).replace(/"/g, '\\"') %>",
+        statusInactive: "<%- String(t('page.products.filters.inactive')).replace(/"/g, '\\"') %>",
+        errorLoadProducts: "<%- String(t('page.products.messages.errorLoadProducts')).replace(/"/g, '\\"') %>",
+        errorApplyFilter: "<%- String(t('page.products.messages.errorApplyFilter')).replace(/"/g, '\\"') %>"
+      };
+
       init();
       console.log("[Products] Script loaded");
 
       // -------------------- Breadcrumbs (same pattern) --------------------
       function setBreadcrumbs() {
-        $("#pageName").text("Produtos");
-        $("#subpageName").text("Produtos");
+        $("#pageName").text(I18N.pageTitle);
+        $("#subpageName").text(I18N.pageTitle);
       }
 
 
@@ -246,7 +256,7 @@
           default_unit_price: formattedPrice,
 
           default_tax_rate: String(p.default_tax_rate ?? "0"),
-          is_active_text: p.is_active ? "Ativo" : "Inativo",
+          is_active_text: p.is_active ? I18N.statusActive : I18N.statusInactive,
           created_at_text: formatDatePtBR(p.created_at),
         };
       }
@@ -384,7 +394,7 @@
           updateSortIndicators();
         } catch (e) {
           console.error(e);
-          alert("Falha ao carregar produtos.");
+          alert(I18N.errorLoadProducts || "Falha ao carregar produtos.");
         }
 
         // Column input filters
@@ -416,7 +426,7 @@
             updateSortIndicators();
           } catch (e) {
             console.error(e);
-            alert("Falha ao aplicar filtro.");
+            alert(I18N.errorApplyFilter || "Falha ao aplicar filtro.");
           }
         });
 

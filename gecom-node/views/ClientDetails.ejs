@@ -55,7 +55,7 @@
             <div class="col-lg-12">
               <div class="m-b-md">
                 <a onclick="callEditDetails()" class="btn btn-white btn-xs float-right" name="btn_act_new">
-                  Edite os detalhes do cliente
+                  <%= t('page.clientDetails.header.editClientDetails') %>
                 </a>
                 <h2 id="companyName"></h2>
               </div>
@@ -68,7 +68,7 @@
                 <div class="col-lg-6">
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Status:</dt>
+                      <dt><%= t('page.clientDetails.header.status') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
                       <dd class="mb-1">
@@ -79,16 +79,16 @@
 
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Porte:</dt>
+                      <dt><%= t('page.clientDetails.header.size') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
-                      <dd class="mb-1" id="size">Médio</dd>
+                      <dd class="mb-1" id="size"><%= t('page.clientDetails.header.sizeDefault') %></dd>
                     </div>
                   </dl>
 
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Setor:</dt>
+                      <dt><%= t('page.clientDetails.header.sector') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
                       <dd class="mb-1" id="sector"></dd>
@@ -97,7 +97,7 @@
 
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Nome Fantasia:</dt>
+                      <dt><%= t('page.clientDetails.header.fantasyName') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
                       <dd class="mb-1">
@@ -110,7 +110,7 @@
                 <div class="col-lg-6" id="cluster_info">
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Telefone:</dt>
+                      <dt><%= t('page.clientDetails.header.phone') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
                       <dd class="mb-1" id="phone"></dd>
@@ -119,7 +119,7 @@
 
                   <dl class="row mb-0">
                     <div class="col-sm-4 text-sm-right">
-                      <dt>Email:</dt>
+                      <dt><%= t('page.clientDetails.header.email') %></dt>
                     </div>
                     <div class="col-sm-8 text-sm-left">
                       <dd class="mb-1" id="email"></dd>
@@ -133,7 +133,7 @@
                 <div class="col-lg-12">
                   <dl class="row mb-0">
                     <div class="col-sm-2 text-sm-right">
-                      <dt>Valor total de projetos:</dt>
+                      <dt><%= t('page.clientDetails.header.projectsTotalLabel') %></dt>
                     </div>
                     <div class="col-sm-10 text-sm-left">
                       <dd>
@@ -144,8 +144,8 @@
                         </div>
 
                         <small id="projectsTotalText">
-                          Valor total de <strong class="projects-total-strong" id="projectsTotalValue">R$ 0,00</strong>.
-                          <span class="text-muted">(meta: <strong>R$ 1.000.000,00</strong>)</span>
+                          <%= t('page.clientDetails.header.projectsTotalText') %> <strong class="projects-total-strong" id="projectsTotalValue">R$ 0,00</strong>.
+                          <span class="text-muted">(<%= t('page.clientDetails.header.goal') %> <strong><%= t('page.clientDetails.header.goalValueExample') %></strong>)</span>
                         </small>
                       </dd>
                     </div>
@@ -158,7 +158,7 @@
             <div class="col-lg-2" style="text-align: center;">
               <img id="company_logo" src="../Assets/inspinia/img/zender_logo.png" alt="Logo do cliente">
               <div class="logo-muted" style="padding:0 20px 10px 20px;">
-                * Edite o logo em “Edite os detalhes do cliente”.
+                <%= t('page.clientDetails.header.logoHint') %>
               </div>
             </div>
           </div>
@@ -170,8 +170,8 @@
                 <div class="panel-heading">
                   <div class="panel-options">
                     <ul class="nav nav-tabs">
-                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Contatos</a></li>
-                      <li><a class="nav-link" href="#tab-2" data-toggle="tab">Documentos</a></li>
+                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab"><%= t('page.clientDetails.tabs.contacts') %></a></li>
+                      <li><a class="nav-link" href="#tab-2" data-toggle="tab"><%= t('page.clientDetails.tabs.documents') %></a></li>
                     </ul>
                   </div>
                 </div>
@@ -186,7 +186,7 @@
                             <div class="col-lg-12 text-right">
                               <button name="btn_act_new" type="button" class="btn btn-primary btn-sm"
                                 onclick="callNewContact()">
-                                <i class="fa fa-plus"></i> Novo contato
+                                <i class="fa fa-plus"></i> <%= t('page.clientDetails.contacts.newContact') %>
                               </button>
                             </div>
                           </div>
@@ -208,37 +208,37 @@
                             <div class="row" style="padding: 0 15px;">
                               <div class="col-lg-9" style="margin-left:-15px;">
                                 <button type="button" class="btn btn-primary" id="cd_btnDocsBack" style="display:none;">
-                                  <i class="fa fa-arrow-left"></i> Voltar
+                                  <i class="fa fa-arrow-left"></i> <%= t('page.clientDetails.documentsToolbar.back') %>
                                 </button>
 
                                 <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
                                   <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-                                    Adicionar
+                                    <%= t('page.clientDetails.documentsToolbar.add') %>
                                   </button>
                                   <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="#" id="cd_btnDocsNewFolder"><i
-                                          class="fa fa-folder"></i> Nova Pasta</a></li>
+                                          class="fa fa-folder"></i> <%= t('page.clientDetails.documentsToolbar.newFolder') %></a></li>
                                     <li><a class="dropdown-item" href="#" id="cd_btnDocsUpload"><i
-                                          class="fa fa-upload"></i> Upload de Documento</a></li>
+                                          class="fa fa-upload"></i> <%= t('page.clientDetails.documentsToolbar.uploadDocument') %></a></li>
                                     <li><a class="dropdown-item" href="#" id="cd_btnDocsNewLink"><i
-                                          class="fa fa-link"></i> Link do Drive</a></li>
+                                          class="fa fa-link"></i> <%= t('page.clientDetails.documentsToolbar.driveLink') %></a></li>
                                   </ul>
                                 </div>
 
                                 <button type="button" class="btn btn-white" id="cd_btnDocsOpenSelected"
                                   style="margin-left:8px; display:none;">
-                                  <i class="fa fa-external-link"></i> Abrir
+                                  <i class="fa fa-external-link"></i> <%= t('page.clientDetails.documentsToolbar.open') %>
                                 </button>
 
                                 <button type="button" class="btn btn-danger" id="cd_btnDocsDeleteSelected"
                                   style="margin-left:8px; display:none;">
-                                  <i class="fa fa-trash"></i> Excluir
+                                  <i class="fa fa-trash"></i> <%= t('page.clientDetails.documentsToolbar.delete') %>
                                 </button>
 
                                 <span id="cd_currentDocsFolderLabel" class="text-muted"
                                   style="margin-left:12px;"></span>
                                 <span id="cd_docsLoadingBadge" class="label label-info"
-                                  style="display:none;margin-left:10px;">Carregando...</span>
+                                  style="display:none;margin-left:10px;"><%= t('page.clientDetails.documentsToolbar.loading') %></span>
                               </div>
 
                               <div class="col-lg-3">
@@ -255,7 +255,7 @@
 
                             <!-- GRID -->
                             <div class="row" id="cd_itemsDocsGrid" style="padding: 0 15px;">
-                              <div class="col-lg-12 text-muted">Carregando...</div>
+                              <div class="col-lg-12 text-muted"><%= t('page.clientDetails.documentsToolbar.loading') %></div>
                             </div>
 
                           </div>
@@ -279,6 +279,48 @@
 
 <script>
   (function () {
+    // ✅ Inject translations into JS (no global t() needed)
+    const I18N = {
+      pageTitle: "<%- String(t('page.clientDetails.pageTitle')).replace(/"/g, '\\"') %>",
+      breadcrumbsClients: "<%- String(t('page.clientDetails.breadcrumbs.clients')).replace(/"/g, '\\"') %>",
+      breadcrumbsTitle: "<%- String(t('page.clientDetails.breadcrumbs.title')).replace(/"/g, '\\"') %>",
+
+      headerStatus: "<%- String(t('page.clientDetails.header.status')).replace(/"/g, '\\"') %>",
+
+      // Fallback keys (you can add later)
+      errorsLocalStorage: "<%- String((t('page.clientDetails.messages.localStorageMissing') || '')).replace(/"/g, '\\"') %>",
+      errorsApiLoad: "<%- String((t('page.clientDetails.messages.apiLoadFail') || '')).replace(/"/g, '\\"') %>",
+
+      contactsNoneFound: "<%- String((t('page.clientDetails.contacts.noneFound') || '')).replace(/"/g, '\\"') %>",
+
+      contactRoleLabel: "<%- String((t('page.clientDetails.contacts.labels.role') || '')).replace(/"/g, '\\"') %>",
+      contactStatusLabel: "<%- String((t('page.clientDetails.contacts.labels.status') || '')).replace(/"/g, '\\"') %>",
+
+      contactEditTitle: "<%- String((t('page.clientDetails.contacts.modals.editTitle') || '')).replace(/"/g, '\\"') %>",
+      contactDeleteTitle: "<%- String((t('page.clientDetails.contacts.modals.deleteTitle') || '')).replace(/"/g, '\\"') %>",
+      contactDeleteOk: "<%- String((t('page.clientDetails.contacts.modals.deleteOk') || '')).replace(/"/g, '\\"') %>",
+      contactDeleteBodyLine1: "<%- String((t('page.clientDetails.contacts.modals.deleteBodyLine1') || '')).replace(/"/g, '\\"') %>",
+      contactDeleteBodyLine2: "<%- String((t('page.clientDetails.contacts.modals.deleteBodyLine2') || '')).replace(/"/g, '\\"') %>",
+
+      newContactTitle: "<%- String((t('page.clientDetails.contacts.modals.newTitle') || '')).replace(/"/g, '\\"') %>",
+
+      validationsCompanyIdMissing: "<%- String((t('page.clientDetails.messages.companyIdMissing') || '')).replace(/"/g, '\\"') %>",
+      validationsNameRequired: "<%- String((t('page.clientDetails.messages.nameRequired') || '')).replace(/"/g, '\\"') %>",
+      validationsValidEmailRequired: "<%- String((t('page.clientDetails.messages.validEmailRequired') || '')).replace(/"/g, '\\"') %>",
+
+      errorsSaveUser: "<%- String((t('page.clientDetails.messages.saveUserFail') || '')).replace(/"/g, '\\"') %>",
+      errorsDeleteUser: "<%- String((t('page.clientDetails.messages.deleteUserFail') || '')).replace(/"/g, '\\"') %>",
+      errorsCreateUser: "<%- String((t('page.clientDetails.messages.createContactFail') || '')).replace(/"/g, '\\"') %>",
+      errorsSaveClient: "<%- String((t('page.clientDetails.messages.saveClientFail') || '')).replace(/"/g, '\\"') %>",
+
+      editClientTitle: "<%- String((t('page.clientDetails.modals.editClientTitle') || '')).replace(/"/g, '\\"') %>",
+
+      globalConfirmTitle: "<%- String((t('page.layout.modal.ok') || '')).replace(/"/g, '\\"') %>", // not ideal, but keeps existing without new key
+      globalCancel: "<%- String((t('page.layout.modal.cancel') || '')).replace(/"/g, '\\"') %>",
+
+      docsInvoicesTitlePrefix: "<%- String((t('page.clientDetails.header.projectsTotalInvoiceTitle') || '')).replace(/"/g, '\\"') %>"
+    };
+
     // If your backend uses another field name for the logo, change it here:
     const COMPANY_LOGO_FIELD = "company_picture"; // must match backend DTO/patch handling
     const DEFAULT_LOGO = "../Assets/inspinia/img/zender_logo.png";
@@ -474,7 +516,7 @@
       btnSave.classList.add(okClass);
 
       btnSave.textContent = okText;
-      btnClose.textContent = "Cancelar";
+      btnClose.textContent = I18N.globalCancel || "Cancelar";
 
       return new Promise((resolve) => {
         const cleanup = () => {
@@ -646,7 +688,12 @@
         bar.setAttribute("aria-valuenow", String(total));
         bar.setAttribute("aria-valuemin", "0");
         bar.setAttribute("aria-valuemax", String(goal));
-        bar.title = `Total de invoices: R$ ${moneyPtBr(total)} / Meta: R$ ${moneyPtBr(goal)}`;
+
+        const invTitle = (I18N.docsInvoicesTitlePrefix && String(I18N.docsInvoicesTitlePrefix).trim().length > 0)
+          ? String(I18N.docsInvoicesTitlePrefix)
+          : "Total de invoices";
+
+        bar.title = `${invTitle}: R$ ${moneyPtBr(total)} / Meta: R$ ${moneyPtBr(goal)}`;
       }
 
       const val = document.getElementById("projectsTotalValue");
@@ -683,13 +730,25 @@
       container.innerHTML = "";
 
       if (!contacts || contacts.length === 0) {
-        container.innerHTML = `<div class="col-lg-12"><p>Nenhum contato encontrado.</p></div>`;
+        const msg = (I18N.contactsNoneFound && String(I18N.contactsNoneFound).trim().length > 0)
+          ? I18N.contactsNoneFound
+          : "Nenhum contato encontrado.";
+
+        container.innerHTML = `<div class="col-lg-12"><p>${escapeHtml(msg)}</p></div>`;
         return;
       }
 
       contacts.forEach((c, index) => {
         const col = document.createElement("div");
         col.className = "col-lg-3";
+
+        const roleLabel = (I18N.contactRoleLabel && String(I18N.contactRoleLabel).trim().length > 0)
+          ? I18N.contactRoleLabel
+          : "Role";
+
+        const statusLabel = (I18N.contactStatusLabel && String(I18N.contactStatusLabel).trim().length > 0)
+          ? I18N.contactStatusLabel
+          : "Status:";
 
         col.innerHTML = `
           <div class="contact-box" onclick="onContactClick(${index});">
@@ -705,7 +764,7 @@
                 <h3><strong>${escapeHtml(c.fullName)}</strong></h3>
                 ${c.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(c.email)}</p>` : ""}
                 ${c.phone ? `<p><i class="fa fa-phone"></i> ${escapeHtml(c.phone)}</p>` : ""}
-                <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(c.status ?? ""))}</p>
+                <p><i class="fa fa-circle"></i> ${escapeHtml(statusLabel)} ${escapeHtml(String(c.status ?? ""))}</p>
               </div>
             </a>
 
@@ -779,7 +838,7 @@
       `;
 
       SideModal.open({
-        title: "Editar Contato",
+        title: (I18N.contactEditTitle && String(I18N.contactEditTitle).trim().length > 0) ? I18N.contactEditTitle : "Editar Contato",
         html: html,
 
         onOk: async function () {
@@ -810,7 +869,7 @@
             location.reload();
           } catch (err) {
             console.error(err);
-            alert(err?.message || "Erro ao salvar usuário.");
+            alert(err?.message || (I18N.errorsSaveUser && String(I18N.errorsSaveUser).trim().length > 0 ? I18N.errorsSaveUser : "Erro ao salvar usuário."));
           }
         },
 
@@ -829,13 +888,29 @@
       const c = contacts[index];
       if (!c || !c.id) return;
 
+      const title = (I18N.contactDeleteTitle && String(I18N.contactDeleteTitle).trim().length > 0)
+        ? I18N.contactDeleteTitle
+        : "Excluir contato";
+
+      const okText = (I18N.contactDeleteOk && String(I18N.contactDeleteOk).trim().length > 0)
+        ? I18N.contactDeleteOk
+        : "Excluir";
+
+      const line1 = (I18N.contactDeleteBodyLine1 && String(I18N.contactDeleteBodyLine1).trim().length > 0)
+        ? I18N.contactDeleteBodyLine1
+        : "Você está prestes a excluir o contato";
+
+      const line2 = (I18N.contactDeleteBodyLine2 && String(I18N.contactDeleteBodyLine2).trim().length > 0)
+        ? I18N.contactDeleteBodyLine2
+        : "Esta ação não poderá ser desfeita.";
+
       const ok = await openGlobalConfirm({
-        title: "Excluir contato",
+        title: title,
         bodyHtml: `
-          <p>Você está prestes a excluir o contato <strong>${escapeHtml(c.fullName || "-")}</strong>.</p>
-          <p class="text-danger" style="margin-bottom:0;">Esta ação não poderá ser desfeita.</p>
+          <p>${escapeHtml(line1)} <strong>${escapeHtml(c.fullName || "-")}</strong>.</p>
+          <p class="text-danger" style="margin-bottom:0;">${escapeHtml(line2)}</p>
         `,
-        okText: "Excluir",
+        okText: okText,
         okClass: "btn-danger"
       });
 
@@ -847,7 +922,7 @@
         location.reload();
       } catch (e) {
         console.error(e);
-        alert(e?.message || "Erro ao excluir contato.");
+        alert(e?.message || (I18N.errorsDeleteUser && String(I18N.errorsDeleteUser).trim().length > 0 ? I18N.errorsDeleteUser : "Erro ao excluir contato."));
       }
     }
 
@@ -858,7 +933,9 @@
     function callNewContact() {
       const companyId = getCurrentCompanyId();
       if (!isNonEmptyString(companyId)) {
-        alert("Não foi possível identificar o company_id desta página.");
+        alert(I18N.validationsCompanyIdMissing && String(I18N.validationsCompanyIdMissing).trim().length > 0
+          ? I18N.validationsCompanyIdMissing
+          : "Não foi possível identificar o company_id desta página.");
         return;
       }
 
@@ -901,7 +978,7 @@
       `;
 
       SideModal.open({
-        title: "Novo Contato",
+        title: (I18N.newContactTitle && String(I18N.newContactTitle).trim().length > 0) ? I18N.newContactTitle : "Novo Contato",
         html: html,
 
         onOk: async function () {
@@ -912,8 +989,8 @@
             const role = normalizeString($("#selNewRole").val()) || "USER";
             const sendAccess = $("#chkSendAccess").is(":checked") === true;
 
-            if (!isNonEmptyString(fullName)) { alert("Informe o Nome."); return; }
-            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email válido."); return; }
+            if (!isNonEmptyString(fullName)) { alert(I18N.validationsNameRequired && String(I18N.validationsNameRequired).trim().length > 0 ? I18N.validationsNameRequired : "Informe o Nome."); return; }
+            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert(I18N.validationsValidEmailRequired && String(I18N.validationsValidEmailRequired).trim().length > 0 ? I18N.validationsValidEmailRequired : "Informe um Email válido."); return; }
 
             const tempPassword = generateTempPassword();
 
@@ -934,7 +1011,7 @@
             location.reload();
           } catch (err) {
             console.error(err);
-            alert(err?.message || "Erro ao criar contato.");
+            alert(err?.message || (I18N.errorsCreateUser && String(I18N.errorsCreateUser).trim().length > 0 ? I18N.errorsCreateUser : "Erro ao criar contato."));
           }
         },
 
@@ -1026,7 +1103,7 @@
       `;
 
       SideModal.open({
-        title: "Editar detalhes do Cliente",
+        title: (I18N.editClientTitle && String(I18N.editClientTitle).trim().length > 0) ? I18N.editClientTitle : "Editar detalhes do Cliente",
         html: html,
 
         onOk: async function () {
@@ -1110,7 +1187,7 @@
             location.reload();
           } catch (err) {
             console.error(err);
-            alert(err?.message || "Erro ao salvar dados do cliente.");
+            alert(err?.message || (I18N.errorsSaveClient && String(I18N.errorsSaveClient).trim().length > 0 ? I18N.errorsSaveClient : "Erro ao salvar dados do cliente."));
           }
         },
 
@@ -1157,9 +1234,9 @@
 
     // -------------------- Init --------------------
     async function init() {
-      setText("#pageName", "Detalhes do Cliente");
-      setText("#subSecoundPageName", "Detalhes do Cliente");
-      setText("#subpageName", "Clientes");
+      setText("#pageName", I18N.pageTitle);
+      setText("#subSecoundPageName", I18N.breadcrumbsTitle);
+      setText("#subpageName", I18N.breadcrumbsClients);
       setAttr("#subpageName", "href", "Clientes");
       show("#path");
 
@@ -1167,7 +1244,9 @@
       const rawClient = localStorage.getItem("selectedClient");
 
       if (!selectedClientId && !rawClient) {
-        alert("Erro ao carregar dados do cliente! (no localStorage)");
+        alert(I18N.errorsLocalStorage && String(I18N.errorsLocalStorage).trim().length > 0
+          ? I18N.errorsLocalStorage
+          : "Erro ao carregar dados do cliente! (no localStorage)");
         return;
       }
 
@@ -1213,7 +1292,7 @@
           await loadInvoicesTotal(selectedClientId);
         } catch (err) {
           console.error("Failed to fetch company by id:", err);
-          if (!cached) alert("Erro ao carregar dados do cliente via API.");
+          if (!cached) alert(I18N.errorsApiLoad && String(I18N.errorsApiLoad).trim().length > 0 ? I18N.errorsApiLoad : "Erro ao carregar dados do cliente via API.");
           setProjectsTotalUi(0);
           setCompanyLogoOnHeader(null);
         }
@@ -1229,7 +1308,6 @@
     }
   })();
 </script>
-
 
 <style>
   /* ClientDetails Documents mini grid selection */
@@ -1280,6 +1358,57 @@
 
 <script>
   (function () {
+    // ✅ Inject translations into JS (no global t() needed)
+    const I18N_DOCS = {
+      toolbarLoading: "<%- String(t('page.clientDetails.documentsToolbar.loading')).replace(/"/g, '\\"') %>",
+      toolbarBack: "<%- String(t('page.clientDetails.documentsToolbar.back')).replace(/"/g, '\\"') %>",
+      toolbarAdd: "<%- String(t('page.clientDetails.documentsToolbar.add')).replace(/"/g, '\\"') %>",
+      toolbarNewFolder: "<%- String(t('page.clientDetails.documentsToolbar.newFolder')).replace(/"/g, '\\"') %>",
+      toolbarUpload: "<%- String(t('page.clientDetails.documentsToolbar.uploadDocument')).replace(/"/g, '\\"') %>",
+      toolbarDriveLink: "<%- String(t('page.clientDetails.documentsToolbar.driveLink')).replace(/"/g, '\\"') %>",
+      toolbarOpen: "<%- String(t('page.clientDetails.documentsToolbar.open')).replace(/"/g, '\\"') %>",
+      toolbarDelete: "<%- String(t('page.clientDetails.documentsToolbar.delete')).replace(/"/g, '\\"') %>",
+
+      // Fallback keys (you can add later)
+      searchPlaceholder: "<%- String((t('page.clientDetails.documents.placeholders.searchInFolder') || '')).replace(/"/g, '\\"') %>",
+      noneFound: "<%- String((t('page.clientDetails.documents.messages.noneFound') || '')).replace(/"/g, '\\"') %>",
+      sideModalMissing: "<%- String((t('page.clientDetails.documents.messages.sideModalMissing') || '')).replace(/"/g, '\\"') %>",
+
+      addedLabel: "<%- String((t('page.clientDetails.documents.labels.added') || '')).replace(/"/g, '\\"') %>",
+      selectLabel: "<%- String((t('page.clientDetails.documents.labels.select') || '')).replace(/"/g, '\\"') %>",
+
+      errorsLoad: "<%- String((t('page.clientDetails.documents.messages.loadFail') || '')).replace(/"/g, '\\"') %>",
+      errorsDownloadLink: "<%- String((t('page.clientDetails.documents.messages.downloadLinkFail') || '')).replace(/"/g, '\\"') %>",
+      errorsDownload: "<%- String((t('page.clientDetails.documents.messages.downloadFail') || '')).replace(/"/g, '\\"') %>",
+
+      confirmDeleteMany: "<%- String((t('page.clientDetails.documents.confirm.deleteMany') || '')).replace(/"/g, '\\"') %>",
+      errorsDelete: "<%- String((t('page.clientDetails.documents.messages.deleteFail') || '')).replace(/"/g, '\\"') %>",
+
+      folderTitle: "<%- String((t('page.clientDetails.documents.modals.newFolder.title') || '')).replace(/"/g, '\\"') %>",
+      folderCreate: "<%- String((t('page.clientDetails.documents.modals.newFolder.create') || '')).replace(/"/g, '\\"') %>",
+      folderName: "<%- String((t('page.clientDetails.documents.modals.newFolder.name') || '')).replace(/"/g, '\\"') %>",
+      folderPlaceholder: "<%- String((t('page.clientDetails.documents.modals.newFolder.placeholder') || '')).replace(/"/g, '\\"') %>",
+      folderNameRequired: "<%- String((t('page.clientDetails.documents.modals.newFolder.nameRequired') || '')).replace(/"/g, '\\"') %>",
+
+      linkTitle: "<%- String((t('page.clientDetails.documents.modals.newLink.title') || '')).replace(/"/g, '\\"') %>",
+      linkSave: "<%- String((t('page.clientDetails.documents.modals.newLink.save') || '')).replace(/"/g, '\\"') %>",
+      linkNameRequired: "<%- String((t('page.clientDetails.documents.modals.newLink.nameRequired') || '')).replace(/"/g, '\\"') %>",
+      linkUrlRequired: "<%- String((t('page.clientDetails.documents.modals.newLink.urlRequired') || '')).replace(/"/g, '\\"') %>",
+
+      uploadTitle: "<%- String((t('page.clientDetails.documents.modals.upload.title') || '')).replace(/"/g, '\\"') %>",
+      uploadSend: "<%- String((t('page.clientDetails.documents.modals.upload.send') || '')).replace(/"/g, '\\"') %>",
+      uploadSelectFile: "<%- String((t('page.clientDetails.documents.modals.upload.selectFile') || '')).replace(/"/g, '\\"') %>",
+      uploadError: "<%- String((t('page.clientDetails.documents.modals.upload.error') || '')).replace(/"/g, '\\"') %>"
+    };
+
+    // Apply placeholder translation (no logic change)
+    try {
+      const ph = (I18N_DOCS.searchPlaceholder && String(I18N_DOCS.searchPlaceholder).trim().length > 0)
+        ? I18N_DOCS.searchPlaceholder
+        : "Buscar nesta pasta...";
+      $("#cd_txtDocsSearch").attr("placeholder", ph);
+    } catch { }
+
     // ---------------------------
     // Mini MyDocuments inside ClientDetails (Tab Documentos)
     // ---------------------------
@@ -1433,7 +1562,9 @@
       let btnOk = pickFirst(["#dynamicModalOkBtn", ".dynamic-modal-ok"]);
 
       if (!overlay || !modal || !titleEl || !bodyEl || !btnOk) {
-        alert("Side modal global não encontrado no layout. Verifique IDs do dynamic modal.");
+        alert((I18N_DOCS.sideModalMissing && String(I18N_DOCS.sideModalMissing).trim().length > 0)
+          ? I18N_DOCS.sideModalMissing
+          : "Side modal global não encontrado no layout. Verifique IDs do dynamic modal.");
         return;
       }
 
@@ -1534,37 +1665,36 @@
       applySelectionClasses();
     }
 
-   function buildListQuery() {
-  const qs = new URLSearchParams();
+    function buildListQuery() {
+      const qs = new URLSearchParams();
 
-  // parent_id
-  if (docsState.currentParentId === null) qs.set("parent_id", "null");
-  else qs.set("parent_id", docsState.currentParentId);
+      // parent_id
+      if (docsState.currentParentId === null) qs.set("parent_id", "null");
+      else qs.set("parent_id", docsState.currentParentId);
 
-  // search
-  if (docsState.currentSearch && docsState.currentSearch.trim()) {
-    qs.set("q", docsState.currentSearch.trim());
-  }
+      // search
+      if (docsState.currentSearch && docsState.currentSearch.trim()) {
+        qs.set("q", docsState.currentSearch.trim());
+      }
 
-  qs.set("take", "500");
-  qs.set("skip", "0");
+      qs.set("take", "500");
+      qs.set("skip", "0");
 
-  const clientId = getClientId();
+      const clientId = getClientId();
 
-  /**
-   * IMPORTANT:
-   * Only filter by related_table/related_id on ROOT listing (parent_id = null).
-   * Inside folders, we should rely on parent_id only, because children may not
-   * have related_table/related_id populated (they inherit the scope from the parent).
-   */
-  if (docsState.currentParentId === null) {
-    qs.set("related_table", "company");
-    qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
-  }
+      /**
+       * IMPORTANT:
+       * Only filter by related_table/related_id on ROOT listing (parent_id = null).
+       * Inside folders, we should rely on parent_id only, because children may not
+       * have related_table/related_id populated (they inherit the scope from the parent).
+       */
+      if (docsState.currentParentId === null) {
+        qs.set("related_table", "company");
+        qs.set("related_id", clientId || "00000000-0000-0000-0000-000000000000");
+      }
 
-  return qs.toString();
-}
-
+      return qs.toString();
+    }
 
     function renderGrid(items) {
       const $grid = $("#cd_itemsDocsGrid");
@@ -1574,7 +1704,8 @@
       docsState.lastLoadedItems = list;
 
       if (list.length === 0) {
-        $grid.append('<div class="col-lg-12 text-muted">Nenhum item encontrado.</div>');
+        const msg = (I18N_DOCS.noneFound && String(I18N_DOCS.noneFound).trim().length > 0) ? I18N_DOCS.noneFound : "Nenhum item encontrado.";
+        $grid.append('<div class="col-lg-12 text-muted">' + escapeHtml(msg) + '</div>');
         clearSelection();
         return;
       }
@@ -1585,9 +1716,12 @@
         const added = formatDate(item.created_at);
         const iconHtml = iconFor(item);
 
+        const selectTitle = (I18N_DOCS.selectLabel && String(I18N_DOCS.selectLabel).trim().length > 0) ? I18N_DOCS.selectLabel : "Selecionar";
+        const addedLabel = (I18N_DOCS.addedLabel && String(I18N_DOCS.addedLabel).trim().length > 0) ? I18N_DOCS.addedLabel : "Adicionado:";
+
         $grid.append(`
           <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
-            <div class="select-badge" title="Selecionar"><i class="fa fa-check"></i></div>
+            <div class="select-badge" title="${escapeHtml(selectTitle)}"><i class="fa fa-check"></i></div>
 
             <div class="file">
               <a href="javascript:void(0)" class="cd-doc-hit" data-id="${escapeHtml(id)}" style="display:block;">
@@ -1596,7 +1730,7 @@
                 <div class="file-name">
                   ${name}
                   <br />
-                  <small>Adicionado: ${escapeHtml(added || "-")}</small>
+                  <small>${escapeHtml(addedLabel)} ${escapeHtml(added || "-")}</small>
                 </div>
               </a>
             </div>
@@ -1650,7 +1784,8 @@
         renderGrid(data);
         clearSelection();
       } catch (e) {
-        $("#cd_itemsDocsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || "Erro ao carregar") + '</div>');
+        const msg = e?.message || ((I18N_DOCS.errorsLoad && String(I18N_DOCS.errorsLoad).trim().length > 0) ? I18N_DOCS.errorsLoad : "Erro ao carregar");
+        $("#cd_itemsDocsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(msg) + '</div>');
       } finally {
         updateTopActions();
         showLoading(false);
@@ -1680,10 +1815,10 @@
         showLoading(true);
         const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
         const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
-        if (!url) throw new Error("Não foi possível gerar o link de download.");
+        if (!url) throw new Error((I18N_DOCS.errorsDownloadLink && String(I18N_DOCS.errorsDownloadLink).trim().length > 0) ? I18N_DOCS.errorsDownloadLink : "Não foi possível gerar o link de download.");
         window.open(url, "_blank", "noopener,noreferrer");
       } catch (err) {
-        alert(err?.message || "Erro ao baixar arquivo.");
+        alert(err?.message || ((I18N_DOCS.errorsDownload && String(I18N_DOCS.errorsDownload).trim().length > 0) ? I18N_DOCS.errorsDownload : "Erro ao baixar arquivo."));
       } finally {
         showLoading(false);
       }
@@ -1763,13 +1898,13 @@
 
     function openNewFolderSideModal() {
       openSideModal({
-        title: "Nova Pasta",
-        okText: "Criar",
+        title: (I18N_DOCS.folderTitle && String(I18N_DOCS.folderTitle).trim().length > 0) ? I18N_DOCS.folderTitle : "Nova Pasta",
+        okText: (I18N_DOCS.folderCreate && String(I18N_DOCS.folderCreate).trim().length > 0) ? I18N_DOCS.folderCreate : "Criar",
         cancelText: "Cancelar",
         bodyHtml: `
           <div class="form-group">
-            <label>Nome</label>
-            <input id="cd_sm_folderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
+            <label>${escapeHtml((I18N_DOCS.folderName && String(I18N_DOCS.folderName).trim().length > 0) ? I18N_DOCS.folderName : "Nome")}</label>
+            <input id="cd_sm_folderName" type="text" class="form-control" maxlength="255" placeholder="${escapeHtml((I18N_DOCS.folderPlaceholder && String(I18N_DOCS.folderPlaceholder).trim().length > 0) ? I18N_DOCS.folderPlaceholder : "Ex: Contratos")}" />
             <div id="cd_sm_folderError" class="text-danger" style="margin-top:8px; display:none;"></div>
           </div>
         `,
@@ -1777,7 +1912,10 @@
           const name = ($("#cd_sm_folderName").val() || "").trim();
           $("#cd_sm_folderError").hide().text("");
 
-          if (!name) { $("#cd_sm_folderError").show().text("Informe o nome da pasta."); return true; }
+          if (!name) {
+            $("#cd_sm_folderError").show().text((I18N_DOCS.folderNameRequired && String(I18N_DOCS.folderNameRequired).trim().length > 0) ? I18N_DOCS.folderNameRequired : "Informe o nome da pasta.");
+            return true;
+          }
 
           const accountId = getAccountIdForCreate();
           if (!accountId) { $("#cd_sm_folderError").show().text("Não foi possível identificar o account_id para criar."); return true; }
@@ -1816,8 +1954,8 @@
 
     function openNewLinkSideModal() {
       openSideModal({
-        title: "Link do Drive",
-        okText: "Salvar",
+        title: (I18N_DOCS.linkTitle && String(I18N_DOCS.linkTitle).trim().length > 0) ? I18N_DOCS.linkTitle : "Link do Drive",
+        okText: (I18N_DOCS.linkSave && String(I18N_DOCS.linkSave).trim().length > 0) ? I18N_DOCS.linkSave : "Salvar",
         cancelText: "Cancelar",
         bodyHtml: `
           <div class="form-group">
@@ -1836,8 +1974,8 @@
           const url = ($("#cd_sm_linkUrl").val() || "").trim();
           $("#cd_sm_linkError").hide().text("");
 
-          if (!name) { $("#cd_sm_linkError").show().text("Informe o nome."); return true; }
-          if (!url || !/^https?:\/\//i.test(url)) { $("#cd_sm_linkError").show().text("Informe uma URL válida (http/https)."); return true; }
+          if (!name) { $("#cd_sm_linkError").show().text((I18N_DOCS.linkNameRequired && String(I18N_DOCS.linkNameRequired).trim().length > 0) ? I18N_DOCS.linkNameRequired : "Informe o nome."); return true; }
+          if (!url || !/^https?:\/\//i.test(url)) { $("#cd_sm_linkError").show().text((I18N_DOCS.linkUrlRequired && String(I18N_DOCS.linkUrlRequired).trim().length > 0) ? I18N_DOCS.linkUrlRequired : "Informe uma URL válida (http/https)."); return true; }
 
           const accountId = getAccountIdForCreate();
           if (!accountId) { $("#cd_sm_linkError").show().text("Não foi possível identificar o account_id."); return true; }
@@ -1877,8 +2015,8 @@
 
     function openUploadSideModal() {
       openSideModal({
-        title: "Upload de Documento",
-        okText: "Enviar",
+        title: (I18N_DOCS.uploadTitle && String(I18N_DOCS.uploadTitle).trim().length > 0) ? I18N_DOCS.uploadTitle : "Upload de Documento",
+        okText: (I18N_DOCS.uploadSend && String(I18N_DOCS.uploadSend).trim().length > 0) ? I18N_DOCS.uploadSend : "Enviar",
         cancelText: "Cancelar",
         bodyHtml: `
           <div class="alert alert-info" style="margin-bottom:10px;">
@@ -1912,7 +2050,7 @@
           const displayNameRaw = ($("#cd_sm_uploadDisplayName").val() || "").trim();
           $("#cd_sm_uploadError").hide().text("");
 
-          if (!file) { $("#cd_sm_uploadError").show().text("Selecione um arquivo."); return true; }
+          if (!file) { $("#cd_sm_uploadError").show().text((I18N_DOCS.uploadSelectFile && String(I18N_DOCS.uploadSelectFile).trim().length > 0) ? I18N_DOCS.uploadSelectFile : "Selecione um arquivo."); return true; }
 
           const accountId = getAccountIdForCreate();
           if (!accountId) { $("#cd_sm_uploadError").show().text("Não foi possível identificar o account_id."); return true; }
@@ -1929,7 +2067,7 @@
             await loadCurrentFolder();
             return false;
           } catch (e) {
-            $("#cd_sm_uploadError").show().text(e?.message || "Erro no upload.");
+            $("#cd_sm_uploadError").show().text(e?.message || ((I18N_DOCS.uploadError && String(I18N_DOCS.uploadError).trim().length > 0) ? I18N_DOCS.uploadError : "Erro no upload."));
             return true;
           } finally {
             showLoading(false);
@@ -1953,7 +2091,11 @@
     async function deleteSelected() {
       if (docsState.selected.size === 0) return;
 
-      const ok = confirm("Confirma excluir " + docsState.selected.size + " item(ns)?");
+      const msg = (I18N_DOCS.confirmDeleteMany && String(I18N_DOCS.confirmDeleteMany).trim().length > 0)
+        ? I18N_DOCS.confirmDeleteMany
+        : ("Confirma excluir " + docsState.selected.size + " item(ns)?");
+
+      const ok = confirm(msg);
       if (!ok) return;
 
       try {
@@ -1964,7 +2106,7 @@
         }
         await loadCurrentFolder();
       } catch (e) {
-        alert(e?.message || "Erro ao excluir.");
+        alert(e?.message || ((I18N_DOCS.errorsDelete && String(I18N_DOCS.errorsDelete).trim().length > 0) ? I18N_DOCS.errorsDelete : "Erro ao excluir."));
       } finally {
         showLoading(false);
       }

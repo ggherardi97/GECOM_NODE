@@ -24,7 +24,6 @@
   .bulk-actions .count{ font-weight:600; }
   .bulk-actions .btn{ margin:0; }
 
-  /* Sorting UX */
   th.sortable {
     cursor: pointer;
     user-select: none;
@@ -40,81 +39,142 @@
   <div class="col-lg-12">
     <div class="ibox ">
       <div class="ibox-title">
-        <h5>Processos ativos</h5>
+        <h5><%= t('page.processos.header.active') %></h5>
         <div class="ibox-tools">
-          <a type="button" class="btn btn-sm btn-primary" name="btn_act_new" value="Novo Cliente" href="/NovoProcesso">Novo Processo</a>
+          <a type="button"
+             class="btn btn-sm btn-primary"
+             name="btn_act_new"
+             href="/NovoProcesso">
+            <%= t('page.processos.header.newProcess') %>
+          </a>
         </div>
       </div>
 
       <div class="ibox-content">
-        <!-- <div class="row">
-          <div class="col-sm-9 m-b-xs">
-            <div data-toggle="buttons" class="btn-group btn-group-toggle">
-              <label class="btn btn-sm btn-white">
-                <input type="radio" id="option1" name="options">
-                Day
-              </label>
-              <label class="btn btn-sm btn-white active">
-                <input type="radio" id="option2" name="options">
-                Week
-              </label>
-              <label class="btn btn-sm btn-white">
-                <input type="radio" id="option3" name="options">
-                Month
-              </label>
-            </div>
-          </div>
-          <div class="col-sm-3"></div>
-        </div> -->
 
         <!-- Bulk actions -->
         <div id="bulkActions" class="bulk-actions">
-          <span class="count">Selecionados: <span id="selectedCount">0</span></span>
+          <span class="count">
+            <%= t('page.processos.toolbar.selected') %>
+            <span id="selectedCount">0</span>
+          </span>
+
           <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
-            <i class="fa fa-trash"></i> Remover
+            <i class="fa fa-trash"></i>
+            <%= t('page.processos.toolbar.remove') %>
           </button>
+
           <button id="btnClearSelection" type="button" class="btn btn-white btn-sm">
-            Limpar seleção
+            <%= t('page.processos.toolbar.clearSelection') %>
           </button>
         </div>
 
         <div class="table-responsive">
           <table class="table table-striped" id="process">
             <thead>
+
               <!-- Filters row -->
               <tr>
                 <th style="width:40px;"></th>
                 <th></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Processo" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Contato Principal" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Telefone" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Empresa" /></th>
-                <th><input type="text" disabled class="form-control input-sm" placeholder="Estagio (%)" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Invoice" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Data" /></th>
-                <th>
-                 <select id="actionFilter" class="form-control input-sm">
-  <option value="">Todos</option>
-</select>
 
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.process') %>" />
+                </th>
+
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.primaryContact') %>" />
+                </th>
+
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.phone') %>" />
+                </th>
+
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.company') %>" />
+                </th>
+
+                <th>
+                  <input type="text" disabled class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.stage') %>" />
+                </th>
+
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.invoice') %>" />
+                </th>
+
+                <th>
+                  <input type="text" class="form-control input-sm"
+                    placeholder="<%= t('page.processos.columns.date') %>" />
+                </th>
+
+                <th>
+                  <select id="actionFilter" class="form-control input-sm">
+                    <option value="">
+                      <%= t('page.processos.filters.all') %>
+                    </option>
+                  </select>
                 </th>
               </tr>
 
               <!-- Header row -->
               <tr>
                 <th style="width:40px;">
-                  <input id="chkSelectAll" type="checkbox" title="Selecionar todos">
+                  <input id="chkSelectAll" type="checkbox"
+                    title="<%= t('page.processos.toolbar.selected') %>">
                 </th>
-                <th class="sortable" data-sort-key="rowNumber"># <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ProjectName">Processo <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ContactName" style="width: 15%;">Contato Principal <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="Phone">Telefone <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="CompanyName" style="width: 27%;">Empresa <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="CompletedNumber">Estagio (%) <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="Task">Invoice <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="DateValue">Data <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="ActionText">Status <span class="sort-indicator"></span></th>
+
+                <th class="sortable" data-sort-key="rowNumber">
+                  <%= t('page.processos.columns.number') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="ProjectName">
+                  <%= t('page.processos.columns.process') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="ContactName" style="width: 15%;">
+                  <%= t('page.processos.columns.primaryContact') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="Phone">
+                  <%= t('page.processos.columns.phone') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="CompanyName" style="width: 27%;">
+                  <%= t('page.processos.columns.company') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="CompletedNumber">
+                  <%= t('page.processos.columns.stage') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="Task">
+                  <%= t('page.processos.columns.invoice') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="DateValue">
+                  <%= t('page.processos.columns.date') %>
+                  <span class="sort-indicator"></span>
+                </th>
+
+                <th class="sortable" data-sort-key="ActionText">
+                  <%= t('page.processos.columns.status') %>
+                  <span class="sort-indicator"></span>
+                </th>
               </tr>
+
             </thead>
 
             <tbody id="processLines"></tbody>
@@ -125,6 +185,7 @@
     </div>
   </div>
 </div>
+
 
 <% contentFor('scripts') %>
 <script src="../Assets/inspinia/js/plugins/flot/jquery.flot.js"></script>
@@ -160,6 +221,49 @@
 <%  %>
 
 <script>
+  // -------------------- i18n (server -> client) --------------------
+  const I18N = {
+    pageTitle: <%- JSON.stringify(t('page.processos.pageTitle')) %>,
+
+    toolbarSelected: <%- JSON.stringify(t('page.processos.toolbar.selected')) %>,
+    toolbarRemove: <%- JSON.stringify(t('page.processos.toolbar.remove')) %>,
+    toolbarClearSelection: <%- JSON.stringify(t('page.processos.toolbar.clearSelection')) %>,
+
+    filtersAll: <%- JSON.stringify(t('page.processos.filters.all')) %>,
+
+    // Generic layout modal
+    modalCancel: <%- JSON.stringify(t('page.layout.modal.cancel')) %>,
+    modalClose: <%- JSON.stringify(t('page.layout.modal.close')) %>,
+    modalSave: <%- JSON.stringify(t('page.layout.modal.save')) %>,
+
+    // Messages (ADD THESE KEYS in common.json - see snippet below)
+    msgLoadFail: <%- JSON.stringify(t('page.processos.messages.loadFail')) %>,
+    msgDeleteFail: <%- JSON.stringify(t('page.processos.messages.deleteFail')) %>,
+    msgDeleteFailSingle: <%- JSON.stringify(t('page.processos.messages.deleteFailSingle')) %>,
+    msgNoneFound: <%- JSON.stringify(t('page.processos.messages.noneFound')) %>,
+    msgBulkSomeFailed: <%- JSON.stringify(t('page.processos.messages.bulkSomeFailed')) %>,
+    msgBulkUnexpected: <%- JSON.stringify(t('page.processos.messages.bulkUnexpected')) %>,
+
+    // UI strings (ADD THESE KEYS in common.json - see snippet below)
+    uiSelect: <%- JSON.stringify(t('page.processos.ui.select')) %>,
+    uiRemoving: <%- JSON.stringify(t('page.processos.ui.removing')) %>,
+
+    // Modal remove (ADD THESE KEYS in common.json - see snippet below)
+    modalRemoveTitle: <%- JSON.stringify(t('page.processos.modalRemove.title')) %>,
+    modalRemoveLine1: <%- JSON.stringify(t('page.processos.modalRemove.line1')) %>,
+    modalRemoveLine2: <%- JSON.stringify(t('page.processos.modalRemove.line2')) %>,
+    modalRemoveConfirm: <%- JSON.stringify(t('page.processos.modalRemove.confirm')) %>,
+
+    // Status fallback key template: page.processos.status.<number>
+    statusKeyPrefix: "page.processos.status."
+  };
+
+  function tClient(key) {
+    // This uses server-injected strings when you reference a known key
+    // For dynamic keys (like status), we handle separately below
+    return key;
+  }
+
   // -------------------- Global state --------------------
   let processes = [];
   const selectedProcessIds = new Set();
@@ -247,7 +351,7 @@
 
     const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(data?.message || "Falha ao carregar processos.");
+    if (!resp.ok) throw new Error(data?.message || I18N.msgLoadFail);
     return data;
   }
 
@@ -258,7 +362,7 @@
     });
 
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(data?.message || "Falha ao remover processo.");
+    if (!resp.ok) throw new Error(data?.message || I18N.msgDeleteFailSingle);
     return data;
   }
 
@@ -279,8 +383,37 @@
     return Number.isNaN(n) ? 0 : n;
   }
 
+  function tryGetI18nStatusLabel(statusValue) {
+    // We can't call server t() dynamically here; instead we rely on common.json having these keys
+    // and your server-side i18n system returning the translation at render time.
+    // Strategy: we embed a small lookup table generated from those keys.
+    const s = getStatusValueFromApi(statusValue);
+
+    // If you add these keys in common.json, the server will inject the correct strings here:
+    // page.processos.status.0 ... etc
+    const map = {
+      0: <%- JSON.stringify(t('page.processos.status.0')) %>,
+      1: <%- JSON.stringify(t('page.processos.status.1')) %>,
+      2: <%- JSON.stringify(t('page.processos.status.2')) %>,
+      3: <%- JSON.stringify(t('page.processos.status.3')) %>,
+      4: <%- JSON.stringify(t('page.processos.status.4')) %>,
+    };
+
+    const label = map[s];
+
+    // If the key doesn't exist in i18n, many libs return the key string itself.
+    // We detect that and fallback to ProcessStatusEnum.
+    if (label && !String(label).startsWith(I18N.statusKeyPrefix)) return label;
+
+    return null;
+  }
+
   function getStatusLabel(statusValue) {
     const s = getStatusValueFromApi(statusValue);
+
+    const i18nLabel = tryGetI18nStatusLabel(s);
+    if (i18nLabel) return i18nLabel;
+
     return window.ProcessStatusEnum?.getLabel(s) ?? `Status ${s}`;
   }
 
@@ -301,11 +434,9 @@
 
     const completedNumber = Math.max(0, Math.min(100, toNumber(p?.completed)));
 
-    // Expanded relations (backend)
     const companyName = p?.companies?.company_name ?? "";
     const contactName = p?.users?.full_name ?? "";
-const contactPhone = p?.users?.phonenumber ?? "";
-
+    const contactPhone = p?.users?.phonenumber ?? "";
 
     return {
       Id: String(id),
@@ -404,7 +535,7 @@ const contactPhone = p?.users?.phonenumber ?? "";
     const sorted = sortProcesses(list);
 
     if (!sorted || sorted.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="10">Nenhum processo encontrado.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10">${escapeHtml(I18N.msgNoneFound)}</td></tr>`;
       updateBulkUI();
       return;
     }
@@ -429,7 +560,7 @@ const contactPhone = p?.users?.phonenumber ?? "";
             type="checkbox"
             data-id="${escapeHtml(String(p.Id))}"
             ${isChecked ? "checked" : ""}
-            title="Selecionar"
+            title="${escapeHtml(I18N.uiSelect)}"
           />
         </td>
         <td>${escapeHtml(String(idx + 1))}</td>
@@ -493,22 +624,22 @@ const contactPhone = p?.users?.phonenumber ?? "";
     const btnClose = document.getElementById("closeModal");
 
     if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-      const ok = confirm(`Remover ${qty} processo(s)?`);
+      const ok = confirm(`${I18N.toolbarRemove} ${qty} processo(s)?`);
       return Promise.resolve(ok);
     }
 
-    modalTitle.textContent = "Remover processos";
+    modalTitle.textContent = I18N.modalRemoveTitle;
     modalBody.innerHTML = `
-      <p>Você está prestes a remover <strong>${escapeHtml(qty)}</strong> processo(s).</p>
-      <p class="text-danger">Esta ação não poderá ser desfeita.</p>
-      <p>Deseja continuar?</p>
+      <p>${escapeHtml(I18N.modalRemoveLine1)} <strong>${escapeHtml(qty)}</strong> processo(s).</p>
+      <p class="text-danger">${escapeHtml(I18N.modalRemoveLine2)}</p>
+      <p>${escapeHtml(I18N.modalRemoveConfirm)}</p>
     `;
 
-    btnSave.textContent = "Remover";
+    btnSave.textContent = I18N.toolbarRemove;
     btnSave.classList.remove("btn-primary");
     btnSave.classList.add("btn-danger");
 
-    btnClose.textContent = "Cancelar";
+    btnClose.textContent = I18N.modalCancel;
 
     return new Promise((resolve) => {
       const cleanup = () => {
@@ -517,8 +648,8 @@ const contactPhone = p?.users?.phonenumber ?? "";
 
         btnSave.classList.remove("btn-danger");
         btnSave.classList.add("btn-primary");
-        btnSave.textContent = "Save";
-        btnClose.textContent = "Close";
+        btnSave.textContent = I18N.modalSave;
+        btnClose.textContent = I18N.modalClose;
       };
 
       btnSave.onclick = () => {
@@ -546,7 +677,7 @@ const contactPhone = p?.users?.phonenumber ?? "";
     const oldText = btn ? btn.innerHTML : "";
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Removendo...`;
+      btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> ${escapeHtml(I18N.uiRemoving)}...`;
     }
 
     try {
@@ -555,13 +686,13 @@ const contactPhone = p?.users?.phonenumber ?? "";
         try {
           await deleteProcessById(id);
         } catch (e) {
-          failures.push({ id, message: e?.message || "Erro ao remover." });
+          failures.push({ id, message: e?.message || I18N.msgDeleteFail });
         }
       });
 
       if (failures.length > 0) {
         console.warn("Bulk delete failures:", failures);
-        alert(`Alguns processos não puderam ser removidos (${failures.length}). Veja o console para detalhes.`);
+        alert(`${I18N.msgBulkSomeFailed} (${failures.length}).`);
       }
 
       const failedIds = new Set(failures.map((x) => String(x.id)));
@@ -574,11 +705,11 @@ const contactPhone = p?.users?.phonenumber ?? "";
       applyCurrentFilters();
     } catch (err) {
       console.error("executeBulkDelete error:", err);
-      alert(err?.message || "Erro ao remover processos.");
+      alert(err?.message || I18N.msgBulkUnexpected);
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = oldText || `<i class="fa fa-trash"></i> Remover`;
+        btn.innerHTML = oldText || `<i class="fa fa-trash"></i> ${escapeHtml(I18N.toolbarRemove)}`;
       }
       updateBulkUI();
     }
@@ -667,7 +798,11 @@ const contactPhone = p?.users?.phonenumber ?? "";
     options.forEach((o) => {
       const opt = document.createElement("option");
       opt.value = String(o.value);
-      opt.textContent = o.label;
+
+      // Apply same i18n override to dropdown labels
+      const i18nLabel = tryGetI18nStatusLabel(o.value);
+      opt.textContent = i18nLabel ? i18nLabel : o.label;
+
       sel.appendChild(opt);
     });
   }
@@ -690,15 +825,15 @@ const contactPhone = p?.users?.phonenumber ?? "";
       console.error("loadProcesses error:", err);
       const tbody = document.getElementById("processLines");
       if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="10">${escapeHtml(err?.message || "Erro ao carregar processos.")}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10">${escapeHtml(err?.message || I18N.msgLoadFail)}</td></tr>`;
       }
     }
   }
 
   // -------------------- Init --------------------
   $(document).ready(function () {
-    $("#pageName").text("Processos");
-    $("#subpageName").text("Processos");
+    $("#pageName").text(I18N.pageTitle);
+    $("#subpageName").text(I18N.pageTitle);
 
     bindBulkEvents();
     bindSorting();
@@ -707,5 +842,6 @@ const contactPhone = p?.users?.phonenumber ?? "";
     loadProcesses();
   });
 </script>
+
 
 

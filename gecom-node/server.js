@@ -5,6 +5,11 @@ const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const cookieParser = require('cookie-parser');
 
+/* ---------- i18n (i18next) ---------- */
+const i18next = require('i18next');
+const i18nextFsBackend = require('i18next-fs-backend');
+const i18nextHttpMiddleware = require('i18next-http-middleware');
+
 const authRoutes = require('./routes/auth');
 const companiesApiRoutes = require("./routes/companiesApi");
 const processApiRoutes = require("./routes/processApi");
@@ -13,10 +18,6 @@ const invoicesApiRoutes = require('./routes/invoicesApi');
 const productsApiRoutes = require('./routes/productsApi');
 const currenciesApiRoutes = require('./routes/currenciesApi');
 const processTypesApi = require("./routes/processTypesApi");
-
-console.log("invoicesApiRoutes typeof:", typeof invoicesApiRoutes);
-console.log("productsApiRoutes typeof:", typeof productsApiRoutes);
-console.log("currenciesApiRoutes typeof:", typeof currenciesApiRoutes);
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -41,9 +42,44 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 app.use(cookieParser());
 
+/* ---------- i18n setup MUST come after cookieParser (for cookie detection) ---------- */
+i18next
+  .use(i18nextFsBackend)
+  .use(i18nextHttpMiddleware.LanguageDetector)
+  .init({
+    fallbackLng: 'pt-BR',
+    preload: ['pt-BR', 'en', 'es'],
+    supportedLngs: ['pt-BR', 'en', 'es'],
+    ns: ['common'],
+    defaultNS: 'common',
+    backend: {
+      loadPath: path.join(__dirname, 'locales/{{lng}}/{{ns}}.json'),
+    },
+    detection: {
+      // Priority: ?lang=en -> cookie -> browser header -> fallback
+      order: ['querystring', 'cookie', 'header'],
+      lookupQuerystring: 'lang',
+      lookupCookie: 'gecom_lang',
+      caches: ['cookie'], // auto set cookie if detected from query/header
+      cookieSameSite: 'lax',
+    },
+  });
+
+// Attach i18n to request
+app.use(i18nextHttpMiddleware.handle(i18next));
+
+// Make translation helpers available in all EJS views
+app.use((req, res, next) => {
+  res.locals.t = req.t;
+  res.locals.lang = req.language || 'pt-BR';
+  res.locals.i18n = req.i18n;
+  next();
+});
+
 /* ---------- Static files ---------- */
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Assets', express.static(path.join(__dirname, 'public/Assets')));
+app.use('/locales', express.static(path.join(__dirname, 'locales')));
 
 /* ---------- API (BFF) ---------- */
 app.use('/auth', authRoutes);
@@ -76,13 +112,11 @@ app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
 app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 app.get('/NewProduct', (req, res) => res.render('NewProduct'));
-app.get("/Profile", (req, res) => {
-  res.render("Profile");
-});
+app.get("/Profile", (req, res) => res.render("Profile"));
+
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
 app.get('/LandingPage', (req, res) => res.render('LandingPage', { layout: false }));
-app.get('/InvoicesPrint', (req, res) => res.render('LandingPage', { layout: false }));
 
 /* ---------- 404 e erro genérico (opcional, mas útil) ---------- */
 app.use((req, res) => res.status(404).send('Not Found'));

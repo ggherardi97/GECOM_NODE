@@ -1,0 +1,693 @@
+{
+  "page": {
+    "clientDetails": {
+      "pageTitle": "Client Details",
+      "breadcrumbs": {
+        "clients": "Clients",
+        "title": "Client Details"
+      },
+      "header": {
+        "editClientDetails": "Edit client details",
+        "status": "Status:",
+        "size": "Size:",
+        "sizeDefault": "Medium",
+        "sector": "Sector:",
+        "sectorDefault": "General",
+        "fantasyName": "Trade Name:",
+        "phone": "Phone:",
+        "email": "Email:",
+        "projectsTotalLabel": "Total project value:",
+        "projectsTotalText": "Total value of",
+        "goal": "goal:",
+        "goalValueExample": "R$ 1,000,000.00",
+        "logoHint": "* Edit the logo in “Edit client details”."
+      },
+      "tabs": {
+        "contacts": "Contacts",
+        "documents": "Documents"
+      },
+      "contacts": {
+        "newContact": "New contact"
+      },
+      "documentsToolbar": {
+        "back": "Back",
+        "add": "Add",
+        "newFolder": "New Folder",
+        "uploadDocument": "Upload Document",
+        "driveLink": "Drive Link",
+        "open": "Open",
+        "delete": "Delete",
+        "loading": "Loading..."
+      }
+    },
+
+    "dashboard": {
+      "pageTitle": "Billing / Processes",
+      "filters": {
+        "year": "Year:",
+        "monthly": "Monthly",
+        "annual": "Annual"
+      },
+      "cards": {
+        "monthBillingTitle": "Billing this month",
+        "yearBillingTitle": "Billing this year",
+        "monthlyAverageTitle": "Monthly average",
+        "monthlyAverageHelp": "Average yearly billing (÷ 12)",
+        "bestMonthTitle": "Best month",
+        "bestMonthHelp": "Month with the highest billing"
+      },
+      "sections": {
+        "nearDeadline": "Processes near the deadline",
+        "byStatus": "Processes by status",
+        "annualBilling": "Annual billing",
+        "processes": "Processes"
+      },
+      "labels": {
+        "loading": "Loading...",
+        "totalInvoicesInPeriod": "Total invoices in period:",
+        "totalProcessesInPeriod": "Total processes in period:",
+        "note": "Note:",
+        "noteLine1": "Ideally, create aggregated endpoints in the backend (sum/group-by) as it grows.",
+        "updatedAt": "Updated at",
+        "legend": "Active (status 0) / Paid (status 4) / Estimated (30k/month).",
+        "emptyPeriod": "No processes in the period to display.",
+        "yearByStatus": "Number of processes in the year by status."
+      },
+      "table": {
+        "reload": "Reload",
+        "search": "Search",
+        "process": "Process",
+        "company": "Company",
+        "completed": "Completed",
+        "status": "Status",
+        "invoice": "Invoice",
+        "action": "Action",
+        "previous": "Previous",
+        "next": "Next",
+        "loading": "Loading..."
+      }
+    },
+
+    "invoices": {
+      "pageTitle": "Invoices",
+      "header": {
+        "newInvoice": "New Invoice"
+      },
+      "bulkDelete": {
+        "title": "Confirmation",
+        "bodyTextFirst": "Confirm deletion of ",
+        "bodyLine2": " invoice(s)?",
+        "warning": "This action cannot be undone",
+        "confirmQuestion": ""
+      },
+      "bulkSend": {
+        "title": "Confirmation",
+        "bodyTextFirst": "Confirm sending ",
+        "bodyLine2": " invoice(s)? This action will change the invoice status to ",
+        "confirmQuestion": ""
+      },
+      "toolbar": {
+        "selected": "Selected:",
+        "sendToClient": "Send to client",
+        "delete": "Delete",
+        "clearSelection": "Clear selection",
+        "newInvoice": "New Invoice"
+      },
+      "filters": {
+        "all": "All",
+        "invoiceNumber": "Invoice #",
+        "company": "Company"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "expired": "Expired",
+        "billed": "Billed",
+        "paid": "Paid"
+      },
+      "columns": {
+        "number": "#",
+        "invoice": "Invoice",
+        "company": "Company",
+        "status": "Status",
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "taxes": "Taxes",
+        "total": "Total",
+        "dueDate": "Due date"
+      }
+    },
+
+    "login": {
+      "pageTitle": "Login",
+      "welcomeTitle": "Welcome to GECOM",
+      "subtitle": "Your platform for import and export processes.",
+      "actions": {
+        "forgotPasswordLink": "Forgot your password? Click here",
+        "hasAccessNumber": "Do you have an access number?",
+        "accessNumberTitle": "Enter access number",
+        "accessNumberHelp": "Enter the number provided by our team below.",
+        "access": "Access",
+        "backToLogin": "Back to login",
+        "sendResetEmail": "Send reset email"
+      },
+      "forgot": {
+        "title": "Forgot your password?",
+        "help": "Enter your registered email below"
+      },
+      "reset": {
+        "newPassword": "New Password",
+        "newPasswordHelp": "Enter your new password below",
+        "confirmPassword": "Confirm password",
+        "confirmNewPassword": "Confirm New Password"
+      },
+      "modal": {
+        "close": "Close"
+      }
+    },
+
+    "myDocuments": {
+      "pageTitle": "My Documents",
+      "sidebar": {
+        "folders": "Folders"
+      },
+      "quickUpload": {
+        "title": "Quick upload",
+        "hint": "You can also use the “Add” button at the top."
+      },
+      "toolbar": {
+        "back": "Back",
+        "add": "Add",
+        "newFolder": "New Folder",
+        "uploadDocument": "Upload Document",
+        "driveLink": "Drive Link",
+        "open": "Open",
+        "delete": "Delete"
+      },
+      "state": {
+        "loading": "Loading..."
+      },
+      "buttons": {
+        "ok": "OK"
+      }
+    },
+
+    "processos": {
+      "pageTitle": "Processes",
+      "header": {
+        "active": "Active processes",
+        "newProcess": "New Process"
+      },
+      "toolbar": {
+        "selected": "Selected:",
+        "remove": "Remove",
+        "clearSelection": "Clear selection"
+      },
+      "filters": {
+        "all": "All"
+      },
+      "columns": {
+        "number": "#",
+        "process": "Process",
+        "primaryContact": "Primary Contact",
+        "phone": "Phone",
+        "company": "Company",
+        "stage": "Stage (%)",
+        "invoice": "Invoice",
+        "date": "Date",
+        "status": "Status"
+      },
+      "status": {
+        "0": "Draft",
+        "1": "In progress",
+        "2": "Near deadline",
+        "3": "Overdue",
+        "4": "Completed"
+      },
+      "ui": {
+        "select": "Select",
+        "removing": "Removing"
+      },
+      "messages": {
+        "loadFail": "Failed to load processes.",
+        "deleteFailSingle": "Failed to remove process.",
+        "deleteFail": "Error while removing.",
+        "noneFound": "No processes found.",
+        "bulkSomeFailed": "Some processes could not be removed. See the console for details",
+        "bulkUnexpected": "Error while removing processes."
+      },
+      "modalRemove": {
+        "title": "Remove processes",
+        "line1": "You are about to remove",
+        "line2": "This action cannot be undone.",
+        "confirm": "Do you want to continue?"
+      }
+    },
+
+    "processDetail": {
+      "header": {
+        "editProject": "Edit project",
+        "process": "Process",
+        "status": "Status:",
+        "createdBy": "Created by:",
+        "invoice": "Invoice:",
+        "client": "Client:",
+        "estimatedDelivery": "Estimated Delivery Date:",
+        "start": "Process Start:",
+        "completed": "Completed:",
+        "completedOn": "Project completed on"
+      },
+      "sections": {
+        "timeline": "Timeline",
+        "history": "Process History",
+        "transports": "Transports",
+        "trajectory": "Route",
+        "description": "Process Description",
+        "documents": "Process documents"
+      },
+      "actions": {
+        "addEvent": "Add event",
+        "addTransport": "Add transport",
+        "addDocuments": "Add Documents",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "state": {
+        "loading": "Loading...",
+        "fetchingEvents": "Fetching process events.",
+        "loadingDocuments": "Loading documents..."
+      },
+      "tableEvents": {
+        "status": "Status",
+        "title": "Title",
+        "start": "Start",
+        "end": "End",
+        "description": "Description",
+        "actions": "Actions"
+      },
+      "tableTransports": {
+        "company": "Company",
+        "type": "Type",
+        "status": "Status",
+        "origin": "Origin",
+        "destination": "Destination",
+        "etaDeparture": "Estimated Departure",
+        "etaArrival": "Estimated Arrival",
+        "actions": "Actions"
+      }
+    },
+
+    "products": {
+      "pageTitle": "Products",
+      "header": {
+        "newProduct": "New Product"
+      },
+      "filters": {
+        "all": "All",
+        "activePlural": "Active",
+        "inactivePlural": "Inactive",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "columns": {
+        "number": "#",
+        "code": "Code",
+        "name": "Name",
+        "brand": "Brand",
+        "unit": "Unit",
+        "currency": "Currency",
+        "price": "Price",
+        "tax": "Tax",
+        "status": "Status",
+        "createdAt": "Created at"
+      }
+    },
+
+    "profile": {
+      "pageTitle": "My Profile",
+      "actions": {
+        "editMyData": "Edit my data",
+        "changePassword": "Change password",
+        "newUser": "New user"
+      },
+      "subtitle": "Update your details and, if you are Admin/Manager, manage users from your company.",
+      "labels": {
+        "email": "Email:",
+        "phone": "Phone:",
+        "company": "Company:",
+        "permission": "Permission:"
+      },
+      "tabs": {
+        "myProfile": "My Profile",
+        "companyUsers": "Company Users"
+      },
+      "hints": {
+        "passwordStrength": "Tip: use a strong password with 12+ characters, uppercase, lowercase, number, and symbol."
+      }
+    },
+
+    "layout": {
+      "appTitle": "GECOM System",
+      "menu": {
+        "profile": "Profile",
+        "logout": "Logout",
+        "dashboard": "Dashboard",
+        "clients": "Clients",
+        "processes": "Processes",
+        "myDocuments": "My Documents",
+        "invoices": "Invoices",
+        "products": "Products"
+      },
+      "modal": {
+        "cancel": "Cancel",
+        "ok": "OK",
+        "save": "Save",
+        "close": "Close"
+      },
+      "footer": {
+        "copyright": "GECOM ©"
+      }
+    },
+
+    "novoProcesso": {
+      "pageTitle": "New Process",
+      "subtitle": "Fill in the process information and its transports.",
+      "tabs": {
+        "details": "Details",
+        "documents": "Documents"
+      },
+      "form": {
+        "processNumber": "Process Number *",
+        "company": "Company *",
+        "companyInvoicesHint": "Select a company to list invoices.",
+        "estimatedDelivery": "Estimated Delivery",
+        "processType": "Process Type",
+        "clientContact": "Client Contact *",
+        "companyContactsHint": "Select a company to list contacts."
+      },
+      "transports": {
+        "title": "Process transports",
+        "subtitle": "Add one or more transports related to this process.",
+        "addTransport": "Add transport",
+        "columns": {
+          "phone": "Phone",
+          "origin": "Origin *",
+          "destination": "Destination *",
+          "etaDeparture": "Estimated Departure",
+          "etaArrival": "Estimated Arrival",
+          "actions": "Actions"
+        },
+        "countries": {
+          "france": "France",
+          "mexico": "Mexico",
+          "japan": "Japan",
+          "italy": "Italy",
+          "canada": "Canada"
+        },
+        "labels": {
+          "countryOrigin": "Country of origin",
+          "countryDestination": "Destination country"
+        }
+      },
+      "documents": {
+        "title": "Documents",
+        "uploadTitle": "Upload documents",
+        "attachUpTo": "Attach up to",
+        "uploadOnFinish": "The upload will be done when finishing.",
+        "dragHint": "You can also drag files to the area below.",
+        "maxFiles": "Maximum 5 files.",
+        "renameHint": "You can rename each file below before finishing."
+      }
+    },
+
+    "newInvoice": {
+      "actions": {
+        "deleteInvoice": "Delete invoice",
+        "saveInvoice": "Save invoice"
+      },
+      "form": {
+        "company": "Company *",
+        "statusDraft": "Draft",
+        "quoteDate": "Quote Date",
+        "exchangeRate": "Exchange rate",
+        "version": "Version",
+        "notes": "Notes",
+        "billingAddress": "Billing Address",
+        "country": "Country",
+        "headerDiscount": "Discount (header)"
+      },
+      "hints": {
+        "discountRule": "*The percentage will be calculated based on the gross total (Subtotal)",
+        "saveHeaderToUnlockLines": "Save the invoice header to unlock the lines.",
+        "totalsFromLines": "Totals are calculated from the lines."
+      },
+      "lines": {
+        "addProduct": "Add product",
+        "addManualLine": "Add manual line",
+        "price": "Price",
+        "actions": "Actions"
+      },
+      "placeholders": {
+        "searchCompany": "Search company..."
+      }
+    },
+
+    "invoicesPrint": {
+      "pageTitle": "Invoice - Print",
+      "actions": {
+        "close": "Close",
+        "print": "Print"
+      },
+      "labels": {
+        "date": "Date:",
+        "unitPrice": "Unit Price",
+        "notes": "Notes",
+        "phone": "Phone"
+      }
+    },
+
+    "clients": {
+      "pageTitle": "Clients",
+      "toolbar": {
+        "search": "Search",
+        "newClient": "New Client",
+        "clearSelection": "Clear selection",
+        "remove": "Remove",
+        "selecionados": "Selected",
+        "typeCompany": "Type the company name..."
+      },
+      "columns": {
+        "phone": "Phone",
+        "cnpj": "Tax ID",
+        "ninvoices": "Number of invoices",
+        "setor": "Sector",
+        "contatoPrincipal": "Primary Contact",
+        "name": "Name",
+        "createdAt": "Creation date"
+      },
+      "placeholders": {
+        "searchCompanyName": "Type the company name..."
+      },
+      "modalRemove": {
+        "title": "Remove clients",
+        "line1": "You are about to remove client(s).",
+        "line2": "This action cannot be undone.",
+        "confirm": "Do you want to continue?",
+        "confirmFallbackPrefix": "Remove",
+        "confirmFallbackSuffix": "client(s)?"
+      },
+      "bulk": {
+        "selectAll": "Select all"
+      },
+      "defaults": {
+        "sector": "General"
+      },
+      "ui": {
+        "select": "Select",
+        "removing": "Removing"
+      },
+      "messages": {
+        "loadFail": "Failed to load companies.",
+        "loadUnexpected": "Error loading clients.",
+        "deleteFailSingle": "Failed to remove company.",
+        "deleteFail": "Error while removing.",
+        "noneFound": "No clients found.",
+        "bulkSomeFailedPrefix": "Some clients could not be removed",
+        "bulkSomeFailedSuffix": "See the console for details.",
+        "bulkUnexpected": "Error while removing clients."
+      }
+    },
+
+    "newProduct": {
+      "pageTitle": "New Product",
+      "actions": {
+        "back": "Back"
+      },
+      "tabs": {
+        "info": "Information",
+        "prices": "Prices"
+      },
+      "form": {
+        "productCodeRequired": "Product code *",
+        "productCodeUniqueHint": "This code must be unique.",
+        "description": "Description",
+        "defaultPriceRequired": "Default price *",
+        "defaultTax": "Default tax (0..1)",
+        "unitExample": "package, service, box...",
+        "productDescription": "Product description"
+      }
+    },
+
+    "productDetail": {
+      "state": {
+        "loading": "Loading..."
+      },
+      "actions": {
+        "back": "Back",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "tabs": {
+        "info": "Information",
+        "prices": "Prices"
+      },
+      "form": {
+        "productCode": "Product code",
+        "description": "Description",
+        "currencyHint": "Currency used in the default price.",
+        "defaultPrice": "Default price",
+        "defaultTaxPercent": "Default tax (%)",
+        "createdAt": "Created at",
+        "imageUploadNotImplemented": "Image upload not implemented yet.",
+        "unitExample": "package, service, box...",
+        "productDescription": "Product description"
+      },
+      "messages": {
+        "deleteError": "Error deleting product.",
+        "deleteSuccess": "Product deleted successfully.",
+        "deleteUnexpected": "Unexpected error deleting product."
+      }
+    },
+
+    "newClient": {
+      "pageTitle": "Create client",
+      "subtitle": "Fill in the company information, then the optional data, and finally the access users.",
+      "wizard": {
+        "optionalToAccess": "Optional Data -> Access -->"
+      },
+      "steps": {
+        "client": "Client",
+        "optional": "Optional Data",
+        "access": "Access"
+      },
+      "client": {
+        "title": "Client information",
+        "phoneRequired": "Phone *",
+        "companyNameRequired": "Company name *",
+        "sizeDefault": "Medium",
+        "nextHint": "When you move to the next step, you will fill in the optional data."
+      },
+      "optional": {
+        "addressOptional": "Address (optional)",
+        "postalCode": "Postal code",
+        "fetchingAddress": "Searching address...",
+        "country": "Country"
+      },
+      "access": {
+        "title": "Access users",
+        "companyNotCreated": "The Company has not been created yet. Go back one step and click Next on Step 2.",
+        "addUser": "Add user",
+        "setPrimaryHint": "to set the company's primary user.",
+        "emailRequired": "Email *",
+        "phone": "Phone",
+        "sendAccess": "Send access?",
+        "actions": "Actions",
+        "sectorExample": "Ex:.. Agricultural",
+        "emailExample": "email@company.com"
+      }
+    },
+
+    "landingPage": {
+      "pageTitle": "GECOM - Import & Export Portal",
+      "menu": {
+        "home": "Home",
+        "solutions": "Solutions"
+      },
+      "hero": {
+        "welcome": "welcome to GECOM",
+        "subtitle": "Complete platform for managing foreign trade processes, from registration to customs clearance.",
+        "cta": "SEE SOLUTION",
+        "portalTitle": "Discover the GECOM Portal",
+        "portalSubtitle": "Centralize orders, processes, documents, and shipping status in one place."
+      },
+      "common": {
+        "next": "Next",
+        "details": "Details »",
+        "moreInfo": "More information",
+        "tomorrow": "Tomorrow"
+      },
+      "features": {
+        "responsiveTitle": "Responsive experience",
+        "responsiveText": "Access GECOM from any device, with dashboards and information optimized for desktop, tablet, and mobile.",
+        "reportsTitle": "Real-time reports",
+        "reportsText1": "Track costs, deadlines, process statuses, and operation performance with up-to-date reports.",
+        "reportsText2": "Quickly visualize shipments, releases, deliveries, and key indicators of your logistics flow.",
+        "formsTitle": "Smart forms",
+        "formsText1": "Reduce errors when registering clients, processes, and documents with validations and standardized fields.",
+        "integrationsTitle": "Integrations",
+        "integrationsText": "Connect GECOM to other systems to further automate the information flow.",
+        "emailNotificationsTitle": "Email notifications",
+        "emailNotificationsText": "Notify clients and partners about status updates and important process events.",
+        "strategicIndicatorsTitle": "Strategic indicators",
+        "strategicIndicatorsText": "Charts and metrics that help you make fast and confident decisions about your operations."
+      },
+      "sections": {
+        "endToEndTitle": "End-to-end management of import and export operations in a single system.",
+        "dailyOpsTitle": "Designed for day-to-day operations",
+        "teamworkTitle": "Team collaboration",
+        "managerViewTitle": "Manager view"
+      },
+      "steps": {
+        "alignmentMeeting": "Alignment meeting",
+        "alignmentMeetingText": "We understand your processes, volumes, and operational specifics to configure GECOM according to your needs.",
+        "implementation": "Implementation",
+        "implementationText": "Setup, training, and close follow-up of the first processes to ensure everything works as expected."
+      },
+      "testimonials": {
+        "quote1": "GECOM gave us full visibility over import and export processes. Today we track deadlines and costs in real time and can be much more proactive with our clients.",
+        "signature1": "02/12/2014 - André Santos",
+        "quote2": "We managed to integrate our operation with GECOM and now have much more control over shared client shipments.",
+        "signature2": "Logistics partner in São Paulo",
+        "quote3": "Centralizing information reduces rework and email back-and-forth. Everyone knows exactly what stage each process is in.",
+        "signature3": "Logistics operator in Brazil",
+        "quote4": "GECOM helped standardize the flow of information between our team in Brazil and partners abroad."
+      },
+      "contact": {
+        "title": "Ask questions, request a demo, or learn more about how GECOM can help your operation.",
+        "company": "GECOM Foreign Trade Solutions",
+        "location": "São Paulo, SP - Brazil",
+        "sendEmail": "Send email",
+        "phone": "Phone"
+      }
+    },
+
+    "publicProcessDetail": {
+      "actions": {
+        "login": "Login"
+      },
+      "header": {
+        "process": "Process",
+        "estimatedDelivery": "Estimated Delivery Date:",
+        "start": "Process Start:"
+      },
+      "sections": {
+        "history": "Process History",
+        "description": "Process Description",
+        "documents": "Process documents"
+      },
+      "actions2": {
+        "addDocuments": "Add Documents"
+      }
+    }
+  }
+}

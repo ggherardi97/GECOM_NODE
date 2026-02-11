@@ -76,15 +76,15 @@
   <div class="row">
     <div class="col-lg-9">
 <div class="dash-filterbar" style="float: inline-start;">
-        <label for="yearFilter">Dashboard:</label>
+        <label for="yearFilter"><%= t('page.layout.menu.dashboard') %>:</label>
         <select class="form-control input-sm" style="width: 250px;">
-          <option value="0" selected>Faturamento / Processos</option>
+          <option value="0" selected><%= t('page.dashboard.pageTitle') %></option>
         </select>
       </div>
     </div>
     <div class="col-lg-3">
       <div class="dash-filterbar">
-        <label for="yearFilter">Ano:</label>
+        <label for="yearFilter"><%= t('page.dashboard.filters.year') %></label>
         <select id="yearFilter" class="form-control input-sm" style="width: 120px;">
           <option value="2025">2025</option>
           <option value="2026">2026</option>
@@ -98,7 +98,7 @@
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span class="label label-success float-right">Mensal</span>
+          <span class="label label-success float-right"><%= t('page.dashboard.filters.monthly') %></span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -106,7 +106,7 @@
           <div class="stat-percent font-bold text-success">
             <span id="monthlyDelta">-</span> <i class="fa fa-bolt"></i>
           </div>
-          <small>Faturamento no mês</small>
+          <small><%= t('page.dashboard.cards.monthBillingTitle') %></small>
         </div>
       </div>
     </div>
@@ -114,7 +114,7 @@
     <div class="col-lg-2">
       <div class="ibox">
         <div class="ibox-title">
-          <span class="label label-info float-right">Anual</span>
+          <span class="label label-info float-right"><%= t('page.dashboard.filters.annual') %></span>
           <h5>Faturamento</h5>
         </div>
         <div class="ibox-content">
@@ -122,7 +122,7 @@
           <div class="stat-percent font-bold text-info">
             <span id="annualDelta">-</span> <i class="fa fa-level-up"></i>
           </div>
-          <small>Faturamento no ano</small>
+          <small><%= t('page.dashboard.cards.yearBillingTitle') %></small>
         </div>
       </div>
     </div>
@@ -132,14 +132,14 @@
       <div class="ibox">
         <div class="ibox-title">
           <span class="label label-primary float-right">Ano</span>
-          <h5>Média mensal</h5>
+          <h5><%= t('page.dashboard.cards.monthlyAverageTitle') %></h5>
         </div>
         <div class="ibox-content">
           <h1 id="avgMonthlyRevenue" class="no-margins">-</h1>
           <div class="stat-percent font-bold text-navy">
             <span id="avgMonthlyHint">-</span> <i class="fa fa-line-chart"></i>
           </div>
-          <small>Média do faturamento do ano (÷ 12)</small>
+          <small><%= t('page.dashboard.cards.monthlyAverageHelp') %></small>
         </div>
       </div>
     </div>
@@ -149,14 +149,14 @@
       <div class="ibox">
         <div class="ibox-title">
           <span class="label label-warning float-right">Ano</span>
-          <h5>Melhor mês</h5>
+          <h5><%= t('page.dashboard.cards.bestMonthTitle') %></h5>
         </div>
         <div class="ibox-content">
           <h2 id="bestMonthName" class="no-margins">-</h2>
           <div class="stat-percent font-bold text-warning">
             <span id="bestMonthRevenue">-</span> <i class="fa fa-trophy"></i>
           </div>
-          <small>Mês com maior faturamento</small>
+          <small><%= t('page.dashboard.cards.bestMonthHelp') %></small>
         </div>
       </div>
     </div>
@@ -165,11 +165,11 @@
     <div class="col-lg-4">
       <div class="ibox">
         <div class="ibox-title">
-          <h5>Processos próximos do prazo</h5>
+          <h5><%= t('page.dashboard.sections.nearDeadline') %></h5>
         </div>
 
         <div id="nearDueContainer" class="dash-inprogress-list">
-          <div class="ibox-content"><small>Carregando...</small></div>
+          <div class="ibox-content"><small><%= t('page.dashboard.labels.loading') %></small></div>
         </div>
       </div>
     </div>
@@ -182,12 +182,12 @@
         <div class="ibox-content">
           <div>
             <span class="float-right text-right">
-              <small>Total de invoices no período: <strong id="totalInvoicesInPeriod">-</strong></small>
+              <small><%= t('page.dashboard.labels.totalInvoicesInPeriod') %> <strong id="totalInvoicesInPeriod">-</strong></small>
               <br />
-              <small>Total de processos no período: <strong id="totalProcessesInPeriod">-</strong></small>
+              <small><%= t('page.dashboard.labels.totalProcessesInPeriod') %> <strong id="totalProcessesInPeriod">-</strong></small>
             </span>
-            <h3 class="font-bold no-margins">Faturamento anual</h3>
-            <small>Ativos (status 0) / Pagos (status 4) / Estimado (30k/mês).</small>
+            <h3 class="font-bold no-margins"><%= t('page.dashboard.sections.annualBilling') %></h3>
+            <small><%= t('page.dashboard.labels.legend') %></small>
           </div>
 
           <div class="m-t-sm">
@@ -199,10 +199,10 @@
           <div class="m-t-md">
             <small class="float-right">
               <i class="fa fa-clock-o"></i>
-              Atualizado em <span id="lastUpdateAt">-</span>
+              <%= t('page.dashboard.labels.updatedAt') %> <span id="lastUpdateAt">-</span>
             </small>
             <small>
-              <strong>Obs:</strong> Ideal ter endpoints agregados no backend (sum/group-by) quando crescer.
+              <strong><%= t('page.dashboard.labels.note') %></strong> <%= t('page.dashboard.labels.noteLine1') %>
             </small>
           </div>
         </div>
@@ -213,17 +213,17 @@
     <div class="col-lg-4">
       <div class="ibox">
         <div class="ibox-title">
-          <h5>Processos por status</h5>
+          <h5><%= t('page.dashboard.sections.byStatus') %></h5>
         </div>
         <div class="ibox-content">
           <div class="dash-doughnut-wrap">
             <canvas id="processStatusChart"></canvas>
             <div id="processStatusEmpty" class="dash-empty-chart" style="display:none;">
-              Sem processos no período para exibir.
+              <%= t('page.dashboard.labels.emptyPeriod') %>
             </div>
           </div>
           <div class="text-center m-t-sm">
-            <small>Quantidade de processos no ano por status.</small>
+            <small><%= t('page.dashboard.labels.yearByStatus') %></small>
           </div>
         </div>
       </div>
@@ -235,7 +235,7 @@
     <div class="col-lg-12">
       <div class="ibox">
         <div class="ibox-title">
-          <h5>Processos</h5>
+          <h5><%= t('page.dashboard.sections.processes') %></h5>
         </div>
 
         <div class="ibox-content">
@@ -243,15 +243,15 @@
             <div class="col-sm-9 m-b-xs">
               <div class="btn-group">
                 <button id="btnReloadProcesses" class="btn btn-sm btn-white" type="button">
-                  <i class="fa fa-refresh"></i> Recarregar
+                  <i class="fa fa-refresh"></i> <%= t('page.dashboard.table.reload') %>
                 </button>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="input-group mb-3">
-                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="Buscar">
+                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="<%= t('page.dashboard.table.search') %>">
                 <div class="input-group-append">
-                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button">Buscar</button>
+                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button"><%= t('page.dashboard.table.search') %></button>
                 </div>
               </div>
             </div>
@@ -261,16 +261,16 @@
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th class="sortable" data-sort="process_number">Processo <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="company">Empresa <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="completed">Concluído <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="status">Status <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="invoice">Invoice <span class="sort-indicator"></span></th>
-                  <th>Ação</th>
+                  <th class="sortable" data-sort="process_number"><%= t('page.dashboard.table.process') %> <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="company"><%= t('page.dashboard.table.company') %> <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="completed"><%= t('page.dashboard.table.completed') %> <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="status"><%= t('page.dashboard.table.status') %> <span class="sort-indicator"></span></th>
+                  <th class="sortable" data-sort="invoice"><%= t('page.dashboard.table.invoice') %> <span class="sort-indicator"></span></th>
+                  <th><%= t('page.dashboard.table.action') %></th>
                 </tr>
               </thead>
               <tbody id="processesTbody">
-                <tr><td colspan="6">Carregando...</td></tr>
+                <tr><td colspan="6"><%= t('page.dashboard.table.loading') %></td></tr>
               </tbody>
             </table>
           </div>
@@ -280,8 +280,8 @@
               <small id="processesCount">-</small>
             </div>
             <div class="col-sm-6 text-right">
-              <button id="prevPage" class="btn btn-sm btn-white" type="button">Anterior</button>
-              <button id="nextPage" class="btn btn-sm btn-white" type="button">Próximo</button>
+              <button id="prevPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.previous') %></button>
+              <button id="nextPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.next') %></button>
             </div>
           </div>
 
@@ -309,8 +309,6 @@
 
   $(document).ready(function () {
     $("#masterHeader").hide();
-    $("#pageName").text("Dashboard");
-    $("#subpageName").text("Dashboard");
 
     // -------------------- Helpers --------------------
     function toNumber(value) {
@@ -988,4 +986,3 @@
     loadDashboard();
   });
 </script>
-

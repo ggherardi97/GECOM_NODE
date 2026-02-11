@@ -23,31 +23,119 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 1px solid #e7eaec;
-    background: #fff;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
+    background: #f3f3f4;
+    border: 1px solid #e7eaec;
     cursor: pointer;
-    transition: all .12s ease-in-out;
   }
 
   .user-card-actions .action-icon:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    background: #e7eaec;
   }
 
   .user-avatar-round {
-    width: 86px;
-    height: 86px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #e7eaec;
     background: #fff;
   }
 
+  .muted {
+    color: #888;
+    font-size: 12px;
+  }
+
+  .profile-card {
+    position: relative;
+    cursor: default;
+  }
+
+  .profile-info-dl dt {
+    font-weight: 600;
+    color: #666;
+  }
+
+  .profile-info-dl dd {
+    margin-bottom: 6px;
+  }
+
+  /* Users list (tab 2) */
   .user-card {
     position: relative;
+    cursor: pointer;
+  }
+
+  .user-card:hover {
+    box-shadow: 0 0 0 3px rgba(26, 179, 148, 0.10);
+  }
+
+  .user-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: inline-block;
+  }
+
+  .user-badge.admin {
+    background: rgba(220, 38, 38, 0.12);
+    color: rgb(220, 38, 38);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+  }
+
+  .user-badge.manager {
+    background: rgba(23, 162, 184, 0.12);
+    color: rgb(23, 162, 184);
+    border: 1px solid rgba(23, 162, 184, 0.25);
+  }
+
+  .user-badge.user {
+    background: rgba(108, 117, 125, 0.12);
+    color: rgb(108, 117, 125);
+    border: 1px solid rgba(108, 117, 125, 0.25);
+  }
+
+  .user-status-pill {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .user-status-pill.active {
+    background: rgba(26, 179, 148, 0.12);
+    color: rgb(26, 179, 148);
+    border-color: rgba(26, 179, 148, 0.25);
+  }
+
+  .user-status-pill.inactive {
+    background: rgba(220, 53, 69, 0.10);
+    color: rgb(220, 53, 69);
+    border-color: rgba(220, 53, 69, 0.20);
+  }
+
+  /* Password strength */
+  .pw-meter {
+    height: 10px;
+    width: 100%;
+    background: #eee;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e7eaec;
+  }
+
+  .pw-meter > div {
+    height: 100%;
+    width: 0%;
+    background: #1ab394;
+  }
+
+  .pw-reqs li {
+    margin-bottom: 4px;
   }
 </style>
 
@@ -62,14 +150,14 @@
             <div class="col-lg-12">
               <div class="m-b-md">
                 <a onclick="openEditMyProfile()" class="btn btn-white btn-xs float-right" style="margin-left:8px;">
-                  Editar meus dados
+                  <%= t('page.profile.actions.editMyData') %>
                 </a>
                 <a onclick="openChangePassword()" style="color:#fff;" class="btn btn-primary btn-xs float-right">
-                  Trocar senha
+                  <%= t('page.profile.actions.changePassword') %>
                 </a>
 
                 <h2 id="myName"></h2>
-                <small class="text-muted">Ajuste seus dados e, se você for Admin/Manager, gerencie usuários da sua empresa.</small>
+                <small class="text-muted"><%= t('page.profile.subtitle') %></small>
               </div>
             </div>
           </div>
@@ -77,21 +165,21 @@
           <div class="row" style="margin-top:10px;">
             <div class="col-lg-6">
               <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right"><dt>Email:</dt></div>
+                <div class="col-sm-4 text-sm-right"><dt><%= t('page.profile.labels.email') %></dt></div>
                 <div class="col-sm-8 text-sm-left"><dd class="mb-1" id="myEmail"></dd></div>
               </dl>
               <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right"><dt>Telefone:</dt></div>
+                <div class="col-sm-4 text-sm-right"><dt><%= t('page.profile.labels.phone') %></dt></div>
                 <div class="col-sm-8 text-sm-left"><dd class="mb-1" id="myPhone"></dd></div>
               </dl>
             </div>
             <div class="col-lg-6">
               <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right"><dt>Empresa:</dt></div>
+                <div class="col-sm-4 text-sm-right"><dt><%= t('page.profile.labels.company') %></dt></div>
                 <div class="col-sm-8 text-sm-left"><dd class="mb-1" id="myCompanyName">-</dd></div>
               </dl>
               <dl class="row mb-0">
-                <div class="col-sm-4 text-sm-right"><dt>Permissão:</dt></div>
+                <div class="col-sm-4 text-sm-right"><dt><%= t('page.profile.labels.permission') %></dt></div>
                 <div class="col-sm-8 text-sm-left"><dd class="mb-1" id="myRole">-</dd></div>
               </dl>
             </div>
@@ -103,8 +191,8 @@
                 <div class="panel-heading">
                   <div class="panel-options">
                     <ul class="nav nav-tabs">
-                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab">Meu Perfil</a></li>
-                      <li id="tabUsersLi" style="display:none;"><a class="nav-link" href="#tab-2" data-toggle="tab">Usuários da Empresa</a></li>
+                      <li><a class="nav-link active" href="#tab-1" data-toggle="tab"><%= t('page.profile.tabs.myProfile') %></a></li>
+                      <li id="tabUsersLi" style="display:none;"><a class="nav-link" href="#tab-2" data-toggle="tab"><%= t('page.profile.tabs.companyUsers') %></a></li>
                     </ul>
                   </div>
                 </div>
@@ -116,22 +204,25 @@
                     <div class="tab-pane active" id="tab-1">
                       <div class="row">
                         <div class="col-lg-12">
-                          <div class="contact-box" style="cursor:default;">
+                          <div class="contact-box profile-card" style="cursor:default;">
                             <div class="row">
+
                               <div class="col-4">
                                 <div class="text-center">
                                   <img id="myAvatar" alt="image" class="user-avatar-round m-t-xs" src="/Assets/inspinia/img/user.png">
                                   <div class="m-t-xs font-bold" id="myRoleBadge"></div>
                                 </div>
                               </div>
+
                               <div class="col-8">
                                 <h3><strong id="myName2"></strong></h3>
                                 <p><i class="fa fa-envelope"></i> <span id="myEmail2"></span></p>
                                 <p><i class="fa fa-phone"></i> <span id="myPhone2"></span></p>
                                 <p class="text-muted" style="margin-bottom:0;">
-                                  <i class="fa fa-lock"></i> Dica: use uma senha forte com 12+ caracteres, maiúscula, minúscula, número e símbolo.
+                                  <i class="fa fa-lock"></i> <%= t('page.profile.hints.passwordStrength') %>
                                 </p>
                               </div>
+
                             </div>
                           </div>
                         </div>
@@ -143,7 +234,7 @@
                       <div class="row" style="margin-bottom: 10px;">
                         <div class="col-lg-12 text-right">
                           <button id="btnNewUser" type="button" class="btn btn-primary btn-sm" onclick="openNewCompanyUser()">
-                            <i class="fa fa-plus"></i> Novo usuário
+                            <i class="fa fa-plus"></i> <%= t('page.profile.actions.newUser') %>
                           </button>
                         </div>
                       </div>
@@ -160,15 +251,26 @@
             </div>
           </div>
 
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+        </div><!-- ibox-content -->
+      </div><!-- ibox -->
+    </div><!-- wrapper -->
+  </div><!-- col -->
+</div><!-- row -->
 
 <script>
+  // i18n helpers for JS template strings
+  const I18N_PROFILE = {
+    editMyData: "<%= t('page.profile.actions.editMyData') %>",
+    changePassword: "<%= t('page.profile.actions.changePassword') %>",
+    newUser: "<%= t('page.profile.actions.newUser') %>",
+    passwordStrengthHint: "<%= t('page.profile.hints.passwordStrength') %>",
+    pageTitle: "<%= t('page.profile.pageTitle') %>"
+  };
+
   (function () {
-    // -------------------- Utils (English comments only) --------------------
+    const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
+
+    // -------------------- Utils --------------------
     function escapeHtml(value) {
       if (value == null) return "";
       return String(value)
@@ -179,8 +281,8 @@
         .replace(/'/g, "&#039;");
     }
 
-    function isNonEmptyString(value) {
-      return typeof value === "string" && value.trim().length > 0;
+    function safeJsonParse(raw) {
+      try { return raw ? JSON.parse(raw) : null; } catch { return null; }
     }
 
     function normalizeString(value) {
@@ -191,9 +293,18 @@
       return String(value ?? "").trim();
     }
 
+    function isNonEmptyString(value) {
+      return typeof value === "string" && value.trim().length > 0;
+    }
+
     function isValidEmail(email) {
       const v = String(email ?? "").trim();
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function isImageFile(file) {
+      const type = String(file?.type || "").toLowerCase();
+      return type.startsWith("image/");
     }
 
     function buildPatchOnlyChanged(originalObj, currentObj, fields) {
@@ -203,6 +314,7 @@
       for (const f of fields) {
         const originalValue = f.normalize(originalObj[f.key]);
         const currentValue = f.normalize(f.read());
+
         if (originalValue !== currentValue) {
           f.write(payload, currentValue);
           hasChanges = true;
@@ -212,333 +324,288 @@
       return { hasChanges, payload };
     }
 
-    function getRoleDisplay(role) {
-      const r = String(role ?? "").toUpperCase();
-      if (r === "ADMIN") return "Admin";
-      if (r === "MANAGER") return "Manager";
-      return "User";
+    function generateTempPassword() {
+      const letters = "abcdefghijklmnopqrstuvwxyz";
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const digits = "0123456789";
+      const specials = "@$!%*#?&";
+      const rand = (s) => s[Math.floor(Math.random() * s.length)];
+
+      let pwd = "";
+      pwd += "Tmp";
+      pwd += rand(specials);
+      pwd += rand(upper);
+      for (let i = 0; i < 10; i++) pwd += rand(letters + digits);
+      pwd += rand(digits);
+      return pwd;
     }
 
-    function canManageCompanyUsers(role) {
-      const r = String(role ?? "").toUpperCase();
-      return r === "ADMIN" || r === "MANAGER";
+    function roleToBadge(role) {
+      const r = String(role || "").toUpperCase();
+      if (r === "ADMIN") return { text: "Admin", css: "user-badge admin" };
+      if (r === "MANAGER") return { text: "Manager", css: "user-badge manager" };
+      return { text: "User", css: "user-badge user" };
     }
 
-    // Default avatar only. The actual picture is loaded via /api/users/:id/profile-picture (cached).
-    function pickUserAvatar() {
-      return "/Assets/inspinia/img/user.png";
+    function statusToPill(status) {
+      const s = String(status || "").toUpperCase();
+      if (s === "INACTIVE" || s === "INATIVO") return { text: "Inativo", css: "user-status-pill inactive" };
+      return { text: "Ativo", css: "user-status-pill active" };
     }
 
-    function showApiError(err, fallbackMessage) {
-      const msg = err?.message || fallbackMessage || "Erro inesperado.";
-      console.error(err);
-      alert(msg);
+    function normalizeStatusToSelectValue(status) {
+      const s = String(status ?? "").toUpperCase();
+      if (s === "INACTIVE" || s === "INATIVO") return "INACTIVE";
+      return "ACTIVE";
     }
 
-    // -------------------- Profile picture cache (localStorage) --------------------
-    const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
-    const PROFILE_CACHE_KEY = "gecom.profilePictureCache";
-    const PROFILE_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
-
-    function safeJsonParse(raw) {
-      try { return JSON.parse(raw); } catch { return null; }
+    function mapSelectValueToApiStatus(selectValue) {
+      const v = String(selectValue ?? "").toUpperCase();
+      return v === "INACTIVE" ? "INACTIVE" : "ACTIVE";
     }
 
+    // -------------------- Profile picture cache --------------------
     function getCachedProfilePicture(userId) {
-      const raw = localStorage.getItem(PROFILE_CACHE_KEY);
-      if (!raw) return null;
-
-      const cache = safeJsonParse(raw);
-      if (!cache) return null;
-
-      if (String(cache.userId || "") !== String(userId || "")) return null;
-
-      const savedAt = Number(cache.savedAt || 0);
-      if (!savedAt || (Date.now() - savedAt) > PROFILE_CACHE_TTL_MS) return null;
-
-      const value = String(cache.value || "");
-      return value ? value : null;
+      try {
+        if (!userId) return "";
+        return String(localStorage.getItem("profile_picture_" + userId) || "");
+      } catch {
+        return "";
+      }
     }
 
     function setCachedProfilePicture(userId, dataUrl) {
       try {
-        if (!dataUrl) return;
-        localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({
-          userId: String(userId),
-          value: String(dataUrl),
-          savedAt: Date.now()
-        }));
-      } catch (e) {
-        // If storage is full, just ignore cache
-        console.warn("Failed to cache profile picture:", e);
-      }
-    }
-
-    function clearCachedProfilePicture() {
-      try { localStorage.removeItem(PROFILE_CACHE_KEY); } catch {}
+        if (!userId) return;
+        if (!dataUrl) localStorage.removeItem("profile_picture_" + userId);
+        else localStorage.setItem("profile_picture_" + userId, String(dataUrl));
+      } catch { }
     }
 
     // -------------------- API --------------------
-    async function safeJson(resp) {
-      return await resp.json().catch(() => ({}));
+    async function readJsonSafe(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try { return JSON.parse(text); } catch { return { message: text }; }
     }
 
-    async function fetchMe() {
-      const resp = await fetch(`/api/auth/me`, { method: "GET", headers: { Accept: "application/json" } });
-      const data = await safeJson(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao carregar /auth/me");
+    async function apiGet(url) {
+      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao buscar dados");
       return data;
     }
 
-    async function fetchCompanyById(companyId) {
-      const resp = await fetch(`/api/companies/${encodeURIComponent(companyId)}`, {
-        method: "GET",
-        headers: { Accept: "application/json" }
-      });
-      const data = await safeJson(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao carregar empresa.");
-      return data;
-    }
-
-    async function fetchUsersByCompany(companyId) {
-      const resp = await fetch(`/api/users?company_id=${encodeURIComponent(companyId)}`, {
-        method: "GET",
-        headers: { Accept: "application/json" }
-      });
-      const data = await safeJson(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao carregar usuários da empresa.");
-
-      if (Array.isArray(data)) return data;
-      return data?.data ?? data?.rows ?? data?.users ?? [];
-    }
-
-    async function patchUserById(userId, patchBody) {
-      // PATCH (preferred) with PUT fallback (common backend mismatch)
-      const url = `/api/users/${encodeURIComponent(userId)}`;
-      const body = JSON.stringify(patchBody ?? {});
-
-      // Try PATCH
-      let resp = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body
-      });
-
-      if (resp.ok) return await safeJson(resp);
-
-      const dataPatch = await safeJson(resp);
-      const statusPatch = resp.status;
-
-      // Fallback to PUT if method not allowed or route mismatch
-      if (statusPatch === 404 || statusPatch === 405) {
-        resp = await fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body
-        });
-
-        const dataPut = await safeJson(resp);
-        if (!resp.ok) throw new Error(dataPut?.message || dataPatch?.message || "Falha ao atualizar usuário.");
-        return dataPut;
-      }
-
-      throw new Error(dataPatch?.message || "Falha ao atualizar usuário.");
-    }
-
-    async function createUser(payload) {
-      const resp = await fetch(`/api/users`, {
+    async function apiPost(url, body) {
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload ?? {})
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
       });
-      const data = await safeJson(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao criar usuário.");
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao salvar");
       return data;
     }
 
-    async function deleteUserById(userId) {
-      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
-        method: "DELETE",
-        headers: { Accept: "application/json" }
+    async function apiPatch(url, body) {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
       });
-      const data = await safeJson(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao deletar usuário.");
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao atualizar");
       return data;
     }
 
-    // Dedicated endpoint for picture
-async function fetchProfilePicture(userId) {
-  const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
-    method: "GET",
-    headers: { Accept: "application/json" }
-  });
+    async function apiDelete(url) {
+      const res = await fetch(url, { method: "DELETE", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao excluir");
+      return data;
+    }
 
-  const data = await safeJson(resp);
-  if (!resp.ok) return null;
+    // -------------------- DOM helpers --------------------
+    function setText(selector, value) {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = value ?? "";
+    }
 
-  const base64 = data?.base64;
-  if (typeof base64 !== "string" || base64.trim().length === 0) return null;
+    function setHtml(selector, html) {
+      const el = document.querySelector(selector);
+      if (el) el.innerHTML = html ?? "";
+    }
 
-  // Backend returns raw base64 (no prefix). Convert to dataURL for <img>.
-  return `data:image/png;base64,${base64}`;
-}
-async function saveMyProfilePicture(base64OrDataUrl) {
-  const resp = await fetch(`/api/users/me/profile-picture`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ base64: String(base64OrDataUrl ?? "") })
-  });
+    function show(selector) {
+      const el = document.querySelector(selector);
+      if (el) el.style.display = "";
+    }
 
-  const data = await safeJson(resp);
-  if (!resp.ok) throw new Error(data?.message || "Falha ao salvar foto de perfil.");
-  return data;
-}
-
-
-    async function applyMyProfilePicture(userId) {
-      if (!userId) return;
-
-      // 1) Cache first
-      const cached = getCachedProfilePicture(userId);
-      if (cached) {
-        $("#myAvatar").attr("src", cached);
-        return;
-      }
-
-      // 2) API then cache
-      const pic = await fetchProfilePicture(userId);
-      if (pic) {
-        $("#myAvatar").attr("src", pic);
-        setCachedProfilePicture(userId, pic);
-      } else {
-        $("#myAvatar").attr("src", DEFAULT_AVATAR);
-      }
+    function hide(selector) {
+      const el = document.querySelector(selector);
+      if (el) el.style.display = "none";
     }
 
     // -------------------- Password strength --------------------
-    function scorePassword(pwd) {
-      const s = String(pwd ?? "");
-      const lengthOk = s.length >= 12;
-      const hasUpper = /[A-Z]/.test(s);
-      const hasLower = /[a-z]/.test(s);
-      const hasDigit = /[0-9]/.test(s);
-      const hasSymbol = /[^A-Za-z0-9]/.test(s);
+    function calcPasswordStrength(pwd) {
+      const v = String(pwd || "");
+      let score = 0;
 
-      const points = [lengthOk, hasUpper, hasLower, hasDigit, hasSymbol].filter(Boolean).length;
+      if (v.length >= 8) score += 1;
+      if (v.length >= 12) score += 1;
+      if (/[A-Z]/.test(v)) score += 1;
+      if (/[a-z]/.test(v)) score += 1;
+      if (/[0-9]/.test(v)) score += 1;
+      if (/[^A-Za-z0-9]/.test(v)) score += 1;
 
-      let label = "Fraca";
-      if (points >= 5) label = "Forte";
-      else if (points >= 4) label = "Boa";
-      else if (points >= 3) label = "Média";
-
-      const percent = Math.min(100, Math.max(0, Math.round((points / 5) * 100)));
-      return { points, percent, label, lengthOk, hasUpper, hasLower, hasDigit, hasSymbol };
+      score = Math.max(0, Math.min(6, score));
+      const pct = Math.round((score / 6) * 100);
+      return { score, pct };
     }
 
-    function renderPasswordHints(state) {
-      const ok = (v) => v ? '<i class="fa fa-check text-navy"></i>' : '<i class="fa fa-times text-danger"></i>';
-      return `
-        <div style="margin-top:8px;">
-          <div class="text-muted" style="margin-bottom:6px;">Requisitos:</div>
-          <div>${ok(state.lengthOk)} 12+ caracteres</div>
-          <div>${ok(state.hasUpper)} 1 letra maiúscula</div>
-          <div>${ok(state.hasLower)} 1 letra minúscula</div>
-          <div>${ok(state.hasDigit)} 1 número</div>
-          <div>${ok(state.hasSymbol)} 1 símbolo</div>
-        </div>
-      `;
+    function renderStrength(pwd) {
+      const r = calcPasswordStrength(pwd);
+      $("#pwMeterFill").css("width", r.pct + "%");
+      $("#pwScoreText").text(r.pct + "%");
+      return r;
+    }
+
+    // -------------------- Global: SideModal (expected from layout) --------------------
+    function ensureSideModal() {
+      if (window.SideModal && typeof window.SideModal.open === "function") return true;
+      alert("SideModal global não encontrado no layout. Verifique o JS do layout.");
+      return false;
+    }
+
+    // -------------------- Auth/context --------------------
+    function getAuth() {
+      return window.__auth || safeJsonParse(localStorage.getItem("auth")) || {};
+    }
+
+    function isAdminOrManager(auth) {
+      const role = String(auth?.role || auth?.user?.role || "").toUpperCase();
+      return role === "ADMIN" || role === "MANAGER";
+    }
+
+    function getMyUserId(auth) {
+      return auth?.id || auth?.user_id || auth?.user?.id || null;
+    }
+
+    function getMyCompanyId(auth) {
+      return auth?.company_id || auth?.companyId || auth?.company?.id || null;
     }
 
     // -------------------- Rendering --------------------
-    function fillMeHeader(me, company) {
-      const fullName = me?.full_name ?? me?.fullName ?? "";
-      const email = me?.email ?? "";
-      const phone = me?.phonenumber ?? me?.phone ?? "";
-      const role = me?.role ?? "USER";
-
-      $("#myName").text(fullName);
-      $("#myName2").text(fullName);
-      $("#myEmail").text(email);
-      $("#myEmail2").text(email);
-      $("#myPhone").text(phone || "-");
-      $("#myPhone2").text(phone || "-");
-
-      $("#myRole").text(getRoleDisplay(role));
-      $("#myRoleBadge").text(getRoleDisplay(role));
-
+    function fillMyCard(me, company) {
+      const fullName = me?.full_name ?? me?.fullName ?? "-";
+      const email = me?.email ?? "-";
+      const phone = me?.phonenumber ?? me?.phone ?? "-";
       const companyName = company?.company_name ?? company?.name ?? "-";
-      $("#myCompanyName").text(companyName);
+      const role = me?.role ?? "-";
 
-      // Do NOT use me.profile_picture here (performance). Default now; picture loaded async + cached.
-      $("#myAvatar").attr("src", DEFAULT_AVATAR);
+      setText("#myName", fullName);
+      setText("#myName2", fullName);
+      setText("#myEmail", email);
+      setText("#myEmail2", email);
+      setText("#myPhone", phone);
+      setText("#myPhone2", phone);
+      setText("#myCompanyName", companyName);
+      setText("#myRole", role);
+
+      const badge = roleToBadge(role);
+      setHtml("#myRoleBadge", `<span class="${badge.css}">${escapeHtml(badge.text)}</span>`);
+
+      // avatar from cache (this page uses base64 cache)
+      const cachedPic = getCachedProfilePicture(me?.id);
+      const avatar = cachedPic || DEFAULT_AVATAR;
+      $("#myAvatar").attr("src", avatar);
     }
 
-    function renderCompanyUsers(users, me) {
-      const container = document.querySelector("#companyUsersContainer");
-      if (!container) return;
+    function renderCompanyUsers(users, meId) {
+      const $container = $("#companyUsersContainer");
+      $container.empty();
 
-      container.innerHTML = "";
-
-      if (!Array.isArray(users) || users.length === 0) {
-        container.innerHTML = `<div class="col-lg-12"><p>Nenhum usuário encontrado para esta empresa.</p></div>`;
+      const list = Array.isArray(users) ? users : [];
+      if (!list.length) {
+        $container.append('<div class="col-lg-12"><p class="text-muted">Nenhum usuário encontrado para esta empresa.</p></div>');
         return;
       }
 
-      window.__companyUsers = users;
-
-      const canManage = canManageCompanyUsers(me?.role);
-      const cards = users.map((u, index) => {
+      list.forEach(function (u, idx) {
+        const fullName = u?.full_name ?? u?.fullName ?? "-";
+        const email = u?.email ?? "-";
+        const phone = u?.phonenumber ?? u?.phone ?? "";
         const role = u?.role ?? "USER";
         const status = u?.status ?? "ACTIVE";
-        const isMe = String(u?.id ?? "") === String(me?.id ?? "");
-        const avatar = pickUserAvatar(u);
 
-        // Show pencil/trash like ClientDetail (only if manager/admin)
-        const actionsHtml = canManage ? `
-          <div class="user-card-actions">
-            <span class="action-icon" title="Editar" onclick="onEditCompanyUser(${index}); event.stopPropagation();">
-              <i class="fa fa-pencil"></i>
-            </span>
-            <span class="action-icon" title="${isMe ? "Você não pode deletar seu próprio usuário" : "Deletar"}"
-                  style="${isMe ? "opacity:.35; cursor:not-allowed;" : ""}"
-                  onclick="${isMe ? "event.stopPropagation();" : `onDeleteCompanyUser(${index}); event.stopPropagation();`}">
-              <i class="fa fa-trash text-danger"></i>
-            </span>
-          </div>
-        ` : "";
+        const badge = roleToBadge(role);
+        const pill = statusToPill(status);
 
-        return `
-          <div class="col-lg-4">
-            <div class="contact-box user-card" style="cursor:default;">
-              ${actionsHtml}
-              <div class="row">
+        const cached = getCachedProfilePicture(u?.id);
+        const avatar = cached || DEFAULT_AVATAR;
+
+        const isMe = (String(u?.id || "") === String(meId || ""));
+
+        const html = `
+          <div class="col-lg-3">
+            <div class="contact-box user-card" onclick="openEditCompanyUser(${idx});">
+              <div class="user-card-actions">
+                <div class="action-icon" title="Editar" onclick="event.stopPropagation(); openEditCompanyUser(${idx});">
+                  <i class="fa fa-pencil"></i>
+                </div>
+                ${isMe ? "" : `
+                  <div class="action-icon" title="Excluir" onclick="event.stopPropagation(); deleteCompanyUser(${idx});">
+                    <i class="fa fa-trash"></i>
+                  </div>
+                `}
+              </div>
+
+              <a class="row" style="cursor:pointer;">
                 <div class="col-4">
                   <div class="text-center">
-                    <img alt="image" class="user-avatar-round m-t-xs" src="${escapeHtml(avatar)}">
-                    <div class="m-t-xs font-bold">${escapeHtml(getRoleDisplay(role))}${isMe ? " (Você)" : ""}</div>
+                    <img alt="image" class="rounded-circle m-t-xs img-fluid user-avatar-round" src="${escapeHtml(avatar)}">
+                    <div class="m-t-xs font-bold">${escapeHtml(badge.text)}</div>
                   </div>
                 </div>
                 <div class="col-8">
-                  <h3 style="margin-top:6px;"><strong>${escapeHtml(u?.full_name ?? u?.fullName ?? "-")}</strong></h3>
-                  ${u?.email ? `<p><i class="fa fa-envelope"></i> ${escapeHtml(u.email)}</p>` : ""}
-                  ${u?.phonenumber ? `<p><i class="fa fa-phone"></i> ${escapeHtml(u.phonenumber)}</p>` : ""}
-                  <p><i class="fa fa-circle"></i> Status: ${escapeHtml(String(status))}</p>
+                  <h3 style="margin-top:0;"><strong>${escapeHtml(fullName)}</strong></h3>
+                  <p><i class="fa fa-envelope"></i> ${escapeHtml(email)}</p>
+                  ${phone ? `<p><i class="fa fa-phone"></i> ${escapeHtml(phone)}</p>` : ""}
+                  <p style="margin-bottom:0;">
+                    <span class="${pill.css}">${escapeHtml(pill.text)}</span>
+                    ${isMe ? `<span class="muted" style="margin-left:8px;">(Você)</span>` : ""}
+                  </p>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         `;
-      }).join("");
 
-      container.innerHTML = cards;
+        $container.append(html);
+      });
+
+      window.__companyUsers = list;
     }
 
-    // -------------------- Side modals --------------------
-    async function openEditMyProfile() {
-      try {
-        const me = window.__me;
-        if (!me?.id) return;
+    // -------------------- Modals --------------------
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Falha ao ler o arquivo."));
+        reader.readAsDataURL(file);
+      });
+    }
 
+    async function openEditMyProfile() {
+      if (!ensureSideModal()) return;
+
+      try {
+        const auth = getAuth();
+        const myId = getMyUserId(auth);
+        if (!myId) { alert("Não foi possível identificar seu user_id."); return; }
+
+        const me = await apiGet("/api/users/" + encodeURIComponent(myId));
         const cachedPic = getCachedProfilePicture(me.id);
 
         const original = {
@@ -594,277 +661,245 @@ async function saveMyProfilePicture(base64OrDataUrl) {
                 [
                   { key: "fullName", read: () => current.fullName, normalize: normalizeString, write: (p, v) => { p.full_name = v; } },
                   { key: "phone", read: () => current.phone, normalize: normalizePhone, write: (p, v) => { p.phonenumber = v; } },
-                  { key: "profilePicture", read: () => current.profilePicture, normalize: normalizeString, write: (p, v) => { p.profile_picture = v; } }
+                  // profile_picture is not persisted by backend yet; we keep in cache
+                  { key: "profilePicture", read: () => current.profilePicture, normalize: normalizeString, write: (_p, _v) => { } }
                 ]
               );
 
-              if (!diff.hasChanges) return;
-
-             // 1) Update name/phone via users/:id
-const payloadWithoutPic = { ...diff.payload };
-delete payloadWithoutPic.profile_picture;
-
-if (Object.keys(payloadWithoutPic).length > 0) {
-  await patchUserById(me.id, payloadWithoutPic);
-}
-
-// 2) Update picture via dedicated endpoint
-if (Object.prototype.hasOwnProperty.call(diff.payload, "profile_picture")) {
-  const newPic = diff.payload.profile_picture;
-
-  await saveMyProfilePicture(newPic);
-
-  if (typeof newPic === "string" && newPic.trim().length > 0) {
-    setCachedProfilePicture(me.id, newPic);
-  } else {
-    clearCachedProfilePicture();
-  }
-}
-
-location.reload();
-
-            } catch (err) {
-              showApiError(err, "Erro ao salvar seu perfil.");
-            }
-          },
-          onCancel: function () {}
-        });
-
-        // Bind upload after modal render
-        setTimeout(() => {
-          const input = document.getElementById("fileProfilePic");
-          if (!input) return;
-
-          input.addEventListener("change", function () {
-            const file = input.files && input.files[0];
-            if (!file) return;
-
-            const maxBytes = 5 * 1024 * 1024;
-            if (file.size > maxBytes) {
-              alert("A imagem excede 5MB. Escolha uma menor.");
-              input.value = "";
-              return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              const result = e.target && e.target.result ? String(e.target.result) : "";
-              if (!result) return;
-
-              $("#hidProfilePic").val(result);
-              $("#imgPreview").attr("src", result);
-            };
-            reader.readAsDataURL(file);
-          });
-        }, 50);
-
-      } catch (err) {
-        showApiError(err, "Erro ao abrir edição do perfil.");
-      }
-    }
-    window.openEditMyProfile = openEditMyProfile;
-
-    async function openChangePassword() {
-      try {
-        const me = window.__me;
-        if (!me?.id) return;
-
-        const html = `
-          <div class="form-group">
-            <label for="txtNewPwd">Nova senha</label>
-            <input id="txtNewPwd" class="form-control" type="password" autocomplete="new-password" />
-          </div>
-
-          <div class="form-group">
-            <label for="txtNewPwd2">Confirmar nova senha</label>
-            <input id="txtNewPwd2" class="form-control" type="password" autocomplete="new-password" />
-          </div>
-
-          <div class="form-group" style="margin-bottom:10px;">
-            <div class="progress m-b-1" style="height:10px;">
-              <div id="pwdBar" style="width:0%;" class="progress-bar progress-bar-striped progress-bar-animated"></div>
-            </div>
-            <small class="text-muted">Força: <strong id="pwdLabel">-</strong></small>
-            <div id="pwdHints"></div>
-          </div>
-
-          <small class="text-muted">
-            Observação: ao trocar a senha, você continuará logado (a não ser que o backend invalide a sessão).
-          </small>
-        `;
-
-        SideModal.open({
-          title: "Trocar senha",
-          html: html,
-          onOk: async function () {
-            try {
-              const p1 = String($("#txtNewPwd").val() || "");
-              const p2 = String($("#txtNewPwd2").val() || "");
-
-              if (!p1 || p1.length < 8) {
-                alert("Informe uma senha válida (mínimo 8 caracteres).");
-                return;
+              if (diff.hasChanges) {
+                await apiPatch("/api/users/" + encodeURIComponent(me.id), diff.payload);
               }
 
-              const strength = scorePassword(p1);
-              if (strength.points < 4) {
-                alert("Senha fraca. Use 12+ caracteres e misture maiúscula, minúscula, número e símbolo.");
-                return;
-              }
-
-              if (p1 !== p2) {
-                alert("A confirmação da senha não confere.");
-                return;
-              }
-
-              await patchUserById(me.id, { password: p1 });
-              alert("Senha atualizada com sucesso.");
-            } catch (err) {
-              showApiError(err, "Erro ao trocar senha.");
-            }
-          },
-          onCancel: function () {}
-        });
-
-        setTimeout(() => {
-          const $p1 = $("#txtNewPwd");
-          const $label = $("#pwdLabel");
-          const $bar = $("#pwdBar");
-          const $hints = $("#pwdHints");
-
-          function update() {
-            const val = String($p1.val() || "");
-            const st = scorePassword(val);
-            $label.text(st.label);
-            $bar.css("width", st.percent + "%");
-            $hints.html(renderPasswordHints(st));
-          }
-
-          $p1.on("input", update);
-          update();
-        }, 50);
-
-      } catch (err) {
-        showApiError(err, "Erro ao abrir troca de senha.");
-      }
-    }
-    window.openChangePassword = openChangePassword;
-
-    function generateTempPassword() {
-      const letters = "abcdefghijklmnopqrstuvwxyz";
-      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const digits = "0123456789";
-      const specials = "@$!%*#?&";
-      const rand = (s) => s[Math.floor(Math.random() * s.length)];
-
-      let pwd = "";
-      pwd += "Tmp";
-      pwd += rand(specials);
-      pwd += rand(upper);
-      for (let i = 0; i < 10; i++) pwd += rand(letters + digits);
-      pwd += rand(digits);
-      return pwd;
-    }
-
-    async function openNewCompanyUser() {
-      try {
-        const me = window.__me;
-        const companyId = me?.company_id;
-        if (!isNonEmptyString(companyId)) {
-          alert("Não foi possível identificar o company_id do seu usuário.");
-          return;
-        }
-
-        const html = `
-          <div class="form-group">
-            <label for="txtNewName">Nome</label>
-            <input id="txtNewName" class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label for="txtNewEmail">Email</label>
-            <input id="txtNewEmail" class="form-control" />
-          </div>
-
-          <div class="form-group">
-            <label for="txtNewPhone">Telefone</label>
-            <input id="txtNewPhone" class="form-control" placeholder="+5511961381234" />
-          </div>
-
-          <div class="form-group">
-            <label for="selNewRole">Permissão</label>
-            <select id="selNewRole" class="form-control">
-              <option value="USER" selected>User</option>
-              <option value="MANAGER">Manager</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-            <small class="text-muted">Manager/Admin conseguem gerenciar usuários da empresa.</small>
-          </div>
-
-          <div class="form-group" style="margin-top:10px;">
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" id="chkSendAccess" checked />
-                Enviar acesso (primeiro acesso)
-              </label>
-            </div>
-          </div>
-        `;
-
-        SideModal.open({
-          title: "Novo usuário da empresa",
-          html: html,
-          onOk: async function () {
-            try {
-              const fullName = normalizeString($("#txtNewName").val());
-              const email = normalizeString($("#txtNewEmail").val());
-              const phonenumber = normalizePhone($("#txtNewPhone").val());
-              const role = normalizeString($("#selNewRole").val()) || "USER";
-              const sendAccess = $("#chkSendAccess").is(":checked") === true;
-
-              if (!isNonEmptyString(fullName)) { alert("Informe o Nome."); return; }
-              if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email válido."); return; }
-
-              const tempPassword = generateTempPassword();
-
-              await createUser({
-                full_name: fullName,
-                email: email,
-                password: tempPassword,
-                role: role,
-                phonenumber: phonenumber,
-                first_access: sendAccess,
-                company_id: companyId,
-                status: "ACTIVE"
-              });
+              // Save picture in cache (even if backend doesn't store it yet)
+              setCachedProfilePicture(me.id, normalizeString(current.profilePicture));
 
               location.reload();
             } catch (err) {
-              showApiError(err, "Erro ao criar usuário.");
+              console.error(err);
+              alert(err?.message || "Erro ao salvar seu perfil.");
             }
-          },
-          onCancel: function () {}
+          }
         });
 
-      } catch (err) {
-        showApiError(err, "Erro ao abrir criação de usuário.");
+        setTimeout(function () {
+          $("#fileProfilePic").off("change.__pic").on("change.__pic", async function () {
+            const f = this.files && this.files[0];
+            if (!f) return;
+
+            if (!isImageFile(f)) {
+              alert("Selecione um arquivo de imagem.");
+              $(this).val("");
+              return;
+            }
+
+            const maxBytes = 5 * 1024 * 1024;
+            if (f.size > maxBytes) {
+              alert("Imagem maior que 5MB. Reduza o tamanho do arquivo.");
+              $(this).val("");
+              return;
+            }
+
+            try {
+              const dataUrl = await readFileAsDataUrl(f);
+              $("#imgPreview").attr("src", dataUrl);
+              $("#hidProfilePic").val(dataUrl);
+            } catch (e) {
+              alert(e?.message || "Falha ao ler arquivo.");
+            }
+          });
+        }, 50);
+
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Erro ao carregar seu perfil.");
       }
     }
+
+    window.openEditMyProfile = openEditMyProfile;
+
+    function openChangePassword() {
+      if (!ensureSideModal()) return;
+
+      const html = `
+        <div class="form-group">
+          <label for="txtNewPassword">Nova senha</label>
+          <input id="txtNewPassword" type="password" class="form-control" placeholder="********" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtConfirmPassword">Confirmar nova senha</label>
+          <input id="txtConfirmPassword" type="password" class="form-control" placeholder="********" />
+        </div>
+
+        <div class="form-group">
+          <label>Força:</label>
+          <div class="pw-meter"><div id="pwMeterFill"></div></div>
+          <small class="text-muted">Score: <span id="pwScoreText">0%</span></small>
+        </div>
+
+        <div class="form-group">
+          <label>Requisitos:</label>
+          <ul class="pw-reqs text-muted" style="padding-left:18px;">
+            <li>12+ caracteres</li>
+            <li>Maiúscula e minúscula</li>
+            <li>Número</li>
+            <li>Símbolo</li>
+          </ul>
+        </div>
+      `;
+
+      SideModal.open({
+        title: "Trocar senha",
+        html: html,
+        onOk: async function () {
+          try {
+            const auth = getAuth();
+            const myId = getMyUserId(auth);
+            if (!myId) { alert("Não foi possível identificar seu user_id."); return; }
+
+            const pwd = String($("#txtNewPassword").val() || "");
+            const confirmPwd = String($("#txtConfirmPassword").val() || "");
+
+            if (!pwd || pwd.length < 8) { alert("Informe uma senha com pelo menos 8 caracteres."); return; }
+            if (pwd !== confirmPwd) { alert("As senhas não conferem."); return; }
+
+            await apiPatch("/api/users/" + encodeURIComponent(myId), { password: pwd });
+
+            alert("Senha atualizada com sucesso!");
+          } catch (e) {
+            console.error(e);
+            alert(e?.message || "Erro ao atualizar senha.");
+          }
+        }
+      });
+
+      setTimeout(function () {
+        $("#txtNewPassword").on("input keyup", function () {
+          renderStrength(String($(this).val() || ""));
+        });
+      }, 30);
+    }
+
+    window.openChangePassword = openChangePassword;
+
+    async function openNewCompanyUser() {
+      if (!ensureSideModal()) return;
+
+      const auth = getAuth();
+      if (!isAdminOrManager(auth)) {
+        alert("Manager/Admin conseguem gerenciar usuários da empresa.");
+        return;
+      }
+
+      const companyId = getMyCompanyId(auth);
+      if (!companyId) { alert("Não foi possível identificar seu company_id."); return; }
+
+      const html = `
+        <div class="form-group">
+          <label for="txtNewUserName">Nome</label>
+          <input id="txtNewUserName" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtNewUserEmail">Email</label>
+          <input id="txtNewUserEmail" class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label for="txtNewUserPhone">Telefone</label>
+          <input id="txtNewUserPhone" class="form-control" placeholder="+5511961381234" />
+        </div>
+
+        <div class="form-group">
+          <label for="selNewUserRole">Permissão</label>
+          <select id="selNewUserRole" class="form-control">
+            <option value="USER" selected>User</option>
+            <option value="MANAGER">Manager</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="selNewUserStatus">Status</label>
+          <select id="selNewUserStatus" class="form-control">
+            <option value="ACTIVE" selected>Ativo</option>
+            <option value="INACTIVE">Inativo</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top:10px;">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="chkFirstAccess" checked />
+              Enviar acesso (primeiro acesso)
+            </label>
+          </div>
+        </div>
+      `;
+
+      SideModal.open({
+        title: "Novo usuário",
+        html: html,
+        onOk: async function () {
+          try {
+            const fullName = normalizeString($("#txtNewUserName").val());
+            const email = normalizeString($("#txtNewUserEmail").val());
+            const phone = normalizePhone($("#txtNewUserPhone").val());
+            const role = normalizeString($("#selNewUserRole").val()) || "USER";
+            const status = mapSelectValueToApiStatus($("#selNewUserStatus").val());
+            const firstAccess = $("#chkFirstAccess").is(":checked") === true;
+
+            if (!isNonEmptyString(fullName)) { alert("Informe o Nome."); return; }
+            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email válido."); return; }
+
+            const tempPassword = generateTempPassword();
+
+            const payload = {
+              full_name: fullName,
+              email: email,
+              password: tempPassword,
+              role: role === "ADMIN" ? "ADMIN" : (role === "MANAGER" ? "MANAGER" : "USER"),
+              phonenumber: phone,
+              first_access: firstAccess,
+              company_id: companyId,
+              status: status
+            };
+
+            await apiPost("/api/users", payload);
+
+            location.reload();
+          } catch (e) {
+            console.error(e);
+            alert(e?.message || "Erro ao criar usuário.");
+          }
+        }
+      });
+    }
+
     window.openNewCompanyUser = openNewCompanyUser;
 
-    async function onEditCompanyUser(index) {
-      const me = window.__me;
-      const users = window.__companyUsers ?? [];
+    async function openEditCompanyUser(index) {
+      if (!ensureSideModal()) return;
+
+      const auth = getAuth();
+      if (!isAdminOrManager(auth)) {
+        alert("Manager/Admin conseguem gerenciar usuários da empresa.");
+        return;
+      }
+
+      const users = window.__companyUsers || [];
       const u = users[index];
       if (!u?.id) return;
 
       const original = {
         fullName: normalizeString(u?.full_name ?? u?.fullName ?? ""),
         email: normalizeString(u?.email ?? ""),
-        phone: normalizePhone(u?.phonenumber ?? ""),
+        phone: normalizePhone(u?.phonenumber ?? u?.phone ?? ""),
         role: normalizeString(u?.role ?? "USER"),
         status: normalizeString(u?.status ?? "ACTIVE")
       };
+
+      const statusValue = normalizeStatusToSelectValue(original.status);
 
       const html = `
         <div class="form-group">
@@ -878,13 +913,13 @@ location.reload();
         </div>
 
         <div class="form-group">
-          <label for="txtPhone">Telefone</label>
-          <input id="txtPhone" class="form-control" value="${escapeHtml(original.phone)}" />
+          <label for="txtPhoneNumber">Telefone</label>
+          <input id="txtPhoneNumber" class="form-control" value="${escapeHtml(original.phone)}" />
         </div>
 
         <div class="form-group">
-          <label for="selRole">Permissão</label>
-          <select id="selRole" class="form-control">
+          <label for="txtRole">Permissão</label>
+          <select id="txtRole" class="form-control">
             <option value="USER" ${original.role.toUpperCase() === "USER" ? "selected" : ""}>User</option>
             <option value="MANAGER" ${original.role.toUpperCase() === "MANAGER" ? "selected" : ""}>Manager</option>
             <option value="ADMIN" ${original.role.toUpperCase() === "ADMIN" ? "selected" : ""}>Admin</option>
@@ -900,7 +935,7 @@ location.reload();
         </div>
 
         <small class="text-muted">
-          Dica: para foto do usuário, use "Editar meus dados" logado nesse usuário (por enquanto).
+          Dica: para foto do usuário, use "${I18N_PROFILE.editMyData}" logado nesse usuário (por enquanto).
         </small>
       `;
 
@@ -912,13 +947,10 @@ location.reload();
             const current = {
               fullName: $("#txtName").val(),
               email: $("#txtEmail").val(),
-              phone: $("#txtPhone").val(),
-              role: $("#selRole").val(),
-              status: $("#selStatus").val()
+              phone: $("#txtPhoneNumber").val(),
+              role: $("#txtRole").val(),
+              status: mapSelectValueToApiStatus($("#selStatus").val())
             };
-
-            if (!isNonEmptyString(current.fullName)) { alert("Informe o Nome."); return; }
-            if (!isNonEmptyString(current.email) || !isValidEmail(current.email)) { alert("Informe um Email válido."); return; }
 
             const diff = buildPatchOnlyChanged(
               {
@@ -934,89 +966,110 @@ location.reload();
                 { key: "email", read: () => current.email, normalize: normalizeString, write: (p, v) => { p.email = v; } },
                 { key: "phone", read: () => current.phone, normalize: normalizePhone, write: (p, v) => { p.phonenumber = v; } },
                 { key: "role", read: () => current.role, normalize: normalizeString, write: (p, v) => { p.role = v; } },
-                { key: "status", read: () => current.status, normalize: normalizeString, write: (p, v) => { p.status = v; } }
+                { key: "status", read: () => current.status, normalize: normalizeString, write: (p, v) => { p.status = v; } },
               ]
             );
 
             if (!diff.hasChanges) return;
 
-            await patchUserById(u.id, diff.payload);
+            await apiPatch("/api/users/" + encodeURIComponent(u.id), diff.payload);
             location.reload();
-          } catch (err) {
-            showApiError(err, "Erro ao salvar usuário.");
+          } catch (e) {
+            console.error(e);
+            alert(e?.message || "Erro ao salvar usuário.");
           }
-        },
-        onCancel: function () {}
+        }
       });
     }
-    window.onEditCompanyUser = onEditCompanyUser;
 
-    async function onDeleteCompanyUser(index) {
-      const me = window.__me;
-      const users = window.__companyUsers ?? [];
-      const u = users[index];
-      if (!u?.id) return;
+    window.openEditCompanyUser = openEditCompanyUser;
 
-      if (String(u.id) === String(me?.id)) {
-        alert("Você não pode deletar seu próprio usuário.");
+    async function deleteCompanyUser(index) {
+      const auth = getAuth();
+      if (!isAdminOrManager(auth)) {
+        alert("Manager/Admin conseguem gerenciar usuários da empresa.");
         return;
       }
 
-      const ok = confirm(`Tem certeza que deseja deletar o usuário "${u?.full_name ?? u?.email ?? u?.id}"?`);
+      const users = window.__companyUsers || [];
+      const u = users[index];
+      if (!u?.id) return;
+
+      const meId = getMyUserId(auth);
+      if (String(u.id) === String(meId)) {
+        alert("Você não pode excluir seu próprio usuário.");
+        return;
+      }
+
+      const ok = confirm("Confirma excluir este usuário?");
       if (!ok) return;
 
       try {
-        await deleteUserById(u.id);
+        await apiDelete("/api/users/" + encodeURIComponent(u.id));
         location.reload();
-      } catch (err) {
-        showApiError(err, "Erro ao deletar usuário.");
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Erro ao excluir usuário.");
       }
     }
-    window.onDeleteCompanyUser = onDeleteCompanyUser;
+
+    window.deleteCompanyUser = deleteCompanyUser;
 
     // -------------------- Init --------------------
     async function init() {
+      $("#masterHeader").hide();
+      $("#pageName").text("<%= t('page.profile.pageTitle') %>");
+      $("#subpageName").text("<%= t('page.profile.pageTitle') %>");
+      $("#subSecoundPageName").text("<%= t('page.profile.pageTitle') %>");
+
       try {
-        $("#pageName").text("Meu Perfil");
-        $("#subSecoundPageName").text("Meu Perfil");
-        $("#subpageName").text("Meu Perfil");
-        $("#subpageName").attr("href", "MeuPerfil");
-        $("#path").css("display", "");
-      } catch {}
+        const auth = getAuth();
+        const myId = getMyUserId(auth);
+        const companyId = getMyCompanyId(auth);
 
-      const me = await fetchMe();
-      window.__me = me;
+        if (!myId) {
+          alert("Não foi possível identificar seu user_id.");
+          return;
+        }
 
-      const role = me?.role ?? "USER";
-      const allowCompanyTab = canManageCompanyUsers(role);
+        // Load me + company in parallel (best effort)
+        const results = await Promise.all([
+          apiGet("/api/users/" + encodeURIComponent(myId)),
+          companyId ? apiGet("/api/companies/" + encodeURIComponent(companyId)) : Promise.resolve(null)
+        ]);
 
-      let company = null;
-      const companyId = me?.company_id;
-      if (isNonEmptyString(companyId)) {
-        try { company = await fetchCompanyById(companyId); } catch (e) {}
+        const me = results[0];
+        const company = results[1];
+
+        fillMyCard(me, company);
+
+        const canManage = isAdminOrManager(auth);
+        if (canManage) {
+          $("#tabUsersLi").show();
+
+          // List company users
+          if (companyId) {
+            // best effort - if you have a specific endpoint, swap this call
+            const usersResp = await apiGet("/api/users?company_id=" + encodeURIComponent(companyId));
+            const users = Array.isArray(usersResp) ? usersResp : (usersResp?.data || usersResp?.items || []);
+            renderCompanyUsers(users, myId);
+          }
+        } else {
+          $("#tabUsersLi").hide();
+        }
+
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || "Erro ao carregar página de perfil.");
       }
+    }
 
-      fillMeHeader(me, company);
-
-      // Apply profile picture asynchronously (cache-first)
-      applyMyProfilePicture(me?.id);
-
-      if (allowCompanyTab && isNonEmptyString(companyId)) {
-        document.getElementById("tabUsersLi").style.display = "";
-        document.getElementById("btnNewUser").style.display = "";
-
-        const users = await fetchUsersByCompany(companyId);
-        renderCompanyUsers(users, me);
+    $(document).ready(function () {
+      if (typeof $ === "function") {
+        init();
       } else {
-        document.getElementById("tabUsersLi").style.display = "none";
+        init();
       }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", init);
-    } else {
-      init();
-    }
+    });
   })();
 </script>
-
