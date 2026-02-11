@@ -44,6 +44,35 @@ async function readJsonSafe(response) {
   }
 }
 
+/* -------------------- PATCH /api/users/me -------------------- */
+/**
+ * Forwards to BACKEND: PATCH {BACKEND}/users/me
+ * Allows the logged user to update own profile (name/phone/password/etc).
+ */
+router.patch("/users/me", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/me`, {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("PATCH /api/users/me error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 /* -------------------- GET /api/users (list/filter) -------------------- */
 /**
  * Forwards to BACKEND: GET {BACKEND}/users?...
@@ -122,7 +151,7 @@ router.post("/users", async (req, res) => {
     const missing = [];
     if (!isNonEmptyString(full_name)) missing.push("full_name");
     if (!isNonEmptyString(email)) missing.push("email");
-    if (!hasOwn(req.body, "password")) missing.push("password"); // allow empty string password
+   // if (!hasOwn(req.body, "password")) missing.push("password"); // allow empty string password
 
     if (missing.length > 0) {
       return res.status(400).json({

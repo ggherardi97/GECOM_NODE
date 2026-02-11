@@ -5,17 +5,17 @@
       <div class="ibox-content">
         <div class="file-manager">
           <div class="row" style="margin:0;">
-            <h5 class="tag-title">Pastas</h5>
+            <h5 class="tag-title"><%= t('page.myDocuments.sidebar.folders') %></h5>
 
             <div class="input-group" style="margin: 8px 0 12px 0;">
-              <input id="txtSearchLeft" type="text" class="form-control input-sm" placeholder="Buscar..." />
+              <input id="txtSearchLeft" type="text" class="form-control input-sm" placeholder="<%= t('page.documents.placeholders.searchFolders') %>" />
               <span class="input-group-btn">
-                <button id="btnSearchLeft" class="btn btn-sm btn-primary" type="button">OK</button>
+                <button id="btnSearchLeft" class="btn btn-sm btn-primary" type="button"><%= t('page.myDocuments.buttons.ok') %></button>
               </span>
             </div>
 
             <ul id="leftFolders" class="folder-list" style="width: 100%;padding:0;margin-top:10px;">
-              <li class="text-muted">Carregando...</li>
+              <li class="text-muted"><%= t('page.clientDetails.documentsToolbar.loading') %></li>
             </ul>
           </div>
 
@@ -23,12 +23,12 @@
           <div class="clearfix"></div>
 
           <button class="btn btn-primary btn-block" id="btnAddQuickUpload" type="button" name="btn_act_new">
-            <i class="fa fa-upload"></i> Upload rápido
+            <i class="fa fa-upload"></i> <%= t('page.myDocuments.quickUpload.title') %>
           </button>
           <input type="file" style="display:none;" id="fileQuickInput" />
 
           <div style="margin-top:10px;" class="text-muted">
-            <small>Você também pode usar o botão “Adicionar” no topo.</small>
+            <small><%= t('page.myDocuments.quickUpload.hint') %></small>
           </div>
         </div>
       </div>
@@ -41,35 +41,35 @@
     <div class="row" style="padding: 15px 15px;">
       <div class="col-lg-9" style="margin-left:-15px;">
         <button type="button" class="btn btn-primary" id="btnBack" style="display:none;">
-          <i class="fa fa-arrow-left"></i> Voltar
+          <i class="fa fa-arrow-left"></i> <%= t('page.myDocuments.toolbar.back') %>
         </button>
 
         <div class="btn-group" style="margin-left:8px;" name="btn_act_new">
           <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
-            Adicionar
+            <%= t('page.myDocuments.toolbar.add') %>
           </button>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#" id="btnNewFolder"><i class="fa fa-folder"></i> Nova Pasta</a></li>
-            <li><a class="dropdown-item" href="#" id="btnUploadDoc"><i class="fa fa-upload"></i> Upload de Documento</a></li>
-            <li><a class="dropdown-item" href="#" id="btnNewLink"><i class="fa fa-link"></i> Link do Drive</a></li>
+            <li><a class="dropdown-item" href="#" id="btnNewFolder"><i class="fa fa-folder"></i> <%= t('page.myDocuments.toolbar.newFolder') %></a></li>
+            <li><a class="dropdown-item" href="#" id="btnUploadDoc"><i class="fa fa-upload"></i> <%= t('page.myDocuments.toolbar.uploadDocument') %></a></li>
+            <li><a class="dropdown-item" href="#" id="btnNewLink"><i class="fa fa-link"></i> <%= t('page.myDocuments.toolbar.driveLink') %></a></li>
           </ul>
         </div>
 
         <button type="button" class="btn btn-white" id="btnOpenSelected" style="margin-left:8px; display:none;">
-          <i class="fa fa-external-link"></i> Abrir
+          <i class="fa fa-external-link"></i> <%= t('page.myDocuments.toolbar.open') %>
         </button>
 
         <button type="button" class="btn btn-danger" id="btnDeleteSelected" style="margin-left:8px; display:none;">
-          <i class="fa fa-trash"></i> Excluir
+          <i class="fa fa-trash"></i> <%= t('page.myDocuments.toolbar.delete') %>
         </button>
 
         <span id="currentFolderLabel" class="text-muted" style="margin-left:12px;"></span>
-        <span id="loadingBadge" class="label label-info" style="display:none;margin-left:10px;">Carregando...</span>
+        <span id="loadingBadge" class="label label-info" style="display:none;margin-left:10px;"><%= t('page.clientDetails.documentsToolbar.loading') %></span>
       </div>
 
       <div class="col-lg-3">
         <div class="input-group" style="margin: 0px 0 15px -15px;">
-          <input id="txtSearch" type="text" class="form-control input-sm" placeholder="Buscar nesta pasta..." />
+          <input id="txtSearch" type="text" class="form-control input-sm" placeholder="<%= t('page.clientDetails.documents.placeholders.searchInFolder') %>" />
           <span class="input-group-btn">
             <button id="btnSearch" class="btn btn-sm btn-white" type="button"><i class="fa fa-search"></i></button>
           </span>
@@ -79,7 +79,7 @@
 
     <!-- GRID -->
     <div class="row" id="itemsGrid">
-      <div class="col-lg-12 text-muted">Carregando...</div>
+      <div class="col-lg-12 text-muted"><%= t('page.clientDetails.documentsToolbar.loading') %></div>
     </div>
   </div>
 </div>
@@ -155,9 +155,9 @@
     // Page headers + permissions
     // ---------------------------
     $(document).ready(function () {
-      $("#pageName").text("Meus Documentos");
+      $("#pageName").text(t("page.myDocuments.pageTitle"));
       $("#subSecoundPageName").text("");
-      $("#subpageName").text("Meus Documentos");
+      $("#subpageName").text(t("page.myDocuments.pageTitle"));
       $("#subpageName").attr("href", "MyDocuments");
       $("#path").hide();
 
@@ -205,7 +205,7 @@
       let btnOk = pickFirst(["#dynamicModalOkBtn", ".dynamic-modal-ok"]);
 
       if (!overlay || !modal || !titleEl || !bodyEl || !btnOk) {
-        alert("Side modal global não encontrado no layout. Verifique IDs do dynamic modal.");
+        alert(t("page.clientDetails.documents.messages.sideModalMissing"));
         return;
       }
 
@@ -216,8 +216,8 @@
 
       titleEl.textContent = (opts?.title || "");
       bodyEl.innerHTML = (opts?.bodyHtml || "");
-      if (btnCancel) btnCancel.textContent = (opts?.cancelText || "Cancelar");
-      btnOk.textContent = (opts?.okText || "OK");
+      if (btnCancel) btnCancel.textContent = (opts?.cancelText || t("page.layout.modal.cancel"));
+      btnOk.textContent = (opts?.okText || t("page.layout.modal.ok"));
 
       function close() {
         overlay.style.display = "none";
@@ -371,7 +371,7 @@
       if (state.navStack.length === 0) {
         $("#currentFolderLabel").text("");
       } else {
-        const parts = state.navStack.map(x => x.name || "Pasta");
+        const parts = state.navStack.map(x => x.name || t("page.documents.defaults.folderName"));
         $("#currentFolderLabel").text(parts.join(" / "));
       }
     }
@@ -418,7 +418,7 @@
     async function apiGet(url) {
       const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Erro ao buscar dados");
+      if (!res.ok) throw new Error(data?.message || t("page.documents.api.getFail"));
       return data;
     }
 
@@ -429,14 +429,14 @@
         body: JSON.stringify(body || {})
       });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Erro ao salvar");
+      if (!res.ok) throw new Error(data?.message || t("page.documents.api.saveFail"));
       return data;
     }
 
     async function apiDelete(url) {
       const res = await fetch(url, { method: "DELETE", headers: { "Accept": "application/json" } });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Erro ao excluir");
+      if (!res.ok) throw new Error(data?.message || t("page.documents.api.deleteFail"));
       return data;
     }
 
@@ -539,7 +539,7 @@
 
       const r = readRelatedFromModal();
       if (!r.relatedId) {
-        if (errorSelector) $(errorSelector).show().text("Selecione um cliente relacionado (digitar não basta).");
+        if (errorSelector) $(errorSelector).show().text(t("page.documents.messages.relatedCompanyRequired"));
         return { ok: false, related: null };
       }
 
@@ -549,16 +549,16 @@
     function renderRelatedCompanyFieldHtml() {
       return `
         <div id="sm_relatedWrap" class="form-group" style="display:none;">
-          <label>Cliente relacionado</label>
+          <label>${t("page.documents.modals.relatedCompany.label")}</label>
           <input
             id="sm_related_company_name"
             type="text"
             class="form-control"
-            placeholder="Pesquisar cliente..."
+            placeholder="${t("page.documents.modals.relatedCompany.placeholder")}"
             autocomplete="off"
           />
           <input id="sm_related_company_id" type="hidden" />
-          <div class="small text-muted" style="margin-top:6px;">Digite para pesquisar e selecione na lista.</div>
+          <div class="small text-muted" style="margin-top:6px;">${t("page.documents.modals.relatedCompany.hint")}</div>
         </div>
       `;
     }
@@ -580,7 +580,7 @@
       try {
         await bindCompanyTypeahead({ $nameInput: $name, $idInput: $id, $errorEl: $err });
       } catch (e) {
-        if ($err) $err.show().text(e?.message || "Erro ao carregar lista de clientes.");
+        if ($err) $err.show().text(e?.message || t("page.documents.messages.loadCompaniesFail"));
       }
     }
 
@@ -621,13 +621,13 @@
       state.lastLoadedItems = list;
 
       if (list.length === 0) {
-        $grid.append('<div class="col-lg-12 text-muted">Nenhum item encontrado.</div>');
+        $grid.append('<div class="col-lg-12 text-muted">' + escapeHtml(t("page.clientDetails.documents.messages.noneFound")) + '</div>');
         clearSelection();
         return;
       }
 list.forEach(function (item) {
   const id = item.id;
-  const name = escapeHtml(item.name || item.filename || "Sem nome");
+  const name = escapeHtml(item.name || item.filename || t("page.documents.defaults.unnamed"));
   const added = formatDate(item.created_at);
   const iconHtml = iconFor(item);
 
@@ -644,9 +644,9 @@ list.forEach(function (item) {
   }
 
   function relatedLabelPrefix(table) {
-    if (table === "company") return "Cliente";
-    if (table === "process") return "Processo";
-    return "Relacionado";
+    if (table === "company") return t("page.documents.related.company");
+    if (table === "process") return t("page.documents.related.process");
+    return t("page.documents.related.generic");
   }
 
   const relatedHtml =
@@ -659,7 +659,7 @@ list.forEach(function (item) {
 
   $grid.append(`
     <div class="file-box" data-id="${escapeHtml(id)}" style="position:relative;">
-      <div class="select-badge" title="Selecionar">
+      <div class="select-badge" title="${escapeHtml(t("page.clientDetails.documents.labels.select"))}">
         <i class="fa fa-check"></i>
       </div>
 
@@ -671,7 +671,7 @@ list.forEach(function (item) {
             ${name}
             <br />
             ${relatedHtml}
-            <small>Adicionado: ${escapeHtml(added || "-")}</small>
+            <small>${escapeHtml(t("page.clientDetails.documents.labels.added"))} ${escapeHtml(added || "-")}</small>
           </div>
         </a>
       </div>
@@ -722,7 +722,7 @@ list.forEach(function (item) {
       if (!item) return;
 
       if (isFolder(item)) {
-        state.navStack.push({ parentId: state.currentParentId, name: item.name || "Pasta" });
+        state.navStack.push({ parentId: state.currentParentId, name: item.name || t("page.documents.defaults.folderName") });
         state.currentParentId = item.id;
         await loadCurrentFolder();
         return;
@@ -741,10 +741,10 @@ list.forEach(function (item) {
         showLoading(true);
         const dl = await apiGet("/api/documents/" + encodeURIComponent(item.id) + "/presign-download");
         const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
-        if (!url) throw new Error("Não foi possível gerar o link de download.");
+        if (!url) throw new Error(t("page.clientDetails.documents.messages.downloadLinkFail"));
         window.open(url, "_blank", "noopener,noreferrer");
       } catch (err) {
-        alert(err?.message || "Erro ao baixar arquivo.");
+        alert(err?.message || t("page.clientDetails.documents.messages.downloadFail"));
       } finally {
         showLoading(false);
       }
@@ -777,15 +777,15 @@ list.forEach(function (item) {
         $ul.empty();
 
         if (list.length === 0) {
-          $ul.append('<li class="text-muted">Nenhuma pasta.</li>');
+          $ul.append('<li class="text-muted">' + escapeHtml(t("page.documents.messages.noFolders")) + '</li>');
           return;
         }
 
         list.forEach(function (f) {
           $ul.append(`
             <li>
-              <a href="javascript:void(0)" class="left-folder" data-id="${escapeHtml(f.id)}" data-name="${escapeHtml(f.name || "Pasta")}">
-                <i class="fa fa-folder"></i> ${escapeHtml(f.name || "Pasta")}
+              <a href="javascript:void(0)" class="left-folder" data-id="${escapeHtml(f.id)}" data-name="${escapeHtml(f.name || t("page.documents.defaults.folderName"))}">
+                <i class="fa fa-folder"></i> ${escapeHtml(f.name || t("page.documents.defaults.folderName"))}
               </a>
             </li>
           `);
@@ -794,14 +794,14 @@ list.forEach(function (item) {
         $(".left-folder").off("click").on("click", async function (e) {
           e.preventDefault();
           const folderId = String($(this).data("id"));
-          const folderName = String($(this).data("name") || "Pasta");
+          const folderName = String($(this).data("name") || t("page.documents.defaults.folderName"));
 
           state.navStack = [{ parentId: null, name: folderName }];
           state.currentParentId = folderId;
           await loadCurrentFolder();
         });
       } catch (e) {
-        $("#leftFolders").html('<li class="text-danger">Erro ao carregar pastas.</li>');
+        $("#leftFolders").html('<li class="text-danger">' + escapeHtml(t("page.documents.messages.loadFoldersFail")) + '</li>');
       }
     }
 
@@ -817,7 +817,7 @@ list.forEach(function (item) {
         clearSelection();
         await loadLeftFolders();
       } catch (e) {
-        $("#itemsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || "Erro ao carregar") + '</div>');
+        $("#itemsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || t("page.clientDetails.documents.messages.loadFail")) + '</div>');
       } finally {
         updateTopActions();
         showLoading(false);
@@ -840,7 +840,7 @@ list.forEach(function (item) {
       const mimeType = file.type || "application/octet-stream";
       const ext = getExtFromName(fileName);
 
-      progressCb && progressCb(5, "Criando registro no banco...");
+      progressCb && progressCb(5, t("page.documents.progress.creatingRecord"));
 
       const createPayload = {
         account_id: accountId,
@@ -863,9 +863,9 @@ list.forEach(function (item) {
 
       const created = await apiPost("/api/documents", createPayload);
       const docId = created?.id;
-      if (!docId) throw new Error("Falha ao criar registro do documento.");
+      if (!docId) throw new Error(t("page.documents.messages.createRecordFail"));
 
-      progressCb && progressCb(20, "Gerando URL de upload...");
+      progressCb && progressCb(20, t("page.documents.progress.generatingUploadUrl"));
 
       const presign = await apiPost("/api/documents/" + encodeURIComponent(docId) + "/presign-upload", {
         fileName: fileName,
@@ -877,19 +877,19 @@ list.forEach(function (item) {
       const putHeaders = presign?.headers || { "Content-Type": mimeType };
       const objectKey = presign?.object_key || presign?.key || null;
 
-      if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+      if (!putUrl) throw new Error(t("page.documents.messages.uploadUrlFail"));
 
-      progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
+      progressCb && progressCb(45, t("page.documents.progress.uploadingToR2"));
 
       const putRes = await fetch(putUrl, { method: "PUT", headers: putHeaders, body: file });
       if (!putRes.ok) {
-        const t = await putRes.text().catch(() => "");
-        throw new Error(("Upload falhou (" + putRes.status + "). " + (t || "")).trim());
+        const tRes = await putRes.text().catch(() => "");
+        throw new Error((t("page.documents.messages.uploadFailedPrefix") + " (" + putRes.status + "). " + (tRes || "")).trim());
       }
 
       const etag = putRes.headers.get("etag") || presign?.etag || null;
 
-      progressCb && progressCb(85, "Finalizando (atualizando status no banco)...");
+      progressCb && progressCb(85, t("page.documents.progress.finalizing"));
 
       await apiPost("/api/documents/" + encodeURIComponent(docId) + "/complete-upload", {
         upload_status: "UPLOADED",
@@ -899,7 +899,7 @@ list.forEach(function (item) {
         size_bytes: file.size
       });
 
-      progressCb && progressCb(100, "Concluído!");
+      progressCb && progressCb(100, t("page.documents.progress.done"));
       return docId;
     }
 
@@ -908,15 +908,15 @@ list.forEach(function (item) {
     // ---------------------------
     function openNewFolderSideModal() {
       openSideModal({
-        title: "Nova Pasta",
-        okText: "Criar",
-        cancelText: "Cancelar",
+        title: t("page.clientDetails.documents.modals.newFolder.title"),
+        okText: t("page.clientDetails.documents.modals.newFolder.create"),
+        cancelText: t("page.layout.modal.cancel"),
         bodyHtml: `
           ${renderRelatedCompanyFieldHtml()}
 
           <div class="form-group">
-            <label>Nome</label>
-            <input id="sm_folderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
+            <label>${t("page.clientDetails.documents.modals.newFolder.name")}</label>
+            <input id="sm_folderName" type="text" class="form-control" maxlength="255" placeholder="${t("page.clientDetails.documents.modals.newFolder.placeholder")}" />
             <div id="sm_folderError" class="text-danger" style="margin-top:8px; display:none;"></div>
           </div>
         `,
@@ -929,13 +929,13 @@ list.forEach(function (item) {
           $("#sm_folderError").hide().text("");
 
           if (!name) {
-            $("#sm_folderError").show().text("Informe o nome da pasta.");
+            $("#sm_folderError").show().text(t("page.clientDetails.documents.modals.newFolder.nameRequired"));
             return true;
           }
 
           const accountId = getAccountIdForCreate();
           if (!accountId) {
-            $("#sm_folderError").show().text("Não foi possível identificar o account_id para criar.");
+            $("#sm_folderError").show().text(t("page.documents.messages.accountIdMissing"));
             return true;
           }
 
@@ -967,7 +967,7 @@ list.forEach(function (item) {
             await loadCurrentFolder();
             return false;
           } catch (e) {
-            $("#sm_folderError").show().text(e?.message || "Erro ao criar pasta.");
+            $("#sm_folderError").show().text(e?.message || t("page.documents.messages.createFolderFail"));
             return true;
           } finally {
             showLoading(false);
@@ -978,20 +978,20 @@ list.forEach(function (item) {
 
     function openNewLinkSideModal() {
       openSideModal({
-        title: "Link do Drive",
-        okText: "Salvar",
-        cancelText: "Cancelar",
+        title: t("page.clientDetails.documents.modals.newLink.title"),
+        okText: t("page.clientDetails.documents.modals.newLink.save"),
+        cancelText: t("page.layout.modal.cancel"),
         bodyHtml: `
           ${renderRelatedCompanyFieldHtml()}
 
           <div class="form-group">
-            <label>Nome</label>
-            <input id="sm_linkName" type="text" class="form-control" maxlength="255" placeholder="Ex: Pasta do Google Drive" />
+            <label>${t("page.clientDetails.documents.modals.newFolder.name")}</label>
+            <input id="sm_linkName" type="text" class="form-control" maxlength="255" placeholder="${t("page.documents.modals.newLink.namePlaceholder")}" />
           </div>
           <div class="form-group">
-            <label>URL</label>
-            <input id="sm_linkUrl" type="text" class="form-control" maxlength="1000" placeholder="https://drive.google.com/..." />
-            <small class="text-muted">O link será salvo no campo <strong>object_key</strong>.</small>
+            <label>${t("page.documents.modals.newLink.urlLabel")}</label>
+            <input id="sm_linkUrl" type="text" class="form-control" maxlength="1000" placeholder="${t("page.documents.modals.newLink.urlPlaceholder")}" />
+            <small class="text-muted">${t("page.documents.modals.newLink.savedInObjectKey")}</small>
           </div>
           <div id="sm_linkError" class="text-danger" style="display:none;"></div>
         `,
@@ -1004,11 +1004,11 @@ list.forEach(function (item) {
           const url = ($("#sm_linkUrl").val() || "").trim();
           $("#sm_linkError").hide().text("");
 
-          if (!name) { $("#sm_linkError").show().text("Informe o nome."); return true; }
-          if (!url || !/^https?:\/\//i.test(url)) { $("#sm_linkError").show().text("Informe uma URL válida (http/https)."); return true; }
+          if (!name) { $("#sm_linkError").show().text(t("page.clientDetails.documents.modals.newLink.nameRequired")); return true; }
+          if (!url || !/^https?:\/\//i.test(url)) { $("#sm_linkError").show().text(t("page.clientDetails.documents.modals.newLink.urlRequired")); return true; }
 
           const accountId = getAccountIdForCreate();
-          if (!accountId) { $("#sm_linkError").show().text("Não foi possível identificar o account_id para criar."); return true; }
+          if (!accountId) { $("#sm_linkError").show().text(t("page.documents.messages.accountIdMissing")); return true; }
 
           // ✅ admin root must select related company
           const relCheck = requireRelatedCompanyIfAdminRoot("#sm_linkError");
@@ -1039,7 +1039,7 @@ list.forEach(function (item) {
             await loadCurrentFolder();
             return false;
           } catch (e) {
-            $("#sm_linkError").show().text(e?.message || "Erro ao salvar link.");
+            $("#sm_linkError").show().text(e?.message || t("page.documents.messages.saveLinkFail"));
             return true;
           } finally {
             showLoading(false);
@@ -1050,26 +1050,26 @@ list.forEach(function (item) {
 
     function openUploadSideModal() {
       openSideModal({
-        title: "Upload de Documento",
-        okText: "Enviar",
-        cancelText: "Cancelar",
+        title: t("page.clientDetails.documents.modals.upload.title"),
+        okText: t("page.clientDetails.documents.modals.upload.send"),
+        cancelText: t("page.layout.modal.cancel"),
         bodyHtml: `
           ${renderRelatedCompanyFieldHtml()}
 
           <div class="alert alert-info" style="margin-bottom:10px;">
-            Selecione apenas um arquivo.
+            ${t("page.documents.modals.upload.singleFileOnly")}
           </div>
 
           <div class="form-group">
-            <label>Arquivo</label>
+            <label>${t("page.documents.modals.upload.fileLabel")}</label>
             <input id="sm_uploadFile" type="file" class="form-control" />
           </div>
 
           <div class="form-group">
-            <label>Nome</label>
+            <label>${t("page.clientDetails.documents.modals.newFolder.name")}</label>
             <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
-              placeholder="Vamos preencher automaticamente com o nome do arquivo" />
-            <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
+              placeholder="${t("page.documents.modals.upload.autoFillName")}" />
+            <small class="text-muted">${t("page.documents.modals.upload.renameHint")}</small>
           </div>
 
           <div id="sm_uploadProgress" style="display:none;">
@@ -1105,10 +1105,10 @@ list.forEach(function (item) {
           const displayNameRaw = ($("#sm_uploadDisplayName").val() || "").trim();
           $("#sm_uploadError").hide().text("");
 
-          if (!file) { $("#sm_uploadError").show().text("Selecione um arquivo."); return true; }
+          if (!file) { $("#sm_uploadError").show().text(t("page.clientDetails.documents.modals.upload.selectFile")); return true; }
 
           const accountId = getAccountIdForCreate();
-          if (!accountId) { $("#sm_uploadError").show().text("Não foi possível identificar o account_id para enviar."); return true; }
+          if (!accountId) { $("#sm_uploadError").show().text(t("page.documents.messages.accountIdMissingForUpload")); return true; }
 
           // ✅ admin root must select related company
           const relCheck = requireRelatedCompanyIfAdminRoot("#sm_uploadError");
@@ -1126,7 +1126,7 @@ list.forEach(function (item) {
             await loadCurrentFolder();
             return false;
           } catch (e) {
-            $("#sm_uploadError").show().text(e?.message || "Erro no upload.");
+            $("#sm_uploadError").show().text(e?.message || t("page.clientDetails.documents.modals.upload.error"));
             return true;
           } finally {
             showLoading(false);
@@ -1141,7 +1141,7 @@ list.forEach(function (item) {
     async function deleteSelected() {
       if (state.selected.size === 0) return;
 
-      const ok = await confirmAsync("Confirma excluir " + state.selected.size + " item(ns)?", { danger: true, okText: "Excluir", cancelText: "Cancelar" });
+      const ok = await confirmAsync(t("page.documents.confirm.deleteMany"), { danger: true, okText: t("page.layout.modal.delete"), cancelText: t("page.layout.modal.cancel") });
       if (!ok) return;
 
       try {
@@ -1153,7 +1153,7 @@ list.forEach(function (item) {
         await loadCurrentFolder();
         await loadLeftFolders();
       } catch (e) {
-        alert(e?.message || "Erro ao excluir.");
+        alert(e?.message || t("page.clientDetails.documents.messages.deleteFail"));
       } finally {
         showLoading(false);
       }
@@ -1171,11 +1171,11 @@ list.forEach(function (item) {
     // Search-as-you-type (debounce)
     // ---------------------------
     function debounce(fn, waitMs) {
-      let t = null;
+      let tmr = null;
       return function () {
         const args = arguments;
-        clearTimeout(t);
-        t = setTimeout(() => fn.apply(null, args), waitMs);
+        clearTimeout(tmr);
+        tmr = setTimeout(() => fn.apply(null, args), waitMs);
       };
     }
 
@@ -1193,13 +1193,13 @@ list.forEach(function (item) {
     // ---------------------------
     function openQuickUploadCompanyPicker(file) {
       openSideModal({
-        title: "Upload rápido - selecionar cliente",
-        okText: "Enviar",
-        cancelText: "Cancelar",
+        title: t("page.documents.quickUpload.pickCompanyTitle"),
+        okText: t("page.clientDetails.documents.modals.upload.send"),
+        cancelText: t("page.layout.modal.cancel"),
         bodyHtml: `
           ${renderRelatedCompanyFieldHtml()}
           <div class="form-group">
-            <label>Arquivo</label>
+            <label>${t("page.documents.modals.upload.fileLabel")}</label>
             <input class="form-control" value="${escapeHtml(file?.name || "")}" readonly />
           </div>
           <div id="sm_quickError" class="text-danger" style="display:none;"></div>
@@ -1211,7 +1211,7 @@ list.forEach(function (item) {
           $("#sm_quickError").hide().text("");
 
           const accountId = getAccountIdForCreate();
-          if (!accountId) { $("#sm_quickError").show().text("Não foi possível identificar o account_id para enviar."); return true; }
+          if (!accountId) { $("#sm_quickError").show().text(t("page.documents.messages.accountIdMissingForUpload")); return true; }
 
           const relCheck = requireRelatedCompanyIfAdminRoot("#sm_quickError");
           if (!relCheck.ok) return true;
@@ -1222,7 +1222,7 @@ list.forEach(function (item) {
             await loadCurrentFolder();
             return false;
           } catch (e) {
-            $("#sm_quickError").show().text(e?.message || "Erro no upload.");
+            $("#sm_quickError").show().text(e?.message || t("page.clientDetails.documents.modals.upload.error"));
             return true;
           } finally {
             showLoading(false);
@@ -1300,7 +1300,7 @@ list.forEach(function (item) {
 
         const accountId = getAccountIdForCreate();
         if (!accountId) {
-          alert("Não foi possível identificar o account_id para enviar o arquivo.");
+          alert(t("page.documents.messages.accountIdMissingForUpload"));
           return;
         }
 
@@ -1309,7 +1309,7 @@ list.forEach(function (item) {
           await doUpload(file, accountId, "", null, null);
           await loadCurrentFolder();
         } catch (e) {
-          alert(e?.message || "Erro no upload.");
+          alert(e?.message || t("page.clientDetails.documents.modals.upload.error"));
         } finally {
           showLoading(false);
         }
@@ -1319,5 +1319,3 @@ list.forEach(function (item) {
     });
   })();
 </script>
-
-

@@ -207,59 +207,124 @@
           }
         },
 
-        "login": {
-          "pageTitle": "Login",
-          "welcomeTitle": "Bem Vindo à GECOM",
-          "subtitle": "Sua plataforma de processos em importação e exportação.",
-          "actions": {
-            "forgotPasswordLink": "Esqueceu a senha? Clique aqui",
-            "hasAccessNumber": "Possui um número de acesso?",
-            "accessNumberTitle": "Entre com número de acesso",
-            "accessNumberHelp": "Digite abaixo o número fornecido por nosso time.",
-            "access": "Acessar",
-            "backToLogin": "Voltar para o login",
-            "sendResetEmail": "Enviar email de reset"
-          },
-          "forgot": {
-            "title": "Esqueceu a senha?",
-            "help": "Digite abaixo o email cadastrado"
-          },
-          "reset": {
-            "newPassword": "Nova Senha",
-            "newPasswordHelp": "Digite a nova senha abaixo",
-            "confirmPassword": "Confirmar senha",
-            "confirmNewPassword": "Confirmar Nova Senha"
-          },
-          "modal": {
-            "close": "Fechar"
-          }
+       "login": {
+  "pageTitle": "Login",
+  "welcomeTitle": "Bem Vindo à GECOM",
+  "subtitle": "Sua plataforma de processos em importação e exportação.",
+  "fields": {
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Senha",
+    "accessNumberPlaceholder": "Ex: PRC-0000111"
+  },
+  "actions": {
+    "login": "Login",
+    "forgotPasswordLink": "Esqueceu a senha? Clique aqui",
+    "hasAccessNumber": "Possui um número de acesso?",
+    "accessNumberCta": "Entre com número de acesso",
+    "accessNumberTitle": "Entre com número de acesso",
+    "accessNumberHelp": "Digite abaixo o número fornecido por nosso time.",
+    "access": "Acessar",
+    "backToLogin": "Voltar para o login",
+    "sendResetEmail": "Enviar email de reset"
+  },
+  "forgot": {
+    "title": "Esqueceu a senha?",
+    "help": "Digite abaixo o email cadastrado"
+  },
+  "reset": {
+    "newPassword": "Nova Senha",
+    "newPasswordHelp": "Digite a nova senha abaixo",
+    "confirmPassword": "Confirmar senha",
+    "confirmNewPassword": "Confirmar Nova Senha"
+  },
+  "modal": {
+    "close": "Fechar",
+    "hiddenTriggerLabel": "Abrir modal"
+  },
+  "messages": {
+    "defaultModalTitle": "Mensagem",
+    "invalidLinkTitle": "Link inválido",
+    "invalidLinkBody": "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.",
+    "forgotPasswordTitle": "Recuperação de Senha",
+    "forgotPasswordEmailRequired": "Por favor, informe o email cadastrado.",
+    "forgotPasswordRequestFail": "Não foi possível solicitar o reset de senha. Tente novamente.",
+    "forgotPasswordRequestSuccess": "Um email com instruções foi enviado com sucesso.",
+    "resetPasswordTitle": "Redefinir senha",
+    "resetPasswordFillBoth": "Por favor, preencha a nova senha e a confirmação.",
+    "resetPasswordMismatch": "As senhas não conferem. Verifique e tente novamente.",
+    "resetPasswordFail": "Não foi possível redefinir a senha. Tente novamente.",
+    "resetPasswordSuccessTitle": "Senha redefinida",
+    "resetPasswordSuccessBody": "Sua senha foi redefinida com sucesso. Você já pode fazer login.",
+    "loginFail": "Não foi possível realizar o login. Verifique suas credenciais.",
+    "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+  }
+},
+"myDocuments": { "pageTitle": "Meus Documentos", "sidebar": { "folders": "Pastas" }, "quickUpload": { "title": "Upload rápido", "hint": "Você também pode usar o botão “Adicionar” no topo." }, "toolbar": { "back": "Voltar", "add": "Adicionar", "newFolder": "Nova Pasta", "uploadDocument": "Upload de Documento", "driveLink": "Link do Drive", "open": "Abrir", "delete": "Excluir" }, "state": { "loading": "Carregando..." }, "buttons": { "ok": "OK" } },
+"documents": {
+      "placeholders": {
+        "searchFolders": "Buscar..."
+      },
+      "defaults": {
+        "folderName": "Pasta",
+        "unnamed": "Sem nome"
+      },
+      "related": {
+        "company": "Cliente",
+        "process": "Processo",
+        "generic": "Relacionado"
+      },
+      "api": {
+        "getFail": "Erro ao buscar dados",
+        "saveFail": "Erro ao salvar",
+        "deleteFail": "Erro ao excluir"
+      },
+      "messages": {
+        "noFolders": "Nenhuma pasta.",
+        "loadFoldersFail": "Erro ao carregar pastas.",
+        "relatedCompanyRequired": "Selecione um cliente relacionado (digitar não basta).",
+        "loadCompaniesFail": "Erro ao carregar lista de clientes.",
+        "accountIdMissing": "Não foi possível identificar o account_id para criar.",
+        "accountIdMissingForUpload": "Não foi possível identificar o account_id para enviar o arquivo.",
+        "createFolderFail": "Erro ao criar pasta.",
+        "saveLinkFail": "Erro ao salvar link.",
+        "createRecordFail": "Falha ao criar registro do documento.",
+        "uploadUrlFail": "Não foi possível gerar a URL de upload.",
+        "uploadFailedPrefix": "Upload falhou",
+        "uploadingFail": "Erro no upload."
+      },
+      "progress": {
+        "creatingRecord": "Criando registro no banco...",
+        "generatingUploadUrl": "Gerando URL de upload...",
+        "uploadingToR2": "Enviando arquivo para o Cloudflare R2...",
+        "finalizing": "Finalizando (atualizando status no banco)...",
+        "done": "Concluído!"
+      },
+      "modals": {
+        "relatedCompany": {
+          "label": "Cliente relacionado",
+          "placeholder": "Pesquisar cliente...",
+          "hint": "Digite para pesquisar e selecione na lista."
         },
-
-        "myDocuments": {
-          "pageTitle": "Meus Documentos",
-          "sidebar": {
-            "folders": "Pastas"
-          },
-          "quickUpload": {
-            "title": "Upload rápido",
-            "hint": "Você também pode usar o botão “Adicionar” no topo."
-          },
-          "toolbar": {
-            "back": "Voltar",
-            "add": "Adicionar",
-            "newFolder": "Nova Pasta",
-            "uploadDocument": "Upload de Documento",
-            "driveLink": "Link do Drive",
-            "open": "Abrir",
-            "delete": "Excluir"
-          },
-          "state": {
-            "loading": "Carregando..."
-          },
-          "buttons": {
-            "ok": "OK"
-          }
+        "newLink": {
+          "namePlaceholder": "Ex: Pasta do Google Drive",
+          "urlLabel": "URL",
+          "urlPlaceholder": "https://drive.google.com/...",
+          "savedInObjectKey": "O link será salvo no campo object_key."
         },
+        "upload": {
+          "singleFileOnly": "Selecione apenas um arquivo.",
+          "fileLabel": "Arquivo",
+          "autoFillName": "Vamos preencher automaticamente com o nome do arquivo",
+          "renameHint": "Você pode alterar o nome antes de enviar."
+        }
+      },
+      "confirm": {
+        "deleteMany": "Confirma excluir os itens selecionados?"
+      },
+      "quickUpload": {
+        "pickCompanyTitle": "Upload rápido - selecionar cliente"
+      }
+    },
 
         "processos": {
           "pageTitle": "Processos",
@@ -489,37 +554,158 @@
           }
         },
 
-        "newInvoice": {
-          "actions": {
-            "deleteInvoice": "Excluir fatura",
-            "saveInvoice": "Salvar fatura"
-          },
-          "form": {
-            "company": "Empresa *",
-            "statusDraft": "Rascunho",
-            "quoteDate": "Data da Cotação",
-            "exchangeRate": "Taxa de câmbio",
-            "version": "Versão",
-            "notes": "Observações",
-            "billingAddress": "Endereço de Cobrança",
-            "country": "País",
-            "headerDiscount": "Desconto (cabeçalho)"
-          },
-          "hints": {
-            "discountRule": "*A porcentagem será calculada sob o total bruto (Subtotal)",
-            "saveHeaderToUnlockLines": "Salve o cabeçalho da fatura para liberar as linhas.",
-            "totalsFromLines": "Os totalizadores são calculados a partir das linhas."
-          },
-          "lines": {
-            "addProduct": "Adicionar produto",
-            "addManualLine": "Adicionar linha manual",
-            "price": "Preço",
-            "actions": "Ações"
-          },
-          "placeholders": {
-            "searchCompany": "Pesquisar empresa..."
-          }
-        },
+"newInvoice": {
+  "pageTitle": "Nova Fatura",
+  "pageTitleEdit": "Editar Fatura",
+
+  "breadcrumbs": {
+    "forms": "Formulários",
+    "newInvoice": "Nova Fatura",
+    "editInvoice": "Editar Fatura"
+  },
+
+  "titles": {
+    "create": "Criação de Fatura"
+  },
+
+  "header": {
+    "titleCreate": "Criação de Fatura",
+    "invoiceIdLabel": "ID da Fatura:"
+  },
+
+  "labels": {
+    "invoiceId": "ID da Fatura"
+  },
+
+  "actions": {
+    "generateInvoice": "Gerar invoice",
+    "deleteInvoice": "Excluir fatura",
+    "saveInvoice": "Salvar fatura",
+    "addProduct": "Adicionar produto",
+    "addManualLine": "Adicionar linha manual",
+    "editLine": "Editar linha",
+    "saveLine": "Salvar",
+    "addLine": "Adicionar"
+  },
+
+  "form": {
+    "invoiceDataTitle": "Dados da Fatura",
+
+    "company": "Empresa *",
+    "currency": "Moeda *",
+    "selectCurrency": "Selecionar...",
+
+    "status": "Status",
+    "statusDraft": "Rascunho",
+    "statusActive": "Ativo",
+    "statusExpired": "Expirado",
+    "statusBilled": "Faturado",
+    "statusPaid": "Pago",
+
+    "quoteDate": "Data da Cotação",
+    "dueDate": "Vencimento",
+    "exchangeRate": "Taxa de câmbio",
+
+    "discountPercent": "Desconto %",
+    "version": "Versão",
+    "notes": "Observações",
+    "terms": "Termos",
+
+    "billingAddress": "Endereço de Cobrança",
+    "billingAddressTitle": "Endereço de Cobrança",
+
+    "addressLine1": "Linha 1",
+    "addressLine2": "Linha 2",
+    "city": "Cidade",
+    "state": "Estado",
+    "postalCode": "CEP",
+    "country": "País",
+
+    "headerDiscount": "Desconto (cabeçalho)"
+  },
+
+  "placeholders": {
+    "searchCompany": "Pesquisar empresa...",
+    "selectCurrency": "Selecionar..."
+  },
+
+  "hints": {
+    "discountRule": "*A porcentagem será calculada sob o total bruto (Subtotal)",
+    "saveHeaderToUnlockLines": "Salve o cabeçalho da fatura para liberar as linhas.",
+    "totalsFromLines": "Os totalizadores são calculados a partir das linhas."
+  },
+
+  "lines": {
+    "addProduct": "Adicionar produto",
+    "addManualLine": "Adicionar linha manual",
+    "actions": "Ações",
+
+    "columns": {
+      "product": "Produto",
+      "unit": "Unidade",
+      "price": "Preço",
+      "quantity": "Qtd",
+      "discount": "Desconto",
+      "tax": "Imposto",
+      "lineTotal": "Total linha"
+    },
+
+    "empty": "Nenhuma linha adicionada",
+    "manual": "Manual"
+  },
+
+  "totals": {
+    "title": "Totalizadores",
+    "subtotal": "Subtotal",
+    "taxes": "Impostos",
+    "total": "Total",
+    "linesDiscount": "Descontos (linhas)"
+  },
+
+  "lineModal": {
+    "product": "Produto",
+    "searchProduct": "Pesquisar produto...",
+    "typeToSearch": "Digite para pesquisar.",
+    "description": "Descrição",
+    "unit": "Unidade",
+    "unitPrice": "Preço unitário",
+    "quantity": "Quantidade",
+    "integerOnly": "*Somente inteiro",
+    "taxRate": "Taxa de imposto (0..1)",
+    "discountValue": "Desconto (valor)",
+    "lineTotal": "Total da linha",
+    "autoCalculated": "Subtotal/Imposto/Total são calculados automaticamente.",
+
+    "addTitle": "Adicionar linha",
+    "editTitle": "Editar linha",
+    "add": "Adicionar",
+    "save": "Salvar",
+    "cancel": "Cancelar"
+  },
+
+  "confirm": {
+    "deleteModalTitle": "Excluir fatura",
+    "deleteTitle": "Tem certeza que deseja excluir esta fatura?"
+  },
+
+  "messages": {
+    "requestFail": "Falha na requisição.",
+    "initFail": "Falha ao carregar dados iniciais.",
+    "createFail": "Falha ao criar a fatura.",
+    "saveFail": "Falha ao salvar a fatura.",
+    "deleteFail": "Falha ao excluir a fatura.",
+    "deleteSuccess": "Fatura excluída com sucesso.",
+
+    "companyAndCurrencyRequired": "Empresa e Moeda são obrigatórios.",
+    "selectCurrencyToLoadProducts": "Selecione uma moeda para carregar os produtos.",
+    "noProductsForCurrency": "Nenhum produto encontrado para a moeda selecionada.",
+    "loadProductsFail": "Falha ao carregar produtos para a moeda selecionada.",
+    "pickProductFromList": "Selecione um produto na lista (digitar não basta).",
+    "quantityGreaterThanZero": "Quantidade deve ser maior que 0."
+  }
+}
+
+,
 
         "invoicesPrint": {
           "pageTitle": "Invoice - Impressão",
@@ -649,18 +835,20 @@
             "optional": "Dados Opcionais",
             "access": "Acesso"
           },
-          "client": {
-            "title": "Informações do cliente",
-            "phoneRequired": "Telefone *",
-            "companyNameRequired": "Nome da Empresa *",
-            "sizeDefault": "Médio",
-            "nextHint": "Ao avançar para o próximo passo, você preencherá os dados opcionais."
-          },
           "optional": {
             "addressOptional": "Endereço (opcional)",
             "postalCode": "Código Postal",
             "fetchingAddress": "Buscando endereço...",
-            "country": "País"
+            "country": "País",
+    "placeholders": {
+      "postalCode": "00000-000"
+    },
+    "labels": {
+      "street": "Rua",
+      "city": "Cidade",
+      "state": "Estado",
+      "complement": "Complemento"
+    }
           },
           "access": {
             "title": "Usuários de acesso",
@@ -672,8 +860,77 @@
             "sendAccess": "Enviar acesso?",
             "actions": "Ações",
             "sectorExample": "Ex:.. Agrícola",
-            "emailExample": "email@empresa.com"
-          }
+            "emailExample": "email@empresa.com",
+    "setPrimaryPrefix": "Marque",
+    "setPrimaryStrong": "Principal",
+    "table": {
+      "primary": "Principal",
+      "nameRequired": "Nome *"
+    },
+    "placeholders": {
+      "fullName": "Nome Completo",
+      "phoneExample": "(11) 99999-9999"
+    },
+    "yes": "Sim"
+          },
+          "navbar": {
+    "searchPlaceholder": "Buscar..."
+  },
+  "breadcrumbs": {
+    "clients": "Clientes"
+  },
+  "client": {
+            "title": "Informações do cliente",
+            "phoneRequired": "Telefone *",
+            "companyNameRequired": "Nome da Empresa *",
+            "sizeDefault": "Médio",
+            "nextHint": "Ao avançar para o próximo passo, você preencherá os dados opcionais.",
+    "labels": {
+      "cnpjRequired": "CNPJ *",
+      "sector": "Setor",
+      "size": "Porte",
+      "status": "Status"
+    },
+    "placeholders": {
+      "cnpj": "00.000.000/0000-00"
+    },
+    "state": {
+      "fetchingCnpj": "Buscando dados do CNPJ..."
+    },
+    "status": {
+      "active": "Ativo"
+    },
+    "sizeOptions": {
+      "select": "Selecionar...",
+      "selectKeyword": "Selecionar",
+      "small": "Pequeno",
+      "medium": "Médio",
+      "large": "Grande"
+    }
+  },
+  "defaults": {
+    "country": "Brasil"
+  },
+  "messages": {
+    "cnpjLookupFail": "Falha ao consultar CNPJ.",
+    "cnpjAutoFillFail": "Não foi possível buscar os dados do CNPJ.",
+    "createUserFail": "Falha ao criar usuário.",
+    "patchUserFail": "Falha ao atualizar usuário.",
+    "createCompanyFail": "Falha ao criar company.",
+    "patchCompanyFail": "Falha ao atualizar company.",
+    "usersAtLeastOne": "Adicione pelo menos 1 usuário.",
+    "usersFillNameEmail": "Preencha Nome e Email em todos os usuários.",
+    "invalidEmailPrefix": "Email inválido:",
+    "duplicateEmail": "Existe email duplicado na lista de usuários.",
+    "companyCreatedNoId": "Company criada, mas não retornou ID.",
+    "createCompanyStep2Fail": "Erro ao criar company no Step 2.",
+    "companyIdMissingForFinish": "CompanyId não encontrado. Volte e avance no Step 2 para criar a company.",
+    "selectPrimary": "Selecione um usuário como Principal.",
+    "userCreatedNoIdPrefix": "Usuário criado",
+    "userCreatedNoIdSuffix": "mas não retornou ID.",
+    "primaryNotFound": "Não foi possível identificar o usuário Principal criado.",
+    "finishFail": "Erro ao finalizar criação."
+  }
         },
 
         "landingPage": {

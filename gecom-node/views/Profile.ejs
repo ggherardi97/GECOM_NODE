@@ -605,7 +605,7 @@
         const myId = getMyUserId(auth);
         if (!myId) { alert("Não foi possível identificar seu user_id."); return; }
 
-        const me = await apiGet("/api/users/" + encodeURIComponent(myId));
+        const me = await apiGet("/api/users/me");
         const cachedPic = getCachedProfilePicture(me.id);
 
         const original = {
@@ -815,7 +815,6 @@
           <select id="selNewUserRole" class="form-control">
             <option value="USER" selected>User</option>
             <option value="MANAGER">Manager</option>
-            <option value="ADMIN">Admin</option>
           </select>
         </div>
 

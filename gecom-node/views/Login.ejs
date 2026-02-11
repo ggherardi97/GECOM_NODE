@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
-    <title>GECOM | Login</title>
+    <title>GECOM | <%= t('page.login.pageTitle') %></title>
     <link rel="shortcut icon" href="../Pages/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="../Pages/favicon.ico" type="image/x-icon" />
     <link href="../Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
@@ -19,13 +19,13 @@
 <body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
     <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" />
     <button type="button" class="btn btn-primary" style="display: none;" data-toggle="modal" id="modalLoginButton" data-target="#loginModal">
-        Large Modal
+        <%= t('page.login.modal.hiddenTriggerLabel') %>
     </button>
     <div class="modal inmodal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only"><%= t('page.login.modal.close') %></span></button>
                     <h4 class="modal-title" id="modalTitle"></h4>
                     <!-- <small class="font-bold">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</small> -->
                 </div>
@@ -33,80 +33,80 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button onclick="window.location = '/'" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                    <button onclick="window.location = '/'" type="button" class="btn btn-white" data-dismiss="modal"><%= t('page.login.modal.close') %></button>
                 </div>
             </div>
         </div>
     </div>
     <!-- Login Form -->
     <form id="loginForm" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px;">
-        <h3>Bem Vindo à GECOM</h3>
+        <h3><%= t('page.login.welcomeTitle') %></h3>
         <div id="world-map" style="height: 100px; margin-top: 20px;"></div>
         <p style="margin-top: 20px; font-size: 12px;">
-            Sua plataforma de processos em importação e exportação.
+            <%= t('page.login.subtitle') %>
         </p>
 
         <div class="form-group">
-            <input type="email" class="form-control" placeholder="Email" id="email" required />
+            <input type="email" class="form-control" placeholder="<%= t('page.login.fields.emailPlaceholder') %>" id="email" required />
         </div>
         <div class="form-group">
-            <input type="password" class="form-control" placeholder="Senha" id="password" required />
+            <input type="password" class="form-control" placeholder="<%= t('page.login.fields.passwordPlaceholder') %>" id="password" required />
         </div>
-        <button type="submit" class="btn btn-primary block full-width m-b">Login</button>
+        <button type="submit" class="btn btn-primary block full-width m-b"><%= t('page.login.actions.login') %></button>
 
-        <a onclick="changeView('#forgotPassword')"><small>Esqueceu a senha? Clique aqui</small></a>
-        <p class="text-muted text-center"><small>Possui um número de acesso?</small></p>
-        <a style="display: none;" class="btn btn-sm btn-white btn-block" onclick="changeView('#acessNumberForm')">Entre com número de acesso</a>
+        <a onclick="changeView('#forgotPassword')"><small><%= t('page.login.actions.forgotPasswordLink') %></small></a>
+        <p class="text-muted text-center"><small><%= t('page.login.actions.hasAccessNumber') %></small></p>
+        <a style="display: none;" class="btn btn-sm btn-white btn-block" onclick="changeView('#acessNumberForm')"><%= t('page.login.actions.accessNumberCta') %></a>
     </form>
 
     <!-- Access Number Form -->
     <form id="acessNumberForm" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
-        <h3>Entre com número de acesso</h3>
+        <h3><%= t('page.login.actions.accessNumberTitle') %></h3>
         <p style="margin-top: 20px; font-size: 12px;">
-            Digite abaixo o número fornecido por nosso time.
+            <%= t('page.login.actions.accessNumberHelp') %>
         </p>
         <div class="form-group">
-            <input type="text" class="form-control" placeholder="Ex: PRC-0000111" name="number" required />
+            <input type="text" class="form-control" placeholder="<%= t('page.login.fields.accessNumberPlaceholder') %>" name="number" required />
         </div>
-        <a href="PublicProcessDetail" class="btn btn-primary block full-width m-b">Acessar</a>
+        <a href="PublicProcessDetail" class="btn btn-primary block full-width m-b"><%= t('page.login.actions.access') %></a>
         <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
-            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+            <i class="fa fa-arrow-left me-1"></i><%= t('page.login.actions.backToLogin') %>
         </a>
     </form>
 
     <!-- Forgot Password Form -->
     <form id="forgotPassword" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
-        <h3>Esqueceu a senha?</h3>
+        <h3><%= t('page.login.forgot.title') %></h3>
         <p style="margin-top: 20px; font-size: 12px;">
-            Digite abaixo o email cadastrado
+            <%= t('page.login.forgot.help') %>
         </p>
         <div class="form-group">
             <input type="text" class="form-control" id="forgotEmail" name="forgotEmail" required />
         </div>
-        <a onclick="onForgotPassword()" style="color: white;" class="btn btn-primary block full-width m-b">Enviar email de reset</a>
+        <a onclick="onForgotPassword()" style="color: white;" class="btn btn-primary block full-width m-b"><%= t('page.login.actions.sendResetEmail') %></a>
         <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
-            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+            <i class="fa fa-arrow-left me-1"></i><%= t('page.login.actions.backToLogin') %>
         </a>
     </form>
 
     <!-- ResetPassword Form -->
     <form id="resetPassword" class="middle-box text-center loginscreen animated fadeInDown" style="transform: scale(1.2); transform-origin: center; background-color: white; padding: 25px; border-radius: 5px; display: none;">
-        <h3>Nova Senha</h3>
+        <h3><%= t('page.login.reset.newPassword') %></h3>
         <p style="margin-top: 20px; font-size: 12px;">
-            Digite a nova senha abaixo
+            <%= t('page.login.reset.newPasswordHelp') %>
         </p>
         <div class="form-group">
             <input type="password" class="form-control" id="newPassword" required />
         </div>
         <p style="margin-top: 20px; font-size: 12px;">
-            Confirmar senha
+            <%= t('page.login.reset.confirmPassword') %>
         </p>
         <div class="form-group">
             <input type="password" class="form-control" id="confirmPassword" required />
         </div>
-        <a onclick="onResetPassword()" style="color: white;" class="btn btn-primary block full-width m-b">Confirmar Nova Senha</a>
+        <a onclick="onResetPassword()" style="color: white;" class="btn btn-primary block full-width m-b"><%= t('page.login.reset.confirmNewPassword') %></a>
         <a class="btn btn-sm btn-white btn-block" onclick="changeView('#loginForm')">
-            <i class="fa fa-arrow-left me-1"></i>Voltar para o login
+            <i class="fa fa-arrow-left me-1"></i><%= t('page.login.actions.backToLogin') %>
         </a>
     </form>
 
@@ -143,7 +143,7 @@
         }
 
         function showModalMessage(title, message) {
-            $("#modalTitle").text(title || "Mensagem");
+            $("#modalTitle").text(title || "<%= t('page.login.messages.defaultModalTitle') %>");
             $("#loginModalBody").html("<p>" + (message || "") + "</p>");
             $("#modalLoginButton").click();
         }
@@ -155,7 +155,7 @@
 
                 if (!token || !userId) {
                     changeView("#loginForm");
-                    showModalMessage("Link inválido", "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.");
+                    showModalMessage("<%= t('page.login.messages.invalidLinkTitle') %>", "<%= t('page.login.messages.invalidLinkBody') %>");
                     return;
                 }
 
@@ -169,7 +169,7 @@
             var email = $("#forgotEmail").val();
 
             if (!email) {
-                showModalMessage("Recuperação de Senha", "Por favor, informe o email cadastrado.");
+                showModalMessage("<%= t('page.login.messages.forgotPasswordTitle') %>", "<%= t('page.login.messages.forgotPasswordEmailRequired') %>");
                 return;
             }
 
@@ -182,11 +182,11 @@
             const data = await resp.json().catch(() => ({}));
 
             if (!resp.ok) {
-                showModalMessage("Recuperação de Senha", data.message || "Não foi possível solicitar o reset de senha. Tente novamente.");
+                showModalMessage("<%= t('page.login.messages.forgotPasswordTitle') %>", data.message || "<%= t('page.login.messages.forgotPasswordRequestFail') %>");
                 return;
             }
 
-            showModalMessage("Recuperação de Senha", data.message || "Um email com instruções foi enviado com sucesso.");
+            showModalMessage("<%= t('page.login.messages.forgotPasswordTitle') %>", data.message || "<%= t('page.login.messages.forgotPasswordRequestSuccess') %>");
         }
 
         async function onResetPassword() {
@@ -194,7 +194,7 @@
             const userId = getQueryParam("userId");
 
             if (!token || !userId) {
-                showModalMessage("Link inválido", "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.");
+                showModalMessage("<%= t('page.login.messages.invalidLinkTitle') %>", "<%= t('page.login.messages.invalidLinkBody') %>");
                 return;
             }
 
@@ -202,12 +202,12 @@
             const confirmPassword = $("#confirmPassword").val();
 
             if (!newPassword || !confirmPassword) {
-                showModalMessage("Redefinir senha", "Por favor, preencha a nova senha e a confirmação.");
+                showModalMessage("<%= t('page.login.messages.resetPasswordTitle') %>", "<%= t('page.login.messages.resetPasswordFillBoth') %>");
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                showModalMessage("Redefinir senha", "As senhas não conferem. Verifique e tente novamente.");
+                showModalMessage("<%= t('page.login.messages.resetPasswordTitle') %>", "<%= t('page.login.messages.resetPasswordMismatch') %>");
                 return;
             }
 
@@ -227,7 +227,7 @@
             const data = await resp.json().catch(() => ({}));
 
             if (!resp.ok) {
-                showModalMessage("Redefinir senha", data.message || "Não foi possível redefinir a senha. Tente novamente.");
+                showModalMessage("<%= t('page.login.messages.resetPasswordTitle') %>", data.message || "<%= t('page.login.messages.resetPasswordFail') %>");
                 return;
             }
 
@@ -239,7 +239,7 @@
             $("#newPassword").val("");
             $("#confirmPassword").val("");
 
-            showModalMessage("Senha redefinida", data.message || "Sua senha foi redefinida com sucesso. Você já pode fazer login.");
+            showModalMessage("<%= t('page.login.messages.resetPasswordSuccessTitle') %>", data.message || "<%= t('page.login.messages.resetPasswordSuccessBody') %>");
 
             // Foco no email após abrir o modal
             setTimeout(() => $("#email").focus(), 200);
@@ -262,7 +262,7 @@
 
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
-                    showModalMessage("Login", error.message || "Não foi possível realizar o login. Verifique suas credenciais.");
+                    showModalMessage("<%= t('page.login.actions.login') %>", error.message || "<%= t('page.login.messages.loginFail') %>");
                     return;
                 }
 
@@ -283,7 +283,7 @@
                 window.location.href = "/Default";
             }
             catch (err) {
-                showModalMessage("Login", "Ocorreu um erro inesperado. Tente novamente.");
+                showModalMessage("<%= t('page.login.actions.login') %>", "<%= t('page.login.messages.unexpectedError') %>");
             }
         });
 

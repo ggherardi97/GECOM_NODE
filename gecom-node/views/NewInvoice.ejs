@@ -64,15 +64,15 @@
           <h5 id="invoiceTitle">-</h5>
           <div class="ibox-tools">
             <button type="button" class="btn btn-white" id="btnGenerateInvoicePrint" disabled>
-              <i class="fa fa-file-pdf-o"></i> Gerar invoice
+              <i class="fa fa-file-pdf-o"></i> <%= t('page.newInvoice.actions.generateInvoice') %>
             </button>
 
             <button type="button" class="btn btn-danger" id="btnDeleteInvoice" disabled>
-              <i class="fa fa-trash"></i> Excluir fatura
+              <i class="fa fa-trash"></i> <%= t('page.newInvoice.actions.deleteInvoice') %>
             </button>
 
             <button type="button" class="btn btn-success" id="btnSaveInvoice">
-              <i class="fa fa-check"></i> Salvar fatura
+              <i class="fa fa-check"></i> <%= t('page.newInvoice.actions.saveInvoice') %>
             </button>
           </div>
         </div>
@@ -85,57 +85,60 @@
               <div class="col-lg-4">
                 <div class="panel panel-default invoice-panel">
                   <div class="panel-heading">
-                    <strong>Dados da Fatura</strong>
+                    <strong><%= t('page.newInvoice.form.invoiceDataTitle') %></strong>
                   </div>
                   <div class="panel-body">
 
                     <div class="form-group">
-                      <label>Empresa *</label>
-                      <input id="company_name" type="text" class="form-control typeahead-company"
-                        placeholder="Pesquisar empresa..." autocomplete="off" />
+                      <label><%= t('page.newInvoice.form.company') %></label>
+                      <input
+                        id="company_name"
+                        type="text"
+                        class="form-control typeahead-company"
+                        placeholder="<%= t('page.newInvoice.placeholders.searchCompany') %>"
+                        autocomplete="off"
+                      />
                       <input id="company_id" type="hidden" />
                     </div>
 
                     <div class="row">
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Moeda *</label>
+                          <label><%= t('page.newInvoice.form.currency') %></label>
                           <select id="currency_id" class="form-control"></select>
                         </div>
                       </div>
 
                       <div class="col-lg-6">
                          <div class="form-group">
-                          <label>Status</label>
+                          <label><%= t('page.newInvoice.form.status') %></label>
                           <select id="status" class="form-control">
-                            <option value="0" selected>Rascunho</option>
-                            <option value="1">Ativo</option>
-                            <option value="2">Expirado</option>
-                            <option value="3">Faturado</option>
-                            <option value="4">Pago</option>
+                            <option value="0" selected><%= t('page.newInvoice.form.statusDraft') %></option>
+                            <option value="1"><%= t('page.newInvoice.form.statusActive') %></option>
+                            <option value="2"><%= t('page.newInvoice.form.statusExpired') %></option>
+                            <option value="3"><%= t('page.newInvoice.form.statusBilled') %></option>
+                            <option value="4"><%= t('page.newInvoice.form.statusPaid') %></option>
                           </select>
                         </div>
-                        
                       </div>
                     </div>
 
                     <div class="row">
                       <div class="col-lg-6">
                        <div class="form-group">
-                          <label>Data da Cotação</label>
+                          <label><%= t('page.newInvoice.form.quoteDate') %></label>
                           <input id="quote_at" type="datetime-local" class="form-control" />
                         </div>
                       </div>
 
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Vencimento</label>
+                          <label><%= t('page.newInvoice.form.dueDate') %></label>
                           <input id="due_at" type="date" class="form-control" />
                         </div>
-                        
 
                         <div class="form-group" style="display:none;">
-                          <label>Taxa de câmbio</label>
+                          <label><%= t('page.newInvoice.form.exchangeRate') %></label>
                           <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
                         </div>
                       </div>
@@ -145,10 +148,10 @@
                     <div class="row">
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Desconto %</label>
+                          <label><%= t('page.newInvoice.form.discountPercent') %></label>
                           <input id="discount_percent" type="number" min="0" max="100" class="form-control" value="0" readonly />
                           <div class="small-muted" style="margin-top:4px;">
-                            *A porcentagem será calculada sob o total bruto (Subtotal)
+                            <%= t('page.newInvoice.hints.discountRule') %>
                           </div>
                         </div>
                       </div>
@@ -159,19 +162,19 @@
                       <div class="col-lg-6"></div>
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Versão</label>
+                          <label><%= t('page.newInvoice.form.version') %></label>
                           <input id="version" type="number" min="1" class="form-control" value="1" />
                         </div>
                       </div>
                     </div>
 
                     <div class="form-group">
-                      <label>Observações</label>
+                      <label><%= t('page.newInvoice.form.notes') %></label>
                       <textarea id="notes" class="form-control" rows="3"></textarea>
                     </div>
 
                     <div class="form-group" style="display:none;">
-                      <label>Termos</label>
+                      <label><%= t('page.newInvoice.form.terms') %></label>
                       <textarea id="terms" class="form-control" rows="3"></textarea>
                     </div>
 
@@ -180,30 +183,30 @@
 
                 <div class="panel panel-default invoice-panel">
                   <div class="panel-heading">
-                    <strong>Endereço de Cobrança</strong>
+                    <strong><%= t('page.newInvoice.form.billingAddress') %></strong>
                   </div>
                   <div class="panel-body">
 
                     <div class="form-group" style="margin-top:10px;">
-                      <label>Linha 1</label>
+                      <label><%= t('page.newInvoice.form.addressLine1') %></label>
                       <input id="billing_address_line1" type="text" class="form-control" />
                     </div>
 
                     <div class="form-group">
-                      <label>Linha 2</label>
+                      <label><%= t('page.newInvoice.form.addressLine2') %></label>
                       <input id="billing_address_line2" type="text" class="form-control" />
                     </div>
 
                     <div class="row row-tight">
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Cidade</label>
+                          <label><%= t('page.newInvoice.form.city') %></label>
                           <input id="billing_address_city" type="text" class="form-control" />
                         </div>
                       </div>
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>Estado</label>
+                          <label><%= t('page.newInvoice.form.state') %></label>
                           <input id="billing_address_state" type="text" class="form-control" />
                         </div>
                       </div>
@@ -212,13 +215,13 @@
                     <div class="row row-tight">
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>CEP</label>
+                          <label><%= t('page.newInvoice.form.postalCode') %></label>
                           <input id="billing_address_postal_code" type="text" class="form-control" />
                         </div>
                       </div>
                       <div class="col-lg-6">
                         <div class="form-group">
-                          <label>País</label>
+                          <label><%= t('page.newInvoice.form.country') %></label>
                           <input id="billing_address_country" type="text" class="form-control" />
                         </div>
                       </div>
@@ -235,23 +238,23 @@
                     <div class="header-actions">
                       <div class="left-actions">
                         <button type="button" class="btn btn-primary" id="btnAddProduct" disabled="disabled">
-                          <i class="fa fa-plus"></i> Adicionar produto
+                          <i class="fa fa-plus"></i> <%= t('page.newInvoice.lines.addProduct') %>
                         </button>
 
                         <button type="button" class="btn btn-white" id="btnAddManualLine" disabled="disabled">
-                          <i class="fa fa-pencil"></i> Adicionar linha manual
+                          <i class="fa fa-pencil"></i> <%= t('page.newInvoice.lines.addManualLine') %>
                         </button>
                       </div>
 
                       <span class="text-muted">
-                        ID da Fatura: <span id="uiInvoiceId">-</span>
+                        <%= t('page.newInvoice.labels.invoiceId') %>: <span id="uiInvoiceId">-</span>
                       </span>
                     </div>
                   </div>
 
                   <div class="panel-body">
                     <div id="invoiceNotCreatedBanner" class="alert alert-warning lines-banner">
-                      Salve o cabeçalho da fatura para liberar as linhas.
+                      <%= t('page.newInvoice.hints.saveHeaderToUnlockLines') %>
                     </div>
 
                     <div id="linesArea" class="lines-disabled">
@@ -260,14 +263,14 @@
                           <thead>
                             <tr>
                               <th style="width: 30px;">#</th>
-                              <th style="width: 28%;">Produto</th>
-                              <th style="width:110px;">Unidade</th>
-                              <th style="width:130px;">Preço</th>
-                              <th style="width:90px;">Qtd</th>
-                              <th style="width:140px;">Desconto</th>
-                              <th style="width:120px;">Imposto</th>
-                              <th style="width:140px;">Total linha</th>
-                              <th style="width: 8%;">Ações</th>
+                              <th style="width: 28%;"><%= t('page.newInvoice.lines.columns.product') %></th>
+                              <th style="width:110px;"><%= t('page.newInvoice.lines.columns.unit') %></th>
+                              <th style="width:130px;"><%= t('page.newInvoice.lines.columns.price') %></th>
+                              <th style="width:90px;"><%= t('page.newInvoice.lines.columns.quantity') %></th>
+                              <th style="width:140px;"><%= t('page.newInvoice.lines.columns.discount') %></th>
+                              <th style="width:120px;"><%= t('page.newInvoice.lines.columns.tax') %></th>
+                              <th style="width:140px;"><%= t('page.newInvoice.lines.columns.lineTotal') %></th>
+                              <th style="width: 8%;"><%= t('page.newInvoice.lines.actions') %></th>
                             </tr>
                           </thead>
                           <tbody id="linesTbody"></tbody>
@@ -280,34 +283,34 @@
 
                 <div class="panel panel-default invoice-panel">
                   <div class="panel-heading">
-                    <strong>Totalizadores</strong>
+                    <strong><%= t('page.newInvoice.totals.title') %></strong>
                   </div>
                   <div class="panel-body">
                     <table class="table">
                       <tr>
-                        <th>Subtotal</th>
+                        <th><%= t('page.newInvoice.totals.subtotal') %></th>
                         <td class="text-right money" id="uiSubtotal">0,00</td>
                       </tr>
                       <tr>
-                        <th>Desconto (cabeçalho)</th>
+                        <th><%= t('page.newInvoice.form.headerDiscount') %></th>
                         <td class="text-right money" id="uiDiscountHeader">0,00</td>
                       </tr>
                       <tr>
-                        <th>Descontos (linhas)</th>
+                        <th><%= t('page.newInvoice.totals.linesDiscount') %></th>
                         <td class="text-right money" id="uiDiscountLines">0,00</td>
                       </tr>
                       <tr>
-                        <th>Impostos</th>
+                        <th><%= t('page.newInvoice.totals.taxes') %></th>
                         <td class="text-right money" id="uiTaxTotal">0,00</td>
                       </tr>
                       <tr>
-                        <th>Total</th>
+                        <th><%= t('page.newInvoice.totals.total') %></th>
                         <td class="text-right money" id="uiTotal">0,00</td>
                       </tr>
                     </table>
 
                     <div class="help-block">
-                      <small class="text-muted">Os totalizadores são calculados a partir das linhas.</small>
+                      <small class="text-muted"><%= t('page.newInvoice.hints.totalsFromLines') %></small>
                     </div>
                   </div>
                 </div>
@@ -327,6 +330,17 @@
 
 <script>
   (function () {
+    // =========================
+    // i18n helper
+    // =========================
+    function tSafe(key, fallback) {
+      try {
+        if (typeof window.t === "function") return window.t(key);
+        if (typeof t === "function") return t(key);
+      } catch { /* ignore */ }
+      return fallback ?? key;
+    }
+
     // =========================
     // State
     // =========================
@@ -412,22 +426,22 @@
       );
     }
 
-function tryToDateInput(value) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return "";
+    function tryToDateInput(value) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return "";
 
-  const dt = new Date(raw);
-  if (Number.isNaN(dt.getTime())) return "";
+      const dt = new Date(raw);
+      if (Number.isNaN(dt.getTime())) return "";
 
-  const pad = (n) => String(n).padStart(2, "0");
+      const pad = (n) => String(n).padStart(2, "0");
 
-  // Use UTC to avoid timezone shifting the day
-  return (
-    dt.getUTCFullYear() + "-" +
-    pad(dt.getUTCMonth() + 1) + "-" +
-    pad(dt.getUTCDate())
-  );
-}
+      // Use UTC to avoid timezone shifting the day
+      return (
+        dt.getUTCFullYear() + "-" +
+        pad(dt.getUTCMonth() + 1) + "-" +
+        pad(dt.getUTCDate())
+      );
+    }
 
     function getSelectedCurrency() {
       const currencyId = String($("#currency_id").val() || "").trim();
@@ -514,7 +528,7 @@ function tryToDateInput(value) {
     async function apiGet(url) {
       const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
       return data;
     }
 
@@ -525,7 +539,7 @@ function tryToDateInput(value) {
         body: JSON.stringify(payload ?? {}),
       });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
       return data;
     }
 
@@ -536,7 +550,7 @@ function tryToDateInput(value) {
         body: JSON.stringify(payload ?? {}),
       });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha na requisição.");
+      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
       return data;
     }
 
@@ -544,7 +558,7 @@ function tryToDateInput(value) {
       const resp = await fetch(url, { method: "DELETE", headers: { Accept: "application/json" } });
       if (resp.status === 204) return {};
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || "Falha ao excluir.");
+      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.deleteFail", "Falha ao excluir."));
       return data;
     }
 
@@ -648,7 +662,7 @@ function tryToDateInput(value) {
         .filter((x) => x.id && x.name);
 
       const $ddl = $("#currency_id");
-      $ddl.empty().append(`<option value="">Selecionar...</option>`);
+      $ddl.empty().append(`<option value="">${escapeHtml(tSafe("page.newInvoice.form.selectCurrency", "Selecionar..."))}</option>`);
       currenciesCache.forEach((c) => {
         $ddl.append(`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}</option>`);
       });
@@ -762,7 +776,7 @@ function tryToDateInput(value) {
       const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
 
       if (!payload.company_id || !payload.currency_id) {
-        alert("Empresa e Moeda são obrigatórios.");
+        alert(tSafe("page.newInvoice.messages.companyAndCurrencyRequired", "Empresa e Moeda são obrigatórios."));
         return false;
       }
 
@@ -774,7 +788,7 @@ function tryToDateInput(value) {
         setPrintEnabled();
 
         $("#uiInvoiceId").text(invoiceId || "-");
-        $("#invoiceTitle").text(invoiceId || "Criação de Fatura");
+        $("#invoiceTitle").text(invoiceId || tSafe("page.newInvoice.titles.create", "Criação de Fatura"));
         $("#invoiceNotCreatedBanner").hide();
 
         $("#discount_percent").prop("readonly", false);
@@ -782,7 +796,7 @@ function tryToDateInput(value) {
         return !!invoiceId;
       } catch (e) {
         console.error(e);
-        alert(e?.message || "Falha ao criar a fatura.");
+        alert(e?.message || tSafe("page.newInvoice.messages.createFail", "Falha ao criar a fatura."));
         return false;
       } finally {
         creatingInvoice = false;
@@ -865,7 +879,7 @@ function tryToDateInput(value) {
       (lines || []).forEach(recalcLine);
 
       if (!lines || lines.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">Nenhuma linha adicionada</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted">${escapeHtml(tSafe("page.newInvoice.lines.empty", "Nenhuma linha adicionada"))}</td></tr>`;
         computeTotals();
         return;
       }
@@ -875,7 +889,7 @@ function tryToDateInput(value) {
         tr.innerHTML = `
           <td>${escapeHtml(String(idx + 1))}</td>
           <td>
-            <div><strong>${escapeHtml(l.product_name || "Manual")}</strong></div>
+            <div><strong>${escapeHtml(l.product_name || tSafe("page.newInvoice.lines.manual", "Manual"))}</strong></div>
             <small class="text-muted">${escapeHtml(l.description || "")}</small>
           </td>
           <td>${escapeHtml(l.unit || "")}</td>
@@ -942,36 +956,36 @@ function tryToDateInput(value) {
 
       const html = `
         <div class="form-group">
-          <label>Produto</label>
+          <label>${escapeHtml(tSafe("page.newInvoice.lineModal.product", "Produto"))}</label>
 
           <input
             id="il_product_name"
             type="text"
             class="form-control typeahead-product"
-            placeholder="Pesquisar produto..."
+            placeholder="${escapeHtml(tSafe("page.newInvoice.lineModal.searchProduct", "Pesquisar produto..."))}"
             autocomplete="off"
           />
 
           <input id="il_product_id" type="hidden" />
 
-          <div class="small text-muted" style="margin-top:6px;">Digite para pesquisar.</div>
+          <div class="small text-muted" style="margin-top:6px;">${escapeHtml(tSafe("page.newInvoice.lineModal.typeToSearch", "Digite para pesquisar."))}</div>
         </div>
 
         <div class="form-group">
-          <label>Descrição</label>
+          <label>${escapeHtml(tSafe("page.newInvoice.lineModal.description", "Descrição"))}</label>
           <input id="il_description" type="text" class="form-control" value="${escapeHtml(line.description || "")}" />
         </div>
 
         <div class="row row-tight">
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Unidade</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.unit", "Unidade"))}</label>
               <input id="il_unit" type="text" class="form-control" maxlength="50" value="${escapeHtml(line.unit || "")}" />
             </div>
           </div>
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Preço unitário</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.unitPrice", "Preço unitário"))}</label>
               <input id="il_unit_price" type="text" class="form-control money" value="${escapeHtml(String(parseNumberSafe(line.unit_price, 0)))}" />
             </div>
           </div>
@@ -980,14 +994,14 @@ function tryToDateInput(value) {
         <div class="row row-tight">
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Quantidade</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.quantity", "Quantidade"))}</label>
               <input id="il_quantity" type="number" step="1" min="1" class="form-control" value="${escapeHtml(String(toIntSafe(line.quantity, 1)))}" />
-              <div class="small text-muted" style="margin-top:4px;">*Somente inteiro</div>
+              <div class="small text-muted" style="margin-top:4px;">${escapeHtml(tSafe("page.newInvoice.lineModal.integerOnly", "*Somente inteiro"))}</div>
             </div>
           </div>
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Taxa de imposto (0..1)</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.taxRate", "Taxa de imposto (0..1)"))}</label>
               <input id="il_tax_rate" type="text" class="form-control money" value="${escapeHtml(String(clamp01(line.tax_rate)))}" />
             </div>
           </div>
@@ -996,25 +1010,25 @@ function tryToDateInput(value) {
         <div class="row row-tight">
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Desconto (valor)</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.discountValue", "Desconto (valor)"))}</label>
               <input id="il_discount_amount" type="text" class="form-control money" value="${escapeHtml(String(parseNumberSafe(line.discount_amount, 0)))}" />
             </div>
           </div>
           <div class="col-xs-6">
             <div class="form-group">
-              <label>Total da linha</label>
+              <label>${escapeHtml(tSafe("page.newInvoice.lineModal.lineTotal", "Total da linha"))}</label>
               <input id="il_line_total" type="text" class="form-control" value="${escapeHtml(formatMoney(line.line_total))}" readonly />
             </div>
           </div>
         </div>
 
-        <div class="small text-muted">Subtotal/Imposto/Total são calculados automaticamente.</div>
+        <div class="small text-muted">${escapeHtml(tSafe("page.newInvoice.lineModal.autoCalculated", "Subtotal/Imposto/Total são calculados automaticamente."))}</div>
       `;
 
       window.SideModal.open({
-        title: isEdit ? "Editar linha" : "Adicionar linha",
-        okText: isEdit ? "Salvar" : "Adicionar",
-        cancelText: "Cancelar",
+        title: isEdit ? tSafe("page.newInvoice.lineModal.editTitle", "Editar linha") : tSafe("page.newInvoice.lineModal.addTitle", "Adicionar linha"),
+        okText: isEdit ? tSafe("page.newInvoice.lineModal.save", "Salvar") : tSafe("page.newInvoice.lineModal.add", "Adicionar"),
+        cancelText: tSafe("page.newInvoice.lineModal.cancel", "Cancelar"),
         html,
 
         onOpen: async function (ctx) {
@@ -1127,7 +1141,7 @@ function tryToDateInput(value) {
           const typedName = String($root.find("#il_product_name").val() || "").trim();
 
           if (requireProduct && (!productId || !typedName)) {
-            alert("Selecione um produto na lista (digitar não basta).");
+            alert(tSafe("page.newInvoice.messages.pickProductFromList", "Selecione um produto na lista (digitar não basta)."));
             return true;
           }
 
@@ -1136,7 +1150,7 @@ function tryToDateInput(value) {
           const updated = {
             ...line,
             product_id: productId,
-            product_name: prod?.name || (typedName || (productId ? productId : "Manual")),
+            product_name: prod?.name || (typedName || (productId ? productId : tSafe("page.newInvoice.lines.manual", "Manual"))),
             description: String($root.find("#il_description").val() || ""),
             unit: String($root.find("#il_unit").val() || ""),
             unit_price: parseNumberSafe($root.find("#il_unit_price").val(), 0),
@@ -1155,7 +1169,7 @@ function tryToDateInput(value) {
           recalcLine(updated);
 
           if (toIntSafe(updated.quantity, 0) <= 0) {
-            alert("Quantidade deve ser maior que 0.");
+            alert(tSafe("page.newInvoice.messages.quantityGreaterThanZero", "Quantidade deve ser maior que 0."));
             return true;
           }
 
@@ -1193,7 +1207,7 @@ function tryToDateInput(value) {
       const normalized = {
         id: l?.id ? String(l.id).trim() : null,
         product_id: productId,
-        product_name: prod?.name || (productId ? productId : "Manual"),
+        product_name: prod?.name || (productId ? productId : tSafe("page.newInvoice.lines.manual", "Manual")),
         description: String(l?.description ?? "").trim(),
         unit: String(l?.unit ?? "").trim(),
         unit_price: parseNumberSafe(l?.unit_price, 0),
@@ -1282,12 +1296,10 @@ function tryToDateInput(value) {
       try {
         const payload = { ...headerPayload, lines: buildLinesPayload() };
         await apiPatch(`/api/invoices/${encodeURIComponent(invoiceId)}`, payload);
-
-        // alert("Fatura salva com sucesso.");
         return true;
       } catch (e) {
         console.error(e);
-        alert(e?.message || "Falha ao salvar a fatura.");
+        alert(e?.message || tSafe("page.newInvoice.messages.saveFail", "Falha ao salvar a fatura."));
         return false;
       }
     }
@@ -1304,20 +1316,20 @@ function tryToDateInput(value) {
 
       const currencyId = String($("#currency_id").val() || "").trim();
       if (!currencyId) {
-        alert("Selecione uma moeda para carregar os produtos.");
+        alert(tSafe("page.newInvoice.messages.selectCurrencyToLoadProducts", "Selecione uma moeda para carregar os produtos."));
         return;
       }
 
       try {
         const loaded = await preloadProducts();
         if (!loaded) {
-          alert("Nenhum produto encontrado para a moeda selecionada.");
+          alert(tSafe("page.newInvoice.messages.noProductsForCurrency", "Nenhum produto encontrado para a moeda selecionada."));
           return;
         }
       } catch (e) {
         console.error(e);
         productsCache = [];
-        alert("Falha ao carregar produtos para a moeda selecionada.");
+        alert(tSafe("page.newInvoice.messages.loadProductsFail", "Falha ao carregar produtos para a moeda selecionada."));
         return;
       }
 
@@ -1349,16 +1361,19 @@ function tryToDateInput(value) {
     $("#btnDeleteInvoice").on("click", async function () {
       if (!invoiceId) return;
 
-      const ok = await confirm("Tem certeza que deseja excluir esta fatura?", { title: "Excluir fatura", danger: true });
+      const ok = await confirm(
+        tSafe("page.newInvoice.confirm.deleteTitle", "Tem certeza que deseja excluir esta fatura?"),
+        { title: tSafe("page.newInvoice.confirm.deleteModalTitle", "Excluir fatura"), danger: true }
+      );
       if (!ok) return;
 
       try {
         await apiDelete(`/api/invoices/${encodeURIComponent(invoiceId)}`);
-        alert("Fatura excluída com sucesso.");
+        alert(tSafe("page.newInvoice.messages.deleteSuccess", "Fatura excluída com sucesso."));
         window.location.href = "/Invoices";
       } catch (e) {
         console.error(e);
-        alert(e?.message || "Falha ao excluir a fatura.");
+        alert(e?.message || tSafe("page.newInvoice.messages.deleteFail", "Falha ao excluir a fatura."));
       }
     });
 
@@ -1375,12 +1390,13 @@ function tryToDateInput(value) {
     (async function init() {
       try {
         if ($("#pageName").length) {
-          $("#pageName").text("Faturas");
-          $("#subpageName").text("Faturas");
+          // Mantive aqui apenas com t, sem mudar fluxo
+          $("#pageName").text(tSafe("page.invoices.pageTitle", "Faturas"));
+          $("#subpageName").text(tSafe("page.invoices.pageTitle", "Faturas"));
           $("#path").show();
-          $("#subSecoundPageName").text("Formulários");
+          $("#subSecoundPageName").text(tSafe("page.newInvoice.breadcrumbs.forms", "Formulários"));
           $("#subpath").show();
-          $("#subpathName").text("Nova Fatura");
+          $("#subpathName").text(tSafe("page.newInvoice.breadcrumbs.newInvoice", "Nova Fatura"));
         }
 
         await Promise.all([loadCompanies(), loadCurrencies()]);
@@ -1398,29 +1414,29 @@ function tryToDateInput(value) {
 
         const existingId = detectInvoiceIdFromUrl();
         if (existingId) {
-          $("#subpathName").text("Editar Fatura");
+          $("#subpathName").text(tSafe("page.newInvoice.breadcrumbs.editInvoice", "Editar Fatura"));
           await loadInvoiceForEdit(existingId);
         } else {
           await preloadProducts();
-          $("#invoiceTitle").text("Criação de Fatura");
+          $("#invoiceTitle").text(tSafe("page.newInvoice.titles.create", "Criação de Fatura"));
         }
       } catch (e) {
         console.error(e);
-        alert("Falha ao carregar dados iniciais.");
+        alert(tSafe("page.newInvoice.messages.initFail", "Falha ao carregar dados iniciais."));
       }
     })();
   })();
 
   function dateInputToIsoUtc(dateInputValue) {
-  const s = String(dateInputValue || "").trim(); // "YYYY-MM-DD"
-  if (!s) return null;
+    const s = String(dateInputValue || "").trim(); // "YYYY-MM-DD"
+    if (!s) return null;
 
-  const [y, m, d] = s.split("-").map((x) => parseInt(x, 10));
-  if (!y || !m || !d) return null;
+    const [y, m, d] = s.split("-").map((x) => parseInt(x, 10));
+    if (!y || !m || !d) return null;
 
-  // Local midnight -> ISO (UTC)
-  const localMidnight = new Date(y, m - 1, d, 0, 0, 0, 0);
-  return localMidnight.toISOString();
-}
+    // Local midnight -> ISO (UTC)
+    const localMidnight = new Date(y, m - 1, d, 0, 0, 0, 0);
+    return localMidnight.toISOString();
+  }
 </script>
 <% %>
