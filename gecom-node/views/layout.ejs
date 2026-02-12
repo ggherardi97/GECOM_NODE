@@ -307,8 +307,8 @@
 
         <!-- Footer -->
         <div class="footer">
-          <div class="float-right" data-i18n="page.layout.appTitle">Sistema GECOM</div>
-          <div><strong>Copyright</strong> <span data-i18n="page.layout.footer.copyright">GECOM ©</span></div>
+          <div class="float-right" data-i18n="page.layout.appTitle">Sistema G+</div>
+          <div><strong>Copyright</strong> <span data-i18n="page.layout.footer.copyright">G+ ©</span></div>
         </div>
     </div>
   </div>
@@ -978,7 +978,7 @@
           }
 
           async function loadPictureFromApi(userId) {
-            const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/profile-picture`, {
+            const resp = await fetch(`/api/users/me/profile-picture`, {
               method: "GET",
               headers: { Accept: "application/json" }
             });

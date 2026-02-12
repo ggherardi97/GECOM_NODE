@@ -12,44 +12,6 @@
   .sortable { cursor: pointer; user-select: none; }
   .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
 
-  /* Chart */
-  .dash-chart-wrap { height: 320px; }
-  #lineChart { width: 100% !important; height: 100% !important; }
-
-  /* Doughnut */
-  .dash-doughnut-wrap {
-    height: 320px;
-    display: block;
-    position: relative;
-  }
-  #processStatusChart {
-    width: 100% !important;
-    height: 320px !important;
-    display: block;
-  }
-
-  .dash-empty-chart {
-    height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-    font-size: 12px;
-    text-align: center;
-  }
-
-  /* Cards clicáveis */
-  .dash-clicker {
-    padding: 5px 20px;
-    cursor: pointer;
-  }
-
-  /* Lista */
-  .dash-inprogress-list {
-    max-height: 220px;
-    overflow: auto;
-  }
-
   /* Filter bar */
   .dash-filterbar {
     display: flex;
@@ -68,22 +30,72 @@
     height: 30px;
     padding: 3px 10px;
   }
+
+  /* ---------- Billing Dashboard charts ---------- */
+  .dash-chart-wrap { height: 420px; } /* AUMENTA a altura do gráfico principal */
+  #lineChart { width: 100% !important; height: 100% !important; }
+
+  .dash-doughnut-wrap {
+    height: 320px;
+    display: block;
+    position: relative;
+  }
+  #processStatusChart {
+    width: 100% !important;
+    height: 320px !important;
+    display: block;
+  }
+  .dash-empty-chart {
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* Cards clicáveis */
+  .dash-clicker { padding: 5px 20px; cursor: pointer; }
+
+  /* Lista */
+  .dash-inprogress-list { max-height: 220px; overflow: auto; }
+
+  /* ---------- My Processes Dashboard ---------- */
+  .dash-kpi .ibox-title h5 { text-transform: none; }
+  .dash-kpi .ibox-content h1 { font-size: 28px; }
+  .dash-table td, .dash-table th { vertical-align: middle; }
+  .dash-muted { color: #999; }
+  .dash-mini-list .feed-element { padding: 10px 0; border-bottom: 1px solid #e7eaec; }
+  .dash-mini-list .feed-element:last-child { border-bottom: none; }
+  .dash-mini-list .media-body { padding-left: 0; }
+  .inspinia-timeline .timeline-item .date { width: 110px; }
+  .inspinia-timeline .timeline-item .content { width: calc(100% - 110px); }
+
+  /* AQUI resolve o gráfico “espremidinho” do Meus Processos */
+  .dash-chart-wrap-company { height: 260px; }
+  #lineChartCompany { width: 100% !important; height: 100% !important; display:block; }
 </style>
 
 <div class="wrapper wrapper-content">
 
-  <!-- FILTER BAR -->
+  <!-- FILTER BAR (mantém a Default) -->
   <div class="row">
     <div class="col-lg-9">
-<div class="dash-filterbar" style="float: inline-start;">
-        <label for="yearFilter"><%= t('page.layout.menu.dashboard') %>:</label>
-        <select class="form-control input-sm" style="width: 250px;">
-          <option value="0" selected><%= t('page.dashboard.pageTitle') %></option>
+      <div class="dash-filterbar" style="float: inline-start;">
+        <label for="dashboardPicker"><%= t('page.layout.menu.dashboard') %>:</label>
+
+        <!-- Picklist de dashboards (Faturamento + Meus processos) -->
+        <select id="dashboardPicker" class="form-control input-sm" style="width: 250px;">
+          <option value="billing" selected><%= t('page.dashboard.pageTitle') %></option>
+          <option value="myprocesses">Meus processos</option>
         </select>
       </div>
     </div>
+
     <div class="col-lg-3">
-      <div class="dash-filterbar">
+      <!-- Ano (só afeta o dashboard de faturamento) -->
+      <div class="dash-filterbar" id="yearFilterWrap">
         <label for="yearFilter"><%= t('page.dashboard.filters.year') %></label>
         <select id="yearFilter" class="form-control input-sm" style="width: 120px;">
           <option value="2025">2025</option>
@@ -93,202 +105,373 @@
     </div>
   </div>
 
-  <!-- ROW 1: Cards + Processos próximos do prazo (top 2) -->
-  <div class="row">
-    <div class="col-lg-2">
-      <div class="ibox">
-        <div class="ibox-title">
-          <span class="label label-success float-right"><%= t('page.dashboard.filters.monthly') %></span>
-          <h5>Faturamento</h5>
-        </div>
-        <div class="ibox-content">
-          <h1 id="monthlyRevenue" class="no-margins">-</h1>
-          <div class="stat-percent font-bold text-success">
-            <span id="monthlyDelta">-</span> <i class="fa fa-bolt"></i>
+  <!-- =========================================================
+       VIEW 1: FATURAMENTO (seu dashboard atual)
+  ========================================================== -->
+  <div id="dashBillingWrap">
+
+    <!-- ROW 1: Cards + Processos próximos do prazo (top 2) -->
+    <div class="row">
+      <div class="col-lg-2">
+        <div class="ibox">
+          <div class="ibox-title">
+            <span class="label label-success float-right"><%= t('page.dashboard.filters.monthly') %></span>
+            <h5>Faturamento</h5>
           </div>
-          <small><%= t('page.dashboard.cards.monthBillingTitle') %></small>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-2">
-      <div class="ibox">
-        <div class="ibox-title">
-          <span class="label label-info float-right"><%= t('page.dashboard.filters.annual') %></span>
-          <h5>Faturamento</h5>
-        </div>
-        <div class="ibox-content">
-          <h1 id="annualRevenue" class="no-margins">-</h1>
-          <div class="stat-percent font-bold text-info">
-            <span id="annualDelta">-</span> <i class="fa fa-level-up"></i>
-          </div>
-          <small><%= t('page.dashboard.cards.yearBillingTitle') %></small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Média mensal -->
-    <div class="col-lg-2">
-      <div class="ibox">
-        <div class="ibox-title">
-          <span class="label label-primary float-right">Ano</span>
-          <h5><%= t('page.dashboard.cards.monthlyAverageTitle') %></h5>
-        </div>
-        <div class="ibox-content">
-          <h1 id="avgMonthlyRevenue" class="no-margins">-</h1>
-          <div class="stat-percent font-bold text-navy">
-            <span id="avgMonthlyHint">-</span> <i class="fa fa-line-chart"></i>
-          </div>
-          <small><%= t('page.dashboard.cards.monthlyAverageHelp') %></small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Melhor mês -->
-    <div class="col-lg-2">
-      <div class="ibox">
-        <div class="ibox-title">
-          <span class="label label-warning float-right">Ano</span>
-          <h5><%= t('page.dashboard.cards.bestMonthTitle') %></h5>
-        </div>
-        <div class="ibox-content">
-          <h2 id="bestMonthName" class="no-margins">-</h2>
-          <div class="stat-percent font-bold text-warning">
-            <span id="bestMonthRevenue">-</span> <i class="fa fa-trophy"></i>
-          </div>
-          <small><%= t('page.dashboard.cards.bestMonthHelp') %></small>
-        </div>
-      </div>
-    </div>
-
-    <!-- Processos próximos do prazo (top 2) -->
-    <div class="col-lg-4">
-      <div class="ibox">
-        <div class="ibox-title">
-          <h5><%= t('page.dashboard.sections.nearDeadline') %></h5>
-        </div>
-
-        <div id="nearDueContainer" class="dash-inprogress-list">
-          <div class="ibox-content"><small><%= t('page.dashboard.labels.loading') %></small></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 2: Line (col-lg-8) + Doughnut (col-lg-4) -->
-  <div class="row">
-    <div class="col-lg-8">
-      <div class="ibox">
-        <div class="ibox-content">
-          <div>
-            <span class="float-right text-right">
-              <small><%= t('page.dashboard.labels.totalInvoicesInPeriod') %> <strong id="totalInvoicesInPeriod">-</strong></small>
-              <br />
-              <small><%= t('page.dashboard.labels.totalProcessesInPeriod') %> <strong id="totalProcessesInPeriod">-</strong></small>
-            </span>
-            <h3 class="font-bold no-margins"><%= t('page.dashboard.sections.annualBilling') %></h3>
-            <small><%= t('page.dashboard.labels.legend') %></small>
-          </div>
-
-          <div class="m-t-sm">
-            <div class="dash-chart-wrap">
-              <canvas id="lineChart"></canvas>
+          <div class="ibox-content">
+            <h1 id="monthlyRevenue" class="no-margins">-</h1>
+            <div class="stat-percent font-bold text-success">
+              <span id="monthlyDelta">-</span> <i class="fa fa-bolt"></i>
             </div>
-          </div>
-
-          <div class="m-t-md">
-            <small class="float-right">
-              <i class="fa fa-clock-o"></i>
-              <%= t('page.dashboard.labels.updatedAt') %> <span id="lastUpdateAt">-</span>
-            </small>
-            <small>
-              <strong><%= t('page.dashboard.labels.note') %></strong> <%= t('page.dashboard.labels.noteLine1') %>
-            </small>
+            <small><%= t('page.dashboard.cards.monthBillingTitle') %></small>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Doughnut: Processos por status -->
-    <div class="col-lg-4">
-      <div class="ibox">
-        <div class="ibox-title">
-          <h5><%= t('page.dashboard.sections.byStatus') %></h5>
-        </div>
-        <div class="ibox-content">
-          <div class="dash-doughnut-wrap">
-            <canvas id="processStatusChart"></canvas>
-            <div id="processStatusEmpty" class="dash-empty-chart" style="display:none;">
-              <%= t('page.dashboard.labels.emptyPeriod') %>
+      <div class="col-lg-2">
+        <div class="ibox">
+          <div class="ibox-title">
+            <span class="label label-info float-right"><%= t('page.dashboard.filters.annual') %></span>
+            <h5>Faturamento</h5>
+          </div>
+          <div class="ibox-content">
+            <h1 id="annualRevenue" class="no-margins">-</h1>
+            <div class="stat-percent font-bold text-info">
+              <span id="annualDelta">-</span> <i class="fa fa-level-up"></i>
             </div>
+            <small><%= t('page.dashboard.cards.yearBillingTitle') %></small>
           </div>
-          <div class="text-center m-t-sm">
-            <small><%= t('page.dashboard.labels.yearByStatus') %></small>
+        </div>
+      </div>
+
+      <!-- Média mensal -->
+      <div class="col-lg-2">
+        <div class="ibox">
+          <div class="ibox-title">
+            <span class="label label-primary float-right">Ano</span>
+            <h5><%= t('page.dashboard.cards.monthlyAverageTitle') %></h5>
+          </div>
+          <div class="ibox-content">
+            <h1 id="avgMonthlyRevenue" class="no-margins">-</h1>
+            <div class="stat-percent font-bold text-navy">
+              <span id="avgMonthlyHint">-</span> <i class="fa fa-line-chart"></i>
+            </div>
+            <small><%= t('page.dashboard.cards.monthlyAverageHelp') %></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Melhor mês -->
+      <div class="col-lg-2">
+        <div class="ibox">
+          <div class="ibox-title">
+            <span class="label label-warning float-right">Ano</span>
+            <h5><%= t('page.dashboard.cards.bestMonthTitle') %></h5>
+          </div>
+          <div class="ibox-content">
+            <h2 id="bestMonthName" class="no-margins">-</h2>
+            <div class="stat-percent font-bold text-warning">
+              <span id="bestMonthRevenue">-</span> <i class="fa fa-trophy"></i>
+            </div>
+            <small><%= t('page.dashboard.cards.bestMonthHelp') %></small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Processos próximos do prazo (top 2) -->
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title">
+            <h5><%= t('page.dashboard.sections.nearDeadline') %></h5>
+          </div>
+
+          <div id="nearDueContainer" class="dash-inprogress-list">
+            <div class="ibox-content"><small><%= t('page.dashboard.labels.loading') %></small></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ROW 3: Grid de Processos -->
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="ibox">
-        <div class="ibox-title">
-          <h5><%= t('page.dashboard.sections.processes') %></h5>
-        </div>
+    <!-- ROW 2: Line + Doughnut -->
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="ibox">
+          <div class="ibox-content">
+            <div>
+              <span class="float-right text-right">
+                <small><%= t('page.dashboard.labels.totalInvoicesInPeriod') %> <strong id="totalInvoicesInPeriod">-</strong></small>
+                <br />
+                <small><%= t('page.dashboard.labels.totalProcessesInPeriod') %> <strong id="totalProcessesInPeriod">-</strong></small>
+              </span>
+              <h3 class="font-bold no-margins"><%= t('page.dashboard.sections.annualBilling') %></h3>
+              <small><%= t('page.dashboard.labels.legend') %></small>
+            </div>
 
-        <div class="ibox-content">
-          <div class="row">
-            <div class="col-sm-9 m-b-xs">
-              <div class="btn-group">
-                <button id="btnReloadProcesses" class="btn btn-sm btn-white" type="button">
-                  <i class="fa fa-refresh"></i> <%= t('page.dashboard.table.reload') %>
-                </button>
+            <div class="m-t-sm">
+              <div class="dash-chart-wrap">
+                <canvas id="lineChart"></canvas>
               </div>
             </div>
-            <div class="col-sm-3">
-              <div class="input-group mb-3">
-                <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="<%= t('page.dashboard.table.search') %>">
-                <div class="input-group-append">
-                  <button id="btnSearch" class="btn btn-sm btn-primary" type="button"><%= t('page.dashboard.table.search') %></button>
+
+            <div class="m-t-md">
+              <small class="float-right">
+                <i class="fa fa-clock-o"></i>
+                <%= t('page.dashboard.labels.updatedAt') %> <span id="lastUpdateAt">-</span>
+              </small>
+              <small>
+                <strong><%= t('page.dashboard.labels.note') %></strong> <%= t('page.dashboard.labels.noteLine1') %>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doughnut -->
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title">
+            <h5><%= t('page.dashboard.sections.byStatus') %></h5>
+          </div>
+          <div class="ibox-content">
+            <div class="dash-doughnut-wrap">
+              <canvas id="processStatusChart"></canvas>
+              <div id="processStatusEmpty" class="dash-empty-chart" style="display:none;">
+                <%= t('page.dashboard.labels.emptyPeriod') %>
+              </div>
+            </div>
+            <div class="text-center m-t-sm">
+              <small><%= t('page.dashboard.labels.yearByStatus') %></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Grid de Processos -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="ibox">
+          <div class="ibox-title">
+            <h5><%= t('page.dashboard.sections.processes') %></h5>
+          </div>
+
+          <div class="ibox-content">
+            <div class="row">
+              <div class="col-sm-9 m-b-xs">
+                <div class="btn-group">
+                  <button id="btnReloadProcesses" class="btn btn-sm btn-white" type="button">
+                    <i class="fa fa-refresh"></i> <%= t('page.dashboard.table.reload') %>
+                  </button>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <div class="input-group mb-3">
+                  <input id="processSearch" type="text" class="form-control form-control-sm" placeholder="<%= t('page.dashboard.table.search') %>">
+                  <div class="input-group-append">
+                    <button id="btnSearch" class="btn btn-sm btn-primary" type="button"><%= t('page.dashboard.table.search') %></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="process_number"><%= t('page.dashboard.table.process') %> <span class="sort-indicator"></span></th>
+                    <th class="sortable" data-sort="company"><%= t('page.dashboard.table.company') %> <span class="sort-indicator"></span></th>
+                    <th class="sortable" data-sort="completed"><%= t('page.dashboard.table.completed') %> <span class="sort-indicator"></span></th>
+                    <th class="sortable" data-sort="status"><%= t('page.dashboard.table.status') %> <span class="sort-indicator"></span></th>
+                    <th class="sortable" data-sort="invoice"><%= t('page.dashboard.table.invoice') %> <span class="sort-indicator"></span></th>
+                    <th><%= t('page.dashboard.table.action') %></th>
+                  </tr>
+                </thead>
+                <tbody id="processesTbody">
+                  <tr><td colspan="6"><%= t('page.dashboard.table.loading') %></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="row m-t-sm">
+              <div class="col-sm-6">
+                <small id="processesCount">-</small>
+              </div>
+              <div class="col-sm-6 text-right">
+                <button id="prevPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.previous') %></button>
+                <button id="nextPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.next') %></button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       VIEW 2: MEUS PROCESSOS (dashboard “da empresa logada”)
+  ========================================================== -->
+  <div id="dashMyProcessesWrap" style="display:none;">
+
+    <div class="wrapper wrapper-content animated fadeInUp">
+
+      <!-- Row 1: Line chart + Notificações -->
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="ibox">
+            <div class="ibox-content">
+              <div>
+                <span class="float-right text-right">
+                  <small class="dash-muted">Atualizado em: <strong id="lastUpdateAtCompany">-</strong></small>
+                  <br />
+                  <span class="dash-muted">Empresa:</span> <strong id="companyNameText">-</strong>
+                </span>
+
+                <h1 class="m-b-xs" id="lineTotalYear">R$ 0,00</h1>
+                <h3 class="font-bold no-margins">Valores dos meus Processos</h3>
+                <small class="dash-muted">Somatório dos invoices por mês (ano atual).</small>
+              </div>
+
+              <div class="m-t-md">
+                <div class="dash-chart-wrap-company">
+                  <!-- REMOVIDO height="70" para não “espremir” -->
+                  <canvas id="lineChartCompany"></canvas>
+                </div>
+              </div>
+
+              <div class="m-t-md">
+                <small class="dash-muted">
+                  <strong>Observação:</strong> valores calculados com base nos invoices vinculados à sua empresa.
+                </small>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Notificações</h5>
+            </div>
+            <div class="ibox-content dash-mini-list" id="notificationsList">
+              <div class="feed-element">
+                <div class="media-body">
+                  Bem-vindo ao seu dashboard! Em breve teremos notificações reais aqui.
+                  <br />
+                  <small class="dash-muted">Hoje</small>
+                </div>
+              </div>
+              <div class="feed-element">
+                <div class="media-body">
+                  Dica: clique em um processo para abrir os detalhes.
+                  <br />
+                  <small class="dash-muted">Hoje</small>
+                </div>
+              </div>
+              <div class="feed-element">
+                <div class="media-body">
+                  Você pode acompanhar os eventos do processo ativo mais recente na timeline.
+                  <br />
+                  <small class="dash-muted">Hoje</small>
                 </div>
               </div>
             </div>
           </div>
-
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th class="sortable" data-sort="process_number"><%= t('page.dashboard.table.process') %> <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="company"><%= t('page.dashboard.table.company') %> <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="completed"><%= t('page.dashboard.table.completed') %> <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="status"><%= t('page.dashboard.table.status') %> <span class="sort-indicator"></span></th>
-                  <th class="sortable" data-sort="invoice"><%= t('page.dashboard.table.invoice') %> <span class="sort-indicator"></span></th>
-                  <th><%= t('page.dashboard.table.action') %></th>
-                </tr>
-              </thead>
-              <tbody id="processesTbody">
-                <tr><td colspan="6"><%= t('page.dashboard.table.loading') %></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="row m-t-sm">
-            <div class="col-sm-6">
-              <small id="processesCount">-</small>
-            </div>
-            <div class="col-sm-6 text-right">
-              <button id="prevPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.previous') %></button>
-              <button id="nextPage" class="btn btn-sm btn-white" type="button"><%= t('page.dashboard.table.next') %></button>
-            </div>
-          </div>
-
         </div>
       </div>
+
+      <!-- Row 2: KPI cards -->
+      <div class="row dash-kpi">
+        <div class="col-lg-4">
+          <div class="ibox">
+            <div class="ibox-title">
+              <span class="label label-primary float-right">Total</span>
+              <h5>Número de processos GECOM</h5>
+            </div>
+            <div class="ibox-content">
+              <h1 class="no-margins" id="kpiProcessCount">0</h1>
+              <small class="dash-muted">Processos vinculados à sua empresa</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="ibox">
+            <div class="ibox-title">
+              <span class="label label-info float-right">Este ano</span>
+              <h5>Valor total de processos</h5>
+            </div>
+            <div class="ibox-content">
+              <h1 class="no-margins" id="kpiTotalYear">R$ 0,00</h1>
+              <small class="dash-muted">Somatório dos invoices do ano</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="ibox">
+            <div class="ibox-title">
+              <span class="label label-success float-right">Status 4</span>
+              <h5>Processos fechados</h5>
+            </div>
+            <div class="ibox-content">
+              <h1 class="no-margins" id="kpiClosedCount">0</h1>
+              <small class="dash-muted">Processos com status = 4</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Top 2 + Timeline -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Novos dados para o relatório</h5>
+            </div>
+
+            <div class="ibox-content">
+              <div class="table-responsive">
+                <table class="table table-striped dash-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 160px;">Processo</th>
+                      <th style="width: 140px;">Status</th>
+                      <th style="width: 200px;">Criado em</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top2ProcessesTbody">
+                    <tr><td colspan="3">Carregando...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <small class="dash-muted">Mostrando os 2 processos mais recentes.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="ibox">
+            <div class="ibox-title">
+              <h5>Timeline</h5>
+              <span class="label label-primary" id="timelineBadge">Processo ativo</span>
+            </div>
+
+            <div class="ibox-content inspinia-timeline" id="timelineWrap">
+              <div id="timelineEmpty" class="dash-muted">Carregando timeline...</div>
+              <div id="timelineContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+
   </div>
+
 </div>
 
 <% contentFor('scripts') %>
@@ -298,7 +481,6 @@
 <script src="../Assets/inspinia/js/inspinia.js"></script>
 <script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
-
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
 
 <script>
@@ -310,7 +492,33 @@
   $(document).ready(function () {
     $("#masterHeader").hide();
 
-    // -------------------- Helpers --------------------
+    // -------------------- View toggle --------------------
+    var myProcessesLoaded = false;
+
+    function setView(viewName) {
+      if (viewName === "myprocesses") {
+        $("#dashBillingWrap").hide();
+        $("#dashMyProcessesWrap").show();
+        $("#yearFilterWrap").hide(); // ano só no faturamento
+
+        if (!myProcessesLoaded) {
+          myProcessesLoaded = true;
+          loadMyProcessesDashboard();
+        }
+        return;
+      }
+
+      // default: billing
+      $("#dashMyProcessesWrap").hide();
+      $("#dashBillingWrap").show();
+      $("#yearFilterWrap").show();
+    }
+
+    $("#dashboardPicker").on("change", function () {
+      setView(String($(this).val() || "billing"));
+    });
+
+    // -------------------- Helpers (shared/billing) --------------------
     function toNumber(value) {
       var n = Number(String(value ?? "").replace(",", "."));
       return Number.isFinite(n) ? n : 0;
@@ -324,6 +532,10 @@
         }
       } catch (e) { }
       return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+    }
+
+    function moneyPtBr(value, currencyCode) {
+      return moneyCurrencyPtBr(value, currencyCode);
     }
 
     function formatDateTimePtBr(value) {
@@ -344,14 +556,24 @@
       try { $(".pie").peity("pie"); } catch (e) { }
     }
 
-    function pickInvoiceDate(inv) {
-      return inv?.quote_at || inv?.created_at || null;
+    async function fetchJson(url) {
+      var res = await fetch(url, { headers: { "Accept": "application/json" } });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
+      return data;
     }
 
-    function pickInvoiceTotal(inv) {
-      return inv?.total ?? 0;
+    function normalizeArrayResponse(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
     }
 
+    // -------- Invoice helpers (billing) --------
+    function pickInvoiceDate(inv) { return inv?.quote_at || inv?.created_at || null; }
+    function pickInvoiceTotal(inv) { return inv?.total ?? 0; }
     function pickInvoiceStatus(inv) {
       var s = inv?.status ?? inv?.invoice_status ?? inv?.invoiceStatus ?? inv?.state ?? inv?.statecode ?? null;
       if (s == null) return null;
@@ -359,7 +581,7 @@
       return Number.isFinite(n) ? n : null;
     }
 
-    // -------- Process Status (usa window.ProcessStatusEnum) --------
+    // -------- Process helpers (billing + myprocesses) --------
     function getProcessStatusValue(p) {
       var v = p?.status;
       var n = Number(v);
@@ -375,27 +597,16 @@
 
     function getProcessStatusCssFull(p) {
       var v = getProcessStatusValue(p);
-
       var cssClass = "label-default";
       if (v != null && window.ProcessStatusEnum?.getCssClass) {
         cssClass = window.ProcessStatusEnum.getCssClass(v) || "label-default";
       }
-
       return "label " + cssClass;
     }
 
-    function pickProcessNumber(p) {
-      return p?.process_number || p?.processNumber || p?.number || p?.code || p?.id || "-";
-    }
-
-    function pickProcessCompanyName(p) {
-      return p?.companies?.company_name || p?.company?.company_name || p?.company_name || p?.companyName || "-";
-    }
-
-    function pickProcessId(p) {
-      return p?.id || p?.process_id || p?.processId || null;
-    }
-
+    function pickProcessNumber(p) { return p?.process_number || p?.processNumber || p?.number || p?.code || p?.id || "-"; }
+    function pickProcessCompanyName(p) { return p?.companies?.company_name || p?.company?.company_name || p?.company_name || p?.companyName || "-"; }
+    function pickProcessId(p) { return p?.id || p?.process_id || p?.processId || null; }
     function pickProcessInvoice(p) {
       var v =
         p?.invoice ??
@@ -414,15 +625,9 @@
       return s.length ? s : "-";
     }
 
-    function pickProcessCreatedAt(p) {
-      return p?.created_on || p?.createdOn || p?.created_at || p?.createdAt || null;
-    }
+    function pickProcessCreatedAt(p) { return p?.created_on || p?.createdOn || p?.created_at || p?.createdAt || null; }
+    function pickProcessUpdatedAt(p) { return p?.updated_on || p?.updatedOn || p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_on || p?.createdOn || null; }
 
-    function pickProcessUpdatedAt(p) {
-      return p?.updated_on || p?.updatedOn || p?.updated_at || p?.updatedAt || p?.modified_at || p?.modifiedAt || p?.created_on || p?.createdOn || null;
-    }
-
-    // Used for "Próximo do prazo" ordering (best effort)
     function pickProcessDueAt(p) {
       return (
         p?.ship_date || p?.shipDate ||
@@ -454,37 +659,11 @@
       return n;
     }
 
-    async function fetchJson(url) {
-      var res = await fetch(url, { headers: { "Accept": "application/json" } });
-      var data = await res.json().catch(function () { return {}; });
-      if (!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
-      return data;
-    }
-
-    // -------------------- Time/Filters --------------------
-    var now = new Date();
-    var currentYear = now.getFullYear();
-    var currentMonth = now.getMonth();
-    var selectedYear = currentYear;
-
-    $("#yearFilter").val(String(selectedYear));
-
-    function computeRanges() {
-      var yearStart = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
-      var yearEnd = new Date(selectedYear + 1, 0, 1, 0, 0, 0, 0);
-
-      var monthStart = new Date(selectedYear, currentMonth, 1, 0, 0, 0, 0);
-      var monthEnd = new Date(selectedYear, currentMonth + 1, 1, 0, 0, 0, 0);
-
-      return { yearStart: yearStart, yearEnd: yearEnd, monthStart: monthStart, monthEnd: monthEnd };
-    }
-
+    // -------------------- BILLING dashboard state --------------------
     var monthsPt = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
     var lineChart = null;
     var doughnutChart = null;
 
-    // -------------------- Grid state --------------------
     var allProcesses = [];
     var viewProcesses = [];
     var sortState = { key: "process_number", dir: "asc" };
@@ -590,14 +769,10 @@
       applyPeity();
     }
 
-    // TOP 2 - Próximo do prazo (status 2)
     function renderNearDue(processesInSelectedYear) {
       var items = Array.isArray(processesInSelectedYear) ? processesInSelectedYear.slice() : [];
 
-      items = items.filter(function (p) {
-        var v = getProcessStatusValue(p);
-        return v === 2;
-      });
+      items = items.filter(function (p) { return getProcessStatusValue(p) === 2; });
 
       items.sort(function (a, b) {
         var ad = new Date(pickProcessDueAt(a) || pickProcessUpdatedAt(a) || 0).getTime();
@@ -650,10 +825,6 @@
       });
     }
 
-    function pickProcessDateForYearFilter(p) {
-      return pickProcessCreatedAt(p) || pickProcessUpdatedAt(p) || null;
-    }
-
     function renderProcessStatusDoughnut(processesYear) {
       var $empty = $("#processStatusEmpty");
       var canvas = document.getElementById("processStatusChart");
@@ -700,15 +871,7 @@
 
       doughnutChart = new Chart(ctx, {
         type: "doughnut",
-        data: {
-          labels: labels,
-          datasets: [{
-            data: values,
-            backgroundColor: bg,
-            borderColor: border,
-            borderWidth: 1
-          }]
-        },
+        data: { labels: labels, datasets: [{ data: values, backgroundColor: bg, borderColor: border, borderWidth: 1 }] },
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -726,14 +889,30 @@
       });
     }
 
-    var INVOICE_STATUS = {
-      rascunho: 0,
-      ativo: 1,
-      faturado: 3,
-      pago: 4
-    };
+    var INVOICE_STATUS = { rascunho: 0, ativo: 1, faturado: 3, pago: 4 };
 
-    async function loadDashboard() {
+    var now = new Date();
+    var currentYear = now.getFullYear();
+    var currentMonth = now.getMonth();
+    var selectedYear = currentYear;
+
+    $("#yearFilter").val(String(selectedYear));
+
+    function computeRanges() {
+      var yearStart = new Date(selectedYear, 0, 1, 0, 0, 0, 0);
+      var yearEnd = new Date(selectedYear + 1, 0, 1, 0, 0, 0, 0);
+
+      var monthStart = new Date(selectedYear, currentMonth, 1, 0, 0, 0, 0);
+      var monthEnd = new Date(selectedYear, currentMonth + 1, 1, 0, 0, 0, 0);
+
+      return { yearStart: yearStart, yearEnd: yearEnd, monthStart: monthStart, monthEnd: monthEnd };
+    }
+
+    function pickProcessDateForYearFilter(p) {
+      return pickProcessCreatedAt(p) || pickProcessUpdatedAt(p) || null;
+    }
+
+    async function loadBillingDashboard() {
       try {
         $("#lastUpdateAt").text(formatDateTimePtBr(new Date()));
 
@@ -743,7 +922,6 @@
         var monthStart = ranges.monthStart;
         var monthEnd = ranges.monthEnd;
 
-        // ✅ Load invoices + processes in parallel
         var results = await Promise.all([
           fetchJson("/api/invoices?fields=summary"),
           fetchJson("/api/processes?fields=dashboard")
@@ -752,18 +930,13 @@
         var invoicesResp = results[0];
         var processesResp = results[1];
 
-        // --------- INVOICES ---------
-        var invoicesRaw = Array.isArray(invoicesResp) ? invoicesResp : (invoicesResp?.data || invoicesResp?.items || []);
+        var invoicesRaw = normalizeArrayResponse(invoicesResp);
 
         // Filter out "faturado"
         var invoices = invoicesRaw.filter(function (inv) {
           var st = pickInvoiceStatus(inv);
           return st !== INVOICE_STATUS.faturado;
         });
-
-        // Single pass: month/year arrays + sums + monthly buckets
-        var invoicesMonth = [];
-        var invoicesYear = [];
 
         var totalsByMonthAll = new Array(12).fill(0);
         var activeByMonth = new Array(12).fill(0);
@@ -782,15 +955,9 @@
           var total = toNumber(pickInvoiceTotal(inv));
           var st = pickInvoiceStatus(inv);
 
-          // month
-          if (dt >= monthStart && dt < monthEnd) {
-            invoicesMonth.push(inv);
-            monthSumAll += total;
-          }
+          if (dt >= monthStart && dt < monthEnd) monthSumAll += total;
 
-          // year
           if (dt >= yearStart && dt < yearEnd) {
-            invoicesYear.push(inv);
             yearSumAll += total;
 
             var m = dt.getMonth();
@@ -817,7 +984,6 @@
         $("#avgMonthlyRevenue").text(moneyCurrencyPtBr(avgMonthly, "BRL"));
         $("#avgMonthlyHint").text("Ano ÷ 12");
 
-        // Best month
         var bestMonthIndex = 0;
         var bestMonthValue = totalsByMonthAll[0] || 0;
         for (var i = 1; i < 12; i++) {
@@ -830,7 +996,6 @@
         $("#bestMonthName").text(monthsPt[bestMonthIndex] || "-");
         $("#bestMonthRevenue").text(moneyCurrencyPtBr(bestMonthValue, "BRL"));
 
-        // Chart
         var estimatedByMonth = new Array(12).fill(30000);
 
         var lineData = {
@@ -896,10 +1061,12 @@
           lineChart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
         }
 
-        $("#totalInvoicesInPeriod").text(String(invoicesYear.length));
+        $("#totalInvoicesInPeriod").text(String(invoices.filter(function (inv) {
+          var dt = new Date(pickInvoiceDate(inv) || 0);
+          return dt >= yearStart && dt < yearEnd;
+        }).length));
 
-        // --------- PROCESSES ---------
-        var processes = Array.isArray(processesResp) ? processesResp : (processesResp?.data || processesResp?.items || []);
+        var processes = normalizeArrayResponse(processesResp);
 
         var processesYear = processes.filter(function (p) {
           var dtRaw = pickProcessDateForYearFilter(p);
@@ -922,7 +1089,7 @@
         renderProcessesTable();
 
       } catch (e) {
-        console.error("Erro ao carregar dashboard:", e);
+        console.error("Erro ao carregar dashboard faturamento:", e);
         $("#monthlyRevenue").text("Erro");
         $("#annualRevenue").text("Erro");
         $("#avgMonthlyRevenue").text("Erro");
@@ -933,14 +1100,13 @@
       }
     }
 
-    // -------------------- UI events --------------------
+    // -------------------- Billing UI events --------------------
     $(document).on("click", ".sortable", function () {
       var key = $(this).data("sort");
       if (!key) return;
 
-      if (sortState.key === key) {
-        sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
-      } else {
+      if (sortState.key === key) sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
+      else {
         sortState.key = key;
         sortState.dir = (key === "completed") ? "desc" : "asc";
       }
@@ -950,7 +1116,7 @@
       renderProcessesTable();
     });
 
-    $("#btnReloadProcesses").on("click", function () { loadDashboard(); });
+    $("#btnReloadProcesses").on("click", function () { loadBillingDashboard(); });
 
     $("#btnSearch").on("click", function () {
       pageIndex = 0;
@@ -979,10 +1145,264 @@
     $("#yearFilter").on("change", function () {
       var v = Number($(this).val());
       if (Number.isFinite(v)) selectedYear = v;
-      loadDashboard();
+      loadBillingDashboard();
     });
 
+    // -------------------- MY PROCESSES dashboard --------------------
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function pickCompanyId() {
+      return (
+        window.__auth?.company_id ||
+        window.__auth?.companyId ||
+        window.__auth?.company?.id ||
+        window.__auth?.company?.company_id ||
+        null
+      );
+    }
+
+    function pickCompanyName() {
+      return (
+        window.__auth?.company_name ||
+        window.__auth?.companyName ||
+        window.__auth?.company?.company_name ||
+        window.__auth?.company?.company_name ||
+        "-"
+      );
+    }
+
+    function pickInvoiceCurrency(inv) {
+      return inv?.currency_code || inv?.currency || inv?.currencyCode || null;
+    }
+
+    function typeToMeta(type) {
+      var t = Number(type ?? 0);
+      switch (t) {
+        case 8: return { icon: "fa fa-briefcase", label: "Informação", color: "#1ab394" };
+        case 1: return { icon: "fa fa-file-text", label: "Documento", color: "#1c84c6" };
+        case 2: return { icon: "fa fa-phone", label: "Reunião / Telefonema", color: "#f8ac59" };
+        case 3: return { icon: "fa fa-coffee", label: "Reunião presencial / Café", color: "#23c6c8" };
+        case 4: return { icon: "fa fa-plane", label: "Informação - Aérea", color: "#e1bb00" };
+        case 5: return { icon: "fa fa-ship", label: "Informação - Marítimo", color: "#445fad" };
+        case 6: return { icon: "fa fa-truck", label: "Informação - Terrestre", color: "#a17f72" };
+        case 7: return { icon: "fa fa-check-circle-o", label: "Processo finalizado", color: "#dc3545" };
+        case 9: return { icon: "fa fa-envelope-o", label: "Email", color: "#1c84c6" };
+        default: return { icon: "fa fa-info-circle", label: "Evento", color: "#999" };
+      }
+    }
+
+    function renderTimeline(events) {
+      var wrap = document.getElementById("timelineContainer");
+      var empty = document.getElementById("timelineEmpty");
+      if (!wrap) return;
+
+      wrap.innerHTML = "";
+
+      var rows = Array.isArray(events) ? events : [];
+      if (!rows.length) {
+        if (empty) empty.textContent = "Nenhum evento encontrado para o processo ativo.";
+        return;
+      }
+
+      if (empty) empty.style.display = "none";
+
+      rows = rows.slice().sort(function (a, b) {
+        return new Date(b?.start_time ?? 0) - new Date(a?.start_time ?? 0);
+      });
+
+      rows.forEach(function (ev) {
+        var meta = typeToMeta(ev?.type);
+        var title = escapeHtml(ev?.title || "Evento");
+        var desc = escapeHtml(ev?.description || "");
+        var when = ev?.start_time ? formatDateTimePtBr(ev.start_time) : "-";
+
+        var item = document.createElement("div");
+        item.className = "timeline-item";
+        item.innerHTML = `
+          <div class="row">
+            <div class="col-3 date">
+              <i class="${escapeHtml(meta.icon)}" style="color:${escapeHtml(meta.color)}"></i>
+              <br/>
+              <small class="text-navy">${escapeHtml(when)}</small>
+            </div>
+            <div class="col-9 content">
+              <p class="m-b-xs"><strong>${title}</strong></p>
+              ${desc ? `<p>${desc}</p>` : `<p class="dash-muted">Sem descrição</p>`}
+              <span class="text-muted"><small>${escapeHtml(meta.label)}</small></span>
+            </div>
+          </div>
+        `;
+        wrap.appendChild(item);
+      });
+    }
+
+    var lineChartCompany = null;
+
+    function buildLineChartCompany(labels, values, currencyCode) {
+      var el = document.getElementById("lineChartCompany");
+      if (!el) return;
+
+      var ctx = el.getContext("2d");
+      if (lineChartCompany) {
+        try { lineChartCompany.destroy(); } catch (e) {}
+      }
+
+      var data = {
+        labels: labels,
+        datasets: [{
+          label: "Invoices",
+          backgroundColor: "rgba(26,179,148,0.2)",
+          borderColor: "rgba(26,179,148,0.8)",
+          pointBackgroundColor: "rgba(26,179,148,1)",
+          pointBorderColor: "#fff",
+          data: values
+        }]
+      };
+
+      var options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        tooltips: {
+          callbacks: {
+            label: function (tooltipItem) {
+              return moneyPtBr(tooltipItem.yLabel, currencyCode);
+            }
+          }
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              callback: function (v) { return moneyPtBr(v, currencyCode); }
+            }
+          }]
+        }
+      };
+
+      lineChartCompany = new Chart(ctx, { type: "line", data: data, options: options });
+    }
+
+    async function loadMyProcessesDashboard() {
+      $("#companyNameText").text(pickCompanyName());
+
+      var companyId = pickCompanyId();
+      if (!companyId) {
+        $("#timelineEmpty").text("Não foi possível identificar a empresa logada (company_id).");
+        $("#top2ProcessesTbody").html("<tr><td colspan='3'>Empresa não identificada.</td></tr>");
+        return;
+      }
+
+      try {
+        window.GECOM?.spinner?.show("Carregando dashboard...");
+
+        var [procRes, invRes] = await Promise.all([
+          fetchJson("/api/processes?company_id=" + encodeURIComponent(String(companyId))),
+          fetchJson("/api/invoices?company_id=" + encodeURIComponent(String(companyId)))
+        ]);
+
+        var processes = normalizeArrayResponse(procRes);
+        var invoices = normalizeArrayResponse(invRes);
+
+        $("#kpiProcessCount").text(String(processes.length));
+
+        var closedCount = processes.filter(function (p) { return Number(p?.status) === 4; }).length;
+        $("#kpiClosedCount").text(String(closedCount));
+
+        var now = new Date();
+        var year = now.getFullYear();
+
+        var totalYear = 0;
+        var currencyCode = null;
+
+        invoices.forEach(function (inv) {
+          var dt = inv?.quote_at || inv?.created_at || inv?.createdAt || inv?.issued_at || inv?.issue_date || inv?.date || null;
+          if (!dt) return;
+          var d = new Date(dt);
+          if (Number.isNaN(d.getTime())) return;
+          if (d.getFullYear() !== year) return;
+
+          totalYear += toNumber(inv?.total ?? inv?.total_value ?? inv?.total_amount ?? inv?.amount ?? inv?.grand_total ?? inv?.value ?? 0);
+          if (!currencyCode) currencyCode = pickInvoiceCurrency(inv);
+        });
+
+        $("#kpiTotalYear").text(moneyPtBr(totalYear, currencyCode));
+        $("#lineTotalYear").text(moneyPtBr(totalYear, currencyCode));
+        $("#lastUpdateAtCompany").text(formatDateTimePtBr(new Date().toISOString()));
+
+        var monthsPt2 = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        var monthly = new Array(12).fill(0);
+
+        invoices.forEach(function (inv) {
+          var dt = inv?.quote_at || inv?.created_at || inv?.createdAt || inv?.issued_at || inv?.issue_date || inv?.date || null;
+          if (!dt) return;
+          var d = new Date(dt);
+          if (Number.isNaN(d.getTime())) return;
+          if (d.getFullYear() !== year) return;
+
+          monthly[d.getMonth()] += toNumber(inv?.total ?? inv?.total_value ?? inv?.total_amount ?? inv?.amount ?? inv?.grand_total ?? inv?.value ?? 0);
+        });
+
+        buildLineChartCompany(monthsPt2, monthly, currencyCode);
+
+        var top2 = processes.slice().sort(function (a, b) {
+          return new Date(pickProcessCreatedAt(b) ?? 0) - new Date(pickProcessCreatedAt(a) ?? 0);
+        }).slice(0, 2);
+
+        if (!top2.length) {
+          $("#top2ProcessesTbody").html("<tr><td colspan='3'>Nenhum processo encontrado.</td></tr>");
+        } else {
+          var topHtml = top2.map(function (p) {
+            var num = escapeHtml(pickProcessNumber(p));
+            var stLabel = escapeHtml(getProcessStatusLabel(p));
+            var stClass = escapeHtml(getProcessStatusCssFull(p));
+            var created = escapeHtml(formatDateTimePtBr(pickProcessCreatedAt(p)));
+            return `
+              <tr style="cursor:pointer;" onclick="window.location='ProcessDetail?id=${encodeURIComponent(String(p?.id || ''))}'">
+                <td><strong>${num}</strong></td>
+                <td><span class="${stClass}">${stLabel}</span></td>
+                <td>${created}</td>
+              </tr>
+            `;
+          }).join("");
+
+          $("#top2ProcessesTbody").html(topHtml);
+        }
+
+        var active = processes
+          .filter(function (p) { return Number(p?.status) === 0; })
+          .sort(function (a, b) { return new Date(pickProcessCreatedAt(b) ?? 0) - new Date(pickProcessCreatedAt(a) ?? 0); })[0];
+
+        if (!active?.id) {
+          $("#timelineEmpty").text("Nenhum processo ativo (status 0) encontrado.");
+          $("#timelineBadge").text("Sem processo ativo");
+          return;
+        }
+
+        $("#timelineBadge").text("Processo ativo: " + (active?.process_number || active?.id));
+
+        var detail = await fetchJson("/api/processes/" + encodeURIComponent(String(active.id)));
+        var events = detail?.events || detail?.Events || detail?.eventos || [];
+        renderTimeline(events);
+
+      } catch (e) {
+        console.error("DashboardCompany error:", e);
+        $("#top2ProcessesTbody").html("<tr><td colspan='3'>Erro ao carregar.</td></tr>");
+        $("#timelineEmpty").text(e?.message || "Erro ao carregar a timeline.");
+      } finally {
+        window.GECOM?.spinner?.hide();
+      }
+    }
+
+    // -------------------- Bootstrap init --------------------
     setSortIndicator();
-    loadDashboard();
+    loadBillingDashboard();
+    setView("billing");
   });
 </script>

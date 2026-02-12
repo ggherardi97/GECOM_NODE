@@ -36,17 +36,17 @@
       <div class="ibox-title">
         <div class="header-row">
           <div>
-            <h5 style="margin-bottom:4px;"><%= t('page.newProduct.pageTitle') %></h5>
-            <div class="muted" id="subtitle"><%= t('page.newProduct.subtitle') %></div>
+            <h5 style="margin-bottom:4px;">Novo Produto</h5>
+            <div class="muted" id="subtitle">Preencha os campos e clique em Criar.</div>
           </div>
 
           <div class="toolbar-right">
             <a class="btn btn-sm btn-white" href="/Products">
-              <i class="fa fa-arrow-left"></i> <%= t('page.newProduct.actions.back') %>
+              <i class="fa fa-arrow-left"></i> Voltar
             </a>
 
             <button id="btnCreate" class="btn btn-sm btn-primary" disabled>
-              <i class="fa fa-plus"></i> <%= t('page.newProduct.actions.create') %>
+              <i class="fa fa-plus"></i> Criar
             </button>
           </div>
         </div>
@@ -55,8 +55,8 @@
       <div class="ibox-content">
         <div class="tabs-container">
           <ul class="nav nav-tabs">
-            <li><a class="nav-link active" data-toggle="tab" href="#tab-info"><%= t('page.newProduct.tabs.info') %></a></li>
-            <li><a class="nav-link" data-toggle="tab" href="#tab-pricing"><%= t('page.newProduct.tabs.prices') %></a></li>
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-info">Informações</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-pricing">Preços</a></li>
           </ul>
 
           <div class="tab-content">
@@ -65,44 +65,44 @@
                 <div class="row">
                   <div class="col-lg-8">
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.productNameRequired') %></label>
-                      <input id="name" type="text" class="form-control" placeholder="<%= t('page.newProduct.placeholders.productName') %>" />
+                      <label>Nome do produto *</label>
+                      <input id="name" type="text" class="form-control" placeholder="Nome do produto" />
                     </div>
 
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.productCodeRequired') %></label>
-                      <input id="product_code" type="text" class="form-control" placeholder="<%= t('page.newProduct.placeholders.productCodeExample') %>" />
-                      <div class="muted" style="margin-top:6px;"><%= t('page.newProduct.form.productCodeUniqueHint') %></div>
+                      <label>Código do produto *</label>
+                      <input id="product_code" type="text" class="form-control" placeholder="Ex: SRV-CONT-001" />
+                      <div class="muted" style="margin-top:6px;">Esse código precisa ser único.</div>
                     </div>
 
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.brand') %></label>
-                      <input id="brand" type="text" class="form-control" placeholder="<%= t('page.newProduct.placeholders.brand') %>" />
+                      <label>Marca</label>
+                      <input id="brand" type="text" class="form-control" placeholder="Marca" />
                     </div>
 
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.unit') %></label>
-                      <input id="unit" type="text" class="form-control" placeholder="<%= t('page.newProduct.form.unitExample') %>" />
+                      <label>Unidade</label>
+                      <input id="unit" type="text" class="form-control" placeholder="pacote, serviço, caixa..." />
                     </div>
 
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.description') %></label>
+                      <label>Descrição</label>
                       <textarea id="description" class="form-control" rows="5"
-                        placeholder="<%= t('page.newProduct.form.productDescription') %>"></textarea>
+                        placeholder="Descrição do produto"></textarea>
                     </div>
                   </div>
 
                   <div class="col-lg-4">
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.status') %></label>
+                      <label>Status</label>
                       <select id="is_active" class="form-control">
-                        <option value="true" selected><%= t('page.newProduct.form.statusActive') %></option>
-                        <option value="false"><%= t('page.newProduct.form.statusInactive') %></option>
+                        <option value="true" selected>Ativo</option>
+                        <option value="false">Inativo</option>
                       </select>
                     </div>
 
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.currencyRequired') %></label>
+                      <label>Moeda *</label>
                       <select id="currency_id" class="form-control"></select>
                     </div>
                   </div>
@@ -116,14 +116,14 @@
 
                   <div class="col-lg-6">
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.defaultPriceRequired') %></label>
+                      <label>Preço padrão *</label>
                   
                       <div class="input-group m-b">
                         <div class="input-group-prepend">
                           <span class="input-group-addon" id="pricePrefix">R$</span>
                         </div>
                   
-                        <input id="default_unit_price" type="text" class="form-control" placeholder="<%= t('page.newProduct.placeholders.defaultPrice') %>" autocomplete="off"
+                        <input id="default_unit_price" type="text" class="form-control" placeholder="0,00" autocomplete="off"
                           inputmode="decimal" />
                       </div>
                     </div>
@@ -131,9 +131,9 @@
 
                   <div class="col-lg-6">
                     <div class="form-row">
-                      <label><%= t('page.newProduct.form.defaultTax') %></label>
-                      <input id="default_tax_rate" type="text" class="form-control" placeholder="<%= t('page.newProduct.placeholders.defaultTaxExample') %>" />
-                      <div class="muted" style="margin-top:6px;"><%= t('page.newProduct.hints.taxExample') %></div>
+                      <label>Imposto padrão (0..1)</label>
+                      <input id="default_tax_rate" type="text" class="form-control" placeholder="Ex: 0,15" />
+                      <div class="muted" style="margin-top:6px;">Use 0,15 para 15%.</div>
                     </div>
                   </div>
                 
@@ -165,7 +165,7 @@
       async function apiGet(url) {
         const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
         const data = await readJsonSafe(res);
-        if (!res.ok) throw new Error(data?.message || t('page.newProduct.messages.requestFail'));
+        if (!res.ok) throw new Error(data?.message || "Request failed");
         return data;
       }
 
@@ -176,7 +176,7 @@
           body: JSON.stringify(body ?? {})
         });
         const data = await readJsonSafe(res);
-        if (!res.ok) throw new Error(data?.message || t('page.newProduct.messages.requestFail'));
+        if (!res.ok) throw new Error(data?.message || "Request failed");
         return data;
       }
 
@@ -305,15 +305,15 @@ default_tax_rate: moneyToDecimalString($("#default_tax_rate").val()),
       }
 
       function validate(model) {
-        if (!model.name) return t('page.newProduct.messages.nameRequired');
-        if (!model.product_code) return t('page.newProduct.messages.productCodeRequired');
-        if (!model.currency_id) return t('page.newProduct.messages.currencyRequired');
+        if (!model.name) return "Nome do produto é obrigatório.";
+        if (!model.product_code) return "Código do produto é obrigatório.";
+        if (!model.currency_id) return "Moeda é obrigatória.";
 
         const price = Number(model.default_unit_price);
-        if (Number.isNaN(price) || price < 0) return t('page.newProduct.messages.defaultPriceInvalid');
+        if (Number.isNaN(price) || price < 0) return "Preço padrão inválido.";
 
         const tax = Number(model.default_tax_rate);
-        if (Number.isNaN(tax) || tax < 0) return t('page.newProduct.messages.defaultTaxInvalid');
+        if (Number.isNaN(tax) || tax < 0) return "Imposto padrão inválido.";
 
         return null;
       }
@@ -331,8 +331,8 @@ default_tax_rate: moneyToDecimalString($("#default_tax_rate").val()),
 
       pageLoad();
       async function pageLoad() {
-        $("#pageName").text(t('page.newProduct.breadcrumbs.pageName'));
-        $("#subpageName").text(t('page.newProduct.breadcrumbs.subpageName'));
+        $("#pageName").text("Produtos");
+        $("#subpageName").text("Novo Produto");
 
         try {
           const cur = await apiGet("/api/currencies?is_active=true");
@@ -385,13 +385,11 @@ installTaxMaskClassic();
               const err = validate(payload);
               if (err) { alert(err); return; }
 
-              $("#btnCreate")
-                .prop("disabled", true)
-                .html('<i class="fa fa-spinner fa-spin"></i> ' + t('page.newProduct.actions.creating'));
+              $("#btnCreate").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Criando...');
 
               const created = await apiPost("/api/products", payload);
 
-              alert(t('page.newProduct.messages.createSuccess'));
+              alert("Produto criado com sucesso.");
 
               if (created?.id) {
                 window.location = `/ProductDetail?id=${encodeURIComponent(created.id)}`;
@@ -401,14 +399,14 @@ installTaxMaskClassic();
               window.location = "/Products";
             } catch (e) {
               console.error(e);
-              $("#btnCreate").html('<i class="fa fa-plus"></i> ' + t('page.newProduct.actions.create'));
+              $("#btnCreate").html('<i class="fa fa-plus"></i> Criar');
               updateCreateEnabled();
-              alert(t('page.newProduct.messages.createFail'));
+              alert("Falha ao criar o produto.");
             }
           });
         } catch (e) {
           console.error(e);
-          alert(t('page.newProduct.messages.loadCurrenciesFail'));
+          alert("Falha ao carregar moedas.");
           window.location = "/Products";
         }
       }

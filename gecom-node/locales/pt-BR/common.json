@@ -517,7 +517,8 @@
             "estimatedDelivery": "Previsão de Entrega",
             "processType": "Tipo de Processo",
             "clientContact": "Contato do Cliente *",
-            "companyContactsHint": "Selecione uma empresa para listar os contatos."
+            "companyContactsHint": "Selecione uma empresa para listar os contatos.",
+        "invoiceRelated": "Invoice relacionado"
           },
           "transports": {
             "title": "Transportes do processo",
@@ -529,7 +530,10 @@
               "destination": "Destino *",
               "etaDeparture": "Previsão Embarque",
               "etaArrival": "Previsão Chegada",
-              "actions": "Ações"
+              "actions": "Ações",
+          "company": "Companhia *",
+          "type": "Tipo *",
+          "status": "Status *"
             },
             "countries": {
               "france": "França",
@@ -550,8 +554,22 @@
             "uploadOnFinish": "O upload será feito ao finalizar.",
             "dragHint": "Você também pode arrastar os arquivos para a área abaixo.",
             "maxFiles": "Máximo 5 arquivos.",
-            "renameHint": "Você poderá renomear cada arquivo abaixo antes de finalizar."
-          }
+            "renameHint": "Você poderá renomear cada arquivo abaixo antes de finalizar.",
+        "selectFiles": "Selecionar arquivos"
+          },
+           "placeholders": {
+        "systemFilled": "Preenchido pelo sistema."
+      },
+      "messages": {
+        "requestFail": "Falha na requisição.",
+        "saveFail": "Falha ao salvar.",
+        "transportRequired": "Adicione pelo menos 1 transporte.",
+        "transportInvalid": "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.",
+        "companyRequired": "Empresa é obrigatória.",
+        "contactRequired": "Contato do Cliente é obrigatório.",
+        "maxFiles": "Máximo 5 arquivos.",
+        "createFail": "Falha ao criar processo/transportes/documentos."
+      }
         },
 
 "newInvoice": {

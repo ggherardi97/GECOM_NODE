@@ -34,13 +34,13 @@
       </div>
 
       <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-6" style="    padding-top: 57px;">
           <h5>De:</h5>
           <address>
-            <strong><%= from?.name || "GECOM" %></strong><br>
-            <%= from?.addr1 || "-" %><br>
-            <%= from?.addr2 || "" %>
-            <abbr title="Telefone">T:</abbr> <%= from?.phone || "-" %>
+            <strong><%= from?.name || "Convert Solution" %></strong><br>
+            Rua Fagundes Varela 121<br>
+            Apto 106
+            <abbr title="Telefone">T:</abbr> <%= from?.phone || "+55 96138-3449" %>
           </address>
         </div>
 
@@ -81,8 +81,8 @@
               <% lines.forEach(function(l){ %>
                 <tr>
                   <td>
-                    <div><strong><%= l.product_name || "Manual" %></strong></div>
-                    <small><%= l.description || "" %></small>
+                    <div><%= l.description || "" %></div>
+                    <small></small>
                   </td>
                   <td class="text-right"><%= l.quantityFmt %></td>
                   <td class="text-right"><%= l.unitPriceFmt %></td>
