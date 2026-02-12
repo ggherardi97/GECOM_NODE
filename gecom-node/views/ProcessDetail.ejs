@@ -951,11 +951,11 @@ function renderTransports(list) {
     tr.style.cursor = "pointer";
     let disabled = "";
 
-    if (window.__auth.isAdmin) {
-      tr.addEventListener("click", function () {
-        openEditTransportModal(t);
+    if (!window.__auth.isAdmin) {
+      // tr.addEventListener("click", function () {
+      //   openEditTransportModal(t);
+      // });
     disabled = "disabled='disabled'";
-      });
     }
 
 

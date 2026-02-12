@@ -1,0 +1,525 @@
+<style>
+  .ibox-title {
+    padding: 15px 90px 20px 15px;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .muted {
+    color: #888;
+    font-size: 12px;
+  }
+
+  .form-row {
+    margin-bottom: 12px;
+  }
+
+  .form-row label {
+    font-weight: 600;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .readonly-box {
+    background: #f9f9f9;
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    padding: 10px;
+  }
+
+  .readonly-box .row {
+    margin-bottom: 8px;
+  }
+
+  .badge-sev {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    border: 1px solid #e7eaec;
+    background: #f3f3f4;
+    margin-left: 8px;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div class="header-row">
+          <div>
+            <h5 style="margin-bottom:4px;" id="pageTitle">Nova Notificação</h5>
+            <div class="muted" id="subtitle">Preencha os campos e clique em Criar.</div>
+          </div>
+
+          <div class="toolbar-right">
+            <a class="btn btn-sm btn-white" href="/Notifications">
+              <i class="fa fa-arrow-left"></i> Voltar
+            </a>
+
+            <button id="btnSave" class="btn btn-sm btn-primary" disabled>
+              <i class="fa fa-plus"></i> Criar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="tabs-container">
+          <ul class="nav nav-tabs">
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-main">Informações</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-system">Sistema</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- TAB MAIN -->
+            <div id="tab-main" class="tab-pane active">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-8">
+                    <div class="form-row">
+                      <label>Mensagem *</label>
+                      <textarea id="message" class="form-control" rows="6" placeholder="Digite a mensagem da notificação"></textarea>
+                      <div class="muted" style="margin-top:6px;">
+                        Essa mensagem será exibida para todos os usuários da companhia selecionada.
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Título</label>
+                      <input id="title" type="text" class="form-control" placeholder="Ex: Mudança de prazo / Aviso importante" maxlength="150" />
+                    </div>
+
+                    <div class="form-row">
+                      <label>Data de início</label>
+                      <input id="starts_at" type="datetime-local" class="form-control" />
+                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação aparece imediatamente.</div>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Data de expiração</label>
+                      <input id="expires_at" type="datetime-local" class="form-control" />
+                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação não expira.</div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-4">
+                    <div class="form-row">
+                      <label>Companhia *</label>
+                      <select id="company_id" class="form-control"></select>
+                      <div class="muted" style="margin-top:6px;">Selecione a companhia que irá receber a notificação.</div>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Severidade</label>
+                      <select id="severity" class="form-control">
+                        <option value="INFO" selected>Info</option>
+                        <option value="WARNING">Atenção</option>
+                        <option value="CRITICAL">Crítico</option>
+                      </select>
+                      <div class="muted" style="margin-top:6px;">
+                        Ajuda a destacar notificações importantes.
+                        <span class="badge-sev" id="sevBadge">INFO</span>
+                      </div>
+                    </div>
+
+                    <div class="form-row">
+                      <label>Status</label>
+                      <select id="is_active" class="form-control">
+                        <option value="true" selected>Ativo</option>
+                        <option value="false">Inativo</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <button id="btnMarkRead" class="btn btn-sm btn-white btn-block" style="display:none;">
+                        <i class="fa fa-check"></i> Marcar como lida (minha conta)
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB SYSTEM -->
+            <div id="tab-system" class="tab-pane">
+              <div class="panel-body">
+                <div class="readonly-box">
+                  <div class="row">
+                    <div class="col-lg-3"><strong>ID</strong></div>
+                    <div class="col-lg-9"><span id="sys_id">—</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3"><strong>Criado em</strong></div>
+                    <div class="col-lg-9"><span id="sys_created_at">—</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3"><strong>Atualizado em</strong></div>
+                    <div class="col-lg-9"><span id="sys_updated_at">—</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3"><strong>Criado por</strong></div>
+                    <div class="col-lg-9"><span id="sys_created_by">—</span></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-3"><strong>Tenant</strong></div>
+                    <div class="col-lg-9"><span id="sys_tenant">—</span></div>
+                  </div>
+                </div>
+
+                <div class="muted" style="margin-top:10px;">
+                  Campos do sistema são somente leitura.
+                </div>
+              </div>
+            </div>
+
+          </div><!-- tab-content -->
+        </div><!-- tabs-container -->
+      </div><!-- ibox-content -->
+    </div><!-- ibox -->
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+<script>
+  (function () {
+    let companies = [];
+    let initialModel = null;
+    let notificationId = null;
+
+    function toStr(v) { return v == null ? "" : String(v); }
+
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value == null || value === "" ? "—" : String(value);
+    }
+
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function readJsonSafe(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try { return JSON.parse(text); } catch { return { message: text }; }
+    }
+
+    async function apiGet(url) {
+      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    async function apiPost(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body ?? {})
+      });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    async function apiPatch(url, body) {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body ?? {})
+      });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    function normalizeDateTimeLocal(value) {
+      // returns ISO string or null
+      const raw = String(value || "").trim();
+      if (!raw) return null;
+
+      // datetime-local comes as "YYYY-MM-DDTHH:mm"
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return null;
+      return d.toISOString();
+    }
+
+    function toDateTimeLocalValue(value) {
+      // input: ISO date string (UTC) or null -> output: "YYYY-MM-DDTHH:mm" in local time
+      if (!value) return "";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+
+      const pad = (n) => String(n).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth() + 1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+
+    function getModel() {
+      return {
+        company_id: $("#company_id").val() || null,
+        message: $("#message").val().trim(),
+        title: $("#title").val().trim() || null,
+        severity: $("#severity").val() || "INFO",
+        starts_at: normalizeDateTimeLocal($("#starts_at").val()),
+        expires_at: normalizeDateTimeLocal($("#expires_at").val()),
+        is_active: $("#is_active").val() === "true"
+      };
+    }
+
+    function validate(model) {
+      if (!model.company_id) return "Companhia é obrigatória.";
+      if (!model.message) return "Mensagem é obrigatória.";
+
+      if (model.starts_at && model.expires_at) {
+        const s = new Date(model.starts_at);
+        const e = new Date(model.expires_at);
+        if (!Number.isNaN(s.getTime()) && !Number.isNaN(e.getTime()) && e <= s) {
+          return "A data de expiração precisa ser maior que a data de início.";
+        }
+      }
+
+      return null;
+    }
+
+    function isDirty() {
+      if (!initialModel) return false;
+      return JSON.stringify(getModel()) !== JSON.stringify(initialModel);
+    }
+
+    function updateSaveEnabled() {
+      const model = getModel();
+      const requiredOk = !!model.company_id && !!model.message;
+      $("#btnSave").prop("disabled", !(requiredOk && isDirty()));
+    }
+
+    function setMode(isEdit) {
+      if (isEdit) {
+        $("#pageTitle").text("Editar Notificação");
+        $("#subtitle").text("Altere os campos e clique em Salvar.");
+        $("#btnSave").html('<i class="fa fa-save"></i> Salvar');
+        $("#subpageName").text("Editar Notificação");
+        $("#btnMarkRead").show();
+      } else {
+        $("#pageTitle").text("Nova Notificação");
+        $("#subtitle").text("Preencha os campos e clique em Criar.");
+        $("#btnSave").html('<i class="fa fa-plus"></i> Criar');
+        $("#subpageName").text("Nova Notificação");
+        $("#btnMarkRead").hide();
+      }
+    }
+
+async function loadCompanies() {
+  // Igual ao NovoProcesso: sem filtro e com parse robusto
+  const data = await apiGet("/api/companies");
+  const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
+
+  companies = [];
+  const sel = $("#company_id");
+  sel.empty().append(`<option value="">Selecionar...</option>`);
+
+  list.forEach(c => {
+    const id = String(c?.id || "").trim();
+
+    // ✅ mesmo padrão do NovoProcesso
+    const name = String(
+      c?.company_name ||
+      c?.fantasy_name ||
+      c?.legal_name ||
+      c?.name ||
+      ""
+    ).trim();
+
+    if (!id || !name) return;
+
+    companies.push({ id, name });
+    sel.append(`<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`);
+  });
+
+  if (companies.length === 0) {
+    sel.empty().append(`<option value="">(Nenhuma companhia encontrada)</option>`);
+  }
+}
+
+
+    function bindSeverityBadge() {
+      function render() {
+        const v = $("#severity").val() || "INFO";
+        $("#sevBadge").text(v);
+      }
+      $("#severity").on("change", render);
+      render();
+    }
+
+    function fillForm(model) {
+      $("#company_id").val(model.company_id || "");
+      $("#message").val(model.message || "");
+      $("#title").val(model.title || "");
+      $("#severity").val(model.severity || "INFO");
+      $("#is_active").val(model.is_active === false ? "false" : "true");
+
+      $("#starts_at").val(toDateTimeLocalValue(model.starts_at));
+      $("#expires_at").val(toDateTimeLocalValue(model.expires_at));
+    }
+
+    function fillSystem(model) {
+      setText("sys_id", model?.id);
+      setText("sys_created_at", model?.created_at ? new Date(model.created_at).toLocaleString("pt-BR") : "");
+      setText("sys_updated_at", model?.updated_at ? new Date(model.updated_at).toLocaleString("pt-BR") : "");
+      setText("sys_tenant", model?.tenant_id || "");
+
+      const createdByName = model?.createdBy?.name || model?.createdBy?.email || model?.created_by_user_id || "";
+      setText("sys_created_by", createdByName);
+    }
+
+    async function loadNotificationIfEdit() {
+      notificationId = getQueryParam("id");
+      const isEdit = !!(notificationId && String(notificationId).trim().length > 0);
+      setMode(isEdit);
+
+      if (!isEdit) return null;
+
+      // IMPORTANTE:
+      // - Isso depende do seu backend/proxy ter GET /api/notifications/:id
+      // - Se você ainda não tiver GET no backend, eu te mando o endpoint pronto.
+      const data = await apiGet(`/api/notifications/${encodeURIComponent(notificationId)}`);
+      return data;
+    }
+
+    async function markRead() {
+      if (!notificationId) return;
+
+      try {
+        $("#btnMarkRead").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Marcando...');
+        await apiPost(`/api/notifications/${encodeURIComponent(notificationId)}/read`, {});
+        alert("Notificação marcada como lida (para sua conta).");
+      } catch (e) {
+        console.error(e);
+        alert("Falha ao marcar como lida.");
+      } finally {
+        $("#btnMarkRead").prop("disabled", false).html('<i class="fa fa-check"></i> Marcar como lida (minha conta)');
+      }
+    }
+
+    pageLoad();
+    async function pageLoad() {
+      $("#pageName").text("Notificações");
+
+      try {
+        await loadCompanies();
+        bindSeverityBadge();
+
+        const existing = await loadNotificationIfEdit();
+        if (existing) {
+          // Map backend fields to front model (keep it tolerant)
+          const mapped = {
+            id: existing.id,
+            tenant_id: existing.tenant_id,
+            company_id: existing.company_id || existing.company?.id || null,
+            message: existing.message || "",
+            title: existing.title || null,
+            severity: existing.severity || "INFO",
+            starts_at: existing.starts_at || null,
+            expires_at: existing.expires_at || null,
+            is_active: existing.is_active !== false,
+            created_at: existing.created_at || null,
+            updated_at: existing.updated_at || null,
+            createdBy: existing.createdBy || null,
+            created_by_user_id: existing.created_by_user_id || null
+          };
+
+          fillForm(mapped);
+          fillSystem(mapped);
+        } else {
+          // Defaults
+          $("#is_active").val("true");
+          $("#severity").val("INFO");
+        }
+
+        initialModel = getModel();
+        updateSaveEnabled();
+
+        $("input, textarea, select").on("keyup change", updateSaveEnabled);
+
+        $("#btnMarkRead").on("click", function () {
+          markRead();
+        });
+
+        $("#btnSave").on("click", async function () {
+          try {
+            const payload = getModel();
+            const err = validate(payload);
+            if (err) { alert(err); return; }
+
+            const isEdit = !!notificationId;
+
+            $("#btnSave").prop("disabled", true).html(`<i class="fa fa-spinner fa-spin"></i> ${isEdit ? "Salvando..." : "Criando..."}`);
+
+            if (!isEdit) {
+              const created = await apiPost("/api/notifications", payload);
+              alert("Notificação criada com sucesso.");
+
+              if (created?.id) {
+                window.location = `/NotificationDetail?id=${encodeURIComponent(created.id)}`;
+                return;
+              }
+
+              window.location = "/Notifications";
+              return;
+            }
+
+            const updated = await apiPatch(`/api/notifications/${encodeURIComponent(notificationId)}`, payload);
+            alert("Notificação salva com sucesso.");
+
+            // Refresh system tab info if backend returns it
+            if (updated?.id) {
+              fillSystem(updated);
+            }
+
+            initialModel = getModel();
+            updateSaveEnabled();
+
+            $("#btnSave").html('<i class="fa fa-save"></i> Salvar');
+          } catch (e) {
+            console.error(e);
+            const isEdit = !!notificationId;
+            $("#btnSave").html(isEdit ? '<i class="fa fa-save"></i> Salvar' : '<i class="fa fa-plus"></i> Criar');
+            updateSaveEnabled();
+            alert(isEdit ? "Falha ao salvar a notificação." : "Falha ao criar a notificação.");
+          }
+        });
+
+      } catch (e) {
+        console.error(e);
+        alert("Falha ao carregar a página de Notificações.");
+        window.location = "/Notifications";
+      }
+    }
+  })();
+</script>
+<% %>

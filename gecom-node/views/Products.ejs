@@ -1,8 +1,14 @@
+<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
 <style>
   .ibox-title {
     padding: 15px 90px 20px 15px;
   }
-
+.text-muted{
+display: none !important;
+}
+  .sv-actions{
+    margin-left: unset !important;
+  }
   th {
     padding-left: 0px;
   }
@@ -22,38 +28,94 @@
     font-size: 11px;
     opacity: .75;
   }
+
+  /* Saved views host alignment */
+  #productsSavedViewsHost .sv-bar {
+    margin-top: -2px;
+  }
+
+  /* bulk delete button (next to view icons) */
+  #btnDeleteSelectedProducts {
+    padding: 3px 8px;
+  }
+
+  /* datepicker icon */
+  .sv-date-filter .input-group-addon {
+    padding: 3px 8px;
+    cursor: pointer;
+  }
+
+  /* fix datepicker over tables/modals */
+  .ui-datepicker {
+    z-index: 9999 !important;
+  }
+
+  /* Selection column must NEVER hide */
+  th.sv-fixed-col,
+  td.sv-fixed-col {
+    display: table-cell !important;
+    visibility: visible !important;
+  }
+
+  /* tiny checkbox alignment */
+  .sv-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* compact range input */
+  .sv-date-range .input-group {
+    margin-bottom: 0;
+  }
+
+  /* top-right counters */
+  .sv-counters {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 10px;
+    color: #777;
+    font-size: 12px;
+  }
+
+  .sv-actionbar-btn {
+    padding: 3px 8px;
+  }
+
+  /* Range highlight */
+  .ui-datepicker td.range-start a,
+  .ui-datepicker td.range-end a {
+    font-weight: 700;
+  }
+  .ui-datepicker td.in-range a {
+    opacity: .95;
+  }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
   <div class="col-lg-12">
     <div class="ibox ">
       <div class="ibox-title">
-        <h5><%= t('page.products.pageTitle') %></h5>
+        <!-- ✅ Saved Views replaces title -->
+        <div id="productsSavedViewsHost"></div>
+
         <div class="ibox-tools">
+          <span class="sv-counters" id="productsCounters">
+            <span id="productsCountLabel">Exibindo 0 de 0</span>
+          </span>
+
           <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="/NewProduct"><%= t('page.products.header.newProduct') %></a>
         </div>
       </div>
 
       <div class="ibox-content">
         <div class="row">
-          <!-- <div class="col-sm-9 m-b-xs">
-            <div data-toggle="buttons" class="btn-group btn-group-toggle">
-              <label class="btn btn-sm btn-white">
-                <input type="radio" id="option1" name="options"> Day
-              </label>
-              <label class="btn btn-sm btn-white active">
-                <input type="radio" id="option2" name="options"> Week
-              </label>
-              <label class="btn btn-sm btn-white">
-                <input type="radio" id="option3" name="options"> Month
-              </label>
-            </div>
-          </div> -->
-
+          <!-- 🔥 Removido filtro global de ativo (evita forçar "Produtos Ativos") -->
           <div class="col-sm-3" style="display:none;">
             <select id="activeFilter" class="form-control input-sm">
-              <option value=""><%= t('page.products.filters.all') %></option>
-              <option value="true" selected><%= t('page.products.filters.activePlural') %></option>
+              <option value="" selected><%= t('page.products.filters.all') %></option>
+              <option value="true"><%= t('page.products.filters.activePlural') %></option>
               <option value="false"><%= t('page.products.filters.inactivePlural') %></option>
             </select>
           </div>
@@ -63,18 +125,21 @@
           <table class="table table-striped" id="productsTable">
             <thead>
               <!-- Filters row -->
-              <tr>
-                <th style="width:60px;"></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Código" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Nome" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Brand" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Unidade" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Moeda" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Preço" /></th>
-                <th><input type="text" class="form-control input-sm" placeholder="Filtrar por Imposto" /></th>
+              <tr id="productsFiltersRow">
+                <!-- fixed selection column -->
+                <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:60px;"></th>
+
+                <!-- IMPORTANT: data-field ties filters to columns (so reordering/views won't break filtering) -->
+                <th data-field="product_code"><input type="text" class="form-control input-sm" placeholder="Filtrar por Código" /></th>
+                <th data-field="name"><input type="text" class="form-control input-sm" placeholder="Filtrar por Nome" /></th>
+                <th data-field="brand"><input type="text" class="form-control input-sm" placeholder="Filtrar por Brand" /></th>
+                <th data-field="unit"><input type="text" class="form-control input-sm" placeholder="Filtrar por Unidade" /></th>
+                <th data-field="currency_text"><input type="text" class="form-control input-sm" placeholder="Filtrar por Moeda" /></th>
+                <th data-field="default_unit_price"><input type="text" class="form-control input-sm" placeholder="Filtrar por Preço" /></th>
+                <th data-field="default_tax_rate"><input type="text" class="form-control input-sm" placeholder="Filtrar por Imposto" /></th>
 
                 <!-- ✅ Active column filter: picklist -->
-                <th>
+                <th data-field="is_active_text">
                   <select id="activeColumnFilter" class="form-control input-sm">
                     <option value=""><%= t('page.products.filters.all') %></option>
                     <option value="yes"><%= t('page.products.filters.active') %></option>
@@ -82,28 +147,42 @@
                   </select>
                 </th>
 
-                <!-- ✅ Created filter: datepicker -->
-                <th>
-                  <input id="createdOnFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa" />
+                <!-- ✅ Created filter: SINGLE input date RANGE + icon -->
+                <th class="sv-date-filter sv-date-range" data-field="created_at_text">
+                  <div class="input-group">
+                    <input id="createdOnRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <span class="input-group-addon" id="createdOnRangeBtn" title="Selecionar intervalo">
+                      <i class="fa fa-calendar"></i>
+                    </span>
+                  </div>
+
+                  <!-- Hidden fields kept for Saved Views compatibility -->
+                  <input id="createdOnFromFilter" type="hidden" />
+                  <input id="createdOnToFilter" type="hidden" />
                 </th>
+
               </tr>
 
               <!-- Header row -->
-              <tr>
-                <th class="sortable" data-sort-key="rowNumber"><%= t('page.products.columns.number') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="product_code"><%= t('page.products.columns.code') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="name" style="    width: 24%;"><%= t('page.products.columns.name') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="brand"><%= t('page.products.columns.brand') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="unit"><%= t('page.products.columns.unit') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="currency_text"><%= t('page.products.columns.currency') %> <span class="sort-indicator"></span></th>
+              <tr id="productsHeaderRow">
+                <!-- ✅ checkbox only (no #) -->
+                <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:60px;">
+                  <label class="sv-select-wrap" style="margin:0;">
+                    <input type="checkbox" id="selectAllProducts" />
+                  </label>
+                </th>
 
-                <!-- NOTE: sorting uses displayed value (string). If you want numeric sort, I can adjust to use hidden numeric -->
-                <th class="sortable" data-sort-key="default_unit_price"><%= t('page.products.columns.price') %> <span
-                    class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="product_code" data-field="product_code"><%= t('page.products.columns.code') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="name" data-field="name" style="width: 24%;"><%= t('page.products.columns.name') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="brand" data-field="brand"><%= t('page.products.columns.brand') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="unit" data-field="unit"><%= t('page.products.columns.unit') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="currency_text" data-field="currency_text"><%= t('page.products.columns.currency') %> <span class="sort-indicator"></span></th>
 
-                <th class="sortable" data-sort-key="default_tax_rate"><%= t('page.products.columns.tax') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="is_active_text"><%= t('page.products.columns.status') %> <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="created_at_text"><%= t('page.products.columns.createdAt') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="default_unit_price" data-field="default_unit_price"><%= t('page.products.columns.price') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="default_tax_rate" data-field="default_tax_rate"><%= t('page.products.columns.tax') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text" data-field="is_active_text"><%= t('page.products.columns.status') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text" data-field="created_at_text"><%= t('page.products.columns.createdAt') %> <span class="sort-indicator"></span></th>
+
               </tr>
             </thead>
 
@@ -117,44 +196,51 @@
 </div>
 
 <% contentFor('scripts') %>
-  <!-- jQuery UI (datepicker) -->
+  <script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+  <script src="../Assets/inspinia/js/plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- jQuery UI (datepicker + sortable used by SavedViewsGrid columns modal) -->
   <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
 
   <script>
-      function redirectToProduct(productId) {
-        if (!productId) return;
+    function redirectToProduct(productId) {
+      if (!productId) return;
+      localStorage.setItem("selectedProductId", String(productId));
+      window.location = `/ProductDetail?id=${encodeURIComponent(productId)}`;
+    }
 
-        // Optional: keep for later use
-        localStorage.setItem("selectedProductId", String(productId));
-
-        // Use querystring to load detail
-        window.location = `/ProductDetail?id=${encodeURIComponent(productId)}`;
-      }
     (function () {
 
-      // ✅ Inject translations into JS (no global t() needed)
       const I18N = {
         pageTitle: "<%- String(t('page.products.pageTitle')).replace(/"/g, '\\"') %>",
         statusActive: "<%- String(t('page.products.filters.active')).replace(/"/g, '\\"') %>",
         statusInactive: "<%- String(t('page.products.filters.inactive')).replace(/"/g, '\\"') %>",
         errorLoadProducts: "<%- String(t('page.products.messages.errorLoadProducts')).replace(/"/g, '\\"') %>",
-        errorApplyFilter: "<%- String(t('page.products.messages.errorApplyFilter')).replace(/"/g, '\\"') %>"
+        errorApplyFilter: "<%- String(t('page.products.messages.errorApplyFilter')).replace(/"/g, '\\"') %>",
+        confirmDeleteView: "Excluir esta view?",
+        confirmDeleteProducts: "Excluir {0} produto(s)?",
+        errorDeleteView: "Falha ao excluir a view.",
+        errorSaveView: "Falha ao salvar a view."
       };
-
-      init();
-      console.log("[Products] Script loaded");
-
-      // -------------------- Breadcrumbs (same pattern) --------------------
-      function setBreadcrumbs() {
-        $("#pageName").text(I18N.pageTitle);
-        $("#subpageName").text(I18N.pageTitle);
-      }
-
 
       // -------------------- State --------------------
       let products = [];
-      const currencyCache = new Map(); // currency_id -> { code, name, symbol }
+      const currencyCache = new Map();
       const sortState = { key: null, dir: "asc" };
+      const selection = { ids: new Set() };
+
+      const savedViewsState = {
+        viewId: null,
+        name: "",
+        columns: [],
+        columns_order: [],
+        filters: [],
+        sort: [],
+        pageSize: 0,
+        quickSearch: ""
+      };
+
+      // Date range selection state (for single input)
+      const createdRange = { start: null, end: null, selecting: false };
 
       // -------------------- Utils --------------------
       function escapeHtml(value) {
@@ -177,6 +263,26 @@
         return `${day}/${month}/${year}`;
       }
 
+      function parseDatePtBR(text) {
+        const raw = String(text || "").trim();
+        if (!raw) return null;
+        const m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return null;
+        const dd = Number(m[1]);
+        const mm = Number(m[2]);
+        const yyyy = Number(m[3]);
+        const dt = new Date(yyyy, mm - 1, dd, 0, 0, 0, 0);
+        if (Number.isNaN(dt.getTime())) return null;
+        return dt;
+      }
+
+      function formatRangeText(start, end) {
+        if (!start && !end) return "";
+        if (start && !end) return `${formatDatePtBR(start)} -`;
+        if (!start && end) return `- ${formatDatePtBR(end)}`;
+        return `${formatDatePtBR(start)} - ${formatDatePtBR(end)}`;
+      }
+
       function parseDecimalSafe(value) {
         if (value == null) return 0;
         const normalized = String(value).replace(",", ".");
@@ -194,6 +300,19 @@
         return symbol ? `${symbol} ${formatted}` : formatted;
       }
 
+      function setBreadcrumbs() {
+        $("#pageName").text(I18N.pageTitle);
+        $("#subpageName").text(I18N.pageTitle);
+      }
+
+      function setCounters(visibleCount, totalCount) {
+        $("#productsCountLabel").text(`Exibindo ${visibleCount} de ${totalCount}`);
+      }
+
+      function replaceTokens(template, a) {
+        return String(template || "").replace("{0}", String(a));
+      }
+
       // -------------------- API --------------------
       async function readJsonSafe(response) {
         const text = await response.text();
@@ -209,7 +328,32 @@
           console.error("[Products] API error:", url, data);
           throw new Error(data?.message || "Request failed");
         }
+        return data;
+      }
 
+      async function apiDelete(url) {
+        const res = await fetch(url, { method: "DELETE", headers: { "Accept": "application/json" } });
+        const data = await readJsonSafe(res);
+
+        if (!res.ok) {
+          console.error("[Products] API error:", url, data);
+          throw new Error(data?.message || "Request failed");
+        }
+        return data;
+      }
+
+      async function apiPut(url, payload) {
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: { "Accept": "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(payload || {})
+        });
+        const data = await readJsonSafe(res);
+
+        if (!res.ok) {
+          console.error("[Products] API error:", url, data);
+          throw new Error(data?.message || "Request failed");
+        }
         return data;
       }
 
@@ -219,22 +363,43 @@
       }
 
       async function loadProducts() {
-        const active = $("#activeFilter").val(); // "", "true", "false"
+        // ✅ do NOT force any "active" filter by default
+        const active = String($("#activeFilter").val() || "");
         const qs = new URLSearchParams();
         if (active !== "") qs.set("is_active", active);
 
         const url = `/api/products${qs.toString() ? "?" + qs.toString() : ""}`;
-        console.log("[Products] Fetching:", url);
-
         const data = await apiGet(url);
-
-        // Accept either array or { data: [] }
         products = Array.isArray(data) ? data : (data?.data || []);
-        console.log("[Products] Products count:", products.length);
+      }
+
+      // -------------------- Column model (from header) --------------------
+      function getHeaderFieldsInOrder(includeHidden) {
+        const fields = [];
+        $("#productsHeaderRow th").each(function () {
+          const th = $(this);
+          const field = String(th.data("field") || "");
+          if (!field) return;
+
+          const isSpacer = th.hasClass("sv-spacer");
+          const isFixed =
+            String(th.attr("data-sv-fixed") || "").trim().length > 0 ||
+            th.hasClass("sv-fixed-col") ||
+            field === "__select";
+
+          if (!includeHidden) {
+            if (isSpacer) { fields.push(field); return; }
+            if (isFixed) { fields.push(field); return; }
+            if (!th.is(":visible")) return;
+          }
+
+          fields.push(field);
+        });
+        return fields;
       }
 
       // -------------------- Rendering --------------------
-      function buildRowModel(p, index) {
+      function buildRowModel(p) {
         const currency = currencyCache.get(p.currency_id) || null;
 
         const currencyText = currency
@@ -245,184 +410,730 @@
         const formattedPrice = formatMoneyPtBR(priceNumber, currency);
 
         return {
-          rowNumber: index + 1,
+          id: String(p.id || ""),
+
           product_code: p.product_code || "",
           name: p.name || "",
           brand: p.brand || "",
           unit: p.unit || "",
           currency_text: currencyText,
 
-          // ✅ formatted money
+          default_unit_price_raw: parseDecimalSafe(p.default_unit_price),
           default_unit_price: formattedPrice,
 
           default_tax_rate: String(p.default_tax_rate ?? "0"),
+
           is_active_text: p.is_active ? I18N.statusActive : I18N.statusInactive,
+          is_active_yesno: p.is_active ? "yes" : "no",
+
           created_at_text: formatDatePtBR(p.created_at),
         };
       }
 
-      function renderTable() {
+      function renderTableRespectingHeader() {
         const tbody = $("#productsLines");
         tbody.empty();
 
-        products.forEach((p, idx) => {
-          const r = buildRowModel(p, idx);
-
-          tbody.append(`
-      <tr class="clicker" onclick="redirectToProduct('${escapeHtml(p.id)}')">
-        <td>${r.rowNumber}</td>
-        <td>${escapeHtml(r.product_code)}</td>
-        <td>${escapeHtml(r.name)}</td>
-        <td>${escapeHtml(r.brand)}</td>
-        <td>${escapeHtml(r.unit)}</td>
-        <td>${escapeHtml(r.currency_text)}</td>
-        <td class="text-right">${escapeHtml(r.default_unit_price)}</td>
-        <td class="text-right">${escapeHtml(r.default_tax_rate)}</td>
-        <td>${escapeHtml(r.is_active_text)}</td>
-        <td>${escapeHtml(r.created_at_text)}</td>
-      </tr>
-    `);
+        // Keep selection only for existing ids
+        const existingIds = new Set(products.map(p => String(p.id)));
+        Array.from(selection.ids).forEach(id => {
+          if (!existingIds.has(String(id))) selection.ids.delete(String(id));
         });
 
+        const visibleFields = getHeaderFieldsInOrder(false);
+
+        products.forEach((p) => {
+          const r = buildRowModel(p);
+          const checked = selection.ids.has(r.id) ? "checked" : "";
+
+          let tds = "";
+          visibleFields.forEach(field => {
+            if (field === "__select") {
+              tds += `
+                <td class="sv-fixed-col" data-sv-fixed="left">
+                  <div class="sv-select-wrap">
+                    <input type="checkbox" class="rowSelect" data-id="${escapeHtml(r.id)}" ${checked} />
+                  </div>
+                </td>
+              `;
+              return;
+            }
+
+            if (field === "default_unit_price") {
+              tds += `<td data-field="default_unit_price" class="text-right">${escapeHtml(r.default_unit_price)}</td>`;
+              return;
+            }
+
+            if (field === "default_tax_rate") {
+              tds += `<td data-field="default_tax_rate" class="text-right">${escapeHtml(r.default_tax_rate)}</td>`;
+              return;
+            }
+
+            if (field === "is_active_text") {
+              tds += `<td data-field="is_active_text" data-yesno="${escapeHtml(r.is_active_yesno)}">${escapeHtml(r.is_active_text)}</td>`;
+              return;
+            }
+
+            if (field === "created_at_text") {
+              tds += `<td data-field="created_at_text">${escapeHtml(r.created_at_text)}</td>`;
+              return;
+            }
+
+            if (field === "product_code") tds += `<td data-field="product_code">${escapeHtml(r.product_code)}</td>`;
+            else if (field === "name") tds += `<td data-field="name">${escapeHtml(r.name)}</td>`;
+            else if (field === "brand") tds += `<td data-field="brand">${escapeHtml(r.brand)}</td>`;
+            else if (field === "unit") tds += `<td data-field="unit">${escapeHtml(r.unit)}</td>`;
+            else if (field === "currency_text") tds += `<td data-field="currency_text">${escapeHtml(r.currency_text)}</td>`;
+            else if (field === "__spacer__") tds += `<td class="sv-spacer" data-sv-fixed="right"></td>`;
+            else tds += `<td data-field="${escapeHtml(field)}"></td>`;
+          });
+
+          if ($("#productsHeaderRow th.sv-spacer").length) {
+            tds += `<td class="sv-spacer" data-sv-fixed="right"></td>`;
+          }
+
+          tbody.append(`
+            <tr class="clicker" data-id="${escapeHtml(r.id)}">
+              ${tds}
+            </tr>
+          `);
+        });
+
+        syncSelectAllCheckbox();
+        updateBulkDeleteButton();
         rerunAllFilters();
+        updateCountersFromDom();
       }
 
-      // -------------------- Filters --------------------
+      function updateCountersFromDom() {
+        const total = products.length;
+        const visible = $("#productsLines tr:visible").length;
+        setCounters(visible, total);
+      }
+
+      // -------------------- Selection --------------------
+      function syncSelectAllCheckbox() {
+        const all = $("#productsLines .rowSelect:visible");
+        const total = all.length;
+        const checked = all.filter(":checked").length;
+
+        const selectAll = $("#selectAllProducts").get(0);
+        if (!selectAll) return;
+
+        if (total === 0) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+          return;
+        }
+
+        if (checked === 0) {
+          selectAll.checked = false;
+          selectAll.indeterminate = false;
+          return;
+        }
+
+        if (checked === total) {
+          selectAll.checked = true;
+          selectAll.indeterminate = false;
+          return;
+        }
+
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+      }
+
+      function updateBulkDeleteButton() {
+        const btn = $("#btnDeleteSelectedProducts");
+        if (!btn.length) return;
+
+        const count = selection.ids.size;
+        if (count > 0) {
+          btn.show();
+          btn.attr("title", `Excluir ${count} produto(s)`);
+          btn.find(".count").text(String(count));
+        } else {
+          btn.hide();
+          btn.find(".count").text("0");
+        }
+      }
+
+      async function deleteSelectedProducts() {
+        const ids = Array.from(selection.ids);
+        if (ids.length === 0) return;
+
+        const msg = replaceTokens(I18N.confirmDeleteProducts, ids.length);
+        if (!confirm(msg)) return;
+
+        try {
+          for (const id of ids) {
+            await apiDelete(`/api/products/${encodeURIComponent(String(id))}`);
+          }
+
+          selection.ids.clear();
+          $("#selectAllProducts").prop("checked", false).prop("indeterminate", false);
+
+          await loadProducts();
+          renderTableRespectingHeader();
+          updateSortIndicators();
+        } catch (e) {
+          console.error(e);
+          alert(e?.message || "Falha ao excluir produtos.");
+        }
+      }
+
+      // -------------------- Filters (field-based) --------------------
+      function getVisibleHeaderIndexByField() {
+        const map = new Map(); // field -> visible index in row
+        let visibleIndex = 0;
+
+        $("#productsHeaderRow th").each(function () {
+          const th = $(this);
+          const field = String(th.data("field") || "");
+          if (!field) return;
+
+          const fixedAttr = String(th.attr("data-sv-fixed") || "").trim();
+          const isFixed = fixedAttr.length > 0 || th.hasClass("sv-fixed-col") || field === "__select";
+
+          if (!isFixed && !th.is(":visible")) return;
+
+          map.set(field, visibleIndex);
+          visibleIndex += 1;
+        });
+
+        return map;
+      }
+
       function rerunAllFilters() {
         const table = $("#productsTable");
+        const indexMap = getVisibleHeaderIndexByField();
+
         table.find("tbody tr").show();
 
-        // Text filters (all inputs except createdOnFilter)
-        table.find("thead tr:eq(0) input").each(function () {
-          const input = $(this);
-          const id = input.attr("id");
+        // Text inputs by data-field
+        $("#productsFiltersRow th").each(function () {
+          const th = $(this);
+          const field = String(th.data("field") || "");
+          const input = th.find("input");
 
-          if (id === "createdOnFilter") return;
+          if (!field || !input.length) return;
 
-          const index = input.parent().index();
-          const value = (input.val() || "").toLowerCase();
+          const inputId = String(input.attr("id") || "");
+          // Skip range inputs (handled below)
+          if (inputId === "createdOnRangeFilter" || inputId === "createdOnFromFilter" || inputId === "createdOnToFilter") return;
+
+          const value = String(input.val() || "").toLowerCase().trim();
           if (!value) return;
 
+          const cellIndex = indexMap.get(field);
+          if (cellIndex == null) return;
+
           table.find("tbody tr:visible").each(function () {
-            const cellText = $(this).find("td").eq(index).text().toLowerCase();
+            const cellText = $(this).find("td").eq(cellIndex).text().toLowerCase();
             if (cellText.indexOf(value) === -1) $(this).hide();
           });
         });
 
-        // Active column filter (select)
-        const activeSelected = ($("#activeColumnFilter").val() || "").toLowerCase(); // "", "yes", "no"
+        // Active select (yes/no via data-yesno)
+        const activeSelected = String($("#activeColumnFilter").val() || "").toLowerCase().trim();
         if (activeSelected) {
-          const activeColIndex = $("#activeColumnFilter").parent().index();
-          table.find("tbody tr:visible").each(function () {
-            const cellText = $(this).find("td").eq(activeColIndex).text().toLowerCase(); // "yes" / "no"
-            if (cellText !== activeSelected) $(this).hide();
-          });
+          const cellIndex = indexMap.get("is_active_text");
+          if (cellIndex != null) {
+            table.find("tbody tr:visible").each(function () {
+              const td = $(this).find("td").eq(cellIndex);
+              const yesno = String(td.attr("data-yesno") || "").toLowerCase();
+              if (yesno !== activeSelected) $(this).hide();
+            });
+          }
         }
 
-        // Created date filter (exact match dd/mm/yyyy)
-        const createdValue = ($("#createdOnFilter").val() || "").trim();
-        if (createdValue) {
-          const createdColIndex = $("#createdOnFilter").parent().index();
-          table.find("tbody tr:visible").each(function () {
-            const cellText = $(this).find("td").eq(createdColIndex).text().trim();
-            if (cellText !== createdValue) $(this).hide();
-          });
+        // Created date range via hidden fields
+        const fromText = String($("#createdOnFromFilter").val() || "").trim();
+        const toText = String($("#createdOnToFilter").val() || "").trim();
+
+        const fromDate = parseDatePtBR(fromText);
+        const toDate = parseDatePtBR(toText);
+
+        if (fromDate || toDate) {
+          const cellIndex = indexMap.get("created_at_text");
+          if (cellIndex != null) {
+            table.find("tbody tr:visible").each(function () {
+              const cellText = $(this).find("td").eq(cellIndex).text().trim();
+              const cellDate = parseDatePtBR(cellText);
+              if (!cellDate) return;
+
+              if (fromDate && cellDate < fromDate) { $(this).hide(); return; }
+              if (toDate && cellDate > toDate) { $(this).hide(); return; }
+            });
+          }
         }
+
+        syncSelectAllCheckbox();
+        updateBulkDeleteButton();
+        updateCountersFromDom();
       }
 
       // -------------------- Sorting --------------------
-      function compareValues(a, b) {
-        const an = Number(a), bn = Number(b);
-        const bothNumbers = !Number.isNaN(an) && !Number.isNaN(bn);
-        if (bothNumbers) return an - bn;
-        return String(a ?? "").localeCompare(String(b ?? ""), undefined, { numeric: true, sensitivity: "base" });
-      }
-
       function sortProductsBy(key, dir) {
         products = products.slice().sort((pa, pb) => {
-          const rowA = buildRowModel(pa, 0);
-          const rowB = buildRowModel(pb, 0);
+          const a = buildRowModel(pa);
+          const b = buildRowModel(pb);
 
-          let a = rowA[key];
-          let b = rowB[key];
+          let va = a[key];
+          let vb = b[key];
 
-          // ✅ Special case: numeric sort for price
           if (key === "default_unit_price") {
-            a = rowA.default_unit_price_number;
-            b = rowB.default_unit_price_number;
+            va = a.default_unit_price_raw;
+            vb = b.default_unit_price_raw;
           }
 
-          const an = Number(a);
-          const bn = Number(b);
-          const bothNumbers = !Number.isNaN(an) && !Number.isNaN(bn);
+          const na = Number(va);
+          const nb = Number(vb);
+          const bothNumbers = !Number.isNaN(na) && !Number.isNaN(nb);
 
           const cmp = bothNumbers
-            ? an - bn
-            : String(a ?? "").localeCompare(String(b ?? ""), undefined, {
-              numeric: true,
-              sensitivity: "base",
-            });
+            ? na - nb
+            : String(va ?? "").localeCompare(String(vb ?? ""), undefined, { numeric: true, sensitivity: "base" });
 
           return dir === "asc" ? cmp : -cmp;
         });
       }
 
-
       function updateSortIndicators() {
-        $("#productsTable thead tr:eq(1) th.sortable").each(function () {
+        $("#productsHeaderRow th.sortable").each(function () {
           const th = $(this);
           const key = th.data("sort-key");
           const indicator = th.find(".sort-indicator");
 
-          if (sortState.key === key) {
-            indicator.text(sortState.dir === "asc" ? "▲" : "▼");
-          } else {
-            indicator.text("");
+          if (sortState.key === key) indicator.text(sortState.dir === "asc" ? "▲" : "▼");
+          else indicator.text("");
+        });
+      }
+
+      // -------------------- Saved Views helpers --------------------
+      function getAllColumnKeys() {
+        return $("#productsHeaderRow th.sortable")
+          .map(function () { return String($(this).data("sort-key") || ""); })
+          .get()
+          .filter(k => k.length > 0);
+      }
+
+      function captureFiltersForSavedView() {
+        const filters = [];
+
+        // text inputs (excluding hidden range helpers)
+        $("#productsFiltersRow th").each(function () {
+          const th = $(this);
+          const field = String(th.data("field") || "");
+          const input = th.find("input");
+
+          if (!field || field === "__select") return;
+          if (!input.length) return;
+
+          const inputId = String(input.attr("id") || "");
+          if (inputId === "createdOnRangeFilter" || inputId === "createdOnFromFilter" || inputId === "createdOnToFilter") return;
+
+          const value = String(input.val() || "").trim();
+          if (!value) return;
+
+          filters.push({ field, op: "contains", value });
+        });
+
+        const activeValue = String($("#activeColumnFilter").val() || "").trim();
+        if (activeValue) filters.push({ field: "is_active_text", op: "eq", value: activeValue });
+
+        // Keep gte/lte for compatibility (use hidden fields)
+        const fromValue = String($("#createdOnFromFilter").val() || "").trim();
+        if (fromValue) filters.push({ field: "created_at_text", op: "gte", value: fromValue });
+
+        const toValue = String($("#createdOnToFilter").val() || "").trim();
+        if (toValue) filters.push({ field: "created_at_text", op: "lte", value: toValue });
+
+        return filters;
+      }
+
+      function applyFiltersFromSavedView(def) {
+        $("#productsFiltersRow input").val("");
+        $("#activeColumnFilter").val("");
+        $("#createdOnRangeFilter").val("");
+        $("#createdOnFromFilter").val("");
+        $("#createdOnToFilter").val("");
+
+        (def.filters || []).forEach(f => {
+          const field = String(f.field || "");
+          const op = String(f.op || "").toLowerCase().trim();
+          const value = f.value != null ? String(f.value) : "";
+          if (!field) return;
+
+          if (field === "is_active_text") {
+            $("#activeColumnFilter").val(value);
+            return;
+          }
+
+          if (field === "created_at_text") {
+            if (op === "gte") $("#createdOnFromFilter").val(value);
+            if (op === "lte") $("#createdOnToFilter").val(value);
+            return;
+          }
+
+          const th = $(`#productsFiltersRow th[data-field="${field}"]`);
+          if (th.length) {
+            const input = th.find("input");
+            if (input.length) input.val(value);
+          }
+        });
+
+        // Sync single range text from hidden fields
+        const start = parseDatePtBR($("#createdOnFromFilter").val());
+        const end = parseDatePtBR($("#createdOnToFilter").val());
+        createdRange.start = start;
+        createdRange.end = end;
+        createdRange.selecting = false;
+        $("#createdOnRangeFilter").val(formatRangeText(start, end));
+
+        rerunAllFilters();
+      }
+
+      function applySortFromSavedView(def) {
+        const sort = Array.isArray(def.sort) ? def.sort : [];
+        const first = sort[0];
+        if (!first || !first.field) return;
+
+        const key = String(first.field);
+        const dir = String(first.dir || "asc").toLowerCase() === "desc" ? "desc" : "asc";
+
+        sortState.key = key;
+        sortState.dir = dir;
+
+        sortProductsBy(sortState.key, sortState.dir);
+        renderTableRespectingHeader();
+        updateSortIndicators();
+      }
+
+      // Replace logical keys in Columns modal with real labels from header
+      function patchColumnsModalLabels() {
+        const labelByField = new Map();
+        $("#productsHeaderRow th").each(function () {
+          const th = $(this);
+          const field = String(th.data("field") || "");
+          if (!field || field === "__select") return;
+
+          const text = th.clone().children().remove().end().text();
+          const label = String(text || "").replace(/\s+/g, " ").trim();
+          if (label) labelByField.set(field, label);
+        });
+
+        const modal = $(".modal:visible");
+        if (!modal.length) return;
+
+        modal.find("li, .sv-col-item, .sv-columns-item, label").each(function () {
+          const el = $(this);
+          const raw = String(el.text() || "").trim();
+          if (!raw) return;
+
+          if (labelByField.has(raw)) {
+            const label = labelByField.get(raw);
+            const span = el.find(".sv-col-name, .sv-label, .col-name, .name").first();
+            if (span.length) { span.text(label); return; }
+
+            const nodes = el.contents().filter(function () { return this.nodeType === 3; });
+            if (nodes.length) nodes.last().replaceWith(" " + label);
           }
         });
       }
 
-      // -------------------- Init --------------------
-      async function init() {
-        console.log("[Products] Document ready fired");
-        setBreadcrumbs();
+      // -------------------- Saved Views action buttons --------------------
+      function tryTriggerAny(selectors) {
+        for (const s of selectors) {
+          const el = $(s);
+          if (el.length) { el.trigger("click"); return true; }
+        }
+        return false;
+      }
 
-        try {
-          await loadCurrencies();
-          await loadProducts();
-          renderTable();
-          updateSortIndicators();
-        } catch (e) {
-          console.error(e);
-          alert(I18N.errorLoadProducts || "Falha ao carregar produtos.");
+      function ensureSavedViewsExtraButtons() {
+        const host = $("#productsSavedViewsHost");
+        if (!host.length) return;
+
+        // Try to locate the actions container created by SavedViewsGrid
+        const actions = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
+
+        if (!$("#btnSaveCurrentView").length) {
+          actions.append(`
+            <button id="btnSaveCurrentView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left: 8px;" title="Salvar a view atual">
+              <i class="fa fa-check"></i> Salvar
+            </button>
+          `);
         }
 
-        // Column input filters
-        $("#productsTable thead tr:eq(0) input").on("keyup change", function () {
-          rerunAllFilters();
+        if (!$("#btnDeleteCurrentView").length) {
+          actions.append(`
+            <button id="btnDeleteCurrentView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left: 6px; display:none;" title="Excluir esta view">
+              <i class="fa fa-trash"></i> Deletar view
+            </button>
+          `);
+        }
+
+        // Toggle delete visibility based on current viewId
+        if (savedViewsState.viewId) $("#btnDeleteCurrentView").show();
+        else $("#btnDeleteCurrentView").hide();
+
+        $("#btnSaveCurrentView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
+          e.preventDefault(); e.stopPropagation();
+
+          // If library has a Save button, prefer it (updates current view)
+          const did = tryTriggerAny([
+            "#sv_btnSave",               // common
+            "[data-action='save']",
+            ".sv-btn-save"
+          ]);
+
+          if (did) return;
+
+          // If we have viewId but no library save, try PUT to API (definition update)
+          if (savedViewsState.viewId) {
+            (async () => {
+              try {
+                const current = window.SavedViewsGrid?.getCurrentState
+                  ? window.SavedViewsGrid.getCurrentState()
+                  : null;
+
+                // Use our captured state regardless
+                const state = (typeof current === "object" && current) ? current : null;
+                const payload = {
+                  name: savedViewsState.name || undefined,
+                  definition_json: (state?.definition || state?.definition_json || state) ? (state.definition || state.definition_json || state) : savedViewsState
+                };
+
+                await apiPut(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, payload);
+
+                // Refresh list if available, otherwise reload
+                if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+              } catch (err) {
+                console.error(err);
+                alert(err?.message || I18N.errorSaveView);
+              }
+            })();
+            return;
+          }
+
+          // No view selected -> Save As
+          tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
         });
 
-        // Active column filter
-        $("#activeColumnFilter").on("change", function () {
-          rerunAllFilters();
-        });
+        $("#btnDeleteCurrentView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
+          e.preventDefault(); e.stopPropagation();
 
-        // Datepicker for created filter
-        if ($.fn.datepicker) {
-          $("#createdOnFilter").datepicker({
+          if (!savedViewsState.viewId) return;
+          if (!confirm(I18N.confirmDeleteView)) return;
+
+          // Prefer library delete if exists
+          const did = tryTriggerAny([
+            "#sv_btnDelete",
+            "[data-action='delete']",
+            ".sv-btn-delete"
+          ]);
+          if (did) return;
+
+          // Fallback to API
+          (async () => {
+            try {
+              await apiDelete(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`);
+
+              savedViewsState.viewId = null;
+              savedViewsState.name = "";
+
+              if (typeof window.SavedViewsGrid?.reload === "function") {
+                window.SavedViewsGrid.reload();
+                return;
+              }
+
+              // Hard fallback
+              window.location.reload();
+            } catch (err) {
+              console.error(err);
+              alert(err?.message || I18N.errorDeleteView);
+            }
+          })();
+        });
+      }
+
+      function ensureBulkDeleteButton() {
+        const host = $("#productsSavedViewsHost");
+        if (!host.length) return;
+        if ($("#btnDeleteSelectedProducts").length) return;
+
+        const container = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
+
+        container.append(`
+          <button id="btnDeleteSelectedProducts" class="btn btn-danger btn-xs" style="display:none; margin-left: 8px;">
+            <i class="fa fa-trash"></i>
+            Excluir (<span class="count">0</span>)
+          </button>
+        `);
+
+        $("#btnDeleteSelectedProducts").off("click").on("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          deleteSelectedProducts();
+        });
+      }
+
+      // -------------------- Datepicker (single input range) --------------------
+      function initDatepickerRange() {
+        const $range = $("#createdOnRangeFilter");
+        if (!$range.length) return;
+
+        function setHiddenFromState() {
+          const start = createdRange.start ? formatDatePtBR(createdRange.start) : "";
+          const end = createdRange.end ? formatDatePtBR(createdRange.end) : "";
+          $("#createdOnFromFilter").val(start);
+          $("#createdOnToFilter").val(end);
+          $range.val(formatRangeText(createdRange.start, createdRange.end));
+        }
+
+        function resetRange() {
+          createdRange.start = null;
+          createdRange.end = null;
+          createdRange.selecting = false;
+          setHiddenFromState();
+        }
+
+        try {
+          if ($range.data("daterangepicker")) $range.data("daterangepicker").remove();
+        } catch {}
+
+        const hasDateRangePicker = !!($.fn.daterangepicker && window.moment);
+        if (hasDateRangePicker) {
+          $range.daterangepicker({
+            autoUpdateInput: false,
+            linkedCalendars: false,
+            showDropdowns: true,
+            alwaysShowCalendars: true,
+            locale: {
+              format: "DD/MM/YYYY",
+              separator: " - ",
+              applyLabel: "Aplicar",
+              cancelLabel: "Limpar"
+            }
+          });
+
+          $range.off("apply.daterangepicker.sv").on("apply.daterangepicker.sv", function (_ev, picker) {
+            createdRange.start = picker.startDate.clone().startOf("day").toDate();
+            createdRange.end = picker.endDate.clone().startOf("day").toDate();
+            createdRange.selecting = false;
+            setHiddenFromState();
+            rerunAllFilters();
+          });
+
+          $range.off("cancel.daterangepicker.sv").on("cancel.daterangepicker.sv", function () {
+            resetRange();
+            rerunAllFilters();
+          });
+        } else {
+          const hasJqUi = !!($.ui && $.ui.datepicker && $.fn.datepicker);
+          if (!hasJqUi) {
+            console.warn("[Products] date range picker not found.");
+            return;
+          }
+          try { if ($range.hasClass("hasDatepicker")) $range.datepicker("destroy"); } catch {}
+          $range.datepicker({
             dateFormat: "dd/mm/yy",
             changeMonth: true,
-            changeYear: true
-          }).on("change", function () {
-            rerunAllFilters();
+            changeYear: true,
+            showButtonPanel: true,
+            onSelect: function (text) {
+              const picked = parseDatePtBR(text);
+              if (!picked) return;
+              createdRange.start = new Date(picked.getFullYear(), picked.getMonth(), picked.getDate(), 0, 0, 0, 0);
+              createdRange.end = createdRange.start;
+              createdRange.selecting = false;
+              setHiddenFromState();
+              rerunAllFilters();
+            }
           });
         }
 
-        // Top filter (API reload)
-        $("#activeFilter").on("change", async function () {
+        // Manual edit support: allow clearing
+        $range.off("keyup.svRange change.svRange").on("keyup.svRange change.svRange", function () {
+          const raw = String($range.val() || "").trim();
+          if (!raw) {
+            resetRange();
+            rerunAllFilters();
+          }
+        });
+
+        $("#createdOnRangeBtn").off("click.svRangeBtn").on("click.svRangeBtn", function (e) {
+          e.preventDefault(); e.stopPropagation();
+          if ($range.data("daterangepicker")) {
+            $range.data("daterangepicker").show();
+          } else {
+            $range.focus();
+          }
+        });
+      }
+
+      // -------------------- Events --------------------
+      function bindEvents() {
+        // Row click -> detail (ignore checkboxes)
+        $("#productsTable").off("click.svRow").on("click.svRow", "tbody tr", function (e) {
+          const target = $(e.target);
+          if (target.closest(".rowSelect").length) return;
+          const id = String($(this).attr("data-id") || "");
+          if (!id) return;
+          redirectToProduct(id);
+        });
+
+        // Checkbox click stop
+        $("#productsTable").off("click.svChk").on("click.svChk", ".rowSelect", function (e) {
+          e.stopPropagation();
+        });
+
+        // Checkbox change
+        $("#productsTable").off("change.svChk").on("change.svChk", ".rowSelect", function () {
+          const id = String($(this).data("id") || "");
+          if (!id) return;
+          if ($(this).is(":checked")) selection.ids.add(id);
+          else selection.ids.delete(id);
+          syncSelectAllCheckbox();
+          updateBulkDeleteButton();
+        });
+
+        // Select all
+        $("#selectAllProducts").off("change.svAll").on("change.svAll", function (e) {
+          e.stopPropagation();
+
+          const checked = $(this).is(":checked");
+          $("#productsLines .rowSelect").each(function () {
+            const id = String($(this).data("id") || "");
+            if (!id) return;
+
+            $(this).prop("checked", checked);
+            if (checked) selection.ids.add(id);
+            else selection.ids.delete(id);
+          });
+
+          syncSelectAllCheckbox();
+          updateBulkDeleteButton();
+        });
+
+        // Filters change
+        $("#productsTable")
+          .off("keyup.svF change.svF")
+          .on("keyup.svF change.svF", "#productsFiltersRow input", function () {
+            rerunAllFilters();
+          });
+
+        $("#activeColumnFilter").off("change.svActive").on("change.svActive", function () {
+          rerunAllFilters();
+        });
+
+        // Top filter reload (kept, but default is "")
+        $("#activeFilter").off("change.svTop").on("change.svTop", async function () {
           try {
             await loadProducts();
-            renderTable();
+            selection.ids.clear();
+            $("#selectAllProducts").prop("checked", false).prop("indeterminate", false);
+            renderTableRespectingHeader();
             updateSortIndicators();
           } catch (e) {
             console.error(e);
@@ -430,23 +1141,150 @@
           }
         });
 
-        // Sort headers
-        $("#productsTable thead tr:eq(1) th.sortable").on("click", function () {
-          const key = $(this).data("sort-key");
-          if (!key) return;
+        // Sorting delegated
+        $("#productsTable")
+          .off("click.svSort")
+          .on("click.svSort", "#productsHeaderRow th.sortable", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-          if (sortState.key === key) {
-            sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
-          } else {
-            sortState.key = key;
-            sortState.dir = "asc";
-          }
+            const key = $(this).data("sort-key");
+            if (!key) return;
 
-          sortProductsBy(sortState.key, sortState.dir);
-          renderTable();
-          updateSortIndicators();
+            if (sortState.key === key) sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+            else { sortState.key = key; sortState.dir = "asc"; }
+
+            sortProductsBy(sortState.key, sortState.dir);
+            renderTableRespectingHeader();
+            updateSortIndicators();
+          });
+
+        $(document).off("click.svCols").on("click.svCols", "#sv_btnColumns, .sv-btn-columns, [data-action='columns']", function () {
+          setTimeout(patchColumnsModalLabels, 60);
+        });
+
+        $(document).off("shown.bs.modal.svCols").on("shown.bs.modal.svCols", ".modal", function () {
+          setTimeout(patchColumnsModalLabels, 60);
         });
       }
+
+      // -------------------- Init --------------------
+      async function init() {
+        console.log("[Products] init");
+        setBreadcrumbs();
+
+        ensureBulkDeleteButton();
+        bindEvents();
+
+        try {
+          await loadCurrencies();
+          await loadProducts();
+
+          initDatepickerRange();
+          renderTableRespectingHeader();
+          updateSortIndicators();
+        } catch (e) {
+          console.error(e);
+          alert(I18N.errorLoadProducts || "Falha ao carregar produtos.");
+        }
+
+        // -------------------- SavedViewsGrid init --------------------
+        const allKeys = getAllColumnKeys();
+        savedViewsState.columns = allKeys.slice();
+        savedViewsState.columns_order = allKeys.slice();
+
+        // ✅ IMPORTANT: do NOT enforce any "Produtos ativos" fallback definition
+        const fallbackDefinition = {
+          columns: allKeys.slice(),
+          columns_order: allKeys.slice(),
+          filters: [],
+          sort: [],
+          pageSize: 0
+        };
+
+        await window.SavedViewsGrid.init({
+          entityName: "products",
+          hostSelector: "#productsSavedViewsHost",
+          tableSelector: "#productsTable",
+          headerRowSelector: "#productsTable thead tr:eq(1)",
+          filtersRowSelector: "#productsTable thead tr:eq(0)",
+
+          getAllColumnKeys: () => getAllColumnKeys(),
+
+          // keep generic (no forced default name)
+          fallbackViewName: "",
+          includeFallbackOption: false,
+          fallbackDefinition: fallbackDefinition,
+
+          getCurrentState: () => {
+            const domOrder = $("#productsHeaderRow th.sortable")
+              .map(function () { return String($(this).data("sort-key") || ""); })
+              .get()
+              .filter(k => k.length > 0);
+
+            const visible = $("#productsHeaderRow th.sortable:visible")
+              .map(function () { return String($(this).data("sort-key") || ""); })
+              .get()
+              .filter(k => k.length > 0);
+
+            savedViewsState.columns_order = domOrder.length ? domOrder : savedViewsState.columns_order;
+            savedViewsState.columns = visible.length ? visible : savedViewsState.columns;
+
+            savedViewsState.filters = captureFiltersForSavedView();
+
+            if (sortState.key) savedViewsState.sort = [{ field: sortState.key, dir: sortState.dir }];
+            else savedViewsState.sort = [];
+
+            return Object.assign({}, savedViewsState);
+          },
+
+          applyState: ({ viewId, name, definition, _fromColumnsModal }) => {
+            savedViewsState.viewId = viewId;
+            savedViewsState.name = name || "";
+
+            savedViewsState.columns = Array.isArray(definition.columns) ? definition.columns.slice() : savedViewsState.columns;
+            savedViewsState.columns_order = Array.isArray(definition.columns_order) ? definition.columns_order.slice() : savedViewsState.columns_order;
+
+            renderTableRespectingHeader();
+
+            if (_fromColumnsModal === true) {
+              initDatepickerRange();
+              setTimeout(patchColumnsModalLabels, 60);
+              ensureSavedViewsExtraButtons();
+              return;
+            }
+
+            savedViewsState.filters = Array.isArray(definition.filters) ? definition.filters : [];
+            applyFiltersFromSavedView(definition);
+
+            savedViewsState.sort = Array.isArray(definition.sort) ? definition.sort : [];
+            applySortFromSavedView(definition);
+
+            initDatepickerRange();
+            setTimeout(patchColumnsModalLabels, 60);
+
+            ensureSavedViewsExtraButtons();
+          },
+
+          onAfterApply: () => {
+            initDatepickerRange();
+            renderTableRespectingHeader();
+            updateSortIndicators();
+            setTimeout(patchColumnsModalLabels, 60);
+            ensureSavedViewsExtraButtons();
+          }
+        });
+
+        // Ensure fixed columns are always visible (defensive)
+        $("#productsHeaderRow th[data-field='__select']").addClass("sv-fixed-col").attr("data-sv-fixed", "left").show();
+        $("#productsFiltersRow th[data-field='__select']").addClass("sv-fixed-col").attr("data-sv-fixed", "left").show();
+        initDatepickerRange();
+        ensureSavedViewsExtraButtons();
+        setTimeout(patchColumnsModalLabels, 120);
+      }
+
+      init().catch(err => console.error("[Products] init failed:", err));
+
     })();
   </script>
-  <% %>
+<% %>

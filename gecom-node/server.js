@@ -18,6 +18,7 @@ const invoicesApiRoutes = require('./routes/invoicesApi');
 const productsApiRoutes = require('./routes/productsApi');
 const currenciesApiRoutes = require('./routes/currenciesApi');
 const processTypesApi = require("./routes/processTypesApi");
+const savedViewsApi = require("./routes/savedViewsApi");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -92,11 +93,14 @@ app.use('/api', productsApiRoutes);
 app.use('/api', currenciesApiRoutes);
 app.use('/api', companiesApiRoutes);
 app.use("/api", processTypesApi);
+app.use("/api", savedViewsApi);
 app.use("/api", require("./routes/eventsApi"));
 app.use("/api", require("./routes/documentsApi"));
 app.use("/api", require("./routes/transportTypesApi"));
 app.use("/api", require("./routes/transportsApi"));
 app.use("/api", require("./routes/transportStatusesApi"));
+const notificationsApi = require("./routes/notificationsApi");
+app.use("/api", notificationsApi);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes'));
@@ -113,6 +117,7 @@ app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 app.get('/NewProduct', (req, res) => res.render('NewProduct'));
 app.get("/Profile", (req, res) => res.render("Profile"));
+app.get("/NewNotification", (req, res) => res.render("NewNotification"));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

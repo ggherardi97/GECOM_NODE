@@ -13,13 +13,13 @@
         "sizeDefault": "Medium",
         "sector": "Sector:",
         "sectorDefault": "General",
-        "fantasyName": "Trade Name:",
+        "fantasyName": "Trade name:",
         "phone": "Phone:",
         "email": "Email:",
         "projectsTotalLabel": "Total project value:",
         "projectsTotalText": "Total value of",
         "goal": "goal:",
-        "goalValueExample": "R$ 1,000,000.00",
+        "goalValueExample": "$ 1,000,000.00",
         "logoHint": "* Edit the logo in “Edit client details”."
       },
       "tabs": {
@@ -27,17 +27,86 @@
         "documents": "Documents"
       },
       "contacts": {
-        "newContact": "New contact"
+        "newContact": "New contact",
+        "noneFound": "No contacts found.",
+        "labels": {
+          "role": "Role",
+          "status": "Status:"
+        },
+        "modals": {
+          "editTitle": "Edit Contact",
+          "newTitle": "New Contact",
+          "deleteTitle": "Delete contact",
+          "deleteOk": "Delete",
+          "deleteBodyLine1": "You are about to delete the contact",
+          "deleteBodyLine2": "This action cannot be undone."
+        }
       },
       "documentsToolbar": {
         "back": "Back",
         "add": "Add",
         "newFolder": "New Folder",
         "uploadDocument": "Upload Document",
-        "driveLink": "Drive Link",
+        "driveLink": "Drive link",
         "open": "Open",
         "delete": "Delete",
         "loading": "Loading..."
+      },
+      "messages": {
+        "localStorageMissing": "Error loading client data! (no localStorage)",
+        "apiLoadFail": "Error loading client data via API.",
+        "companyIdMissing": "Could not identify the company_id for this page.",
+        "nameRequired": "Enter the Name.",
+        "validEmailRequired": "Enter a valid Email.",
+        "saveUserFail": "Error saving user.",
+        "deleteUserFail": "Error deleting contact.",
+        "createContactFail": "Error creating contact.",
+        "saveClientFail": "Error saving client data.",
+        "projectsTotalInvoiceTitle": "Total invoices"
+      },
+      "documents": {
+        "placeholders": {
+          "searchInFolder": "Search in this folder..."
+        },
+        "labels": {
+          "added": "Added:",
+          "select": "Select"
+        },
+        "messages": {
+          "noneFound": "No items found.",
+          "sideModalMissing": "Global side modal not found in the layout. Check dynamic modal IDs.",
+          "loadFail": "Error loading",
+          "downloadLinkFail": "Could not generate the download link.",
+          "downloadFail": "Error downloading file.",
+          "deleteFail": "Error deleting."
+        },
+        "confirm": {
+          "deleteMany": "Confirm deleting the selected items?"
+        },
+        "modals": {
+          "newFolder": {
+            "title": "New Folder",
+            "create": "Create",
+            "name": "Name",
+            "placeholder": "Ex: Contracts",
+            "nameRequired": "Enter the folder name."
+          },
+          "newLink": {
+            "title": "Drive link",
+            "save": "Save",
+            "nameRequired": "Enter the name.",
+            "urlRequired": "Enter a valid URL (http/https)."
+          },
+          "upload": {
+            "title": "Upload Document",
+            "send": "Send",
+            "selectFile": "Select a file.",
+            "error": "Upload error."
+          }
+        }
+      },
+      "modals": {
+        "editClientTitle": "Edit client details"
       }
     },
 
@@ -52,7 +121,7 @@
         "monthBillingTitle": "Billing this month",
         "yearBillingTitle": "Billing this year",
         "monthlyAverageTitle": "Monthly average",
-        "monthlyAverageHelp": "Average yearly billing (÷ 12)",
+        "monthlyAverageHelp": "Average billing for the year (÷ 12)",
         "bestMonthTitle": "Best month",
         "bestMonthHelp": "Month with the highest billing"
       },
@@ -64,10 +133,10 @@
       },
       "labels": {
         "loading": "Loading...",
-        "totalInvoicesInPeriod": "Total invoices in period:",
-        "totalProcessesInPeriod": "Total processes in period:",
+        "totalInvoicesInPeriod": "Total invoices in the period:",
+        "totalProcessesInPeriod": "Total processes in the period:",
         "note": "Note:",
-        "noteLine1": "Ideally, create aggregated endpoints in the backend (sum/group-by) as it grows.",
+        "noteLine1": "Ideally, have aggregated endpoints in the backend (sum/group-by) as it grows.",
         "updatedAt": "Updated at",
         "legend": "Active (status 0) / Paid (status 4) / Estimated (30k/month).",
         "emptyPeriod": "No processes in the period to display.",
@@ -95,7 +164,7 @@
       },
       "bulkDelete": {
         "title": "Confirmation",
-        "bodyTextFirst": "Confirm deletion of ",
+        "bodyTextFirst": "Confirm removal of ",
         "bodyLine2": " invoice(s)?",
         "warning": "This action cannot be undone",
         "confirmQuestion": ""
@@ -103,7 +172,7 @@
       "bulkSend": {
         "title": "Confirmation",
         "bodyTextFirst": "Confirm sending ",
-        "bodyLine2": " invoice(s)? This action will change the invoice status to ",
+        "bodyLine2": " invoice(s)? This action will change the invoice state to ",
         "confirmQuestion": ""
       },
       "toolbar": {
@@ -115,7 +184,7 @@
       },
       "filters": {
         "all": "All",
-        "invoiceNumber": "Invoice #",
+        "invoiceNumber": "Invoice No.",
         "company": "Company"
       },
       "status": {
@@ -142,10 +211,17 @@
       "pageTitle": "Login",
       "welcomeTitle": "Welcome to GECOM",
       "subtitle": "Your platform for import and export processes.",
+      "fields": {
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Password",
+        "accessNumberPlaceholder": "Ex: PRC-0000111"
+      },
       "actions": {
+        "login": "Login",
         "forgotPasswordLink": "Forgot your password? Click here",
         "hasAccessNumber": "Do you have an access number?",
-        "accessNumberTitle": "Enter access number",
+        "accessNumberCta": "Sign in with access number",
+        "accessNumberTitle": "Sign in with access number",
         "accessNumberHelp": "Enter the number provided by our team below.",
         "access": "Access",
         "backToLogin": "Back to login",
@@ -157,12 +233,30 @@
       },
       "reset": {
         "newPassword": "New Password",
-        "newPasswordHelp": "Enter your new password below",
+        "newPasswordHelp": "Enter the new password below",
         "confirmPassword": "Confirm password",
         "confirmNewPassword": "Confirm New Password"
       },
       "modal": {
-        "close": "Close"
+        "close": "Close",
+        "hiddenTriggerLabel": "Open modal"
+      },
+      "messages": {
+        "defaultModalTitle": "Message",
+        "invalidLinkTitle": "Invalid link",
+        "invalidLinkBody": "The password reset link is invalid or incomplete. Request a new link.",
+        "forgotPasswordTitle": "Password Recovery",
+        "forgotPasswordEmailRequired": "Please enter your registered email.",
+        "forgotPasswordRequestFail": "Could not request password reset. Try again.",
+        "forgotPasswordRequestSuccess": "An email with instructions was sent successfully.",
+        "resetPasswordTitle": "Reset password",
+        "resetPasswordFillBoth": "Please fill in the new password and confirmation.",
+        "resetPasswordMismatch": "Passwords do not match. Check and try again.",
+        "resetPasswordFail": "Could not reset the password. Try again.",
+        "resetPasswordSuccessTitle": "Password reset",
+        "resetPasswordSuccessBody": "Your password has been reset successfully. You can now log in.",
+        "loginFail": "Could not log in. Check your credentials.",
+        "unexpectedError": "An unexpected error occurred. Try again."
       }
     },
 
@@ -180,7 +274,7 @@
         "add": "Add",
         "newFolder": "New Folder",
         "uploadDocument": "Upload Document",
-        "driveLink": "Drive Link",
+        "driveLink": "Drive link",
         "open": "Open",
         "delete": "Delete"
       },
@@ -189,6 +283,72 @@
       },
       "buttons": {
         "ok": "OK"
+      }
+    },
+
+    "documents": {
+      "placeholders": {
+        "searchFolders": "Search..."
+      },
+      "defaults": {
+        "folderName": "Folder",
+        "unnamed": "Unnamed"
+      },
+      "related": {
+        "company": "Client",
+        "process": "Process",
+        "generic": "Related"
+      },
+      "api": {
+        "getFail": "Error fetching data",
+        "saveFail": "Error saving",
+        "deleteFail": "Error deleting"
+      },
+      "messages": {
+        "noFolders": "No folders.",
+        "loadFoldersFail": "Error loading folders.",
+        "relatedCompanyRequired": "Select a related client (typing is not enough).",
+        "loadCompaniesFail": "Error loading client list.",
+        "accountIdMissing": "Could not identify the account_id to create.",
+        "accountIdMissingForUpload": "Could not identify the account_id to upload the file.",
+        "createFolderFail": "Error creating folder.",
+        "saveLinkFail": "Error saving link.",
+        "createRecordFail": "Failed to create document record.",
+        "uploadUrlFail": "Could not generate the upload URL.",
+        "uploadFailedPrefix": "Upload failed",
+        "uploadingFail": "Upload error."
+      },
+      "progress": {
+        "creatingRecord": "Creating database record...",
+        "generatingUploadUrl": "Generating upload URL...",
+        "uploadingToR2": "Uploading file to Cloudflare R2...",
+        "finalizing": "Finalizing (updating status in database)...",
+        "done": "Done!"
+      },
+      "modals": {
+        "relatedCompany": {
+          "label": "Related client",
+          "placeholder": "Search client...",
+          "hint": "Type to search and select from the list."
+        },
+        "newLink": {
+          "namePlaceholder": "Ex: Google Drive folder",
+          "urlLabel": "URL",
+          "urlPlaceholder": "https://drive.google.com/...",
+          "savedInObjectKey": "The link will be saved in the object_key field."
+        },
+        "upload": {
+          "singleFileOnly": "Select only one file.",
+          "fileLabel": "File",
+          "autoFillName": "We will auto-fill with the file name",
+          "renameHint": "You can change the name before uploading."
+        }
+      },
+      "confirm": {
+        "deleteMany": "Confirm deleting the selected items?"
+      },
+      "quickUpload": {
+        "pickCompanyTitle": "Quick upload - select client"
       }
     },
 
@@ -231,10 +391,10 @@
       "messages": {
         "loadFail": "Failed to load processes.",
         "deleteFailSingle": "Failed to remove process.",
-        "deleteFail": "Error while removing.",
+        "deleteFail": "Error removing.",
         "noneFound": "No processes found.",
         "bulkSomeFailed": "Some processes could not be removed. See the console for details",
-        "bulkUnexpected": "Error while removing processes."
+        "bulkUnexpected": "Error removing processes."
       },
       "modalRemove": {
         "title": "Remove processes",
@@ -253,16 +413,16 @@
         "invoice": "Invoice:",
         "client": "Client:",
         "estimatedDelivery": "Estimated Delivery Date:",
-        "start": "Process Start:",
+        "start": "Process start:",
         "completed": "Completed:",
         "completedOn": "Project completed on"
       },
       "sections": {
         "timeline": "Timeline",
-        "history": "Process History",
+        "history": "Process history",
         "transports": "Transports",
-        "trajectory": "Route",
-        "description": "Process Description",
+        "trajectory": "Trajectory",
+        "description": "Process description",
         "documents": "Process documents"
       },
       "actions": {
@@ -291,8 +451,8 @@
         "status": "Status",
         "origin": "Origin",
         "destination": "Destination",
-        "etaDeparture": "Estimated Departure",
-        "etaArrival": "Estimated Arrival",
+        "etaDeparture": "Estimated departure",
+        "etaArrival": "Estimated arrival",
         "actions": "Actions"
       }
     },
@@ -319,7 +479,7 @@
         "price": "Price",
         "tax": "Tax",
         "status": "Status",
-        "createdAt": "Created at"
+        "createdAt": "Created on"
       }
     },
 
@@ -330,7 +490,7 @@
         "changePassword": "Change password",
         "newUser": "New user"
       },
-      "subtitle": "Update your details and, if you are Admin/Manager, manage users from your company.",
+      "subtitle": "Update your data and, if you are an Admin/Manager, manage users in your company.",
       "labels": {
         "email": "Email:",
         "phone": "Phone:",
@@ -377,13 +537,14 @@
         "documents": "Documents"
       },
       "form": {
-        "processNumber": "Process Number *",
+        "processNumber": "Process No. *",
         "company": "Company *",
-        "companyInvoicesHint": "Select a company to list invoices.",
+        "companyInvoicesHint": "Select a company to list the invoices.",
         "estimatedDelivery": "Estimated Delivery",
         "processType": "Process Type",
         "clientContact": "Client Contact *",
-        "companyContactsHint": "Select a company to list contacts."
+        "companyContactsHint": "Select a company to list the contacts.",
+        "invoiceRelated": "Related invoice"
       },
       "transports": {
         "title": "Process transports",
@@ -393,9 +554,12 @@
           "phone": "Phone",
           "origin": "Origin *",
           "destination": "Destination *",
-          "etaDeparture": "Estimated Departure",
-          "etaArrival": "Estimated Arrival",
-          "actions": "Actions"
+          "etaDeparture": "Estimated departure",
+          "etaArrival": "Estimated arrival",
+          "actions": "Actions",
+          "company": "Company *",
+          "type": "Type *",
+          "status": "Status *"
         },
         "countries": {
           "france": "France",
@@ -413,42 +577,151 @@
         "title": "Documents",
         "uploadTitle": "Upload documents",
         "attachUpTo": "Attach up to",
-        "uploadOnFinish": "The upload will be done when finishing.",
+        "uploadOnFinish": "Upload will happen when finishing.",
         "dragHint": "You can also drag files to the area below.",
         "maxFiles": "Maximum 5 files.",
-        "renameHint": "You can rename each file below before finishing."
+        "renameHint": "You can rename each file below before finishing.",
+        "selectFiles": "Select files"
+      },
+      "placeholders": {
+        "systemFilled": "Filled by the system."
+      },
+      "messages": {
+        "requestFail": "Request failed.",
+        "saveFail": "Save failed.",
+        "transportRequired": "Add at least 1 transport.",
+        "transportInvalid": "Fill Company, Origin, Destination, Type and Status in all transports.",
+        "companyRequired": "Company is required.",
+        "contactRequired": "Client Contact is required.",
+        "maxFiles": "Maximum 5 files.",
+        "createFail": "Failed to create process/transports/documents."
       }
     },
 
     "newInvoice": {
+      "pageTitle": "New Invoice",
+      "pageTitleEdit": "Edit Invoice",
+      "breadcrumbs": {
+        "forms": "Forms",
+        "newInvoice": "New Invoice",
+        "editInvoice": "Edit Invoice"
+      },
+      "titles": {
+        "create": "Invoice Creation"
+      },
+      "header": {
+        "titleCreate": "Invoice Creation",
+        "invoiceIdLabel": "Invoice ID:"
+      },
+      "labels": {
+        "invoiceId": "Invoice ID"
+      },
       "actions": {
+        "generateInvoice": "Generate invoice",
         "deleteInvoice": "Delete invoice",
-        "saveInvoice": "Save invoice"
+        "saveInvoice": "Save invoice",
+        "addProduct": "Add product",
+        "addManualLine": "Add manual line",
+        "editLine": "Edit line",
+        "saveLine": "Save",
+        "addLine": "Add"
       },
       "form": {
+        "invoiceDataTitle": "Invoice Data",
         "company": "Company *",
+        "currency": "Currency *",
+        "selectCurrency": "Select...",
+        "status": "Status",
         "statusDraft": "Draft",
-        "quoteDate": "Quote Date",
+        "statusActive": "Active",
+        "statusExpired": "Expired",
+        "statusBilled": "Billed",
+        "statusPaid": "Paid",
+        "quoteDate": "Quote date",
+        "dueDate": "Due date",
         "exchangeRate": "Exchange rate",
+        "discountPercent": "Discount %",
         "version": "Version",
         "notes": "Notes",
+        "terms": "Terms",
         "billingAddress": "Billing Address",
+        "billingAddressTitle": "Billing Address",
+        "addressLine1": "Line 1",
+        "addressLine2": "Line 2",
+        "city": "City",
+        "state": "State",
+        "postalCode": "ZIP/Postal code",
         "country": "Country",
         "headerDiscount": "Discount (header)"
       },
+      "placeholders": {
+        "searchCompany": "Search company...",
+        "selectCurrency": "Select..."
+      },
       "hints": {
-        "discountRule": "*The percentage will be calculated based on the gross total (Subtotal)",
+        "discountRule": "*The percentage will be calculated on the gross total (Subtotal)",
         "saveHeaderToUnlockLines": "Save the invoice header to unlock the lines.",
         "totalsFromLines": "Totals are calculated from the lines."
       },
       "lines": {
         "addProduct": "Add product",
         "addManualLine": "Add manual line",
-        "price": "Price",
-        "actions": "Actions"
+        "actions": "Actions",
+        "columns": {
+          "product": "Product",
+          "unit": "Unit",
+          "price": "Price",
+          "quantity": "Qty",
+          "discount": "Discount",
+          "tax": "Tax",
+          "lineTotal": "Line total"
+        },
+        "empty": "No lines added",
+        "manual": "Manual"
       },
-      "placeholders": {
-        "searchCompany": "Search company..."
+      "totals": {
+        "title": "Totals",
+        "subtotal": "Subtotal",
+        "taxes": "Taxes",
+        "total": "Total",
+        "linesDiscount": "Discounts (lines)"
+      },
+      "lineModal": {
+        "product": "Product",
+        "searchProduct": "Search product...",
+        "typeToSearch": "Type to search.",
+        "description": "Description",
+        "unit": "Unit",
+        "unitPrice": "Unit price",
+        "quantity": "Quantity",
+        "integerOnly": "*Integers only",
+        "taxRate": "Tax rate (0..1)",
+        "discountValue": "Discount (amount)",
+        "lineTotal": "Line total",
+        "autoCalculated": "Subtotal/Tax/Total are calculated automatically.",
+        "addTitle": "Add line",
+        "editTitle": "Edit line",
+        "add": "Add",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "confirm": {
+        "deleteModalTitle": "Delete invoice",
+        "deleteTitle": "Are you sure you want to delete this invoice?"
+      },
+      "messages": {
+        "requestFail": "Request failed.",
+        "initFail": "Failed to load initial data.",
+        "createFail": "Failed to create the invoice.",
+        "saveFail": "Failed to save the invoice.",
+        "deleteFail": "Failed to delete the invoice.",
+        "deleteSuccess": "Invoice deleted successfully.",
+        "companyAndCurrencyRequired": "Company and Currency are required.",
+        "selectCurrencyToLoadProducts": "Select a currency to load products.",
+        "noProductsForCurrency": "No products found for the selected currency.",
+        "loadProductsFail": "Failed to load products for the selected currency.",
+        "pickProductFromList": "Select a product from the list (typing is not enough).",
+        "quantityGreaterThanZero": "Quantity must be greater than 0."
       }
     },
 
@@ -460,7 +733,7 @@
       },
       "labels": {
         "date": "Date:",
-        "unitPrice": "Unit Price",
+        "unitPrice": "Unit price",
         "notes": "Notes",
         "phone": "Phone"
       }
@@ -478,12 +751,12 @@
       },
       "columns": {
         "phone": "Phone",
-        "cnpj": "Tax ID",
+        "cnpj": "CNPJ",
         "ninvoices": "Number of invoices",
         "setor": "Sector",
-        "contatoPrincipal": "Primary Contact",
+        "contatoPrincipal": "Primary contact",
         "name": "Name",
-        "createdAt": "Creation date"
+        "createdAt": "Created on"
       },
       "placeholders": {
         "searchCompanyName": "Type the company name..."
@@ -510,18 +783,20 @@
         "loadFail": "Failed to load companies.",
         "loadUnexpected": "Error loading clients.",
         "deleteFailSingle": "Failed to remove company.",
-        "deleteFail": "Error while removing.",
+        "deleteFail": "Error removing.",
         "noneFound": "No clients found.",
         "bulkSomeFailedPrefix": "Some clients could not be removed",
         "bulkSomeFailedSuffix": "See the console for details.",
-        "bulkUnexpected": "Error while removing clients."
+        "bulkUnexpected": "Error removing clients."
       }
     },
 
     "newProduct": {
       "pageTitle": "New Product",
       "actions": {
-        "back": "Back"
+        "back": "Back",
+        "create": "Create",
+        "creating": "Creating..."
       },
       "tabs": {
         "info": "Information",
@@ -534,7 +809,40 @@
         "defaultPriceRequired": "Default price *",
         "defaultTax": "Default tax (0..1)",
         "unitExample": "package, service, box...",
-        "productDescription": "Product description"
+        "productDescription": "Product description",
+        "productNameRequired": "Product name *",
+        "brand": "Brand",
+        "unit": "Unit",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "currencyRequired": "Currency *"
+      },
+      "subtitle": "Fill in the fields and click Create.",
+      "breadcrumbs": {
+        "pageName": "Products",
+        "subpageName": "New Product"
+      },
+      "placeholders": {
+        "productName": "Product name",
+        "productCodeExample": "Ex: SRV-CONT-001",
+        "brand": "Brand",
+        "defaultPrice": "0.00",
+        "defaultTaxExample": "Ex: 0.15"
+      },
+      "hints": {
+        "taxExample": "Use 0.15 for 15%."
+      },
+      "messages": {
+        "requestFail": "Request failed",
+        "nameRequired": "Product name is required.",
+        "productCodeRequired": "Product code is required.",
+        "currencyRequired": "Currency is required.",
+        "defaultPriceInvalid": "Invalid default price.",
+        "defaultTaxInvalid": "Invalid default tax.",
+        "createSuccess": "Product created successfully.",
+        "createFail": "Failed to create product.",
+        "loadCurrenciesFail": "Failed to load currencies."
       }
     },
 
@@ -557,7 +865,7 @@
         "currencyHint": "Currency used in the default price.",
         "defaultPrice": "Default price",
         "defaultTaxPercent": "Default tax (%)",
-        "createdAt": "Created at",
+        "createdAt": "Created on",
         "imageUploadNotImplemented": "Image upload not implemented yet.",
         "unitExample": "package, service, box...",
         "productDescription": "Product description"
@@ -570,8 +878,8 @@
     },
 
     "newClient": {
-      "pageTitle": "Create client",
-      "subtitle": "Fill in the company information, then the optional data, and finally the access users.",
+      "pageTitle": "Client creation",
+      "subtitle": "Fill in the company information, then optional data, and finally access users.",
       "wizard": {
         "optionalToAccess": "Optional Data -> Access -->"
       },
@@ -580,18 +888,20 @@
         "optional": "Optional Data",
         "access": "Access"
       },
-      "client": {
-        "title": "Client information",
-        "phoneRequired": "Phone *",
-        "companyNameRequired": "Company name *",
-        "sizeDefault": "Medium",
-        "nextHint": "When you move to the next step, you will fill in the optional data."
-      },
       "optional": {
         "addressOptional": "Address (optional)",
         "postalCode": "Postal code",
-        "fetchingAddress": "Searching address...",
-        "country": "Country"
+        "fetchingAddress": "Fetching address...",
+        "country": "Country",
+        "placeholders": {
+          "postalCode": "00000-000"
+        },
+        "labels": {
+          "street": "Street",
+          "city": "City",
+          "state": "State",
+          "complement": "Complement"
+        }
       },
       "access": {
         "title": "Access users",
@@ -602,8 +912,77 @@
         "phone": "Phone",
         "sendAccess": "Send access?",
         "actions": "Actions",
-        "sectorExample": "Ex:.. Agricultural",
-        "emailExample": "email@company.com"
+        "sectorExample": "Ex: Agricultural",
+        "emailExample": "email@company.com",
+        "setPrimaryPrefix": "Check",
+        "setPrimaryStrong": "Primary",
+        "table": {
+          "primary": "Primary",
+          "nameRequired": "Name *"
+        },
+        "placeholders": {
+          "fullName": "Full name",
+          "phoneExample": "(11) 99999-9999"
+        },
+        "yes": "Yes"
+      },
+      "navbar": {
+        "searchPlaceholder": "Search..."
+      },
+      "breadcrumbs": {
+        "clients": "Clients"
+      },
+      "client": {
+        "title": "Client information",
+        "phoneRequired": "Phone *",
+        "companyNameRequired": "Company name *",
+        "sizeDefault": "Medium",
+        "nextHint": "When you move to the next step, you will fill in the optional data.",
+        "labels": {
+          "cnpjRequired": "CNPJ *",
+          "sector": "Sector",
+          "size": "Size",
+          "status": "Status"
+        },
+        "placeholders": {
+          "cnpj": "00.000.000/0000-00"
+        },
+        "state": {
+          "fetchingCnpj": "Fetching CNPJ data..."
+        },
+        "status": {
+          "active": "Active"
+        },
+        "sizeOptions": {
+          "select": "Select...",
+          "selectKeyword": "Select",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        }
+      },
+      "defaults": {
+        "country": "Brazil"
+      },
+      "messages": {
+        "cnpjLookupFail": "Failed to look up CNPJ.",
+        "cnpjAutoFillFail": "Could not fetch CNPJ data.",
+        "createUserFail": "Failed to create user.",
+        "patchUserFail": "Failed to update user.",
+        "createCompanyFail": "Failed to create company.",
+        "patchCompanyFail": "Failed to update company.",
+        "usersAtLeastOne": "Add at least 1 user.",
+        "usersFillNameEmail": "Fill Name and Email for all users.",
+        "invalidEmailPrefix": "Invalid email:",
+        "duplicateEmail": "There is a duplicate email in the user list.",
+        "companyCreatedNoId": "Company created, but no ID returned.",
+        "createCompanyStep2Fail": "Error creating company on Step 2.",
+        "companyIdMissingForFinish": "CompanyId not found. Go back and advance in Step 2 to create the company.",
+        "selectPrimary": "Select a user as Primary.",
+        "userCreatedNoIdPrefix": "User created",
+        "userCreatedNoIdSuffix": "but no ID returned.",
+        "primaryNotFound": "Could not identify the created Primary user.",
+        "finishFail": "Error finishing creation."
       }
     },
 
@@ -615,10 +994,10 @@
       },
       "hero": {
         "welcome": "welcome to GECOM",
-        "subtitle": "Complete platform for managing foreign trade processes, from registration to customs clearance.",
+        "subtitle": "Complete platform for managing foreign trade processes, from registration to clearance.",
         "cta": "SEE SOLUTION",
         "portalTitle": "Discover the GECOM Portal",
-        "portalSubtitle": "Centralize orders, processes, documents, and shipping status in one place."
+        "portalSubtitle": "Centralize requests, processes, documents and shipping status in one place."
       },
       "common": {
         "next": "Next",
@@ -628,18 +1007,18 @@
       },
       "features": {
         "responsiveTitle": "Responsive experience",
-        "responsiveText": "Access GECOM from any device, with dashboards and information optimized for desktop, tablet, and mobile.",
+        "responsiveText": "Access GECOM from any device, with dashboards and information optimized for desktop, tablet and mobile.",
         "reportsTitle": "Real-time reports",
-        "reportsText1": "Track costs, deadlines, process statuses, and operation performance with up-to-date reports.",
-        "reportsText2": "Quickly visualize shipments, releases, deliveries, and key indicators of your logistics flow.",
+        "reportsText1": "Track costs, deadlines, process status and operations performance with updated reports.",
+        "reportsText2": "Quickly view shipments, releases, deliveries and key indicators of your logistics flow.",
         "formsTitle": "Smart forms",
-        "formsText1": "Reduce errors when registering clients, processes, and documents with validations and standardized fields.",
+        "formsText1": "Reduce errors in client, process and document registration with validations and standardized fields.",
         "integrationsTitle": "Integrations",
         "integrationsText": "Connect GECOM to other systems to further automate the information flow.",
         "emailNotificationsTitle": "Email notifications",
         "emailNotificationsText": "Notify clients and partners about status updates and important process events.",
         "strategicIndicatorsTitle": "Strategic indicators",
-        "strategicIndicatorsText": "Charts and metrics that help you make fast and confident decisions about your operations."
+        "strategicIndicatorsText": "Charts and metrics that help you make fast and safe decisions about your operations."
       },
       "sections": {
         "endToEndTitle": "End-to-end management of import and export operations in a single system.",
@@ -649,18 +1028,19 @@
       },
       "steps": {
         "alignmentMeeting": "Alignment meeting",
-        "alignmentMeetingText": "We understand your processes, volumes, and operational specifics to configure GECOM according to your needs.",
+        "alignmentMeetingText": "We understand your processes, volumes and operational details to configure GECOM according to your needs.",
         "implementation": "Implementation",
-        "implementationText": "Setup, training, and close follow-up of the first processes to ensure everything works as expected."
+        "implementationText": "Configuration, training and follow-up on the first processes to ensure everything works as expected."
       },
       "testimonials": {
-        "quote1": "GECOM gave us full visibility over import and export processes. Today we track deadlines and costs in real time and can be much more proactive with our clients.",
+        "quote1": "GECOM gave us full visibility into import and export processes. Today we track deadlines and costs in real time and can be much more proactive with our clients.",
         "signature1": "02/12/2014 - André Santos",
-        "quote2": "We managed to integrate our operation with GECOM and now have much more control over shared client shipments.",
+        "quote2": "We managed to integrate our operation with GECOM and today we have much more control over shipments from mutual clients.",
         "signature2": "Logistics partner in São Paulo",
         "quote3": "Centralizing information reduces rework and email back-and-forth. Everyone knows exactly what stage each process is in.",
         "signature3": "Logistics operator in Brazil",
-        "quote4": "GECOM helped standardize the flow of information between our team in Brazil and partners abroad."
+        "quote4": "GECOM helped standardize the information flow between our team in Brazil and partners abroad.",
+        "signature4": "Foreign trade team"
       },
       "contact": {
         "title": "Ask questions, request a demo, or learn more about how GECOM can help your operation.",
@@ -678,11 +1058,11 @@
       "header": {
         "process": "Process",
         "estimatedDelivery": "Estimated Delivery Date:",
-        "start": "Process Start:"
+        "start": "Process start:"
       },
       "sections": {
-        "history": "Process History",
-        "description": "Process Description",
+        "history": "Process history",
+        "description": "Process description",
         "documents": "Process documents"
       },
       "actions2": {

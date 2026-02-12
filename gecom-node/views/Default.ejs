@@ -32,8 +32,8 @@
   }
 
   /* ---------- Billing Dashboard charts ---------- */
-  .dash-chart-wrap { height: 420px; } /* AUMENTA a altura do gráfico principal */
-  #lineChart { width: 100% !important; height: 100% !important; }
+  .dash-chart-wrap { height: 315px; } /* AUMENTA a altura do gráfico principal */
+  /* #lineChart { width: 100% !important; height: 100% !important; } */
 
   .dash-doughnut-wrap {
     height: 320px;
@@ -312,7 +312,7 @@
   <!-- =========================================================
        VIEW 2: MEUS PROCESSOS (dashboard “da empresa logada”)
   ========================================================== -->
-  <div id="dashMyProcessesWrap" style="display:none;">
+  <div id="dashMyProcessesWrap" style="display:none;padding-top: 0px;">
 
     <div class="wrapper wrapper-content animated fadeInUp">
 
@@ -492,33 +492,122 @@
   $(document).ready(function () {
     $("#masterHeader").hide();
 
+    // -------------------- Auth / Role helpers --------------------
+    function parseBool(value) {
+      if (value === true) return true;
+      if (value === false) return false;
+      if (value == null) return false;
+
+      var s = String(value).trim().toLowerCase();
+      if (s === "true" || s === "1" || s === "yes" || s === "y") return true;
+      if (s === "false" || s === "0" || s === "no" || s === "n" || s === "") return false;
+
+      // fallback: avoid treating random strings as true
+      return false;
+    }
+
+    function getUserRole() {
+      return String(
+        window.__auth?.role ||
+        window.__auth?.user_role ||
+        window.__auth?.user?.role ||
+        window.__auth?.user?.user_role ||
+        ""
+      ).trim().toLowerCase();
+    }
+
+    function isAdminUser() {
+      // Only treat as admin if it's really true OR role is admin
+      var isAdminFlag =
+        parseBool(window.__auth?.is_admin) ||
+        parseBool(window.__auth?.isAdmin) ||
+        parseBool(window.__auth?.user?.is_admin) ||
+        parseBool(window.__auth?.user?.isAdmin);
+
+      if (isAdminFlag) return true;
+
+      var role = getUserRole();
+      return role === "admin" || role === "administrator";
+    }
+
+    // -------------------- Dashboard view model --------------------
+    var DASH_VIEW = { billing: "billing", my: "my" };
+    var isAdmin = isAdminUser();
+
+    // Admin: default billing | Non-admin: default my
+    var selectedDashView = isAdmin ? DASH_VIEW.billing : DASH_VIEW.my;
+
+    // -------------------- Picker --------------------
+    function buildDashPicker() {
+      var $sel = $("#dashboardPicker");
+      if (!$sel.length) return;
+
+      $sel.empty();
+
+      if (isAdmin) {
+        $sel.append(`<option value="${DASH_VIEW.billing}"><%= t('page.dashboard.pageTitle') %></option>`);
+        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
+        $sel.prop("disabled", false);
+
+        // garante visível
+        $sel.closest(".dash-filterbar").show();
+      } else {
+        // Non-admin: ONLY my
+        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
+        $sel.val(DASH_VIEW.my);
+        $sel.prop("disabled", true);
+
+        // Se você quer esconder o picker inteiro:
+        $sel.closest(".dash-filterbar").hide();
+      }
+
+      // Important: set value AFTER options
+      $sel.val(selectedDashView);
+    }
+
     // -------------------- View toggle --------------------
-    var myProcessesLoaded = false;
+    var myProcessesLoadedOnce = false;
 
     function setView(viewName) {
-      if (viewName === "myprocesses") {
+      if (viewName === DASH_VIEW.my) {
         $("#dashBillingWrap").hide();
         $("#dashMyProcessesWrap").show();
-        $("#yearFilterWrap").hide(); // ano só no faturamento
-
-        if (!myProcessesLoaded) {
-          myProcessesLoaded = true;
-          loadMyProcessesDashboard();
-        }
+        $("#yearFilterWrap").hide();
         return;
       }
 
-      // default: billing
       $("#dashMyProcessesWrap").hide();
       $("#dashBillingWrap").show();
       $("#yearFilterWrap").show();
     }
 
-    $("#dashboardPicker").on("change", function () {
-      setView(String($(this).val() || "billing"));
+    // Orchestrator
+    function loadDashboard() {
+      setView(selectedDashView);
+
+      if (selectedDashView === DASH_VIEW.billing) {
+        loadBillingDashboard();
+        return;
+      }
+
+      // my
+      if (!myProcessesLoadedOnce) {
+        myProcessesLoadedOnce = true;
+        loadMyProcessesDashboard();
+      } else {
+        // se você quiser sempre recarregar ao trocar, deixe assim:
+        loadMyProcessesDashboard();
+      }
+    }
+
+    // ✅ FIX: event delegation (pega change mesmo se plugin mexer no select)
+    $(document).on("change", "#dashboardPicker", function () {
+      var v = String($(this).val() || "");
+      selectedDashView = (v === DASH_VIEW.my) ? DASH_VIEW.my : DASH_VIEW.billing;
+      loadDashboard();
     });
 
-    // -------------------- Helpers (shared/billing) --------------------
+    // -------------------- Helpers (shared) --------------------
     function toNumber(value) {
       var n = Number(String(value ?? "").replace(",", "."));
       return Number.isFinite(n) ? n : 0;
@@ -534,9 +623,7 @@
       return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
     }
 
-    function moneyPtBr(value, currencyCode) {
-      return moneyCurrencyPtBr(value, currencyCode);
-    }
+    function moneyPtBr(value, currencyCode) { return moneyCurrencyPtBr(value, currencyCode); }
 
     function formatDateTimePtBr(value) {
       if (!value) return "-";
@@ -583,8 +670,7 @@
 
     // -------- Process helpers (billing + myprocesses) --------
     function getProcessStatusValue(p) {
-      var v = p?.status;
-      var n = Number(v);
+      var n = Number(p?.status);
       return Number.isFinite(n) ? n : null;
     }
 
@@ -659,7 +745,7 @@
       return n;
     }
 
-    // -------------------- BILLING dashboard state --------------------
+    // -------------------- BILLING dashboard --------------------
     var monthsPt = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     var lineChart = null;
     var doughnutChart = null;
@@ -771,7 +857,6 @@
 
     function renderNearDue(processesInSelectedYear) {
       var items = Array.isArray(processesInSelectedYear) ? processesInSelectedYear.slice() : [];
-
       items = items.filter(function (p) { return getProcessStatusValue(p) === 2; });
 
       items.sort(function (a, b) {
@@ -793,13 +878,10 @@
       items.forEach(function (p) {
         var number = pickProcessNumber(p);
         var company = pickProcessCompanyName(p);
-
         var dueAt = pickProcessDueAt(p);
         var dueText = dueAt ? formatDatePtBr(dueAt) : "-";
-
         var statusLabel = getProcessStatusLabel(p);
         var cls = getProcessStatusCssFull(p);
-
         var pid = pickProcessId(p);
 
         var block = `
@@ -875,16 +957,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          legend: { display: true, position: "bottom" },
-          tooltips: {
-            callbacks: {
-              label: function (tooltipItem, data) {
-                var label = data.labels[tooltipItem.index] || "";
-                var value = data.datasets[0].data[tooltipItem.index] || 0;
-                return label + ": " + value;
-              }
-            }
-          }
+          legend: { display: true, position: "bottom" }
         }
       });
     }
@@ -912,195 +985,147 @@
       return pickProcessCreatedAt(p) || pickProcessUpdatedAt(p) || null;
     }
 
-    async function loadBillingDashboard() {
-      try {
-        $("#lastUpdateAt").text(formatDateTimePtBr(new Date()));
+async function loadBillingDashboard() {
+    try {
+      $("#lastUpdateAt").text(formatDateTimePtBr(new Date()));
 
-        var ranges = computeRanges();
-        var yearStart = ranges.yearStart;
-        var yearEnd = ranges.yearEnd;
-        var monthStart = ranges.monthStart;
-        var monthEnd = ranges.monthEnd;
+      var ranges = computeRanges();
+      var yearStart = ranges.yearStart;
+      var yearEnd = ranges.yearEnd;
+      var monthStart = ranges.monthStart;
+      var monthEnd = ranges.monthEnd;
 
-        var results = await Promise.all([
-          fetchJson("/api/invoices?fields=summary"),
-          fetchJson("/api/processes?fields=dashboard")
-        ]);
+      var results = await Promise.all([
+        fetchJson("/api/invoices?fields=summary"),
+        fetchJson("/api/processes?fields=dashboard")
+      ]);
 
-        var invoicesResp = results[0];
-        var processesResp = results[1];
+      var invoicesResp = results[0];
+      var processesResp = results[1];
 
-        var invoicesRaw = normalizeArrayResponse(invoicesResp);
+      var invoicesRaw = normalizeArrayResponse(invoicesResp);
 
-        // Filter out "faturado"
-        var invoices = invoicesRaw.filter(function (inv) {
-          var st = pickInvoiceStatus(inv);
-          return st !== INVOICE_STATUS.faturado;
-        });
+      var invoices = invoicesRaw.filter(function (inv) {
+        var st = pickInvoiceStatus(inv);
+        return st !== INVOICE_STATUS.faturado;
+      });
 
-        var totalsByMonthAll = new Array(12).fill(0);
-        var activeByMonth = new Array(12).fill(0);
-        var paidByMonth = new Array(12).fill(0);
+      var totalsByMonthAll = new Array(12).fill(0);
+      var activeByMonth = new Array(12).fill(0);
+      var paidByMonth = new Array(12).fill(0);
 
-        var monthSumAll = 0;
-        var yearSumAll = 0;
+      var monthSumAll = 0;
+      var yearSumAll = 0;
 
-        invoices.forEach(function (inv) {
-          var dtRaw = pickInvoiceDate(inv);
-          if (!dtRaw) return;
+      invoices.forEach(function (inv) {
+        var dtRaw = pickInvoiceDate(inv);
+        if (!dtRaw) return;
 
-          var dt = new Date(dtRaw);
-          if (Number.isNaN(dt.getTime())) return;
+        var dt = new Date(dtRaw);
+        if (Number.isNaN(dt.getTime())) return;
 
-          var total = toNumber(pickInvoiceTotal(inv));
-          var st = pickInvoiceStatus(inv);
+        var total = toNumber(pickInvoiceTotal(inv));
+        var st = pickInvoiceStatus(inv);
 
-          if (dt >= monthStart && dt < monthEnd) monthSumAll += total;
+        if (dt >= monthStart && dt < monthEnd) monthSumAll += total;
 
-          if (dt >= yearStart && dt < yearEnd) {
-            yearSumAll += total;
+        if (dt >= yearStart && dt < yearEnd) {
+          yearSumAll += total;
 
-            var m = dt.getMonth();
-            totalsByMonthAll[m] += total;
+          var m = dt.getMonth();
+          totalsByMonthAll[m] += total;
 
-            if (st === INVOICE_STATUS.ativo) activeByMonth[m] += total;
-            if (st === INVOICE_STATUS.pago) paidByMonth[m] += total;
-          }
-        });
-
-        $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSumAll, "BRL"));
-        $("#annualRevenue").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
-
-        var estimatedMonthly = 30000;
-        var estimatedYear = 30000 * 12;
-
-        var deltaMonth = estimatedMonthly > 0 ? ((monthSumAll / estimatedMonthly) * 100) : 0;
-        $("#monthlyDelta").text((deltaMonth || 0).toFixed(0) + "%");
-
-        var deltaYear = estimatedYear > 0 ? ((yearSumAll / estimatedYear) * 100) : 0;
-        $("#annualDelta").text((deltaYear || 0).toFixed(0) + "%");
-
-        var avgMonthly = yearSumAll / 12;
-        $("#avgMonthlyRevenue").text(moneyCurrencyPtBr(avgMonthly, "BRL"));
-        $("#avgMonthlyHint").text("Ano ÷ 12");
-
-        var bestMonthIndex = 0;
-        var bestMonthValue = totalsByMonthAll[0] || 0;
-        for (var i = 1; i < 12; i++) {
-          if ((totalsByMonthAll[i] || 0) > bestMonthValue) {
-            bestMonthValue = totalsByMonthAll[i] || 0;
-            bestMonthIndex = i;
-          }
+          if (st === INVOICE_STATUS.ativo) activeByMonth[m] += total;
+          if (st === INVOICE_STATUS.pago) paidByMonth[m] += total;
         }
+      });
 
-        $("#bestMonthName").text(monthsPt[bestMonthIndex] || "-");
-        $("#bestMonthRevenue").text(moneyCurrencyPtBr(bestMonthValue, "BRL"));
+      // Revenues
+      $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSumAll, "BRL"));
+      $("#annualRevenue").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
 
-        var estimatedByMonth = new Array(12).fill(30000);
+      // ✅ RESTORE DELTAS (avoid null/NaN)
+      // If you had these numbers coming from DB/settings before, plug them here later.
+      var estimatedMonthly = 30000;       // same as your old script
+      var estimatedYear = 30000 * 12;
 
-        var lineData = {
-          labels: monthsPt,
-          datasets: [
-            {
-              label: "Estimado (30.000/mês)",
-              backgroundColor: "rgba(220,220,220,0.10)",
-              borderColor: "rgba(170,170,170,1)",
-              pointBackgroundColor: "rgba(170,170,170,1)",
-              pointBorderColor: "#fff",
-              data: estimatedByMonth
-            },
-            {
-              label: "Invoices ativas (status 1)",
-              backgroundColor: "rgba(26,179,148,0.10)",
-              borderColor: "rgba(26,179,148,1)",
-              pointBackgroundColor: "rgba(26,179,148,1)",
-              pointBorderColor: "#fff",
-              data: activeByMonth
-            },
-            {
-              label: "Invoices pagas (status 4)",
-              backgroundColor: "rgba(220,38,38,0.08)",
-              borderColor: "rgba(220,38,38,1)",
-              pointBackgroundColor: "rgba(220,38,38,1)",
-              pointBorderColor: "#fff",
-              data: paidByMonth
-            }
-          ]
-        };
+      var deltaMonth = estimatedMonthly > 0 ? ((monthSumAll / estimatedMonthly) * 100) : 0;
+      var deltaYear = estimatedYear > 0 ? ((yearSumAll / estimatedYear) * 100) : 0;
 
-        var lineOptions = {
-          responsive: true,
-          maintainAspectRatio: false,
-          tooltips: {
-            enabled: true,
-            callbacks: {
-              label: function (tooltipItem, data) {
-                var dsLabel = data?.datasets?.[tooltipItem.datasetIndex]?.label || "";
-                return dsLabel + ": " + moneyCurrencyPtBr(tooltipItem.yLabel, "BRL");
-              }
-            }
-          },
-          scales: {
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                stepSize: 10000,
-                callback: function (value) {
-                  try { return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value); }
-                  catch (e) { return String(value); }
-                }
-              }
-            }]
-          }
-        };
+      if (!Number.isFinite(deltaMonth)) deltaMonth = 0;
+      if (!Number.isFinite(deltaYear)) deltaYear = 0;
 
-        var canvasLine = document.getElementById("lineChart");
-        if (canvasLine) {
-          var ctx = canvasLine.getContext("2d");
-          if (lineChart) lineChart.destroy();
-          lineChart = new Chart(ctx, { type: "line", data: lineData, options: lineOptions });
+      $("#monthlyDelta").text(deltaMonth.toFixed(0) + "%");
+      $("#annualDelta").text(deltaYear.toFixed(0) + "%");
+
+      // Avg / Best month
+      var avgMonthly = yearSumAll / 12;
+      $("#avgMonthlyRevenue").text(moneyCurrencyPtBr(avgMonthly, "BRL"));
+      $("#avgMonthlyHint").text("Ano ÷ 12");
+
+      var bestMonthIndex = 0;
+      var bestMonthValue = totalsByMonthAll[0] || 0;
+      for (var i = 1; i < 12; i++) {
+        if ((totalsByMonthAll[i] || 0) > bestMonthValue) {
+          bestMonthValue = totalsByMonthAll[i] || 0;
+          bestMonthIndex = i;
         }
-
-        $("#totalInvoicesInPeriod").text(String(invoices.filter(function (inv) {
-          var dt = new Date(pickInvoiceDate(inv) || 0);
-          return dt >= yearStart && dt < yearEnd;
-        }).length));
-
-        var processes = normalizeArrayResponse(processesResp);
-
-        var processesYear = processes.filter(function (p) {
-          var dtRaw = pickProcessDateForYearFilter(p);
-          if (!dtRaw) return false;
-
-          var dt = new Date(dtRaw);
-          if (Number.isNaN(dt.getTime())) return false;
-
-          return dt >= yearStart && dt < yearEnd;
-        });
-
-        $("#totalProcessesInPeriod").text(String(processesYear.length));
-
-        renderNearDue(processesYear);
-        renderProcessStatusDoughnut(processesYear);
-
-        allProcesses = processes.slice();
-        pageIndex = 0;
-        setSortIndicator();
-        renderProcessesTable();
-
-      } catch (e) {
-        console.error("Erro ao carregar dashboard faturamento:", e);
-        $("#monthlyRevenue").text("Erro");
-        $("#annualRevenue").text("Erro");
-        $("#avgMonthlyRevenue").text("Erro");
-        $("#bestMonthName").text("-");
-        $("#bestMonthRevenue").text("Erro");
-        $("#processesTbody").html('<tr><td colspan="6">Erro ao carregar dados.</td></tr>');
-        $("#nearDueContainer").html('<div class="ibox-content"><small>Erro ao carregar processos.</small></div>');
       }
-    }
+      $("#bestMonthName").text(monthsPt[bestMonthIndex] || "-");
+      $("#bestMonthRevenue").text(moneyCurrencyPtBr(bestMonthValue, "BRL"));
 
-    // -------------------- Billing UI events --------------------
+      // Chart (kept as your simplified version)
+      var canvasLine = document.getElementById("lineChart");
+      if (canvasLine) {
+        var ctx = canvasLine.getContext("2d");
+        if (lineChart) lineChart.destroy();
+
+        lineChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: monthsPt,
+            datasets: [
+              { label: "Invoices ativas (status 1)", backgroundColor: "rgba(26,179,148,0.10)", borderColor: "rgba(26,179,148,1)", data: activeByMonth },
+              { label: "Invoices pagas (status 4)", backgroundColor: "rgba(220,38,38,0.08)", borderColor: "rgba(220,38,38,1)", data: paidByMonth }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+
+      $("#totalInvoicesInPeriod").text(String(invoices.filter(function (inv) {
+        var dt = new Date(pickInvoiceDate(inv) || 0);
+        return dt >= yearStart && dt < yearEnd;
+      }).length));
+
+      var processes = normalizeArrayResponse(processesResp);
+
+      var processesYear = processes.filter(function (p) {
+        var dtRaw = pickProcessDateForYearFilter(p);
+        if (!dtRaw) return false;
+
+        var dt = new Date(dtRaw);
+        if (Number.isNaN(dt.getTime())) return false;
+
+        return dt >= yearStart && dt < yearEnd;
+      });
+
+      $("#totalProcessesInPeriod").text(String(processesYear.length));
+
+      renderNearDue(processesYear);
+      renderProcessStatusDoughnut(processesYear);
+
+      allProcesses = processes.slice();
+      pageIndex = 0;
+      setSortIndicator();
+      renderProcessesTable();
+
+    } catch (e) {
+      console.error("Erro ao carregar dashboard faturamento:", e);
+    }
+  }
+
+    // Billing UI events
     $(document).on("click", ".sortable", function () {
       var key = $(this).data("sort");
       if (!key) return;
@@ -1117,30 +1142,7 @@
     });
 
     $("#btnReloadProcesses").on("click", function () { loadBillingDashboard(); });
-
-    $("#btnSearch").on("click", function () {
-      pageIndex = 0;
-      renderProcessesTable();
-    });
-
-    $("#processSearch").on("keyup", function (e) {
-      if (e.key === "Enter") {
-        pageIndex = 0;
-        renderProcessesTable();
-      }
-    });
-
-    $("#prevPage").on("click", function () {
-      if (pageIndex > 0) pageIndex--;
-      renderProcessesTable();
-    });
-
-    $("#nextPage").on("click", function () {
-      var total = viewProcesses.length;
-      var maxPage = Math.max(0, Math.ceil(total / pageSize) - 1);
-      if (pageIndex < maxPage) pageIndex++;
-      renderProcessesTable();
-    });
+    $("#btnSearch").on("click", function () { pageIndex = 0; renderProcessesTable(); });
 
     $("#yearFilter").on("change", function () {
       var v = Number($(this).val());
@@ -1149,16 +1151,6 @@
     });
 
     // -------------------- MY PROCESSES dashboard --------------------
-    function escapeHtml(value) {
-      if (value == null) return "";
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
     function pickCompanyId() {
       return (
         window.__auth?.company_id ||
@@ -1174,13 +1166,22 @@
         window.__auth?.company_name ||
         window.__auth?.companyName ||
         window.__auth?.company?.company_name ||
-        window.__auth?.company?.company_name ||
         "-"
       );
     }
 
     function pickInvoiceCurrency(inv) {
       return inv?.currency_code || inv?.currency || inv?.currencyCode || null;
+    }
+
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function typeToMeta(type) {
@@ -1251,42 +1252,21 @@
       if (!el) return;
 
       var ctx = el.getContext("2d");
-      if (lineChartCompany) {
-        try { lineChartCompany.destroy(); } catch (e) {}
-      }
+      if (lineChartCompany) { try { lineChartCompany.destroy(); } catch (e) { } }
 
-      var data = {
-        labels: labels,
-        datasets: [{
-          label: "Invoices",
-          backgroundColor: "rgba(26,179,148,0.2)",
-          borderColor: "rgba(26,179,148,0.8)",
-          pointBackgroundColor: "rgba(26,179,148,1)",
-          pointBorderColor: "#fff",
-          data: values
-        }]
-      };
-
-      var options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        tooltips: {
-          callbacks: {
-            label: function (tooltipItem) {
-              return moneyPtBr(tooltipItem.yLabel, currencyCode);
-            }
-          }
-        },
-        scales: {
-          yAxes: [{
-            ticks: {
-              callback: function (v) { return moneyPtBr(v, currencyCode); }
-            }
+      lineChartCompany = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Invoices",
+            backgroundColor: "rgba(26,179,148,0.2)",
+            borderColor: "rgba(26,179,148,0.8)",
+            data: values
           }]
-        }
-      };
-
-      lineChartCompany = new Chart(ctx, { type: "line", data: data, options: options });
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
     }
 
     async function loadMyProcessesDashboard() {
@@ -1304,20 +1284,16 @@
 
         var [procRes, invRes] = await Promise.all([
           fetchJson("/api/processes?company_id=" + encodeURIComponent(String(companyId))),
-          fetchJson("/api/invoices?company_id=" + encodeURIComponent(String(companyId)))
+          fetchJson("/api/invoices?fields=summary&company_id=" + encodeURIComponent(String(companyId)))
         ]);
 
         var processes = normalizeArrayResponse(procRes);
         var invoices = normalizeArrayResponse(invRes);
 
         $("#kpiProcessCount").text(String(processes.length));
+        $("#kpiClosedCount").text(String(processes.filter(function (p) { return Number(p?.status) === 4; }).length));
 
-        var closedCount = processes.filter(function (p) { return Number(p?.status) === 4; }).length;
-        $("#kpiClosedCount").text(String(closedCount));
-
-        var now = new Date();
-        var year = now.getFullYear();
-
+        var year = new Date().getFullYear();
         var totalYear = 0;
         var currencyCode = null;
 
@@ -1336,7 +1312,7 @@
         $("#lineTotalYear").text(moneyPtBr(totalYear, currencyCode));
         $("#lastUpdateAtCompany").text(formatDateTimePtBr(new Date().toISOString()));
 
-        var monthsPt2 = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        var labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
         var monthly = new Array(12).fill(0);
 
         invoices.forEach(function (inv) {
@@ -1349,8 +1325,9 @@
           monthly[d.getMonth()] += toNumber(inv?.total ?? inv?.total_value ?? inv?.total_amount ?? inv?.amount ?? inv?.grand_total ?? inv?.value ?? 0);
         });
 
-        buildLineChartCompany(monthsPt2, monthly, currencyCode);
+        buildLineChartCompany(labels, monthly, currencyCode);
 
+        // Top 2
         var top2 = processes.slice().sort(function (a, b) {
           return new Date(pickProcessCreatedAt(b) ?? 0) - new Date(pickProcessCreatedAt(a) ?? 0);
         }).slice(0, 2);
@@ -1358,7 +1335,7 @@
         if (!top2.length) {
           $("#top2ProcessesTbody").html("<tr><td colspan='3'>Nenhum processo encontrado.</td></tr>");
         } else {
-          var topHtml = top2.map(function (p) {
+          $("#top2ProcessesTbody").html(top2.map(function (p) {
             var num = escapeHtml(pickProcessNumber(p));
             var stLabel = escapeHtml(getProcessStatusLabel(p));
             var stClass = escapeHtml(getProcessStatusCssFull(p));
@@ -1370,11 +1347,10 @@
                 <td>${created}</td>
               </tr>
             `;
-          }).join("");
-
-          $("#top2ProcessesTbody").html(topHtml);
+          }).join(""));
         }
 
+        // Timeline
         var active = processes
           .filter(function (p) { return Number(p?.status) === 0; })
           .sort(function (a, b) { return new Date(pickProcessCreatedAt(b) ?? 0) - new Date(pickProcessCreatedAt(a) ?? 0); })[0];
@@ -1400,9 +1376,10 @@
       }
     }
 
-    // -------------------- Bootstrap init --------------------
+    // -------------------- Init --------------------
+    buildDashPicker();
     setSortIndicator();
-    loadBillingDashboard();
-    setView("billing");
+    loadDashboard();
   });
 </script>
+
