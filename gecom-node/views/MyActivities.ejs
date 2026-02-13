@@ -1,0 +1,382 @@
+﻿<style>
+  #masterHeader { display: none !important; }
+  .myact { margin-top: 12px; }
+  .myact .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .myact .cols { overflow-x: auto; white-space: nowrap; padding-bottom: 8px; }
+  .myact .colx { width: 340px; display: inline-block; vertical-align: top; white-space: normal; margin-right: 10px; }
+  .myact .list { list-style: none; margin: 0; padding: 0; min-height: 160px; }
+  .myact .cardx { border: 1px solid #e7eaec; border-left: 4px solid #1ab394; border-radius: 4px; margin-bottom: 10px; padding: 10px; background: #fff; cursor: pointer; }
+  .myact .cardx.priority-high { border-left-color: #ed5565; }
+  .myact .cardx.priority-medium { border-left-color: #f8ac59; }
+  .myact .cardx.priority-low { border-left-color: #1c84c6; }
+  .myact .cardx.sel { box-shadow: 0 0 0 2px #1ab394 inset; }
+  .myact .tagx { display: inline-block; font-size: 11px; padding: 2px 7px; border: 1px solid #ddd; border-radius: 20px; background: #f5f5f5; margin-right: 4px; margin-top: 5px; }
+  .myact .emptyx { border: 1px dashed #ddd; background: #fafafa; color: #999; font-size: 12px; padding: 12px; text-align: center; border-radius: 4px; }
+  .myact .btn-danger, .myact .btn-danger i { color: #fff !important; }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight myact">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5><%= t('page.myActivities.pageTitle') %></h5>
+          <div class="ibox-tools">
+            <a id="maRefresh" class="btn btn-xs btn-white"><i class="fa fa-refresh"></i> <%= t('page.myActivities.actions.refresh') %></a>
+            <a id="maArchive" class="btn btn-xs btn-danger"><i class="fa fa-archive"></i> <%= t('page.myActivities.actions.archive') %></a>
+          </div>
+        </div>
+        <div class="ibox-content">
+          <div class="toolbar">
+            <select id="maBoard" class="form-control input-sm" style="min-width:240px;"></select>
+            <label class="checkbox-inline" style="margin:0;"><input id="maInactive" type="checkbox"> <%= t('page.myActivities.includeInactive') %></label>
+            <button id="maNewBoard" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> <%= t('page.myActivities.actions.newBoard') %></button>
+            <button id="maEditBoard" class="btn btn-sm btn-white"><i class="fa fa-pencil"></i> <%= t('page.myActivities.actions.editBoard') %></button>
+            <button id="maNewCol" class="btn btn-sm btn-white"><i class="fa fa-columns"></i> <%= t('page.myActivities.actions.newColumn') %></button>
+          </div>
+          <hr style="margin:12px 0;">
+          <div id="maMeta" class="text-muted" style="display:block !important;"></div>
+          <!-- <div class="text-muted" style="font-size:12px;margin-bottom:8px;display:block !important;"><%= t('page.myActivities.hints.dragAndDoubleClick') %></div> -->
+          <div id="maCols" class="cols" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+<script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script>
+(function () {
+  const TXT = {
+    pageTitle: "<%- String(t('page.myActivities.pageTitle')).replace(/\"/g, '\\\"') %>",
+    noBoard: "<%- String(t('page.myActivities.messages.noBoardSelected')).replace(/\"/g, '\\\"') %>",
+    noBoardOption: "<%- String(t('page.myActivities.messages.noBoardsOption')).replace(/\"/g, '\\\"') %>",
+    emptyCol: "<%- String(t('page.myActivities.messages.emptyColumn')).replace(/\"/g, '\\\"') %>",
+    createOrSelectBoard: "<%- String(t('page.myActivities.messages.createOrSelectBoard')).replace(/\"/g, '\\\"') %>",
+    noDueDate: "<%- String(t('page.myActivities.messages.noDueDate')).replace(/\"/g, '\\\"') %>",
+    noAssignees: "<%- String(t('page.myActivities.messages.noAssignees')).replace(/\"/g, '\\\"') %>",
+    userFallback: "<%- String(t('page.myActivities.messages.userFallback')).replace(/\"/g, '\\\"') %>",
+    save: "<%- String(t('page.myActivities.actions.save')).replace(/\"/g, '\\\"') %>",
+    cancel: "<%- String(t('page.myActivities.actions.cancel')).replace(/\"/g, '\\\"') %>",
+    alertLoadFail: "<%- String(t('page.myActivities.alerts.loadFail')).replace(/\"/g, '\\\"') %>",
+    alertRefreshFail: "<%- String(t('page.myActivities.alerts.refreshFail')).replace(/\"/g, '\\\"') %>",
+    alertOpenBoardFail: "<%- String(t('page.myActivities.alerts.openBoardFail')).replace(/\"/g, '\\\"') %>",
+    alertMoveFail: "<%- String(t('page.myActivities.alerts.moveFail')).replace(/\"/g, '\\\"') %>",
+    alertReorderColumnsFail: "<%- String(t('page.myActivities.alerts.reorderColumnsFail')).replace(/\"/g, '\\\"') %>",
+    alertCreateCardFail: "<%- String(t('page.myActivities.alerts.createCardFail')).replace(/\"/g, '\\\"') %>",
+    alertDeleteCardFail: "<%- String(t('page.myActivities.alerts.deleteCardFail')).replace(/\"/g, '\\\"') %>",
+    alertEditColumnFail: "<%- String(t('page.myActivities.alerts.editColumnFail')).replace(/\"/g, '\\\"') %>",
+    alertDeleteColumnFail: "<%- String(t('page.myActivities.alerts.deleteColumnFail')).replace(/\"/g, '\\\"') %>",
+    alertCreateBoardFail: "<%- String(t('page.myActivities.alerts.createBoardFail')).replace(/\"/g, '\\\"') %>",
+    alertEditBoardFail: "<%- String(t('page.myActivities.alerts.editBoardFail')).replace(/\"/g, '\\\"') %>",
+    alertArchiveBoardFail: "<%- String(t('page.myActivities.alerts.archiveBoardFail')).replace(/\"/g, '\\\"') %>",
+    alertCreateColumnFail: "<%- String(t('page.myActivities.alerts.createColumnFail')).replace(/\"/g, '\\\"') %>",
+    confirmDeleteCard: "<%- String(t('page.myActivities.confirm.deleteCard')).replace(/\"/g, '\\\"') %>",
+    confirmDeleteColumn: "<%- String(t('page.myActivities.confirm.deleteColumn')).replace(/\"/g, '\\\"') %>",
+    confirmArchiveBoard: "<%- String(t('page.myActivities.confirm.archiveBoard')).replace(/\"/g, '\\\"') %>",
+    labelBoard: "<%- String(t('page.myActivities.labels.board')).replace(/\"/g, '\\\"') %>",
+    labelEntity: "<%- String(t('page.myActivities.labels.entity')).replace(/\"/g, '\\\"') %>",
+    labelColumns: "<%- String(t('page.myActivities.labels.columns')).replace(/\"/g, '\\\"') %>",
+    labelCards: "<%- String(t('page.myActivities.labels.cards')).replace(/\"/g, '\\\"') %>",
+    labelNoWip: "<%- String(t('page.myActivities.labels.noWip')).replace(/\"/g, '\\\"') %>",
+    labelFinal: "<%- String(t('page.myActivities.labels.final')).replace(/\"/g, '\\\"') %>",
+    labelWip: "<%- String(t('page.myActivities.labels.wip')).replace(/\"/g, '\\\"') %>",
+    newCardPlaceholder: "<%- String(t('page.myActivities.placeholders.newCard')).replace(/\"/g, '\\\"') %>",
+    modalBoardTitle: "<%- String(t('page.myActivities.modals.newBoardTitle')).replace(/\"/g, '\\\"') %>",
+    modalEditBoardTitle: "<%- String(t('page.myActivities.modals.editBoardTitle')).replace(/\"/g, '\\\"') %>",
+    modalNewColumnTitle: "<%- String(t('page.myActivities.modals.newColumnTitle')).replace(/\"/g, '\\\"') %>",
+    modalEditColumnTitle: "<%- String(t('page.myActivities.modals.editColumnTitle')).replace(/\"/g, '\\\"') %>",
+    modalCardTitlePrefix: "<%- String(t('page.myActivities.modals.cardTitlePrefix')).replace(/\"/g, '\\\"') %>",
+    fieldName: "<%- String(t('page.myActivities.fields.name')).replace(/\"/g, '\\\"') %>",
+    fieldDescription: "<%- String(t('page.myActivities.fields.description')).replace(/\"/g, '\\\"') %>",
+    fieldColor: "<%- String(t('page.myActivities.fields.color')).replace(/\"/g, '\\\"') %>",
+    fieldWip: "<%- String(t('page.myActivities.fields.wip')).replace(/\"/g, '\\\"') %>",
+    fieldTitle: "<%- String(t('page.myActivities.fields.title')).replace(/\"/g, '\\\"') %>",
+    fieldPriority: "<%- String(t('page.myActivities.fields.priority')).replace(/\"/g, '\\\"') %>",
+    fieldDueDate: "<%- String(t('page.myActivities.fields.dueDate')).replace(/\"/g, '\\\"') %>",
+    labelTag: "<%- String(t('page.myActivities.actions.tag')).replace(/\"/g, '\\\"') %>",
+    labelComments: "<%- String(t('page.myActivities.actions.comments')).replace(/\"/g, '\\\"') %>",
+    labelAssignees: "<%- String(t('page.myActivities.actions.assignees')).replace(/\"/g, '\\\"') %>",
+    labelDelete: "<%- String(t('page.myActivities.actions.delete')).replace(/\"/g, '\\\"') %>",
+    labelBoardFallback: "<%- String(t('page.myActivities.labels.boardFallback')).replace(/\"/g, '\\\"') %>",
+    labelInactiveSuffix: "<%- String(t('page.myActivities.labels.inactiveSuffix')).replace(/\"/g, '\\\"') %>",
+    priorityLow: "<%- String(t('page.myActivities.priority.low')).replace(/\"/g, '\\\"') %>",
+    priorityMedium: "<%- String(t('page.myActivities.priority.medium')).replace(/\"/g, '\\\"') %>",
+    priorityHigh: "<%- String(t('page.myActivities.priority.high')).replace(/\"/g, '\\\"') %>",
+    dateYmd: "<%- String(t('page.myActivities.placeholders.dateYmd')).replace(/\"/g, '\\\"') %>",
+    sideModalMissing: "<%- String(t('page.myActivities.messages.sideModalMissing')).replace(/\"/g, '\\\"') %>",
+    apiStatusPrefix: "<%- String(t('page.myActivities.messages.apiStatusPrefix')).replace(/\"/g, '\\\"') %>",
+    validationBoardName: "<%- String(t('page.myActivities.validation.boardName')).replace(/\"/g, '\\\"') %>",
+    validationColumnName: "<%- String(t('page.myActivities.validation.columnName')).replace(/\"/g, '\\\"') %>",
+  };
+
+  const S = { boards: [], board: null, cols: [], cards: [], tags: [], users: [], cardId: null };
+  const q = (s) => $(s);
+  const pick = (d) => Array.isArray(d) ? d : (Array.isArray(d?.data) ? d.data : (Array.isArray(d?.rows) ? d.rows : (Array.isArray(d?.items) ? d.items : [])));
+  const esc = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
+  const dt = (v) => { if (!v) return "-"; const d = new Date(v); return Number.isNaN(d.getTime()) ? "-" : d.toLocaleString(); };
+  const ymd = (v) => { if (!v) return ""; const d = new Date(v); if (Number.isNaN(d.getTime())) return ""; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+
+  async function j(res){ const t=await res.text().catch(()=>""); if(!t) return {}; try{return JSON.parse(t);}catch{return {message:t};}}
+  async function api(m,u,b){ const r=await fetch(u,{method:m,headers:{Accept:"application/json",...(b?{"Content-Type":"application/json"}:{})},...(b?{body:JSON.stringify(b)}:{})}); const d=await j(r); if(!r.ok) throw new Error(d?.message||(`${TXT.apiStatusPrefix} ${r.status}`)); return d; }
+
+  function openFormModal(opts){
+    if(!window.SideModal||typeof window.SideModal.open!=="function") throw new Error(TXT.sideModalMissing);
+    window.SideModal.open({title:opts.title,html:opts.html,okText:opts.okText||TXT.save,cancelText:TXT.cancel,onOpen:(ctx)=>opts.onOpen&&opts.onOpen(ctx),onOk:async(ctx)=>opts.onOk&&opts.onOk(ctx)});
+  }
+
+  function nPr(v){const s=String(v||"MEDIUM").toUpperCase(); if(s.includes("HIGH")) return "HIGH"; if(s.includes("LOW")) return "LOW"; return "MEDIUM";}
+  function nTags(c){ return pick(c?.tags||c?.card_tags).map((x)=>({id:String(x?.tag?.id||x?.id||x?.tag_id||""),name:String(x?.tag?.name||x?.name||TXT.labelTag),color:x?.tag?.color||x?.color||null})).filter(t=>t.id); }
+  function nAss(c){ return pick(c?.assignees||c?.card_assignees).map((a)=>{const u=a?.user||a;const id=String(u?.id||a?.user_id||"");return{id,name:String(u?.full_name||u?.name||u?.email||id||TXT.userFallback)};}).filter(a=>a.id); }
+  function nCard(c){ return {id:String(c?.id||""),title:String(c?.title||TXT.fieldTitle),description:String(c?.description||""),column_id:String(c?.column_id||c?.columnId||""),sort_order:Number(c?.sort_order??c?.sortOrder??0),priority:nPr(c?.priority),due_date:c?.due_date||c?.dueDate||null,comments_count:Number(c?.comments_count??c?.commentsCount??c?._count?.comments??0),tags:nTags(c),assignees:nAss(c)}; }
+  function nCols(p){ const root=p?.board||p||{}; return pick(p?.columns||root?.columns).map((c)=>({id:String(c?.id||""),name:String(c?.name||TXT.labelColumns),sort_order:Number(c?.sort_order??c?.sortOrder??0),wip:c?.wip_limit??c?.wipLimit??null,color:c?.color||null,is_done:Boolean(c?.is_done??c?.isDone??false),cards:pick(c?.cards).map(nCard)})).filter(c=>c.id).sort((a,b)=>a.sort_order-b.sort_order); }
+  function nCards(p,cols){ const root=p?.board||p||{}; const direct=pick(p?.cards||root?.cards).map(nCard); return direct.length?direct:cols.flatMap((c)=>(c.cards||[]).map((x)=>({...x,column_id:x.column_id||c.id}))); }
+
+  function renderBoards(sel){
+    const e=q("#maBoard"); e.empty();
+    if(!S.boards.length){ e.append(`<option value="">${esc(TXT.noBoardOption)}</option>`); return; }
+    S.boards.forEach((b)=>e.append(`<option value="${esc(b.id)}">${esc(b.name||TXT.labelBoardFallback)}${(b?.is_active===false||b?.isActive===false)?` ${esc(TXT.labelInactiveSuffix)}`:""}</option>`));
+    if(sel&&S.boards.find((x)=>String(x.id)===String(sel))) e.val(String(sel)); else e.val(String(S.boards[0].id));
+  }
+
+  function renderMeta(){
+    if(!S.board){ q("#maMeta").text(TXT.noBoard); return; }
+    q("#maMeta").text(`${TXT.labelBoard}: ${S.board.name}${S.board.description?" - "+S.board.description:""} | ${TXT.labelEntity}: ${S.board.entity_type||S.board.entityType||"NONE"} | ${TXT.labelColumns}: ${S.cols.length} | ${TXT.labelCards}: ${S.cards.length}`);
+  }
+
+  function renderCols(){
+    const h=q("#maCols"); h.empty();
+    if(!S.board){ h.html(`<div class="emptyx">${esc(TXT.createOrSelectBoard)}</div>`); return; }
+
+    S.cols.forEach((col)=>{
+      const cards=S.cards.filter((c)=>String(c.column_id)===String(col.id)).sort((a,b)=>a.sort_order-b.sort_order);
+      let html=cards.map((c)=>`<li class="cardx priority-${String(c.priority).toLowerCase()} ${String(S.cardId||"")===String(c.id)?"sel":""}" data-card-id="${esc(c.id)}"><div style="font-weight:600;margin-bottom:6px;">${esc(c.title)}</div><div style="font-size:12px;color:#666;margin-bottom:6px;white-space:pre-wrap;">${esc(c.description||"")}</div><div style="font-size:11px;color:#777;"><i class="fa fa-clock-o"></i> ${esc(c.due_date?dt(c.due_date):TXT.noDueDate)} | <i class="fa fa-comments-o"></i> ${esc(c.comments_count)}</div><div>${(c.tags||[]).map((t)=>`<span class="tagx" style="${t.color?`border-color:${esc(t.color)};`:""}">${esc(t.name)}</span>`).join("")}</div><div style="margin-top:7px;"><button class="btn btn-xs btn-white maTag"><i class="fa fa-tag"></i> ${esc(TXT.labelTag)}</button> <button class="btn btn-xs btn-white maCom"><i class="fa fa-comment"></i> ${esc(TXT.labelComments)}</button> <button class="btn btn-xs btn-white maAss"><i class="fa fa-users"></i> ${esc(TXT.labelAssignees)}</button> <button class="btn btn-xs btn-danger maDel"><i class="fa fa-trash"></i></button></div></li>`).join("");
+      if(!html) html=`<li class="emptyx">${esc(TXT.emptyCol)}</li>`;
+
+      h.append(`<div class="colx" data-col-id="${esc(col.id)}"><div class="ibox" ${col.color?`style="border-top:3px solid ${esc(col.color)};"`:""}><div class="ibox-title"><h5>${esc(col.name)}</h5><div class="ibox-tools"><a class="btn btn-xs btn-white maEditCol" data-col="${esc(col.id)}"><i class="fa fa-pencil"></i></a> <a class="btn btn-xs btn-danger maDelCol" data-col="${esc(col.id)}"><i class="fa fa-trash"></i></a></div><div style="font-size:12px;color:#888;margin-top:4px;">${esc(col.wip?`${TXT.labelWip} ${col.wip}`:TXT.labelNoWip)}${col.is_done?` | ${TXT.labelFinal}`:""}</div></div><div class="ibox-content"><div class="input-group input-group-sm" style="margin-bottom:10px;"><input class="form-control maNewCard" data-col="${esc(col.id)}" placeholder="${esc(TXT.newCardPlaceholder)}"><span class="input-group-btn"><button class="btn btn-primary maAddCard" data-col="${esc(col.id)}"><i class="fa fa-plus"></i></button></span></div><ul class="list connectList" data-col="${esc(col.id)}">${html}</ul></div></div></div>`);
+    });
+
+    bindSortables();
+  }
+
+  function refreshEmptyRows(){
+    q("#maCols .list").each(function(){
+      const ul=q(this);
+      const cards=ul.children(".cardx").length;
+      const empty=ul.children(".emptyx");
+      if(cards===0 && empty.length===0) ul.append(`<li class="emptyx">${esc(TXT.emptyCol)}</li>`);
+      if(cards>0) empty.remove();
+    });
+  }
+
+  async function loadBoards(prefId){ const inc=q("#maInactive").is(":checked")?"true":"false"; S.boards=pick(await api("GET", `/api/kanban/boards?include_inactive=${encodeURIComponent(inc)}`)); renderBoards(prefId); }
+  async function loadBoard(id){ if(!id){ S.board=null;S.cols=[];S.cards=[];S.cardId=null;renderMeta();renderCols();return; } const d=await api("GET", `/api/kanban/boards/${encodeURIComponent(id)}`); S.board=d?.board||d; S.cols=nCols(d); S.cards=nCards(d,S.cols); renderMeta(); renderCols(); }
+  async function loadTags(){ S.tags=pick(await api("GET", "/api/kanban/tags")).map((t)=>({id:String(t?.id||""),name:String(t?.name||TXT.labelTag),color:t?.color||null})).filter((t)=>t.id); }
+  async function loadUsers(){ try { S.users=pick(await api("GET", "/api/users")).map((u)=>({id:String(u?.id||""),full_name:String(u?.full_name||u?.name||""),email:String(u?.email||"")})).filter((u)=>u.id); } catch { S.users=[]; } }
+
+  async function moveCard(cardId,toColId,sortIndex){
+    let moved=false;
+    const payloads=[
+      {target_column_id:toColId,target_order:Number.isFinite(sortIndex)?sortIndex:undefined},
+      {targetColumnId:toColId,targetOrder:Number.isFinite(sortIndex)?sortIndex:undefined},
+      {to_column_id:toColId,to_sort_order:Number.isFinite(sortIndex)?sortIndex:undefined},
+      {column_id:toColId,sort_order:Number.isFinite(sortIndex)?sortIndex:undefined}
+    ];
+    for(const p of payloads){
+      try { await api("POST",`/api/kanban/cards/${encodeURIComponent(cardId)}/move`,p); moved=true; break; } catch {}
+    }
+    if(!moved) await api("PATCH",`/api/kanban/cards/${encodeURIComponent(cardId)}`,{column_id:toColId, ...(Number.isFinite(sortIndex)?{sort_order:sortIndex}:{})});
+  }
+
+  async function persistColumnsOrder(){
+    const ids=q("#maCols .colx").map(function(){return String(q(this).data("col-id")||"");}).get().filter(Boolean);
+    for(let i=0;i<ids.length;i++) await api("PATCH",`/api/kanban/columns/${encodeURIComponent(ids[i])}`,{sort_order:i});
+  }
+
+  function bindSortables(){
+    q(".list").sortable({
+      connectWith:".connectList",
+      items:"> .cardx",
+      distance: 6,
+      start:function(_e,ui){ ui.item.data("from",ui.item.closest(".list").data("col")); },
+      receive:function(){ refreshEmptyRows(); setTimeout(refreshEmptyRows,0); },
+      remove:function(){ refreshEmptyRows(); setTimeout(refreshEmptyRows,0); },
+      stop:async function(_e,ui){
+        refreshEmptyRows(); setTimeout(refreshEmptyRows,0);
+        const cardId=String(ui.item.data("card-id")||"");
+        const to=String(ui.item.closest(".list").data("col")||"");
+        const from=String(ui.item.data("from")||"");
+        const idx=Number(ui.item.index());
+        if(!cardId||!to) return;
+        try{ if(to===from) await api("PATCH",`/api/kanban/cards/${encodeURIComponent(cardId)}`,{sort_order:idx}); else await moveCard(cardId,to,idx); await loadBoard(S.board?.id); }
+        catch(err){ alert(err.message||TXT.alertMoveFail); await loadBoard(S.board?.id); }
+      }
+    }).disableSelection();
+
+    q("#maCols").sortable({
+      items:"> .colx",
+      handle:".ibox-title",
+      tolerance:"pointer",
+      stop:async function(){ try{ await persistColumnsOrder(); await loadBoard(S.board?.id); } catch(e){ alert(e.message||TXT.alertReorderColumnsFail); await loadBoard(S.board?.id); } }
+    });
+  }
+
+  function openCardDetail(cardId){
+    const c=S.cards.find((x)=>String(x.id)===String(cardId)); if(!c) return;
+    const selectedTagIds=new Set((c.tags||[]).map((t)=>String(t.id)));
+    const tagOptions=(S.tags||[]).map((t)=>`<label style="display:block;font-weight:400;"><input type="checkbox" class="maDtlTagOpt" value="${esc(t.id)}" ${selectedTagIds.has(String(t.id))?"checked":""}> <span class="tagx" style="${t.color?`border-color:${esc(t.color)};`:""}">${esc(t.name)}</span></label>`).join("");
+    openFormModal({
+      title:`${TXT.modalCardTitlePrefix}: ${c.title}`,
+      html:`<div class="form-group"><label>${TXT.fieldTitle}</label><input id="maModalTitle" class="form-control" value="${esc(c.title)}"></div><div class="form-group"><label>${TXT.fieldDescription}</label><textarea id="maModalDesc" class="form-control" rows="4">${esc(c.description||"")}</textarea></div><div class="form-group"><label>${TXT.fieldPriority}</label><select id="maModalPri" class="form-control"><option value="LOW" ${c.priority==="LOW"?"selected":""}>${esc(TXT.priorityLow)}</option><option value="MEDIUM" ${c.priority==="MEDIUM"?"selected":""}>${esc(TXT.priorityMedium)}</option><option value="HIGH" ${c.priority==="HIGH"?"selected":""}>${esc(TXT.priorityHigh)}</option></select></div><div class="form-group"><label>${TXT.fieldDueDate}</label><input id="maModalDue" class="form-control" value="${esc(ymd(c.due_date))}" placeholder="${esc(TXT.dateYmd)}"></div><hr/><div class="form-group"><label>${TXT.labelTag}</label><div style="max-height:150px;overflow:auto;border:1px solid #eee;padding:8px;border-radius:4px;">${tagOptions || `<div class="text-muted">${esc(TXT.noBoardOption)}</div>`}</div><div style="margin-top:8px;"><input id="maDtlNewTagName" class="form-control input-sm" placeholder="${esc(TXT.fieldName)}"></div><div style="margin-top:6px;"><input id="maDtlNewTagColor" class="form-control input-sm" placeholder="${esc(TXT.fieldColor)}"></div></div>`,
+      onOpen:(ctx)=>{ try{ctx.root.find("#maModalDue").datepicker({dateFormat:"yy-mm-dd",changeMonth:true,changeYear:true});}catch{} },
+      onOk:async(ctx)=>{
+        await api("PATCH",`/api/kanban/cards/${encodeURIComponent(cardId)}`,{title:String(ctx.root.find("#maModalTitle").val()||"").trim(),description:String(ctx.root.find("#maModalDesc").val()||"").trim(),priority:String(ctx.root.find("#maModalPri").val()||"MEDIUM").trim().toUpperCase(),due_date:String(ctx.root.find("#maModalDue").val()||"").trim()||null});
+        const newTagName=String(ctx.root.find("#maDtlNewTagName").val()||"").trim();
+        const newTagColor=String(ctx.root.find("#maDtlNewTagColor").val()||"").trim()||null;
+        if(newTagName){
+          const created=await api("POST","/api/kanban/tags",{name:newTagName,color:newTagColor});
+          const createdId=String(created?.id||created?.data?.id||"").trim();
+          if(createdId) ctx.root.append(`<input type="hidden" class="maDtlTagOptExtra" value="${esc(createdId)}">`);
+        }
+        const next=new Set(ctx.root.find(".maDtlTagOpt:checked").map(function(){ return String(q(this).val()||""); }).get());
+        ctx.root.find(".maDtlTagOptExtra").each(function(){ const id=String(q(this).val()||""); if(id) next.add(id); });
+        const prev=new Set((c.tags||[]).map((t)=>String(t.id)));
+        const toAdd=[...next].filter((id)=>!prev.has(id));
+        const toRemove=[...prev].filter((id)=>!next.has(id));
+        for(const tagId of toAdd) await api("POST",`/api/kanban/cards/${encodeURIComponent(cardId)}/tags/${encodeURIComponent(tagId)}`);
+        for(const tagId of toRemove) await api("DELETE",`/api/kanban/cards/${encodeURIComponent(cardId)}/tags/${encodeURIComponent(tagId)}`);
+        await loadTags();
+        await loadBoard(S.board?.id);
+        S.cardId=cardId;
+      }
+    });
+  }
+
+  function findCard(cardId){
+    return S.cards.find((x)=>String(x.id)===String(cardId));
+  }
+
+  async function openTagsModal(cardId){
+    const c=findCard(cardId); if(!c) return;
+    const selected=new Set((c.tags||[]).map((t)=>String(t.id)));
+    const options=(S.tags||[]).map((t)=>`<label style="display:block;font-weight:400;"><input type="checkbox" class="maTagOpt" value="${esc(t.id)}" ${selected.has(String(t.id))?"checked":""}> <span class="tagx" style="${t.color?`border-color:${esc(t.color)};`:""}">${esc(t.name)}</span></label>`).join("");
+    openFormModal({
+      title:`${TXT.labelTag} - ${c.title}`,
+      html:`<div>${options || `<div class="text-muted">${esc(TXT.noBoardOption)}</div>`}</div><div style="margin-top:10px;"><input id="maNewTagName" class="form-control input-sm" placeholder="${esc(TXT.fieldName)}"></div><div style="margin-top:6px;"><input id="maNewTagColor" class="form-control input-sm" placeholder="${esc(TXT.fieldColor)}"></div>`,
+      onOk:async(ctx)=>{
+        const newTagName=String(ctx.root.find("#maNewTagName").val()||"").trim();
+        const newTagColor=String(ctx.root.find("#maNewTagColor").val()||"").trim()||null;
+        let createdTagId="";
+        if(newTagName){
+          const created=await api("POST","/api/kanban/tags",{name:newTagName,color:newTagColor});
+          createdTagId=String(created?.id||created?.data?.id||"").trim();
+        }
+        const next=new Set(ctx.root.find(".maTagOpt:checked").map(function(){ return String(q(this).val()||""); }).get());
+        if(createdTagId) next.add(createdTagId);
+        const prev=new Set((c.tags||[]).map((t)=>String(t.id)));
+        const toAdd=[...next].filter((id)=>!prev.has(id));
+        const toRemove=[...prev].filter((id)=>!next.has(id));
+        for(const tagId of toAdd) await api("POST",`/api/kanban/cards/${encodeURIComponent(cardId)}/tags/${encodeURIComponent(tagId)}`);
+        for(const tagId of toRemove) await api("DELETE",`/api/kanban/cards/${encodeURIComponent(cardId)}/tags/${encodeURIComponent(tagId)}`);
+        await loadTags();
+        await loadBoard(S.board?.id);
+      }
+    });
+  }
+
+  async function openCommentsModal(cardId){
+    const c=findCard(cardId); if(!c) return;
+    const comments=pick(await api("GET",`/api/kanban/cards/${encodeURIComponent(cardId)}/comments`));
+    const list=(comments||[]).map((it)=>{
+      const u=it?.user||{};
+      const name=String(u.full_name||u.name||u.email||TXT.userFallback);
+      return `<div style="border:1px solid #eee;border-radius:4px;padding:8px;margin-bottom:8px;"><div style="font-size:12px;color:#777;">${esc(name)}</div><div style="white-space:pre-wrap;">${esc(it?.comment||"")}</div></div>`;
+    }).join("");
+    openFormModal({
+      title:`${TXT.labelComments} - ${c.title}`,
+      html:`<div style="max-height:260px;overflow:auto;margin-bottom:10px;">${list || `<div class="text-muted">${esc(TXT.noBoardOption)}</div>`}</div><div class="form-group" style="margin-bottom:0;"><textarea id="maNewComment" class="form-control" rows="3" placeholder="${esc(TXT.labelComments)}"></textarea></div>`,
+      onOk:async(ctx)=>{
+        const comment=String(ctx.root.find("#maNewComment").val()||"").trim();
+        if(comment) await api("POST",`/api/kanban/cards/${encodeURIComponent(cardId)}/comments`,{comment});
+        await loadBoard(S.board?.id);
+      }
+    });
+  }
+
+  async function openAssigneesModal(cardId){
+    const c=findCard(cardId); if(!c) return;
+    const selected=new Set((c.assignees||[]).map((a)=>String(a.id)));
+    const users=(S.users||[]).map((u)=>({
+      id:String(u.id),
+      name:String(u.full_name||u.name||u.email||u.id||TXT.userFallback)
+    }));
+    const options=users.map((u)=>`<label style="display:block;font-weight:400;"><input type="checkbox" class="maAssOpt" value="${esc(u.id)}" ${selected.has(u.id)?"checked":""}> ${esc(u.name)}</label>`).join("");
+    openFormModal({
+      title:`${TXT.labelAssignees} - ${c.title}`,
+      html:`<div style="max-height:320px;overflow:auto;">${options || `<div class="text-muted">${esc(TXT.noAssignees)}</div>`}</div>`,
+      onOk:async(ctx)=>{
+        const userIds=ctx.root.find(".maAssOpt:checked").map(function(){ return String(q(this).val()||""); }).get().filter(Boolean);
+        await api("PUT",`/api/kanban/cards/${encodeURIComponent(cardId)}/assignees`,{user_ids:userIds});
+        await loadBoard(S.board?.id);
+      }
+    });
+  }
+
+  async function saveBoard(data,isEdit){
+    if(!String(data.name||"").trim()) throw new Error(TXT.validationBoardName);
+    if(isEdit) await api("PATCH",`/api/kanban/boards/${encodeURIComponent(S.board.id)}`,data); else await api("POST","/api/kanban/boards",data);
+    await loadBoards(S.board?.id);
+    await loadBoard(q("#maBoard").val());
+  }
+
+  function bind(){
+    q("#maInactive").off("change").on("change",async()=>{ try{ const id=q("#maBoard").val(); await loadBoards(id); await loadBoard(q("#maBoard").val()); }catch(e){ alert(e.message||TXT.alertRefreshFail); }});
+    q("#maBoard").off("change").on("change",async function(){ try{ await loadBoard(q(this).val()); }catch(e){ alert(e.message||TXT.alertOpenBoardFail); }});
+    q("#maRefresh").off("click").on("click",async()=>{ try{ await loadTags(); await loadBoard(q("#maBoard").val()); }catch(e){ alert(e.message||TXT.alertRefreshFail); }});
+
+    q("#maNewBoard").off("click").on("click",()=>openFormModal({title:TXT.modalBoardTitle,html:`<div class="form-group"><label>${TXT.fieldName}</label><input id="maMBoardName" class="form-control"></div><div class="form-group"><label>${TXT.fieldDescription}</label><textarea id="maMBoardDesc" class="form-control" rows="3"></textarea></div>`,onOk:async(ctx)=>{await saveBoard({name:String(ctx.root.find("#maMBoardName").val()||"").trim(),description:String(ctx.root.find("#maMBoardDesc").val()||"").trim()},false);}}));
+    q("#maEditBoard").off("click").on("click",()=>{ if(!S.board?.id) return; openFormModal({title:TXT.modalEditBoardTitle,html:`<div class="form-group"><label>${TXT.fieldName}</label><input id="maMBoardName" class="form-control" value="${esc(S.board.name||"")}"></div><div class="form-group"><label>${TXT.fieldDescription}</label><textarea id="maMBoardDesc" class="form-control" rows="3">${esc(S.board.description||"")}</textarea></div>`,onOk:async(ctx)=>{await saveBoard({name:String(ctx.root.find("#maMBoardName").val()||"").trim(),description:String(ctx.root.find("#maMBoardDesc").val()||"").trim()},true);}}); });
+    q("#maArchive").off("click").on("click",async()=>{ try{ if(!S.board?.id) return; if(!confirm(TXT.confirmArchiveBoard)) return; await api("DELETE",`/api/kanban/boards/${encodeURIComponent(S.board.id)}`); await loadBoards(); await loadBoard(q("#maBoard").val()); }catch(e){ alert(e.message||TXT.alertArchiveBoardFail); } });
+
+    q("#maNewCol").off("click").on("click",()=>openFormModal({title:TXT.modalNewColumnTitle,html:`<div class="form-group"><label>${TXT.fieldName}</label><input id="maMColName" class="form-control"></div><div class="form-group"><label>${TXT.fieldColor}</label><input id="maMColColor" class="form-control" placeholder="#1ab394"></div>`,onOk:async(ctx)=>{const name=String(ctx.root.find("#maMColName").val()||"").trim(); if(!name) throw new Error(TXT.validationColumnName); await api("POST",`/api/kanban/boards/${encodeURIComponent(S.board.id)}/columns`,{name,color:String(ctx.root.find("#maMColColor").val()||"").trim()||null}); await loadBoard(S.board.id);}}));
+
+    q("#maCols").off("click", ".maAddCard").on("click", ".maAddCard", async function(e){ e.preventDefault(); const col=String(q(this).data("col")||""); const inp=q(`.maNewCard[data-col="${col}"]`); const t=String(inp.val()||"").trim(); if(!t) return; try{ await api("POST","/api/kanban/cards",{board_id:S.board.id,column_id:col,title:t}); inp.val(""); await loadBoard(S.board.id); }catch(er){ alert(er.message||TXT.alertCreateCardFail); } });
+    q("#maCols").off("keypress", ".maNewCard").on("keypress", ".maNewCard", async function(e){ if(e.key!=="Enter") return; e.preventDefault(); q(this).siblings(".input-group-btn").find(".maAddCard").trigger("click"); });
+
+    q("#maCols").off("click", ".cardx").on("click", ".cardx", function(e){ if(q(e.target).closest(".btn").length) return; S.cardId=String(q(this).data("card-id")||""); q("#maCols .cardx").removeClass("sel"); q(this).addClass("sel"); });
+    q(document).off("click.maCardSelClear").on("click.maCardSelClear", function(e){
+      if(q(e.target).closest("#maCols .cardx, #dynamicModal, .dynamic-modal, .dropdown-menu, .ui-datepicker").length) return;
+      S.cardId=null;
+      q("#maCols .cardx").removeClass("sel");
+    });
+    q("#maCols").off("dblclick", ".cardx").on("dblclick", ".cardx", function(e){
+      if(q(e.target).closest(".btn").length) return;
+      const card=q(e.target).closest(".cardx");
+      const cardId=String(card.data("card-id")||q(this).data("card-id")||"");
+      if(!cardId) return;
+      try { openCardDetail(cardId); } catch(err) { alert(err?.message||TXT.alertLoadFail); }
+    });
+
+    q("#maCols").off("click", ".maEditCol").on("click", ".maEditCol", async function(e){ e.preventDefault(); const colId=String(q(this).data("col")||""); const c=S.cols.find((x)=>String(x.id)===colId); if(!c) return; openFormModal({title:TXT.modalEditColumnTitle,html:`<div class="form-group"><label>${TXT.fieldName}</label><input id="maMColName" class="form-control" value="${esc(c.name||"")}"></div><div class="form-group"><label>${TXT.fieldColor}</label><input id="maMColColor" class="form-control" value="${esc(c.color||"")}"></div><div class="form-group"><label>${TXT.fieldWip}</label><input id="maMColWip" class="form-control" value="${esc(c.wip==null?"":String(c.wip))}"></div>`,onOk:async(ctx)=>{const name=String(ctx.root.find("#maMColName").val()||"").trim(); if(!name) throw new Error(TXT.validationColumnName); await api("PATCH",`/api/kanban/columns/${encodeURIComponent(colId)}`,{name,color:String(ctx.root.find("#maMColColor").val()||"").trim()||null,wip_limit:String(ctx.root.find("#maMColWip").val()||"").trim()?Number(ctx.root.find("#maMColWip").val()):null}); await loadBoard(S.board.id);}}); });
+    q("#maCols").off("click", ".maTag").on("click", ".maTag", async function(e){ e.preventDefault(); e.stopPropagation(); try{ const cardId=String(q(this).closest(".cardx").data("card-id")||""); if(!cardId) return; await openTagsModal(cardId); }catch(er){ alert(er.message||TXT.alertLoadFail); } });
+    q("#maCols").off("click", ".maCom").on("click", ".maCom", async function(e){ e.preventDefault(); e.stopPropagation(); try{ const cardId=String(q(this).closest(".cardx").data("card-id")||""); if(!cardId) return; await openCommentsModal(cardId); }catch(er){ alert(er.message||TXT.alertLoadFail); } });
+    q("#maCols").off("click", ".maAss").on("click", ".maAss", async function(e){ e.preventDefault(); e.stopPropagation(); try{ const cardId=String(q(this).closest(".cardx").data("card-id")||""); if(!cardId) return; await openAssigneesModal(cardId); }catch(er){ alert(er.message||TXT.alertLoadFail); } });
+    q("#maCols").off("click", ".maDelCol").on("click", ".maDelCol", async function(e){ e.preventDefault(); try{ const colId=String(q(this).data("col")||""); if(!confirm(TXT.confirmDeleteColumn)) return; await api("DELETE",`/api/kanban/columns/${encodeURIComponent(colId)}`); await loadBoard(S.board.id); }catch(er){ alert(er.message||TXT.alertDeleteColumnFail); } });
+    q("#maCols").off("click", ".maDel").on("click", ".maDel", async function(e){ e.preventDefault(); e.stopPropagation(); try{ const cardId=String(q(this).closest(".cardx").data("card-id")||""); if(!confirm(TXT.confirmDeleteCard)) return; await api("DELETE",`/api/kanban/cards/${encodeURIComponent(cardId)}`); await loadBoard(S.board.id); }catch(er){ alert(er.message||TXT.alertDeleteCardFail); } });
+  }
+
+  async function init(){
+    q("#pageName").text(TXT.pageTitle);
+    q("#subpageName").text(TXT.pageTitle);
+    q("#masterHeader").hide();
+    bind();
+    await Promise.all([loadTags(),loadUsers()]);
+    await loadBoards();
+    await loadBoard(q("#maBoard").val());
+  }
+
+  init().catch((e)=>{ console.error(e); alert(e?.message||TXT.alertLoadFail); });
+})();
+</script>
+<% %>

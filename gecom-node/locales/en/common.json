@@ -109,7 +109,6 @@
         "editClientTitle": "Edit client details"
       }
     },
-
     "dashboard": {
       "pageTitle": "Billing / Processes",
       "filters": {
@@ -156,7 +155,6 @@
         "loading": "Loading..."
       }
     },
-
     "invoices": {
       "pageTitle": "Invoices",
       "header": {
@@ -206,7 +204,6 @@
         "dueDate": "Due date"
       }
     },
-
     "login": {
       "pageTitle": "Login",
       "welcomeTitle": "Welcome to GECOM",
@@ -259,7 +256,6 @@
         "unexpectedError": "An unexpected error occurred. Try again."
       }
     },
-
     "myDocuments": {
       "pageTitle": "My Documents",
       "sidebar": {
@@ -285,7 +281,6 @@
         "ok": "OK"
       }
     },
-
     "documents": {
       "placeholders": {
         "searchFolders": "Search..."
@@ -351,7 +346,6 @@
         "pickCompanyTitle": "Quick upload - select client"
       }
     },
-
     "processos": {
       "pageTitle": "Processes",
       "header": {
@@ -403,7 +397,6 @@
         "confirm": "Do you want to continue?"
       }
     },
-
     "processDetail": {
       "header": {
         "editProject": "Edit project",
@@ -456,7 +449,6 @@
         "actions": "Actions"
       }
     },
-
     "products": {
       "pageTitle": "Products",
       "header": {
@@ -482,7 +474,6 @@
         "createdAt": "Created on"
       }
     },
-
     "profile": {
       "pageTitle": "My Profile",
       "actions": {
@@ -505,7 +496,6 @@
         "passwordStrength": "Tip: use a strong password with 12+ characters, uppercase, lowercase, number, and symbol."
       }
     },
-
     "layout": {
       "appTitle": "GECOM System",
       "menu": {
@@ -516,7 +506,8 @@
         "processes": "Processes",
         "myDocuments": "My Documents",
         "invoices": "Invoices",
-        "products": "Products"
+        "products": "Products",
+        "leads": "Leads"
       },
       "modal": {
         "cancel": "Cancel",
@@ -526,9 +517,20 @@
       },
       "footer": {
         "copyright": "GECOM ©"
+      },
+      "savedViews": {
+        "dateRangePlaceholder": "dd/mm/yyyy - dd/mm/yyyy",
+        "clearLabel": "Clear",
+        "applyLabel": "Apply",
+        "fromLabel": "From",
+        "toLabel": "To",
+        "saveCurrentTitle": "Save current view",
+        "deleteCurrentTitle": "Delete this view",
+        "saveLabel": "Save",
+        "deleteLabel": "Delete view",
+        "deleteCurrentConfirm": "Delete selected view?"
       }
     },
-
     "novoProcesso": {
       "pageTitle": "New Process",
       "subtitle": "Fill in the process information and its transports.",
@@ -597,7 +599,6 @@
         "createFail": "Failed to create process/transports/documents."
       }
     },
-
     "newInvoice": {
       "pageTitle": "New Invoice",
       "pageTitleEdit": "Edit Invoice",
@@ -724,7 +725,6 @@
         "quantityGreaterThanZero": "Quantity must be greater than 0."
       }
     },
-
     "invoicesPrint": {
       "pageTitle": "Invoice - Print",
       "actions": {
@@ -738,7 +738,6 @@
         "phone": "Phone"
       }
     },
-
     "clients": {
       "pageTitle": "Clients",
       "toolbar": {
@@ -790,7 +789,97 @@
         "bulkUnexpected": "Error removing clients."
       }
     },
-
+    "myActivities": {
+      "pageTitle": "My Activities",
+      "includeInactive": "Include inactive",
+      "hints": {
+        "dragAndDoubleClick": "Tip: drag cards between columns. Double-click a card to edit it in the SideModal. Drag the column header to reorder columns."
+      },
+      "actions": {
+        "refresh": "Refresh",
+        "archive": "Archive",
+        "newBoard": "New Board",
+        "editBoard": "Edit Board",
+        "newColumn": "New Column",
+        "tag": "Tag",
+        "comments": "Comments",
+        "assignees": "Assignees",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "labels": {
+        "board": "Board",
+        "boardFallback": "Board",
+        "inactiveSuffix": "(Inactive)",
+        "entity": "Entity",
+        "columns": "Columns",
+        "cards": "Cards",
+        "wip": "WIP",
+        "noWip": "No WIP",
+        "final": "Final"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "color": "Color",
+        "wip": "WIP limit",
+        "title": "Title",
+        "priority": "Priority",
+        "dueDate": "Due date"
+      },
+      "placeholders": {
+        "newCard": "New card...",
+        "dateYmd": "yyyy-mm-dd"
+      },
+      "modals": {
+        "newBoardTitle": "New Board",
+        "editBoardTitle": "Edit Board",
+        "newColumnTitle": "New Column",
+        "editColumnTitle": "Edit Column",
+        "cardTitlePrefix": "Card"
+      },
+      "messages": {
+        "noBoardSelected": "No board selected.",
+        "noBoardsOption": "No boards",
+        "emptyColumn": "No cards in this column.",
+        "createOrSelectBoard": "Create or select a board.",
+        "noDueDate": "No due date",
+        "noAssignees": "No assignees",
+        "userFallback": "User",
+        "sideModalMissing": "SideModal is not available.",
+        "apiStatusPrefix": "Error"
+      },
+      "validation": {
+        "boardName": "Please provide the board name.",
+        "columnName": "Please provide the column name."
+      },
+      "confirm": {
+        "deleteCard": "Delete card?",
+        "deleteColumn": "Delete column?",
+        "archiveBoard": "Archive board?"
+      },
+      "alerts": {
+        "loadFail": "Failed to load My Activities.",
+        "refreshFail": "Failed to refresh.",
+        "openBoardFail": "Failed to open board.",
+        "moveFail": "Failed to move/reorder card.",
+        "reorderColumnsFail": "Failed to reorder columns.",
+        "createCardFail": "Failed to create card.",
+        "deleteCardFail": "Failed to delete card.",
+        "editColumnFail": "Failed to edit column.",
+        "deleteColumnFail": "Failed to delete column.",
+        "createBoardFail": "Failed to create board.",
+        "editBoardFail": "Failed to edit board.",
+        "archiveBoardFail": "Failed to archive board.",
+        "createColumnFail": "Failed to create column."
+      }
+    },
     "newProduct": {
       "pageTitle": "New Product",
       "actions": {
@@ -845,7 +934,6 @@
         "loadCurrenciesFail": "Failed to load currencies."
       }
     },
-
     "productDetail": {
       "state": {
         "loading": "Loading..."
@@ -876,7 +964,6 @@
         "deleteUnexpected": "Unexpected error deleting product."
       }
     },
-
     "newClient": {
       "pageTitle": "Client creation",
       "subtitle": "Fill in the company information, then optional data, and finally access users.",
@@ -985,7 +1072,6 @@
         "finishFail": "Error finishing creation."
       }
     },
-
     "landingPage": {
       "pageTitle": "GECOM - Import & Export Portal",
       "menu": {
@@ -1050,7 +1136,6 @@
         "phone": "Phone"
       }
     },
-
     "publicProcessDetail": {
       "actions": {
         "login": "Login"

@@ -1,266 +1,287 @@
 {
-      "page": {
-        "clientDetails": {
-          "pageTitle": "Detalhes do Cliente",
-          "breadcrumbs": {
-            "clients": "Clientes",
-            "title": "Detalhes do Cliente"
-          },
-          "header": {
-            "editClientDetails": "Edite os detalhes do cliente",
-            "status": "Status:",
-            "size": "Porte:",
-            "sizeDefault": "Médio",
-            "sector": "Setor:",
-            "sectorDefault": "Geral",
-            "fantasyName": "Nome Fantasia:",
-            "phone": "Telefone:",
-            "email": "Email:",
-            "projectsTotalLabel": "Valor total de projetos:",
-            "projectsTotalText": "Valor total de",
-            "goal": "meta:",
-            "goalValueExample": "R$ 1.000.000,00",
-            "logoHint": "* Edite o logo em “Edite os detalhes do cliente”."
-          },
-          "tabs": {
-            "contacts": "Contatos",
-            "documents": "Documentos"
-          },
-          "contacts": {
-            "newContact": "Novo contato",            
-    "noneFound": "Nenhum contato encontrado.",
-    "labels": {
-      "role": "Role",
-      "status": "Status:"
-    },
-    "modals": {
-      "editTitle": "Editar Contato",
-      "newTitle": "Novo Contato",
-      "deleteTitle": "Excluir contato",
-      "deleteOk": "Excluir",
-      "deleteBodyLine1": "Você está prestes a excluir o contato",
-      "deleteBodyLine2": "Esta ação não poderá ser desfeita."
-    }
-          },
-          "documentsToolbar": {
-            "back": "Voltar",
-            "add": "Adicionar",
-            "newFolder": "Nova Pasta",
-            "uploadDocument": "Upload de Documento",
-            "driveLink": "Link do Drive",
-            "open": "Abrir",
-            "delete": "Excluir",
-            "loading": "Carregando..."
-          },
-           "messages": {
-    "localStorageMissing": "Erro ao carregar dados do cliente! (no localStorage)",
-    "apiLoadFail": "Erro ao carregar dados do cliente via API.",
-    "companyIdMissing": "Não foi possível identificar o company_id desta página.",
-    "nameRequired": "Informe o Nome.",
-    "validEmailRequired": "Informe um Email válido.",
-    "saveUserFail": "Erro ao salvar usuário.",
-    "deleteUserFail": "Erro ao excluir contato.",
-    "createContactFail": "Erro ao criar contato.",
-    "saveClientFail": "Erro ao salvar dados do cliente.",
-    "projectsTotalInvoiceTitle": "Total de invoices"
-  },
-  "documents": {
-    "placeholders": {
-      "searchInFolder": "Buscar nesta pasta..."
-    },
-    "labels": {
-      "added": "Adicionado:",
-      "select": "Selecionar"
-    },
-    "messages": {
-      "noneFound": "Nenhum item encontrado.",
-      "sideModalMissing": "Side modal global não encontrado no layout. Verifique IDs do dynamic modal.",
-      "loadFail": "Erro ao carregar",
-      "downloadLinkFail": "Não foi possível gerar o link de download.",
-      "downloadFail": "Erro ao baixar arquivo.",
-      "deleteFail": "Erro ao excluir."
-    },
-    "confirm": {
-      "deleteMany": "Confirma excluir os itens selecionados?"
-    },
-    "modals": {
-      "newFolder": {
-        "title": "Nova Pasta",
-        "create": "Criar",
-        "name": "Nome",
-        "placeholder": "Ex: Contratos",
-        "nameRequired": "Informe o nome da pasta."
+  "page": {
+    "clientDetails": {
+      "pageTitle": "Detalhes do Cliente",
+      "breadcrumbs": {
+        "clients": "Clientes",
+        "title": "Detalhes do Cliente"
       },
-      "newLink": {
-        "title": "Link do Drive",
-        "save": "Salvar",
-        "nameRequired": "Informe o nome.",
-        "urlRequired": "Informe uma URL válida (http/https)."
+      "header": {
+        "editClientDetails": "Edite os detalhes do cliente",
+        "status": "Status:",
+        "size": "Porte:",
+        "sizeDefault": "Médio",
+        "sector": "Setor:",
+        "sectorDefault": "Geral",
+        "fantasyName": "Nome Fantasia:",
+        "phone": "Telefone:",
+        "email": "Email:",
+        "projectsTotalLabel": "Valor total de projetos:",
+        "projectsTotalText": "Valor total de",
+        "goal": "meta:",
+        "goalValueExample": "R$ 1.000.000,00",
+        "logoHint": "* Edite o logo em “Edite os detalhes do cliente”."
       },
-      "upload": {
-        "title": "Upload de Documento",
-        "send": "Enviar",
-        "selectFile": "Selecione um arquivo.",
-        "error": "Erro no upload."
+      "tabs": {
+        "contacts": "Contatos",
+        "documents": "Documentos"
+      },
+      "contacts": {
+        "newContact": "Novo contato",
+        "noneFound": "Nenhum contato encontrado.",
+        "labels": {
+          "role": "Role",
+          "status": "Status:"
+        },
+        "modals": {
+          "editTitle": "Editar Contato",
+          "newTitle": "Novo Contato",
+          "deleteTitle": "Excluir contato",
+          "deleteOk": "Excluir",
+          "deleteBodyLine1": "Você está prestes a excluir o contato",
+          "deleteBodyLine2": "Esta ação não poderá ser desfeita."
+        }
+      },
+      "documentsToolbar": {
+        "back": "Voltar",
+        "add": "Adicionar",
+        "newFolder": "Nova Pasta",
+        "uploadDocument": "Upload de Documento",
+        "driveLink": "Link do Drive",
+        "open": "Abrir",
+        "delete": "Excluir",
+        "loading": "Carregando..."
+      },
+      "messages": {
+        "localStorageMissing": "Erro ao carregar dados do cliente! (no localStorage)",
+        "apiLoadFail": "Erro ao carregar dados do cliente via API.",
+        "companyIdMissing": "Não foi possível identificar o company_id desta página.",
+        "nameRequired": "Informe o Nome.",
+        "validEmailRequired": "Informe um Email válido.",
+        "saveUserFail": "Erro ao salvar usuário.",
+        "deleteUserFail": "Erro ao excluir contato.",
+        "createContactFail": "Erro ao criar contato.",
+        "saveClientFail": "Erro ao salvar dados do cliente.",
+        "projectsTotalInvoiceTitle": "Total de invoices"
+      },
+      "documents": {
+        "placeholders": {
+          "searchInFolder": "Buscar nesta pasta..."
+        },
+        "labels": {
+          "added": "Adicionado:",
+          "select": "Selecionar"
+        },
+        "messages": {
+          "noneFound": "Nenhum item encontrado.",
+          "sideModalMissing": "Side modal global não encontrado no layout. Verifique IDs do dynamic modal.",
+          "loadFail": "Erro ao carregar",
+          "downloadLinkFail": "Não foi possível gerar o link de download.",
+          "downloadFail": "Erro ao baixar arquivo.",
+          "deleteFail": "Erro ao excluir."
+        },
+        "confirm": {
+          "deleteMany": "Confirma excluir os itens selecionados?"
+        },
+        "modals": {
+          "newFolder": {
+            "title": "Nova Pasta",
+            "create": "Criar",
+            "name": "Nome",
+            "placeholder": "Ex: Contratos",
+            "nameRequired": "Informe o nome da pasta."
+          },
+          "newLink": {
+            "title": "Link do Drive",
+            "save": "Salvar",
+            "nameRequired": "Informe o nome.",
+            "urlRequired": "Informe uma URL válida (http/https)."
+          },
+          "upload": {
+            "title": "Upload de Documento",
+            "send": "Enviar",
+            "selectFile": "Selecione um arquivo.",
+            "error": "Erro no upload."
+          }
+        }
+      },
+      "modals": {
+        "editClientTitle": "Editar detalhes do Cliente"
       }
-    }
-  },
-  "modals": {
-    "editClientTitle": "Editar detalhes do Cliente"
-  }
-        },
-
-        "dashboard": {
-          "pageTitle": "Faturamento / Processos",
-          "filters": {
-            "year": "Ano:",
-            "monthly": "Mensal",
-            "annual": "Anual"
-          },
-          "cards": {
-            "monthBillingTitle": "Faturamento no mês",
-            "yearBillingTitle": "Faturamento no ano",
-            "monthlyAverageTitle": "Média mensal",
-            "monthlyAverageHelp": "Média do faturamento do ano (÷ 12)",
-            "bestMonthTitle": "Melhor mês",
-            "bestMonthHelp": "Mês com maior faturamento"
-          },
-          "sections": {
-            "nearDeadline": "Processos próximos do prazo",
-            "byStatus": "Processos por status",
-            "annualBilling": "Faturamento anual",
-            "processes": "Processos"
-          },
-          "labels": {
-            "loading": "Carregando...",
-            "totalInvoicesInPeriod": "Total de invoices no período:",
-            "totalProcessesInPeriod": "Total de processos no período:",
-            "note": "Obs:",
-            "noteLine1": "Ideal ter endpoints agregados no backend (sum/group-by) quando crescer.",
-            "updatedAt": "Atualizado em",
-            "legend": "Ativos (status 0) / Pagos (status 4) / Estimado (30k/mês).",
-            "emptyPeriod": "Sem processos no período para exibir.",
-            "yearByStatus": "Quantidade de processos no ano por status."
-          },
-          "table": {
-            "reload": "Recarregar",
-            "search": "Buscar",
-            "process": "Processo",
-            "company": "Empresa",
-            "completed": "Concluído",
-            "status": "Status",
-            "invoice": "Invoice",
-            "action": "Ação",
-            "previous": "Anterior",
-            "next": "Próximo",
-            "loading": "Carregando..."
-          }
-        },
-
-        "invoices": {
-          "pageTitle": "Invoices",
-          "header": {
-            "newInvoice": "Novo Invoice"
-          },
-          "bulkDelete":{
-            "title": "Confirmação",
-            "bodyTextFirst" :"Confirma a remoção de ",
-            "bodyLine2": " invoice(s)?",
-            "warning": "A ação não pode ser desfeita",
-            "confirmQuestion": ""
-          },
-          "bulkSend":{
-            "title": "Confirmação",
-            "bodyTextFirst" :"Confirma o envio de ",
-            "bodyLine2": " invoice(s)? Essa ação mudará o estado o invoice para ",
-            "confirmQuestion": ""
-          },
-          "toolbar": {
-            "selected": "Selecionados:",
-            "sendToClient": "Enviar ao cliente",
-            "delete": "Excluir",
-            "clearSelection": "Limpar seleção",
-            "newInvoice":"Novo Invoice"
-          },
-          "filters": {
-            "all": "Todos",
-            "invoiceNumber": "Nº do invoice",
-            "company": "Empresa"
-          },
-          "status": {
-            "draft": "Rascunho",
-            "active": "Ativo",
-            "expired": "Expirado",
-            "billed": "Faturado",
-            "paid": "Pago"
-          },
-          "columns": {
-            "number": "#",
-            "invoice": "Invoice",
-            "company": "Empresa",
-            "status": "Status",
-            "subtotal": "Subtotal",
-            "discount": "Desconto",
-            "taxes": "Impostos",
-            "total": "Total",
-            "dueDate": "Vencimento"
-          }
-        },
-
-       "login": {
-  "pageTitle": "Login",
-  "welcomeTitle": "Bem Vindo à GECOM",
-  "subtitle": "Sua plataforma de processos em importação e exportação.",
-  "fields": {
-    "emailPlaceholder": "Email",
-    "passwordPlaceholder": "Senha",
-    "accessNumberPlaceholder": "Ex: PRC-0000111"
-  },
-  "actions": {
-    "login": "Login",
-    "forgotPasswordLink": "Esqueceu a senha? Clique aqui",
-    "hasAccessNumber": "Possui um número de acesso?",
-    "accessNumberCta": "Entre com número de acesso",
-    "accessNumberTitle": "Entre com número de acesso",
-    "accessNumberHelp": "Digite abaixo o número fornecido por nosso time.",
-    "access": "Acessar",
-    "backToLogin": "Voltar para o login",
-    "sendResetEmail": "Enviar email de reset"
-  },
-  "forgot": {
-    "title": "Esqueceu a senha?",
-    "help": "Digite abaixo o email cadastrado"
-  },
-  "reset": {
-    "newPassword": "Nova Senha",
-    "newPasswordHelp": "Digite a nova senha abaixo",
-    "confirmPassword": "Confirmar senha",
-    "confirmNewPassword": "Confirmar Nova Senha"
-  },
-  "modal": {
-    "close": "Fechar",
-    "hiddenTriggerLabel": "Abrir modal"
-  },
-  "messages": {
-    "defaultModalTitle": "Mensagem",
-    "invalidLinkTitle": "Link inválido",
-    "invalidLinkBody": "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.",
-    "forgotPasswordTitle": "Recuperação de Senha",
-    "forgotPasswordEmailRequired": "Por favor, informe o email cadastrado.",
-    "forgotPasswordRequestFail": "Não foi possível solicitar o reset de senha. Tente novamente.",
-    "forgotPasswordRequestSuccess": "Um email com instruções foi enviado com sucesso.",
-    "resetPasswordTitle": "Redefinir senha",
-    "resetPasswordFillBoth": "Por favor, preencha a nova senha e a confirmação.",
-    "resetPasswordMismatch": "As senhas não conferem. Verifique e tente novamente.",
-    "resetPasswordFail": "Não foi possível redefinir a senha. Tente novamente.",
-    "resetPasswordSuccessTitle": "Senha redefinida",
-    "resetPasswordSuccessBody": "Sua senha foi redefinida com sucesso. Você já pode fazer login.",
-    "loginFail": "Não foi possível realizar o login. Verifique suas credenciais.",
-    "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
-  }
-},
-"myDocuments": { "pageTitle": "Meus Documentos", "sidebar": { "folders": "Pastas" }, "quickUpload": { "title": "Upload rápido", "hint": "Você também pode usar o botão “Adicionar” no topo." }, "toolbar": { "back": "Voltar", "add": "Adicionar", "newFolder": "Nova Pasta", "uploadDocument": "Upload de Documento", "driveLink": "Link do Drive", "open": "Abrir", "delete": "Excluir" }, "state": { "loading": "Carregando..." }, "buttons": { "ok": "OK" } },
-"documents": {
+    },
+    "dashboard": {
+      "pageTitle": "Faturamento / Processos",
+      "filters": {
+        "year": "Ano:",
+        "monthly": "Mensal",
+        "annual": "Anual"
+      },
+      "cards": {
+        "monthBillingTitle": "Faturamento no mês",
+        "yearBillingTitle": "Faturamento no ano",
+        "monthlyAverageTitle": "Média mensal",
+        "monthlyAverageHelp": "Média do faturamento do ano (÷ 12)",
+        "bestMonthTitle": "Melhor mês",
+        "bestMonthHelp": "Mês com maior faturamento"
+      },
+      "sections": {
+        "nearDeadline": "Processos próximos do prazo",
+        "byStatus": "Processos por status",
+        "annualBilling": "Faturamento anual",
+        "processes": "Processos"
+      },
+      "labels": {
+        "loading": "Carregando...",
+        "totalInvoicesInPeriod": "Total de invoices no período:",
+        "totalProcessesInPeriod": "Total de processos no período:",
+        "note": "Obs:",
+        "noteLine1": "Ideal ter endpoints agregados no backend (sum/group-by) quando crescer.",
+        "updatedAt": "Atualizado em",
+        "legend": "Ativos (status 0) / Pagos (status 4) / Estimado (30k/mês).",
+        "emptyPeriod": "Sem processos no período para exibir.",
+        "yearByStatus": "Quantidade de processos no ano por status."
+      },
+      "table": {
+        "reload": "Recarregar",
+        "search": "Buscar",
+        "process": "Processo",
+        "company": "Empresa",
+        "completed": "Concluído",
+        "status": "Status",
+        "invoice": "Invoice",
+        "action": "Ação",
+        "previous": "Anterior",
+        "next": "Próximo",
+        "loading": "Carregando..."
+      }
+    },
+    "invoices": {
+      "pageTitle": "Invoices",
+      "header": {
+        "newInvoice": "Novo Invoice"
+      },
+      "bulkDelete": {
+        "title": "Confirmação",
+        "bodyTextFirst": "Confirma a remoção de ",
+        "bodyLine2": " invoice(s)?",
+        "warning": "A ação não pode ser desfeita",
+        "confirmQuestion": ""
+      },
+      "bulkSend": {
+        "title": "Confirmação",
+        "bodyTextFirst": "Confirma o envio de ",
+        "bodyLine2": " invoice(s)? Essa ação mudará o estado o invoice para ",
+        "confirmQuestion": ""
+      },
+      "toolbar": {
+        "selected": "Selecionados:",
+        "sendToClient": "Enviar ao cliente",
+        "delete": "Excluir",
+        "clearSelection": "Limpar seleção",
+        "newInvoice": "Novo Invoice"
+      },
+      "filters": {
+        "all": "Todos",
+        "invoiceNumber": "Nº do invoice",
+        "company": "Empresa"
+      },
+      "status": {
+        "draft": "Rascunho",
+        "active": "Ativo",
+        "expired": "Expirado",
+        "billed": "Faturado",
+        "paid": "Pago"
+      },
+      "columns": {
+        "number": "#",
+        "invoice": "Invoice",
+        "company": "Empresa",
+        "status": "Status",
+        "subtotal": "Subtotal",
+        "discount": "Desconto",
+        "taxes": "Impostos",
+        "total": "Total",
+        "dueDate": "Vencimento"
+      }
+    },
+    "login": {
+      "pageTitle": "Login",
+      "welcomeTitle": "Bem Vindo à GECOM",
+      "subtitle": "Sua plataforma de processos em importação e exportação.",
+      "fields": {
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Senha",
+        "accessNumberPlaceholder": "Ex: PRC-0000111"
+      },
+      "actions": {
+        "login": "Login",
+        "forgotPasswordLink": "Esqueceu a senha? Clique aqui",
+        "hasAccessNumber": "Possui um número de acesso?",
+        "accessNumberCta": "Entre com número de acesso",
+        "accessNumberTitle": "Entre com número de acesso",
+        "accessNumberHelp": "Digite abaixo o número fornecido por nosso time.",
+        "access": "Acessar",
+        "backToLogin": "Voltar para o login",
+        "sendResetEmail": "Enviar email de reset"
+      },
+      "forgot": {
+        "title": "Esqueceu a senha?",
+        "help": "Digite abaixo o email cadastrado"
+      },
+      "reset": {
+        "newPassword": "Nova Senha",
+        "newPasswordHelp": "Digite a nova senha abaixo",
+        "confirmPassword": "Confirmar senha",
+        "confirmNewPassword": "Confirmar Nova Senha"
+      },
+      "modal": {
+        "close": "Fechar",
+        "hiddenTriggerLabel": "Abrir modal"
+      },
+      "messages": {
+        "defaultModalTitle": "Mensagem",
+        "invalidLinkTitle": "Link inválido",
+        "invalidLinkBody": "O link de redefinição de senha é inválido ou está incompleto. Solicite um novo link.",
+        "forgotPasswordTitle": "Recuperação de Senha",
+        "forgotPasswordEmailRequired": "Por favor, informe o email cadastrado.",
+        "forgotPasswordRequestFail": "Não foi possível solicitar o reset de senha. Tente novamente.",
+        "forgotPasswordRequestSuccess": "Um email com instruções foi enviado com sucesso.",
+        "resetPasswordTitle": "Redefinir senha",
+        "resetPasswordFillBoth": "Por favor, preencha a nova senha e a confirmação.",
+        "resetPasswordMismatch": "As senhas não conferem. Verifique e tente novamente.",
+        "resetPasswordFail": "Não foi possível redefinir a senha. Tente novamente.",
+        "resetPasswordSuccessTitle": "Senha redefinida",
+        "resetPasswordSuccessBody": "Sua senha foi redefinida com sucesso. Você já pode fazer login.",
+        "loginFail": "Não foi possível realizar o login. Verifique suas credenciais.",
+        "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+      }
+    },
+    "myDocuments": {
+      "pageTitle": "Meus Documentos",
+      "sidebar": {
+        "folders": "Pastas"
+      },
+      "quickUpload": {
+        "title": "Upload rápido",
+        "hint": "Você também pode usar o botão “Adicionar” no topo."
+      },
+      "toolbar": {
+        "back": "Voltar",
+        "add": "Adicionar",
+        "newFolder": "Nova Pasta",
+        "uploadDocument": "Upload de Documento",
+        "driveLink": "Link do Drive",
+        "open": "Abrir",
+        "delete": "Excluir"
+      },
+      "state": {
+        "loading": "Carregando..."
+      },
+      "buttons": {
+        "ok": "OK"
+      }
+    },
+    "documents": {
       "placeholders": {
         "searchFolders": "Buscar..."
       },
@@ -325,239 +346,246 @@
         "pickCompanyTitle": "Upload rápido - selecionar cliente"
       }
     },
-
-        "processos": {
-          "pageTitle": "Processos",
-          "header": {
-            "active": "Processos ativos",
-            "newProcess": "Novo Processo"
-          },
-          "toolbar": {
-            "selected": "Selecionados:",
-            "remove": "Remover",
-            "clearSelection": "Limpar seleção"
-          },
-          "filters": {
-            "all": "Todos"
-          },
-          "columns": {
-            "number": "#",
-            "process": "Processo",
-            "primaryContact": "Contato Principal",
-            "phone": "Telefone",
-            "company": "Empresa",
-            "stage": "Estagio (%)",
-            "invoice": "Invoice",
-            "date": "Data",
-            "status": "Status"
-          },
-           "status": {
-    "0": "Rascunho",
-    "1": "Em andamento",
-    "2": "Próximo do prazo",
-    "3": "Atrasado",
-    "4": "Finalizado"
-  },
-  "ui": {
-    "select": "Selecionar",
-    "removing": "Removendo"
-  },
-  "messages": {
-    "loadFail": "Falha ao carregar processos.",
-    "deleteFailSingle": "Falha ao remover processo.",
-    "deleteFail": "Erro ao remover.",
-    "noneFound": "Nenhum processo encontrado.",
-    "bulkSomeFailed": "Alguns processos não puderam ser removidos. Veja o console para detalhes",
-    "bulkUnexpected": "Erro ao remover processos."
-  },
-  "modalRemove": {
-    "title": "Remover processos",
-    "line1": "Você está prestes a remover",
-    "line2": "Esta ação não poderá ser desfeita.",
-    "confirm": "Deseja continuar?"
-  }
-        },
-
-        "processDetail": {
-          "header": {
-            "editProject": "Editar projeto",
-            "process": "Processo",
-            "status": "Status:",
-            "createdBy": "Criado por:",
-            "invoice": "Invoice:",
-            "client": "Cliente:",
-            "estimatedDelivery": "Data Estimada de Entrega:",
-            "start": "Início do Processo:",
-            "completed": "Concluído:",
-            "completedOn": "Projeto concluído em"
-          },
-          "sections": {
-            "timeline": "Timeline",
-            "history": "Histórico do Processo",
-            "transports": "Transportes",
-            "trajectory": "Trajetória",
-            "description": "Descrição do Processo",
-            "documents": "Documentos do processo"
-          },
-          "actions": {
-            "addEvent": "Adicionar evento",
-            "addTransport": "Adicionar transporte",
-            "addDocuments": "Adicionar Documentos",
-            "cancel": "Cancelar",
-            "save": "Salvar"
-          },
-          "state": {
-            "loading": "Carregando...",
-            "fetchingEvents": "Buscando eventos do processo.",
-            "loadingDocuments": "Carregando documentos..."
-          },
-          "tableEvents": {
-            "status": "Status",
-            "title": "Título",
-            "start": "Começo",
-            "end": "Fim",
-            "description": "Descrição",
-            "actions": "Ações"
-          },
-          "tableTransports": {
-            "company": "Empresa",
-            "type": "Tipo",
-            "status": "Status",
-            "origin": "Origem",
-            "destination": "Destino",
-            "etaDeparture": "Previsão Saída",
-            "etaArrival": "Previsão Chegada",
-            "actions": "Ações"
-          }
-        },
-
-        "products": {
-          "pageTitle": "Produtos",
-          "header": {
-            "newProduct": "Novo Produto"
-          },
-          "filters": {
-            "all": "Todos",
-            "activePlural": "Ativos",
-            "inactivePlural": "Inativos",
-            "active": "Ativo",
-            "inactive": "Inativo"
-          },
-          "columns": {
-            "number": "#",
-            "code": "Código",
-            "name": "Nome",
-            "brand": "Brand",
-            "unit": "Unidade",
-            "currency": "Moeda",
-            "price": "Preço",
-            "tax": "Imposto",
-            "status": "Status",
-            "createdAt": "Criado em"
-          }
-        },
-
-        "profile": {
-          "pageTitle": "Meu Perfil",
-          "actions": {
-            "editMyData": "Editar meus dados",
-            "changePassword": "Trocar senha",
-            "newUser": "Novo usuário"
-          },
-          "subtitle": "Ajuste seus dados e, se você for Admin/Manager, gerencie usuários da sua empresa.",
-          "labels": {
-            "email": "Email:",
-            "phone": "Telefone:",
-            "company": "Empresa:",
-            "permission": "Permissão:"
-          },
-          "tabs": {
-            "myProfile": "Meu Perfil",
-            "companyUsers": "Usuários da Empresa"
-          },
-          "hints": {
-            "passwordStrength": "Dica: use uma senha forte com 12+ caracteres, maiúscula, minúscula, número e símbolo."
-          }
-        },
-
-        "layout": {
-          "appTitle": "Sistema GECOM",
-          "menu": {
-            "profile": "Perfil",
-            "logout": "Sair",
-            "dashboard": "Dashboard",
-            "clients": "Clientes",
-            "processes": "Processos",
-            "myDocuments": "Meus Documentos",
-            "invoices": "Invoices",
-            "products": "Produtos"
-          },
-          "modal": {
-            "cancel": "Cancelar",
-            "ok": "OK",
-            "save": "Salvar",
-            "close": "Fechar"
-          },
-          "footer": {
-            "copyright": "GECOM ©"
-          }
-        },
-
-        "novoProcesso": {
-          "pageTitle": "Novo Processo",
-          "subtitle": "Preencha as informações do processo e seus transportes.",
-          "tabs": {
-            "details": "Detalhes",
-            "documents": "Documentos"
-          },
-          "form": {
-            "processNumber": "Nº do Processo *",
-            "company": "Empresa *",
-            "companyInvoicesHint": "Selecione uma empresa para listar as invoices.",
-            "estimatedDelivery": "Previsão de Entrega",
-            "processType": "Tipo de Processo",
-            "clientContact": "Contato do Cliente *",
-            "companyContactsHint": "Selecione uma empresa para listar os contatos.",
+    "processos": {
+      "pageTitle": "Processos",
+      "header": {
+        "active": "Processos ativos",
+        "newProcess": "Novo Processo"
+      },
+      "toolbar": {
+        "selected": "Selecionados:",
+        "remove": "Remover",
+        "clearSelection": "Limpar seleção"
+      },
+      "filters": {
+        "all": "Todos"
+      },
+      "columns": {
+        "number": "#",
+        "process": "Processo",
+        "primaryContact": "Contato Principal",
+        "phone": "Telefone",
+        "company": "Empresa",
+        "stage": "Estagio (%)",
+        "invoice": "Invoice",
+        "date": "Data",
+        "status": "Status"
+      },
+      "status": {
+        "0": "Rascunho",
+        "1": "Em andamento",
+        "2": "Próximo do prazo",
+        "3": "Atrasado",
+        "4": "Finalizado"
+      },
+      "ui": {
+        "select": "Selecionar",
+        "removing": "Removendo"
+      },
+      "messages": {
+        "loadFail": "Falha ao carregar processos.",
+        "deleteFailSingle": "Falha ao remover processo.",
+        "deleteFail": "Erro ao remover.",
+        "noneFound": "Nenhum processo encontrado.",
+        "bulkSomeFailed": "Alguns processos não puderam ser removidos. Veja o console para detalhes",
+        "bulkUnexpected": "Erro ao remover processos."
+      },
+      "modalRemove": {
+        "title": "Remover processos",
+        "line1": "Você está prestes a remover",
+        "line2": "Esta ação não poderá ser desfeita.",
+        "confirm": "Deseja continuar?"
+      }
+    },
+    "processDetail": {
+      "header": {
+        "editProject": "Editar projeto",
+        "process": "Processo",
+        "status": "Status:",
+        "createdBy": "Criado por:",
+        "invoice": "Invoice:",
+        "client": "Cliente:",
+        "estimatedDelivery": "Data Estimada de Entrega:",
+        "start": "Início do Processo:",
+        "completed": "Concluído:",
+        "completedOn": "Projeto concluído em"
+      },
+      "sections": {
+        "timeline": "Timeline",
+        "history": "Histórico do Processo",
+        "transports": "Transportes",
+        "trajectory": "Trajetória",
+        "description": "Descrição do Processo",
+        "documents": "Documentos do processo"
+      },
+      "actions": {
+        "addEvent": "Adicionar evento",
+        "addTransport": "Adicionar transporte",
+        "addDocuments": "Adicionar Documentos",
+        "cancel": "Cancelar",
+        "save": "Salvar"
+      },
+      "state": {
+        "loading": "Carregando...",
+        "fetchingEvents": "Buscando eventos do processo.",
+        "loadingDocuments": "Carregando documentos..."
+      },
+      "tableEvents": {
+        "status": "Status",
+        "title": "Título",
+        "start": "Começo",
+        "end": "Fim",
+        "description": "Descrição",
+        "actions": "Ações"
+      },
+      "tableTransports": {
+        "company": "Empresa",
+        "type": "Tipo",
+        "status": "Status",
+        "origin": "Origem",
+        "destination": "Destino",
+        "etaDeparture": "Previsão Saída",
+        "etaArrival": "Previsão Chegada",
+        "actions": "Ações"
+      }
+    },
+    "products": {
+      "pageTitle": "Produtos",
+      "header": {
+        "newProduct": "Novo Produto"
+      },
+      "filters": {
+        "all": "Todos",
+        "activePlural": "Ativos",
+        "inactivePlural": "Inativos",
+        "active": "Ativo",
+        "inactive": "Inativo"
+      },
+      "columns": {
+        "number": "#",
+        "code": "Código",
+        "name": "Nome",
+        "brand": "Brand",
+        "unit": "Unidade",
+        "currency": "Moeda",
+        "price": "Preço",
+        "tax": "Imposto",
+        "status": "Status",
+        "createdAt": "Criado em"
+      }
+    },
+    "profile": {
+      "pageTitle": "Meu Perfil",
+      "actions": {
+        "editMyData": "Editar meus dados",
+        "changePassword": "Trocar senha",
+        "newUser": "Novo usuário"
+      },
+      "subtitle": "Ajuste seus dados e, se você for Admin/Manager, gerencie usuários da sua empresa.",
+      "labels": {
+        "email": "Email:",
+        "phone": "Telefone:",
+        "company": "Empresa:",
+        "permission": "Permissão:"
+      },
+      "tabs": {
+        "myProfile": "Meu Perfil",
+        "companyUsers": "Usuários da Empresa"
+      },
+      "hints": {
+        "passwordStrength": "Dica: use uma senha forte com 12+ caracteres, maiúscula, minúscula, número e símbolo."
+      }
+    },
+    "layout": {
+      "appTitle": "Sistema GECOM",
+      "menu": {
+        "profile": "Perfil",
+        "logout": "Sair",
+        "dashboard": "Dashboard",
+        "clients": "Clientes",
+        "processes": "Processos",
+        "myDocuments": "Meus Documentos",
+        "invoices": "Invoices",
+        "products": "Produtos",
+        "leads": "Leads"
+      },
+      "modal": {
+        "cancel": "Cancelar",
+        "ok": "OK",
+        "save": "Salvar",
+        "close": "Fechar"
+      },
+      "footer": {
+        "copyright": "GECOM ©"
+      },
+      "savedViews": {
+        "dateRangePlaceholder": "dd/mm/aaaa - dd/mm/aaaa",
+        "clearLabel": "Limpar",
+        "applyLabel": "Aplicar",
+        "fromLabel": "De",
+        "toLabel": "At?",
+        "saveCurrentTitle": "Salvar a view atual",
+        "deleteCurrentTitle": "Excluir esta view",
+        "saveLabel": "Salvar",
+        "deleteLabel": "Deletar view",
+        "deleteCurrentConfirm": "Excluir a view selecionada?"
+      }
+    },
+    "novoProcesso": {
+      "pageTitle": "Novo Processo",
+      "subtitle": "Preencha as informações do processo e seus transportes.",
+      "tabs": {
+        "details": "Detalhes",
+        "documents": "Documentos"
+      },
+      "form": {
+        "processNumber": "Nº do Processo *",
+        "company": "Empresa *",
+        "companyInvoicesHint": "Selecione uma empresa para listar as invoices.",
+        "estimatedDelivery": "Previsão de Entrega",
+        "processType": "Tipo de Processo",
+        "clientContact": "Contato do Cliente *",
+        "companyContactsHint": "Selecione uma empresa para listar os contatos.",
         "invoiceRelated": "Invoice relacionado"
-          },
-          "transports": {
-            "title": "Transportes do processo",
-            "subtitle": "Adicione um ou mais transportes relacionados a este processo.",
-            "addTransport": "Adicionar transporte",
-            "columns": {
-              "phone": "Telefone",
-              "origin": "Origem *",
-              "destination": "Destino *",
-              "etaDeparture": "Previsão Embarque",
-              "etaArrival": "Previsão Chegada",
-              "actions": "Ações",
+      },
+      "transports": {
+        "title": "Transportes do processo",
+        "subtitle": "Adicione um ou mais transportes relacionados a este processo.",
+        "addTransport": "Adicionar transporte",
+        "columns": {
+          "phone": "Telefone",
+          "origin": "Origem *",
+          "destination": "Destino *",
+          "etaDeparture": "Previsão Embarque",
+          "etaArrival": "Previsão Chegada",
+          "actions": "Ações",
           "company": "Companhia *",
           "type": "Tipo *",
           "status": "Status *"
-            },
-            "countries": {
-              "france": "França",
-              "mexico": "México",
-              "japan": "Japão",
-              "italy": "Itália",
-              "canada": "Canadá"
-            },
-            "labels": {
-              "countryOrigin": "País de origem",
-              "countryDestination": "País de destino"
-            }
-          },
-          "documents": {
-            "title": "Documentos",
-            "uploadTitle": "Upload de documentos",
-            "attachUpTo": "Anexe até",
-            "uploadOnFinish": "O upload será feito ao finalizar.",
-            "dragHint": "Você também pode arrastar os arquivos para a área abaixo.",
-            "maxFiles": "Máximo 5 arquivos.",
-            "renameHint": "Você poderá renomear cada arquivo abaixo antes de finalizar.",
+        },
+        "countries": {
+          "france": "França",
+          "mexico": "México",
+          "japan": "Japão",
+          "italy": "Itália",
+          "canada": "Canadá"
+        },
+        "labels": {
+          "countryOrigin": "País de origem",
+          "countryDestination": "País de destino"
+        }
+      },
+      "documents": {
+        "title": "Documentos",
+        "uploadTitle": "Upload de documentos",
+        "attachUpTo": "Anexe até",
+        "uploadOnFinish": "O upload será feito ao finalizar.",
+        "dragHint": "Você também pode arrastar os arquivos para a área abaixo.",
+        "maxFiles": "Máximo 5 arquivos.",
+        "renameHint": "Você poderá renomear cada arquivo abaixo antes de finalizar.",
         "selectFiles": "Selecionar arquivos"
-          },
-           "placeholders": {
+      },
+      "placeholders": {
         "systemFilled": "Preenchido pelo sistema."
       },
       "messages": {
@@ -570,246 +598,307 @@
         "maxFiles": "Máximo 5 arquivos.",
         "createFail": "Falha ao criar processo/transportes/documentos."
       }
-        },
-
-"newInvoice": {
-  "pageTitle": "Nova Fatura",
-  "pageTitleEdit": "Editar Fatura",
-
-  "breadcrumbs": {
-    "forms": "Formulários",
-    "newInvoice": "Nova Fatura",
-    "editInvoice": "Editar Fatura"
-  },
-
-  "titles": {
-    "create": "Criação de Fatura"
-  },
-
-  "header": {
-    "titleCreate": "Criação de Fatura",
-    "invoiceIdLabel": "ID da Fatura:"
-  },
-
-  "labels": {
-    "invoiceId": "ID da Fatura"
-  },
-
-  "actions": {
-    "generateInvoice": "Gerar invoice",
-    "deleteInvoice": "Excluir fatura",
-    "saveInvoice": "Salvar fatura",
-    "addProduct": "Adicionar produto",
-    "addManualLine": "Adicionar linha manual",
-    "editLine": "Editar linha",
-    "saveLine": "Salvar",
-    "addLine": "Adicionar"
-  },
-
-  "form": {
-    "invoiceDataTitle": "Dados da Fatura",
-
-    "company": "Empresa *",
-    "currency": "Moeda *",
-    "selectCurrency": "Selecionar...",
-
-    "status": "Status",
-    "statusDraft": "Rascunho",
-    "statusActive": "Ativo",
-    "statusExpired": "Expirado",
-    "statusBilled": "Faturado",
-    "statusPaid": "Pago",
-
-    "quoteDate": "Data da Cotação",
-    "dueDate": "Vencimento",
-    "exchangeRate": "Taxa de câmbio",
-
-    "discountPercent": "Desconto %",
-    "version": "Versão",
-    "notes": "Observações",
-    "terms": "Termos",
-
-    "billingAddress": "Endereço de Cobrança",
-    "billingAddressTitle": "Endereço de Cobrança",
-
-    "addressLine1": "Linha 1",
-    "addressLine2": "Linha 2",
-    "city": "Cidade",
-    "state": "Estado",
-    "postalCode": "CEP",
-    "country": "País",
-
-    "headerDiscount": "Desconto (cabeçalho)"
-  },
-
-  "placeholders": {
-    "searchCompany": "Pesquisar empresa...",
-    "selectCurrency": "Selecionar..."
-  },
-
-  "hints": {
-    "discountRule": "*A porcentagem será calculada sob o total bruto (Subtotal)",
-    "saveHeaderToUnlockLines": "Salve o cabeçalho da fatura para liberar as linhas.",
-    "totalsFromLines": "Os totalizadores são calculados a partir das linhas."
-  },
-
-  "lines": {
-    "addProduct": "Adicionar produto",
-    "addManualLine": "Adicionar linha manual",
-    "actions": "Ações",
-
-    "columns": {
-      "product": "Produto",
-      "unit": "Unidade",
-      "price": "Preço",
-      "quantity": "Qtd",
-      "discount": "Desconto",
-      "tax": "Imposto",
-      "lineTotal": "Total linha"
     },
-
-    "empty": "Nenhuma linha adicionada",
-    "manual": "Manual"
-  },
-
-  "totals": {
-    "title": "Totalizadores",
-    "subtotal": "Subtotal",
-    "taxes": "Impostos",
-    "total": "Total",
-    "linesDiscount": "Descontos (linhas)"
-  },
-
-  "lineModal": {
-    "product": "Produto",
-    "searchProduct": "Pesquisar produto...",
-    "typeToSearch": "Digite para pesquisar.",
-    "description": "Descrição",
-    "unit": "Unidade",
-    "unitPrice": "Preço unitário",
-    "quantity": "Quantidade",
-    "integerOnly": "*Somente inteiro",
-    "taxRate": "Taxa de imposto (0..1)",
-    "discountValue": "Desconto (valor)",
-    "lineTotal": "Total da linha",
-    "autoCalculated": "Subtotal/Imposto/Total são calculados automaticamente.",
-
-    "addTitle": "Adicionar linha",
-    "editTitle": "Editar linha",
-    "add": "Adicionar",
-    "save": "Salvar",
-    "cancel": "Cancelar"
-  },
-
-  "confirm": {
-    "deleteModalTitle": "Excluir fatura",
-    "deleteTitle": "Tem certeza que deseja excluir esta fatura?"
-  },
-
-  "messages": {
-    "requestFail": "Falha na requisição.",
-    "initFail": "Falha ao carregar dados iniciais.",
-    "createFail": "Falha ao criar a fatura.",
-    "saveFail": "Falha ao salvar a fatura.",
-    "deleteFail": "Falha ao excluir a fatura.",
-    "deleteSuccess": "Fatura excluída com sucesso.",
-
-    "companyAndCurrencyRequired": "Empresa e Moeda são obrigatórios.",
-    "selectCurrencyToLoadProducts": "Selecione uma moeda para carregar os produtos.",
-    "noProductsForCurrency": "Nenhum produto encontrado para a moeda selecionada.",
-    "loadProductsFail": "Falha ao carregar produtos para a moeda selecionada.",
-    "pickProductFromList": "Selecione um produto na lista (digitar não basta).",
-    "quantityGreaterThanZero": "Quantidade deve ser maior que 0."
-  }
-}
-
-,
-
-        "invoicesPrint": {
-          "pageTitle": "Invoice - Impressão",
-          "actions": {
-            "close": "Fechar",
-            "print": "Imprimir"
-          },
-          "labels": {
-            "date": "Data:",
-            "unitPrice": "Preço Unit.",
-            "notes": "Observações",
-            "phone": "Telefone"
-          }
+    "newInvoice": {
+      "pageTitle": "Nova Fatura",
+      "pageTitleEdit": "Editar Fatura",
+      "breadcrumbs": {
+        "forms": "Formulários",
+        "newInvoice": "Nova Fatura",
+        "editInvoice": "Editar Fatura"
+      },
+      "titles": {
+        "create": "Criação de Fatura"
+      },
+      "header": {
+        "titleCreate": "Criação de Fatura",
+        "invoiceIdLabel": "ID da Fatura:"
+      },
+      "labels": {
+        "invoiceId": "ID da Fatura"
+      },
+      "actions": {
+        "generateInvoice": "Gerar invoice",
+        "deleteInvoice": "Excluir fatura",
+        "saveInvoice": "Salvar fatura",
+        "addProduct": "Adicionar produto",
+        "addManualLine": "Adicionar linha manual",
+        "editLine": "Editar linha",
+        "saveLine": "Salvar",
+        "addLine": "Adicionar"
+      },
+      "form": {
+        "invoiceDataTitle": "Dados da Fatura",
+        "company": "Empresa *",
+        "currency": "Moeda *",
+        "selectCurrency": "Selecionar...",
+        "status": "Status",
+        "statusDraft": "Rascunho",
+        "statusActive": "Ativo",
+        "statusExpired": "Expirado",
+        "statusBilled": "Faturado",
+        "statusPaid": "Pago",
+        "quoteDate": "Data da Cotação",
+        "dueDate": "Vencimento",
+        "exchangeRate": "Taxa de câmbio",
+        "discountPercent": "Desconto %",
+        "version": "Versão",
+        "notes": "Observações",
+        "terms": "Termos",
+        "billingAddress": "Endereço de Cobrança",
+        "billingAddressTitle": "Endereço de Cobrança",
+        "addressLine1": "Linha 1",
+        "addressLine2": "Linha 2",
+        "city": "Cidade",
+        "state": "Estado",
+        "postalCode": "CEP",
+        "country": "País",
+        "headerDiscount": "Desconto (cabeçalho)"
+      },
+      "placeholders": {
+        "searchCompany": "Pesquisar empresa...",
+        "selectCurrency": "Selecionar..."
+      },
+      "hints": {
+        "discountRule": "*A porcentagem será calculada sob o total bruto (Subtotal)",
+        "saveHeaderToUnlockLines": "Salve o cabeçalho da fatura para liberar as linhas.",
+        "totalsFromLines": "Os totalizadores são calculados a partir das linhas."
+      },
+      "lines": {
+        "addProduct": "Adicionar produto",
+        "addManualLine": "Adicionar linha manual",
+        "actions": "Ações",
+        "columns": {
+          "product": "Produto",
+          "unit": "Unidade",
+          "price": "Preço",
+          "quantity": "Qtd",
+          "discount": "Desconto",
+          "tax": "Imposto",
+          "lineTotal": "Total linha"
         },
-
-        "clients": {
-          "pageTitle": "Clientes",
-          "toolbar": {
-            "search": "Buscar",
-            "newClient": "Novo Cliente",
-            "clearSelection": "Limpar seleção",
-            "remove": "Remover",
-            "selecionados":"Selecionados",
-            "typeCompany": "Digite o nome da empresa..."
-          },
-          "columns": {
-            "phone": "Telefone",
-            "cnpj": "CNPJ",
-            "ninvoices": "Numero de invoices",
-            "setor": "Setor",
-            "contatoPrincipal": "Contato Principal",
-            "name": "Nome",
-            "createdAt": "Data de Criação"
-          },
-          "placeholders": {
-            "searchCompanyName": "Digite o nome da empresa..."
-          },
-          "modalRemove": {
-            "title": "Remover clientes",
-            "line1": "Você está prestes a remover cliente(s).",
-            "line2": "Esta ação não poderá ser desfeita.",
-            "confirm": "Deseja continuar?",
-    "confirmFallbackPrefix": "Remover",
-    "confirmFallbackSuffix": "cliente(s)?"
-          },
-           "bulk": {
-    "selectAll": "Selecionar todos"
-  },
-  "defaults": {
-    "sector": "Geral"
-  },
-  "ui": {
-    "select": "Selecionar",
-    "removing": "Removendo"
-  },
-  "messages": {
-    "loadFail": "Falha ao carregar companies.",
-    "loadUnexpected": "Erro ao carregar clientes.",
-    "deleteFailSingle": "Falha ao remover company.",
-    "deleteFail": "Erro ao remover.",
-    "noneFound": "Nenhum cliente encontrado.",
-    "bulkSomeFailedPrefix": "Alguns clientes não puderam ser removidos",
-    "bulkSomeFailedSuffix": "Veja o console para detalhes.",
-    "bulkUnexpected": "Erro ao remover clientes."
-  }
-        },
-
-        "newProduct": {
-          "pageTitle": "Novo Produto",
-          "actions": {
-            "back": "Voltar",
+        "empty": "Nenhuma linha adicionada",
+        "manual": "Manual"
+      },
+      "totals": {
+        "title": "Totalizadores",
+        "subtotal": "Subtotal",
+        "taxes": "Impostos",
+        "total": "Total",
+        "linesDiscount": "Descontos (linhas)"
+      },
+      "lineModal": {
+        "product": "Produto",
+        "searchProduct": "Pesquisar produto...",
+        "typeToSearch": "Digite para pesquisar.",
+        "description": "Descrição",
+        "unit": "Unidade",
+        "unitPrice": "Preço unitário",
+        "quantity": "Quantidade",
+        "integerOnly": "*Somente inteiro",
+        "taxRate": "Taxa de imposto (0..1)",
+        "discountValue": "Desconto (valor)",
+        "lineTotal": "Total da linha",
+        "autoCalculated": "Subtotal/Imposto/Total são calculados automaticamente.",
+        "addTitle": "Adicionar linha",
+        "editTitle": "Editar linha",
+        "add": "Adicionar",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "confirm": {
+        "deleteModalTitle": "Excluir fatura",
+        "deleteTitle": "Tem certeza que deseja excluir esta fatura?"
+      },
+      "messages": {
+        "requestFail": "Falha na requisição.",
+        "initFail": "Falha ao carregar dados iniciais.",
+        "createFail": "Falha ao criar a fatura.",
+        "saveFail": "Falha ao salvar a fatura.",
+        "deleteFail": "Falha ao excluir a fatura.",
+        "deleteSuccess": "Fatura excluída com sucesso.",
+        "companyAndCurrencyRequired": "Empresa e Moeda são obrigatórios.",
+        "selectCurrencyToLoadProducts": "Selecione uma moeda para carregar os produtos.",
+        "noProductsForCurrency": "Nenhum produto encontrado para a moeda selecionada.",
+        "loadProductsFail": "Falha ao carregar produtos para a moeda selecionada.",
+        "pickProductFromList": "Selecione um produto na lista (digitar não basta).",
+        "quantityGreaterThanZero": "Quantidade deve ser maior que 0."
+      }
+    },
+    "invoicesPrint": {
+      "pageTitle": "Invoice - Impressão",
+      "actions": {
+        "close": "Fechar",
+        "print": "Imprimir"
+      },
+      "labels": {
+        "date": "Data:",
+        "unitPrice": "Preço Unit.",
+        "notes": "Observações",
+        "phone": "Telefone"
+      }
+    },
+    "clients": {
+      "pageTitle": "Clientes",
+      "toolbar": {
+        "search": "Buscar",
+        "newClient": "Novo Cliente",
+        "clearSelection": "Limpar seleção",
+        "remove": "Remover",
+        "selecionados": "Selecionados",
+        "typeCompany": "Digite o nome da empresa..."
+      },
+      "columns": {
+        "phone": "Telefone",
+        "cnpj": "CNPJ",
+        "ninvoices": "Numero de invoices",
+        "setor": "Setor",
+        "contatoPrincipal": "Contato Principal",
+        "name": "Nome",
+        "createdAt": "Data de Criação"
+      },
+      "placeholders": {
+        "searchCompanyName": "Digite o nome da empresa..."
+      },
+      "modalRemove": {
+        "title": "Remover clientes",
+        "line1": "Você está prestes a remover cliente(s).",
+        "line2": "Esta ação não poderá ser desfeita.",
+        "confirm": "Deseja continuar?",
+        "confirmFallbackPrefix": "Remover",
+        "confirmFallbackSuffix": "cliente(s)?"
+      },
+      "bulk": {
+        "selectAll": "Selecionar todos"
+      },
+      "defaults": {
+        "sector": "Geral"
+      },
+      "ui": {
+        "select": "Selecionar",
+        "removing": "Removendo"
+      },
+      "messages": {
+        "loadFail": "Falha ao carregar companies.",
+        "loadUnexpected": "Erro ao carregar clientes.",
+        "deleteFailSingle": "Falha ao remover company.",
+        "deleteFail": "Erro ao remover.",
+        "noneFound": "Nenhum cliente encontrado.",
+        "bulkSomeFailedPrefix": "Alguns clientes não puderam ser removidos",
+        "bulkSomeFailedSuffix": "Veja o console para detalhes.",
+        "bulkUnexpected": "Erro ao remover clientes."
+      }
+    },
+    "myActivities": {
+      "pageTitle": "Minhas Atividades",
+      "includeInactive": "Incluir inativos",
+      "hints": {
+        "dragAndDoubleClick": "Dica: arraste cards entre colunas. Dê duplo clique no card para editar no SideModal. Arraste o cabeçalho da coluna para mudar a ordem."
+      },
+      "actions": {
+        "refresh": "Atualizar",
+        "archive": "Arquivar",
+        "newBoard": "Novo Board",
+        "editBoard": "Editar Board",
+        "newColumn": "Nova Coluna",
+        "tag": "Tag",
+        "comments": "Coment.",
+        "assignees": "Resp.",
+        "delete": "Excluir",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "labels": {
+        "board": "Board",
+        "boardFallback": "Board",
+        "inactiveSuffix": "(Inativo)",
+        "entity": "Entidade",
+        "columns": "Colunas",
+        "cards": "Cards",
+        "wip": "WIP",
+        "noWip": "Sem WIP",
+        "final": "Final"
+      },
+      "priority": {
+        "low": "Baixa",
+        "medium": "Média",
+        "high": "Alta"
+      },
+      "fields": {
+        "name": "Nome",
+        "description": "Descrição",
+        "color": "Cor",
+        "wip": "WIP limite",
+        "title": "Título",
+        "priority": "Prioridade",
+        "dueDate": "Data limite"
+      },
+      "placeholders": {
+        "newCard": "Novo card...",
+        "dateYmd": "aaaa-mm-dd"
+      },
+      "modals": {
+        "newBoardTitle": "Novo Board",
+        "editBoardTitle": "Editar Board",
+        "newColumnTitle": "Nova Coluna",
+        "editColumnTitle": "Editar Coluna",
+        "cardTitlePrefix": "Card"
+      },
+      "messages": {
+        "noBoardSelected": "Nenhum board selecionado.",
+        "noBoardsOption": "Nenhum board",
+        "emptyColumn": "Sem cards nessa coluna.",
+        "createOrSelectBoard": "Crie ou selecione um board.",
+        "noDueDate": "Sem prazo",
+        "noAssignees": "Sem responsáveis",
+        "userFallback": "Usuário",
+        "sideModalMissing": "SideModal não disponível.",
+        "apiStatusPrefix": "Erro"
+      },
+      "validation": {
+        "boardName": "Informe o nome do board.",
+        "columnName": "Informe o nome da coluna."
+      },
+      "confirm": {
+        "deleteCard": "Excluir card?",
+        "deleteColumn": "Excluir coluna?",
+        "archiveBoard": "Arquivar board?"
+      },
+      "alerts": {
+        "loadFail": "Falha ao carregar Minhas Atividades.",
+        "refreshFail": "Falha ao atualizar.",
+        "openBoardFail": "Falha ao abrir board.",
+        "moveFail": "Falha ao mover/reordenar card.",
+        "reorderColumnsFail": "Falha ao reordenar colunas.",
+        "createCardFail": "Falha ao criar card.",
+        "deleteCardFail": "Falha ao excluir card.",
+        "editColumnFail": "Falha ao editar coluna.",
+        "deleteColumnFail": "Falha ao excluir coluna.",
+        "createBoardFail": "Falha ao criar board.",
+        "editBoardFail": "Falha ao editar board.",
+        "archiveBoardFail": "Falha ao arquivar board.",
+        "createColumnFail": "Falha ao criar coluna."
+      }
+    },
+    "newProduct": {
+      "pageTitle": "Novo Produto",
+      "actions": {
+        "back": "Voltar",
         "create": "Criar",
         "creating": "Criando..."
-          },
-          "tabs": {
-            "info": "Informações",
-            "prices": "Preços"
-          },
-          "form": {
-            "productCodeRequired": "Código do produto *",
-            "productCodeUniqueHint": "Esse código precisa ser único.",
-            "description": "Descrição",
-            "defaultPriceRequired": "Preço padrão *",
-            "defaultTax": "Imposto padrão (0..1)",
-            "unitExample": "pacote, serviço, caixa...",
-            "productDescription": "Descrição do produto",
+      },
+      "tabs": {
+        "info": "Informações",
+        "prices": "Preços"
+      },
+      "form": {
+        "productCodeRequired": "Código do produto *",
+        "productCodeUniqueHint": "Esse código precisa ser único.",
+        "description": "Descrição",
+        "defaultPriceRequired": "Preço padrão *",
+        "defaultTax": "Imposto padrão (0..1)",
+        "unitExample": "pacote, serviço, caixa...",
+        "productDescription": "Descrição do produto",
         "productNameRequired": "Nome do produto *",
         "brand": "Marca",
         "unit": "Unidade",
@@ -817,8 +906,8 @@
         "statusActive": "Ativo",
         "statusInactive": "Inativo",
         "currencyRequired": "Moeda *"
-          },
-           "subtitle": "Preencha os campos e clique em Criar.",
+      },
+      "subtitle": "Preencha os campos e clique em Criar.",
       "breadcrumbs": {
         "pageName": "Produtos",
         "subpageName": "Novo Produto"
@@ -844,229 +933,225 @@
         "createFail": "Falha ao criar o produto.",
         "loadCurrenciesFail": "Falha ao carregar moedas."
       }
+    },
+    "productDetail": {
+      "state": {
+        "loading": "Carregando..."
+      },
+      "actions": {
+        "back": "Voltar",
+        "save": "Salvar",
+        "cancel": "Cancelar"
+      },
+      "tabs": {
+        "info": "Informações",
+        "prices": "Preços"
+      },
+      "form": {
+        "productCode": "Código do produto",
+        "description": "Descrição",
+        "currencyHint": "Moeda utilizada no preço padrão.",
+        "defaultPrice": "Preço padrão",
+        "defaultTaxPercent": "Imposto padrão (%)",
+        "createdAt": "Criado em",
+        "imageUploadNotImplemented": "Upload de imagem ainda não implementado.",
+        "unitExample": "pacote, serviço, caixa...",
+        "productDescription": "Descrição do produto"
+      },
+      "messages": {
+        "deleteError": "Erro ao excluir produto.",
+        "deleteSuccess": "Produto excluído com sucesso.",
+        "deleteUnexpected": "Erro inesperado ao excluir produto."
+      }
+    },
+    "newClient": {
+      "pageTitle": "Criação de cliente",
+      "subtitle": "Preencha as informações da empresa, depois os dados opcionais e por último os usuários de acesso.",
+      "wizard": {
+        "optionalToAccess": "Dados Opcionais -> Acesso -->"
+      },
+      "steps": {
+        "client": "Cliente",
+        "optional": "Dados Opcionais",
+        "access": "Acesso"
+      },
+      "optional": {
+        "addressOptional": "Endereço (opcional)",
+        "postalCode": "Código Postal",
+        "fetchingAddress": "Buscando endereço...",
+        "country": "País",
+        "placeholders": {
+          "postalCode": "00000-000"
         },
-
-        "productDetail": {
-          "state": {
-            "loading": "Carregando..."
-          },
-          "actions": {
-            "back": "Voltar",
-            "save": "Salvar",
-            "cancel": "Cancelar"
-          },
-          "tabs": {
-            "info": "Informações",
-            "prices": "Preços"
-          },
-          "form": {
-            "productCode": "Código do produto",
-            "description": "Descrição",
-            "currencyHint": "Moeda utilizada no preço padrão.",
-            "defaultPrice": "Preço padrão",
-            "defaultTaxPercent": "Imposto padrão (%)",
-            "createdAt": "Criado em",
-            "imageUploadNotImplemented": "Upload de imagem ainda não implementado.",
-            "unitExample": "pacote, serviço, caixa...",
-            "productDescription": "Descrição do produto"
-          },
-          "messages": {
-            "deleteError": "Erro ao excluir produto.",
-            "deleteSuccess": "Produto excluído com sucesso.",
-            "deleteUnexpected": "Erro inesperado ao excluir produto."
-          }
-        },
-
-        "newClient": {
-          "pageTitle": "Criação de cliente",
-          "subtitle": "Preencha as informações da empresa, depois os dados opcionais e por último os usuários de acesso.",
-          "wizard": {
-            "optionalToAccess": "Dados Opcionais -> Acesso -->"
-          },
-          "steps": {
-            "client": "Cliente",
-            "optional": "Dados Opcionais",
-            "access": "Acesso"
-          },
-          "optional": {
-            "addressOptional": "Endereço (opcional)",
-            "postalCode": "Código Postal",
-            "fetchingAddress": "Buscando endereço...",
-            "country": "País",
-    "placeholders": {
-      "postalCode": "00000-000"
-    },
-    "labels": {
-      "street": "Rua",
-      "city": "Cidade",
-      "state": "Estado",
-      "complement": "Complemento"
-    }
-          },
-          "access": {
-            "title": "Usuários de acesso",
-            "companyNotCreated": "A Company ainda não foi criada. Volte um passo e clique em Next no Step 2.",
-            "addUser": "Adicionar usuário",
-            "setPrimaryHint": "para definir o usuário principal da empresa.",
-            "emailRequired": "Email *",
-            "phone": "Telefone",
-            "sendAccess": "Enviar acesso?",
-            "actions": "Ações",
-            "sectorExample": "Ex:.. Agrícola",
-            "emailExample": "email@empresa.com",
-    "setPrimaryPrefix": "Marque",
-    "setPrimaryStrong": "Principal",
-    "table": {
-      "primary": "Principal",
-      "nameRequired": "Nome *"
-    },
-    "placeholders": {
-      "fullName": "Nome Completo",
-      "phoneExample": "(11) 99999-9999"
-    },
-    "yes": "Sim"
-          },
-          "navbar": {
-    "searchPlaceholder": "Buscar..."
-  },
-  "breadcrumbs": {
-    "clients": "Clientes"
-  },
-  "client": {
-            "title": "Informações do cliente",
-            "phoneRequired": "Telefone *",
-            "companyNameRequired": "Nome da Empresa *",
-            "sizeDefault": "Médio",
-            "nextHint": "Ao avançar para o próximo passo, você preencherá os dados opcionais.",
-    "labels": {
-      "cnpjRequired": "CNPJ *",
-      "sector": "Setor",
-      "size": "Porte",
-      "status": "Status"
-    },
-    "placeholders": {
-      "cnpj": "00.000.000/0000-00"
-    },
-    "state": {
-      "fetchingCnpj": "Buscando dados do CNPJ..."
-    },
-    "status": {
-      "active": "Ativo"
-    },
-    "sizeOptions": {
-      "select": "Selecionar...",
-      "selectKeyword": "Selecionar",
-      "small": "Pequeno",
-      "medium": "Médio",
-      "large": "Grande"
-    }
-  },
-  "defaults": {
-    "country": "Brasil"
-  },
-  "messages": {
-    "cnpjLookupFail": "Falha ao consultar CNPJ.",
-    "cnpjAutoFillFail": "Não foi possível buscar os dados do CNPJ.",
-    "createUserFail": "Falha ao criar usuário.",
-    "patchUserFail": "Falha ao atualizar usuário.",
-    "createCompanyFail": "Falha ao criar company.",
-    "patchCompanyFail": "Falha ao atualizar company.",
-    "usersAtLeastOne": "Adicione pelo menos 1 usuário.",
-    "usersFillNameEmail": "Preencha Nome e Email em todos os usuários.",
-    "invalidEmailPrefix": "Email inválido:",
-    "duplicateEmail": "Existe email duplicado na lista de usuários.",
-    "companyCreatedNoId": "Company criada, mas não retornou ID.",
-    "createCompanyStep2Fail": "Erro ao criar company no Step 2.",
-    "companyIdMissingForFinish": "CompanyId não encontrado. Volte e avance no Step 2 para criar a company.",
-    "selectPrimary": "Selecione um usuário como Principal.",
-    "userCreatedNoIdPrefix": "Usuário criado",
-    "userCreatedNoIdSuffix": "mas não retornou ID.",
-    "primaryNotFound": "Não foi possível identificar o usuário Principal criado.",
-    "finishFail": "Erro ao finalizar criação."
-  }
-        },
-
-        "landingPage": {
-          "pageTitle": "GECOM - Portal de Importação e Exportação",
-          "menu": {
-            "home": "Início",
-            "solutions": "Soluções"
-          },
-          "hero": {
-            "welcome": "bem-vindo à GECOM",
-            "subtitle": "Plataforma completa para gestão de processos de comércio exterior, do cadastro ao desembaraço.",
-            "cta": "VER SOLUÇÃO",
-            "portalTitle": "Conheça o Portal GECOM",
-            "portalSubtitle": "Centralize pedidos, processos, documentos e status de embarque em um único lugar."
-          },
-          "common": {
-            "next": "Próximo",
-            "details": "Detalhes »",
-            "moreInfo": "Mais informações",
-            "tomorrow": "Amanhã"
-          },
-          "features": {
-            "responsiveTitle": "Experiência responsiva",
-            "responsiveText": "Acesse a GECOM de qualquer dispositivo, com painéis e informações otimizadas para desktop, tablet e celular.",
-            "reportsTitle": "Relatórios em tempo real",
-            "reportsText1": "Acompanhe custos, prazos, status de processos e performance de operações com relatórios atualizados.",
-            "reportsText2": "Visualize rapidamente embarques, liberações, entregas e indicadores-chave do seu fluxo logístico.",
-            "formsTitle": "Formulários inteligentes",
-            "formsText1": "Reduza erros no cadastro de clientes, processos e documentos com validações e campos padronizados.",
-            "integrationsTitle": "Integrações",
-            "integrationsText": "Conecte a GECOM a outros sistemas para automatizar ainda mais o fluxo de informações.",
-            "emailNotificationsTitle": "Notificações por e-mail",
-            "emailNotificationsText": "Avise clientes e parceiros sobre atualizações de status e eventos importantes dos processos.",
-            "strategicIndicatorsTitle": "Indicadores estratégicos",
-            "strategicIndicatorsText": "Gráficos e métricas que ajudam a tomar decisões rápidas e seguras sobre suas operações."
-          },
-          "sections": {
-            "endToEndTitle": "Gestão de ponta a ponta das operações de importação e exportação em um único sistema.",
-            "dailyOpsTitle": "Pensada para o dia a dia da operação",
-            "teamworkTitle": "Colaboração em equipe",
-            "managerViewTitle": "Visão gerencial"
-          },
-          "steps": {
-            "alignmentMeeting": "Reunião de alinhamento",
-            "alignmentMeetingText": "Entendemos seus processos, volumes e particularidades da operação para configurar a GECOM de acordo com a sua necessidade.",
-            "implementation": "Implantação",
-            "implementationText": "Parametrização, treinamentos e acompanhamento dos primeiros processos para garantir que tudo funcione como esperado."
-          },
-          "testimonials": {
-            "quote1": "A GECOM nos deu visibilidade total dos processos de importação e exportação. Hoje acompanhamos prazos e custos em tempo real e conseguimos ser muito mais proativos com nossos clientes.",
-            "signature1": "12.02.2014 - André Santos",
-            "quote2": "Conseguimos integrar nossa operação à GECOM e hoje temos muito mais controle sobre os embarques dos clientes em comum.",
-            "signature2": "Parceira de logística em São Paulo",
-            "quote3": "A centralização das informações reduz retrabalho e trocas de e-mail. Todos sabem exatamente em que etapa cada processo está.",
-            "signature3": "Operador logístico no Brasil",
-            "quote4": "A GECOM ajudou a padronizar o fluxo de informações entre nosso time no Brasil e parceiros no exterior."
-          },
-          "contact": {
-            "title": "Tire dúvidas, peça uma demonstração ou conheça melhor como a GECOM pode ajudar sua operação.",
-            "company": "GECOM Soluções em Comércio Exterior",
-            "location": "São Paulo, SP - Brasil",
-            "sendEmail": "Enviar e-mail",
-            "phone": "Telefone"
-          }
-        },
-
-        "publicProcessDetail": {
-          "actions": {
-            "login": "Entrar"
-          },
-          "header": {
-            "process": "Processo",
-            "estimatedDelivery": "Data Estimada de Entrega:",
-            "start": "Início do Processo:"
-          },
-          "sections": {
-            "history": "Histórico do Processo",
-            "description": "Descrição do Processo",
-            "documents": "Documentos do processo"
-          },
-          "actions2": {
-            "addDocuments": "Adicionar Documentos"
-          }
+        "labels": {
+          "street": "Rua",
+          "city": "Cidade",
+          "state": "Estado",
+          "complement": "Complemento"
         }
+      },
+      "access": {
+        "title": "Usuários de acesso",
+        "companyNotCreated": "A Company ainda não foi criada. Volte um passo e clique em Next no Step 2.",
+        "addUser": "Adicionar usuário",
+        "setPrimaryHint": "para definir o usuário principal da empresa.",
+        "emailRequired": "Email *",
+        "phone": "Telefone",
+        "sendAccess": "Enviar acesso?",
+        "actions": "Ações",
+        "sectorExample": "Ex:.. Agrícola",
+        "emailExample": "email@empresa.com",
+        "setPrimaryPrefix": "Marque",
+        "setPrimaryStrong": "Principal",
+        "table": {
+          "primary": "Principal",
+          "nameRequired": "Nome *"
+        },
+        "placeholders": {
+          "fullName": "Nome Completo",
+          "phoneExample": "(11) 99999-9999"
+        },
+        "yes": "Sim"
+      },
+      "navbar": {
+        "searchPlaceholder": "Buscar..."
+      },
+      "breadcrumbs": {
+        "clients": "Clientes"
+      },
+      "client": {
+        "title": "Informações do cliente",
+        "phoneRequired": "Telefone *",
+        "companyNameRequired": "Nome da Empresa *",
+        "sizeDefault": "Médio",
+        "nextHint": "Ao avançar para o próximo passo, você preencherá os dados opcionais.",
+        "labels": {
+          "cnpjRequired": "CNPJ *",
+          "sector": "Setor",
+          "size": "Porte",
+          "status": "Status"
+        },
+        "placeholders": {
+          "cnpj": "00.000.000/0000-00"
+        },
+        "state": {
+          "fetchingCnpj": "Buscando dados do CNPJ..."
+        },
+        "status": {
+          "active": "Ativo"
+        },
+        "sizeOptions": {
+          "select": "Selecionar...",
+          "selectKeyword": "Selecionar",
+          "small": "Pequeno",
+          "medium": "Médio",
+          "large": "Grande"
+        }
+      },
+      "defaults": {
+        "country": "Brasil"
+      },
+      "messages": {
+        "cnpjLookupFail": "Falha ao consultar CNPJ.",
+        "cnpjAutoFillFail": "Não foi possível buscar os dados do CNPJ.",
+        "createUserFail": "Falha ao criar usuário.",
+        "patchUserFail": "Falha ao atualizar usuário.",
+        "createCompanyFail": "Falha ao criar company.",
+        "patchCompanyFail": "Falha ao atualizar company.",
+        "usersAtLeastOne": "Adicione pelo menos 1 usuário.",
+        "usersFillNameEmail": "Preencha Nome e Email em todos os usuários.",
+        "invalidEmailPrefix": "Email inválido:",
+        "duplicateEmail": "Existe email duplicado na lista de usuários.",
+        "companyCreatedNoId": "Company criada, mas não retornou ID.",
+        "createCompanyStep2Fail": "Erro ao criar company no Step 2.",
+        "companyIdMissingForFinish": "CompanyId não encontrado. Volte e avance no Step 2 para criar a company.",
+        "selectPrimary": "Selecione um usuário como Principal.",
+        "userCreatedNoIdPrefix": "Usuário criado",
+        "userCreatedNoIdSuffix": "mas não retornou ID.",
+        "primaryNotFound": "Não foi possível identificar o usuário Principal criado.",
+        "finishFail": "Erro ao finalizar criação."
+      }
+    },
+    "landingPage": {
+      "pageTitle": "GECOM - Portal de Importação e Exportação",
+      "menu": {
+        "home": "Início",
+        "solutions": "Soluções"
+      },
+      "hero": {
+        "welcome": "bem-vindo à GECOM",
+        "subtitle": "Plataforma completa para gestão de processos de comércio exterior, do cadastro ao desembaraço.",
+        "cta": "VER SOLUÇÃO",
+        "portalTitle": "Conheça o Portal GECOM",
+        "portalSubtitle": "Centralize pedidos, processos, documentos e status de embarque em um único lugar."
+      },
+      "common": {
+        "next": "Próximo",
+        "details": "Detalhes »",
+        "moreInfo": "Mais informações",
+        "tomorrow": "Amanhã"
+      },
+      "features": {
+        "responsiveTitle": "Experiência responsiva",
+        "responsiveText": "Acesse a GECOM de qualquer dispositivo, com painéis e informações otimizadas para desktop, tablet e celular.",
+        "reportsTitle": "Relatórios em tempo real",
+        "reportsText1": "Acompanhe custos, prazos, status de processos e performance de operações com relatórios atualizados.",
+        "reportsText2": "Visualize rapidamente embarques, liberações, entregas e indicadores-chave do seu fluxo logístico.",
+        "formsTitle": "Formulários inteligentes",
+        "formsText1": "Reduza erros no cadastro de clientes, processos e documentos com validações e campos padronizados.",
+        "integrationsTitle": "Integrações",
+        "integrationsText": "Conecte a GECOM a outros sistemas para automatizar ainda mais o fluxo de informações.",
+        "emailNotificationsTitle": "Notificações por e-mail",
+        "emailNotificationsText": "Avise clientes e parceiros sobre atualizações de status e eventos importantes dos processos.",
+        "strategicIndicatorsTitle": "Indicadores estratégicos",
+        "strategicIndicatorsText": "Gráficos e métricas que ajudam a tomar decisões rápidas e seguras sobre suas operações."
+      },
+      "sections": {
+        "endToEndTitle": "Gestão de ponta a ponta das operações de importação e exportação em um único sistema.",
+        "dailyOpsTitle": "Pensada para o dia a dia da operação",
+        "teamworkTitle": "Colaboração em equipe",
+        "managerViewTitle": "Visão gerencial"
+      },
+      "steps": {
+        "alignmentMeeting": "Reunião de alinhamento",
+        "alignmentMeetingText": "Entendemos seus processos, volumes e particularidades da operação para configurar a GECOM de acordo com a sua necessidade.",
+        "implementation": "Implantação",
+        "implementationText": "Parametrização, treinamentos e acompanhamento dos primeiros processos para garantir que tudo funcione como esperado."
+      },
+      "testimonials": {
+        "quote1": "A GECOM nos deu visibilidade total dos processos de importação e exportação. Hoje acompanhamos prazos e custos em tempo real e conseguimos ser muito mais proativos com nossos clientes.",
+        "signature1": "12.02.2014 - André Santos",
+        "quote2": "Conseguimos integrar nossa operação à GECOM e hoje temos muito mais controle sobre os embarques dos clientes em comum.",
+        "signature2": "Parceira de logística em São Paulo",
+        "quote3": "A centralização das informações reduz retrabalho e trocas de e-mail. Todos sabem exatamente em que etapa cada processo está.",
+        "signature3": "Operador logístico no Brasil",
+        "quote4": "A GECOM ajudou a padronizar o fluxo de informações entre nosso time no Brasil e parceiros no exterior."
+      },
+      "contact": {
+        "title": "Tire dúvidas, peça uma demonstração ou conheça melhor como a GECOM pode ajudar sua operação.",
+        "company": "GECOM Soluções em Comércio Exterior",
+        "location": "São Paulo, SP - Brasil",
+        "sendEmail": "Enviar e-mail",
+        "phone": "Telefone"
+      }
+    },
+    "publicProcessDetail": {
+      "actions": {
+        "login": "Entrar"
+      },
+      "header": {
+        "process": "Processo",
+        "estimatedDelivery": "Data Estimada de Entrega:",
+        "start": "Início do Processo:"
+      },
+      "sections": {
+        "history": "Histórico do Processo",
+        "description": "Descrição do Processo",
+        "documents": "Documentos do processo"
+      },
+      "actions2": {
+        "addDocuments": "Adicionar Documentos"
       }
     }
+  }
+}

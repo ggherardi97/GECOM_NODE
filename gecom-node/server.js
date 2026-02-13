@@ -19,6 +19,8 @@ const productsApiRoutes = require('./routes/productsApi');
 const currenciesApiRoutes = require('./routes/currenciesApi');
 const processTypesApi = require("./routes/processTypesApi");
 const savedViewsApi = require("./routes/savedViewsApi");
+const kanbanApi = require("./routes/kanbanApi");
+const leadsApi = require("./routes/leadsApi");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -51,8 +53,9 @@ i18next
     fallbackLng: 'pt-BR',
     preload: ['pt-BR', 'en', 'es'],
     supportedLngs: ['pt-BR', 'en', 'es'],
-    ns: ['common'],
+    ns: ['common', 'leads'],
     defaultNS: 'common',
+    fallbackNS: ['leads'],
     backend: {
       loadPath: path.join(__dirname, 'locales/{{lng}}/{{ns}}.json'),
     },
@@ -94,6 +97,7 @@ app.use('/api', currenciesApiRoutes);
 app.use('/api', companiesApiRoutes);
 app.use("/api", processTypesApi);
 app.use("/api", savedViewsApi);
+app.use("/api", kanbanApi);
 app.use("/api", require("./routes/eventsApi"));
 app.use("/api", require("./routes/documentsApi"));
 app.use("/api", require("./routes/transportTypesApi"));
@@ -101,6 +105,7 @@ app.use("/api", require("./routes/transportsApi"));
 app.use("/api", require("./routes/transportStatusesApi"));
 const notificationsApi = require("./routes/notificationsApi");
 app.use("/api", notificationsApi);
+app.use("/api", leadsApi);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes'));
@@ -116,8 +121,15 @@ app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
 app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 app.get('/NewProduct', (req, res) => res.render('NewProduct'));
+app.get(['/MyActivities', '/my-activities', '/MinhasAtividades'], (req, res) => res.render('MyActivities'));
 app.get("/Profile", (req, res) => res.render("Profile"));
 app.get("/NewNotification", (req, res) => res.render("NewNotification"));
+app.get(["/Notifications", "/notifications"], (req, res) => res.render("Notifications"));
+app.get("/leads/pipeline", (req, res) => res.render("leads/leads-pipeline"));
+app.get("/leads/new", (req, res) => res.render("leads/lead-form"));
+app.get("/leads/:id/edit", (req, res) => res.render("leads/lead-form"));
+app.get("/leads/:id", (req, res) => res.render("leads/lead-detail"));
+app.get("/leads", (req, res) => res.render("leads/leads-list"));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
 <style>
   .ibox-title {
     padding: 15px 90px 20px 15px;
@@ -33,13 +34,18 @@
     font-size: 11px;
     opacity: .75;
   }
+  .sv-actions { margin-left: unset !important; }
+  .sv-name.text-muted { display: inline-block !important; }
+  #processSavedViewsHost .sv-bar { margin-top: -2px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+  .sv-date-filter .input-group-addon { padding: 3px 8px; cursor: pointer; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
   <div class="col-lg-12">
     <div class="ibox ">
       <div class="ibox-title">
-        <h5><%= t('page.processos.header.active') %></h5>
+        <div id="processSavedViewsHost"></div>
         <div class="ibox-tools">
           <a type="button"
              class="btn btn-sm btn-primary"
@@ -74,46 +80,50 @@
             <thead>
 
               <!-- Filters row -->
-              <tr>
-                <th style="width:40px;"></th>
+              <tr id="processFiltersRow">
+                <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:40px;"></th>
                 <th></th>
 
-                <th>
+                <th data-field="ProjectName">
                   <input type="text" class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.process') %>" />
                 </th>
 
-                <th>
+                <th data-field="ContactName">
                   <input type="text" class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.primaryContact') %>" />
                 </th>
 
-                <th>
+                <th data-field="Phone">
                   <input type="text" class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.phone') %>" />
                 </th>
 
-                <th>
+                <th data-field="CompanyName">
                   <input type="text" class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.company') %>" />
                 </th>
 
-                <th>
+                <th data-field="CompletedNumber">
                   <input type="text" disabled class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.stage') %>" />
                 </th>
 
-                <th>
+                <th data-field="Task">
                   <input type="text" class="form-control input-sm"
                     placeholder="<%= t('page.processos.columns.invoice') %>" />
                 </th>
 
-                <th>
-                  <input type="text" class="form-control input-sm"
-                    placeholder="<%= t('page.processos.columns.date') %>" />
+                <th class="sv-date-filter" data-field="DateValue">
+                  <div class="input-group">
+                    <input id="processDateRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
+                    <span class="input-group-addon" id="processDateRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="processDateFromFilter" type="hidden" />
+                  <input id="processDateToFilter" type="hidden" />
                 </th>
 
-                <th>
+                <th data-field="ActionText">
                   <select id="actionFilter" class="form-control input-sm">
                     <option value="">
                       <%= t('page.processos.filters.all') %>
@@ -123,53 +133,53 @@
               </tr>
 
               <!-- Header row -->
-              <tr>
-                <th style="width:40px;">
+              <tr id="processHeaderRow">
+                <th class="sv-fixed-col" data-sort-key="__select" data-field="__select" data-sv-fixed="left" style="width:40px;">
                   <input id="chkSelectAll" type="checkbox"
                     title="<%= t('page.processos.toolbar.selected') %>">
                 </th>
 
-                <th class="sortable" data-sort-key="rowNumber">
+                <th class="sortable" data-sort-key="rowNumber" data-field="rowNumber">
                   <%= t('page.processos.columns.number') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="ProjectName">
+                <th class="sortable" data-sort-key="ProjectName" data-field="ProjectName">
                   <%= t('page.processos.columns.process') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="ContactName" style="width: 15%;">
+                <th class="sortable" data-sort-key="ContactName" data-field="ContactName" style="width: 15%;">
                   <%= t('page.processos.columns.primaryContact') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="Phone">
+                <th class="sortable" data-sort-key="Phone" data-field="Phone">
                   <%= t('page.processos.columns.phone') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="CompanyName" style="width: 27%;">
+                <th class="sortable" data-sort-key="CompanyName" data-field="CompanyName" style="width: 27%;">
                   <%= t('page.processos.columns.company') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="CompletedNumber">
+                <th class="sortable" data-sort-key="CompletedNumber" data-field="CompletedNumber">
                   <%= t('page.processos.columns.stage') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="Task">
+                <th class="sortable" data-sort-key="Task" data-field="Task">
                   <%= t('page.processos.columns.invoice') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="DateValue">
+                <th class="sortable" data-sort-key="DateValue" data-field="DateValue">
                   <%= t('page.processos.columns.date') %>
                   <span class="sort-indicator"></span>
                 </th>
 
-                <th class="sortable" data-sort-key="ActionText">
+                <th class="sortable" data-sort-key="ActionText" data-field="ActionText">
                   <%= t('page.processos.columns.status') %>
                   <span class="sort-indicator"></span>
                 </th>
@@ -205,6 +215,8 @@
 
 <!-- jQuery UI -->
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/daterangepicker/daterangepicker.js"></script>
 
 <!-- Jvectormap -->
 <script src="../Assets/inspinia/js/plugins/jvectormap/jquery-jvectormap-2.0.2.min.js"></script>
@@ -268,6 +280,7 @@
   let processes = [];
   const selectedProcessIds = new Set();
   const sortState = { key: null, dir: "asc" };
+  const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
 
   // -------------------- Utils --------------------
   function escapeHtml(value) {
@@ -301,6 +314,14 @@
     const d = new Date(value);
     const t = d.getTime();
     return Number.isNaN(t) ? 0 : t;
+  }
+
+  function parsePtDateToTs(value) {
+    const raw = String(value || "").trim();
+    const m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return NaN;
+    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+    return d.getTime();
   }
 
   function pickIdFromApi(obj) {
@@ -750,7 +771,7 @@
 
   // -------------------- Filters --------------------
   function installColumnFilters() {
-    $("#process thead input").on("keyup change", function () {
+    $("#process thead input:not([type='hidden'])").on("keyup change", function () {
       applyCurrentFilters();
     });
 
@@ -759,12 +780,58 @@
     });
   }
 
+  function initDateRangeFilter() {
+    const $range = $("#processDateRangeFilter");
+    const $from = $("#processDateFromFilter");
+    const $to = $("#processDateToFilter");
+    if (!$range.length) return;
+
+    const hasDateRangePicker = !!($.fn.daterangepicker && window.moment);
+    if (hasDateRangePicker) {
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").remove();
+
+      $range.daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+          format: "DD/MM/YYYY",
+          cancelLabel: "<%= t('page.layout.savedViews.clearLabel') %>",
+          applyLabel: "<%= t('page.layout.savedViews.applyLabel') %>",
+          fromLabel: "<%= t('page.layout.savedViews.fromLabel') %>",
+          toLabel: "<%= t('page.layout.savedViews.toLabel') %>",
+          daysOfWeek: ["Do", "Se", "Te", "Qa", "Qi", "Se", "Sa"],
+          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        }
+      });
+
+      $range.off("apply.daterangepicker.proc").on("apply.daterangepicker.proc", function (_ev, picker) {
+        $from.val(picker.startDate.format("DD/MM/YYYY"));
+        $to.val(picker.endDate.format("DD/MM/YYYY"));
+        $range.val(`${$from.val()} - ${$to.val()}`);
+        applyCurrentFilters();
+      });
+
+      $range.off("cancel.daterangepicker.proc").on("cancel.daterangepicker.proc", function () {
+        $from.val("");
+        $to.val("");
+        $range.val("");
+        applyCurrentFilters();
+      });
+    }
+
+    $("#processDateRangeBtn").off("click.proc").on("click.proc", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
+      else $range.focus();
+    });
+  }
+
   function applyCurrentFilters() {
     const table = $("#process");
     const actionSelectedRaw = $("#actionFilter").val();
     const actionSelected = actionSelectedRaw !== "" && actionSelectedRaw != null ? Number(actionSelectedRaw) : null;
 
-    const filterInputs = $("#process thead tr:nth-child(1) input");
+    const filterInputs = $("#process thead tr:nth-child(1) input:not([type='hidden'])");
 
     table.find("tbody tr").each(function () {
       const $row = $(this);
@@ -777,6 +844,16 @@
         const map = [2, 3, 4, 5, 6, 7, 8];
         const tdIndex = map[i];
 
+        if (i === 6) {
+          const fromTs = parsePtDateToTs($("#processDateFromFilter").val());
+          const toTs = parsePtDateToTs($("#processDateToFilter").val());
+          const rowDateTs = parsePtDateToTs(String($row.find("td").eq(8).text() || "").trim());
+
+          if (!Number.isNaN(fromTs) && (Number.isNaN(rowDateTs) || rowDateTs < fromTs)) visible = false;
+          if (!Number.isNaN(toTs) && (Number.isNaN(rowDateTs) || rowDateTs > toTs)) visible = false;
+          return;
+        }
+
         const cellText = String($row.find("td").eq(tdIndex).text() || "").toLowerCase();
         if (cellText.indexOf(value) === -1) visible = false;
       });
@@ -788,6 +865,152 @@
 
       $row.toggle(visible);
     });
+  }
+
+  function getAllColumnKeys() {
+    return $("#processHeaderRow th.sortable")
+      .map(function () { return String($(this).data("sort-key") || ""); })
+      .get()
+      .filter(k => k.length > 0);
+  }
+
+  function tryTriggerAny(selectors) {
+    for (const s of selectors) {
+      const el = $(s);
+      if (el.length) { el.trigger("click"); return true; }
+    }
+    return false;
+  }
+
+  function ensureSavedViewsExtraButtons() {
+    const host = $("#processSavedViewsHost");
+    if (!host.length) return;
+    const actions = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
+
+    if (!$("#btnSaveCurrentProcessView").length) {
+      actions.append(`<button id="btnSaveCurrentProcessView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="<%= t('page.layout.savedViews.saveCurrentTitle') %>"><i class="fa fa-check"></i> <%= t('page.layout.savedViews.saveLabel') %></button>`);
+    }
+    if (!$("#btnDeleteCurrentProcessView").length) {
+      actions.append(`<button id="btnDeleteCurrentProcessView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left:6px; display:none;" title="<%= t('page.layout.savedViews.deleteCurrentTitle') %>"><i class="fa fa-trash"></i> <%= t('page.layout.savedViews.deleteLabel') %></button>`);
+    }
+
+    if (savedViewsState.viewId) $("#btnDeleteCurrentProcessView").show();
+    else $("#btnDeleteCurrentProcessView").hide();
+
+    $("#btnSaveCurrentProcessView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const did = tryTriggerAny(["#sv_btnSave", "[data-action='save']", ".sv-btn-save"]);
+      if (did) return;
+      if (savedViewsState.viewId) {
+        (async () => {
+          try {
+            const payload = {
+              name: savedViewsState.name || undefined,
+              definition_json: {
+                columns: savedViewsState.columns,
+                columns_order: savedViewsState.columns_order,
+                filters: captureFiltersForSavedView(),
+                sort: sortState.key ? [{ field: sortState.key, dir: sortState.dir }] : []
+              }
+            };
+            await fetch(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify(payload)
+            });
+            if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+          } catch (err) { console.error(err); }
+        })();
+        return;
+      }
+      tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
+    });
+
+    $("#btnDeleteCurrentProcessView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      if (!savedViewsState.viewId) return;
+      if (!confirm("<%= t('page.layout.savedViews.deleteCurrentConfirm') %>")) return;
+      const did = tryTriggerAny(["#sv_btnDelete", "[data-action='delete']", ".sv-btn-delete"]);
+      if (did) return;
+      (async () => {
+        try {
+          await fetch(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, { method: "DELETE", headers: { Accept: "application/json" } });
+          savedViewsState.viewId = null;
+          savedViewsState.name = "";
+          if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+        } catch (err) { console.error(err); }
+      })();
+    });
+  }
+
+  function captureFiltersForSavedView() {
+    const filters = [];
+    const map = ["ProjectName", "ContactName", "Phone", "CompanyName", "CompletedNumber", "Task", "DateValue"];
+    $("#processFiltersRow input").each(function (idx) {
+      const v = String($(this).val() || "").trim();
+      const field = map[idx];
+      if (!field || !v) return;
+      if (field === "DateValue") return;
+      filters.push({ field, op: "contains", value: v });
+    });
+
+    const action = String($("#actionFilter").val() || "").trim();
+    if (action) filters.push({ field: "ActionText", op: "eq", value: action });
+
+    const from = String($("#processDateFromFilter").val() || "").trim();
+    const to = String($("#processDateToFilter").val() || "").trim();
+    if (from) filters.push({ field: "DateValue", op: "gte", value: from });
+    if (to) filters.push({ field: "DateValue", op: "lte", value: to });
+
+    return filters;
+  }
+
+  function applyFiltersFromSavedView(def) {
+    $("#processFiltersRow input").val("");
+    $("#actionFilter").val("");
+    $("#processDateFromFilter,#processDateToFilter,#processDateRangeFilter").val("");
+
+    (def.filters || []).forEach(f => {
+      const field = String(f.field || "");
+      const value = String(f.value || "");
+      const op = String(f.op || "").toLowerCase();
+      if (!value) return;
+
+      if (field === "ProjectName") $("#processFiltersRow input").eq(0).val(value);
+      else if (field === "ContactName") $("#processFiltersRow input").eq(1).val(value);
+      else if (field === "Phone") $("#processFiltersRow input").eq(2).val(value);
+      else if (field === "CompanyName") $("#processFiltersRow input").eq(3).val(value);
+      else if (field === "CompletedNumber") $("#processFiltersRow input").eq(4).val(value);
+      else if (field === "Task") $("#processFiltersRow input").eq(5).val(value);
+      else if (field === "ActionText") $("#actionFilter").val(value);
+      else if (field === "DateValue" && op === "gte") $("#processDateFromFilter").val(value);
+      else if (field === "DateValue" && op === "lte") $("#processDateToFilter").val(value);
+    });
+
+    const from = $("#processDateFromFilter").val();
+    const to = $("#processDateToFilter").val();
+    if (from && to) $("#processDateRangeFilter").val(`${from} - ${to}`);
+    else if (from) $("#processDateRangeFilter").val(from);
+    else if (to) $("#processDateRangeFilter").val(to);
+  }
+
+  function applySortFromSavedView(def) {
+    const first = Array.isArray(def.sort) ? def.sort[0] : null;
+    const key = first?.field ? String(first.field) : "";
+    const dir = String(first?.dir || "asc").toLowerCase() === "desc" ? "desc" : "asc";
+    if (!key) {
+      sortState.key = null;
+      sortState.dir = "asc";
+      updateSortIndicators();
+      renderProcessTable(processes);
+      applyCurrentFilters();
+      return;
+    }
+    sortState.key = key;
+    sortState.dir = dir;
+    updateSortIndicators();
+    renderProcessTable(processes);
+    applyCurrentFilters();
   }
 
   function fillStatusFilter() {
@@ -839,9 +1062,60 @@
     bindSorting();
     fillStatusFilter();
     installColumnFilters();
-    loadProcesses();
+    initDateRangeFilter();
+
+    (async function initSavedViews() {
+      await loadProcesses();
+
+      const allKeys = getAllColumnKeys();
+      savedViewsState.columns = allKeys.slice();
+      savedViewsState.columns_order = allKeys.slice();
+
+      await window.SavedViewsGrid.init({
+        entityName: "processes",
+        hostSelector: "#processSavedViewsHost",
+        tableSelector: "#process",
+        headerRowSelector: "#process thead tr:eq(1)",
+        filtersRowSelector: "#process thead tr:eq(0)",
+        getAllColumnKeys: () => getAllColumnKeys(),
+        fallbackViewName: "",
+        includeFallbackOption: false,
+        fallbackDefinition: { columns: allKeys.slice(), columns_order: allKeys.slice(), filters: [], sort: [] },
+        getCurrentState: () => {
+          const domOrder = $("#processHeaderRow th.sortable").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          const visible = $("#processHeaderRow th.sortable:visible").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          savedViewsState.columns_order = domOrder.length ? domOrder : savedViewsState.columns_order;
+          savedViewsState.columns = visible.length ? visible : savedViewsState.columns;
+          savedViewsState.filters = captureFiltersForSavedView();
+          savedViewsState.sort = sortState.key ? [{ field: sortState.key, dir: sortState.dir }] : [];
+          return Object.assign({}, savedViewsState);
+        },
+        applyState: ({ viewId, name, definition, _fromColumnsModal }) => {
+          savedViewsState.viewId = viewId;
+          savedViewsState.name = name || "";
+          if (_fromColumnsModal === true) {
+            initDateRangeFilter();
+            return;
+          }
+          applyFiltersFromSavedView(definition || {});
+          applySortFromSavedView(definition || {});
+          initDateRangeFilter();
+          ensureSavedViewsExtraButtons();
+        },
+        onAfterApply: () => {
+          initDateRangeFilter();
+          applyCurrentFilters();
+          updateSortIndicators();
+          ensureSavedViewsExtraButtons();
+        }
+      });
+      setTimeout(ensureSavedViewsExtraButtons, 120);
+    })().catch((err) => {
+      console.error("init saved views (processos) error:", err);
+    });
   });
 </script>
+
 
 
 

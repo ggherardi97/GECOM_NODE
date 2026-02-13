@@ -459,7 +459,7 @@
       companiesLoading = true;
       try {
         // tenta padrões comuns do backend
-        const data = await apiGet("/api/companies");
+        const data = await apiGet("/api/companies?fields=summary");
         const list =
           Array.isArray(data) ? data :
           (Array.isArray(data?.data) ? data.data :

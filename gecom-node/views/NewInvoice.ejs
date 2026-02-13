@@ -636,7 +636,7 @@
     // Load lists
     // =========================
     async function loadCompanies() {
-      const data = await apiGet("/api/companies");
+      const data = await apiGet("/api/companies?fields=summary");
       const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
       companiesCache = list
         .map((c) => ({

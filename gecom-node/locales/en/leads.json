@@ -1,0 +1,113 @@
+{
+  "page": {
+    "leads": {
+      "common": {
+        "loading": "Loading...",
+        "clear": "Clear",
+        "apply": "Apply",
+        "from": "From",
+        "to": "To",
+        "cancel": "Cancel",
+        "save": "Save",
+        "withoutName": "No name"
+      },
+      "messages": {
+        "loadError": "Failed to load leads.",
+        "saved": "Lead saved successfully.",
+        "saveError": "Failed to save lead.",
+        "invalidLead": "Invalid lead.",
+        "stageUpdated": "Stage updated successfully.",
+        "stageUpdateError": "Failed to update stage.",
+        "statusUpdated": "Status updated successfully.",
+        "statusUpdateError": "Failed to update status.",
+        "savedViewsError": "Failed to load saved views."
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Name, email, phone, company...",
+        "owner": "Owner",
+        "allOwners": "All owners",
+        "status": "Status",
+        "allStatus": "All status",
+        "source": "Source",
+        "allSources": "All sources",
+        "createdRange": "Created at (range)",
+        "clear": "Clear filters"
+      },
+      "columns": {
+        "name": "Name",
+        "company": "Company",
+        "contact": "Contact",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "stage": "Stage",
+        "owner": "Owner",
+        "source": "Source",
+        "value": "Estimated value",
+        "currency": "Currency",
+        "nextActionAt": "Next action",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "win": "Win",
+        "lose": "Lose"
+      },
+      "pipeline": {
+        "title": "Leads Pipeline",
+        "newLead": "New Lead",
+        "goList": "Go to List",
+        "emptyColumn": "No leads in this stage"
+      },
+      "list": {
+        "title": "Leads - List",
+        "newLead": "New Lead",
+        "goPipeline": "Go to Pipeline",
+        "noResults": "No leads found.",
+        "prev": "Previous",
+        "next": "Next"
+      },
+      "form": {
+        "title": "Lead Form",
+        "newTitle": "New Lead",
+        "editTitle": "Edit Lead",
+        "save": "Save",
+        "saving": "Saving...",
+        "sectionBasic": "Basic information",
+        "sectionQualification": "Qualification",
+        "sectionNotes": "Notes",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "notes": "Notes",
+        "selectOwner": "Select"
+      },
+      "validation": {
+        "nameRequired": "Lead name is required.",
+        "stageRequired": "Stage is required.",
+        "statusRequired": "Status is required.",
+        "emailInvalid": "Provide a valid email.",
+        "phoneInvalid": "Provide a valid phone."
+      },
+      "detail": {
+        "title": "Lead Details",
+        "back": "Back",
+        "mainInfo": "Main info",
+        "timeline": "Timeline",
+        "moveStage": "Move to stage",
+        "move": "Move",
+        "createdAt": "Created at",
+        "updatedAt": "Updated at",
+        "activity": "Activity",
+        "lostReasonPrompt": "Provide reason for loss:"
+      },
+      "modal": {
+        "statusTitle": "Update lead status",
+        "winTitle": "Mark lead as won",
+        "loseTitle": "Mark lead as lost",
+        "reason": "Reason",
+        "notes": "Notes"
+      }
+    }
+  }
+}

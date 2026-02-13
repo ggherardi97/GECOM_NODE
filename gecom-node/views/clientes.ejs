@@ -1,6 +1,14 @@
+<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
 <style>
   .ibox-title { padding: 15px 90px 20px 15px; }
   .clicker { cursor: pointer; }
+  .sv-actions { margin-left: unset !important; }
+  .sv-name.text-muted { display: inline-block !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #clientsSavedViewsHost .sv-bar { margin-top: -2px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+  .sv-date-filter .input-group-addon { padding: 3px 8px; cursor: pointer; }
 
   /* Bulk actions bar */
   .bulk-actions {
@@ -24,31 +32,21 @@
   <div class="row">
   <div class="col-lg-12">
     <div class="ibox">
-      <div class="ibox-title">
-        <h5><%= t('page.clients.pageTitle') %></th></h5>
-        <div class="ibox-tools">
-          <!-- ferramentas removidas -->
+      <div class="ibox-title" style="display: flex;padding-right: 0px !important;">
+        <div class="col-lg-11">
+        <div id="clientsSavedViewsHost"></div>
+        </div>
+        <div class="col-lg-1">
+          <div class="">
+            <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;"><%= t('page.clients.toolbar.newClient') %></a>
+          </div>
         </div>
       </div>
 
       <div class="ibox-content">
         <div class="row">
-          <div class="col-sm-3">
-            <div class="input-group mb-3">
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                id="searchinput"
-                placeholder="<%= t('page.clients.placeholders.searchCompanyName') %>">
-              <div class="input-group-append">
-                <button class="btn btn-sm btn-primary" type="button"><%= t('page.clients.toolbar.search') %></button>
-              </div>
-            </div>
-          </div>
 
-          <div class="col-sm-9 m-b-xs">
-            <a type="button" name="btn_act_new" class="btn btn-sm btn-primary" href="NewClient" style="float: inline-end;"><%= t('page.clients.toolbar.newClient') %></a>
-          </div>
+          
         </div>
 
         <!-- Bulk actions (shown only when selection exists) -->
@@ -65,19 +63,37 @@
         <div class="table-responsive">
           <table class="table table-striped" id="clientes">
             <thead>
-              <tr>
+              <tr id="clientsFiltersRow">
+                <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:40px;"></th>
+                <th data-field="rowNumber"></th>
+                <th data-field="CompanyName"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.name') %>" /></th>
+                <th data-field="ContactName"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.contatoPrincipal') %>" /></th>
+                <th data-field="Phone"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.phone') %>" /></th>
+                <th data-field="Sector"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.setor') %>" /></th>
+                <th data-field="NumberOfInvoices"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.ninvoices') %>" /></th>
+                <th class="sv-date-filter" data-field="CreatedOn">
+                  <div class="input-group">
+                    <input id="clientsCreatedRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
+                    <span class="input-group-addon" id="clientsCreatedRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="clientsCreatedFromFilter" type="hidden" />
+                  <input id="clientsCreatedToFilter" type="hidden" />
+                </th>
+                <th data-field="CompanyNumber"><input type="text" class="form-control input-sm" placeholder="<%= t('page.clients.columns.cnpj') %>" /></th>
+              </tr>
+              <tr id="clientsHeaderRow">
                 <!-- NEW: selection column -->
-                <th style="width:40px;">
+                <th class="sv-fixed-col" data-sort-key="__select" data-field="__select" data-sv-fixed="left" style="width:40px;">
                   <input id="chkSelectAll" type="checkbox" title="<%= t('page.clients.bulk.selectAll') %>">
                 </th>
-                <th>#</th>
-                <th><%= t('page.clients.columns.name') %></th>
-                <th><%= t('page.clients.columns.contatoPrincipal') %></th>
-                <th><%= t('page.clients.columns.phone') %></th>
-                <th><%= t('page.clients.columns.setor') %></th>
-                <th><%= t('page.clients.columns.ninvoices') %></th>
-                <th><%= t('page.clients.columns.createdAt') %></th>
-                <th><%= t('page.clients.columns.cnpj') %></th>
+                <th class="sortable" data-sort-key="rowNumber" data-field="rowNumber"># <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompanyName" data-field="CompanyName"><%= t('page.clients.columns.name') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="ContactName" data-field="ContactName"><%= t('page.clients.columns.contatoPrincipal') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Phone" data-field="Phone"><%= t('page.clients.columns.phone') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="Sector" data-field="Sector"><%= t('page.clients.columns.setor') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="NumberOfInvoices" data-field="NumberOfInvoices"><%= t('page.clients.columns.ninvoices') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CreatedOn" data-field="CreatedOn"><%= t('page.clients.columns.createdAt') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="CompanyNumber" data-field="CompanyNumber"><%= t('page.clients.columns.cnpj') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
             <tbody id="lines"></tbody>
@@ -112,11 +128,26 @@
 <script src="../Assets/inspinia/js/demo/sparkline-demo.js"></script>
 
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/daterangepicker/daterangepicker.js"></script>
 <% %>
 
 <script>
   // -------------------- Global cache --------------------
   let clients = [];
+  let filteredClients = [];
+  const sortState = { key: null, dir: "asc" };
+  const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
+  const filterState = {
+    CompanyName: "",
+    ContactName: "",
+    Phone: "",
+    Sector: "",
+    NumberOfInvoices: "",
+    CompanyNumber: "",
+    CreatedOnFrom: "",
+    CreatedOnTo: "",
+  };
 
   // Cache userId -> full_name
   const userNameCache = new Map();
@@ -140,6 +171,22 @@
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return String(value);
     return d.toLocaleDateString("pt-BR");
+  }
+
+  function parsePtDateToTs(value, endOfDay) {
+    const raw = String(value || "").trim();
+    const m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return NaN;
+    const h = endOfDay ? 23 : 0;
+    const min = endOfDay ? 59 : 0;
+    const sec = endOfDay ? 59 : 0;
+    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), h, min, sec, endOfDay ? 999 : 0);
+    return d.getTime();
+  }
+
+  function toComparable(v) {
+    if (v == null) return "";
+    return String(v).toLowerCase();
   }
 
   function isNonEmptyString(value) {
@@ -172,7 +219,7 @@
 
   // -------------------- API --------------------
   async function fetchCompanies() {
-    const resp = await fetch("/api/companies", {
+    const resp = await fetch("/api/companies?fields=summary", {
       method: "GET",
       headers: { Accept: "application/json" },
     });
@@ -248,6 +295,7 @@
 
     return {
       Id: String(id),
+      rowNumber: index + 1,
       CompanyName: company.company_name ?? "",
       ContactName: "",
       Phone: company.phone ?? "",
@@ -261,6 +309,71 @@
     };
   }
 
+  function updateSortIndicators() {
+    document.querySelectorAll("#clientsHeaderRow th.sortable").forEach((th) => {
+      const indicator = th.querySelector(".sort-indicator");
+      if (!indicator) return;
+      const key = String(th.getAttribute("data-sort-key") || "");
+      if (sortState.key === key) indicator.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      else indicator.textContent = "";
+    });
+  }
+
+  function sortClients(list) {
+    if (!sortState.key) return [...list];
+    const key = sortState.key;
+    const dir = sortState.dir === "desc" ? -1 : 1;
+    return [...list].sort((a, b) => {
+      let av = a[key];
+      let bv = b[key];
+      if (key === "NumberOfInvoices" || key === "rowNumber") {
+        av = Number(av || 0);
+        bv = Number(bv || 0);
+      } else if (key === "CreatedOn") {
+        av = new Date(a.CreatedOn || 0).getTime();
+        bv = new Date(b.CreatedOn || 0).getTime();
+      } else {
+        av = toComparable(av);
+        bv = toComparable(bv);
+      }
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function applyFiltersAndSort() {
+    const contains = (value, term) => {
+      const v = toComparable(value);
+      const t = toComparable(term).trim();
+      if (!t) return true;
+      return v.includes(t);
+    };
+
+    const fromTs = parsePtDateToTs(filterState.CreatedOnFrom, false);
+    const toTs = parsePtDateToTs(filterState.CreatedOnTo, true);
+
+    filteredClients = clients.filter((c) => {
+      const createdTs = c.CreatedOn ? new Date(c.CreatedOn).getTime() : NaN;
+      const dateOk =
+        (Number.isNaN(fromTs) || (!Number.isNaN(createdTs) && createdTs >= fromTs)) &&
+        (Number.isNaN(toTs) || (!Number.isNaN(createdTs) && createdTs <= toTs));
+
+      return (
+        contains(c.CompanyName, filterState.CompanyName) &&
+        contains(c.ContactName, filterState.ContactName) &&
+        contains(c.Phone, filterState.Phone) &&
+        contains(c.Sector, filterState.Sector) &&
+        contains(c.NumberOfInvoices, filterState.NumberOfInvoices) &&
+        contains(c.CompanyNumber, filterState.CompanyNumber) &&
+        dateOk
+      );
+    });
+
+    renderCompaniesTable(sortClients(filteredClients));
+    updateSortIndicators();
+  }
+
   // -------------------- Render --------------------
   function renderCompaniesTable(list) {
     const tbody = document.querySelector("#lines");
@@ -270,6 +383,7 @@
 
     if (!list || list.length === 0) {
       tbody.innerHTML = `<tr><td colspan="9"><%= t('page.clients.messages.noneFound') %></td></tr>`;
+      updateBulkUI();
       return;
     }
 
@@ -343,7 +457,7 @@
         c.ContactName = isNonEmptyString(name) ? name : (c.ContactName || "");
       }
 
-      renderCompaniesTable(clients);
+      applyFiltersAndSort();
     } catch (err) {
       console.error("loadCompanies error:", err);
       const tbody = document.querySelector("#lines");
@@ -470,7 +584,7 @@
       removedIds.forEach((id) => selectedCompanyIds.delete(String(id)));
 
       // Re-render with remaining
-      renderCompaniesTable(clients);
+      applyFiltersAndSort();
     } catch (err) {
       console.error("executeBulkDelete error:", err);
       alert(err?.message || "<%= t('page.clients.messages.bulkUnexpected') %>");
@@ -485,8 +599,7 @@
 
   function clearSelection() {
     selectedCompanyIds.clear();
-    document.querySelectorAll("input.company-check").forEach((x) => (x.checked = false));
-    updateBulkUI();
+    applyFiltersAndSort();
   }
 
   // -------------------- Events --------------------
@@ -518,6 +631,209 @@
     if (btnClear) btnClear.addEventListener("click", clearSelection);
   }
 
+  function bindSorting() {
+    document.querySelectorAll("#clientsHeaderRow th.sortable").forEach((th) => {
+      th.addEventListener("click", function () {
+        const key = String(this.getAttribute("data-sort-key") || "");
+        if (!key) return;
+        if (sortState.key === key) sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+        else { sortState.key = key; sortState.dir = "asc"; }
+        applyFiltersAndSort();
+      });
+    });
+  }
+
+  function bindColumnFilters() {
+    const map = ["CompanyName", "ContactName", "Phone", "Sector", "NumberOfInvoices", "CreatedOnRange", "CompanyNumber"];
+    document.querySelectorAll("#clientsFiltersRow input:not([type='hidden'])").forEach((input, idx) => {
+      input.addEventListener("input", function () {
+        const field = map[idx];
+        if (!field || field === "CreatedOnRange") return;
+        filterState[field] = String(this.value || "");
+        applyFiltersAndSort();
+      });
+    });
+  }
+
+  function initCreatedDateRange() {
+    const $range = $("#clientsCreatedRangeFilter");
+    const $from = $("#clientsCreatedFromFilter");
+    const $to = $("#clientsCreatedToFilter");
+    if (!$range.length) return;
+
+    if ($range.data("daterangepicker")) $range.data("daterangepicker").remove();
+    if ($.fn.daterangepicker && window.moment) {
+      $range.daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+          format: "DD/MM/YYYY",
+          cancelLabel: "<%= t('page.layout.savedViews.clearLabel') %>",
+          applyLabel: "<%= t('page.layout.savedViews.applyLabel') %>",
+          fromLabel: "<%= t('page.layout.savedViews.fromLabel') %>",
+          toLabel: "<%= t('page.layout.savedViews.toLabel') %>",
+          daysOfWeek: ["Do", "Se", "Te", "Qa", "Qi", "Se", "Sa"],
+          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        }
+      });
+
+      $range.off("apply.daterangepicker.cli").on("apply.daterangepicker.cli", function (_ev, picker) {
+        const from = picker.startDate.format("DD/MM/YYYY");
+        const to = picker.endDate.format("DD/MM/YYYY");
+        $from.val(from);
+        $to.val(to);
+        $range.val(`${from} - ${to}`);
+        filterState.CreatedOnFrom = from;
+        filterState.CreatedOnTo = to;
+        applyFiltersAndSort();
+      });
+
+      $range.off("cancel.daterangepicker.cli").on("cancel.daterangepicker.cli", function () {
+        $from.val("");
+        $to.val("");
+        $range.val("");
+        filterState.CreatedOnFrom = "";
+        filterState.CreatedOnTo = "";
+        applyFiltersAndSort();
+      });
+    }
+
+    $("#clientsCreatedRangeBtn").off("click.cli").on("click.cli", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
+      else $range.focus();
+    });
+  }
+
+  function getAllColumnKeys() {
+    return $("#clientsHeaderRow th.sortable").map(function () {
+      return String($(this).data("sort-key") || "");
+    }).get().filter(Boolean);
+  }
+
+  function captureFiltersForSavedView() {
+    const filters = [];
+    Object.entries(filterState).forEach(([k, v]) => {
+      const value = String(v || "").trim();
+      if (!value) return;
+      if (k === "CreatedOnFrom") filters.push({ field: "CreatedOn", op: "gte", value });
+      else if (k === "CreatedOnTo") filters.push({ field: "CreatedOn", op: "lte", value });
+      else filters.push({ field: k, op: "contains", value });
+    });
+    return filters;
+  }
+
+  function applyFiltersFromSavedView(def) {
+    Object.keys(filterState).forEach((k) => { filterState[k] = ""; });
+    $("#clientsFiltersRow input:not([type='hidden'])").val("");
+    $("#clientsCreatedFromFilter,#clientsCreatedToFilter,#clientsCreatedRangeFilter").val("");
+
+    (def.filters || []).forEach((f) => {
+      const field = String(f.field || "");
+      const value = String(f.value || "");
+      const op = String(f.op || "").toLowerCase();
+      if (!value) return;
+      if (field === "CreatedOn" && op === "gte") filterState.CreatedOnFrom = value;
+      else if (field === "CreatedOn" && op === "lte") filterState.CreatedOnTo = value;
+      else if (Object.prototype.hasOwnProperty.call(filterState, field)) filterState[field] = value;
+    });
+
+    const map = ["CompanyName", "ContactName", "Phone", "Sector", "NumberOfInvoices", "CreatedOnRange", "CompanyNumber"];
+    $("#clientsFiltersRow input:not([type='hidden'])").each(function (idx) {
+      const field = map[idx];
+      if (!field || field === "CreatedOnRange") return;
+      this.value = filterState[field] || "";
+    });
+
+    $("#clientsCreatedFromFilter").val(filterState.CreatedOnFrom || "");
+    $("#clientsCreatedToFilter").val(filterState.CreatedOnTo || "");
+    if (filterState.CreatedOnFrom && filterState.CreatedOnTo) {
+      $("#clientsCreatedRangeFilter").val(`${filterState.CreatedOnFrom} - ${filterState.CreatedOnTo}`);
+    }
+  }
+
+  function applySortFromSavedView(def) {
+    const first = Array.isArray(def.sort) ? def.sort[0] : null;
+    const key = String(first?.field || "").trim();
+    const dir = String(first?.dir || "asc").toLowerCase() === "desc" ? "desc" : "asc";
+    if (!key) {
+      sortState.key = null;
+      sortState.dir = "asc";
+    } else {
+      sortState.key = key;
+      sortState.dir = dir;
+    }
+  }
+
+  function tryTriggerAny(selectors) {
+    for (const s of selectors) {
+      const el = $(s);
+      if (el.length) { el.trigger("click"); return true; }
+    }
+    return false;
+  }
+
+  function ensureSavedViewsExtraButtons() {
+    const host = $("#clientsSavedViewsHost");
+    if (!host.length) return;
+    const actions = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
+
+    if (!$("#btnSaveCurrentClientsView").length) {
+      actions.append(`<button id="btnSaveCurrentClientsView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="<%= t('page.layout.savedViews.saveCurrentTitle') %>"><i class="fa fa-check"></i> <%= t('page.layout.savedViews.saveLabel') %></button>`);
+    }
+    if (!$("#btnDeleteCurrentClientsView").length) {
+      actions.append(`<button id="btnDeleteCurrentClientsView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left:6px; display:none;" title="<%= t('page.layout.savedViews.deleteCurrentTitle') %>"><i class="fa fa-trash"></i> <%= t('page.layout.savedViews.deleteLabel') %></button>`);
+    }
+
+    if (savedViewsState.viewId) $("#btnDeleteCurrentClientsView").show();
+    else $("#btnDeleteCurrentClientsView").hide();
+
+    $("#btnSaveCurrentClientsView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const did = tryTriggerAny(["#sv_btnSave", "[data-action='save']", ".sv-btn-save"]);
+      if (did) return;
+      if (savedViewsState.viewId) {
+        (async () => {
+          try {
+            const payload = {
+              name: savedViewsState.name || undefined,
+              definition_json: {
+                columns: savedViewsState.columns,
+                columns_order: savedViewsState.columns_order,
+                filters: captureFiltersForSavedView(),
+                sort: sortState.key ? [{ field: sortState.key, dir: sortState.dir }] : []
+              }
+            };
+            await fetch(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify(payload)
+            });
+            if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+          } catch (err) { console.error(err); }
+        })();
+        return;
+      }
+      tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
+    });
+
+    $("#btnDeleteCurrentClientsView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      if (!savedViewsState.viewId) return;
+      if (!confirm("<%= t('page.layout.savedViews.deleteCurrentConfirm') %>")) return;
+      const did = tryTriggerAny(["#sv_btnDelete", "[data-action='delete']", ".sv-btn-delete"]);
+      if (did) return;
+      (async () => {
+        try {
+          await fetch(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, { method: "DELETE", headers: { Accept: "application/json" } });
+          savedViewsState.viewId = null;
+          savedViewsState.name = "";
+          if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+        } catch (err) { console.error(err); }
+      })();
+    });
+  }
+
   // -------------------- Init --------------------
   $(document).ready(function () {
     if (!window.Auth || !window.Auth.requireLogin()) return;
@@ -532,14 +848,67 @@
     $("#subpageName").text("<%= t('page.clients.pageTitle') %>");
 
     bindBulkEvents();
-    loadCompanies();
+    bindSorting();
+    bindColumnFilters();
+    initCreatedDateRange();
 
     $("#searchinput").on("keyup change", function () {
-      const value = $(this).val().toLowerCase();
-      $("#clientes tbody tr").filter(function () {
-        // filter by company name (3rd column now, because we added checkbox + #)
-        $(this).toggle($(this).find("td").eq(2).text().toLowerCase().indexOf(value) > -1);
+      const value = String($(this).val() || "");
+      filterState.CompanyName = value;
+      const firstFilterInput = $("#clientsFiltersRow input:not([type='hidden'])").eq(0);
+      if (firstFilterInput.length) firstFilterInput.val(value);
+      applyFiltersAndSort();
+    });
+
+    (async function initClientsSavedViews() {
+      await loadCompanies();
+
+      const allKeys = getAllColumnKeys();
+      savedViewsState.columns = allKeys.slice();
+      savedViewsState.columns_order = allKeys.slice();
+
+      await window.SavedViewsGrid.init({
+        entityName: "clients",
+        hostSelector: "#clientsSavedViewsHost",
+        tableSelector: "#clientes",
+        headerRowSelector: "#clientes thead tr:eq(1)",
+        filtersRowSelector: "#clientes thead tr:eq(0)",
+        getAllColumnKeys: () => getAllColumnKeys(),
+        fallbackViewName: "",
+        includeFallbackOption: false,
+        fallbackDefinition: { columns: allKeys.slice(), columns_order: allKeys.slice(), filters: [], sort: [] },
+        getCurrentState: () => {
+          const domOrder = $("#clientsHeaderRow th.sortable").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          const visible = $("#clientsHeaderRow th.sortable:visible").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          savedViewsState.columns_order = domOrder.length ? domOrder : savedViewsState.columns_order;
+          savedViewsState.columns = visible.length ? visible : savedViewsState.columns;
+          savedViewsState.filters = captureFiltersForSavedView();
+          savedViewsState.sort = sortState.key ? [{ field: sortState.key, dir: sortState.dir }] : [];
+          return Object.assign({}, savedViewsState);
+        },
+        applyState: ({ viewId, name, definition, _fromColumnsModal }) => {
+          savedViewsState.viewId = viewId;
+          savedViewsState.name = name || "";
+          if (_fromColumnsModal === true) {
+            initCreatedDateRange();
+            return;
+          }
+          applyFiltersFromSavedView(definition || {});
+          applySortFromSavedView(definition || {});
+          initCreatedDateRange();
+          applyFiltersAndSort();
+          ensureSavedViewsExtraButtons();
+        },
+        onAfterApply: () => {
+          initCreatedDateRange();
+          applyFiltersAndSort();
+          ensureSavedViewsExtraButtons();
+        }
       });
+      setTimeout(ensureSavedViewsExtraButtons, 120);
+    })().catch((err) => {
+      console.error("init clients saved views error:", err);
     });
   });
 </script>
+

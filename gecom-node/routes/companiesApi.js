@@ -44,8 +44,14 @@ router.get("/companies", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const url = new URL(`${baseUrl}/companies`);
+    for (const [key, value] of Object.entries(req.query ?? {})) {
+      if (value == null) continue;
+      if (Array.isArray(value)) value.forEach((v) => url.searchParams.append(key, String(v)));
+      else url.searchParams.set(key, String(value));
+    }
 
-    const response = await fetch(`${baseUrl}/companies`, {
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         Accept: "application/json",

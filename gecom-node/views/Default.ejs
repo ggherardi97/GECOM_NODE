@@ -69,6 +69,7 @@
   .dash-mini-list .feed-element { padding: 10px 0; border-bottom: 1px solid #e7eaec; }
   .dash-mini-list .feed-element:last-child { border-bottom: none; }
   .dash-mini-list .media-body { padding-left: 0; }
+  .dash-mini-list .feed-element.is-read { background: #eef9f5; border-radius: 4px; padding: 10px 8px; }
   .inspinia-timeline .timeline-item .date { width: 110px; }
   .inspinia-timeline .timeline-item .content { width: calc(100% - 110px); }
 
@@ -357,25 +358,7 @@
             </div>
             <div class="ibox-content dash-mini-list" id="notificationsList">
               <div class="feed-element">
-                <div class="media-body">
-                  Bem-vindo ao seu dashboard! Em breve teremos notificações reais aqui.
-                  <br />
-                  <small class="dash-muted">Hoje</small>
-                </div>
-              </div>
-              <div class="feed-element">
-                <div class="media-body">
-                  Dica: clique em um processo para abrir os detalhes.
-                  <br />
-                  <small class="dash-muted">Hoje</small>
-                </div>
-              </div>
-              <div class="feed-element">
-                <div class="media-body">
-                  Você pode acompanhar os eventos do processo ativo mais recente na timeline.
-                  <br />
-                  <small class="dash-muted">Hoje</small>
-                </div>
+                <div class="media-body">Carregando notificações...</div>
               </div>
             </div>
           </div>
@@ -1184,6 +1167,43 @@ async function loadBillingDashboard() {
         .replace(/'/g, "&#039;");
     }
 
+    function isReadNotification(n) {
+      if (n?.is_read === true) return true;
+      if (n?.isRead === true) return true;
+      if (n?.read_at || n?.readAt) return true;
+      return false;
+    }
+
+    function renderDashboardNotifications(rows) {
+      var $list = $("#notificationsList");
+      if (!$list.length) return;
+
+      var items = Array.isArray(rows) ? rows : [];
+      if (!items.length) {
+        $list.html('<div class="feed-element"><div class="media-body">Nenhuma notificação ativa.</div></div>');
+        return;
+      }
+
+      $list.html(items.map(function (n) {
+        var id = String(n?.id || "");
+        var title = escapeHtml(String(n?.title || "Notificação"));
+        var msg = escapeHtml(String(n?.message || "").trim() || "-");
+        var when = escapeHtml(formatDateTimePtBr(n?.created_at || n?.createdAt || n?.starts_at || n?.startsAt));
+        var readClass = isReadNotification(n) ? "is-read" : "";
+        var href = id ? ("/NewNotification?id=" + encodeURIComponent(id)) : "/Notifications";
+        return `
+          <div class="feed-element ${readClass}">
+            <div class="media-body">
+              <strong>${title}</strong><br/>
+              ${msg}<br/>
+              <small class="dash-muted">${when}</small><br/>
+              <a href="${href}" class="text-navy">Abrir</a>
+            </div>
+          </div>
+        `;
+      }).join(""));
+    }
+
     function typeToMeta(type) {
       var t = Number(type ?? 0);
       switch (t) {
@@ -1286,6 +1306,17 @@ async function loadBillingDashboard() {
           fetchJson("/api/processes?company_id=" + encodeURIComponent(String(companyId))),
           fetchJson("/api/invoices?fields=summary&company_id=" + encodeURIComponent(String(companyId)))
         ]);
+
+        try {
+          var notifRows = [];
+          if (window.GECOM_NOTIFICATIONS?.fetchTopByCompany) {
+            notifRows = await window.GECOM_NOTIFICATIONS.fetchTopByCompany();
+          }
+          renderDashboardNotifications(notifRows);
+        } catch (notifErr) {
+          console.error("Notifications dashboard error:", notifErr);
+          renderDashboardNotifications([]);
+        }
 
         var processes = normalizeArrayResponse(procRes);
         var invoices = normalizeArrayResponse(invRes);

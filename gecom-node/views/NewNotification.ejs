@@ -1,4 +1,4 @@
-<style>
+﻿<style>
   .ibox-title {
     padding: 15px 90px 20px 15px;
   }
@@ -57,7 +57,7 @@
       <div class="ibox-title">
         <div class="header-row">
           <div>
-            <h5 style="margin-bottom:4px;" id="pageTitle">Nova Notificação</h5>
+            <h5 style="margin-bottom:4px;" id="pageTitle">Nova NotificaÃ§Ã£o</h5>
             <div class="muted" id="subtitle">Preencha os campos e clique em Criar.</div>
           </div>
 
@@ -76,7 +76,7 @@
       <div class="ibox-content">
         <div class="tabs-container">
           <ul class="nav nav-tabs">
-            <li><a class="nav-link active" data-toggle="tab" href="#tab-main">Informações</a></li>
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-main">InformaÃ§Ãµes</a></li>
             <li><a class="nav-link" data-toggle="tab" href="#tab-system">Sistema</a></li>
           </ul>
 
@@ -88,27 +88,27 @@
                   <div class="col-lg-8">
                     <div class="form-row">
                       <label>Mensagem *</label>
-                      <textarea id="message" class="form-control" rows="6" placeholder="Digite a mensagem da notificação"></textarea>
+                      <textarea id="message" class="form-control" rows="6" placeholder="Digite a mensagem da notificaÃ§Ã£o"></textarea>
                       <div class="muted" style="margin-top:6px;">
-                        Essa mensagem será exibida para todos os usuários da companhia selecionada.
+                        Essa mensagem serÃ¡ exibida para todos os usuÃ¡rios da companhia selecionada.
                       </div>
                     </div>
 
                     <div class="form-row">
-                      <label>Título</label>
-                      <input id="title" type="text" class="form-control" placeholder="Ex: Mudança de prazo / Aviso importante" maxlength="150" />
+                      <label>TÃ­tulo</label>
+                      <input id="title" type="text" class="form-control" placeholder="Ex: MudanÃ§a de prazo / Aviso importante" maxlength="150" />
                     </div>
 
                     <div class="form-row">
-                      <label>Data de início</label>
+                      <label>Data de inÃ­cio</label>
                       <input id="starts_at" type="datetime-local" class="form-control" />
-                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação aparece imediatamente.</div>
+                      <div class="muted" style="margin-top:6px;">Se vazio, a notificaÃ§Ã£o aparece imediatamente.</div>
                     </div>
 
                     <div class="form-row">
-                      <label>Data de expiração</label>
+                      <label>Data de expiraÃ§Ã£o</label>
                       <input id="expires_at" type="datetime-local" class="form-control" />
-                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação não expira.</div>
+                      <div class="muted" style="margin-top:6px;">Se vazio, a notificaÃ§Ã£o nÃ£o expira.</div>
                     </div>
                   </div>
 
@@ -116,18 +116,18 @@
                     <div class="form-row">
                       <label>Companhia *</label>
                       <select id="company_id" class="form-control"></select>
-                      <div class="muted" style="margin-top:6px;">Selecione a companhia que irá receber a notificação.</div>
+                      <div class="muted" style="margin-top:6px;">Selecione a companhia que irÃ¡ receber a notificaÃ§Ã£o.</div>
                     </div>
 
                     <div class="form-row">
                       <label>Severidade</label>
                       <select id="severity" class="form-control">
                         <option value="INFO" selected>Info</option>
-                        <option value="WARNING">Atenção</option>
-                        <option value="CRITICAL">Crítico</option>
+                        <option value="WARNING">AtenÃ§Ã£o</option>
+                        <option value="CRITICAL">CrÃ­tico</option>
                       </select>
                       <div class="muted" style="margin-top:6px;">
-                        Ajuda a destacar notificações importantes.
+                        Ajuda a destacar notificaÃ§Ãµes importantes.
                         <span class="badge-sev" id="sevBadge">INFO</span>
                       </div>
                     </div>
@@ -157,28 +157,28 @@
                 <div class="readonly-box">
                   <div class="row">
                     <div class="col-lg-3"><strong>ID</strong></div>
-                    <div class="col-lg-9"><span id="sys_id">—</span></div>
+                    <div class="col-lg-9"><span id="sys_id">â€”</span></div>
                   </div>
                   <div class="row">
                     <div class="col-lg-3"><strong>Criado em</strong></div>
-                    <div class="col-lg-9"><span id="sys_created_at">—</span></div>
+                    <div class="col-lg-9"><span id="sys_created_at">â€”</span></div>
                   </div>
                   <div class="row">
                     <div class="col-lg-3"><strong>Atualizado em</strong></div>
-                    <div class="col-lg-9"><span id="sys_updated_at">—</span></div>
+                    <div class="col-lg-9"><span id="sys_updated_at">â€”</span></div>
                   </div>
                   <div class="row">
                     <div class="col-lg-3"><strong>Criado por</strong></div>
-                    <div class="col-lg-9"><span id="sys_created_by">—</span></div>
+                    <div class="col-lg-9"><span id="sys_created_by">â€”</span></div>
                   </div>
                   <div class="row">
                     <div class="col-lg-3"><strong>Tenant</strong></div>
-                    <div class="col-lg-9"><span id="sys_tenant">—</span></div>
+                    <div class="col-lg-9"><span id="sys_tenant">â€”</span></div>
                   </div>
                 </div>
 
                 <div class="muted" style="margin-top:10px;">
-                  Campos do sistema são somente leitura.
+                  Campos do sistema sÃ£o somente leitura.
                 </div>
               </div>
             </div>
@@ -196,6 +196,9 @@
     let companies = [];
     let initialModel = null;
     let notificationId = null;
+    const auth = window.__auth || {};
+    const authRole = String(auth.role || auth.userRole || "").toUpperCase();
+    const isAdmin = auth.isAdmin === true || authRole === "ADMIN" || (Array.isArray(auth.roles) && auth.roles.map(r => String(r).toUpperCase()).includes("ADMIN"));
 
     function toStr(v) { return v == null ? "" : String(v); }
 
@@ -206,7 +209,7 @@
 
     function setText(id, value) {
       const el = document.getElementById(id);
-      if (el) el.textContent = value == null || value === "" ? "—" : String(value);
+      if (el) el.textContent = value == null || value === "" ? "â€”" : String(value);
     }
 
     function escapeHtml(value) {
@@ -293,14 +296,14 @@
     }
 
     function validate(model) {
-      if (!model.company_id) return "Companhia é obrigatória.";
-      if (!model.message) return "Mensagem é obrigatória.";
+      if (!model.company_id) return "Companhia Ã© obrigatÃ³ria.";
+      if (!model.message) return "Mensagem Ã© obrigatÃ³ria.";
 
       if (model.starts_at && model.expires_at) {
         const s = new Date(model.starts_at);
         const e = new Date(model.expires_at);
         if (!Number.isNaN(s.getTime()) && !Number.isNaN(e.getTime()) && e <= s) {
-          return "A data de expiração precisa ser maior que a data de início.";
+          return "A data de expiraÃ§Ã£o precisa ser maior que a data de inÃ­cio.";
         }
       }
 
@@ -313,30 +316,47 @@
     }
 
     function updateSaveEnabled() {
+      if (!isAdmin) {
+        $("#btnSave").prop("disabled", true);
+        return;
+      }
       const model = getModel();
       const requiredOk = !!model.company_id && !!model.message;
       $("#btnSave").prop("disabled", !(requiredOk && isDirty()));
     }
 
+    function applyReadonlyForNonAdmin() {
+      if (isAdmin) return;
+      $("#message,#title,#starts_at,#expires_at,#company_id,#severity,#is_active").prop("disabled", true).attr("readonly", true);
+      $("#btnSave").hide().prop("disabled", true);
+      $("#btnMarkRead").hide().prop("disabled", true);
+      $("#subtitle").text("VisualizaÃ§Ã£o apenas para leitura.");
+      $("#pageTitle").text("Detalhes da NotificaÃ§Ã£o");
+    }
+
     function setMode(isEdit) {
       if (isEdit) {
-        $("#pageTitle").text("Editar Notificação");
+        $("#pageTitle").text("Editar NotificaÃ§Ã£o");
         $("#subtitle").text("Altere os campos e clique em Salvar.");
         $("#btnSave").html('<i class="fa fa-save"></i> Salvar');
-        $("#subpageName").text("Editar Notificação");
+        $("#subpageName").text("Editar NotificaÃ§Ã£o");
         $("#btnMarkRead").show();
       } else {
-        $("#pageTitle").text("Nova Notificação");
+        $("#pageTitle").text("Nova NotificaÃ§Ã£o");
         $("#subtitle").text("Preencha os campos e clique em Criar.");
         $("#btnSave").html('<i class="fa fa-plus"></i> Criar');
-        $("#subpageName").text("Nova Notificação");
+        $("#subpageName").text("Nova NotificaÃ§Ã£o");
+        $("#btnMarkRead").hide();
+      }
+      if (!isAdmin) {
+        $("#btnSave").hide();
         $("#btnMarkRead").hide();
       }
     }
 
 async function loadCompanies() {
   // Igual ao NovoProcesso: sem filtro e com parse robusto
-  const data = await apiGet("/api/companies");
+  const data = await apiGet("/api/companies?fields=summary");
   const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.companies ?? []);
 
   companies = [];
@@ -346,7 +366,7 @@ async function loadCompanies() {
   list.forEach(c => {
     const id = String(c?.id || "").trim();
 
-    // ✅ mesmo padrão do NovoProcesso
+    // âœ… mesmo padrÃ£o do NovoProcesso
     const name = String(
       c?.company_name ||
       c?.fantasy_name ||
@@ -406,7 +426,7 @@ async function loadCompanies() {
 
       // IMPORTANTE:
       // - Isso depende do seu backend/proxy ter GET /api/notifications/:id
-      // - Se você ainda não tiver GET no backend, eu te mando o endpoint pronto.
+      // - Se vocÃª ainda nÃ£o tiver GET no backend, eu te mando o endpoint pronto.
       const data = await apiGet(`/api/notifications/${encodeURIComponent(notificationId)}`);
       return data;
     }
@@ -417,7 +437,7 @@ async function loadCompanies() {
       try {
         $("#btnMarkRead").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Marcando...');
         await apiPost(`/api/notifications/${encodeURIComponent(notificationId)}/read`, {});
-        alert("Notificação marcada como lida (para sua conta).");
+        alert("NotificaÃ§Ã£o marcada como lida (para sua conta).");
       } catch (e) {
         console.error(e);
         alert("Falha ao marcar como lida.");
@@ -428,7 +448,7 @@ async function loadCompanies() {
 
     pageLoad();
     async function pageLoad() {
-      $("#pageName").text("Notificações");
+      $("#pageName").text("NotificaÃ§Ãµes");
 
       try {
         await loadCompanies();
@@ -461,6 +481,7 @@ async function loadCompanies() {
           $("#severity").val("INFO");
         }
 
+        applyReadonlyForNonAdmin();
         initialModel = getModel();
         updateSaveEnabled();
 
@@ -482,10 +503,10 @@ async function loadCompanies() {
 
             if (!isEdit) {
               const created = await apiPost("/api/notifications", payload);
-              alert("Notificação criada com sucesso.");
+              alert("NotificaÃ§Ã£o criada com sucesso.");
 
               if (created?.id) {
-                window.location = `/NotificationDetail?id=${encodeURIComponent(created.id)}`;
+                window.location = `/NewNotification?id=${encodeURIComponent(created.id)}`;
                 return;
               }
 
@@ -494,7 +515,7 @@ async function loadCompanies() {
             }
 
             const updated = await apiPatch(`/api/notifications/${encodeURIComponent(notificationId)}`, payload);
-            alert("Notificação salva com sucesso.");
+            alert("NotificaÃ§Ã£o salva com sucesso.");
 
             // Refresh system tab info if backend returns it
             if (updated?.id) {
@@ -510,14 +531,13 @@ async function loadCompanies() {
             const isEdit = !!notificationId;
             $("#btnSave").html(isEdit ? '<i class="fa fa-save"></i> Salvar' : '<i class="fa fa-plus"></i> Criar');
             updateSaveEnabled();
-            alert(isEdit ? "Falha ao salvar a notificação." : "Falha ao criar a notificação.");
+            alert(isEdit ? "Falha ao salvar a notificaÃ§Ã£o." : "Falha ao criar a notificaÃ§Ã£o.");
           }
         });
 
       } catch (e) {
         console.error(e);
-        alert("Falha ao carregar a página de Notificações.");
-        window.location = "/Notifications";
+        alert("Falha ao carregar a pÃ¡gina de NotificaÃ§Ãµes.");
       }
     }
   })();

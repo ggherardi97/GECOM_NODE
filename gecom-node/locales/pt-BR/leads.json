@@ -1,0 +1,113 @@
+{
+  "page": {
+    "leads": {
+      "common": {
+        "loading": "Carregando...",
+        "clear": "Limpar",
+        "apply": "Aplicar",
+        "from": "De",
+        "to": "Até",
+        "cancel": "Cancelar",
+        "save": "Salvar",
+        "withoutName": "Sem nome"
+      },
+      "messages": {
+        "loadError": "Erro ao carregar leads.",
+        "saved": "Lead salvo com sucesso.",
+        "saveError": "Erro ao salvar lead.",
+        "invalidLead": "Lead inválido.",
+        "stageUpdated": "Estágio atualizado com sucesso.",
+        "stageUpdateError": "Falha ao atualizar estágio.",
+        "statusUpdated": "Status atualizado com sucesso.",
+        "statusUpdateError": "Falha ao atualizar status.",
+        "savedViewsError": "Falha ao carregar views salvas."
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Nome, e-mail, telefone, empresa...",
+        "owner": "Responsável",
+        "allOwners": "Todos os responsáveis",
+        "status": "Status",
+        "allStatus": "Todos os status",
+        "source": "Origem",
+        "allSources": "Todas as origens",
+        "createdRange": "Criado em (intervalo)",
+        "clear": "Limpar filtros"
+      },
+      "columns": {
+        "name": "Nome",
+        "company": "Empresa",
+        "contact": "Contato",
+        "email": "E-mail",
+        "phone": "Telefone",
+        "status": "Status",
+        "stage": "Estágio",
+        "owner": "Responsável",
+        "source": "Origem",
+        "value": "Valor estimado",
+        "currency": "Moeda",
+        "nextActionAt": "Próxima ação",
+        "actions": "Ações"
+      },
+      "actions": {
+        "edit": "Editar",
+        "win": "Ganhar",
+        "lose": "Perder"
+      },
+      "pipeline": {
+        "title": "Pipeline de Leads",
+        "newLead": "Novo Lead",
+        "goList": "Ver Lista",
+        "emptyColumn": "Sem leads neste estágio"
+      },
+      "list": {
+        "title": "Leads - Lista",
+        "newLead": "Novo Lead",
+        "goPipeline": "Ver Pipeline",
+        "noResults": "Nenhum lead encontrado.",
+        "prev": "Anterior",
+        "next": "Próximo"
+      },
+      "form": {
+        "title": "Cadastro de Lead",
+        "newTitle": "Novo Lead",
+        "editTitle": "Editar Lead",
+        "save": "Salvar",
+        "saving": "Salvando...",
+        "sectionBasic": "Informações básicas",
+        "sectionQualification": "Qualificação",
+        "sectionNotes": "Observações",
+        "firstName": "Primeiro nome",
+        "lastName": "Sobrenome",
+        "notes": "Notas",
+        "selectOwner": "Selecione"
+      },
+      "validation": {
+        "nameRequired": "Nome do lead é obrigatório.",
+        "stageRequired": "Estágio é obrigatório.",
+        "statusRequired": "Status é obrigatório.",
+        "emailInvalid": "Informe um e-mail válido.",
+        "phoneInvalid": "Informe um telefone válido."
+      },
+      "detail": {
+        "title": "Detalhes do Lead",
+        "back": "Voltar",
+        "mainInfo": "Informações principais",
+        "timeline": "Timeline",
+        "moveStage": "Mover para estágio",
+        "move": "Mover",
+        "createdAt": "Criado em",
+        "updatedAt": "Atualizado em",
+        "activity": "Atividade",
+        "lostReasonPrompt": "Informe o motivo da perda:"
+      },
+      "modal": {
+        "statusTitle": "Atualizar status do lead",
+        "winTitle": "Marcar lead como ganho",
+        "loseTitle": "Marcar lead como perdido",
+        "reason": "Motivo",
+        "notes": "Observações"
+      }
+    }
+  }
+}

@@ -155,6 +155,32 @@
         object-fit: cover;
         object-position: center;
       }
+
+      .top-notification-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f1f1;
+      }
+
+      .top-notification-item.is-read {
+        background: #eef9f5;
+      }
+
+      .top-notification-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #333;
+      }
+
+      .top-notification-message {
+        color: #666;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .top-notification-time {
+        color: #999;
+        font-size: 11px;
+      }
     </style>
 </head>
 
@@ -201,6 +227,13 @@
               <span class="nav-label" data-i18n="page.layout.menu.dashboard">Dashboard</span>
             </a>
           </li>
+          
+          <li>
+            <a href="/MyActivities">
+              <i class="fa fa-tasks"></i>
+              <span class="nav-label">Minhas Atividades</span>
+            </a>
+          </li>
 
           <li><a class="menuDivider" style="padding-top:20px;">Services</a></li>
 
@@ -241,6 +274,21 @@
             </a>
           </li>
 
+          <li>
+            <a href="/leads/pipeline">
+              <i class="fa fa-filter"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
+            </a>
+          </li>
+
+          <li><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li id='notificationList' style="display: none;">
+            <a href="/Notifications">
+              <i class="fa fa-bell"></i>
+              <span class="nav-label">Notificações</span>
+            </a>
+          </li>
+
           <!-- ✅ opcional: botões simples pra testar troca de idioma -->
           <!--
           <li style="padding:10px 20px;">
@@ -262,6 +310,16 @@
           </div>
 
           <ul class="nav navbar-top-links navbar-right">
+            <li class="dropdown">
+              <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#" aria-expanded="false">
+                <i class="fa fa-bell"></i>
+                <span class="label label-primary" id="topNotificationsBadge" style="display:none;">0</span>
+              </a>
+              <ul class="dropdown-menu dropdown-alerts" id="topNotificationsList" style="min-width: 360px; max-width: 420px; max-height: 420px; overflow-y: auto;">
+                <li><a href="#"><div>Carregando notificações...</div></a></li>
+              </ul>
+            </li>
+
             <!-- Language selector -->
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
@@ -365,6 +423,173 @@
 
   <%- typeof script !=='undefined' ? script : '' %>
     <%- typeof scripts !=='undefined' ? scripts : '' %>
+
+      <script>
+        (function () {
+          function pickCompanyId() {
+            return (
+              window.__auth?.company_id ||
+              window.__auth?.companyId ||
+              window.__auth?.company?.id ||
+              window.__auth?.company?.company_id ||
+              null
+            );
+          }
+
+          function normalizeArrayResponse(data) {
+            if (Array.isArray(data)) return data;
+            if (Array.isArray(data?.data)) return data.data;
+            if (Array.isArray(data?.rows)) return data.rows;
+            if (Array.isArray(data?.items)) return data.items;
+            return [];
+          }
+
+          function isReadNotification(n) {
+            if (n?.is_read === true) return true;
+            if (n?.isRead === true) return true;
+            if (n?.read_at || n?.readAt) return true;
+            return false;
+          }
+
+          function inActiveWindow(n, now) {
+            if (n?.is_active === false) return false;
+            if (n?.isActive === false) return false;
+
+            const startsAt = n?.starts_at || n?.startsAt || null;
+            const expiresAt = n?.expires_at || n?.expiresAt || null;
+
+            const s = startsAt ? new Date(startsAt) : null;
+            const e = expiresAt ? new Date(expiresAt) : null;
+
+            if (s && !Number.isNaN(s.getTime()) && now < s) return false;
+            if (e && !Number.isNaN(e.getTime()) && now > e) return false;
+            return true;
+          }
+
+          function sortByDateDesc(a, b) {
+            const da = new Date(a?.created_at || a?.createdAt || a?.starts_at || a?.startsAt || 0).getTime();
+            const db = new Date(b?.created_at || b?.createdAt || b?.starts_at || b?.startsAt || 0).getTime();
+            return db - da;
+          }
+
+          function escapeHtml(value) {
+            if (value == null) return "";
+            return String(value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+
+          function formatDateTimePtBr(value) {
+            if (!value) return "-";
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return "-";
+            return d.toLocaleString("pt-BR");
+          }
+
+          async function fetchTopNotifications(companyId) {
+            if (!companyId) return [];
+            const q = new URLSearchParams();
+            q.set("company_id", String(companyId));
+            q.set("is_active", "true");
+            q.set("include_expired", "true");
+
+            const res = await fetch(`/api/notifications/admin?${q.toString()}`, {
+              method: "GET",
+              headers: { Accept: "application/json" }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+            return normalizeArrayResponse(data);
+          }
+
+          async function fetchTopNotificationsSafe(companyId) {
+            try {
+              return await fetchTopNotifications(companyId);
+            } catch {
+              const res = await fetch("/api/notifications/my", {
+                method: "GET",
+                headers: { Accept: "application/json" }
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) return [];
+              return normalizeArrayResponse(data).filter(n => String(n?.company_id || n?.companyId || "") === String(companyId));
+            }
+          }
+
+          function buildTop5Notifications(items) {
+            const now = new Date();
+            return (items || [])
+              .filter(n => inActiveWindow(n, now))
+              .sort(sortByDateDesc)
+              .slice(0, 5);
+          }
+
+          function renderTopNotifications(items) {
+            const list = document.getElementById("topNotificationsList");
+            const badge = document.getElementById("topNotificationsBadge");
+            if (!list || !badge) return;
+
+            const rows = buildTop5Notifications(items);
+            badge.textContent = String(rows.length);
+            badge.style.display = rows.length ? "inline-block" : "none";
+
+            if (!rows.length) {
+              list.innerHTML = `<li><a href="#"><div>Nenhuma notificação ativa.</div></a></li>
+                                <li class="divider"></li>
+                                <li><a href="/Notifications"><div class="text-center link-block">Ver todas</div></a></li>`;
+              return;
+            }
+
+            list.innerHTML = rows.map(n => {
+              const id = String(n?.id || "");
+              const title = escapeHtml(String(n?.title || "Notificação"));
+              const msg = escapeHtml(String(n?.message || "").trim() || "-");
+              const when = formatDateTimePtBr(n?.created_at || n?.createdAt || n?.starts_at || n?.startsAt);
+              const readClass = isReadNotification(n) ? "is-read" : "";
+              const href = id ? `/NewNotification?id=${encodeURIComponent(id)}` : "/Notifications";
+
+              return `
+                <li>
+                  <a href="${href}">
+                    <div class="top-notification-item ${readClass}">
+                      <div class="top-notification-title">${title}</div>
+                      <div class="top-notification-message">${msg}</div>
+                      <div class="top-notification-time">${escapeHtml(when)}</div>
+                    </div>
+                  </a>
+                </li>
+              `;
+            }).join("") + `
+              <li class="divider"></li>
+              <li><a href="/Notifications"><div class="text-center link-block">Ver todas</div></a></li>
+            `;
+          }
+
+          window.GECOM_NOTIFICATIONS = window.GECOM_NOTIFICATIONS || {};
+          window.GECOM_NOTIFICATIONS.fetchTopByCompany = async function () {
+            const companyId = pickCompanyId();
+            if (!companyId) return [];
+            const rows = await fetchTopNotificationsSafe(companyId);
+            return buildTop5Notifications(rows);
+          };
+
+          window.GECOM_NOTIFICATIONS.renderTopBar = async function () {
+            const rows = await window.GECOM_NOTIFICATIONS.fetchTopByCompany();
+            renderTopNotifications(rows);
+          };
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", function () {
+              window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
+            });
+          } else {
+            window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
+          }
+        })();
+      </script>
 
       <script>
         async function LogOut() {
@@ -921,6 +1146,7 @@
             else if (window.__auth.isAdmin) {
               $("#clientTab").show();
               $("#productTab").show();
+              $("#notificationList").show();
             }
 
           } catch (e) {

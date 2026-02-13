@@ -109,7 +109,6 @@
         "editClientTitle": "Editar detalles del Cliente"
       }
     },
-
     "dashboard": {
       "pageTitle": "Facturación / Procesos",
       "filters": {
@@ -156,7 +155,6 @@
         "loading": "Cargando..."
       }
     },
-
     "invoices": {
       "pageTitle": "Invoices",
       "header": {
@@ -206,7 +204,6 @@
         "dueDate": "Vencimiento"
       }
     },
-
     "login": {
       "pageTitle": "Inicio de sesión",
       "welcomeTitle": "Bienvenido a GECOM",
@@ -259,7 +256,6 @@
         "unexpectedError": "Ocurrió un error inesperado. Inténtalo nuevamente."
       }
     },
-
     "myDocuments": {
       "pageTitle": "Mis Documentos",
       "sidebar": {
@@ -285,7 +281,6 @@
         "ok": "OK"
       }
     },
-
     "documents": {
       "placeholders": {
         "searchFolders": "Buscar..."
@@ -351,7 +346,6 @@
         "pickCompanyTitle": "Carga rápida - seleccionar cliente"
       }
     },
-
     "processos": {
       "pageTitle": "Procesos",
       "header": {
@@ -403,7 +397,6 @@
         "confirm": "¿Deseas continuar?"
       }
     },
-
     "processDetail": {
       "header": {
         "editProject": "Editar proyecto",
@@ -456,7 +449,6 @@
         "actions": "Acciones"
       }
     },
-
     "products": {
       "pageTitle": "Productos",
       "header": {
@@ -482,7 +474,6 @@
         "createdAt": "Creado el"
       }
     },
-
     "profile": {
       "pageTitle": "Mi Perfil",
       "actions": {
@@ -505,7 +496,6 @@
         "passwordStrength": "Consejo: usa una contraseña fuerte con 12+ caracteres, mayúsculas, minúsculas, número y símbolo."
       }
     },
-
     "layout": {
       "appTitle": "Sistema GECOM",
       "menu": {
@@ -516,7 +506,8 @@
         "processes": "Procesos",
         "myDocuments": "Mis Documentos",
         "invoices": "Invoices",
-        "products": "Productos"
+        "products": "Productos",
+        "leads": "Leads"
       },
       "modal": {
         "cancel": "Cancelar",
@@ -526,9 +517,20 @@
       },
       "footer": {
         "copyright": "GECOM ©"
+      },
+      "savedViews": {
+        "dateRangePlaceholder": "dd/mm/aaaa - dd/mm/aaaa",
+        "clearLabel": "Limpiar",
+        "applyLabel": "Aplicar",
+        "fromLabel": "Desde",
+        "toLabel": "Hasta",
+        "saveCurrentTitle": "Guardar vista actual",
+        "deleteCurrentTitle": "Eliminar esta vista",
+        "saveLabel": "Guardar",
+        "deleteLabel": "Eliminar vista",
+        "deleteCurrentConfirm": "?Eliminar la vista seleccionada?"
       }
     },
-
     "novoProcesso": {
       "pageTitle": "Nuevo Proceso",
       "subtitle": "Completa la información del proceso y sus transportes.",
@@ -597,7 +599,6 @@
         "createFail": "Fallo al crear proceso/transportes/documentos."
       }
     },
-
     "newInvoice": {
       "pageTitle": "Nueva Factura",
       "pageTitleEdit": "Editar Factura",
@@ -724,7 +725,6 @@
         "quantityGreaterThanZero": "La cantidad debe ser mayor que 0."
       }
     },
-
     "invoicesPrint": {
       "pageTitle": "Invoice - Impresión",
       "actions": {
@@ -738,7 +738,6 @@
         "phone": "Teléfono"
       }
     },
-
     "clients": {
       "pageTitle": "Clientes",
       "toolbar": {
@@ -790,7 +789,97 @@
         "bulkUnexpected": "Error al eliminar clientes."
       }
     },
-
+    "myActivities": {
+      "pageTitle": "Mis Actividades",
+      "includeInactive": "Incluir inactivos",
+      "hints": {
+        "dragAndDoubleClick": "Consejo: arrastra tarjetas entre columnas. Haz doble clic en una tarjeta para editarla en el SideModal. Arrastra el encabezado de la columna para cambiar el orden."
+      },
+      "actions": {
+        "refresh": "Actualizar",
+        "archive": "Archivar",
+        "newBoard": "Nuevo Board",
+        "editBoard": "Editar Board",
+        "newColumn": "Nueva Columna",
+        "tag": "Etiqueta",
+        "comments": "Coment.",
+        "assignees": "Resp.",
+        "delete": "Eliminar",
+        "save": "Guardar",
+        "cancel": "Cancelar"
+      },
+      "labels": {
+        "board": "Board",
+        "boardFallback": "Board",
+        "inactiveSuffix": "(Inactivo)",
+        "entity": "Entidad",
+        "columns": "Columnas",
+        "cards": "Tarjetas",
+        "wip": "WIP",
+        "noWip": "Sin WIP",
+        "final": "Final"
+      },
+      "priority": {
+        "low": "Baja",
+        "medium": "Media",
+        "high": "Alta"
+      },
+      "fields": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "color": "Color",
+        "wip": "Límite WIP",
+        "title": "Título",
+        "priority": "Prioridad",
+        "dueDate": "Fecha límite"
+      },
+      "placeholders": {
+        "newCard": "Nueva tarjeta...",
+        "dateYmd": "aaaa-mm-dd"
+      },
+      "modals": {
+        "newBoardTitle": "Nuevo Board",
+        "editBoardTitle": "Editar Board",
+        "newColumnTitle": "Nueva Columna",
+        "editColumnTitle": "Editar Columna",
+        "cardTitlePrefix": "Tarjeta"
+      },
+      "messages": {
+        "noBoardSelected": "Ningún board seleccionado.",
+        "noBoardsOption": "Sin boards",
+        "emptyColumn": "Sin tarjetas en esta columna.",
+        "createOrSelectBoard": "Crea o selecciona un board.",
+        "noDueDate": "Sin fecha límite",
+        "noAssignees": "Sin responsables",
+        "userFallback": "Usuario",
+        "sideModalMissing": "SideModal no está disponible.",
+        "apiStatusPrefix": "Error"
+      },
+      "validation": {
+        "boardName": "Informe el nombre del board.",
+        "columnName": "Informe el nombre de la columna."
+      },
+      "confirm": {
+        "deleteCard": "¿Eliminar tarjeta?",
+        "deleteColumn": "¿Eliminar columna?",
+        "archiveBoard": "¿Archivar board?"
+      },
+      "alerts": {
+        "loadFail": "Error al cargar Mis Actividades.",
+        "refreshFail": "Error al actualizar.",
+        "openBoardFail": "Error al abrir el board.",
+        "moveFail": "Error al mover/reordenar la tarjeta.",
+        "reorderColumnsFail": "Error al reordenar columnas.",
+        "createCardFail": "Error al crear la tarjeta.",
+        "deleteCardFail": "Error al eliminar la tarjeta.",
+        "editColumnFail": "Error al editar la columna.",
+        "deleteColumnFail": "Error al eliminar la columna.",
+        "createBoardFail": "Error al crear el board.",
+        "editBoardFail": "Error al editar el board.",
+        "archiveBoardFail": "Error al archivar el board.",
+        "createColumnFail": "Error al crear la columna."
+      }
+    },
     "newProduct": {
       "pageTitle": "Nuevo Producto",
       "actions": {
@@ -845,7 +934,6 @@
         "loadCurrenciesFail": "Fallo al cargar monedas."
       }
     },
-
     "productDetail": {
       "state": {
         "loading": "Cargando..."
@@ -876,7 +964,6 @@
         "deleteUnexpected": "Error inesperado al eliminar producto."
       }
     },
-
     "newClient": {
       "pageTitle": "Creación de cliente",
       "subtitle": "Completa la información de la empresa, luego los datos opcionales y por último los usuarios de acceso.",
@@ -985,7 +1072,6 @@
         "finishFail": "Error al finalizar la creación."
       }
     },
-
     "landingPage": {
       "pageTitle": "GECOM - Portal de Importación y Exportación",
       "menu": {
@@ -1050,7 +1136,6 @@
         "phone": "Teléfono"
       }
     },
-
     "publicProcessDetail": {
       "actions": {
         "login": "Entrar"

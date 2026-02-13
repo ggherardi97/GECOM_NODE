@@ -1,0 +1,112 @@
+<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  #leadsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .sv-actions { margin-left: unset !important; }
+  .sv-name.text-muted { display: inline-block !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  .sv-date-filter .input-group-addon { padding: 3px 8px; cursor: pointer; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="leadsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <a href="/leads/pipeline" class="btn btn-sm btn-default"><%= t('page.leads.list.goPipeline') %></a>
+          <a href="/leads/new" class="btn btn-sm btn-primary"><%= t('page.leads.list.newLead') %></a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="table-responsive">
+          <table id="leadsListTable" class="table table-striped">
+            <thead>
+              <tr id="leadListFiltersRow">
+                <th></th>
+                <th><input id="leadListSearch" type="text" class="form-control input-sm" placeholder="<%= t('page.leads.filters.searchPlaceholder') %>" /></th>
+                <th><input type="text" disabled class="form-control input-sm" placeholder="<%= t('page.leads.columns.company') %>" /></th>
+                <th><input type="text" disabled class="form-control input-sm" placeholder="<%= t('page.leads.columns.email') %>" /></th>
+                <th><input type="text" disabled class="form-control input-sm" placeholder="<%= t('page.leads.columns.phone') %>" /></th>
+                <th>
+                  <select id="leadListStatus" class="form-control input-sm">
+                    <option value=""><%= t('page.leads.filters.allStatus') %></option>
+                    <option value="NEW">NEW</option>
+                    <option value="WORKING">WORKING</option>
+                    <option value="NURTURING">NURTURING</option>
+                    <option value="QUALIFIED">QUALIFIED</option>
+                    <option value="CONVERTED">CONVERTED</option>
+                    <option value="DISQUALIFIED">DISQUALIFIED</option>
+                  </select>
+                </th>
+                <th><input type="text" disabled class="form-control input-sm" placeholder="<%= t('page.leads.columns.stage') %>" /></th>
+                <th>
+                  <select id="leadListOwner" class="form-control input-sm">
+                    <option value=""><%= t('page.leads.filters.allOwners') %></option>
+                  </select>
+                </th>
+                <th>
+                  <select id="leadListSource" class="form-control input-sm">
+                    <option value=""><%= t('page.leads.filters.allSources') %></option>
+                    <option value="WEBSITE">WEBSITE</option>
+                    <option value="REFERRAL">REFERRAL</option>
+                    <option value="SOCIAL">SOCIAL</option>
+                    <option value="PHONE">PHONE</option>
+                    <option value="EMAIL">EMAIL</option>
+                    <option value="OTHER">OTHER</option>
+                  </select>
+                </th>
+                <th class="sv-date-filter">
+                  <div class="input-group">
+                    <input id="leadListCreatedRange" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
+                    <span class="input-group-addon" id="leadListCreatedRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                </th>
+                <th></th>
+              </tr>
+              <tr id="leadListHeaderRow">
+                <th class="sortable" data-sort-key="rownum"># <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="name"><%= t('page.leads.columns.name') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="company_name"><%= t('page.leads.columns.company') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="email"><%= t('page.leads.columns.email') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="phone"><%= t('page.leads.columns.phone') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="status"><%= t('page.leads.columns.status') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="stage"><%= t('page.leads.columns.stage') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="owner"><%= t('page.leads.columns.owner') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="source"><%= t('page.leads.columns.source') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="estimated_value"><%= t('page.leads.columns.value') %> <span class="sort-indicator"></span></th>
+                <th><%= t('page.leads.columns.actions') %></th>
+              </tr>
+            </thead>
+            <tbody id="leadListRows"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+          <div>
+            <button id="leadListFiltersClear" class="btn btn-white btn-sm"><%= t('page.leads.filters.clear') %></button>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <select id="leadListPageSize" class="form-control input-sm" style="width:90px;">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+            </select>
+            <button id="leadListPrev" class="btn btn-white btn-sm"><%= t('page.leads.list.prev') %></button>
+            <span id="leadListPageInfo">1 / 1</span>
+            <button id="leadListNext" class="btn btn-white btn-sm"><%= t('page.leads.list.next') %></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+  <script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+  <script src="../Assets/inspinia/js/plugins/daterangepicker/daterangepicker.js"></script>
+  <script src="/js/common/apiClient.js"></script>
+  <script src="/js/leads/leads.list.js"></script>
+<% %>

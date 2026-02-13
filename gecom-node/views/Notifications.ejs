@@ -1,0 +1,675 @@
+<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #notificationsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .sv-date-filter .input-group-addon { padding: 3px 8px; cursor: pointer; }
+  .sv-counters { display: inline-flex; align-items: center; gap: 10px; margin-right: 10px; color: #777; font-size: 12px; }
+  .sv-actionbar-btn { padding: 3px 8px; }
+  .notif-read { background: #eef9f5; }
+  .notif-message { max-width: 520px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .text-muted{
+display: none !important;
+}
+  .sv-actions{
+    margin-left: unset !important;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="notificationsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <span class="sv-counters"><span id="notificationsCountLabel">Exibindo 0 de 0</span></span>
+          <a type="button" class="btn btn-sm btn-primary" href="/NewNotification"><i class="fa fa-plus"></i> Nova Notificação</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="table-responsive">
+          <table class="table table-striped" id="notificationsTable">
+            <thead>
+              <tr id="notificationsFiltersRow">
+                <th data-field="title"><input id="fTitle" type="text" class="form-control input-sm" placeholder="Filtrar por Título" /></th>
+                <th data-field="message"><input id="fMessage" type="text" class="form-control input-sm" placeholder="Filtrar por Mensagem" /></th>
+                <th data-field="severity"><input id="fSeverity" type="text" class="form-control input-sm" placeholder="Filtrar por Severidade" /></th>
+                <th data-field="is_active_text">
+                  <select id="fActive" class="form-control input-sm">
+                    <option value="">Todos</option>
+                    <option value="yes">Ativo</option>
+                    <option value="no">Inativo</option>
+                  </select>
+                </th>
+                <th data-field="is_read_text">
+                  <select id="fRead" class="form-control input-sm">
+                    <option value="">Todas</option>
+                    <option value="yes">Lida</option>
+                    <option value="no">Não lida</option>
+                  </select>
+                </th>
+                <th data-field="in_window_text">
+                  <select id="fWindow" class="form-control input-sm">
+                    <option value="">Todos</option>
+                    <option value="yes">Dentro da janela</option>
+                    <option value="no">Fora da janela</option>
+                  </select>
+                </th>
+                <th class="sv-date-filter" data-field="starts_at_text">
+                  <div class="input-group">
+                    <input id="startsAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <span class="input-group-addon" id="startsAtRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="startsAtFromFilter" type="hidden" />
+                  <input id="startsAtToFilter" type="hidden" />
+                </th>
+                <th class="sv-date-filter" data-field="expires_at_text">
+                  <div class="input-group">
+                    <input id="expiresAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <span class="input-group-addon" id="expiresAtRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="expiresAtFromFilter" type="hidden" />
+                  <input id="expiresAtToFilter" type="hidden" />
+                </th>
+                <th class="sv-date-filter" data-field="created_at_text">
+                  <div class="input-group">
+                    <input id="createdAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <span class="input-group-addon" id="createdAtRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="createdAtFromFilter" type="hidden" />
+                  <input id="createdAtToFilter" type="hidden" />
+                </th>
+              </tr>
+
+              <tr id="notificationsHeaderRow">
+                <th class="sortable" data-sort-key="title" data-field="title">Título <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="message" data-field="message">Mensagem <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="severity" data-field="severity">Severidade <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text" data-field="is_active_text">Ativo <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_read_text" data-field="is_read_text">Lida <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="in_window_text" data-field="in_window_text">Janela Atual <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="starts_at_text" data-field="starts_at_text">Início <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="expires_at_text" data-field="expires_at_text">Expira em <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text" data-field="created_at_text">Criada em <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="notificationsLines"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+<script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/daterangepicker/daterangepicker.js"></script>
+<script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script>
+  (function () {
+    const I18N = {
+      errorLoad: "Falha ao carregar notificações.",
+      errorSaveView: "Falha ao salvar a view.",
+      errorDeleteView: "Falha ao excluir a view.",
+      confirmDeleteView: "Excluir esta view?"
+    };
+
+    let notifications = [];
+    const sortState = { key: "created_at_text", dir: "desc" };
+    const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
+    const startsRange = { start: null, end: null };
+    const expiresRange = { start: null, end: null };
+    const createdRange = { start: null, end: null };
+
+    function pickCompanyId() {
+      return (
+        window.__auth?.company_id ||
+        window.__auth?.companyId ||
+        window.__auth?.company?.id ||
+        window.__auth?.company?.company_id ||
+        null
+      );
+    }
+
+    function escapeHtml(value) {
+      if (value == null) return "";
+      return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function formatDateTimePtBr(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleString("pt-BR");
+    }
+
+    function formatDatePtBR(value) {
+      if (!value) return "";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "";
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    function parseDatePtBR(text) {
+      const raw = String(text || "").trim();
+      const m = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!m) return null;
+      const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function isRead(n) {
+      return n?.is_read === true || n?.isRead === true || !!(n?.read_at || n?.readAt);
+    }
+
+    function inWindow(n, now) {
+      if (n?.is_active === false || n?.isActive === false) return false;
+      const s = n?.starts_at || n?.startsAt;
+      const e = n?.expires_at || n?.expiresAt;
+      const sd = s ? new Date(s) : null;
+      const ed = e ? new Date(e) : null;
+      if (sd && !Number.isNaN(sd.getTime()) && now < sd) return false;
+      if (ed && !Number.isNaN(ed.getTime()) && now > ed) return false;
+      return true;
+    }
+
+    function normalizeArrayResponse(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    async function readJsonSafe(res) {
+      const text = await res.text();
+      if (!text) return {};
+      try { return JSON.parse(text); } catch { return { message: text }; }
+    }
+
+    async function apiGet(url) {
+      const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    async function apiPut(url, payload) {
+      const res = await fetch(url, { method: "PUT", headers: { Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify(payload || {}) });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    async function apiDelete(url) {
+      const res = await fetch(url, { method: "DELETE", headers: { Accept: "application/json" } });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Request failed");
+      return data;
+    }
+
+    function buildRowModel(n) {
+      const now = new Date();
+      const isActive = (n?.is_active !== false && n?.isActive !== false);
+      const read = isRead(n);
+      const win = inWindow(n, now);
+      return {
+        id: String(n?.id || ""),
+        title: String(n?.title || "Notificação"),
+        message: String(n?.message || ""),
+        severity: String(n?.severity || "INFO"),
+        is_active_text: isActive ? "Ativo" : "Inativo",
+        is_active_yesno: isActive ? "yes" : "no",
+        is_read_text: read ? "Lida" : "Não lida",
+        is_read_yesno: read ? "yes" : "no",
+        in_window_text: win ? "Sim" : "Não",
+        in_window_yesno: win ? "yes" : "no",
+        starts_at_text: formatDateTimePtBr(n?.starts_at || n?.startsAt),
+        starts_at_raw: (n?.starts_at || n?.startsAt || ""),
+        expires_at_text: formatDateTimePtBr(n?.expires_at || n?.expiresAt),
+        created_at_text: formatDateTimePtBr(n?.created_at || n?.createdAt),
+        created_at_raw: (n?.created_at || n?.createdAt || "")
+      };
+    }
+
+    function getAllColumnKeys() {
+      return $("#notificationsHeaderRow th.sortable")
+        .map(function () { return String($(this).data("sort-key") || ""); })
+        .get()
+        .filter(Boolean);
+    }
+
+    function setCounters(visibleCount, totalCount) {
+      $("#notificationsCountLabel").text(`Exibindo ${visibleCount} de ${totalCount}`);
+    }
+
+    function renderTableRespectingHeader() {
+      const tbody = $("#notificationsLines");
+      tbody.empty();
+      const visibleFields = $("#notificationsHeaderRow th")
+        .filter(":visible")
+        .map(function () { return String($(this).data("field") || ""); })
+        .get();
+
+      notifications.forEach((n) => {
+        const r = buildRowModel(n);
+        let cls = "";
+        if (r.is_read_yesno === "yes") cls += " notif-read";
+
+        let tds = "";
+        visibleFields.forEach((f) => {
+          if (f === "message") tds += `<td data-field="message"><span class="notif-message">${escapeHtml(r.message)}</span></td>`;
+          else tds += `<td data-field="${escapeHtml(f)}">${escapeHtml(r[f] ?? "")}</td>`;
+        });
+
+        tbody.append(`<tr class="clicker${cls}" data-id="${escapeHtml(r.id)}">${tds}</tr>`);
+      });
+
+      rerunAllFilters();
+      updateSortIndicators();
+    }
+
+    function sortNotificationsBy(key, dir) {
+      const mul = dir === "desc" ? -1 : 1;
+      notifications = notifications.slice().sort((a, b) => {
+        const ra = buildRowModel(a);
+        const rb = buildRowModel(b);
+        let va = ra[key];
+        let vb = rb[key];
+
+        if (key === "starts_at_text") {
+          va = new Date(ra.starts_at_raw || 0).getTime();
+          vb = new Date(rb.starts_at_raw || 0).getTime();
+        } else if (key === "created_at_text") {
+          va = new Date(ra.created_at_raw || 0).getTime();
+          vb = new Date(rb.created_at_raw || 0).getTime();
+        } else if (typeof va !== "number" || typeof vb !== "number") {
+          va = String(va ?? "").toLowerCase();
+          vb = String(vb ?? "").toLowerCase();
+        }
+
+        if (va < vb) return -1 * mul;
+        if (va > vb) return 1 * mul;
+        return 0;
+      });
+    }
+
+    function updateSortIndicators() {
+      $("#notificationsHeaderRow th .sort-indicator").text("");
+      if (!sortState.key) return;
+      const th = $(`#notificationsHeaderRow th[data-sort-key="${sortState.key}"]`);
+      th.find(".sort-indicator").text(sortState.dir === "asc" ? "▲" : "▼");
+    }
+
+    function setRangeHidden() {
+      $("#startsAtFromFilter").val(startsRange.start ? formatDatePtBR(startsRange.start) : "");
+      $("#startsAtToFilter").val(startsRange.end ? formatDatePtBR(startsRange.end) : "");
+      const from = $("#startsAtFromFilter").val();
+      const to = $("#startsAtToFilter").val();
+      $("#startsAtRangeFilter").val(from && to ? `${from} - ${to}` : (from ? `${from} -` : (to ? `- ${to}` : "")));
+    }
+
+    function setRangeHiddenGeneric(rangeObj, inputId, fromId, toId) {
+      $(`#${fromId}`).val(rangeObj.start ? formatDatePtBR(rangeObj.start) : "");
+      $(`#${toId}`).val(rangeObj.end ? formatDatePtBR(rangeObj.end) : "");
+      const from = String($(`#${fromId}`).val() || "");
+      const to = String($(`#${toId}`).val() || "");
+      $(`#${inputId}`).val(from && to ? `${from} - ${to}` : (from ? `${from} -` : (to ? `- ${to}` : "")));
+    }
+
+    function rerunAllFilters() {
+      const title = String($("#fTitle").val() || "").trim().toLowerCase();
+      const message = String($("#fMessage").val() || "").trim().toLowerCase();
+      const severity = String($("#fSeverity").val() || "").trim().toLowerCase();
+      const active = String($("#fActive").val() || "").trim();
+      const read = String($("#fRead").val() || "").trim();
+      const win = String($("#fWindow").val() || "").trim();
+      const from = parseDatePtBR($("#startsAtFromFilter").val());
+      const to = parseDatePtBR($("#startsAtToFilter").val());
+      const expiresFrom = parseDatePtBR($("#expiresAtFromFilter").val());
+      const expiresTo = parseDatePtBR($("#expiresAtToFilter").val());
+      const createdFrom = parseDatePtBR($("#createdAtFromFilter").val());
+      const createdTo = parseDatePtBR($("#createdAtToFilter").val());
+
+      $("#notificationsLines tr").show().each(function () {
+        const row = $(this);
+        const titleCell = String(row.find("td[data-field='title']").text() || "").toLowerCase();
+        const msgCell = String(row.find("td[data-field='message']").text() || "").toLowerCase();
+        const sevCell = String(row.find("td[data-field='severity']").text() || "").toLowerCase();
+        const activeCell = String(row.find("td[data-field='is_active_text']").text() || "").toLowerCase();
+        const readCell = String(row.find("td[data-field='is_read_text']").text() || "").toLowerCase();
+        const winCell = String(row.find("td[data-field='in_window_text']").text() || "").toLowerCase();
+        const startsCell = String(row.find("td[data-field='starts_at_text']").text() || "");
+        const expCell = String(row.find("td[data-field='expires_at_text']").text() || "");
+        const createdCell = String(row.find("td[data-field='created_at_text']").text() || "");
+
+        if (title && !titleCell.includes(title)) return row.hide();
+        if (message && !msgCell.includes(message)) return row.hide();
+        if (severity && !sevCell.includes(severity)) return row.hide();
+        if (active && !activeCell.includes(active === "yes" ? "ativo" : "inativo")) return row.hide();
+        if (read && !readCell.includes(read === "yes" ? "lida" : "não")) return row.hide();
+        if (win && !winCell.includes(win === "yes" ? "sim" : "não")) return row.hide();
+        if (from || to) {
+          const m = startsCell.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+          if (!m) return row.hide();
+          const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+          if (from && d < from) return row.hide();
+          if (to && d > to) return row.hide();
+        }
+
+        if (expiresFrom || expiresTo) {
+          const m = expCell.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+          if (!m) return row.hide();
+          const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+          if (expiresFrom && d < expiresFrom) return row.hide();
+          if (expiresTo && d > expiresTo) return row.hide();
+        }
+
+        if (createdFrom || createdTo) {
+          const m = createdCell.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+          if (!m) return row.hide();
+          const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), 0, 0, 0, 0);
+          if (createdFrom && d < createdFrom) return row.hide();
+          if (createdTo && d > createdTo) return row.hide();
+        }
+      });
+
+      setCounters($("#notificationsLines tr:visible").length, notifications.length);
+    }
+
+    function captureFiltersForSavedView() {
+      const filters = [];
+      const map = [
+        ["title", "#fTitle"], ["message", "#fMessage"], ["severity", "#fSeverity"]
+      ];
+      map.forEach(([field, id]) => {
+        const value = String($(id).val() || "").trim();
+        if (value) filters.push({ field, op: "contains", value });
+      });
+      const active = String($("#fActive").val() || "");
+      if (active) filters.push({ field: "is_active_text", op: "eq", value: active });
+      const read = String($("#fRead").val() || "");
+      if (read) filters.push({ field: "is_read_text", op: "eq", value: read });
+      const win = String($("#fWindow").val() || "");
+      if (win) filters.push({ field: "in_window_text", op: "eq", value: win });
+      const from = String($("#startsAtFromFilter").val() || "").trim();
+      const to = String($("#startsAtToFilter").val() || "").trim();
+      if (from) filters.push({ field: "starts_at_text", op: "gte", value: from });
+      if (to) filters.push({ field: "starts_at_text", op: "lte", value: to });
+      const expFrom = String($("#expiresAtFromFilter").val() || "").trim();
+      const expTo = String($("#expiresAtToFilter").val() || "").trim();
+      if (expFrom) filters.push({ field: "expires_at_text", op: "gte", value: expFrom });
+      if (expTo) filters.push({ field: "expires_at_text", op: "lte", value: expTo });
+      const creFrom = String($("#createdAtFromFilter").val() || "").trim();
+      const creTo = String($("#createdAtToFilter").val() || "").trim();
+      if (creFrom) filters.push({ field: "created_at_text", op: "gte", value: creFrom });
+      if (creTo) filters.push({ field: "created_at_text", op: "lte", value: creTo });
+      return filters;
+    }
+
+    function applyFiltersFromSavedView(def) {
+      $("#fTitle,#fMessage,#fSeverity").val("");
+      $("#fActive,#fRead,#fWindow").val("");
+      $("#startsAtRangeFilter,#startsAtFromFilter,#startsAtToFilter,#expiresAtRangeFilter,#expiresAtFromFilter,#expiresAtToFilter,#createdAtRangeFilter,#createdAtFromFilter,#createdAtToFilter").val("");
+      startsRange.start = null; startsRange.end = null;
+      expiresRange.start = null; expiresRange.end = null;
+      createdRange.start = null; createdRange.end = null;
+
+      (def.filters || []).forEach(f => {
+        const field = String(f.field || "");
+        const op = String(f.op || "").toLowerCase();
+        const value = String(f.value ?? "");
+        if (field === "title") $("#fTitle").val(value);
+        if (field === "message") $("#fMessage").val(value);
+        if (field === "severity") $("#fSeverity").val(value);
+        if (field === "is_active_text") $("#fActive").val(value);
+        if (field === "is_read_text") $("#fRead").val(value);
+        if (field === "in_window_text") $("#fWindow").val(value);
+        if (field === "starts_at_text" && op === "gte") $("#startsAtFromFilter").val(value);
+        if (field === "starts_at_text" && op === "lte") $("#startsAtToFilter").val(value);
+        if (field === "expires_at_text" && op === "gte") $("#expiresAtFromFilter").val(value);
+        if (field === "expires_at_text" && op === "lte") $("#expiresAtToFilter").val(value);
+        if (field === "created_at_text" && op === "gte") $("#createdAtFromFilter").val(value);
+        if (field === "created_at_text" && op === "lte") $("#createdAtToFilter").val(value);
+      });
+
+      startsRange.start = parseDatePtBR($("#startsAtFromFilter").val());
+      startsRange.end = parseDatePtBR($("#startsAtToFilter").val());
+      setRangeHidden();
+      expiresRange.start = parseDatePtBR($("#expiresAtFromFilter").val());
+      expiresRange.end = parseDatePtBR($("#expiresAtToFilter").val());
+      createdRange.start = parseDatePtBR($("#createdAtFromFilter").val());
+      createdRange.end = parseDatePtBR($("#createdAtToFilter").val());
+      setRangeHiddenGeneric(expiresRange, "expiresAtRangeFilter", "expiresAtFromFilter", "expiresAtToFilter");
+      setRangeHiddenGeneric(createdRange, "createdAtRangeFilter", "createdAtFromFilter", "createdAtToFilter");
+      rerunAllFilters();
+    }
+
+    function applySortFromSavedView(def) {
+      const first = Array.isArray(def.sort) ? def.sort[0] : null;
+      if (!first?.field) return;
+      sortState.key = String(first.field);
+      sortState.dir = String(first.dir || "asc").toLowerCase() === "desc" ? "desc" : "asc";
+      sortNotificationsBy(sortState.key, sortState.dir);
+      renderTableRespectingHeader();
+    }
+
+    function initDateRange() {
+      const $range = $("#startsAtRangeFilter");
+      try { if ($range.data("daterangepicker")) $range.data("daterangepicker").remove(); } catch {}
+      if (!($.fn.daterangepicker && window.moment)) return;
+
+      $range.daterangepicker({
+        autoUpdateInput: false,
+        linkedCalendars: false,
+        showDropdowns: true,
+        alwaysShowCalendars: true,
+        locale: { format: "DD/MM/YYYY", separator: " - ", applyLabel: "Aplicar", cancelLabel: "Limpar" }
+      });
+
+      $range.off("apply.daterangepicker.sv").on("apply.daterangepicker.sv", function (_ev, picker) {
+        startsRange.start = picker.startDate.clone().startOf("day").toDate();
+        startsRange.end = picker.endDate.clone().startOf("day").toDate();
+        setRangeHidden();
+        rerunAllFilters();
+      });
+
+      $range.off("cancel.daterangepicker.sv").on("cancel.daterangepicker.sv", function () {
+        startsRange.start = null; startsRange.end = null;
+        setRangeHidden();
+        rerunAllFilters();
+      });
+
+      $("#startsAtRangeBtn").off("click.sv").on("click.sv", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
+      });
+
+      const extraRanges = [
+        { input: "#expiresAtRangeFilter", btn: "#expiresAtRangeBtn", obj: expiresRange, from: "expiresAtFromFilter", to: "expiresAtToFilter" },
+        { input: "#createdAtRangeFilter", btn: "#createdAtRangeBtn", obj: createdRange, from: "createdAtFromFilter", to: "createdAtToFilter" }
+      ];
+
+      extraRanges.forEach((cfg) => {
+        const $el = $(cfg.input);
+        try { if ($el.data("daterangepicker")) $el.data("daterangepicker").remove(); } catch {}
+        $el.daterangepicker({
+          autoUpdateInput: false,
+          linkedCalendars: false,
+          showDropdowns: true,
+          alwaysShowCalendars: true,
+          locale: { format: "DD/MM/YYYY", separator: " - ", applyLabel: "Aplicar", cancelLabel: "Limpar" }
+        });
+
+        $el.off("apply.daterangepicker.sv").on("apply.daterangepicker.sv", function (_ev, picker) {
+          cfg.obj.start = picker.startDate.clone().startOf("day").toDate();
+          cfg.obj.end = picker.endDate.clone().startOf("day").toDate();
+          setRangeHiddenGeneric(cfg.obj, cfg.input.substring(1), cfg.from, cfg.to);
+          rerunAllFilters();
+        });
+
+        $el.off("cancel.daterangepicker.sv").on("cancel.daterangepicker.sv", function () {
+          cfg.obj.start = null; cfg.obj.end = null;
+          setRangeHiddenGeneric(cfg.obj, cfg.input.substring(1), cfg.from, cfg.to);
+          rerunAllFilters();
+        });
+
+        $(cfg.btn).off("click.sv").on("click.sv", function (e) {
+          e.preventDefault(); e.stopPropagation();
+          if ($el.data("daterangepicker")) $el.data("daterangepicker").show();
+        });
+      });
+    }
+
+    function ensureSavedViewsExtraButtons() {
+      const host = $("#notificationsSavedViewsHost");
+      if (!host.length) return;
+      const actions = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
+
+      if (!$("#btnSaveCurrentView").length) {
+        actions.append(`<button id="btnSaveCurrentView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="Salvar a view atual"><i class="fa fa-check"></i> Salvar</button>`);
+      }
+      if (!$("#btnDeleteCurrentView").length) {
+        actions.append(`<button id="btnDeleteCurrentView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left:6px;display:none;" title="Excluir esta view"><i class="fa fa-trash"></i> Deletar view</button>`);
+      }
+
+      if (savedViewsState.viewId) $("#btnDeleteCurrentView").show(); else $("#btnDeleteCurrentView").hide();
+
+      $("#btnSaveCurrentView").off("click.sv").on("click.sv", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if ($("#sv_btnSave").length) return $("#sv_btnSave").trigger("click");
+        if (savedViewsState.viewId) {
+          (async () => {
+            try {
+              await apiPut(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, {
+                name: savedViewsState.name || undefined,
+                definition_json: Object.assign({}, savedViewsState)
+              });
+              if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+            } catch (err) {
+              alert(err?.message || I18N.errorSaveView);
+            }
+          })();
+          return;
+        }
+        $("#sv_btnSaveAs").trigger("click");
+      });
+
+      $("#btnDeleteCurrentView").off("click.sv").on("click.sv", function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (!savedViewsState.viewId) return;
+        if (!confirm(I18N.confirmDeleteView)) return;
+        if ($(".sv-btn-delete").length) return $(".sv-btn-delete").trigger("click");
+        (async () => {
+          try {
+            await apiDelete(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`);
+            if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
+          } catch (err) {
+            alert(err?.message || I18N.errorDeleteView);
+          }
+        })();
+      });
+    }
+
+    function bindEvents() {
+      $("#notificationsTable").off("click.svRow").on("click.svRow", "tbody tr", function () {
+        const id = String($(this).data("id") || "");
+        if (!id) return;
+        window.location = `/NewNotification?id=${encodeURIComponent(id)}`;
+      });
+
+      $("#notificationsTable")
+        .off("keyup.sv change.sv")
+        .on("keyup.sv change.sv", "#notificationsFiltersRow input, #notificationsFiltersRow select", function () {
+          rerunAllFilters();
+        });
+
+      $("#notificationsTable")
+        .off("click.svSort")
+        .on("click.svSort", "#notificationsHeaderRow th.sortable", function (e) {
+          e.preventDefault();
+          const key = $(this).data("sort-key");
+          if (!key) return;
+          if (sortState.key === key) sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+          else { sortState.key = key; sortState.dir = "asc"; }
+          sortNotificationsBy(sortState.key, sortState.dir);
+          renderTableRespectingHeader();
+        });
+    }
+
+    async function loadNotifications() {
+      const companyId = pickCompanyId();
+      if (!companyId) throw new Error("Company não identificado.");
+      const qs = new URLSearchParams();
+      qs.set("company_id", String(companyId));
+      qs.set("include_expired", "true");
+      const data = await apiGet(`/api/notifications/admin?${qs.toString()}`);
+      notifications = normalizeArrayResponse(data);
+      sortNotificationsBy(sortState.key, sortState.dir);
+    }
+
+    async function init() {
+      $("#pageName,#subpageName").text("Notificações");
+      bindEvents();
+      await loadNotifications();
+      initDateRange();
+      renderTableRespectingHeader();
+
+      const allKeys = getAllColumnKeys();
+      savedViewsState.columns = allKeys.slice();
+      savedViewsState.columns_order = allKeys.slice();
+
+      await window.SavedViewsGrid.init({
+        entityName: "notifications",
+        hostSelector: "#notificationsSavedViewsHost",
+        tableSelector: "#notificationsTable",
+        headerRowSelector: "#notificationsTable thead tr:eq(1)",
+        filtersRowSelector: "#notificationsTable thead tr:eq(0)",
+        getAllColumnKeys: () => getAllColumnKeys(),
+        fallbackViewName: "",
+        includeFallbackOption: false,
+        fallbackDefinition: { columns: allKeys.slice(), columns_order: allKeys.slice(), filters: [], sort: [] },
+        getCurrentState: () => {
+          const domOrder = $("#notificationsHeaderRow th.sortable").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          const visible = $("#notificationsHeaderRow th.sortable:visible").map(function () { return String($(this).data("sort-key") || ""); }).get().filter(Boolean);
+          savedViewsState.columns_order = domOrder.length ? domOrder : savedViewsState.columns_order;
+          savedViewsState.columns = visible.length ? visible : savedViewsState.columns;
+          savedViewsState.filters = captureFiltersForSavedView();
+          savedViewsState.sort = sortState.key ? [{ field: sortState.key, dir: sortState.dir }] : [];
+          return Object.assign({}, savedViewsState);
+        },
+        applyState: ({ viewId, name, definition }) => {
+          savedViewsState.viewId = viewId;
+          savedViewsState.name = name || "";
+          savedViewsState.columns = Array.isArray(definition.columns) ? definition.columns.slice() : savedViewsState.columns;
+          savedViewsState.columns_order = Array.isArray(definition.columns_order) ? definition.columns_order.slice() : savedViewsState.columns_order;
+          renderTableRespectingHeader();
+          savedViewsState.filters = Array.isArray(definition.filters) ? definition.filters : [];
+          applyFiltersFromSavedView(definition);
+          savedViewsState.sort = Array.isArray(definition.sort) ? definition.sort : [];
+          applySortFromSavedView(definition);
+          initDateRange();
+          ensureSavedViewsExtraButtons();
+        },
+        onAfterApply: () => {
+          initDateRange();
+          renderTableRespectingHeader();
+          ensureSavedViewsExtraButtons();
+        }
+      });
+
+      ensureSavedViewsExtraButtons();
+    }
+
+    init().catch((err) => {
+      console.error(err);
+      alert(err?.message || I18N.errorLoad);
+    });
+  })();
+</script>
+<% %>

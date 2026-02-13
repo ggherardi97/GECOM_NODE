@@ -1,0 +1,90 @@
+<style>
+  .lead-detail-header { display: flex; justify-content: space-between; gap: 12px; align-items: start; flex-wrap: wrap; }
+  .lead-detail-header .right { display: flex; gap: 8px; }
+  .lead-kv { display: grid; grid-template-columns: 180px 1fr; row-gap: 8px; column-gap: 10px; }
+  .lead-kv label { margin: 0; color: #777; }
+  .lead-kv div { font-weight: 600; }
+  .lead-timeline { list-style: none; padding: 0; margin: 0; }
+  .lead-timeline li { border-left: 2px solid #e7eaec; padding: 8px 10px; margin-left: 8px; margin-bottom: 8px; background: #fafafa; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div class="lead-detail-header">
+          <div>
+            <h3 id="leadDetailTitle">-</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="label label-info" id="leadDetailStage">-</span>
+              <span class="label label-default" id="leadDetailStatus">-</span>
+              <small><strong><%= t('page.leads.columns.owner') %>:</strong> <span id="leadDetailOwner">-</span></small>
+            </div>
+          </div>
+          <div class="right">
+            <button id="leadDetailBack" class="btn btn-white btn-sm"><%= t('page.leads.detail.back') %></button>
+            <button id="leadDetailEdit" class="btn btn-primary btn-sm"><%= t('page.leads.actions.edit') %></button>
+            <button id="leadDetailWin" class="btn btn-primary btn-sm"><%= t('page.leads.actions.win') %></button>
+            <button id="leadDetailLose" class="btn btn-danger btn-sm"><%= t('page.leads.actions.lose') %></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="ibox">
+              <div class="ibox-title"><h5><%= t('page.leads.detail.mainInfo') %></h5></div>
+              <div class="ibox-content">
+                <div class="lead-kv">
+                  <label><%= t('page.leads.columns.company') %></label><div id="ldCompany">-</div>
+                  <label><%= t('page.leads.columns.contact') %></label><div id="ldContact">-</div>
+                  <label><%= t('page.leads.columns.email') %></label><div id="ldEmail">-</div>
+                  <label><%= t('page.leads.columns.phone') %></label><div id="ldPhone">-</div>
+                  <label><%= t('page.leads.columns.source') %></label><div id="ldSource">-</div>
+                  <label><%= t('page.leads.columns.value') %></label><div id="ldValue">-</div>
+                  <label><%= t('page.leads.columns.currency') %></label><div id="ldCurrency">-</div>
+                  <label><%= t('page.leads.detail.createdAt') %></label><div id="ldCreatedAt">-</div>
+                  <label><%= t('page.leads.detail.updatedAt') %></label><div id="ldUpdatedAt">-</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ibox">
+              <div class="ibox-title"><h5><%= t('page.leads.form.sectionNotes') %></h5></div>
+              <div class="ibox-content">
+                <div id="ldNotes">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="ibox">
+              <div class="ibox-title"><h5><%= t('page.leads.detail.moveStage') %></h5></div>
+              <div class="ibox-content">
+                <div class="input-group">
+                  <select id="leadDetailMoveStage" class="form-control"></select>
+                  <span class="input-group-btn">
+                    <button id="leadDetailMoveBtn" class="btn btn-primary" type="button"><%= t('page.leads.detail.move') %></button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ibox">
+              <div class="ibox-title"><h5><%= t('page.leads.detail.timeline') %></h5></div>
+              <div class="ibox-content">
+                <ul id="leadTimeline" class="lead-timeline"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+  <script src="/js/common/apiClient.js"></script>
+  <script src="/js/leads/lead.detail.js"></script>
+<% %>
