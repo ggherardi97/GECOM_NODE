@@ -18,6 +18,24 @@ router.get("/transports/:id", (req, res, next) => {
   return handler(req, res, next);
 });
 
+// GET /api/transports/:id/tracking?refresh=true|false -> backend GET /transports/:id/tracking
+router.get("/transports/:id/tracking", (req, res, next) => {
+  const handler = createProxyHandler({ backendPath: `/transports/${req.params.id}/tracking` });
+  return handler(req, res, next);
+});
+
+// PUT /api/transports/:id/tracking/link -> backend PUT /transports/:id/tracking/link
+router.put("/transports/:id/tracking/link", (req, res, next) => {
+  const handler = createProxyHandler({ backendPath: `/transports/${req.params.id}/tracking/link` });
+  return handler(req, res, next);
+});
+
+// DELETE /api/transports/:id/tracking/link -> backend DELETE /transports/:id/tracking/link
+router.delete("/transports/:id/tracking/link", (req, res, next) => {
+  const handler = createProxyHandler({ backendPath: `/transports/${req.params.id}/tracking/link` });
+  return handler(req, res, next);
+});
+
 // POST /api/transports -> backend POST /transports
 router.post("/transports", createProxyHandler({ backendPath: "/transports" }));
 

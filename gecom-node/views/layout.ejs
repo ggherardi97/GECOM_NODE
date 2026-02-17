@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -13,7 +13,7 @@
   <link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
   <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
 
-  <!-- Ícone -->
+  <!-- Ãcone -->
   <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
   <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
 
@@ -41,6 +41,8 @@
 
   <script src="/Assets/js/functionalities/dynamicsModal.js"></script>
   <script src="/Assets/js/functionalities/savedViewsGrid.js"></script>
+  <script src="/js/common/aiApi.js"></script>
+  <script src="/js/gecom-ai.js"></script>
   <script src="/Assets/js/enums/globalEnum.js"></script>
   <script src="/Assets/js/authContext.js"></script>
 
@@ -54,7 +56,9 @@
       body.mini-navbar .menuDivider {
         display: none !important;
       }
-
+.sv-picker{
+  height: 35px !important;
+}
       .dynamic-modal-overlay {
         display: none;
         position: fixed;
@@ -181,10 +185,88 @@
         color: #999;
         font-size: 11px;
       }
+
+      .gecom-ai-top-search {
+        position: relative;
+      }
+
+      .gecom-ai-top-search .ai-top-btn {
+        color: #676a6c;
+      }
+
+      .gecom-ai-top-search .ai-top-input-wrap {
+        position: absolute;
+        top: 44px;
+        right: 0;
+        width: 420px;
+        background: #fff;
+        border: 1px solid #e7eaec;
+        border-radius: 4px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+        padding: 10px;
+        z-index: 1002;
+        display: none;
+      }
+
+      .gecom-ai-top-search.is-open .ai-top-input-wrap {
+        display: block;
+      }
+
+      .gecom-ai-top-search .ai-top-results {
+        max-height: 320px;
+        overflow-y: auto;
+        margin-top: 8px;
+      }
+
+      .gecom-ai-top-search .ai-top-group {
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .gecom-ai-top-search .ai-top-group-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #999;
+        margin: 0;
+        padding: 6px 8px;
+        border-bottom: 1px solid #f4f4f4;
+        background: #fafafa;
+      }
+
+      .gecom-ai-top-search .ai-top-item {
+        padding: 8px;
+        border-bottom: 1px solid #f7f7f7;
+      }
+
+      .gecom-ai-top-search .ai-top-item:last-child {
+        border-bottom: none;
+      }
+
+      .gecom-ai-top-search .ai-top-item-sub {
+        font-size: 12px;
+        color: #888;
+      }
+
+      @media (max-width: 768px) {
+        .gecom-ai-top-search .ai-top-input-wrap {
+          width: 300px;
+          right: -70px;
+        }
+      }
     </style>
 </head>
 
 <body>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("gecom.sidebar.collapsed") === "1") {
+          document.body.classList.add("mini-navbar");
+        }
+      } catch {}
+    })();
+  </script>
   <!-- Global Spinner Overlay -->
   <div id="globalSpinner" class="gecom-spinner-overlay" aria-hidden="true">
     <div class="gecom-spinner-content">
@@ -228,10 +310,17 @@
             </a>
           </li>
           
-          <li>
+          <li id="myActivitiesTab" style="display: none;">
             <a href="/MyActivities">
               <i class="fa fa-tasks"></i>
               <span class="nav-label">Minhas Atividades</span>
+            </a>
+          </li>
+
+          <li id="aiHubTab" style="display: none;">
+            <a href="/AI">
+              <i class="fa fa-magic"></i>
+              <span class="nav-label">IA</span>
             </a>
           </li>
 
@@ -274,14 +363,14 @@
             </a>
           </li>
 
-          <li>
+          <li id="leadsTab" style="display: none;">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
             </a>
           </li>
 
-          <li><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li id="configDivider" style="display: none;"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
           <li id='notificationList' style="display: none;">
             <a href="/Notifications">
               <i class="fa fa-bell"></i>
@@ -289,7 +378,7 @@
             </a>
           </li>
 
-          <!-- ✅ opcional: botões simples pra testar troca de idioma -->
+          <!-- âœ… opcional: botÃµes simples pra testar troca de idioma -->
           <!--
           <li style="padding:10px 20px;">
             <button class="btn btn-xs btn-white" onclick="setLanguage('pt-BR')">PT</button>
@@ -320,15 +409,26 @@
               </ul>
             </li>
 
+            <li id="aiTopSearchLi" class="gecom-ai-top-search" style="display:none;">
+              <a href="#" class="ai-top-btn" id="aiTopSearchToggle" title="Busca global">
+                <i class="fa fa-search"></i>
+              </a>
+              <div class="ai-top-input-wrap" id="aiTopSearchPanel">
+                <input id="aiTopSearchInput" type="text" class="form-control input-sm" placeholder="Buscar clientes, processos, invoices e produtos..." />
+                <div id="aiTopSearchStatus" class="text-muted small" style="margin-top:6px; display:none;"></div>
+                <div id="aiTopSearchResults" class="ai-top-results"></div>
+              </div>
+            </li>
+
             <!-- Language selector -->
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
-                🌎 <span id="langLabel">PT</span> <b class="caret"></b>
+                <span id="langLabel">PT</span> <b class="caret"></b>
               </a>
               <ul class="dropdown-menu dropdown-user">
-                <li><a href="#" onclick="return window.GECOM_LANG.go('pt-BR');">🇧🇷 Português</a></li>
-                <li><a href="#" onclick="return window.GECOM_LANG.go('en');">🇺🇸 English</a></li>
-                <li><a href="#" onclick="return window.GECOM_LANG.go('es');">🇪🇸 Español</a></li>
+                <li><a href="#" onclick="return window.GECOM_LANG.go('pt-BR');">Português</a></li>
+                <li><a href="#" onclick="return window.GECOM_LANG.go('en');">English</a></li>
+                <li><a href="#" onclick="return window.GECOM_LANG.go('es');">Español</a></li>
               </ul>
             </li>
 
@@ -423,9 +523,27 @@
 
   <%- typeof script !=='undefined' ? script : '' %>
     <%- typeof scripts !=='undefined' ? scripts : '' %>
+      <script>
+        window.__features = Object.assign({}, window.__features || {}, {
+          enableAI: <%- JSON.stringify(!!enableAI) %>
+        });
+      </script>
 
       <script>
         (function () {
+          function persistSidebarState() {
+            try {
+              const collapsed = document.body.classList.contains("mini-navbar") ? "1" : "0";
+              localStorage.setItem("gecom.sidebar.collapsed", collapsed);
+            } catch {}
+          }
+
+          document.addEventListener("click", function (ev) {
+            const trigger = ev.target && ev.target.closest ? ev.target.closest(".navbar-minimalize") : null;
+            if (!trigger) return;
+            setTimeout(persistSidebarState, 80);
+          });
+
           function pickCompanyId() {
             return (
               window.__auth?.company_id ||
@@ -584,9 +702,271 @@
           if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
               window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
+              persistSidebarState();
             });
           } else {
             window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
+            persistSidebarState();
+          }
+        })();
+      </script>
+
+      <script>
+        (function () {
+          function debounce(fn, wait) {
+            let timer = null;
+            return function () {
+              const ctx = this;
+              const args = arguments;
+              clearTimeout(timer);
+              timer = setTimeout(function () {
+                fn.apply(ctx, args);
+              }, wait);
+            };
+          }
+
+          function esc(v) {
+            if (v == null) return "";
+            return String(v)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+
+          function groupByEntity(items) {
+            const groups = {};
+            (items || []).forEach((item) => {
+              const key = String(item?.entityName || item?.entity_name || "outros");
+              if (!groups[key]) groups[key] = [];
+              groups[key].push(item);
+            });
+            return groups;
+          }
+
+          function setStatus(text) {
+            const el = document.getElementById("aiTopSearchStatus");
+            if (!el) return;
+            if (!text) {
+              el.style.display = "none";
+              el.textContent = "";
+              return;
+            }
+            el.style.display = "block";
+            el.textContent = text;
+          }
+
+          function normalizeArrayResponse(data) {
+            if (Array.isArray(data)) return data;
+            if (Array.isArray(data?.data)) return data.data;
+            if (Array.isArray(data?.rows)) return data.rows;
+            if (Array.isArray(data?.items)) return data.items;
+            return [];
+          }
+
+          async function readJsonSafe(response) {
+            const text = await response.text();
+            if (!text) return {};
+            try { return JSON.parse(text); } catch { return { message: text }; }
+          }
+
+          async function getJson(url) {
+            const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+            const data = await readJsonSafe(res);
+            if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+            return data;
+          }
+
+          function pickId(row) {
+            return row?.id || row?.Id || row?.product_id || row?.invoice_id || row?.process_id || row?.company_id || null;
+          }
+
+          function normalizeIndexFromEntity(entityName, rows) {
+            const source = String(entityName || "").toLowerCase();
+            const mapped = [];
+            (rows || []).forEach((row) => {
+              const id = pickId(row);
+              if (!id) return;
+
+              if (source === "companies") {
+                mapped.push({
+                  entityName: "Clientes",
+                  id,
+                  title: row?.company_name || row?.fantasy_name || row?.legal_name || row?.name || `Cliente ${id}`,
+                  subtitle: row?.email || row?.phone || "",
+                  href: `/ClientDetails?id=${encodeURIComponent(String(id))}`
+                });
+              } else if (source === "processes") {
+                mapped.push({
+                  entityName: "Processos",
+                  id,
+                  title: row?.process_number || row?.name || `Processo ${id}`,
+                  subtitle: row?.companies?.company_name || row?.company_name || row?.status || "",
+                  href: `/ProcessDetail?id=${encodeURIComponent(String(id))}`
+                });
+              } else if (source === "invoices") {
+                mapped.push({
+                  entityName: "Invoices",
+                  id,
+                  title: row?.invoice_number || row?.number || `Invoice ${id}`,
+                  subtitle: row?.companies?.company_name || row?.company_name || row?.status || "",
+                  href: `/NewInvoice?id=${encodeURIComponent(String(id))}`
+                });
+              } else if (source === "products") {
+                mapped.push({
+                  entityName: "Produtos",
+                  id,
+                  title: row?.name || row?.product_name || row?.sku || `Produto ${id}`,
+                  subtitle: row?.sku || row?.description || "",
+                  href: `/ProductDetail?id=${encodeURIComponent(String(id))}`
+                });
+              }
+            });
+            return mapped;
+          }
+
+          function filterRowsByQuery(rows, query) {
+            const q = String(query || "").toLowerCase();
+            return (rows || []).filter((row) => {
+              const text = [
+                row?.title, row?.subtitle, row?.name, row?.company_name, row?.process_number,
+                row?.invoice_number, row?.product_name, row?.email, row?.phone, row?.sku, row?.status
+              ].map((v) => String(v || "").toLowerCase()).join(" ");
+              return text.includes(q);
+            });
+          }
+
+          function limitResults(rows, maxPerGroup) {
+            return (rows || []).slice(0, maxPerGroup);
+          }
+
+          function renderResults(items) {
+            const root = document.getElementById("aiTopSearchResults");
+            if (!root) return;
+            root.innerHTML = "";
+
+            if (!items.length) {
+              setStatus("Nenhum resultado.");
+              return;
+            }
+
+            setStatus("");
+            const groups = groupByEntity(items);
+            Object.keys(groups).forEach((entityName) => {
+              const rows = groups[entityName].map((item) => {
+                const title = esc(item?.title || item?.name || item?.id || "-");
+                const subtitle = esc(item?.subtitle || "");
+                const href = String(item?.href || item?.url || "");
+                const content = `
+                  <div class="ai-top-item">
+                    <div><strong>${title}</strong></div>
+                    ${subtitle ? `<div class="ai-top-item-sub">${subtitle}</div>` : ""}
+                  </div>
+                `;
+                if (!href) return content;
+                return `<a href="${href}" style="text-decoration:none; color:inherit;">${content}</a>`;
+              }).join("");
+
+              root.insertAdjacentHTML("beforeend", `
+                <div class="ai-top-group">
+                  <p class="ai-top-group-title">${esc(entityName)}</p>
+                  ${rows}
+                </div>
+              `);
+            });
+          }
+
+          const indexCache = {
+            companies: null,
+            processes: null,
+            invoices: null,
+            products: null
+          };
+
+          async function loadIndexes() {
+            if (!indexCache.companies) {
+              indexCache.companies = normalizeArrayResponse(await getJson("/api/companies?fields=summary"));
+            }
+            if (!indexCache.processes) {
+              indexCache.processes = normalizeArrayResponse(await getJson("/api/processes"));
+            }
+            if (!indexCache.invoices) {
+              indexCache.invoices = normalizeArrayResponse(await getJson("/api/invoices?fields=summary"));
+            }
+            if (!indexCache.products) {
+              indexCache.products = normalizeArrayResponse(await getJson("/api/products"));
+            }
+          }
+
+          async function runTopSearch() {
+            const input = document.getElementById("aiTopSearchInput");
+            if (!input) return;
+            const query = String(input.value || "").trim();
+            if (!query) {
+              const root = document.getElementById("aiTopSearchResults");
+              if (root) root.innerHTML = "";
+              setStatus("");
+              return;
+            }
+
+            setStatus("Buscando...");
+            try {
+              await loadIndexes();
+              const all = [
+                ...normalizeIndexFromEntity("companies", filterRowsByQuery(indexCache.companies, query)),
+                ...normalizeIndexFromEntity("processes", filterRowsByQuery(indexCache.processes, query)),
+                ...normalizeIndexFromEntity("invoices", filterRowsByQuery(indexCache.invoices, query)),
+                ...normalizeIndexFromEntity("products", filterRowsByQuery(indexCache.products, query))
+              ];
+
+              const groupedLimited = [];
+              const grouped = groupByEntity(all);
+              Object.keys(grouped).forEach((group) => {
+                groupedLimited.push(...limitResults(grouped[group], 6));
+              });
+
+              renderResults(groupedLimited);
+            } catch (err) {
+              setStatus(err?.message || "Falha ao buscar.");
+            }
+          }
+
+          const debouncedSearch = debounce(runTopSearch, 400);
+
+          function initTopSearch() {
+            const li = document.getElementById("aiTopSearchLi");
+            const toggle = document.getElementById("aiTopSearchToggle");
+            const panel = document.getElementById("aiTopSearchPanel");
+            const input = document.getElementById("aiTopSearchInput");
+            if (!li || !toggle || !panel || !input) return;
+
+            li.style.display = "";
+
+            toggle.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              li.classList.toggle("is-open");
+              if (li.classList.contains("is-open")) {
+                setTimeout(() => input.focus(), 10);
+              }
+            });
+
+            input.addEventListener("input", debouncedSearch);
+            input.addEventListener("keydown", function (ev) {
+              if (ev.key === "Escape") li.classList.remove("is-open");
+            });
+
+            document.addEventListener("click", function (ev) {
+              if (!li.classList.contains("is-open")) return;
+              if (li.contains(ev.target)) return;
+              li.classList.remove("is-open");
+            });
+          }
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initTopSearch);
+          } else {
+            initTopSearch();
           }
         })();
       </script>
@@ -611,7 +991,7 @@
         }
       </script>
 
-      <!-- Mudança de idioma -->
+      <!-- MudanÃ§a de idioma -->
 <script>
   (function () {
     // Prevent double-installation
@@ -830,7 +1210,7 @@
 </script>
 
 
-      <!-- Loader com global spin e validação de sessão -->
+      <!-- Loader com global spin e validaÃ§Ã£o de sessÃ£o -->
       <script>
         (function () {
           // Prevent double-installation
@@ -911,7 +1291,7 @@
 
             // Fallback if modal not found
             if (!modalBtn || !modalTitle || !modalBody || !btnSave || !btnClose) {
-              alert("Sua sessão expirou. Faça login novamente.");
+              alert("Sua sessÃ£o expirou. FaÃ§a login novamente.");
               window.location.href = "/";
               return;
             }
@@ -1120,7 +1500,7 @@
 
       <script src="/Assets/js/globalSpinner.js"></script>
 
-      <!-- Script de permissões -->
+      <!-- Script de permissÃµes -->
       <script>
         (function () {
           try {
@@ -1137,15 +1517,19 @@
               $('a[name="btn_act_new"]').hide();
               $('button[name="btn_act_new"]').hide();
               $('button[name="btn_act_new_manager"]').hide();
-              $('#profilePage"]').hide();
+              $("#profilePage").hide();
               $('input[name="btn_act_new"]').hide();//
             }
             else if (window.__auth.isManager) {
               $('button[name="btn_act_new_manager"]').hide();
             }
             else if (window.__auth.isAdmin) {
+              $("#myActivitiesTab").show();
+              if (window.__features?.enableAI) $("#aiHubTab").show();
               $("#clientTab").show();
               $("#productTab").show();
+              $("#leadsTab").show();
+              $("#configDivider").show();
               $("#notificationList").show();
             }
 
@@ -1335,7 +1719,7 @@
 
             const opts = options || {};
 
-            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "Confirmação");
+            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "ConfirmaÃ§Ã£o");
             modalBody.innerHTML = `<p>${String(message || "")}</p>`;
 
             btnSave.textContent = opts.okText || tt("page.clientDetails.globalModal.confirmOk", "Confirmar");
@@ -1365,3 +1749,10 @@
 </body>
 
 </html>
+
+
+
+
+
+
+

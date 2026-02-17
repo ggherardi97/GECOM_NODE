@@ -420,16 +420,8 @@
       `);
     }
 
-    if (!$("#btnDeleteCurrentLeadsView").length) {
-      actions.append(`
-        <button id="btnDeleteCurrentLeadsView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left: 6px; display:none;" title="${esc(t("page.layout.savedViews.deleteCurrentTitle", "Excluir esta view"))}">
-          <i class="fa fa-trash"></i> ${esc(t("page.layout.savedViews.deleteLabel", "Deletar view"))}
-        </button>
-      `);
-    }
-
-    if (state.savedView.viewId) $("#btnDeleteCurrentLeadsView").show();
-    else $("#btnDeleteCurrentLeadsView").hide();
+    // Keep only default small delete icon from SavedViewsGrid.
+    $("#btnDeleteCurrentLeadsView").remove();
 
     $("#btnSaveCurrentLeadsView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
       e.preventDefault();
@@ -465,28 +457,7 @@
       tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
     });
 
-    $("#btnDeleteCurrentLeadsView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!state.savedView.viewId) return;
-
-      if (!confirm(t("page.layout.savedViews.deleteCurrentConfirm", "Excluir a view selecionada?"))) return;
-
-      const did = tryTriggerAny(["#sv_btnDelete", "[data-action='delete']", ".sv-btn-delete"]);
-      if (did) return;
-
-      (async () => {
-        try {
-          await api.delete(`/api/saved-views/${encodeURIComponent(state.savedView.viewId)}`);
-          state.savedView.viewId = null;
-          state.savedView.name = "";
-          if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
-        } catch (err) {
-          console.error(err);
-          toast(err?.message || t("page.leads.messages.savedViewsError", "Falha ao excluir view"), "error");
-        }
-      })();
-    });
+    // Delete action is handled by default SavedViewsGrid icon.
   }
 
   function initSavedViews() {

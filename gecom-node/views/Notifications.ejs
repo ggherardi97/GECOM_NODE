@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
+﻿<link rel="stylesheet" href="../Assets/inspinia/css/plugins/daterangepicker/daterangepicker-bs3.css">
 <style>
   .ibox-title { padding: 15px 90px 20px 15px; }
   th.sortable { cursor: pointer; user-select: none; }
@@ -9,9 +9,7 @@
   .sv-actionbar-btn { padding: 3px 8px; }
   .notif-read { background: #eef9f5; }
   .notif-message { max-width: 520px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .text-muted{
-display: none !important;
-}
+  .text-muted { display:none !important; }
   .sv-actions{
     margin-left: unset !important;
   }
@@ -534,11 +532,8 @@ display: none !important;
       if (!$("#btnSaveCurrentView").length) {
         actions.append(`<button id="btnSaveCurrentView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="Salvar a view atual"><i class="fa fa-check"></i> Salvar</button>`);
       }
-      if (!$("#btnDeleteCurrentView").length) {
-        actions.append(`<button id="btnDeleteCurrentView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left:6px;display:none;" title="Excluir esta view"><i class="fa fa-trash"></i> Deletar view</button>`);
-      }
-
-      if (savedViewsState.viewId) $("#btnDeleteCurrentView").show(); else $("#btnDeleteCurrentView").hide();
+      // Keep only default small delete icon from SavedViewsGrid.
+      $("#btnDeleteCurrentView").remove();
 
       $("#btnSaveCurrentView").off("click.sv").on("click.sv", function (e) {
         e.preventDefault(); e.stopPropagation();
@@ -560,20 +555,7 @@ display: none !important;
         $("#sv_btnSaveAs").trigger("click");
       });
 
-      $("#btnDeleteCurrentView").off("click.sv").on("click.sv", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        if (!savedViewsState.viewId) return;
-        if (!confirm(I18N.confirmDeleteView)) return;
-        if ($(".sv-btn-delete").length) return $(".sv-btn-delete").trigger("click");
-        (async () => {
-          try {
-            await apiDelete(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`);
-            if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
-          } catch (err) {
-            alert(err?.message || I18N.errorDeleteView);
-          }
-        })();
-      });
+      // Delete action is handled by default SavedViewsGrid icon.
     }
 
     function bindEvents() {
@@ -673,3 +655,5 @@ display: none !important;
   })();
 </script>
 <% %>
+
+

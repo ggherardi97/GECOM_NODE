@@ -3,16 +3,13 @@
   .ibox-title {
     padding: 15px 90px 20px 15px;
   }
-.text-muted{
-display: none !important;
-}
   .sv-actions{
     margin-left: unset !important;
   }
   th {
     padding-left: 0px;
   }
-
+  .text-muted { display:none !important; }
   .clicker {
     cursor: pointer;
   }
@@ -865,17 +862,8 @@ display: none !important;
           `);
         }
 
-        if (!$("#btnDeleteCurrentView").length) {
-          actions.append(`
-            <button id="btnDeleteCurrentView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left: 6px; display:none;" title="Excluir esta view">
-              <i class="fa fa-trash"></i> Deletar view
-            </button>
-          `);
-        }
-
-        // Toggle delete visibility based on current viewId
-        if (savedViewsState.viewId) $("#btnDeleteCurrentView").show();
-        else $("#btnDeleteCurrentView").hide();
+        // Keep only default small delete icon from SavedViewsGrid.
+        $("#btnDeleteCurrentView").remove();
 
         $("#btnSaveCurrentView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
           e.preventDefault(); e.stopPropagation();
@@ -920,41 +908,8 @@ display: none !important;
           tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
         });
 
-        $("#btnDeleteCurrentView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
-          e.preventDefault(); e.stopPropagation();
-
-          if (!savedViewsState.viewId) return;
-          if (!confirm(I18N.confirmDeleteView)) return;
-
-          // Prefer library delete if exists
-          const did = tryTriggerAny([
-            "#sv_btnDelete",
-            "[data-action='delete']",
-            ".sv-btn-delete"
-          ]);
-          if (did) return;
-
-          // Fallback to API
-          (async () => {
-            try {
-              await apiDelete(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`);
-
-              savedViewsState.viewId = null;
-              savedViewsState.name = "";
-
-              if (typeof window.SavedViewsGrid?.reload === "function") {
-                window.SavedViewsGrid.reload();
-                return;
-              }
-
-              // Hard fallback
-              window.location.reload();
-            } catch (err) {
-              console.error(err);
-              alert(err?.message || I18N.errorDeleteView);
-            }
-          })();
-        });
+        // Delete action stays on default SavedViewsGrid icon.
+        ensureBulkDeleteButton();
       }
 
       function ensureBulkDeleteButton() {
@@ -965,7 +920,7 @@ display: none !important;
         const container = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
 
         container.append(`
-          <button id="btnDeleteSelectedProducts" class="btn btn-danger btn-xs" style="display:none; margin-left: 8px;">
+          <button id="btnDeleteSelectedProducts" class="btn btn-white btn-xs" style="display:none; margin-left: 8px;">
             <i class="fa fa-trash"></i>
             Excluir (<span class="count">0</span>)
           </button>

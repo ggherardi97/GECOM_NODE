@@ -7,7 +7,12 @@
   th {
     padding-left: 0px;
   }
-
+.text-muted{
+display: none !important;
+}
+  .sv-actions{
+    margin-left: unset !important;
+  }
   .clicker {
     cursor: pointer;
   }
@@ -35,7 +40,6 @@
     opacity: .75;
   }
   .sv-actions { margin-left: unset !important; }
-  .sv-name.text-muted { display: inline-block !important; }
   #processSavedViewsHost .sv-bar { margin-top: -2px; }
   th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
   .sv-date-filter .input-group-addon { padding: 3px 8px; cursor: pointer; }
@@ -208,10 +212,6 @@
 <!-- Peity -->
 <script src="../Assets/inspinia/js/plugins/peity/jquery.peity.min.js"></script>
 <script src="../Assets/inspinia/js/demo/peity-demo.js"></script>
-
-<!-- Custom and plugin javascript -->
-<script src="../Assets/inspinia/js/inspinia.js"></script>
-<script src="../Assets/inspinia/js/plugins/pace/pace.min.js"></script>
 
 <!-- jQuery UI -->
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
@@ -890,12 +890,8 @@
     if (!$("#btnSaveCurrentProcessView").length) {
       actions.append(`<button id="btnSaveCurrentProcessView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="<%= t('page.layout.savedViews.saveCurrentTitle') %>"><i class="fa fa-check"></i> <%= t('page.layout.savedViews.saveLabel') %></button>`);
     }
-    if (!$("#btnDeleteCurrentProcessView").length) {
-      actions.append(`<button id="btnDeleteCurrentProcessView" class="btn btn-danger btn-xs sv-actionbar-btn" style="margin-left:6px; display:none;" title="<%= t('page.layout.savedViews.deleteCurrentTitle') %>"><i class="fa fa-trash"></i> <%= t('page.layout.savedViews.deleteLabel') %></button>`);
-    }
-
-    if (savedViewsState.viewId) $("#btnDeleteCurrentProcessView").show();
-    else $("#btnDeleteCurrentProcessView").hide();
+    // Keep only default small delete icon from SavedViewsGrid.
+    $("#btnDeleteCurrentProcessView").remove();
 
     $("#btnSaveCurrentProcessView").off("click.svSaveCurrent").on("click.svSaveCurrent", function (e) {
       e.preventDefault(); e.stopPropagation();
@@ -926,21 +922,7 @@
       tryTriggerAny(["#sv_btnSaveAs", "[data-action='saveas']", ".sv-btn-saveas"]);
     });
 
-    $("#btnDeleteCurrentProcessView").off("click.svDeleteCurrent").on("click.svDeleteCurrent", function (e) {
-      e.preventDefault(); e.stopPropagation();
-      if (!savedViewsState.viewId) return;
-      if (!confirm("<%= t('page.layout.savedViews.deleteCurrentConfirm') %>")) return;
-      const did = tryTriggerAny(["#sv_btnDelete", "[data-action='delete']", ".sv-btn-delete"]);
-      if (did) return;
-      (async () => {
-        try {
-          await fetch(`/api/saved-views/${encodeURIComponent(savedViewsState.viewId)}`, { method: "DELETE", headers: { Accept: "application/json" } });
-          savedViewsState.viewId = null;
-          savedViewsState.name = "";
-          if (typeof window.SavedViewsGrid?.reload === "function") window.SavedViewsGrid.reload();
-        } catch (err) { console.error(err); }
-      })();
-    });
+    // Delete action is handled by default SavedViewsGrid icon.
   }
 
   function captureFiltersForSavedView() {

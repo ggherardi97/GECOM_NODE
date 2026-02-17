@@ -185,6 +185,9 @@
                       <th style="min-width:160px;">Destino *</th>
                       <th style="min-width:170px;">Tipo *</th>
                       <th style="min-width:170px;">Status *</th>
+                      <th style="min-width:120px;">Tracking Modo</th>
+                      <th style="min-width:150px;">Tracking Provider</th>
+                      <th style="min-width:160px;">Tracking External ID</th>
                       <th style="min-width:150px;">Previsão Embarque</th>
                       <th style="min-width:150px;">Previsão Chegada</th>
                       <th style="width:70px;" class="text-center">Ações</th>
@@ -310,6 +313,17 @@
   async function apiPost(url, payload) {
     const resp = await fetch(url, {
       method: "POST",
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(payload || {})
+    });
+    const data = await readJsonSafe(resp);
+    if (!resp.ok) throw new Error(data?.message || "Falha ao salvar.");
+    return data;
+  }
+
+  async function apiPut(url, payload) {
+    const resp = await fetch(url, {
+      method: "PUT",
       headers: { "Accept": "application/json", "Content-Type": "application/json" },
       body: JSON.stringify(payload || {})
     });
@@ -601,6 +615,18 @@
       .concat(state.transportStatuses.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`))
       .join("");
 
+    const trackingModeOptions = `
+      <option value="">-</option>
+      <option value="AIR">AIR</option>
+      <option value="SEA">SEA</option>
+    `;
+
+    const trackingProviderOptions = `
+      <option value="">-</option>
+      <option value="FR24">FR24</option>
+      <option value="MARINETRAFFIC">MARINETRAFFIC</option>
+    `;
+
     return `
       <tr data-row-id="${escapeHtml(rowId)}">
         <td><input type="text" class="form-control" id="${escapeHtml(rowId)}_company" placeholder="Ex: Maersk" /></td>
@@ -613,6 +639,13 @@
         <td>
           <select class="form-control transport-status" id="${escapeHtml(rowId)}_status">${statusOptions}</select>
         </td>
+        <td>
+          <select class="form-control transport-tracking-mode" id="${escapeHtml(rowId)}_tracking_mode">${trackingModeOptions}</select>
+        </td>
+        <td>
+          <select class="form-control transport-tracking-provider" id="${escapeHtml(rowId)}_tracking_provider">${trackingProviderOptions}</select>
+        </td>
+        <td><input type="text" class="form-control" id="${escapeHtml(rowId)}_tracking_external_id" placeholder="AZ1234 / IMO123..." /></td>
         <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_departure" autocomplete="off" /></td>
         <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_arrival" autocomplete="off" /></td>
         <td class="text-center">
@@ -635,6 +668,8 @@
     initDatePickers(tr);
     initSelect2($(tr).find("select.transport-type"), "Selecionar...", null);
     initSelect2($(tr).find("select.transport-status"), "Selecionar...", null);
+    initSelect2($(tr).find("select.transport-tracking-mode"), "Selecionar...", null);
+    initSelect2($(tr).find("select.transport-tracking-provider"), "Selecionar...", null);
 
     // ✅ typeahead align fix per row
     initCountriesTypeahead(tr);
@@ -659,6 +694,9 @@
       const destination = (document.getElementById(`${rowId}_destination`)?.value || "").trim();
       const transport_type_id = String(document.getElementById(`${rowId}_type`)?.value || "").trim();
       const transport_status_id = String(document.getElementById(`${rowId}_status`)?.value || "").trim();
+      const tracking_mode = String(document.getElementById(`${rowId}_tracking_mode`)?.value || "").trim();
+      const tracking_provider = String(document.getElementById(`${rowId}_tracking_provider`)?.value || "").trim();
+      const tracking_external_id = String(document.getElementById(`${rowId}_tracking_external_id`)?.value || "").trim();
 
       const departure_forecast = toIsoZFromBr(document.getElementById(`${rowId}_departure`)?.value || "");
       const arrival_forecast = toIsoZFromBr(document.getElementById(`${rowId}_arrival`)?.value || "");
@@ -670,6 +708,9 @@
         destination,
         transport_type_id: transport_type_id || null,
         transport_status_id: transport_status_id || null,
+        tracking_mode: tracking_mode || null,
+        tracking_provider: tracking_provider || null,
+        tracking_external_id: tracking_external_id || null,
         departure_forecast: departure_forecast || null,
         arrival_forecast: arrival_forecast || null
       };
@@ -681,6 +722,21 @@
     if (!rows.length) return "Adicione pelo menos 1 transporte.";
     const invalid = rows.find(r => !r.transport_company || !r.origin || !r.destination || !r.transport_type_id || !r.transport_status_id);
     if (invalid) return "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.";
+
+    for (const r of rows) {
+      const hasAnyTracking = !!(r.tracking_mode || r.tracking_provider || r.tracking_external_id);
+      if (!hasAnyTracking) continue;
+
+      if (!r.tracking_mode || !r.tracking_provider || !r.tracking_external_id) {
+        return "Se preencher tracking, informe Modo, Provider e External ID.";
+      }
+      if (r.tracking_mode === "AIR" && r.tracking_provider !== "FR24") {
+        return "Tracking AIR requer provider FR24.";
+      }
+      if (r.tracking_mode === "SEA" && r.tracking_provider !== "MARINETRAFFIC") {
+        return "Tracking SEA requer provider MARINETRAFFIC.";
+      }
+    }
     return null;
   }
 
@@ -724,7 +780,7 @@
   async function createTransportsForProcess(processId) {
     const rows = readTransportRows();
     for (const t of rows) {
-      await apiPost("/api/transports", {
+      const createdTransport = await apiPost("/api/transports", {
         transport_company: t.transport_company,
         origin: t.origin,
         destination: t.destination,
@@ -735,6 +791,16 @@
         arrival_forecast: t.arrival_forecast,
         process_id: processId
       });
+
+      const transportId = String(createdTransport?.id || createdTransport?.transport_id || "").trim();
+      const hasTracking = !!(t.tracking_mode && t.tracking_provider && t.tracking_external_id);
+      if (transportId && hasTracking) {
+        await apiPut(`/api/transports/${encodeURIComponent(transportId)}/tracking/link`, {
+          mode: t.tracking_mode,
+          provider: t.tracking_provider,
+          externalId: t.tracking_external_id
+        });
+      }
     }
   }
 

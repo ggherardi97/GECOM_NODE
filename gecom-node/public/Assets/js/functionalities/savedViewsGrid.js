@@ -6,6 +6,7 @@
 */
 (function () {
   if (window.SavedViewsGrid && window.SavedViewsGrid.__gecom_v2 === true) return;
+  const registry = new Map(); // entityName -> { cfg, state }
 
   const SavedViewsGrid = {
     __gecom_v2: true,
@@ -20,6 +21,7 @@
         currentName: "",
         fallbackApplied: false,
       };
+      registry.set(String(cfg.entityName), { cfg, state });
 
       renderShell(cfg);
       wireBasicActions(cfg, state);
@@ -33,6 +35,32 @@
       // Ensure fixed columns never hidden by any later logic
       enforceFixedColumns(cfg);
 
+      return true;
+    },
+
+    getCurrentDefinition(entityName) {
+      const key = String(entityName || "").trim();
+      if (!key) return null;
+      const instance = registry.get(key);
+      if (!instance || !instance.cfg) return null;
+
+      const raw = instance.cfg.getCurrentState() || {};
+      return normalizeDefinition(raw);
+    },
+
+    async applyExternalDefinition(entityName, definition, nameLabel) {
+      const key = String(entityName || "").trim();
+      if (!key) throw new Error("SavedViewsGrid.applyExternalDefinition: missing entityName.");
+
+      const instance = registry.get(key);
+      if (!instance || !instance.cfg || !instance.state) {
+        throw new Error(`SavedViewsGrid.applyExternalDefinition: grid not initialized for entity '${key}'.`);
+      }
+
+      const label = String(nameLabel || "IA").trim() || "IA";
+      await applyDefinition(instance.cfg, instance.state, null, label, definition || {}, {
+        preservePickerValue: true,
+      });
       return true;
     },
   };
@@ -154,6 +182,9 @@
           <button type="button" class="btn btn-white btn-xs sv-btn-delete" title="Excluir view">
             <i class="fa fa-trash"></i>
           </button>
+          <button type="button" class="btn btn-white btn-xs sv-btn-ai" title="Filtrar com IA">
+            <i class="fa fa-magic"></i>
+          </button>
         </div>
       </div>
     `;
@@ -167,6 +198,8 @@
     const $btnDefault = cfg.$host.find(".sv-btn-default");
     const $btnDelete = cfg.$host.find(".sv-btn-delete");
     const $btnColumns = cfg.$host.find(".sv-btn-columns");
+    const $btnAI = cfg.$host.find(".sv-btn-ai");
+    const isAIEnabled = !(window.__features && window.__features.enableAI === false);
 
     $picker.off("change.sv").on("change.sv", async function () {
       const id = String($(this).val() || "");
@@ -224,6 +257,21 @@
       e.preventDefault();
       e.stopPropagation();
       openColumnsModal(cfg, state);
+    });
+
+    if (!isAIEnabled) {
+      $btnAI.hide();
+      return;
+    }
+
+    $btnAI.off("click.sv").on("click.sv", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!window.GecomAI || typeof window.GecomAI.openGridFilterModal !== "function") {
+        alert("Módulo de IA não carregado.");
+        return;
+      }
+      window.GecomAI.openGridFilterModal({ entityName: cfg.entityName });
     });
   }
 
@@ -318,32 +366,82 @@
     await applyDefinition(cfg, state, null, state.currentName, def);
   }
 
-  async function applyDefinition(cfg, state, viewId, name, definition) {
+  async function applyDefinition(cfg, state, viewId, name, definition, options) {
+    const opts = Object.assign({ preservePickerValue: false }, options || {});
+    const safeDefinition = sanitizeDefinitionForGrid(cfg, definition);
+
     // 1) Apply columns FIRST (no cloning, keep fixed cols)
-    applyColumns(cfg, definition);
+    applyColumns(cfg, safeDefinition);
 
     // 2) Let page apply filters/sort/state (page controls + data model)
     cfg.applyState({
       viewId: viewId,
       name: name,
-      definition: definition || {},
+      definition: safeDefinition,
       _fromColumnsModal: false,
     });
 
     // 3) Update UI label/picker
     cfg.$host.find(".sv-name").text(name ? `(${name})` : "");
     const $picker = cfg.$host.find(".sv-picker");
-    if (viewId) $picker.val(String(viewId));
-    else if (cfg.includeFallbackOption !== false) $picker.val("__fallback__");
-    else $picker.val("");
+    if (!opts.preservePickerValue) {
+      if (viewId) $picker.val(String(viewId));
+      else if (cfg.includeFallbackOption !== false) $picker.val("__fallback__");
+      else $picker.val("");
+    }
 
     // 4) Post apply hook (rebind datepicker, re-run filters, etc.)
     if (typeof cfg.onAfterApply === "function") {
       cfg.onAfterApply();
     }
 
+    // Some pages re-render tbody during applyState/onAfterApply.
+    // Re-apply columns after that render to keep header/filter/body aligned.
+    applyColumns(cfg, safeDefinition);
+
     // Always enforce fixed columns visible
     enforceFixedColumns(cfg);
+  }
+
+  function normalizeDefinition(rawState) {
+    const src = rawState || {};
+    return {
+      columns: Array.isArray(src.columns) ? src.columns : [],
+      columns_order: Array.isArray(src.columns_order) ? src.columns_order : [],
+      filters: Array.isArray(src.filters) ? src.filters : [],
+      sort: Array.isArray(src.sort) ? src.sort : [],
+      pageSize: Number(src.pageSize || 0) || 0,
+      quickSearch: String(src.quickSearch || ""),
+    };
+  }
+
+  function sanitizeDefinitionForGrid(cfg, definition) {
+    const src = normalizeDefinition(definition || {});
+    const allKeys = cfg.getAllColumnKeys().slice();
+    const existing = new Set(allKeys);
+
+    const columns = [];
+    (src.columns || []).forEach((k) => {
+      const key = String(k || "");
+      if (!existing.has(key) || columns.includes(key)) return;
+      columns.push(key);
+    });
+
+    const columnsOrder = [];
+    (src.columns_order || []).forEach((k) => {
+      const key = String(k || "");
+      if (!existing.has(key) || columnsOrder.includes(key)) return;
+      columnsOrder.push(key);
+    });
+
+    return {
+      columns: columns.length ? columns : allKeys.slice(),
+      columns_order: columnsOrder.length ? columnsOrder : (columns.length ? columns.slice() : allKeys.slice()),
+      filters: Array.isArray(src.filters) ? src.filters : [],
+      sort: Array.isArray(src.sort) ? src.sort : [],
+      pageSize: Number(src.pageSize || 0) || 0,
+      quickSearch: String(src.quickSearch || ""),
+    };
   }
 
   // -------------------- Column operations --------------------
@@ -364,8 +462,11 @@
       .map(k => String(k || ""))
       .filter(k => existing.has(k));
 
-    // If still empty, fallback to allKeys
-    const finalOrder = normalizedOrder.length ? normalizedOrder : allKeys.slice();
+    // Keep table structural integrity:
+    // order requested first, then append omitted known keys (hidden later if needed).
+    const baseOrder = normalizedOrder.length ? normalizedOrder : allKeys.slice();
+    const appended = allKeys.filter(k => !baseOrder.includes(k));
+    const finalOrder = baseOrder.concat(appended);
 
     // Visible keys: columns array if present, else all
     const visibleSet = new Set(
@@ -438,6 +539,7 @@
     const fixedRightHeader = fixed.fixedRight.map(i => $headerThs.eq(i));
     const fixedLeftFilter = fixed.fixedLeft.map(i => $filterThs.eq(i));
     const fixedRightFilter = fixed.fixedRight.map(i => $filterThs.eq(i));
+    const fixedIndexSet = new Set([...(fixed.fixedLeft || []), ...(fixed.fixedRight || [])]);
 
     // Middle nodes by ordered keys
     const middleHeader = [];
@@ -451,9 +553,20 @@
       if (fi != null) middleFilter.push($filterThs.eq(fi));
     });
 
+    // Keep structural columns that do not have sort-key (ex: actions),
+    // otherwise header/body can become misaligned after external definitions.
+    const looseHeader = [];
+    const looseFilter = [];
+    $headerThs.each(function (i) {
+      const key = String($(this).data("sort-key") || "");
+      if (fixedIndexSet.has(i) || key) return;
+      looseHeader.push($(this));
+      looseFilter.push($filterThs.eq(i));
+    });
+
     // Re-append in correct order (this moves nodes, keeps event handlers & plugins)
-    cfg.$headerRow.empty().append(fixedLeftHeader).append(middleHeader).append(fixedRightHeader);
-    cfg.$filtersRow.empty().append(fixedLeftFilter).append(middleFilter).append(fixedRightFilter);
+    cfg.$headerRow.empty().append(fixedLeftHeader).append(middleHeader).append(looseHeader).append(fixedRightHeader);
+    cfg.$filtersRow.empty().append(fixedLeftFilter).append(middleFilter).append(looseFilter).append(fixedRightFilter);
 
     // Now reorder each tbody row TDs to match new header order:
     // We do it by reconstructing row children order based on key mapping + fixed.
@@ -477,7 +590,14 @@
         if (oldIndex != null) middleTds.push($tds.eq(oldIndex));
       });
 
-      $tr.empty().append(fixedLeftTds).append(middleTds).append(fixedRightTds);
+      const looseTds = [];
+      $headerThs.each(function (i) {
+        const key = String($(this).data("sort-key") || "");
+        if (fixedIndexSet.has(i) || key) return;
+        looseTds.push($tds.eq(i));
+      });
+
+      $tr.empty().append(fixedLeftTds).append(middleTds).append(looseTds).append(fixedRightTds);
     });
   }
 

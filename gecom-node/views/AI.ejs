@@ -1,0 +1,140 @@
+﻿<style>
+  .ai-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #d7ece3;
+    background: linear-gradient(140deg, #f3fcf8 0%, #e7f7f0 45%, #f7fffb 100%);
+  }
+  .ai-hero:before,
+  .ai-hero:after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: .6;
+    pointer-events: none;
+  }
+  .ai-hero:before {
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(26,179,148,.28) 0%, rgba(26,179,148,0) 70%);
+    top: -70px;
+    right: -40px;
+    animation: aiGlowA 9s ease-in-out infinite alternate;
+  }
+  .ai-hero:after {
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(35,198,200,.22) 0%, rgba(35,198,200,0) 70%);
+    bottom: -60px;
+    left: -40px;
+    animation: aiGlowB 11s ease-in-out infinite alternate;
+  }
+  @keyframes aiGlowA {
+    from { transform: translateY(0) translateX(0) scale(1); }
+    to { transform: translateY(18px) translateX(-12px) scale(1.08); }
+  }
+  @keyframes aiGlowB {
+    from { transform: translateY(0) translateX(0) scale(1); }
+    to { transform: translateY(-16px) translateX(10px) scale(1.05); }
+  }
+  .ai-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .ai-suggestion-chip {
+    border: 1px solid #cde9de;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #2f4f43;
+    cursor: pointer;
+    animation: aiChipFloat 6s ease-in-out infinite;
+    transition: all .2s ease;
+  }
+  .ai-suggestion-chip:nth-child(2n) { animation-duration: 7.5s; }
+  .ai-suggestion-chip:nth-child(3n) { animation-duration: 8.2s; }
+  .ai-suggestion-chip:hover {
+    transform: translateY(-2px);
+    border-color: #1ab394;
+    color: #1a7f68;
+  }
+  @keyframes aiChipFloat {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+    100% { transform: translateY(0px); }
+  }
+  .ai-widget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .ai-widget {
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    background: #fff;
+    padding: 12px;
+    min-height: 120px;
+  }
+  .ai-widget-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .ai-kpi-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .ai-loading {
+    color: #888;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-12">
+    <div class="ibox ai-hero">
+      <div class="ibox-title">
+        <h5>Inteligência Artificial</h5>
+      </div>
+      <div class="ibox-content ai-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="aiDashboardPrompt">Crie seu dashboard com IA</label>
+          <div class="input-group">
+            <input id="aiDashboardPrompt" type="text" class="form-control" placeholder="Ex.: Mostre faturamento dos últimos 6 meses por status e top 5 clientes" />
+            <span class="input-group-btn">
+              <button id="aiDashboardGenerateBtn" class="btn btn-primary" type="button">
+                <i class="fa fa-magic"></i> Gerar
+              </button>
+            </span>
+          </div>
+          <div class="ai-suggestions">
+            <button type="button" class="ai-suggestion-chip js-ai-suggestion" data-prompt="Mostrar faturamento dos últimos 6 meses">Mostrar faturamento dos últimos 6 meses</button>
+            <button type="button" class="ai-suggestion-chip js-ai-suggestion" data-prompt="Comparar invoices pagas vs vencidas no mês atual">Comparar invoices pagas vs vencidas no mês atual</button>
+            <button type="button" class="ai-suggestion-chip js-ai-suggestion" data-prompt="Top 5 clientes por valor total de invoices">Top 5 clientes por valor total de invoices</button>
+            <button type="button" class="ai-suggestion-chip js-ai-suggestion" data-prompt="Evolução mensal de processos concluídos">Evolução mensal de processos concluídos</button>
+          </div>
+        </div>
+
+        <div id="aiDashboardMessage" class="alert alert-info" style="display:none;"></div>
+        <div id="aiDashboardWidgets" class="ai-widget-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% contentFor('scripts') %>
+  <script src="/Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+  <script src="/js/common/apiClient.js"></script>
+  <script src="/js/common/aiApi.js"></script>
+  <script src="/js/ai/ai.page.js"></script>
+<% %>

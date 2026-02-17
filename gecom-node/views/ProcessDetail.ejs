@@ -127,6 +127,10 @@
                                                             data-toggle="tab">Transportes</a></li>
                                                     <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
                                                             data-toggle="tab">Trajetória</a></li>
+                                                    <li><a class="nav-link" href="#tab-5" onclick="loadMapLeft()"
+                                                            data-toggle="tab">Rastreamento Maritimo (BETA)</a></li>
+                                                    <li><a class="nav-link" href="#tab-6" onclick="loadMapLeft()"
+                                                            data-toggle="tab">Rastreamento Aéreo (BETA)</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -242,6 +246,40 @@
                                                     <div id="map" style="height: 500px;"></div>
                                                 </div>
 
+                                                <div class="tab-pane"  id="tab-5">
+                                                  <iframe
+  width="100%"
+  height="520"
+  frameborder="0"
+  scrolling="no"
+  src="https://www.marinetraffic.com/en/ais/embed/zoom:6/centery:-23.6/centerx:-46.6/maptype:0/shownames:false/mmsi:123456789/shipid:0/fleet:/fleet_id:/vtypes:/showmenu:false/remember:false">
+</iframe>
+
+                                                </div>
+
+                                                <div class="tab-pane"  id="tab-6">
+                                               <div class="ibox">
+  <div class="ibox-title">
+    <h5>Rastreamento Aéreo (Flightradar24)</h5>
+  </div>
+  <div class="ibox-content">
+      <p class="m-b-sm">
+        <strong>Voo:</strong> SVA809
+      </p>
+
+      <a class="btn btn-primary"
+         target="_blank"
+         rel="noopener noreferrer"
+         href="https://www.flightradar24.com/SVA809">
+        Abrir no Flightradar24
+      </a>
+
+      <span class="text-muted m-l-sm">
+        (Demo: abre o rastreio no site do FR24)
+      </span>
+  </div>
+</div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -258,11 +296,9 @@
             <div class="col-lg-2">
                 <div class="wrapper wrapper-content project-manager">
                     <h4>Descrição do Processo</h4>
-                    <img src="../Assets/inspinia/img/zender_logo.png" class="img-fluid">
-                    <p class="small">
-                        Importação de carros antigos. Esse processo em específico se destina a trazer 2 carros antigos
-                        da china ao brasil.
-                    </p>
+                    <div id="processCompanyLogoWrap" style="display:none; margin-bottom: 8px;height: 116px !important;">
+                        <img id="processCompanyLogo" src="" class="img-fluid" alt="Logo da companhia">
+                    </div>
                     <p class="small font-bold">
                         <span><i class="fa fa-circle text-warning"></i>Prioridade Alta</span>
                     </p>
@@ -778,6 +814,62 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         return data;
                     }
 
+                    async function apiPut(url, body) {
+                        const r = await fetch(url, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json", Accept: "application/json" },
+                            body: JSON.stringify(body ?? {})
+                        });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        return data;
+                    }
+
+                    async function fetchCompanyLogoObjectUrl(companyId) {
+                        try {
+                            const id = String(companyId || "").trim();
+                            if (!id) return null;
+
+                            const resp = await fetch(`/api/companies/${encodeURIComponent(id)}/logo`, {
+                                method: "GET",
+                                headers: { Accept: "image/*" },
+                                cache: "no-store"
+                            });
+
+                            if (resp.status === 204 || !resp.ok) return null;
+
+                            const blob = await resp.blob();
+                            if (!blob || blob.size === 0) return null;
+                            return URL.createObjectURL(blob);
+                        } catch (e) {
+                            console.warn("fetchCompanyLogoObjectUrl failed:", e);
+                            return null;
+                        }
+                    }
+
+                    function setProcessCompanyLogo(src) {
+                        const wrap = document.getElementById("processCompanyLogoWrap");
+                        const img = document.getElementById("processCompanyLogo");
+                        if (!wrap || !img) return;
+
+                        if (window.__processCompanyLogoObjectUrl && String(window.__processCompanyLogoObjectUrl).startsWith("blob:")) {
+                            try { URL.revokeObjectURL(window.__processCompanyLogoObjectUrl); } catch {}
+                        }
+
+                        if (src) {
+                            img.src = src;
+                            wrap.style.display = "block";
+                            window.__processCompanyLogoObjectUrl = src;
+                            return;
+                        }
+
+                        img.removeAttribute("src");
+                        wrap.style.display = "none";
+                        window.__processCompanyLogoObjectUrl = null;
+                    }
+
                     // =========================
                     // Header bind
                     // =========================
@@ -794,6 +886,10 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         $("#contactName").text(p?.users?.full_name || "-");
                         $("#invoiceNumber").text(p?.invoice || "-");
                         $("#companyName").text(p?.companies?.company_name || "-");
+                        const companyId = p?.companies?.id || p?.company_id || null;
+                        fetchCompanyLogoObjectUrl(companyId)
+                            .then(setProcessCompanyLogo)
+                            .catch(() => setProcessCompanyLogo(null));
 
                         // ship_date -> Data Estimada de Entrega
                         $("#shipDateText").text(formatDateOnlyPtBR(p?.ship_date));
@@ -803,6 +899,152 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         $("#completedBar").css("width", `${completed}%`);
                         $("#completedPercentText").text(`${completed}%`);
                     }
+
+                    const trackingCache = new Map();
+                    function getTrackingCacheKey(transportId) {
+                        return JSON.stringify(["tracking", String(transportId || "")]);
+                    }
+
+                    function getTransportById(transportId) {
+                        return (transportsCache || []).find(x => String(x?.id || "") === String(transportId || ""));
+                    }
+
+                    function normalizeTrackingResponse(raw) {
+                        const snapshot = raw?.snapshot || raw?.tracking_snapshot || raw?.tracking || raw || {};
+                        const link = snapshot?.link || raw?.link || raw?.tracking_link || {};
+                        const normalizedTransportId = raw?.transportId || raw?.transport_id || snapshot?.transportId || snapshot?.transport_id || null;
+                        return {
+                            transportId: normalizedTransportId ? String(normalizedTransportId) : null,
+                            link,
+                            snapshot,
+                            updatedAt: snapshot?.updated_at || snapshot?.updatedAt || raw?.updated_at || raw?.updatedAt || null
+                        };
+                    }
+
+                    async function getTransportTracking(transportId, refresh) {
+                        const id = String(transportId || "").trim();
+                        if (!id) throw new Error("transportId Ã© obrigatÃ³rio.");
+
+                        const key = getTrackingCacheKey(id);
+                        if (refresh !== true && trackingCache.has(key)) return trackingCache.get(key);
+
+                        const data = await apiGet(`/api/transports/${encodeURIComponent(id)}/tracking?refresh=${refresh === true ? "true" : "false"}`);
+                        const normalized = normalizeTrackingResponse(data);
+                        trackingCache.set(key, normalized);
+                        return normalized;
+                    }
+
+                    async function upsertTransportTrackingLink(transportId, linkPayload) {
+                        const id = String(transportId || "").trim();
+                        if (!id) throw new Error("transportId Ã© obrigatÃ³rio.");
+
+                        const data = await apiPut(`/api/transports/${encodeURIComponent(id)}/tracking/link`, linkPayload || {});
+                        trackingCache.delete(getTrackingCacheKey(id));
+                        return normalizeTrackingResponse(data);
+                    }
+
+                    async function removeTransportTrackingLink(transportId) {
+                        const id = String(transportId || "").trim();
+                        if (!id) throw new Error("transportId Ã© obrigatÃ³rio.");
+                        await apiDelete(`/api/transports/${encodeURIComponent(id)}/tracking/link`);
+                        trackingCache.delete(getTrackingCacheKey(id));
+                    }
+
+                    function prettifyJson(value) {
+                        try { return JSON.stringify(value ?? {}, null, 2); } catch { return "{}"; }
+                    }
+
+                    async function openTrackingByTransportId(transportId) {
+                        const id = String(transportId || "").trim();
+                        if (!id) return;
+
+                        const transport = getTransportById(id);
+                        if (!transport) {
+                            alert("Transporte nÃ£o encontrado.");
+                            return;
+                        }
+
+                        let tracking = await getTransportTracking(id, false).catch(() => ({ link: {}, snapshot: {}, transportId: id }));
+
+                        function buildTrackingHtml(vm) {
+                            const currentTransportId = vm?.transportId || id;
+                            const linkJson = prettifyJson(vm?.link || {});
+                            const snapshotJson = prettifyJson(vm?.snapshot || {});
+                            const updatedLabel = vm?.updatedAt ? formatDateTimePtBR(vm.updatedAt) : "â€”";
+                            return `
+                              <div class="form-group">
+                                <label>Transporte</label>
+                                <input class="form-control" value="${escapeHtml(String(transport?.transport_company || currentTransportId))}" disabled />
+                              </div>
+
+                              <div class="form-group">
+                                <label>transportId</label>
+                                <input id="trackingTransportId" class="form-control" value="${escapeHtml(String(currentTransportId))}" disabled />
+                              </div>
+
+                              <div class="form-group">
+                                <label>Link (JSON)</label>
+                                <textarea id="trackingLinkJson" class="form-control" rows="8">${escapeHtml(linkJson)}</textarea>
+                                <div class="text-muted" style="margin-top:6px;">Cole os campos do link exatamente no formato esperado pelo backend.</div>
+                              </div>
+
+                              <div class="form-group">
+                                <label>Snapshot atual</label>
+                                <textarea class="form-control" rows="10" disabled>${escapeHtml(snapshotJson)}</textarea>
+                                <div class="text-muted" style="margin-top:6px;">Atualizado em: ${escapeHtml(updatedLabel)}</div>
+                              </div>
+
+                              <div class="form-group" style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button id="btnTrackingRefresh" type="button" class="btn btn-sm btn-white"><i class="fa fa-refresh"></i> Atualizar snapshot</button>
+                                <button id="btnTrackingDeleteLink" type="button" class="btn btn-sm btn-white"><i class="fa fa-unlink"></i> Remover link</button>
+                              </div>
+                            `;
+                        }
+
+                        SideModal.open({
+                            title: "Tracking do transporte",
+                            subtitle: `Transporte: ${String(transport?.transport_company || id)}`,
+                            okText: "Salvar link",
+                            html: buildTrackingHtml(tracking),
+                            onOk: async function () {
+                                let payload = {};
+                                const raw = String($("#trackingLinkJson").val() || "").trim();
+                                if (raw) {
+                                    try { payload = JSON.parse(raw); }
+                                    catch { throw new Error("JSON de link invÃ¡lido."); }
+                                }
+                                await upsertTransportTrackingLink(id, payload);
+                                await getTransportTracking(id, true);
+                            }
+                        });
+
+                        setTimeout(function wireTrackingButtons() {
+                            $("#btnTrackingRefresh").off("click").on("click", async function () {
+                                try {
+                                    const refreshed = await getTransportTracking(id, true);
+                                    $("#sideModalBody").html(buildTrackingHtml(refreshed));
+                                    wireTrackingButtons();
+                                } catch (e) {
+                                    alert(e?.message || "Falha ao atualizar snapshot.");
+                                }
+                            });
+
+                            $("#btnTrackingDeleteLink").off("click").on("click", async function () {
+                                const ok = confirm("Remover link de tracking deste transporte?");
+                                if (!ok) return;
+
+                                try {
+                                    await removeTransportTrackingLink(id);
+                                    const refreshed = await getTransportTracking(id, true).catch(() => ({ link: {}, snapshot: {}, transportId: id }));
+                                    $("#sideModalBody").html(buildTrackingHtml(refreshed));
+                                    wireTrackingButtons();
+                                } catch (e) {
+                                    alert(e?.message || "Falha ao remover link.");
+                                }
+                            });
+                        }, 20);
+                    }
+                    window.openTrackingByTransportId = openTrackingByTransportId;
 
                     // =========================
                     // Events render
@@ -969,6 +1211,11 @@ function renderTransports(list) {
       <td>${escapeHtml(formatDateOnlyPtBR(t?.arrival_forecast))}</td>
 
       <td style="text-align:center; white-space:nowrap;">
+        <button class="btn btn-xs btn-white" title="Tracking"
+          onclick="event.stopPropagation(); openTrackingByTransportId('${escapeHtml(String(t?.id || ""))}')">
+          <i style='margin: 0px !important;' class="fa fa-map-marker"></i>
+        </button>
+
         <button ${disabled} class="btn btn-xs btn-info" title="Editar"
           onclick="event.stopPropagation(); editTransportById('${escapeHtml(String(t?.id || ""))}')">
           <i style='margin: 0px !important;' class="fa fa-pencil"></i>
@@ -1007,13 +1254,17 @@ async function openEditTransportModal(t) {
   if (!id) return;
 
   // Load lookups (cached)
-  const [statuses, types] = await Promise.all([
+  const [statuses, types, tracking] = await Promise.all([
     getTransportStatuses(),
-    getTransportTypes()
+    getTransportTypes(),
+    getTransportTracking(id, false).catch(() => null)
   ]);
 
   const currentStatusId = String(t?.transport_status_id || "");
   const currentTypeId = String(t?.transport_type_id || "");
+  const currentTrackingMode = String(tracking?.link?.mode || "");
+  const currentTrackingProvider = String(tracking?.link?.provider || "");
+  const currentTrackingExternalId = String(tracking?.link?.externalId || tracking?.link?.external_id || "");
 
   const statusOptions = (statuses || [])
     .map((s) => {
@@ -1032,6 +1283,18 @@ async function openEditTransportModal(t) {
       return `<option value="${escapeHtml(tid)}" ${selected}>${escapeHtml(name)}</option>`;
     })
     .join("");
+
+  const modeOptions = `
+    <option value="" ${!currentTrackingMode ? "selected" : ""}>-</option>
+    <option value="AIR" ${currentTrackingMode === "AIR" ? "selected" : ""}>AIR</option>
+    <option value="SEA" ${currentTrackingMode === "SEA" ? "selected" : ""}>SEA</option>
+  `;
+
+  const providerOptions = `
+    <option value="" ${!currentTrackingProvider ? "selected" : ""}>-</option>
+    <option value="FR24" ${currentTrackingProvider === "FR24" ? "selected" : ""}>FR24</option>
+    <option value="MARINETRAFFIC" ${currentTrackingProvider === "MARINETRAFFIC" ? "selected" : ""}>MARINETRAFFIC</option>
+  `;
 
   const html = `
     <div class="form-group">
@@ -1076,6 +1339,25 @@ async function openEditTransportModal(t) {
       </select>
     </div>
 
+
+    <div class="form-group">
+      <label for="selTrackingMode">Tracking Modo</label>
+      <select id="selTrackingMode" class="form-control">${modeOptions}</select>
+    </div>
+
+    <div class="form-group">
+      <label for="selTrackingProvider">Tracking Provider</label>
+      <select id="selTrackingProvider" class="form-control">${providerOptions}</select>
+    </div>
+
+    <div class="form-group">
+      <label for="txtTrackingExternalId">Tracking External ID</label>
+      <input id="txtTrackingExternalId" class="form-control" value="${escapeHtml(currentTrackingExternalId)}" />
+    </div>
+
+    <div class="checkbox" style="margin-top:-2px;">
+      <label><input type="checkbox" id="chkRemoveTracking" /> Remover link tracking</label>
+    </div>
     <div class="form-group">
       <label for="dtDeparture">Saída prevista</label>
       <input id="dtDeparture" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.departure_forecast))}" />
@@ -1106,7 +1388,34 @@ async function openEditTransportModal(t) {
           : null
       };
 
+      const trackingMode = String($("#selTrackingMode").val() || "").trim();
+      const trackingProvider = String($("#selTrackingProvider").val() || "").trim();
+      const trackingExternalId = String($("#txtTrackingExternalId").val() || "").trim();
+      const removeTracking = $("#chkRemoveTracking").is(":checked");
+      const hasAnyTracking = !!(trackingMode || trackingProvider || trackingExternalId);
+
+      if (hasAnyTracking) {
+        if (!trackingMode || !trackingProvider || !trackingExternalId) {
+          throw new Error("Para tracking, informe Modo, Provider e External ID.");
+        }
+        if (trackingMode === "AIR" && trackingProvider !== "FR24") {
+          throw new Error("Tracking AIR requer provider FR24.");
+        }
+        if (trackingMode === "SEA" && trackingProvider !== "MARINETRAFFIC") {
+          throw new Error("Tracking SEA requer provider MARINETRAFFIC.");
+        }
+      }
+
       await apiPatch(`/api/transports/${encodeURIComponent(id)}`, payload);
+      if (removeTracking) {
+        await removeTransportTrackingLink(id).catch(() => {});
+      } else if (hasAnyTracking) {
+        await upsertTransportTrackingLink(id, {
+          mode: trackingMode,
+          provider: trackingProvider,
+          externalId: trackingExternalId
+        });
+      }
       await loadProcessDetail(processId); // 1 GET refresh
     }
   });
@@ -1360,8 +1669,19 @@ async function loadProcessDocuments() {
     const folderRes = await apiGet(`/api/documents?parent_id=null&item_type=FOLDER&related_table=process&related_id=${encodeURIComponent(String(processId))}`);
     const folders = normalizeArrayResponse(folderRes);
 
-    // If backend returns an object with array props, normalizeArrayResponse handles it.
-    processDocsFolder = folders.length ? folders[0] : null;
+    // Defensive filter on frontend in case backend ignores part of the query.
+    const exactFolders = (folders || []).filter((f) => {
+      const relatedTable = String(f?.related_table || f?.relatedTable || "").toLowerCase();
+      const relatedId = String(f?.related_id || f?.relatedId || "");
+      const parentId = f?.parent_id ?? f?.parentId ?? null;
+      const itemType = String(f?.item_type || f?.itemType || "").toUpperCase();
+      return relatedTable === "process" &&
+        relatedId === String(processId) &&
+        (parentId == null || String(parentId) === "null" || String(parentId) === "") &&
+        itemType === "FOLDER";
+    });
+
+    processDocsFolder = exactFolders.length ? exactFolders[0] : null;
 
     if (!processDocsFolder) {
       $hint.text("Nenhuma pasta encontrada para este processo.");

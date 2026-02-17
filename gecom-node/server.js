@@ -21,6 +21,7 @@ const processTypesApi = require("./routes/processTypesApi");
 const savedViewsApi = require("./routes/savedViewsApi");
 const kanbanApi = require("./routes/kanbanApi");
 const leadsApi = require("./routes/leadsApi");
+const aiApi = require("./routes/aiApi");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -77,6 +78,7 @@ app.use((req, res, next) => {
   res.locals.t = req.t;
   res.locals.lang = req.language || 'pt-BR';
   res.locals.i18n = req.i18n;
+  res.locals.enableAI = String(process.env.ENABLE_AI || "true").toLowerCase() === "true";
   next();
 });
 
@@ -106,6 +108,7 @@ app.use("/api", require("./routes/transportStatusesApi"));
 const notificationsApi = require("./routes/notificationsApi");
 app.use("/api", notificationsApi);
 app.use("/api", leadsApi);
+app.use("/api", aiApi);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes'));
@@ -113,6 +116,7 @@ app.get('/ClientDetails', (req, res) => res.render('ClientDetails'));
 app.get('/NewClient', (req, res) => res.render('NewClient'));
 app.get('/MyDocuments', (req, res) => res.render('MyDocuments'));
 app.get('/Default', (req, res) => res.render('Default'));
+app.get(['/AI', '/ai'], (req, res) => res.render('AI'));
 app.get('/Processos', (req, res) => res.render('Processos'));
 app.get('/NovoProcesso', (req, res) => res.render('NovoProcesso'));
 app.get('/ProcessDetail', (req, res) => res.render('ProcessDetail'));
