@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Cadastro GECOM - escolha seu plano e comece a usar a plataforma." />
+  <meta name="author" content="GECOM" />
+  <title>GECOM | Cadastro</title>
+
+  <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
+
+  <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/animate.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/style.css" rel="stylesheet" />
+  <link href="/Assets/inspinia/css/plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+  <style>
+    body.register-marketing {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #f8fbfd 0%, #f0f5f8 45%, #e9f3ef 100%);
+    }
+
+    .top-login-link {
+      position: fixed;
+      top: 14px;
+      right: 18px;
+      z-index: 1002;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid #1ab394;
+      background: #1ab394;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 22px rgba(26, 179, 148, 0.35);
+      transition: all .18s ease;
+    }
+
+    .top-login-link:hover,
+    .top-login-link:focus {
+      color: #fff;
+      background: #159a80;
+      border-color: #159a80;
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+
+    .gecom-spinner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, .72);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gecom-spinner-overlay.is-visible {
+      display: flex;
+    }
+
+    .gecom-spinner-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border: 1px solid #e7edf2;
+      border-radius: 14px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.12);
+      padding: 18px 22px;
+      min-width: 320px;
+    }
+
+    .gecom-spinner-text {
+      font-weight: 600;
+      color: #2f3f48;
+      text-align: center;
+      max-width: 360px;
+    }
+
+    .hero-wrap {
+      padding: 120px 0 70px;
+    }
+
+    .hero-title {
+      font-size: 44px;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: #4d5a62;
+      margin-bottom: 24px;
+    }
+
+    .hero-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(14, 34, 56, 0.12);
+      padding: 24px;
+      border: 1px solid #e9eef2;
+    }
+
+    .feature-pill {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ecf8f2;
+      color: #1f9d62;
+      margin: 4px 8px 4px 0;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .plans-stage {
+      display: none;
+      padding: 110px 0 60px;
+    }
+
+    .plans-stage.is-active {
+      display: block;
+    }
+
+    .plan-card {
+      background: #fff;
+      border: 1px solid #e7edf2;
+      border-radius: 14px;
+      padding: 22px;
+      min-height: 345px;
+      position: relative;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.10);
+    }
+
+    .plan-card.selected {
+      border-color: #1ab394;
+      box-shadow: 0 20px 44px rgba(26, 179, 148, 0.2);
+    }
+
+    .plan-name {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #29363d;
+    }
+
+    .plan-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1ab394;
+      margin-bottom: 6px;
+    }
+
+    .plan-price small {
+      font-size: 14px;
+      color: #7f8b91;
+      font-weight: 500;
+    }
+
+    .plan-list {
+      margin: 16px 0 18px;
+      padding-left: 18px;
+      color: #57656d;
+    }
+
+    .plan-list li {
+      margin-bottom: 8px;
+    }
+
+    .disclaimer-box {
+      border-left: 4px solid #f8ac59;
+      padding: 12px 14px;
+      background: #fff8ef;
+      color: #8a5b19;
+      border-radius: 6px;
+      margin: 22px 0 0;
+      font-weight: 600;
+    }
+
+    .register-form-wrap {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .register-form-wrap.is-active {
+      display: block;
+    }
+
+    .register-form-card {
+      background: #fff;
+      border: 1px solid #e6edf2;
+      border-radius: 14px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
+      padding: 26px;
+    }
+
+    .section-hidden {
+      display: none !important;
+    }
+
+    .btn-plan {
+      width: 100%;
+    }
+
+    .plans-list-wrap {
+      transition: opacity .2s ease;
+    }
+
+    .plans-list-wrap.is-hidden {
+      display: none;
+    }
+
+    .selected-plan-chip {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      background: #e8fbf5;
+      color: #1a7b58;
+    }
+
+    .back-plan-btn {
+      border: none;
+      background: transparent;
+      color: #1ab394;
+      font-weight: 700;
+      padding: 0;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 991px) {
+      .hero-title {
+        font-size: 34px;
+      }
+
+      .hero-wrap {
+        padding-top: 96px;
+      }
+
+      .plans-stage {
+        padding-top: 94px;
+      }
+    }
+  </style>
+</head>
+<body class="register-marketing">
+  <a class="top-login-link" href="/" title="Login" aria-label="Ir para login">
+    <i class="fa fa-sign-in"></i>
+  </a>
+
+  <div id="publicRegisterSpinner" class="gecom-spinner-overlay" aria-hidden="true">
+    <div class="gecom-spinner-content">
+      <div class="sk-spinner sk-spinner-wandering-cubes">
+        <div class="sk-cube1"></div>
+        <div class="sk-cube2"></div>
+      </div>
+      <div id="publicRegisterSpinnerText" class="gecom-spinner-text">Estamos preparando seu ambiente...</div>
+    </div>
+  </div>
+
+  <section id="heroSection" class="hero-wrap">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-7">
+          <h1 class="hero-title wow fadeInUp"><span>G+</span> a plataforma completa para sua operação</h1>
+          <p class="hero-subtitle wow fadeInUp" data-wow-delay="0.1s">
+            Centralize processos, documentos, comunicação e rastreamento com visão executiva e controle operacional em tempo real.
+          </p>
+          <p class="wow fadeInUp" data-wow-delay="0.2s">
+            <button id="btnExperimentHero" class="btn btn-primary btn-lg">Experimentar</button>
+            <a href="/LandingPage" class="btn btn-white btn-lg m-l-sm">Ver Detalhes</a>
+          </p>
+        </div>
+        <div class="col-lg-5">
+          <div class="hero-card wow zoomIn">
+            <h3 style="margin-top:0;">O que você ativa com o G+</h3>
+            <div class="feature-pill">Módulo de vendas</div>
+            <div class="feature-pill">Módulo de serviço</div>
+            <div class="feature-pill">Módulo de faturamento</div>
+            <div class="feature-pill">Módulo de marketing</div>
+            <div class="feature-pill">Gestão de Projetos</div>
+            <div class="feature-pill">Armazenamento de Documentos</div>
+            <div class="feature-pill">Dashboard Inteligente</div>
+            <div class="feature-pill">IA para filtros, dashboards e automações</div>
+            <div class="feature-pill">Integração e automação de emails</div>
+            <hr />
+            <p class="text-muted" style="margin:0;">
+              Selecione um plano, confirme seus dados e comece sua operação com ambiente dedicado.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="featuresPublic" class="container services">
+    <div class="row">
+      <div class="col-sm-3 wow fadeInUp">
+        <h3>Módulos operacionais</h3>
+        <p>Projetos, vendas, serviço, documentos e faturamento no mesmo ambiente.</p>
+      </div>
+      <div class="col-sm-3 wow fadeInUp" data-wow-delay="0.1s">
+        <h3>Governança</h3>
+        <p>Controle de acessos por usuário, empresa e tenant com segurança.</p>
+      </div>
+      <div class="col-sm-3 wow fadeInUp" data-wow-delay="0.2s">
+        <h3>IA embutida</h3>
+        <p>Resumo operacional e consultas inteligentes para acelerar decisões.</p>
+      </div>
+      <div class="col-sm-3 wow fadeInUp" data-wow-delay="0.3s">
+        <h3>Escalabilidade</h3>
+        <p>Planos com crescimento progressivo em usuários e armazenamento.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="plansStage" class="plans-stage">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <div class="navy-line"></div>
+          <h1>Escolha seu plano</h1>
+          <p class="text-muted">Selecione um plano para continuar com o cadastro da sua empresa.</p>
+        </div>
+      </div>
+
+      <div id="plansListWrap" class="row m-t-lg plans-list-wrap">
+          <div class="col-md-4">
+            <div class="plan-card" data-plan-id="SMALL" data-plan-name="Plano Small">
+              <h3 class="plan-name">Plano Small</h3>
+              <div class="plan-price">R$ 950,00 <small>mensal</small></div>
+              <ul class="plan-list">
+                <li>1 módulo incluso</li>
+                <li>10 users</li>
+                <li>20GB de armazenamento</li>
+              </ul>
+              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Small</button>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="plan-card" data-plan-id="MEDIUM" data-plan-name="Plano Medium">
+              <h3 class="plan-name">Plano Medium</h3>
+              <div class="plan-price">R$ 1.750,00 <small>mensal</small></div>
+              <ul class="plan-list">
+                <li>2 módulos inclusos</li>
+                <li>25 users</li>
+                <li>50GB de armazenamento</li>
+                <li>IA embutida</li>
+              </ul>
+              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Medium</button>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="plan-card" data-plan-id="PREMIUM" data-plan-name="Plano Premium">
+              <h3 class="plan-name">Plano Premium</h3>
+              <div class="plan-price">R$ 3.100,00 <small>mensal</small></div>
+              <ul class="plan-list">
+                <li>Todos os módulos</li>
+                <li>50 users</li>
+                <li>100GB de armazenamento</li>
+                <li>IA embutida</li>
+                <li>Cloudflare para arquivos e docs</li>
+                <li>Rastreamento de rotas (importação/exportação)</li>
+              </ul>
+              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Premium</button>
+            </div>
+          </div>
+
+          <div class="col-lg-12">
+            <div class="disclaimer-box">
+              Desenvolvimentos customizados são cobrados à parte.
+            </div>
+          </div>
+      </div>
+
+      <div id="registerFormWrap" class="register-form-wrap">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2">
+            <div class="register-form-card">
+              <button type="button" id="btnBackPlans" class="back-plan-btn">
+                <i class="fa fa-arrow-left"></i> Voltar e alterar plano
+              </button>
+              <span id="selectedPlanChip" class="selected-plan-chip"></span>
+              <h3 style="margin-top:0;">Dados para ativação</h3>
+              <p class="text-muted">Preencha os dados para criar seu ambiente completo pelo onboarding oficial.</p>
+
+              <form id="publicRegisterForm">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="companyNameInput">Nome da empresa</label>
+                      <input id="companyNameInput" type="text" class="form-control" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="userNameInput">Nome do utilizador</label>
+                      <input id="userNameInput" type="text" class="form-control" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="emailInput">E-mail</label>
+                      <input id="emailInput" type="email" class="form-control" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="phoneInput">Telefone</label>
+                      <input id="phoneInput" type="text" class="form-control" maxlength="20" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="passwordInput">Senha inicial do admin</label>
+                      <input id="passwordInput" type="password" class="form-control" minlength="8" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="companyNumberInput">CNPJ / Company Number</label>
+                      <input id="companyNumberInput" type="text" class="form-control" placeholder="12.345.678/0001-90" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="companySectorInput">Setor</label>
+                      <input id="companySectorInput" type="text" class="form-control" placeholder="Tecnologia" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="companyCategoryInput">Categoria</label>
+                      <input id="companyCategoryInput" type="text" class="form-control" placeholder="Software" required readonly />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressStreetInput">Rua / Avenida</label>
+                      <input id="addressStreetInput" type="text" class="form-control" placeholder="Avenida Paulista" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressNumberInput">Número</label>
+                      <input id="addressNumberInput" type="text" class="form-control" placeholder="1000" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressCityInput">Cidade</label>
+                      <input id="addressCityInput" type="text" class="form-control" placeholder="Sao Paulo" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressStateInput">Estado</label>
+                      <input id="addressStateInput" type="text" class="form-control" placeholder="SP" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressPostalCodeInput">CEP</label>
+                      <input id="addressPostalCodeInput" type="text" class="form-control" placeholder="09271-400" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressCountryInput">País</label>
+                      <input id="addressCountryInput" type="text" class="form-control" value="Brasil" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="companyLanguageInput">Idioma</label>
+                      <select id="companyLanguageInput" class="form-control" required>
+                        <option value="pt-BR" selected>Português (Brasil)</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group" style="margin-top:30px;">
+                      <label style="font-weight:600; cursor:pointer;">
+                        <input id="acceptTermsInput" type="checkbox" />
+                        Eu aceito os termos para criação da conta
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group">
+                      <label for="expectationInput">Escreva abaixo o que espera ao adquirir nossa ferramenta</label>
+                      <textarea
+                        id="expectationInput"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Ex:.. Espero conseguir ver o resultado do meu time de vendas com pipelines e dashboards gerais e individuais"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <button id="confirmBtn" type="submit" class="btn btn-primary btn-lg">
+                    <i class="fa fa-check"></i> Confirmar cadastro
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/Assets/inspinia/js/jquery-3.1.1.min.js"></script>
+  <script src="/Assets/inspinia/js/popper.min.js"></script>
+  <script src="/Assets/inspinia/js/bootstrap.js"></script>
+  <script src="/Assets/inspinia/js/plugins/pace/pace.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/wow/wow.min.js"></script>
+  <script src="/Assets/inspinia/js/plugins/sweetalert/sweetalert.min.js"></script>
+
+  <script>
+    (function () {
+      const state = {
+        selectedPlanId: null,
+        selectedPlanName: null,
+        isSubmitting: false
+      };
+      const loaderMessages = [
+        "Estamos preparando seu ambiente...",
+        "Criando configurações de segurança...",
+        "Configurando empresa e usuário administrador...",
+        "Finalizando seu acesso inicial..."
+      ];
+      let loaderTimer = null;
+      let loaderMessageIndex = 0;
+
+      function showLandingStage() {
+        document.getElementById("heroSection")?.classList.remove("section-hidden");
+        document.getElementById("featuresPublic")?.classList.remove("section-hidden");
+        document.getElementById("plansStage")?.classList.remove("is-active");
+      }
+
+      function showPlansStage() {
+        document.getElementById("heroSection")?.classList.add("section-hidden");
+        document.getElementById("featuresPublic")?.classList.add("section-hidden");
+        document.getElementById("plansStage")?.classList.add("is-active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function showPlanChooser() {
+        document.getElementById("plansListWrap")?.classList.remove("is-hidden");
+        document.getElementById("registerFormWrap")?.classList.remove("is-active");
+      }
+
+      function normalizeString(value) {
+        return String(value || "").trim();
+      }
+
+      function slugifyCompanyName(name) {
+        const normalized = normalizeString(name)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 45);
+
+        if (normalized) return normalized;
+        return `tenant-${Date.now()}`;
+      }
+
+      async function readJsonSafe(response) {
+        const text = await response.text().catch(() => "");
+        if (!text) return {};
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { message: text };
+        }
+      }
+
+      async function postJson(url, payload) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify(payload || {})
+        });
+
+        const data = await readJsonSafe(response);
+        if (!response.ok) {
+          const error = new Error(data?.message || `Falha na chamada ${url}`);
+          error.status = response.status;
+          error.data = data;
+          throw error;
+        }
+        return data;
+      }
+
+      function renderPlanSelection(planCard) {
+        document.querySelectorAll(".plan-card").forEach((card) => card.classList.remove("selected"));
+        planCard.classList.add("selected");
+
+        state.selectedPlanId = normalizeString(planCard.getAttribute("data-plan-id"));
+        state.selectedPlanName = normalizeString(planCard.getAttribute("data-plan-name"));
+
+        const chip = document.getElementById("selectedPlanChip");
+        chip.textContent = `${state.selectedPlanName} selecionado`;
+
+        const categoryInput = document.getElementById("companyCategoryInput");
+        if (categoryInput && !normalizeString(categoryInput.value)) {
+          categoryInput.value = state.selectedPlanName;
+        }
+
+        document.getElementById("plansListWrap")?.classList.add("is-hidden");
+        document.getElementById("registerFormWrap")?.classList.add("is-active");
+        document.getElementById("registerFormWrap")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      async function syncCurrentUserFromMe() {
+        const meResp = await fetch("/api/auth/me", {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          credentials: "include"
+        });
+
+        const me = await readJsonSafe(meResp);
+        if (!meResp.ok || !me?.id) return;
+
+        localStorage.setItem("currentUser", JSON.stringify(me));
+        localStorage.setItem("currentUserId", String(me.id));
+        if (me.company_id != null) {
+          localStorage.setItem("companyId", String(me.company_id));
+        }
+      }
+
+      function setSubmitState(isLoading) {
+        state.isSubmitting = isLoading;
+        const btn = document.getElementById("confirmBtn");
+        if (!btn) return;
+
+        btn.disabled = isLoading;
+        btn.innerHTML = isLoading
+          ? '<i class="fa fa-spinner fa-spin"></i> Processando...'
+          : '<i class="fa fa-check"></i> Confirmar cadastro';
+
+        if (isLoading) {
+          showLoader();
+        } else {
+          hideLoader();
+        }
+      }
+
+      function showLoader() {
+        const overlay = document.getElementById("publicRegisterSpinner");
+        const textEl = document.getElementById("publicRegisterSpinnerText");
+        if (!overlay || !textEl) return;
+
+        loaderMessageIndex = 0;
+        textEl.textContent = loaderMessages[loaderMessageIndex];
+        overlay.classList.add("is-visible");
+        overlay.setAttribute("aria-hidden", "false");
+
+        if (loaderTimer) clearInterval(loaderTimer);
+        loaderTimer = setInterval(function () {
+          loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
+          textEl.textContent = loaderMessages[loaderMessageIndex];
+        }, 1900);
+      }
+
+      function hideLoader() {
+        const overlay = document.getElementById("publicRegisterSpinner");
+        if (!overlay) return;
+        overlay.classList.remove("is-visible");
+        overlay.setAttribute("aria-hidden", "true");
+
+        if (loaderTimer) {
+          clearInterval(loaderTimer);
+          loaderTimer = null;
+        }
+      }
+
+      function validateFormPayload() {
+        const companyName = normalizeString(document.getElementById("companyNameInput")?.value);
+        const userName = normalizeString(document.getElementById("userNameInput")?.value);
+        const email = normalizeString(document.getElementById("emailInput")?.value);
+        const phone = normalizeString(document.getElementById("phoneInput")?.value);
+        const password = normalizeString(document.getElementById("passwordInput")?.value);
+        const companyNumber = normalizeString(document.getElementById("companyNumberInput")?.value);
+        const companySector = normalizeString(document.getElementById("companySectorInput")?.value);
+        const companyCategory = normalizeString(document.getElementById("companyCategoryInput")?.value);
+        const street = normalizeString(document.getElementById("addressStreetInput")?.value);
+        const number = normalizeString(document.getElementById("addressNumberInput")?.value);
+        const city = normalizeString(document.getElementById("addressCityInput")?.value);
+        const stateUf = normalizeString(document.getElementById("addressStateInput")?.value);
+        const postalCode = normalizeString(document.getElementById("addressPostalCodeInput")?.value);
+        const country = normalizeString(document.getElementById("addressCountryInput")?.value);
+        const language = normalizeString(document.getElementById("companyLanguageInput")?.value) || "pt-BR";
+        const acceptTerms = !!document.getElementById("acceptTermsInput")?.checked;
+        const expectation = normalizeString(document.getElementById("expectationInput")?.value);
+
+        if (!state.selectedPlanId) throw new Error("Selecione um plano antes de confirmar.");
+        if (!companyName) throw new Error("Nome da empresa é obrigatório.");
+        if (!userName) throw new Error("Nome do utilizador é obrigatório.");
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail válido.");
+        if (!phone) throw new Error("Telefone é obrigatório.");
+        if (!password || password.length < 8) throw new Error("A senha do admin deve ter no mínimo 8 caracteres.");
+        if (!companyNumber) throw new Error("CNPJ / Company Number é obrigatório.");
+        if (!companySector) throw new Error("Setor é obrigatório.");
+        if (!companyCategory) throw new Error("Categoria é obrigatória.");
+        if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereço.");
+        if (!acceptTerms) throw new Error("Você precisa aceitar os termos para continuar.");
+
+        return {
+          tenant_name: companyName,
+          tenant_slug: slugifyCompanyName(companyName),
+          company_name: companyName,
+          company_phone: phone,
+          company_number: companyNumber,
+          company_sector: companySector,
+          company_category: companyCategory,
+          company_address_street: street,
+          company_address_number: number,
+          company_address_city: city,
+          company_address_country: country,
+          company_address_state: stateUf,
+          company_address_postalcode: postalCode,
+          company_language: language,
+          admin_full_name: userName,
+          admin_email: email,
+          admin_password: password,
+          admin_phone: phone,
+          acept_terms: acceptTerms,
+          expectation
+        };
+      }
+
+      async function onSubmitForm(event) {
+        event.preventDefault();
+        if (state.isSubmitting) return;
+
+        try {
+          const payload = validateFormPayload();
+          const signupPayload = {
+            tenant_name: payload.tenant_name,
+            tenant_slug: payload.tenant_slug,
+            company_name: payload.company_name,
+            company_phone: payload.company_phone,
+            company_number: payload.company_number,
+            company_sector: payload.company_sector,
+            company_category: payload.company_category,
+            company_address_street: payload.company_address_street,
+            company_address_number: payload.company_address_number,
+            company_address_city: payload.company_address_city,
+            company_address_country: payload.company_address_country,
+            company_address_state: payload.company_address_state,
+            company_address_postalcode: payload.company_address_postalcode,
+            company_language: payload.company_language,
+            admin_full_name: payload.admin_full_name,
+            admin_email: payload.admin_email,
+            admin_password: payload.admin_password,
+            admin_phone: payload.admin_phone,
+            acept_terms: payload.acept_terms
+          };
+
+          setSubmitState(true);
+          await postJson("/auth/signup", signupPayload);
+          await syncCurrentUserFromMe();
+
+          swal({
+            title: "Cadastro concluído!",
+            text: "Seu ambiente foi criado e sua sessão já está autenticada.",
+            type: "success"
+          }, function () {
+            window.location.href = "/Default";
+          });
+        } catch (error) {
+          console.error("[PublicRegister] submit error:", error);
+          const msg = error?.message || "Não foi possível concluir o cadastro.";
+          swal("Falha no cadastro", msg, "error");
+        } finally {
+          setSubmitState(false);
+        }
+      }
+
+      function installEvents() {
+        document.getElementById("btnExperimentHero")?.addEventListener("click", function () {
+          showPlansStage();
+        });
+
+        document.querySelectorAll(".plan-select-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const card = btn.closest(".plan-card");
+            if (!card) return;
+            renderPlanSelection(card);
+          });
+        });
+
+        document.getElementById("btnBackPlans")?.addEventListener("click", function () {
+          showPlanChooser();
+          document.getElementById("plansStage")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        document.getElementById("publicRegisterForm")?.addEventListener("submit", onSubmitForm);
+      }
+
+      $(document).ready(function () {
+        new WOW().init();
+        installEvents();
+      });
+    })();
+  </script>
+</body>
+</html>

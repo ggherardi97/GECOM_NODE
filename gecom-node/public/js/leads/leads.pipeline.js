@@ -136,6 +136,26 @@
     return map;
   }
 
+  function renderStatusFilterOptions() {
+    const sel = $("#leadStatusFilter");
+    if (!sel.length) return;
+    const current = String(state.filters.status || "").toUpperCase();
+    const statuses = Array.from(new Set(state.leads.map((l) => String(l?.status || "").toUpperCase()).filter(Boolean)));
+    const preferredOrder = ["NEW", "WORKING", "NURTURING", "QUALIFIED", "CONVERTED", "WON", "DISQUALIFIED", "LOST"];
+    statuses.sort((a, b) => {
+      const ia = preferredOrder.indexOf(a);
+      const ib = preferredOrder.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+
+    sel.empty().append(`<option value="">${esc(t("page.leads.filters.allStatus", "Todos os status"))}</option>`);
+    statuses.forEach((s) => sel.append(`<option value="${esc(s)}">${esc(s)}</option>`));
+    sel.val(current);
+  }
+
   function renderOwners() {
     const sel = $("#leadOwnerFilter");
     if (!sel.length) return;
@@ -222,13 +242,7 @@
   }
 
   async function loadLeads() {
-    const qs = new URLSearchParams();
-    if (state.filters.q) qs.set("q", state.filters.q);
-    if (state.filters.owner_user_id) qs.set("owner_user_id", state.filters.owner_user_id);
-    if (state.filters.status) qs.set("status", state.filters.status);
-    if (state.filters.source) qs.set("source", state.filters.source);
-    const url = `/api/leads${qs.toString() ? `?${qs.toString()}` : ""}`;
-    const res = await api.get(url);
+    const res = await api.get("/api/leads");
     state.leads = listToArray(res);
   }
 
@@ -247,6 +261,7 @@
     setLoading(true);
     try {
       await Promise.all([loadStages(), loadLeads(), loadOwners()]);
+      renderStatusFilterOptions();
       renderOwners();
       renderBoard();
       bindBoardEvents();

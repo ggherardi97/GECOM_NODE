@@ -160,6 +160,9 @@
       "header": {
         "newInvoice": "New Invoice"
       },
+      "empty":{
+        "noResults": "No invoices found"
+      },
       "bulkDelete": {
         "title": "Confirmation",
         "bodyTextFirst": "Confirm removal of ",

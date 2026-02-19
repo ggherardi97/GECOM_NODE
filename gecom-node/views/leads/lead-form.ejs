@@ -1,6 +1,8 @@
 <style>
   .lead-form-actions { display: flex; justify-content: end; gap: 8px; margin-top: 15px; }
   .ibox-content .form-group label { font-weight: 600; }
+  .wizard-big.wizard > .content { min-height: 420px !important; }
+  #leadWizardForm .steps ul li a { font-weight: 600; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -10,18 +12,37 @@
         <h5><%= t('page.leads.form.title') %></h5>
       </div>
       <div class="ibox-content">
-        <div class="row">
-          <div class="col-lg-6">
-            <h4><%= t('page.leads.form.sectionBasic') %></h4>
-            <div class="form-group">
-              <label for="leadName"><%= t('page.leads.columns.name') %> *</label>
-              <input id="leadName" type="text" class="form-control" maxlength="255" />
+        <div class="lead-form-actions">
+          <button id="leadCancelBtn" type="button" class="btn btn-white"><%= t('page.leads.common.cancel') %></button>
+        </div>
+
+        <form id="leadWizardForm" class="wizard-big">
+          <h1>Informações básicas</h1>
+          <fieldset>
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="form-group">
+                  <label for="leadName"><%= t('page.leads.columns.name') %> *</label>
+                  <input id="leadName" type="text" class="form-control" maxlength="255" />
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="form-group">
+                  <label for="leadType">Tipo *</label>
+                  <select id="leadType" class="form-control">
+                    <option value="COMPANY">COMPANY</option>
+                    <option value="PERSON">PERSON</option>
+                  </select>
+                </div>
+              </div>
             </div>
+
             <div class="form-group">
               <label for="leadCompany"><%= t('page.leads.columns.company') %></label>
               <input id="leadCompany" type="text" class="form-control" list="leadCompanies" />
               <datalist id="leadCompanies"></datalist>
             </div>
+
             <div class="row">
               <div class="col-sm-6 form-group">
                 <label for="leadFirstName"><%= t('page.leads.form.firstName') %></label>
@@ -32,6 +53,7 @@
                 <input id="leadLastName" type="text" class="form-control" />
               </div>
             </div>
+
             <div class="row">
               <div class="col-sm-6 form-group">
                 <label for="leadEmail"><%= t('page.leads.columns.email') %></label>
@@ -42,10 +64,10 @@
                 <input id="leadPhone" type="text" class="form-control" />
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div class="col-lg-6">
-            <h4><%= t('page.leads.form.sectionQualification') %></h4>
+          <h1>Qualificação</h1>
+          <fieldset>
             <div class="row">
               <div class="col-sm-6 form-group">
                 <label for="leadStage"><%= t('page.leads.columns.stage') %> *</label>
@@ -63,10 +85,11 @@
                 </select>
               </div>
             </div>
+
             <div class="row">
               <div class="col-sm-6 form-group">
                 <label for="leadValue"><%= t('page.leads.columns.value') %></label>
-                <input id="leadValue" type="number" class="form-control" step="0.01" min="0" />
+                <input id="leadValue" type="text" class="form-control" inputmode="decimal" placeholder="0,00" />
               </div>
               <div class="col-sm-6 form-group">
                 <label for="leadCurrency"><%= t('page.leads.columns.currency') %></label>
@@ -77,6 +100,7 @@
                 </select>
               </div>
             </div>
+
             <div class="row">
               <div class="col-sm-6 form-group">
                 <label for="leadOwner"><%= t('page.leads.columns.owner') %></label>
@@ -86,33 +110,28 @@
                 <label for="leadSource"><%= t('page.leads.columns.source') %></label>
                 <select id="leadSource" class="form-control">
                   <option value="">-</option>
+                  <option value="MANUAL">MANUAL</option>
                   <option value="WEBSITE">WEBSITE</option>
-                  <option value="REFERRAL">REFERRAL</option>
-                  <option value="SOCIAL">SOCIAL</option>
-                  <option value="PHONE">PHONE</option>
-                  <option value="EMAIL">EMAIL</option>
+                  <option value="INDICATION">INDICATION</option>
+                  <option value="IMPORT">IMPORT</option>
                   <option value="OTHER">OTHER</option>
                 </select>
               </div>
             </div>
+
             <div class="form-group">
               <label for="leadNextAction"><%= t('page.leads.columns.nextActionAt') %></label>
               <input id="leadNextAction" type="datetime-local" class="form-control" />
             </div>
-          </div>
-        </div>
 
-        <hr />
-        <h4><%= t('page.leads.form.sectionNotes') %></h4>
-        <div class="form-group">
-          <label for="leadNotes"><%= t('page.leads.form.notes') %></label>
-          <textarea id="leadNotes" class="form-control" rows="4"></textarea>
-        </div>
-
-        <div class="lead-form-actions">
-          <button id="leadCancelBtn" type="button" class="btn btn-white"><%= t('page.leads.common.cancel') %></button>
-          <button id="leadSaveBtn" type="button" class="btn btn-primary"><i class="fa fa-save"></i> <%= t('page.leads.form.save') %></button>
-        </div>
+            <hr />
+            <h4><%= t('page.leads.form.sectionNotes') %></h4>
+            <div class="form-group">
+              <label for="leadNotes"><%= t('page.leads.form.notes') %></label>
+              <textarea id="leadNotes" class="form-control" rows="4"></textarea>
+            </div>
+          </fieldset>
+        </form>
       </div>
     </div>
   </div>

@@ -25,6 +25,7 @@ const aiApi = require("./routes/aiApi");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
+const tenantsApiRoutes = require("./routes/tenantsApi");
 
 const app = express();
 
@@ -91,6 +92,7 @@ app.use('/locales', express.static(path.join(__dirname, 'locales')));
 app.use('/auth', authRoutes);
 app.use("/api", companiesApiRoutes);
 app.use("/api", usersApiRoutes);
+app.use("/api", tenantsApiRoutes);
 app.use("/api", processApiRoutes);
 app.use('/api', cnpjApiRoutes);
 app.use('/api', invoicesApiRoutes);
@@ -138,6 +140,7 @@ app.get("/leads", (req, res) => res.render("leads/leads-list"));
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
 app.get('/LandingPage', (req, res) => res.render('LandingPage', { layout: false }));
+app.get(['/cadastro', '/register'], (req, res) => res.render('PublicRegister', { layout: false }));
 
 /* ---------- 404 e erro genérico (opcional, mas útil) ---------- */
 app.use((req, res) => res.status(404).send('Not Found'));

@@ -32,6 +32,21 @@ router.post("/login", async (req, res) => {
     }
 });
 
+router.post("/signup", async (req, res) => {
+    try {
+        const apiResponse = await authService.signup(req.body ?? {});
+        forwardSetCookie(apiResponse, res);
+        return res.status(apiResponse.status).json(apiResponse.data);
+    }
+    catch (error) {
+        const status = error.response?.status || 500;
+        const data = error.response?.data || { message: "Internal server error" };
+
+        console.error("Signup error:", status, data);
+        return res.status(status).json(data);
+    }
+});
+
 router.post("/refresh-token", async (req, res) => {
     try {
         const refreshToken = req.cookies?.refresh_token;

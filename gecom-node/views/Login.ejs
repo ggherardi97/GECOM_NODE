@@ -14,10 +14,34 @@
         .loginscreen.middle-box {
             width: 350px;
         }
+        body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-image: url("../Assets/img/gecom_bk3.png");
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  opacity: 0.25;
+  z-index: -1;
+  animation: moveBackground 120s linear infinite;
+}
+
+@keyframes moveBackground {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
     </style>
 </head>
 <body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
-    <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" />
+    <!-- <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" /> -->
     <button type="button" class="btn btn-primary" style="display: none;" data-toggle="modal" id="modalLoginButton" data-target="#loginModal">
         <%= t('page.login.modal.hiddenTriggerLabel') %>
     </button>

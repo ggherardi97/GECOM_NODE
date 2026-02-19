@@ -17,6 +17,13 @@ async function refresh(refreshToken) {
     // Swagger: { "refresh_token": "..." }
     return apiClient.post("/auth/refresh-token", { refresh_token: refreshToken });
 }
+
+async function signup(payload) {
+    return apiClient.post("/auth/signup", payload, {
+        withCredentials: true
+    });
+}
+
 async function forgotPassword(email) {
     return apiClient.post("/auth/forgot-password", { email });
 }
@@ -32,6 +39,7 @@ async function resetPassword({ userId, token, newPassword, confirmPassword }) {
 
 module.exports = {
     login,
+    signup,
     refresh,
     forgotPassword,
     resetPassword

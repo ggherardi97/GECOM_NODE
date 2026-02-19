@@ -88,6 +88,25 @@
     return lead?.owner_user?.full_name || lead?.owner?.full_name || lead?.owner_name || lead?.owner_user_id || "";
   }
 
+  function renderStatusFilterOptions() {
+    const sel = $("#leadListStatus");
+    if (!sel.length) return;
+    const current = String(state.filters.status || "").toUpperCase();
+    const statuses = Array.from(new Set(state.leads.map((l) => String(l?.status || "").toUpperCase()).filter(Boolean)));
+    const preferredOrder = ["NEW", "WORKING", "NURTURING", "QUALIFIED", "CONVERTED", "WON", "DISQUALIFIED", "LOST"];
+    statuses.sort((a, b) => {
+      const ia = preferredOrder.indexOf(a);
+      const ib = preferredOrder.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    sel.empty().append(`<option value="">${esc(t("page.leads.filters.allStatus", "Todos os status"))}</option>`);
+    statuses.forEach((s) => sel.append(`<option value="${esc(s)}">${esc(s)}</option>`));
+    sel.val(current);
+  }
+
   function normalizeForCompare(v) {
     if (v == null) return "";
     return String(v).toLowerCase();
@@ -196,8 +215,10 @@
           <td>${esc(lead.source || "-")}</td>
           <td>${esc(money(lead.estimated_value, lead.currency_code))}</td>
           <td>
-            <button type="button" class="btn btn-xs btn-default js-open"><i class="fa fa-eye"></i></button>
-            <button type="button" class="btn btn-xs btn-primary js-edit"><i class="fa fa-pencil"></i></button>
+            <div class="lead-actions-inline">
+              <button type="button" class="btn btn-xs btn-default js-open"><i class="fa fa-eye"></i></button>
+              <button type="button" class="btn btn-xs btn-primary js-edit"><i class="fa fa-pencil"></i></button>
+            </div>
           </td>
         </tr>
       `);
@@ -519,6 +540,7 @@
 
     try {
       await Promise.all([loadOwners(), loadLeads()]);
+      renderStatusFilterOptions();
       bindRows();
       bindFilters();
       bindSort();

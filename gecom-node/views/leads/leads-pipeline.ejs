@@ -47,23 +47,16 @@
             <label><%= t('page.leads.filters.status') %></label>
             <select id="leadStatusFilter" class="form-control input-sm">
               <option value=""><%= t('page.leads.filters.allStatus') %></option>
-              <option value="NEW">NEW</option>
-              <option value="WORKING">WORKING</option>
-              <option value="NURTURING">NURTURING</option>
-              <option value="QUALIFIED">QUALIFIED</option>
-              <option value="CONVERTED">CONVERTED</option>
-              <option value="DISQUALIFIED">DISQUALIFIED</option>
             </select>
           </div>
           <div class="form-group">
             <label><%= t('page.leads.filters.source') %></label>
             <select id="leadSourceFilter" class="form-control input-sm">
               <option value=""><%= t('page.leads.filters.allSources') %></option>
+              <option value="MANUAL">MANUAL</option>
               <option value="WEBSITE">WEBSITE</option>
-              <option value="REFERRAL">REFERRAL</option>
-              <option value="SOCIAL">SOCIAL</option>
-              <option value="PHONE">PHONE</option>
-              <option value="EMAIL">EMAIL</option>
+              <option value="INDICATION">INDICATION</option>
+              <option value="IMPORT">IMPORT</option>
               <option value="OTHER">OTHER</option>
             </select>
           </div>

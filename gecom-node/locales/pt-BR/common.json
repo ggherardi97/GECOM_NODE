@@ -202,6 +202,9 @@
         "taxes": "Impostos",
         "total": "Total",
         "dueDate": "Vencimento"
+      },
+      "empty":{
+        "noResults": "Nenhum invoice encontrado"
       }
     },
     "login": {

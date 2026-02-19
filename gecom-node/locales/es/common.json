@@ -160,6 +160,9 @@
       "header": {
         "newInvoice": "Nuevo Invoice"
       },
+      "empty":{
+        "noResults": "No se encontraron facturas."
+      },
       "bulkDelete": {
         "title": "Confirmación",
         "bodyTextFirst": "Confirma la eliminación de ",
