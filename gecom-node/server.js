@@ -116,6 +116,13 @@ app.use("/api", aiApi);
 app.use("/api", serviceApiRoutes);
 app.use("/", servicePagesRoutes);
 
+// Backward-compatible alias for environments calling /cnpj/lookup without /api
+app.get("/cnpj/lookup", (req, res) => {
+  const qs = new URLSearchParams(req.query || {}).toString();
+  const target = `/api/cnpj/lookup${qs ? `?${qs}` : ""}`;
+  return res.redirect(307, target);
+});
+
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes'));
 app.get('/ClientDetails', (req, res) => res.render('ClientDetails'));

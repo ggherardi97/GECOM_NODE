@@ -18,7 +18,7 @@ async function readJsonSafe(response) {
 }
 
 /**
- * GET /api/cnpj/lookup?cnpj=42274696000194
+ * GET /cnpj/lookup?cnpj=42274696000194
  * Server-side proxy to ReceitaWS (avoids CORS).
  */
 router.get("/cnpj/lookup", async (req, res) => {
@@ -79,7 +79,7 @@ router.get("/cnpj/lookup", async (req, res) => {
 
     return res.status(200).json(safe);
   } catch (error) {
-    console.error("GET /api/cnpj/lookup error:", error);
+    console.error("GET /cnpj/lookup error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
