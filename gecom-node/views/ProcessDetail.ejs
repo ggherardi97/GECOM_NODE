@@ -1437,7 +1437,18 @@ async function loadProcessDocuments() {
     processDocsItems = [];
 
     // 1) Find folder of this process (usually root folder with process name)
-    const folderRes = await apiGet(`/api/documents?parent_id=null&item_type=FOLDER&related_table=process&related_id=${encodeURIComponent(String(processId))}`);
+    // Admin can query directly by relation. For non-admin, we query root folders and filter client-side.
+    const folderQs = new URLSearchParams();
+    folderQs.set("parent_id", "null");
+    folderQs.set("item_type", "FOLDER");
+    folderQs.set("take", "500");
+    folderQs.set("skip", "0");
+    if (window.__auth?.isAdmin) {
+      folderQs.set("related_table", "process");
+      folderQs.set("related_id", String(processId));
+    }
+
+    const folderRes = await apiGet(`/api/documents?${folderQs.toString()}`);
     const folders = normalizeArrayResponse(folderRes);
 
     // Defensive filter on frontend in case backend ignores part of the query.

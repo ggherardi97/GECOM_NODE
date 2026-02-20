@@ -1190,19 +1190,18 @@
   }
 
   let __companyChangeSeq = 0;
-  let __companyChangeInFlight = false;
 
   async function onCompanyChanged(companyId) {
     const seq = ++__companyChangeSeq;
-    if (__companyChangeInFlight) return;
-    __companyChangeInFlight = true;
 
     try {
       resetInvoicesSelect();
       resetContactsSelect();
 
-      await loadInvoicesByCompany(companyId);
-      loadUsersFromCompanyCache(companyId);
+      await Promise.all([
+        loadInvoicesByCompany(companyId),
+        loadUsersByCompany(companyId)
+      ]);
 
       if (seq !== __companyChangeSeq) return;
 
@@ -1211,8 +1210,6 @@
     } catch (e) {
       console.error(e);
       alert(e?.message || "Falha ao carregar dados da empresa.");
-    } finally {
-      __companyChangeInFlight = false;
     }
   }
 

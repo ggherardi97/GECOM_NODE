@@ -666,11 +666,17 @@
                 ]
               );
 
-              if (diff.hasChanges) {
+              if (diff.hasChanges && Object.keys(diff.payload || {}).length > 0) {
                 await apiPatch("/api/users/" + encodeURIComponent(me.id), diff.payload);
               }
 
-              // Save picture in cache (even if backend doesn't store it yet)
+              const originalPic = normalizeString(original.profilePicture);
+              const currentPic = normalizeString(current.profilePicture);
+              if (originalPic !== currentPic) {
+                await apiPatch("/api/users/me/profile-picture", { base64: currentPic || "" });
+              }
+
+              // Save picture in cache
               setCachedProfilePicture(me.id, normalizeString(current.profilePicture));
 
               location.reload();

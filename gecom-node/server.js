@@ -22,6 +22,8 @@ const savedViewsApi = require("./routes/savedViewsApi");
 const kanbanApi = require("./routes/kanbanApi");
 const leadsApi = require("./routes/leadsApi");
 const aiApi = require("./routes/aiApi");
+const serviceApiRoutes = require("./routes/serviceApi");
+const servicePagesRoutes = require("./routes/servicePages");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -111,6 +113,8 @@ const notificationsApi = require("./routes/notificationsApi");
 app.use("/api", notificationsApi);
 app.use("/api", leadsApi);
 app.use("/api", aiApi);
+app.use("/api", serviceApiRoutes);
+app.use("/", servicePagesRoutes);
 
 /* ---------- Páginas (EJS) ---------- */
 app.get('/clientes', (req, res) => res.render('clientes'));

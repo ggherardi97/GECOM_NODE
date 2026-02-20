@@ -153,6 +153,145 @@
         background-color: unset !important;
       }
 
+      #side-menu {
+        /* height: calc(100vh - 96px); */
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: #1f2e3b #2f4050;
+      }
+
+      .navbar-static-side .sidebar-collapse {
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      #side-menu::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #side-menu::-webkit-scrollbar-track {
+        background: #2f4050;
+      }
+
+      #side-menu::-webkit-scrollbar-thumb {
+        background: #1f2e3b;
+        border-radius: 8px;
+      }
+
+      #side-menu::-webkit-scrollbar-thumb:hover {
+        background: #18242e;
+      }
+
+      .sidebar-area-hidden {
+        display: none !important;
+      }
+
+      .sidebar-area-switcher {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-top: 1px solid #2f4050;
+        background: #293846;
+        z-index: 25;
+        overflow: visible;
+      }
+
+      .sidebar-area-trigger {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        text-align: left;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sidebar-area-trigger:focus {
+        outline: none;
+      }
+
+      .sidebar-area-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 3px;
+        background: #1ab394;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .sidebar-area-label {
+        flex: 1;
+        font-weight: 600;
+      }
+
+      .sidebar-area-panel {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: calc(100% - 1px);
+        border: 1px solid #d7d7d7;
+        border-bottom: 0;
+        background: #f7f7f7;
+        color: #222;
+        padding: 8px 0;
+        box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.12);
+      }
+
+      .sidebar-area-panel.is-open {
+        display: block;
+      }
+
+      .sidebar-area-panel-title {
+        padding: 6px 14px 10px 14px;
+        color: #666;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .sidebar-area-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px;
+        color: #333;
+        text-decoration: none;
+      }
+
+      .sidebar-area-option:hover {
+        background: #ececec;
+        color: #222;
+        text-decoration: none;
+      }
+
+      .sidebar-area-option.is-active {
+        font-weight: 700;
+      }
+
+      .sidebar-area-option .fa-check {
+        visibility: hidden;
+        color: #1ab394;
+      }
+
+      .sidebar-area-option.is-active .fa-check {
+        visibility: visible;
+      }
+
+      body.mini-navbar .sidebar-area-switcher {
+        display: none;
+      }
+
       .rounded-circle {
         width: 65px !important;
         height: 65px;
@@ -255,6 +394,7 @@
           right: -70px;
         }
       }
+  .text-muted { display:none !important; }
     </style>
 </head>
 
@@ -281,7 +421,7 @@
 
   <div id="wrapper">
     <!-- Sidebar -->
-    <nav class="navbar-default navbar-static-side" role="navigation">
+      <nav class="navbar-default navbar-static-side" role="navigation">
       <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
           <li class="nav-header text-center">
@@ -378,19 +518,232 @@
               <span class="nav-label">Notificações</span>
             </a>
           </li>
-
-          <!-- âœ… opcional: botÃµes simples pra testar troca de idioma -->
-          <!--
-          <li style="padding:10px 20px;">
-            <button class="btn btn-xs btn-white" onclick="setLanguage('pt-BR')">PT</button>
-            <button class="btn btn-xs btn-white" onclick="setLanguage('en')">EN</button>
-            <button class="btn btn-xs btn-white" onclick="setLanguage('es')">ES</button>
-          </li>
-          -->
-
         </ul>
       </div>
     </nav>
+    <!-- <nav class="navbar-default navbar-static-side" role="navigation" style="height: 100% !important;">
+      <div class="sidebar-collapse">
+        <ul class="nav metismenu" id="side-menu">
+          <li class="nav-header text-center">
+            <div class="dropdown profile-element">
+              <span>
+                <img id="currentUserAvatar" alt="image" class="rounded-circle" style="width: 75px;" src="">
+              </span>
+
+              <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
+                <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
+              </a>
+
+              <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                <li id="profilePage"><a href="/Profile" data-i18n="page.layout.menu.profile">Perfil</a></li>
+                <li class="divider"></li>
+                <li><a onclick="LogOut()" data-i18n="page.layout.menu.logout">Sair</a></li>
+              </ul>
+            </div>
+            <div class="logo-element">G+</div>
+          </li>
+
+          <li data-areas="all">
+            <a href="/Default">
+              <i class="fa fa-home"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.dashboard">Dashboard</span>
+            </a>
+          </li>
+          
+          <li id="myActivitiesTab" style="display: none;" data-areas="all">
+            <a href="/MyActivities">
+              <i class="fa fa-tasks"></i>
+              <span class="nav-label">Minhas Atividades</span>
+            </a>
+          </li>
+
+          <li id="aiHubTab" style="display: none;" data-areas="all">
+            <a href="/AI">
+              <i class="fa fa-magic"></i>
+              <span class="nav-label">IA</span>
+            </a>
+          </li>
+
+          <li data-areas="service"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
+
+          <li id="clientTab" style="display: none;" data-areas="service">
+            <a href="/Clientes">
+              <i class="fa fa-users"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
+            </a>
+          </li>
+
+          <li data-areas="service">
+            <a href="/Processos">
+              <i class="fa fa-file"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
+            </a>
+          </li>
+
+          <li data-areas="service">
+            <a href="/MyDocuments">
+              <i class="fa fa-folder"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.myDocuments">Meus Documentos</span>
+            </a>
+          </li>
+
+          <li data-areas="service">
+            <a href="/servico/incidentes">
+              <i class="fa fa-ticket"></i>
+              <span class="nav-label">Incidentes</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/filas">
+              <i class="fa fa-random"></i>
+              <span class="nav-label">Filas</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/filas/membros">
+              <i class="fa fa-users"></i>
+              <span class="nav-label">Filas - Membros</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/ativos">
+              <i class="fa fa-desktop"></i>
+              <span class="nav-label">Ativos</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/assuntos">
+              <i class="fa fa-tags"></i>
+              <span class="nav-label">Assuntos</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/recursos">
+              <i class="fa fa-cogs"></i>
+              <span class="nav-label">Recursos</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/recursos/agendamentos">
+              <i class="fa fa-calendar-check-o"></i>
+              <span class="nav-label">Recursos - Agendamentos</span>
+            </a>
+          </li>
+          <li data-areas="service">
+            <a href="/servico/tarefas">
+              <i class="fa fa-tasks"></i>
+              <span class="nav-label">Tarefas</span>
+            </a>
+          </li>
+
+          <li data-areas="sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+
+          <li data-areas="sales">
+            <a href="/Invoices">
+              <i class="fa fa-money"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li id="productTab" style="display: none;" data-areas="sales">
+            <a href="/Products">
+              <i class="fa fa-cube"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+            </a>
+          </li>
+
+          <li id="leadsTab" style="display: none;" data-areas="sales">
+            <a href="/leads/pipeline">
+              <i class="fa fa-filter"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
+            </a>
+          </li>
+
+          <li id="configDivider" style="display: none;" data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li data-areas="settings">
+            <a href="/servico/sla/politicas">
+              <i class="fa fa-shield"></i>
+              <span class="nav-label">SLA - Políticas</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/sla/kpis">
+              <i class="fa fa-line-chart"></i>
+              <span class="nav-label">SLA - KPIs</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/sla/instancias">
+              <i class="fa fa-clone"></i>
+              <span class="nav-label">SLA - Instâncias</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/sla/instancias-kpi">
+              <i class="fa fa-sliders"></i>
+              <span class="nav-label">SLA - Instâncias KPI</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/sla/eventos">
+              <i class="fa fa-bolt"></i>
+              <span class="nav-label">SLA - Eventos</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/calendarios">
+              <i class="fa fa-calendar"></i>
+              <span class="nav-label">Calendários</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/calendarios/regras">
+              <i class="fa fa-calendar-plus-o"></i>
+              <span class="nav-label">Calendários - Regras</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/calendarios/excecoes">
+              <i class="fa fa-calendar-times-o"></i>
+              <span class="nav-label">Calendários - Exceções</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/servico/tarefas/tipos">
+              <i class="fa fa-list-alt"></i>
+              <span class="nav-label">Tarefas - Tipos</span>
+            </a>
+          </li>
+          <li id='notificationList' style="display: none;" data-areas="settings">
+            <a href="/Notifications">
+              <i class="fa fa-bell"></i>
+              <span class="nav-label">Notificações</span>
+            </a>
+          </li>
+
+        </ul>
+        <div class="sidebar-area-switcher" id="sidebarAreaSwitcher">
+          <button type="button" class="sidebar-area-trigger" id="sidebarAreaTrigger" aria-expanded="false" aria-controls="sidebarAreaPanel">
+            <span class="sidebar-area-icon" id="sidebarAreaIcon">S</span>
+            <span class="sidebar-area-label" id="sidebarAreaLabel">Serviço</span>
+            <i class="fa fa-chevron-up"></i>
+          </button>
+          <div class="sidebar-area-panel" id="sidebarAreaPanel">
+            <div class="sidebar-area-panel-title">Alterar área</div>
+            <a href="#" class="sidebar-area-option" data-area="service">
+              <span>Serviço</span><i class="fa fa-check"></i>
+            </a>
+            <a href="#" class="sidebar-area-option" data-area="sales">
+              <span>Sales</span><i class="fa fa-check"></i>
+            </a>
+            <a href="#" class="sidebar-area-option" data-area="settings">
+              <span>Configurações</span><i class="fa fa-check"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav> -->
 
     <div id="page-wrapper" class="gray-bg">
       <div class="row border-bottom">
@@ -532,6 +885,94 @@
 
       <script>
         (function () {
+          const SIDEBAR_AREA_KEY = "gecom.sidebar.area";
+
+          function normalizeSidebarArea(area) {
+            const value = String(area || "").toLowerCase();
+            if (value === "sales") return "sales";
+            if (value === "settings") return "settings";
+            return "service";
+          }
+
+          function getSidebarAreaLabel(area) {
+            if (area === "sales") return "Sales";
+            if (area === "settings") return "Configurações";
+            return "Serviço";
+          }
+
+          function getSidebarAreaIcon(area) {
+            if (area === "sales") return "V";
+            if (area === "settings") return "C";
+            return "S";
+          }
+
+          function applySidebarArea(area) {
+            const currentArea = normalizeSidebarArea(area);
+            const items = document.querySelectorAll("#side-menu [data-areas]");
+            items.forEach((item) => {
+              const raw = String(item.getAttribute("data-areas") || "");
+              const areas = raw.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
+              const visible = areas.includes("all") || areas.includes(currentArea);
+              item.classList.toggle("sidebar-area-hidden", !visible);
+            });
+
+            const areaLabel = document.getElementById("sidebarAreaLabel");
+            const areaIcon = document.getElementById("sidebarAreaIcon");
+            if (areaLabel) areaLabel.textContent = getSidebarAreaLabel(currentArea);
+            if (areaIcon) areaIcon.textContent = getSidebarAreaIcon(currentArea);
+
+            const options = document.querySelectorAll(".sidebar-area-option[data-area]");
+            options.forEach((option) => {
+              const optionArea = normalizeSidebarArea(option.getAttribute("data-area"));
+              option.classList.toggle("is-active", optionArea === currentArea);
+            });
+
+            try {
+              localStorage.setItem(SIDEBAR_AREA_KEY, currentArea);
+            } catch {}
+          }
+
+          function setSidebarPanelOpen(open) {
+            const panel = document.getElementById("sidebarAreaPanel");
+            const trigger = document.getElementById("sidebarAreaTrigger");
+            if (!panel || !trigger) return;
+            panel.classList.toggle("is-open", !!open);
+            trigger.setAttribute("aria-expanded", open ? "true" : "false");
+          }
+
+          function initSidebarAreaSwitcher() {
+            const trigger = document.getElementById("sidebarAreaTrigger");
+            const panel = document.getElementById("sidebarAreaPanel");
+            if (!trigger || !panel) return;
+
+            let savedArea = "service";
+            try {
+              savedArea = normalizeSidebarArea(localStorage.getItem(SIDEBAR_AREA_KEY));
+            } catch {}
+            applySidebarArea(savedArea);
+
+            trigger.addEventListener("click", function () {
+              const isOpen = panel.classList.contains("is-open");
+              setSidebarPanelOpen(!isOpen);
+            });
+
+            document.querySelectorAll(".sidebar-area-option[data-area]").forEach((option) => {
+              option.addEventListener("click", function (ev) {
+                ev.preventDefault();
+                const area = normalizeSidebarArea(option.getAttribute("data-area"));
+                applySidebarArea(area);
+                setSidebarPanelOpen(false);
+              });
+            });
+
+            document.addEventListener("click", function (ev) {
+              const switcher = document.getElementById("sidebarAreaSwitcher");
+              if (!switcher) return;
+              if (switcher.contains(ev.target)) return;
+              setSidebarPanelOpen(false);
+            });
+          }
+
           function persistSidebarState() {
             try {
               const collapsed = document.body.classList.contains("mini-navbar") ? "1" : "0";
@@ -702,10 +1143,12 @@
 
           if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
+              initSidebarAreaSwitcher();
               window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
               persistSidebarState();
             });
           } else {
+            initSidebarAreaSwitcher();
             window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
             persistSidebarState();
           }

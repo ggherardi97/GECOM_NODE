@@ -388,7 +388,7 @@
       qs.set("skip", "0");
 
       // ✅ Permissão: admin vê tudo, outros filtram por company
-      if (!window.__auth?.isAdmin) {
+      if (!window.__auth?.isAdmin && state.currentParentId === null) {
         const companyId = getUserCompanyId();
         qs.set("related_table", "company");
         qs.set("related_id", companyId || "00000000-0000-0000-0000-000000000000");

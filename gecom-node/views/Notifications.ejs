@@ -22,7 +22,7 @@
         <div id="notificationsSavedViewsHost"></div>
         <div class="ibox-tools">
           <span class="sv-counters"><span id="notificationsCountLabel">Exibindo 0 de 0</span></span>
-          <a type="button" class="btn btn-sm btn-primary" href="/NewNotification"><i class="fa fa-plus"></i> Nova Notificação</a>
+          <a id="btnNewNotification" type="button" class="btn btn-sm btn-primary" href="/NewNotification"><i class="fa fa-plus"></i> Nova Notificação</a>
         </div>
       </div>
 
@@ -120,6 +120,33 @@
     const startsRange = { start: null, end: null };
     const expiresRange = { start: null, end: null };
     const createdRange = { start: null, end: null };
+
+    function parseBool(value) {
+      if (value === true) return true;
+      if (value === false) return false;
+      if (value == null) return false;
+      const s = String(value).trim().toLowerCase();
+      return s === "true" || s === "1" || s === "yes" || s === "y";
+    }
+
+    function isAdminUser() {
+      if (
+        parseBool(window.__auth?.is_admin) ||
+        parseBool(window.__auth?.isAdmin) ||
+        parseBool(window.__auth?.user?.is_admin) ||
+        parseBool(window.__auth?.user?.isAdmin)
+      ) return true;
+
+      const role = String(
+        window.__auth?.role ||
+        window.__auth?.user_role ||
+        window.__auth?.user?.role ||
+        window.__auth?.user?.user_role ||
+        ""
+      ).trim().toLowerCase();
+
+      return role === "admin" || role === "administrator";
+    }
 
     function pickCompanyId() {
       return (
@@ -560,6 +587,7 @@
 
     function bindEvents() {
       $("#notificationsTable").off("click.svRow").on("click.svRow", "tbody tr", function () {
+        if (!isAdminUser()) return;
         const id = String($(this).data("id") || "");
         if (!id) return;
         window.location = `/NewNotification?id=${encodeURIComponent(id)}`;
@@ -587,16 +615,27 @@
     async function loadNotifications() {
       const companyId = pickCompanyId();
       if (!companyId) throw new Error("Company não identificado.");
+      const admin = isAdminUser();
       const qs = new URLSearchParams();
-      qs.set("company_id", String(companyId));
-      qs.set("include_expired", "true");
-      const data = await apiGet(`/api/notifications/admin?${qs.toString()}`);
+      let endpoint = "/api/notifications/my";
+
+      if (admin) {
+        qs.set("company_id", String(companyId));
+        qs.set("include_expired", "true");
+        endpoint = "/api/notifications/admin";
+      }
+
+      const query = qs.toString();
+      const data = await apiGet(query ? `${endpoint}?${query}` : endpoint);
       notifications = normalizeArrayResponse(data);
       sortNotificationsBy(sortState.key, sortState.dir);
     }
 
     async function init() {
       $("#pageName,#subpageName").text("Notificações");
+      if (!isAdminUser()) {
+        $("#btnNewNotification").hide();
+      }
       bindEvents();
       await loadNotifications();
       initDateRange();
@@ -655,5 +694,3 @@
   })();
 </script>
 <% %>
-
-

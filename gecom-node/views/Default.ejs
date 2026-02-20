@@ -1379,18 +1379,21 @@ async function loadBillingDashboard() {
           }).join(""));
         }
 
-        // Timeline
+        // Timeline: prioriza processos em andamento (1) e próximo do prazo (2), mais recente.
         var active = processes
-          .filter(function (p) { return Number(p?.status) === 0; })
+          .filter(function (p) {
+            var st = Number(p?.status);
+            return st === 1 || st === 2;
+          })
           .sort(function (a, b) { return new Date(pickProcessCreatedAt(b) ?? 0) - new Date(pickProcessCreatedAt(a) ?? 0); })[0];
 
         if (!active?.id) {
-          $("#timelineEmpty").text("Nenhum processo ativo (status 0) encontrado.");
-          $("#timelineBadge").text("Sem processo ativo");
+          $("#timelineEmpty").text("Nenhum processo em andamento ou próximo do prazo foi encontrado.");
+          $("#timelineBadge").text("Sem processo para timeline");
           return;
         }
 
-        $("#timelineBadge").text("Processo ativo: " + (active?.process_number || active?.id));
+        $("#timelineBadge").text("Processo recente: " + (active?.process_number || active?.id));
 
         var detail = await fetchJson("/api/processes/" + encodeURIComponent(String(active.id)));
         var events = detail?.events || detail?.Events || detail?.eventos || [];
