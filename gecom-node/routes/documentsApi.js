@@ -31,8 +31,8 @@ async function readJsonSafe(response) {
 /**
  * Build a query string for listing documents.
  * We support both parent_id and path for backward-compatibility:
- * - If parent_id is provided, we send it as `path` to the backend (since your controller currently reads `path` as parent_id).
- * - If only path is provided, we pass it through as-is.
+ * - Prefer parent_id for current backends.
+ * - Also mirror to path for older backends that still read `path`.
  */
 function buildDocumentsListQuery(req) {
   const qs = new URLSearchParams();
@@ -40,13 +40,17 @@ function buildDocumentsListQuery(req) {
   // Preferred param: parent_id (folder navigation)
   const parentId = req.query.parent_id;
 
-  // Backward compatibility param: path (your backend reads it and maps to parent_id)
+  // Backward compatibility param: path
   const path = req.query.path;
 
-  // Keep current backend contract: it expects query param "path" but uses it as parent_id.
+  // Keep compatibility with both contracts:
+  // - newer: expects parent_id
+  // - older: expects path
   if (parentId !== undefined && String(parentId) !== "") {
+    qs.set("parent_id", String(parentId));
     qs.set("path", String(parentId));
   } else if (path !== undefined && String(path) !== "") {
+    qs.set("parent_id", String(path));
     qs.set("path", String(path));
   }
 
