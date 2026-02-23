@@ -63,12 +63,12 @@
         <div class="ibox-title">
           <h5 id="invoiceTitle">-</h5>
           <div class="ibox-tools">
-            <button type="button" class="btn btn-warning" id="btnCloneInvoice" disabled>
-              <i class="fa fa-clone"></i> <%= t('page.newInvoice.actions.cloneInvoice') %>
-            </button>
-
             <button type="button" class="btn btn-white" id="btnGenerateInvoicePrint" disabled>
               <i class="fa fa-file-pdf-o"></i> <%= t('page.newInvoice.actions.generateInvoice') %>
+            </button>
+
+            <button type="button" class="btn btn-warning" id="btnCloneInvoice" disabled>
+              <i class="fa fa-clone"></i> <%= t('page.newInvoice.actions.cloneInvoice') %>
             </button>
 
             <button type="button" class="btn btn-danger" id="btnDeleteInvoice" disabled>
@@ -505,6 +505,7 @@
       const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
       const min = Number.isFinite(options?.min) ? options.min : null;
       const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
 
       function normalize(val) {
         const raw = String(val ?? "").trim();
@@ -534,8 +535,20 @@
         }).format(n);
       }
 
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
       $el.on("input", function () {
-        $(this).val(normalize($(this).val()));
+        if (thousandsOnInput) {
+          $(this).val(formatTypingMoneyLike($(this).val()));
+        } else {
+          $(this).val(normalize($(this).val()));
+        }
       });
 
       $el.on("blur", function () {
@@ -543,6 +556,15 @@
         if (n == null || !Number.isFinite(n)) return;
         $(this).val(formatPtBr(clamp(n)));
       });
+
+      if ($el.val()) {
+        if (thousandsOnInput) {
+          $el.val(formatTypingMoneyLike($el.val()));
+        } else {
+          const n = parseNumberSafe($el.val(), null);
+          if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+        }
+      }
     }
 
     // =========================
@@ -1192,9 +1214,9 @@
           const $root = $(rootEl);
 
           // normalize numeric typing
-          bindDecimalMaskOnce($root.find("#il_unit_price"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#il_unit_price"), { decimals: 2, min: 0, thousandsOnInput: true });
           bindDecimalMaskOnce($root.find("#il_tax_rate"), { decimals: 4, min: 0, max: 1 });
-          bindDecimalMaskOnce($root.find("#il_discount_amount"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#il_discount_amount"), { decimals: 2, min: 0, thousandsOnInput: true });
 
           function syncModalCalc() {
             const tmp = {
@@ -1245,6 +1267,8 @@
                 }
                 $root.find("#il_unit_price").val(String(parseNumberSafe(item.defaultUnitPrice, 0)));
                 $root.find("#il_tax_rate").val(String(clamp01(item.defaultTaxRate)));
+                $root.find("#il_unit_price").trigger("input");
+                $root.find("#il_tax_rate").trigger("blur");
               }
 
               syncModalCalc();
@@ -1279,6 +1303,9 @@
             $root.find("#il_quantity").val(String(toIntSafe(existing.quantity, 1)));
             $root.find("#il_tax_rate").val(String(clamp01(existing.tax_rate)));
             $root.find("#il_discount_amount").val(String(parseNumberSafe(existing.discount_amount, 0)));
+            $root.find("#il_unit_price").trigger("input");
+            $root.find("#il_discount_amount").trigger("input");
+            $root.find("#il_tax_rate").trigger("blur");
           }
 
           $root

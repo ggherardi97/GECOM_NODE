@@ -110,6 +110,14 @@ display: none !important;
                 <th data-field="tax_total"><input class="form-control input-sm" data-filter="tax_total" placeholder="<%= t('page.invoices.columns.taxes') %>" /></th>
                 <th data-field="total"><input class="form-control input-sm" data-filter="total" placeholder="<%= t('page.invoices.columns.total') %>" /></th>
                 <!-- âœ… REMOVED: issued_at (Emitida) -->
+                <th class="sv-date-filter" data-field="quote_at">
+                  <div class="input-group">
+                    <input id="quoteAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
+                    <span class="input-group-addon" id="quoteAtRangeBtn"><i class="fa fa-calendar"></i></span>
+                  </div>
+                  <input id="quoteAtFromFilter" type="hidden" />
+                  <input id="quoteAtToFilter" type="hidden" />
+                </th>
                 <th class="sv-date-filter" data-field="due_at">
                   <div class="input-group">
                     <input id="dueAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
@@ -133,6 +141,7 @@ display: none !important;
                 <th class="sortable" data-sort="tax_total" data-sort-key="tax_total" data-field="tax_total"><%= t('page.invoices.columns.taxes') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="total" data-sort-key="total" data-field="total"><%= t('page.invoices.columns.total') %> <span class="sort-indicator"></span></th>
                 <!-- âœ… REMOVED -->
+                <th class="sortable" data-sort="quote_at" data-sort-key="quote_at" data-field="quote_at"><%= t('page.invoices.columns.quoteDate') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="due_at" data-sort-key="due_at" data-field="due_at"><%= t('page.invoices.columns.dueDate') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
@@ -189,6 +198,7 @@ display: none !important;
   let invoiceStatusOptions = [];
   const invoiceStatusByConfigId = {};
   const invoiceStatusByLegacy = {};
+  const currencyById = {};
   const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
 
   const selectedInvoiceIds = new Set();
@@ -200,6 +210,9 @@ display: none !important;
     discount_amount: "", // âœ… NEW
     tax_total: "",
     total: "",
+    quote_at: "",
+    quote_at_from: "",
+    quote_at_to: "",
     due_at: "",
     due_at_from: "",
     due_at_to: "",
@@ -258,23 +271,66 @@ display: none !important;
     );
   }
 
+  function normalizeCurrencyCode(value) {
+    const code = String(value || "").trim().toUpperCase();
+    return /^[A-Z]{3}$/.test(code) ? code : "";
+  }
+
+  function normalizeCurrencySymbol(value) {
+    return String(value || "").trim();
+  }
+
+  function fallbackCodeFromSymbol(symbol) {
+    const sym = normalizeCurrencySymbol(symbol);
+    if (sym === "R$") return "BRL";
+    if (sym === "$") return "USD";
+    return "";
+  }
+
+  function getCurrencyRefById(inv) {
+    const id = String(
+      inv?.currency_id ??
+      inv?.currencyId ??
+      inv?.currency?.id ??
+      inv?.currencies?.id ??
+      ""
+    ).trim();
+    return id ? (currencyById[id] || null) : null;
+  }
+
   function extractCurrency(inv) {
     const rel = inv?.currencies || inv?.currency || null;
-    const code =
-      rel?.code ||
-      rel?.iso_code ||
-      rel?.currency_code ||
-      inv?.currency_code ||
-      inv?.currencyCode ||
-      null;
+    const byId = getCurrencyRefById(inv);
 
-    const symbol =
+    const symbol = normalizeCurrencySymbol(
       rel?.symbol ||
       inv?.currency_symbol ||
       inv?.currencySymbol ||
-      null;
+      byId?.symbol ||
+      ""
+    );
 
-    const decimals = Number.isFinite(Number(rel?.decimals)) ? Number(rel.decimals) : 2;
+    const code =
+      normalizeCurrencyCode(
+        rel?.code ||
+        rel?.iso_code ||
+        rel?.currency_code ||
+        inv?.currency_code ||
+        inv?.currencyCode ||
+        byId?.code ||
+        byId?.iso_code ||
+        byId?.currency_code ||
+        ""
+      ) ||
+      fallbackCodeFromSymbol(symbol);
+
+    const decimalsCandidate = Number(
+      rel?.decimals ??
+      inv?.currency_decimals ??
+      inv?.currencyDecimals ??
+      byId?.decimals
+    );
+    const decimals = Number.isFinite(decimalsCandidate) ? decimalsCandidate : 2;
 
     return { code, symbol, decimals };
   }
@@ -302,6 +358,7 @@ display: none !important;
     }).format(n);
 
     if (symbol) return `${symbol} ${num}`;
+    if (code) return `${code} ${num}`;
     return num;
   }
 
@@ -396,6 +453,26 @@ display: none !important;
     if (Array.isArray(data?.rows)) return data.rows;
     if (Array.isArray(data?.items)) return data.items;
     return [];
+  }
+
+  async function loadCurrencies() {
+    try {
+      const resp = await fetch("/api/currencies?is_active=true", {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.loadFailed') %>");
+
+      Object.keys(currencyById).forEach((k) => delete currencyById[k]);
+      toRows(data).forEach((row) => {
+        const id = String(row?.id || "").trim();
+        if (!id) return;
+        currencyById[id] = row;
+      });
+    } catch (e) {
+      console.warn("loadCurrencies invoice fallback:", e);
+    }
   }
 
   async function loadStatusConfigs() {
@@ -638,6 +715,7 @@ display: none !important;
       total: inv?.total ?? 0,
       rowNumber: Number(index || 0) + 1,
       // issued_at removido da UI (mas pode continuar existindo no payload sem problema)
+      quote_at: inv?.quote_at ?? inv?.quoteAt ?? null,
       due_at: inv?.due_at ?? inv?.dueAt ?? null,
     };
   }
@@ -659,6 +737,12 @@ display: none !important;
       const inv = x.raw;
       const selectedStatus = String(f.status_config_id || "").trim();
       const selectedOption = getStatusOptionBySelection(selectedStatus);
+      const quoteTs = x.quote_at ? new Date(x.quote_at).getTime() : NaN;
+      const quoteFromTs = parsePtDateToTs(f.quote_at_from, false);
+      const quoteToTs = parsePtDateToTs(f.quote_at_to, true);
+      const quoteRangeOk =
+        (Number.isNaN(quoteFromTs) || (!Number.isNaN(quoteTs) && quoteTs >= quoteFromTs)) &&
+        (Number.isNaN(quoteToTs) || (!Number.isNaN(quoteTs) && quoteTs <= quoteToTs));
       const dueTs = x.due_at ? new Date(x.due_at).getTime() : NaN;
       const dueFromTs = parsePtDateToTs(f.due_at_from, false);
       const dueToTs = parsePtDateToTs(f.due_at_to, true);
@@ -681,6 +765,7 @@ display: none !important;
         contains(formatMoney(x.discount_amount, inv), f.discount_amount) &&
         contains(formatMoney(x.tax_total, inv), f.tax_total) &&
         contains(formatMoney(x.total, inv), f.total) &&
+        quoteRangeOk &&
         dueRangeOk
       );
     });
@@ -721,7 +806,7 @@ display: none !important;
       else if (key === "subtotal" || key === "discount_amount" || key === "tax_total" || key === "total" || key === "rowNumber") {
         av = toNumber(a[key]); bv = toNumber(b[key]);
       }
-      else if (key === "due_at") {
+      else if (key === "quote_at" || key === "due_at") {
         av = a[key] ? new Date(a[key]) : null;
         bv = b[key] ? new Date(b[key]) : null;
       }
@@ -753,7 +838,7 @@ display: none !important;
     tbody.innerHTML = "";
 
     if (!Array.isArray(list) || list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}"><%= t('page.invoices.empty.noResults') %></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${isAdmin ? 11 : 10}"><%= t('page.invoices.empty.noResults') %></td></tr>`;
       updateBulkUI();
       return;
     }
@@ -793,6 +878,7 @@ display: none !important;
         <td>${escapeHtml(formatMoney(row.discount_amount, inv))}</td> <!-- âœ… NEW -->
         <td>${escapeHtml(formatMoney(row.tax_total, inv))}</td>
         <td><strong>${escapeHtml(formatMoney(row.total, inv))}</strong></td>
+        <td>${escapeHtml(formatDate(row.quote_at))}</td>
         <td>${escapeHtml(formatDate(row.due_at))}</td>
       `;
 
@@ -826,6 +912,62 @@ display: none !important;
     });
   }
 
+  function initQuoteAtRangeFilter() {
+    const $range = $("#quoteAtRangeFilter");
+    if (!$range.length) return;
+    const $from = $("#quoteAtFromFilter");
+    const $to = $("#quoteAtToFilter");
+
+    if ($range.data("daterangepicker")) $range.data("daterangepicker").remove();
+    if ($.fn.daterangepicker) {
+      $range.daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+          format: "DD/MM/YYYY",
+          cancelLabel: "<%= t('page.layout.savedViews.clearLabel') %>",
+          applyLabel: "<%= t('page.layout.savedViews.applyLabel') %>",
+          fromLabel: "<%= t('page.layout.savedViews.fromLabel') %>",
+          toLabel: "<%= t('page.layout.savedViews.toLabel') %>",
+          daysOfWeek: ["Do", "Se", "Te", "Qa", "Qi", "Se", "Sa"],
+          monthNames: ["Janeiro", "Fevereiro", "MarÃƒÂ§o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+        }
+      });
+
+      $range.off("apply.daterangepicker.invQuote").on("apply.daterangepicker.invQuote", function (_ev, picker) {
+        const from = picker.startDate.format("DD/MM/YYYY");
+        const to = picker.endDate.format("DD/MM/YYYY");
+        $from.val(from);
+        $to.val(to);
+        $range.val(`${from} - ${to}`);
+        filterState.quote_at_from = from;
+        filterState.quote_at_to = to;
+        filterState.quote_at = $range.val();
+        applyFilters();
+      });
+
+      $range.off("cancel.daterangepicker.invQuote").on("cancel.daterangepicker.invQuote", function () {
+        $from.val("");
+        $to.val("");
+        $range.val("");
+        filterState.quote_at_from = "";
+        filterState.quote_at_to = "";
+        filterState.quote_at = "";
+        applyFilters();
+      });
+    }
+
+    $("#quoteAtRangeBtn").off("click.invQuote").on("click.invQuote", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
+      else $range.focus();
+    });
+
+    $range.off("focus.invQuote click.invQuoteInput").on("focus.invQuote click.invQuoteInput", function () {
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
+    });
+  }
+
   function initDueAtRangeFilter() {
     const $range = $("#dueAtRangeFilter");
     if (!$range.length) return;
@@ -833,7 +975,7 @@ display: none !important;
     const $to = $("#dueAtToFilter");
 
     if ($range.data("daterangepicker")) $range.data("daterangepicker").remove();
-    if ($.fn.daterangepicker && window.moment) {
+    if ($.fn.daterangepicker) {
       $range.daterangepicker({
         autoUpdateInput: false,
         locale: {
@@ -875,6 +1017,10 @@ display: none !important;
       e.stopPropagation();
       if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
       else $range.focus();
+    });
+
+    $range.off("focus.inv click.invInput").on("focus.inv click.invInput", function () {
+      if ($range.data("daterangepicker")) $range.data("daterangepicker").show();
     });
   }
 
@@ -951,9 +1097,11 @@ display: none !important;
     Object.entries(filterState).forEach(([k, v]) => {
       const value = String(v || "").trim();
       if (!value) return;
-      if (k === "due_at_from") filters.push({ field: "due_at", op: "gte", value });
+      if (k === "quote_at_from") filters.push({ field: "quote_at", op: "gte", value });
+      else if (k === "quote_at_to") filters.push({ field: "quote_at", op: "lte", value });
+      else if (k === "due_at_from") filters.push({ field: "due_at", op: "gte", value });
       else if (k === "due_at_to") filters.push({ field: "due_at", op: "lte", value });
-      else if (k !== "due_at") filters.push({ field: k, op: k === "status_config_id" ? "eq" : "contains", value });
+      else if (k !== "quote_at" && k !== "due_at") filters.push({ field: k, op: k === "status_config_id" ? "eq" : "contains", value });
     });
     return filters;
   }
@@ -961,14 +1109,16 @@ display: none !important;
   function applyFiltersFromSavedView(def) {
     Object.keys(filterState).forEach((k) => { filterState[k] = ""; });
     document.querySelectorAll("#invoicesFiltersRow [data-filter]").forEach((el) => { el.value = ""; });
-    $("#dueAtFromFilter,#dueAtToFilter,#dueAtRangeFilter").val("");
+    $("#quoteAtFromFilter,#quoteAtToFilter,#quoteAtRangeFilter,#dueAtFromFilter,#dueAtToFilter,#dueAtRangeFilter").val("");
 
     (def.filters || []).forEach((f) => {
       const field = String(f.field || "");
       const value = String(f.value || "");
       const op = String(f.op || "").toLowerCase();
       if (!value) return;
-      if (field === "due_at" && op === "gte") filterState.due_at_from = value;
+      if (field === "quote_at" && op === "gte") filterState.quote_at_from = value;
+      else if (field === "quote_at" && op === "lte") filterState.quote_at_to = value;
+      else if (field === "due_at" && op === "gte") filterState.due_at_from = value;
       else if (field === "due_at" && op === "lte") filterState.due_at_to = value;
       else if (field === "status") {
         const legacy = Number(value);
@@ -988,6 +1138,11 @@ display: none !important;
       const key = String(el.getAttribute("data-filter") || "");
       if (key && Object.prototype.hasOwnProperty.call(filterState, key)) el.value = filterState[key];
     });
+
+    $("#quoteAtFromFilter").val(filterState.quote_at_from || "");
+    $("#quoteAtToFilter").val(filterState.quote_at_to || "");
+    if (filterState.quote_at_from && filterState.quote_at_to) filterState.quote_at = `${filterState.quote_at_from} - ${filterState.quote_at_to}`;
+    $("#quoteAtRangeFilter").val(filterState.quote_at || "");
 
     $("#dueAtFromFilter").val(filterState.due_at_from || "");
     $("#dueAtToFilter").val(filterState.due_at_to || "");
@@ -1217,8 +1372,10 @@ display: none !important;
   }
 
   (async function initInvoicesPage() {
+    await loadCurrencies();
     await loadStatusConfigs();
     renderStatusFilterOptions();
+    initQuoteAtRangeFilter();
     initDueAtRangeFilter();
     await loadInvoices(false);
 
@@ -1249,11 +1406,13 @@ display: none !important;
         savedViewsState.viewId = viewId;
         savedViewsState.name = name || "";
         if (_fromColumnsModal === true) {
+          initQuoteAtRangeFilter();
           initDueAtRangeFilter();
           return;
         }
         applyFiltersFromSavedView(definition || {});
         applySortFromSavedView(definition || {});
+        initQuoteAtRangeFilter();
         initDueAtRangeFilter();
         loadInvoices(true)
           .then(() => {
@@ -1265,6 +1424,7 @@ display: none !important;
           });
       },
       onAfterApply: () => {
+        initQuoteAtRangeFilter();
         initDueAtRangeFilter();
         loadInvoices(true)
           .then(() => {
@@ -1276,11 +1436,13 @@ display: none !important;
           });
       }
     });
+    initQuoteAtRangeFilter();
+    initDueAtRangeFilter();
     setTimeout(ensureSavedViewsExtraButtons, 120);
   })().catch((err) => {
     console.error("init invoices error:", err);
     const tbody = document.getElementById("invoiceLines");
-    if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">${escapeHtml(err?.message || "<%= t('page.invoices.errors.loadFailed') %>")}</td></tr>`;
+    if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 11 : 10}">${escapeHtml(err?.message || "<%= t('page.invoices.errors.loadFailed') %>")}</td></tr>`;
   });
 </script>
 

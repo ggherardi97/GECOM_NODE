@@ -204,6 +204,7 @@
         "discount": "Discount",
         "taxes": "Taxes",
         "total": "Total",
+        "quoteDate": "Quote date",
         "dueDate": "Due date"
       }
     },
@@ -639,6 +640,7 @@
         "invoiceId": "Invoice ID"
       },
       "actions": {
+        "cloneInvoice": "Clone invoice",
         "generateInvoice": "Generate invoice",
         "deleteInvoice": "Delete invoice",
         "saveInvoice": "Save invoice",

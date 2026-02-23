@@ -204,6 +204,7 @@
         "discount": "Descuento",
         "taxes": "Impuestos",
         "total": "Total",
+        "quoteDate": "Fecha de cotización",
         "dueDate": "Vencimiento"
       }
     },
@@ -639,6 +640,7 @@
         "invoiceId": "ID de la Factura"
       },
       "actions": {
+        "cloneInvoice": "Clonar invoice",
         "generateInvoice": "Generar invoice",
         "deleteInvoice": "Eliminar factura",
         "saveInvoice": "Guardar factura",

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice - Impressão</title>
+  <title>Invoice - ImpressÃ£o</title>
 
   <!-- Use absolute paths to avoid /Pages/... issues -->
   <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet">
@@ -14,6 +14,8 @@
   <style>
     body.white-bg { background: #fff; }
     .mono { font-family: monospace; }
+    .edit-area { min-height: 110px; resize: vertical; }
+    .edit-notes { min-height: 130px; resize: vertical; }
 
     /* Print only the invoice wrapper */
     @media print {
@@ -39,7 +41,8 @@
 
       <div class="no-print" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;">
         <button class="btn btn-white" onclick="window.close()"><i class="fa fa-times"></i> Fechar</button>
-        <button class="btn btn-primary" onclick="window.print()"><i class="fa fa-print"></i> Imprimir</button>
+        <button id="btnToggleEdit" class="btn btn-warning" type="button"><i class="fa fa-pencil"></i> Editar</button>
+        <button id="btnPrint" class="btn btn-primary" type="button"><i class="fa fa-print"></i> Imprimir</button>
       </div>
 
       <div class="row">
@@ -48,12 +51,13 @@
             <img src="<%= companyLogoDataUri %>" alt="Company logo" class="company-logo-print" />
           <% } %>
           <h5>De:</h5>
-          <address>
-            <strong><%= from?.name || "Convert Solution" %></strong><br>
+          <address id="fromDisplay">
+            <strong><%= from?.name || "-" %></strong><br>
             <%= from?.addr1 || "-" %><br>
             <%= from?.addr2 || "" %>
-            <abbr title="Telefone">T:</abbr> <%= from?.phone || "+55 96138-3449" %>
+            <abbr title="Telefone">T:</abbr> <%= from?.phone || "-" %>
           </address>
+          <textarea id="fromEditor" class="form-control no-print edit-area" style="display:none;"></textarea>
         </div>
 
         <div class="col-sm-6 text-right">
@@ -61,12 +65,13 @@
           <h4 class="text-navy mono"><%= invoice?.invoice_number || ("INV-" + String(invoice?.id || "").slice(0,8).toUpperCase()) %></h4>
 
           <span>Para:</span>
-          <address>
+          <address id="toDisplay">
             <strong><%= company?.company_name || "-" %></strong><br>
             <%= invoice?.billing_address_line1 || "-" %><br>
             <%= invoice?.billing_address_line2 || "" %>
             <abbr title="Telefone">T:</abbr> <%= company?.phone || "-" %>
           </address>
+          <textarea id="toEditor" class="form-control no-print edit-area" style="display:none;"></textarea>
 
           <p>
             <span><strong>Data:</strong> <%= invoiceDate || "-" %></span><br/>
@@ -81,7 +86,7 @@
             <tr>
               <th>Item</th>
               <th class="text-right">Qtd</th>
-              <th class="text-right">Preço Unit.</th>
+              <th class="text-right">PreÃ§o Unit.</th>
               <th class="text-right">Imposto</th>
               <th class="text-right">Total</th>
             </tr>
@@ -132,15 +137,91 @@
 </table>
 
 
-      <div class="well m-t"><strong>Observações</strong>
-        <div style="margin-top:6px;"><%= invoice?.notes || "-" %></div>
+      <div class="well m-t"><strong>ObservaÃ§Ãµes</strong>
+        <div id="notesDisplay" style="margin-top:6px;"><%- notesHtml || "-" %></div>
+        <textarea id="notesEditor" class="form-control no-print edit-notes" style="display:none;margin-top:8px;"></textarea>
       </div>
     </div>
   </div>
 
   <script>
-    // Auto-print
-    window.onload = function () { setTimeout(function(){ window.print(); }, 250); };
+    (function () {
+      const fromDisplay = document.getElementById("fromDisplay");
+      const toDisplay = document.getElementById("toDisplay");
+      const notesDisplay = document.getElementById("notesDisplay");
+      const fromEditor = document.getElementById("fromEditor");
+      const toEditor = document.getElementById("toEditor");
+      const notesEditor = document.getElementById("notesEditor");
+      const btnToggleEdit = document.getElementById("btnToggleEdit");
+      const btnPrint = document.getElementById("btnPrint");
+
+      let isEditing = false;
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function textToHtml(value) {
+        const txt = String(value ?? "").trim();
+        if (!txt) return "-";
+        return escapeHtml(txt).replace(/\r\n|\r|\n/g, "<br>");
+      }
+
+      function blockToEditableText(el) {
+        if (!el) return "";
+        return String(el.innerText || el.textContent || "").trim();
+      }
+
+      function enterEditMode() {
+        fromEditor.value = blockToEditableText(fromDisplay);
+        toEditor.value = blockToEditableText(toDisplay);
+        notesEditor.value = blockToEditableText(notesDisplay);
+
+        fromDisplay.style.display = "none";
+        toDisplay.style.display = "none";
+        notesDisplay.style.display = "none";
+
+        fromEditor.style.display = "";
+        toEditor.style.display = "";
+        notesEditor.style.display = "";
+
+        btnToggleEdit.innerHTML = '<i class="fa fa-check"></i> Aplicar edição';
+        isEditing = true;
+      }
+
+      function applyEdits() {
+        fromDisplay.innerHTML = textToHtml(fromEditor.value);
+        toDisplay.innerHTML = textToHtml(toEditor.value);
+        notesDisplay.innerHTML = textToHtml(notesEditor.value);
+
+        fromDisplay.style.display = "";
+        toDisplay.style.display = "";
+        notesDisplay.style.display = "";
+
+        fromEditor.style.display = "none";
+        toEditor.style.display = "none";
+        notesEditor.style.display = "none";
+
+        btnToggleEdit.innerHTML = '<i class="fa fa-pencil"></i> Editar';
+        isEditing = false;
+      }
+
+      btnToggleEdit.addEventListener("click", function () {
+        if (!isEditing) enterEditMode();
+        else applyEdits();
+      });
+
+      btnPrint.addEventListener("click", function () {
+        if (isEditing) applyEdits();
+        window.print();
+      });
+    })();
   </script>
 </body>
 </html>
+

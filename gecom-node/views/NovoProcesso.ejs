@@ -490,6 +490,21 @@
     if ($el.val()) applyMask($el.get(0));
   }
 
+  function applyCurrencyBrlMaskInput(inputEl) {
+    if (!inputEl) return;
+    const digits = String(inputEl.value || "").replace(/\D/g, "");
+    if (!digits) {
+      inputEl.value = "";
+      return;
+    }
+    const n = Number(digits) / 100;
+    if (!Number.isFinite(n)) {
+      inputEl.value = "";
+      return;
+    }
+    inputEl.value = formatCurrencyBrl(n);
+  }
+
   function listToArray(data) {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.data)) return data.data;
@@ -503,6 +518,18 @@
     if (!target) return;
     if (target.classList.contains("phone-mask")) {
       target.value = applyBrazilPhoneMask(target.value);
+      return;
+    }
+    if (target.classList.contains("currency-brl")) {
+      applyCurrencyBrlMaskInput(target);
+    }
+  }, true);
+
+  document.addEventListener("focusout", function (ev) {
+    const target = ev.target;
+    if (!target) return;
+    if (target.classList.contains("currency-brl")) {
+      applyCurrencyBrlMaskInput(target);
     }
   }, true);
 

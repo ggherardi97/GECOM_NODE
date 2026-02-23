@@ -60,6 +60,45 @@ function qtyFmt(value) {
   return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 4 }).format(n);
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function sanitizeRichTextHtml(rawHtml) {
+  let html = String(rawHtml || "");
+
+  // Remove dangerous tags (with or without closing pair)
+  html = html.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "");
+  html = html.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*\/?>/gi, "");
+
+  // Remove inline event handlers: onclick=..., onerror=...
+  html = html.replace(/\son[a-z]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "");
+
+  // Remove javascript: urls from href/src
+  html = html.replace(/\s(href|src)\s*=\s*("javascript:[^"]*"|'javascript:[^']*'|javascript:[^\s>]*)/gi, "");
+
+  return html.trim();
+}
+
+function formatInvoiceNotesForPrint(rawValue) {
+  const raw = String(rawValue ?? "").trim();
+  if (!raw) return "-";
+
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+  if (!looksLikeHtml) {
+    // Plain text notes: preserve line breaks in print
+    return escapeHtml(raw).replace(/\r\n|\r|\n/g, "<br>");
+  }
+
+  const sanitizedHtml = sanitizeRichTextHtml(raw);
+  return sanitizedHtml || "-";
+}
+
 /**
  * IMPORTANT:
  * Your Nest backend returns relations as:
@@ -113,6 +152,26 @@ async function fetchCompanyById(baseUrl, authHeader, companyId, req) {
   }
 }
 
+async function fetchTenantById(baseUrl, authHeader, tenantId, req) {
+  const id = String(tenantId || "").trim();
+  if (!id) return null;
+
+  try {
+    const response = await fetch(`${baseUrl}/tenants/${encodeURIComponent(id)}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+        ...(req?.headers?.cookie ? { Cookie: req.headers.cookie } : {}),
+      },
+    });
+    if (!response.ok) return null;
+    return await readJsonSafe(response);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchCompanyLogoDataUri(baseUrl, authHeader, companyId) {
   const id = String(companyId || "").trim();
   if (!id) return null;
@@ -150,14 +209,15 @@ function hasCompanyLogoHint(company) {
   );
 }
 
-function buildFromCompanyBlock(company) {
+function buildFromCompanyBlock(company, fallbackName) {
   const c = company || {};
   const name =
     c.company_name ||
     c.fantasy_name ||
     c.legal_name ||
     c.name ||
-    "GECOM";
+    fallbackName ||
+    "-";
 
   const phone = c.phone || c.phonenumber || "-";
 
@@ -177,7 +237,7 @@ function buildFromCompanyBlock(company) {
     .join(" - ");
 
   return {
-    name: String(name || "GECOM"),
+    name: String(name || "-"),
     addr1: String(addr1 || "-"),
     addr2: String(addr2 || ""),
     phone: String(phone || "-"),
@@ -325,14 +385,34 @@ const totals = {
 
 
     const me = await fetchCurrentUserMe(baseUrl, authHeader, req);
-    const senderCompanyId =
+    const tenantId =
+      me?.tenant_id ||
+      me?.tenantId ||
+      me?.tenant?.id ||
+      null;
+    const tenant = await fetchTenantById(baseUrl, authHeader, tenantId, req);
+
+    const tenantPrincipalCompanyId =
+      tenant?.company_id ||
+      tenant?.companyId ||
+      tenant?.company?.id ||
+      tenant?.company?.company_id ||
+      null;
+
+    const meCompanyId =
       me?.company_id ||
       me?.companyId ||
       me?.company?.id ||
       me?.company?.company_id ||
       null;
 
+    const senderCompanyId = tenantPrincipalCompanyId || meCompanyId;
     const senderCompany = await fetchCompanyById(baseUrl, authHeader, senderCompanyId, req);
+    const senderFallbackName =
+      tenant?.name ||
+      tenant?.tenant_name ||
+      tenant?.slug ||
+      null;
 
     let companyLogoDataUri = null;
     try {
@@ -352,7 +432,8 @@ const viewModel = {
   invoice,
   company,
   companyLogoDataUri,
-  from: buildFromCompanyBlock(senderCompany),
+  from: buildFromCompanyBlock(senderCompany, senderFallbackName),
+  notesHtml: formatInvoiceNotesForPrint(invoice?.notes),
   invoiceDate: formatDatePtBr(invoice?.created_at || invoice?.invoice_date || invoice?.createdAt),
   dueDate: formatDatePtBr(invoice?.due_at || invoice?.due_at),
   lines,
