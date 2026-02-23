@@ -74,6 +74,9 @@ display: none !important;
           <button id="btnBulkSend" type="button" class="btn btn-success btn-sm">
             <i class="fa fa-send"></i> <%= t('page.invoices.toolbar.sendToClient') %>
           </button>
+          <button id="btnBulkClone" type="button" class="btn btn-warning btn-sm">
+            <i class="fa fa-clone"></i> <%= t('page.invoices.actions.clone') %>
+          </button>
 
           <button id="btnBulkDelete" type="button" class="btn btn-danger btn-sm">
             <i class="fa fa-trash"></i> <%= t('page.invoices.toolbar.delete') %>
@@ -96,22 +99,17 @@ display: none !important;
                 <th data-field="invoice_number"><input class="form-control input-sm" data-filter="invoice_number" placeholder="<%= t('page.invoices.filters.invoiceNumber') %>" /></th>
                 <th data-field="company"><input class="form-control input-sm" data-filter="company" placeholder="<%= t('page.invoices.filters.company') %>" /></th>
                 <th data-field="status">
-                  <select class="form-control input-sm" data-filter="status" id="statusFilter">
+                  <select class="form-control input-sm" data-filter="status_config_id" id="statusFilter">
                     <option value=""><%= t('page.invoices.filters.all') %></option>
-                    <option value="0" class="admin-only"><%= t('page.invoices.status.draft') %></option>
-                    <option value="1"><%= t('page.invoices.status.active') %></option>
-                    <option value="2"><%= t('page.invoices.status.expired') %></option>
-                    <option value="3"><%= t('page.invoices.status.billed') %></option>
-                    <option value="4"><%= t('page.invoices.status.paid') %></option>
                   </select>
                 </th>
 
                 <th data-field="subtotal"><input class="form-control input-sm" data-filter="subtotal" placeholder="<%= t('page.invoices.columns.subtotal') %>" /></th>
-                <!-- ✅ NEW: desconto antes de impostos -->
+                <!-- âœ… NEW: desconto antes de impostos -->
                 <th data-field="discount_amount"><input class="form-control input-sm" data-filter="discount_amount" placeholder="<%= t('page.invoices.columns.discount') %>" /></th>
                 <th data-field="tax_total"><input class="form-control input-sm" data-filter="tax_total" placeholder="<%= t('page.invoices.columns.taxes') %>" /></th>
                 <th data-field="total"><input class="form-control input-sm" data-filter="total" placeholder="<%= t('page.invoices.columns.total') %>" /></th>
-                <!-- ✅ REMOVED: issued_at (Emitida) -->
+                <!-- âœ… REMOVED: issued_at (Emitida) -->
                 <th class="sv-date-filter" data-field="due_at">
                   <div class="input-group">
                     <input id="dueAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
@@ -130,11 +128,11 @@ display: none !important;
                 <th class="sortable" data-sort="company" data-sort-key="company" data-field="company"><%= t('page.invoices.columns.company') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="status" data-sort-key="status" data-field="status"><%= t('page.invoices.columns.status') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="subtotal" data-sort-key="subtotal" data-field="subtotal"><%= t('page.invoices.columns.subtotal') %> <span class="sort-indicator"></span></th>
-                <!-- ✅ NEW -->
+                <!-- âœ… NEW -->
                 <th class="sortable" data-sort="discount_amount" data-sort-key="discount_amount" data-field="discount_amount"><%= t('page.invoices.columns.discount') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="tax_total" data-sort-key="tax_total" data-field="tax_total"><%= t('page.invoices.columns.taxes') %> <span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="total" data-sort-key="total" data-field="total"><%= t('page.invoices.columns.total') %> <span class="sort-indicator"></span></th>
-                <!-- ✅ REMOVED -->
+                <!-- âœ… REMOVED -->
                 <th class="sortable" data-sort="due_at" data-sort-key="due_at" data-field="due_at"><%= t('page.invoices.columns.dueDate') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
@@ -182,46 +180,30 @@ display: none !important;
     if (!isAdmin) body.classList.add("not-admin");
   })();
 
-  (function hideDraftOptionForNonAdmin() {
-    if (isAdmin) return;
-    const statusEl = document.getElementById("statusFilter");
-    if (!statusEl) return;
-
-    // Remove option value="0" for non-admin
-    const opt = statusEl.querySelector('option[value="0"]');
-    if (opt) opt.remove();
-  })();
-
   // --------------------
   // State
   // --------------------
   let invoices = [];
   let filteredInvoices = [];
   let sortState = { key: null, dir: "asc" };
+  let invoiceStatusOptions = [];
+  const invoiceStatusByConfigId = {};
+  const invoiceStatusByLegacy = {};
   const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
 
   const selectedInvoiceIds = new Set();
   const filterState = {
     invoice_number: "",
     company: "",
-    status: isAdmin ? "" : "1",
+    status_config_id: "",
     subtotal: "",
-    discount_amount: "", // ✅ NEW
+    discount_amount: "", // âœ… NEW
     tax_total: "",
     total: "",
     due_at: "",
     due_at_from: "",
     due_at_to: "",
   };
-
-  (function initStatusFilterDefault() {
-    const statusEl = document.getElementById("statusFilter");
-    if (!statusEl) return;
-
-    // Admin: default = Todos (mostra rascunho também)
-    // Non-admin: default = Ativo (mas mesmo assim nunca verá rascunho por regra)
-    statusEl.value = isAdmin ? "" : "1";
-  })();
 
   // --------------------
   // Utils
@@ -323,14 +305,161 @@ display: none !important;
     return num;
   }
 
-  function statusLabel(v) {
-    switch (Number(v)) {
-      case 0: return "<%= t('page.invoices.status.draft') %>";
-      case 1: return "<%= t('page.invoices.status.active') %>";
-      case 2: return "<%= t('page.invoices.status.expired') %>";
-      case 3: return "<%= t('page.invoices.status.billed') %>";
-      case 4: return "<%= t('page.invoices.status.paid') %>";
-      default: return "<%= t('page.invoices.status.draft') %>";
+  function normalizeStatusConfigId(value) {
+    const id = String(value || "").trim();
+    return id || "";
+  }
+
+  function getInvoiceLegacyStatus(inv) {
+    const n = Number(inv?.status);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function getInvoiceStatusConfigId(inv) {
+    return normalizeStatusConfigId(
+      inv?.status_config_id ??
+      inv?.statusConfigId ??
+      inv?.status_config?.id ??
+      inv?.statusConfig?.id ??
+      ""
+    );
+  }
+
+  function getInvoiceStatusDirect(inv) {
+    const direct = inv?.status_config || inv?.statusConfig || null;
+    return direct && typeof direct === "object" ? direct : null;
+  }
+
+  function getStatusOptionBySelection(selectionValue) {
+    const key = String(selectionValue || "").trim();
+    if (!key) return null;
+    const byId = invoiceStatusByConfigId[key];
+    if (byId) return byId;
+    if (key.startsWith("legacy:")) {
+      const legacy = Number(key.slice("legacy:".length));
+      if (Number.isFinite(legacy)) return invoiceStatusByLegacy[legacy] || null;
+    }
+    return null;
+  }
+
+  function getStatusSelectionByLegacy(legacyStatus) {
+    if (!Number.isFinite(legacyStatus)) return "";
+    const byLegacy = invoiceStatusByLegacy[legacyStatus];
+    if (!byLegacy) return `legacy:${legacyStatus}`;
+    return byLegacy.id ? byLegacy.id : `legacy:${legacyStatus}`;
+  }
+
+  function statusLabel(statusConfigId, legacyStatus, statusConfig) {
+    const directLabel = String(statusConfig?.label || "").trim();
+    if (directLabel) return directLabel;
+
+    const byId = invoiceStatusByConfigId[normalizeStatusConfigId(statusConfigId)];
+    if (byId?.label) return byId.label;
+
+    if (Number.isFinite(legacyStatus)) {
+      const byLegacy = invoiceStatusByLegacy[legacyStatus];
+      if (byLegacy?.label) return byLegacy.label;
+      return `Status ${legacyStatus}`;
+    }
+
+    return "-";
+  }
+
+  function statusColor(statusConfigId, legacyStatus, statusConfig) {
+    const directColor = String(statusConfig?.color || "").trim();
+    if (directColor) return directColor;
+
+    const byId = invoiceStatusByConfigId[normalizeStatusConfigId(statusConfigId)];
+    if (byId?.color) return byId.color;
+
+    if (Number.isFinite(legacyStatus)) {
+      const byLegacy = invoiceStatusByLegacy[legacyStatus];
+      return String(byLegacy?.color || "").trim();
+    }
+
+    return "";
+  }
+
+  function getDefaultInvoiceStatusOptions() {
+    return [
+      { id: "", legacy: 0, label: "<%= t('page.invoices.status.draft') %>", color: "" },
+      { id: "", legacy: 1, label: "<%= t('page.invoices.status.active') %>", color: "" },
+      { id: "", legacy: 2, label: "<%= t('page.invoices.status.expired') %>", color: "" },
+      { id: "", legacy: 3, label: "<%= t('page.invoices.status.billed') %>", color: "" },
+      { id: "", legacy: 4, label: "<%= t('page.invoices.status.paid') %>", color: "" },
+    ];
+  }
+
+  function toRows(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.rows)) return data.rows;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
+  }
+
+  async function loadStatusConfigs() {
+    try {
+      const resp = await fetch("/api/status-configs?entity=INVOICE&active=true", {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.loadFailed') %>");
+
+      const options = toRows(data)
+        .map((row) => ({
+          id: normalizeStatusConfigId(row?.id),
+          legacy: Number(row?.legacy_int_value),
+          label: String(row?.label || "").trim(),
+          color: String(row?.color || "").trim(),
+          sort: Number(row?.sort_order || 0),
+        }))
+        .filter((x) => x.id && x.label)
+        .sort((a, b) => (a.sort - b.sort) || String(a.label).localeCompare(String(b.label), "pt-BR"));
+
+      invoiceStatusOptions = options.length ? options : getDefaultInvoiceStatusOptions();
+    } catch (e) {
+      console.warn("loadStatusConfigs invoice fallback:", e);
+      invoiceStatusOptions = getDefaultInvoiceStatusOptions();
+    }
+
+    Object.keys(invoiceStatusByConfigId).forEach((k) => delete invoiceStatusByConfigId[k]);
+    Object.keys(invoiceStatusByLegacy).forEach((k) => delete invoiceStatusByLegacy[k]);
+    invoiceStatusOptions.forEach((opt) => {
+      if (opt.id) invoiceStatusByConfigId[opt.id] = opt;
+      if (Number.isFinite(opt.legacy) && !invoiceStatusByLegacy[opt.legacy]) invoiceStatusByLegacy[opt.legacy] = opt;
+    });
+  }
+
+  function renderStatusFilterOptions() {
+    const statusEl = document.getElementById("statusFilter");
+    if (!statusEl) return;
+    const current = String(filterState.status_config_id || "");
+    const allLabel = "<%= t('page.invoices.filters.all') %>";
+    const options = invoiceStatusOptions
+      .filter((x) => isAdmin || Number(x.legacy) !== 0);
+
+    statusEl.innerHTML = `<option value="">${escapeHtml(allLabel)}</option>`;
+    options.forEach((opt) => {
+      const option = document.createElement("option");
+      option.value = String(opt.id || `legacy:${opt.legacy}`);
+      option.textContent = opt.label;
+      statusEl.appendChild(option);
+    });
+
+    if (options.some((x) => String(x.id || `legacy:${x.legacy}`) === current)) {
+      statusEl.value = current;
+    } else {
+      if (isAdmin) {
+        statusEl.value = "";
+        filterState.status_config_id = "";
+      } else {
+        const active = options.find((x) => Number(x.legacy) === 1) || options[0] || null;
+        const selected = active ? String(active.id || `legacy:${active.legacy}`) : "";
+        statusEl.value = selected;
+        filterState.status_config_id = selected;
+      }
     }
   }
 
@@ -374,11 +503,21 @@ display: none !important;
   // --------------------
   function fetchInvoices() {
     const qs = new URLSearchParams();
+    const selectedStatus = String(filterState.status_config_id || "").trim();
+    const selectedOption = getStatusOptionBySelection(selectedStatus);
 
     // Non-admin: filter by company_id == auth.company_id
     if (!isAdmin && companyId) {
       qs.set("company_id", String(companyId));
-      qs.set("status", 1); //Ativo por agora
+    }
+
+    if (selectedStatus) {
+      if (selectedOption?.id) qs.set("status_config_id", selectedOption.id);
+      else if (Number.isFinite(selectedOption?.legacy)) qs.set("status", String(selectedOption.legacy));
+    } else if (!isAdmin) {
+      const active = invoiceStatusByLegacy[1];
+      if (active?.id) qs.set("status_config_id", active.id);
+      else qs.set("status", "1");
     }
 
     const url = qs.toString() ? `/api/invoices?fields=header&${qs.toString()}` : `/api/invoices?fields=header`;
@@ -387,11 +526,20 @@ display: none !important;
       .then(r => r.json());
   }
 
-  async function patchInvoiceStatus(invoiceId, status) {
+  async function patchInvoiceStatus(invoiceId, statusSelection) {
+    const option = getStatusOptionBySelection(statusSelection);
+    const payload = {};
+    if (option?.id) payload.status_config_id = option.id;
+    if (Number.isFinite(option?.legacy)) payload.status = option.legacy;
+    if (Object.keys(payload).length === 0) {
+      const fallback = Number(statusSelection);
+      payload.status = Number.isFinite(fallback) ? fallback : 1;
+    }
+
     const resp = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(payload),
     });
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.updateStatusFailed') %>");
@@ -407,6 +555,17 @@ display: none !important;
     if (resp.status === 204) return {};
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.deleteFailed') %>");
+    return data;
+  }
+
+  async function cloneInvoiceById(invoiceId) {
+    const resp = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}/clone`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.cloneFailed') %>");
     return data;
   }
 
@@ -458,15 +617,23 @@ display: none !important;
   // --------------------
   function normalizeInvoice(inv, index) {
     const companyName = extractCompanyName(inv);
+    const legacyStatus = getInvoiceLegacyStatus(inv);
+    const statusConfigId = getInvoiceStatusConfigId(inv);
+    const statusConfig = getInvoiceStatusDirect(inv);
+    const selectionValue = statusConfigId || (Number.isFinite(legacyStatus) ? `legacy:${legacyStatus}` : "");
     return {
       raw: inv,
       id: String(inv?.id || ""),
       company_id: String(inv?.company_id || inv?.companyId || ""),
       invoice_number: inv?.invoice_number || inv?.invoiceNumber || "",
       company: companyName,
-      status: Number(inv?.status ?? 0),
+      status: Number.isFinite(legacyStatus) ? legacyStatus : 0,
+      status_config_id: statusConfigId,
+      status_selection: selectionValue,
+      status_label: statusLabel(statusConfigId, legacyStatus, statusConfig),
+      status_color: statusColor(statusConfigId, legacyStatus, statusConfig),
       subtotal: inv?.subtotal ?? 0,
-      discount_amount: inv?.discount_amount ?? inv?.discountAmount ?? 0, // ✅ NEW
+      discount_amount: inv?.discount_amount ?? inv?.discountAmount ?? 0, // âœ… NEW
       tax_total: inv?.tax_total ?? inv?.taxTotal ?? 0,
       total: inv?.total ?? 0,
       rowNumber: Number(index || 0) + 1,
@@ -490,6 +657,8 @@ display: none !important;
 
     filteredInvoices = invoices.filter((x) => {
       const inv = x.raw;
+      const selectedStatus = String(f.status_config_id || "").trim();
+      const selectedOption = getStatusOptionBySelection(selectedStatus);
       const dueTs = x.due_at ? new Date(x.due_at).getTime() : NaN;
       const dueFromTs = parsePtDateToTs(f.due_at_from, false);
       const dueToTs = parsePtDateToTs(f.due_at_to, true);
@@ -501,9 +670,12 @@ display: none !important;
         contains(x.invoice_number, f.invoice_number) &&
         contains(x.company, f.company) &&
         (
-          !String(f.status || "").trim()
+          !selectedStatus
             ? true
-            : Number(x.status) === Number(f.status)
+            : (
+                (selectedOption?.id && String(x.status_config_id || "") === String(selectedOption.id)) ||
+                (Number.isFinite(selectedOption?.legacy) && Number(x.status) === Number(selectedOption.legacy))
+              )
         ) &&
         contains(formatMoney(x.subtotal, inv), f.subtotal) &&
         contains(formatMoney(x.discount_amount, inv), f.discount_amount) &&
@@ -545,7 +717,7 @@ display: none !important;
       let bv;
 
       if (key === "company") { av = a.company; bv = b.company; }
-      else if (key === "status") { av = a.status; bv = b.status; }
+      else if (key === "status") { av = a.status_label; bv = b.status_label; }
       else if (key === "subtotal" || key === "discount_amount" || key === "tax_total" || key === "total" || key === "rowNumber") {
         av = toNumber(a[key]); bv = toNumber(b[key]);
       }
@@ -616,9 +788,9 @@ display: none !important;
         <td>${escapeHtml(idx + 1)}</td>
         <td>${escapeHtml(row.invoice_number)}</td>
         <td>${escapeHtml(row.company || "")}</td>
-        <td>${escapeHtml(statusLabel(row.status))}</td>
+        <td>${row.status_color ? `<span class="label" style="background-color:${escapeHtml(row.status_color)};color:#fff;">${escapeHtml(row.status_label)}</span>` : escapeHtml(row.status_label)}</td>
         <td>${escapeHtml(formatMoney(row.subtotal, inv))}</td>
-        <td>${escapeHtml(formatMoney(row.discount_amount, inv))}</td> <!-- ✅ NEW -->
+        <td>${escapeHtml(formatMoney(row.discount_amount, inv))}</td> <!-- âœ… NEW -->
         <td>${escapeHtml(formatMoney(row.tax_total, inv))}</td>
         <td><strong>${escapeHtml(formatMoney(row.total, inv))}</strong></td>
         <td>${escapeHtml(formatDate(row.due_at))}</td>
@@ -649,7 +821,7 @@ display: none !important;
       const indicator = th.querySelector(".sort-indicator");
       if (!indicator) return;
       const key = String(th.dataset.sort || "");
-      if (sortState.key === key) indicator.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      if (sortState.key === key) indicator.textContent = sortState.dir === "asc" ? "â–²" : "â–¼";
       else indicator.textContent = "";
     });
   }
@@ -671,7 +843,7 @@ display: none !important;
           fromLabel: "<%= t('page.layout.savedViews.fromLabel') %>",
           toLabel: "<%= t('page.layout.savedViews.toLabel') %>",
           daysOfWeek: ["Do", "Se", "Te", "Qa", "Qi", "Se", "Sa"],
-          monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+          monthNames: ["Janeiro", "Fevereiro", "MarÃ§o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
         }
       });
 
@@ -781,7 +953,7 @@ display: none !important;
       if (!value) return;
       if (k === "due_at_from") filters.push({ field: "due_at", op: "gte", value });
       else if (k === "due_at_to") filters.push({ field: "due_at", op: "lte", value });
-      else if (k !== "due_at") filters.push({ field: k, op: k === "status" ? "eq" : "contains", value });
+      else if (k !== "due_at") filters.push({ field: k, op: k === "status_config_id" ? "eq" : "contains", value });
     });
     return filters;
   }
@@ -798,8 +970,19 @@ display: none !important;
       if (!value) return;
       if (field === "due_at" && op === "gte") filterState.due_at_from = value;
       else if (field === "due_at" && op === "lte") filterState.due_at_to = value;
+      else if (field === "status") {
+        const legacy = Number(value);
+        if (Number.isFinite(legacy)) {
+          const byLegacy = invoiceStatusByLegacy[legacy];
+          filterState.status_config_id = byLegacy?.id || `legacy:${legacy}`;
+        } else {
+          filterState.status_config_id = String(value || "").trim();
+        }
+      }
       else if (Object.prototype.hasOwnProperty.call(filterState, field)) filterState[field] = value;
     });
+
+    renderStatusFilterOptions();
 
     document.querySelectorAll("#invoicesFiltersRow [data-filter]").forEach((el) => {
       const key = String(el.getAttribute("data-filter") || "");
@@ -866,6 +1049,13 @@ display: none !important;
       const key = String(this.getAttribute("data-filter") || "");
       if (!key) return;
       filterState[key] = String(this.value || "");
+      if (key === "status_config_id") {
+        loadInvoices(true).catch((err) => {
+          console.error("status filter reload error:", err);
+          alert(err?.message || "<%= t('page.invoices.errors.loadFailed') %>");
+        });
+        return;
+      }
       applyFilters();
     });
   });
@@ -902,8 +1092,10 @@ display: none !important;
       btnSend.disabled = true;
 
       try {
+        const activeOption = invoiceStatusByLegacy[1];
+        const activeSelection = activeOption?.id ? activeOption.id : "legacy:1";
         await runWithConcurrency(ids, 5, async (id) => {
-          await patchInvoiceStatus(id, 1);
+          await patchInvoiceStatus(id, activeSelection);
         });
 
         await loadInvoices(true);
@@ -912,6 +1104,42 @@ display: none !important;
         alert(err?.message || "<%= t('page.invoices.errors.bulkSendFailed') %>");
       } finally {
         btnSend.disabled = false;
+      }
+    });
+  }
+
+  const btnClone = document.getElementById("btnBulkClone");
+  if (btnClone && isAdmin) {
+    btnClone.addEventListener("click", async function () {
+      const ids = Array.from(selectedInvoiceIds);
+      if (ids.length === 0) return;
+      if (ids.length > 1) {
+        alert("Selecione apenas 1 invoice para clonar.");
+        return;
+      }
+
+      const sourceId = String(ids[0] || "").trim();
+      if (!sourceId) return;
+
+      const ok = await showConfirmModal(
+        "<%= t('page.invoices.clone.title') %>",
+        `<p><%= t('page.invoices.clone.confirmQuestion') %></p>`,
+        "<%= t('page.invoices.clone.confirmButton') %>",
+        "btn-warning"
+      );
+      if (!ok) return;
+
+      btnClone.disabled = true;
+      try {
+        const created = await cloneInvoiceById(sourceId);
+        const newId = String(created?.id || "").trim();
+        if (!newId) throw new Error("<%= t('page.invoices.errors.cloneNoId') %>");
+        window.location.href = `/NewInvoice?id=${encodeURIComponent(newId)}`;
+      } catch (err) {
+        console.error("bulk clone error:", err);
+        alert(err?.message || "<%= t('page.invoices.errors.cloneFailed') %>");
+      } finally {
+        btnClone.disabled = false;
       }
     });
   }
@@ -969,7 +1197,7 @@ display: none !important;
 
     invoices = rows.map((inv, idx) => normalizeInvoice(inv, idx));
 
-    // ✅ Non-admin: remove rascunhos (status 0)
+    // âœ… Non-admin: remove rascunhos (status 0)
     if (!isAdmin) {
       invoices = invoices.filter((x) => Number(x.status) !== 0);
     }
@@ -989,6 +1217,8 @@ display: none !important;
   }
 
   (async function initInvoicesPage() {
+    await loadStatusConfigs();
+    renderStatusFilterOptions();
     initDueAtRangeFilter();
     await loadInvoices(false);
 
@@ -1025,14 +1255,25 @@ display: none !important;
         applyFiltersFromSavedView(definition || {});
         applySortFromSavedView(definition || {});
         initDueAtRangeFilter();
-        applyFilters();
-        ensureSavedViewsExtraButtons();
+        loadInvoices(true)
+          .then(() => {
+            updateSortIndicators();
+            ensureSavedViewsExtraButtons();
+          })
+          .catch((e) => {
+            console.error("saved view reload error:", e);
+          });
       },
       onAfterApply: () => {
         initDueAtRangeFilter();
-        applyFilters();
-        updateSortIndicators();
-        ensureSavedViewsExtraButtons();
+        loadInvoices(true)
+          .then(() => {
+            updateSortIndicators();
+            ensureSavedViewsExtraButtons();
+          })
+          .catch((e) => {
+            console.error("saved view reload error:", e);
+          });
       }
     });
     setTimeout(ensureSavedViewsExtraButtons, 120);
@@ -1042,3 +1283,4 @@ display: none !important;
     if (tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 10 : 9}">${escapeHtml(err?.message || "<%= t('page.invoices.errors.loadFailed') %>")}</td></tr>`;
   });
 </script>
+

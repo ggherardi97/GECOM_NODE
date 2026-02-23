@@ -331,7 +331,7 @@
 
                 <h1 class="m-b-xs" id="lineTotalYear">R$ 0,00</h1>
                 <h3 class="font-bold no-margins">Valores dos meus Processos</h3>
-                <small class="dash-muted">Somatório dos invoices por mês (ano atual).</small>
+                <small class="dash-muted">Somatório dos valores dos processos por mês (ano atual).</small>
               </div>
 
               <div class="m-t-md">
@@ -343,7 +343,7 @@
 
               <div class="m-t-md">
                 <small class="dash-muted">
-                  <strong>Observação:</strong> valores calculados com base nos invoices vinculados à sua empresa.
+                  <strong>Observação:</strong> valores calculados com base nos processos vinculados à sua empresa.
                 </small>
               </div>
 
@@ -388,7 +388,7 @@
             </div>
             <div class="ibox-content">
               <h1 class="no-margins" id="kpiTotalYear">R$ 0,00</h1>
-              <small class="dash-muted">Somatório dos invoices do ano</small>
+              <small class="dash-muted">Somatório dos valores dos processos do ano</small>
             </div>
           </div>
         </div>
@@ -690,6 +690,17 @@
       if (v == null) return "-";
       var s = String(v).trim();
       return s.length ? s : "-";
+    }
+
+    function pickProcessTotalValue(p) {
+      return (
+        p?.total_value ??
+        p?.totalValue ??
+        p?.process_total_value ??
+        p?.processTotalValue ??
+        p?.value ??
+        0
+      );
     }
 
     function pickProcessCreatedAt(p) { return p?.created_on || p?.createdOn || p?.created_at || p?.createdAt || null; }
@@ -1277,7 +1288,7 @@ async function loadBillingDashboard() {
         data: {
           labels: labels,
           datasets: [{
-            label: "Invoices",
+            label: "Processos",
             backgroundColor: "rgba(26,179,148,0.2)",
             borderColor: "rgba(26,179,148,0.8)",
             data: values
@@ -1300,10 +1311,7 @@ async function loadBillingDashboard() {
       try {
         window.GECOM?.spinner?.show("Carregando dashboard...");
 
-        var [procRes, invRes] = await Promise.all([
-          fetchJson("/api/processes?company_id=" + encodeURIComponent(String(companyId))),
-          fetchJson("/api/invoices?fields=summary&company_id=" + encodeURIComponent(String(companyId)))
-        ]);
+        var procRes = await fetchJson("/api/processes?company_id=" + encodeURIComponent(String(companyId)));
 
         try {
           var notifRows = [];
@@ -1317,24 +1325,22 @@ async function loadBillingDashboard() {
         }
 
         var processes = normalizeArrayResponse(procRes);
-        var invoices = normalizeArrayResponse(invRes);
 
         $("#kpiProcessCount").text(String(processes.length));
         $("#kpiClosedCount").text(String(processes.filter(function (p) { return Number(p?.status) === 4; }).length));
 
         var year = new Date().getFullYear();
         var totalYear = 0;
-        var currencyCode = null;
+        var currencyCode = "BRL";
 
-        invoices.forEach(function (inv) {
-          var dt = inv?.quote_at || inv?.created_at || inv?.createdAt || inv?.issued_at || inv?.issue_date || inv?.date || null;
+        processes.forEach(function (p) {
+          var dt = pickProcessDateForYearFilter(p);
           if (!dt) return;
-          var d = new Date(dt);
+          var d = new Date(dt || 0);
           if (Number.isNaN(d.getTime())) return;
           if (d.getFullYear() !== year) return;
 
-          totalYear += toNumber(inv?.total ?? inv?.total_value ?? inv?.total_amount ?? inv?.amount ?? inv?.grand_total ?? inv?.value ?? 0);
-          if (!currencyCode) currencyCode = pickInvoiceCurrency(inv);
+          totalYear += toNumber(pickProcessTotalValue(p));
         });
 
         $("#kpiTotalYear").text(moneyPtBr(totalYear, currencyCode));
@@ -1344,14 +1350,14 @@ async function loadBillingDashboard() {
         var labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
         var monthly = new Array(12).fill(0);
 
-        invoices.forEach(function (inv) {
-          var dt = inv?.quote_at || inv?.created_at || inv?.createdAt || inv?.issued_at || inv?.issue_date || inv?.date || null;
+        processes.forEach(function (p) {
+          var dt = pickProcessDateForYearFilter(p);
           if (!dt) return;
-          var d = new Date(dt);
+          var d = new Date(dt || 0);
           if (Number.isNaN(d.getTime())) return;
           if (d.getFullYear() !== year) return;
 
-          monthly[d.getMonth()] += toNumber(inv?.total ?? inv?.total_value ?? inv?.total_amount ?? inv?.amount ?? inv?.grand_total ?? inv?.value ?? 0);
+          monthly[d.getMonth()] += toNumber(pickProcessTotalValue(p));
         });
 
         buildLineChartCompany(labels, monthly, currencyCode);

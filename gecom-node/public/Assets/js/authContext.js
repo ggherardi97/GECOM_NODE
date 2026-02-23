@@ -4,17 +4,50 @@
     try { return raw ? JSON.parse(raw) : null; } catch { return null; }
   }
 
+  function toBool(value) {
+    if (value === true || value === false) return value;
+    const v = String(value || "").trim().toLowerCase();
+    return v === "true" || v === "1" || v === "yes";
+  }
+
   function normalizeRole(role) {
     return String(role || "").trim().toUpperCase();
   }
 
+  function canonicalRole(role) {
+    const r = normalizeRole(role);
+    if (!r) return "";
+    if (r === "ADMIN" || r === "ADMINISTRATOR") return "ADMIN";
+    if (r === "MANAGER" || r === "GESTOR") return "MANAGER";
+    if (r === "USER" || r === "COMMON_USER" || r === "CLIENT") return "USER";
+    return r;
+  }
+
   function buildAuthFromLocalStorage() {
     const user = safeJsonParse(localStorage.getItem("currentUser"));
-    const role = normalizeRole(user?.role);
+    const roleCandidates = [
+      user?.role,
+      user?.user_role,
+      user?.role_name,
+      Array.isArray(user?.roles) ? user.roles[0] : null,
+    ]
+      .map(canonicalRole)
+      .filter(Boolean);
 
-    const isAdmin = role === "ADMIN";
-    const isManager = role === "MANAGER";
-    const isUser = role === "USER";
+    const hasRole = function (name) {
+      return roleCandidates.includes(name);
+    };
+
+    const isAdmin = hasRole("ADMIN") || toBool(user?.is_admin) || toBool(user?.isAdmin);
+    const isManager =
+      !isAdmin &&
+      (hasRole("MANAGER") || toBool(user?.is_manager) || toBool(user?.isManager));
+    const isUser =
+      !isAdmin &&
+      !isManager &&
+      (hasRole("USER") || toBool(user?.is_user) || toBool(user?.isUser) || true);
+
+    const role = isAdmin ? "ADMIN" : (isManager ? "MANAGER" : "USER");
 
     return {
       user: user || null,

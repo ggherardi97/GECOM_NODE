@@ -167,9 +167,7 @@
         $('button[name="btn_act_new"]').hide();
         $('input[name="btn_act_new"]').hide();
       } else if (window.__auth?.isManager) {
-        $('a[name="btn_act_new"]').hide();
-        $('button[name="btn_act_new"]').hide();
-        $('input[name="btn_act_new"]').hide();
+        // manager can create/upload in MyDocuments
       } else if (window.__auth?.isAdmin) {
         // ok
       }

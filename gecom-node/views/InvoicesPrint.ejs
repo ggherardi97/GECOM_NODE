@@ -21,6 +21,15 @@
       .print-area { box-shadow: none !important; }
       body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
+
+    .company-logo-print {
+      max-width: 180px;
+      max-height: 70px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 
@@ -34,12 +43,15 @@
       </div>
 
       <div class="row">
-        <div class="col-sm-6" style="    padding-top: 57px;">
+        <div class="col-sm-6">
+          <% if (companyLogoDataUri) { %>
+            <img src="<%= companyLogoDataUri %>" alt="Company logo" class="company-logo-print" />
+          <% } %>
           <h5>De:</h5>
           <address>
             <strong><%= from?.name || "Convert Solution" %></strong><br>
-            Rua Fagundes Varela 121<br>
-            Apto 106
+            <%= from?.addr1 || "-" %><br>
+            <%= from?.addr2 || "" %>
             <abbr title="Telefone">T:</abbr> <%= from?.phone || "+55 96138-3449" %>
           </address>
         </div>

@@ -17,7 +17,7 @@
         </div>
 
         <form id="leadWizardForm" class="wizard-big">
-          <h1>Informações básicas</h1>
+          <h1><%= t('page.leads.form.sectionBasic') %></h1>
           <fieldset>
             <div class="row">
               <div class="col-lg-6">
@@ -28,10 +28,10 @@
               </div>
               <div class="col-lg-6">
                 <div class="form-group">
-                  <label for="leadType">Tipo *</label>
+                  <label for="leadType"><%= t('page.leads.form.type') %> *</label>
                   <select id="leadType" class="form-control">
-                    <option value="COMPANY">COMPANY</option>
-                    <option value="PERSON">PERSON</option>
+                    <option value="COMPANY"><%= t('page.leads.form.typeCompany') %></option>
+                    <option value="PERSON"><%= t('page.leads.form.typePerson') %></option>
                   </select>
                 </div>
               </div>
@@ -66,7 +66,7 @@
             </div>
           </fieldset>
 
-          <h1>Qualificação</h1>
+          <h1><%= t('page.leads.form.sectionQualification') %></h1>
           <fieldset>
             <div class="row">
               <div class="col-sm-6 form-group">
@@ -75,14 +75,7 @@
               </div>
               <div class="col-sm-6 form-group">
                 <label for="leadStatus"><%= t('page.leads.columns.status') %> *</label>
-                <select id="leadStatus" class="form-control">
-                  <option value="NEW">NEW</option>
-                  <option value="WORKING">WORKING</option>
-                  <option value="NURTURING">NURTURING</option>
-                  <option value="QUALIFIED">QUALIFIED</option>
-                  <option value="CONVERTED">CONVERTED</option>
-                  <option value="DISQUALIFIED">DISQUALIFIED</option>
-                </select>
+                <select id="leadStatus" class="form-control"></select>
               </div>
             </div>
 
@@ -110,11 +103,11 @@
                 <label for="leadSource"><%= t('page.leads.columns.source') %></label>
                 <select id="leadSource" class="form-control">
                   <option value="">-</option>
-                  <option value="MANUAL">MANUAL</option>
-                  <option value="WEBSITE">WEBSITE</option>
-                  <option value="INDICATION">INDICATION</option>
-                  <option value="IMPORT">IMPORT</option>
-                  <option value="OTHER">OTHER</option>
+                  <option value="MANUAL"><%= t('page.leads.form.source.manual') %></option>
+                  <option value="WEBSITE"><%= t('page.leads.form.source.website') %></option>
+                  <option value="INDICATION"><%= t('page.leads.form.source.indication') %></option>
+                  <option value="IMPORT"><%= t('page.leads.form.source.import') %></option>
+                  <option value="OTHER"><%= t('page.leads.form.source.other') %></option>
                 </select>
               </div>
             </div>
@@ -141,3 +134,4 @@
   <script src="/js/common/apiClient.js"></script>
   <script src="/js/leads/lead.form.js"></script>
 <% %>
+

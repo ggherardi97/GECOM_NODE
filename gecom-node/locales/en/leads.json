@@ -80,7 +80,25 @@
         "firstName": "First name",
         "lastName": "Last name",
         "notes": "Notes",
-        "selectOwner": "Select"
+        "selectOwner": "Select",
+        "type": "Type",
+        "typeCompany": "Company",
+        "typePerson": "Person",
+        "status": {
+          "new": "New",
+          "working": "Working",
+          "nurturing": "Nurturing",
+          "qualified": "Qualified",
+          "converted": "Converted",
+          "disqualified": "Disqualified"
+        },
+        "source": {
+          "manual": "Manual",
+          "website": "Website",
+          "indication": "Referral",
+          "import": "Import",
+          "other": "Other"
+        }
       },
       "validation": {
         "nameRequired": "Lead name is required.",

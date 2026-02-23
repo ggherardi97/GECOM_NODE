@@ -160,7 +160,7 @@
       "header": {
         "newInvoice": "Nuevo Invoice"
       },
-      "empty":{
+      "empty": {
         "noResults": "No se encontraron facturas."
       },
       "bulkDelete": {
@@ -401,6 +401,7 @@
       }
     },
     "processDetail": {
+      "pageTitle": "Detalles del Proceso",
       "header": {
         "editProject": "Editar proyecto",
         "process": "Proceso",
@@ -410,14 +411,18 @@
         "client": "Cliente:",
         "estimatedDelivery": "Fecha Estimada de Entrega:",
         "start": "Inicio del Proceso:",
+        "totalValue": "Valor total del proceso:",
         "completed": "Completado:",
-        "completedOn": "Proyecto completado el"
+        "completedOn": "Proyecto completado el",
+        "highPriority": "Prioridad Alta"
       },
       "sections": {
         "timeline": "Cronograma",
         "history": "Historial del Proceso",
         "transports": "Transportes",
         "trajectory": "Trayectoria",
+        "maritimeTrackingBeta": "Seguimiento Marítimo (BETA)",
+        "airTrackingBeta": "Seguimiento Aéreo (BETA)",
         "description": "Descripción del Proceso",
         "documents": "Documentos del proceso"
       },
@@ -510,7 +515,15 @@
         "myDocuments": "Mis Documentos",
         "invoices": "Invoices",
         "products": "Productos",
-        "leads": "Leads"
+        "leads": "Leads",
+        "statusConfigs": "Estados de Entidades",
+        "ai": "AI",
+        "customsCalculation": "Calculo Aduanero",
+        "myActivities": "Mis Actividades",
+        "notifications": "Notificaciones",
+        "sales": "Ventas",
+        "services": "Servicios",
+        "settings": "Configuraciones"
       },
       "modal": {
         "cancel": "Cancelar",
@@ -532,6 +545,11 @@
         "saveLabel": "Guardar",
         "deleteLabel": "Eliminar vista",
         "deleteCurrentConfirm": "?Eliminar la vista seleccionada?"
+      },
+      "topbar": {
+        "defaultNotificationTitle": "Notificacion",
+        "noActiveNotifications": "No hay notificaciones activas.",
+        "viewAll": "Ver todas"
       }
     },
     "novoProcesso": {
@@ -1008,7 +1026,13 @@
         "setPrimaryStrong": "Principal",
         "table": {
           "primary": "Principal",
-          "nameRequired": "Nombre *"
+          "nameRequired": "Nombre *",
+          "permission": "Permiso"
+        },
+        "roles": {
+          "user": "User",
+          "manager": "Manager",
+          "admin": "Admin"
         },
         "placeholders": {
           "fullName": "Nombre completo",
@@ -1155,6 +1179,104 @@
       },
       "actions2": {
         "addDocuments": "Agregar Documentos"
+      }
+    },
+    "notifications": {
+      "pageTitle": "Notificaciones",
+      "actions": {
+        "back": "Volver",
+        "create": "Crear",
+        "markRead": "Marcar como leida",
+        "new": "Nueva Notificacion",
+        "save": "Guardar"
+      },
+      "columns": {
+        "active": "Activa",
+        "createdAt": "Creada en",
+        "expiresAt": "Expira en",
+        "message": "Mensaje",
+        "read": "Leida",
+        "severity": "Severidad",
+        "startsAt": "Inicio",
+        "title": "Titulo",
+        "updatedAt": "Actualizada en",
+        "window": "En ventana"
+      },
+      "common": {
+        "localeDateFormat": "es-ES",
+        "no": "No",
+        "yes": "Si"
+      },
+      "defaults": {
+        "title": "Notificacion"
+      },
+      "editor": {
+        "company": "Empresa",
+        "companyHint": "Selecciona la empresa que recibira esta notificacion.",
+        "createdBy": "Creado por",
+        "detailTitle": "Detalles de la Notificacion",
+        "editSubtitle": "Actualiza los datos de la notificacion.",
+        "editTitle": "Editar Notificacion",
+        "expiresAtHint": "Si esta vacio, la notificacion no expira.",
+        "messageHint": "Mensaje mostrado a los usuarios.",
+        "messagePlaceholder": "Escribe el mensaje de la notificacion",
+        "newSubtitle": "Crea una nueva notificacion para los usuarios.",
+        "newTitle": "Nueva Notificacion",
+        "select": "Seleccionar",
+        "severity": {
+          "critical": "Critica",
+          "warning": "Aviso"
+        },
+        "severityHint": "Define el nivel de urgencia.",
+        "startsAtHint": "Si esta vacio, se considera inmediatamente.",
+        "systemReadonly": "Los campos del sistema son solo lectura.",
+        "titlePlaceholder": "Escribe un titulo (opcional)"
+      },
+      "filters": {
+        "all": "Todas",
+        "allFeminine": "Todas",
+        "byMessage": "Filtrar por mensaje",
+        "bySeverity": "Filtrar por severidad",
+        "byTitle": "Filtrar por titulo"
+      },
+      "list": {
+        "showingCount": "{{shown}} de {{total}} mostradas"
+      },
+      "messages": {
+        "companyMissing": "Empresa no informada.",
+        "createFail": "Error al crear la notificacion.",
+        "createSuccess": "Notificacion creada con exito.",
+        "deleteViewFail": "Error al eliminar la vista.",
+        "loadFail": "Error al cargar notificaciones.",
+        "markReadFail": "Error al marcar la notificacion como leida.",
+        "markReadSuccess": "Notificacion marcada como leida.",
+        "noCompanies": "No se encontraron empresas",
+        "pageLoadFail": "Error al cargar la pagina de notificaciones.",
+        "requestFail": "Error en la solicitud.",
+        "saveFail": "Error al guardar la notificacion.",
+        "saveSuccess": "Notificacion guardada con exito.",
+        "saveViewFail": "Error al guardar la vista."
+      },
+      "read": {
+        "read": "Leida",
+        "unread": "No leida"
+      },
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva"
+      },
+      "tabs": {
+        "info": "Informacion",
+        "system": "Sistema"
+      },
+      "validation": {
+        "companyRequired": "La empresa es obligatoria.",
+        "expiresAfterStarts": "La fecha de expiracion debe ser mayor que la fecha de inicio.",
+        "messageRequired": "El mensaje es obligatorio."
+      },
+      "window": {
+        "in": "Si",
+        "out": "No"
       }
     }
   }

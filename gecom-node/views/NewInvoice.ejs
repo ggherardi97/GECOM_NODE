@@ -63,6 +63,10 @@
         <div class="ibox-title">
           <h5 id="invoiceTitle">-</h5>
           <div class="ibox-tools">
+            <button type="button" class="btn btn-warning" id="btnCloneInvoice" disabled>
+              <i class="fa fa-clone"></i> <%= t('page.newInvoice.actions.cloneInvoice') %>
+            </button>
+
             <button type="button" class="btn btn-white" id="btnGenerateInvoicePrint" disabled>
               <i class="fa fa-file-pdf-o"></i> <%= t('page.newInvoice.actions.generateInvoice') %>
             </button>
@@ -112,13 +116,7 @@
                       <div class="col-lg-6">
                          <div class="form-group">
                           <label><%= t('page.newInvoice.form.status') %></label>
-                          <select id="status" class="form-control">
-                            <option value="0" selected><%= t('page.newInvoice.form.statusDraft') %></option>
-                            <option value="1"><%= t('page.newInvoice.form.statusActive') %></option>
-                            <option value="2"><%= t('page.newInvoice.form.statusExpired') %></option>
-                            <option value="3"><%= t('page.newInvoice.form.statusBilled') %></option>
-                            <option value="4"><%= t('page.newInvoice.form.statusPaid') %></option>
-                          </select>
+                          <select id="status" class="form-control"></select>
                         </div>
                       </div>
                     </div>
@@ -349,12 +347,17 @@
 
     let companiesCache = [];
     let currenciesCache = [];
+    let invoiceStatusOptions = [];
+    const invoiceStatusByValue = {};
+    const invoiceStatusByConfigId = {};
+    const invoiceStatusByLegacy = {};
     let productsCache = [];
     let lines = [];
 
     let suppressCompanyClear = false;
 
     function setPrintEnabled() {
+      $("#btnCloneInvoice").prop("disabled", !invoiceId);
       $("#btnGenerateInvoicePrint").prop("disabled", !invoiceId);
       $("#btnDeleteInvoice").prop("disabled", !invoiceId);
     }
@@ -491,18 +494,23 @@
     }
 
     // =========================
-    // Money mask for currency inputs (pt-BR user typing -> normalized numeric)
+    // Decimal mask for inputs (pt-BR typing + normalized parse)
     // =========================
-    function bindMoneyMaskOnce(selector) {
+    function bindDecimalMaskOnce(selector, options) {
       const $el = $(selector);
       if (!$el.length) return;
-      if ($el.data("money-mask")) return;
-      $el.data("money-mask", true);
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
 
       function normalize(val) {
         const raw = String(val ?? "").trim();
         if (!raw) return "";
-        const cleaned = raw.replace(/[^\d,.\-]/g, "");
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
         if (cleaned.includes(".") && cleaned.includes(",")) {
           return cleaned.replace(/\./g, "").replace(",", ".");
         }
@@ -512,7 +520,29 @@
         return cleaned;
       }
 
-      $el.on("input", function () { $(this).val(normalize($(this).val())); });
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      $el.on("input", function () {
+        $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
     }
 
     // =========================
@@ -668,6 +698,124 @@
       });
     }
 
+    function getDefaultInvoiceStatusOptions() {
+      return [
+        { value: "legacy:0", status_config_id: "", legacy: 0, label: tSafe("page.newInvoice.form.statusDraft", "Rascunho"), color: "" },
+        { value: "legacy:1", status_config_id: "", legacy: 1, label: tSafe("page.newInvoice.form.statusActive", "Ativo"), color: "" },
+        { value: "legacy:2", status_config_id: "", legacy: 2, label: tSafe("page.newInvoice.form.statusExpired", "Expirado"), color: "" },
+        { value: "legacy:3", status_config_id: "", legacy: 3, label: tSafe("page.newInvoice.form.statusBilled", "Faturado"), color: "" },
+        { value: "legacy:4", status_config_id: "", legacy: 4, label: tSafe("page.newInvoice.form.statusPaid", "Pago"), color: "" },
+      ];
+    }
+
+    function normalizeStatusConfigId(value) {
+      const id = String(value || "").trim();
+      return id || "";
+    }
+
+    function parseLegacyStatusFromSelection(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return null;
+      if (raw.startsWith("legacy:")) {
+        const n = Number(raw.slice("legacy:".length));
+        return Number.isFinite(n) ? n : null;
+      }
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function clearInvoiceStatusMaps() {
+      Object.keys(invoiceStatusByValue).forEach((k) => delete invoiceStatusByValue[k]);
+      Object.keys(invoiceStatusByConfigId).forEach((k) => delete invoiceStatusByConfigId[k]);
+      Object.keys(invoiceStatusByLegacy).forEach((k) => delete invoiceStatusByLegacy[k]);
+    }
+
+    function indexInvoiceStatusOptions() {
+      clearInvoiceStatusMaps();
+      (invoiceStatusOptions || []).forEach((opt) => {
+        const value = String(opt?.value || "").trim();
+        if (!value) return;
+        invoiceStatusByValue[value] = opt;
+        if (opt?.status_config_id) invoiceStatusByConfigId[String(opt.status_config_id)] = opt;
+        if (Number.isFinite(opt?.legacy) && !invoiceStatusByLegacy[opt.legacy]) invoiceStatusByLegacy[opt.legacy] = opt;
+      });
+    }
+
+    function getDefaultStatusSelectionValue() {
+      const draft = invoiceStatusByLegacy[0] || invoiceStatusOptions[0] || null;
+      return draft ? String(draft.value || "") : "";
+    }
+
+    function rowsToArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function renderInvoiceStatusOptions(selectedValue) {
+      const sel = document.getElementById("status");
+      if (!sel) return;
+
+      sel.innerHTML = "";
+      (invoiceStatusOptions || []).forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = String(opt.value);
+        option.textContent = String(opt.label || `Status ${opt.value}`);
+        option.dataset.statusConfigId = String(opt.status_config_id || "");
+        option.dataset.legacy = Number.isFinite(opt.legacy) ? String(opt.legacy) : "";
+        sel.appendChild(option);
+      });
+
+      if (selectedValue != null && selectedValue !== "") {
+        ensureStatusOptionExists(selectedValue);
+        sel.value = String(selectedValue);
+      } else {
+        sel.value = getDefaultStatusSelectionValue();
+      }
+    }
+
+    function ensureStatusOptionExists(value, label, legacyStatus, statusConfigId) {
+      const sel = document.getElementById("status");
+      if (!sel) return;
+      const strValue = String(value ?? "").trim();
+      if (!strValue) return;
+      const exists = Array.from(sel.options || []).some((o) => String(o.value) === strValue);
+      if (exists) return;
+
+      const option = document.createElement("option");
+      option.value = strValue;
+      option.textContent = String(label || `Status ${strValue}`);
+      option.dataset.statusConfigId = String(statusConfigId || "");
+      option.dataset.legacy = Number.isFinite(legacyStatus) ? String(legacyStatus) : "";
+      sel.appendChild(option);
+    }
+
+    async function loadInvoiceStatusOptions() {
+      try {
+        const data = await apiGet("/api/status-configs?entity=INVOICE&active=true");
+        const options = rowsToArray(data)
+          .map((row) => ({
+            value: normalizeStatusConfigId(row?.id),
+            status_config_id: normalizeStatusConfigId(row?.id),
+            legacy: Number(row?.legacy_int_value),
+            label: String(row?.label || "").trim(),
+            color: String(row?.color || "").trim(),
+            sort: Number(row?.sort_order || 0),
+          }))
+          .filter((x) => x.value && x.label)
+          .sort((a, b) => (a.sort - b.sort) || String(a.label).localeCompare(String(b.label), "pt-BR"));
+        invoiceStatusOptions = options.length ? options : getDefaultInvoiceStatusOptions();
+      } catch (e) {
+        console.warn("loadInvoiceStatusOptions fallback:", e);
+        invoiceStatusOptions = getDefaultInvoiceStatusOptions();
+      }
+
+      indexInvoiceStatusOptions();
+      renderInvoiceStatusOptions();
+    }
+
     function toProductModel(p) {
       return {
         id: String(p?.id || "").trim(),
@@ -730,13 +878,21 @@
     // Header payloads
     // =========================
     function buildInvoiceHeaderPayload() {
+      const statusSelection = String($("#status").val() || "").trim();
+      const statusOption = invoiceStatusByValue[statusSelection] || null;
+      const statusConfigId = normalizeStatusConfigId(statusOption?.status_config_id);
+      const legacyStatus = Number.isFinite(statusOption?.legacy)
+        ? Number(statusOption.legacy)
+        : parseLegacyStatusFromSelection(statusSelection);
+
       return {
         company_id: String($("#company_id").val() || "").trim() || null,
         currency_id: String($("#currency_id").val() || "").trim() || null,
         quote_at: $("#quote_at").val() || null,
         due_at: dateInputToIsoUtc($("#due_at").val()),
         exchange_rate: $("#exchange_rate").val() || null,
-        status: parseNumberSafe($("#status").val(), 0),
+        status_config_id: statusConfigId || null,
+        status: Number.isFinite(legacyStatus) ? legacyStatus : 0,
         discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
         version: parseNumberSafe($("#version").val(), 1),
         notes: $("#notes").val() || "",
@@ -1036,9 +1192,9 @@
           const $root = $(rootEl);
 
           // normalize numeric typing
-          bindMoneyMaskOnce($root.find("#il_unit_price"));
-          bindMoneyMaskOnce($root.find("#il_tax_rate"));
-          bindMoneyMaskOnce($root.find("#il_discount_amount"));
+          bindDecimalMaskOnce($root.find("#il_unit_price"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#il_tax_rate"), { decimals: 4, min: 0, max: 1 });
+          bindDecimalMaskOnce($root.find("#il_discount_amount"), { decimals: 2, min: 0 });
 
           function syncModalCalc() {
             const tmp = {
@@ -1237,7 +1393,32 @@
 
       $("#currency_id").val(inv?.currency_id || "").trigger("change");
 
-      $("#status").val(String(inv?.status ?? 0));
+      const statusConfigId = normalizeStatusConfigId(
+        inv?.status_config_id ??
+        inv?.statusConfigId ??
+        inv?.status_config?.id ??
+        inv?.statusConfig?.id ??
+        ""
+      );
+      const legacyStatus = Number.isFinite(Number(inv?.status)) ? Number(inv.status) : null;
+      let statusSelection = "";
+
+      if (statusConfigId) {
+        const byConfig = invoiceStatusByConfigId[statusConfigId];
+        statusSelection = byConfig?.value || statusConfigId;
+        ensureStatusOptionExists(
+          statusSelection,
+          inv?.status_config?.label || byConfig?.label || statusSelection,
+          Number.isFinite(legacyStatus) ? legacyStatus : byConfig?.legacy,
+          statusConfigId
+        );
+      } else if (Number.isFinite(legacyStatus)) {
+        const byLegacy = invoiceStatusByLegacy[legacyStatus];
+        statusSelection = byLegacy?.value || `legacy:${legacyStatus}`;
+        ensureStatusOptionExists(statusSelection, byLegacy?.label || `Status ${legacyStatus}`, legacyStatus, byLegacy?.status_config_id || "");
+      }
+
+      $("#status").val(statusSelection || getDefaultStatusSelectionValue());
       $("#version").val(parseNumberSafe(inv?.version, 1));
 
       $("#quote_at").val(tryToDatetimeLocal(inv?.quote_at));
@@ -1304,6 +1485,35 @@
       }
     }
 
+    async function cloneCurrentInvoice() {
+      if (!invoiceId) return;
+
+      const ok = await confirm(
+        tSafe("page.newInvoice.confirm.cloneTitle", "Deseja clonar esta fatura?"),
+        { title: tSafe("page.newInvoice.confirm.cloneModalTitle", "Clonar fatura") }
+      );
+      if (!ok) return;
+
+      const $btn = $("#btnCloneInvoice");
+      const originalHtml = $btn.html();
+      $btn.prop("disabled", true).html(`<i class="fa fa-spinner fa-spin"></i> ${escapeHtml(tSafe("page.newInvoice.actions.cloning", "Clonando..."))}`);
+
+      try {
+        const created = await apiPost(`/api/invoices/${encodeURIComponent(invoiceId)}/clone`, {});
+        const newId = String(created?.id || "").trim();
+        if (!newId) {
+          throw new Error(tSafe("page.newInvoice.messages.cloneNoId", "A clonagem foi concluída, mas não retornou ID."));
+        }
+        window.location.href = `/NewInvoice?id=${encodeURIComponent(newId)}`;
+      } catch (e) {
+        console.error(e);
+        alert(e?.message || tSafe("page.newInvoice.messages.cloneFail", "Falha ao clonar a fatura."));
+        setPrintEnabled();
+      } finally {
+        $btn.html(originalHtml);
+      }
+    }
+
     // =========================
     // Buttons / events
     // =========================
@@ -1348,6 +1558,10 @@
 
     $("#btnSaveInvoice").on("click", async function () {
       await saveInvoice();
+    });
+
+    $("#btnCloneInvoice").on("click", async function () {
+      await cloneCurrentInvoice();
     });
 
     $("#btnGenerateInvoicePrint").on("click", async function () {
@@ -1399,7 +1613,7 @@
           $("#subpathName").text(tSafe("page.newInvoice.breadcrumbs.newInvoice", "Nova Fatura"));
         }
 
-        await Promise.all([loadCompanies(), loadCurrencies()]);
+        await Promise.all([loadCompanies(), loadCurrencies(), loadInvoiceStatusOptions()]);
 
         $("#uiInvoiceId").text("-");
         setPrintEnabled();

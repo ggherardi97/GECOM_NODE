@@ -278,6 +278,10 @@ display: none !important;
 
   // -------------------- Global state --------------------
   let processes = [];
+  let processStatusOptions = [];
+  let processStatusLabelMap = {};
+  let processStatusByConfigId = {};
+  let processStatusByLegacyValue = {};
   const selectedProcessIds = new Set();
   const sortState = { key: null, dir: "asc" };
   const savedViewsState = { viewId: null, name: "", columns: [], columns_order: [], filters: [], sort: [] };
@@ -364,10 +368,14 @@ display: none !important;
   async function fetchProcesses() {
     const isAdmin = !!window.__auth?.isAdmin;
     const companyId = localStorage.getItem("companyId");
+    const selectedStatusConfigId = String(document.getElementById("actionFilter")?.value || "").trim();
 
     let url = "/api/processes?fields=dashboard";
     if (!isAdmin && companyId) {
       url += `&company_id=${encodeURIComponent(String(companyId))}`;
+    }
+    if (selectedStatusConfigId) {
+      url += `&status_config_id=${encodeURIComponent(selectedStatusConfigId)}`;
     }
 
     const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
@@ -387,6 +395,48 @@ display: none !important;
     return data;
   }
 
+  function listToArray(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.rows)) return data.rows;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
+  }
+
+  async function loadProcessStatusConfigs() {
+    try {
+      const resp = await fetch("/api/status-configs?entity=PROCESS&active=true", {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || I18N.msgLoadFail);
+
+      processStatusOptions = listToArray(data)
+        .map((row) => ({
+          id: String(row?.id || "").trim(),
+          value: Number(row?.legacy_int_value),
+          label: String(row?.label || "").trim(),
+          color: String(row?.color || "").trim(),
+          sort: Number(row?.sort_order || 0),
+        }))
+        .filter((x) => x.id && x.label)
+        .sort((a, b) => (a.sort - b.sort) || String(a.label).localeCompare(String(b.label), "pt-BR"));
+    } catch (e) {
+      console.warn("loadProcessStatusConfigs fallback:", e);
+      processStatusOptions = [];
+    }
+
+    processStatusLabelMap = {};
+    processStatusByConfigId = {};
+    processStatusByLegacyValue = {};
+    processStatusOptions.forEach((x) => {
+      processStatusByConfigId[x.id] = x;
+      if (Number.isFinite(x.value)) processStatusByLegacyValue[x.value] = x;
+      if (Number.isFinite(x.value) && !processStatusLabelMap[x.value]) processStatusLabelMap[x.value] = x.label;
+    });
+  }
+
   async function runWithConcurrency(items, limit, worker) {
     const queue = [...items];
     const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
@@ -404,11 +454,33 @@ display: none !important;
     return Number.isNaN(n) ? 0 : n;
   }
 
+  function normalizeStatusConfigId(value) {
+    const id = String(value || "").trim();
+    return id || "";
+  }
+
+  function getProcessStatusConfigIdFromApi(p) {
+    return normalizeStatusConfigId(
+      p?.status_config_id ??
+      p?.statusConfigId ??
+      p?.status_config?.id ??
+      p?.statusConfig?.id ??
+      ""
+    );
+  }
+
+  function getProcessStatusConfigFromApi(p) {
+    const direct = p?.status_config || p?.statusConfig || null;
+    if (direct && typeof direct === "object") return direct;
+    return null;
+  }
+
   function tryGetI18nStatusLabel(statusValue) {
     // We can't call server t() dynamically here; instead we rely on common.json having these keys
     // and your server-side i18n system returning the translation at render time.
     // Strategy: we embed a small lookup table generated from those keys.
     const s = getStatusValueFromApi(statusValue);
+    if (processStatusLabelMap[s]) return processStatusLabelMap[s];
 
     // If you add these keys in common.json, the server will inject the correct strings here:
     // page.processos.status.0 ... etc
@@ -429,13 +501,30 @@ display: none !important;
     return null;
   }
 
-  function getStatusLabel(statusValue) {
+  function getStatusLabel(statusValue, statusConfigId, statusConfig) {
+    const directLabel = String(statusConfig?.label || "").trim();
+    if (directLabel) return directLabel;
+
+    const byId = processStatusByConfigId[normalizeStatusConfigId(statusConfigId)];
+    if (byId?.label) return byId.label;
+
     const s = getStatusValueFromApi(statusValue);
 
     const i18nLabel = tryGetI18nStatusLabel(s);
     if (i18nLabel) return i18nLabel;
 
     return window.ProcessStatusEnum?.getLabel(s) ?? `Status ${s}`;
+  }
+
+  function getStatusColor(statusValue, statusConfigId, statusConfig) {
+    const directColor = String(statusConfig?.color || "").trim();
+    if (directColor) return directColor;
+
+    const byId = processStatusByConfigId[normalizeStatusConfigId(statusConfigId)];
+    if (byId?.color) return byId.color;
+
+    const byLegacy = processStatusByLegacyValue[getStatusValueFromApi(statusValue)];
+    return String(byLegacy?.color || "").trim();
   }
 
   function getStatusCssClass(statusValue) {
@@ -452,6 +541,10 @@ display: none !important;
     const invoice = p?.invoice ?? "";
     const ship_date = p?.ship_date ?? p?.shipDate ?? p?.created_on ?? p?.createdAt ?? p?.created_at ?? "";
     const status = getStatusValueFromApi(p?.status);
+    const statusConfigId = getProcessStatusConfigIdFromApi(p);
+    const statusConfig = getProcessStatusConfigFromApi(p);
+    const statusLabel = getStatusLabel(status, statusConfigId, statusConfig);
+    const statusColor = getStatusColor(status, statusConfigId, statusConfig);
 
     const completedNumber = Math.max(0, Math.min(100, toNumber(p?.completed)));
 
@@ -473,6 +566,9 @@ display: none !important;
 
       CompletedNumber: completedNumber,
       StatusValue: status,
+      StatusConfigId: statusConfigId,
+      StatusLabel: statusLabel,
+      StatusColor: statusColor,
 
       CompanyName: isNonEmptyString(companyName) ? String(companyName).trim() : "",
       ContactName: isNonEmptyString(contactName) ? String(contactName).trim() : "",
@@ -566,6 +662,7 @@ display: none !important;
       tr.className = "clicker";
       tr.setAttribute("data-process-id", String(p.Id));
       tr.setAttribute("data-status", String(p.StatusValue));
+      tr.setAttribute("data-status-config-id", String(p.StatusConfigId || ""));
 
       tr.addEventListener("click", function () {
         redirectToProcess(p.Id);
@@ -573,6 +670,8 @@ display: none !important;
 
       const isChecked = selectedProcessIds.has(String(p.Id));
       const pieValue = `${p.CompletedNumber}/100`;
+      const statusClass = p.StatusColor ? "label" : getStatusCssClass(p.StatusValue);
+      const statusStyle = p.StatusColor ? ` style="background-color:${escapeHtml(String(p.StatusColor))};color:#fff;"` : "";
 
       tr.innerHTML = `
         <td>
@@ -595,7 +694,7 @@ display: none !important;
         </td>
         <td>${escapeHtml(p.Task)}</td>
         <td>${escapeHtml(formatDatePtBR(p.Date))}</td>
-        <td><span class="${escapeHtml(getStatusCssClass(p.StatusValue))}">${escapeHtml(getStatusLabel(p.StatusValue))}</span></td>
+        <td><span class="${escapeHtml(statusClass)}"${statusStyle}>${escapeHtml(p.StatusLabel || "-")}</span></td>
       `;
 
       const chk = tr.querySelector("input.process-check");
@@ -776,7 +875,7 @@ display: none !important;
     });
 
     $("#actionFilter").on("change", function () {
-      applyCurrentFilters();
+      loadProcesses();
     });
   }
 
@@ -829,7 +928,7 @@ display: none !important;
   function applyCurrentFilters() {
     const table = $("#process");
     const actionSelectedRaw = $("#actionFilter").val();
-    const actionSelected = actionSelectedRaw !== "" && actionSelectedRaw != null ? Number(actionSelectedRaw) : null;
+    const actionSelected = String(actionSelectedRaw || "").trim();
 
     const filterInputs = $("#process thead tr:nth-child(1) input:not([type='hidden'])");
 
@@ -858,9 +957,10 @@ display: none !important;
         if (cellText.indexOf(value) === -1) visible = false;
       });
 
-      if (visible && actionSelected != null && !Number.isNaN(actionSelected)) {
-        const rowStatus = Number($row.attr("data-status"));
-        if (Number.isNaN(rowStatus) || rowStatus !== actionSelected) visible = false;
+      if (visible && actionSelected) {
+        const rowStatusConfigId = String($row.attr("data-status-config-id") || "").trim();
+        const rowLegacyStatus = String($row.attr("data-status") || "").trim();
+        if (rowStatusConfigId !== actionSelected && rowLegacyStatus !== actionSelected) visible = false;
       }
 
       $row.toggle(visible);
@@ -998,16 +1098,15 @@ display: none !important;
   function fillStatusFilter() {
     const sel = document.getElementById("actionFilter");
     if (!sel) return;
-
-    const options = window.ProcessStatusEnum?.toSelectOptions?.() ?? [];
+    sel.innerHTML = `<option value="">${escapeHtml(I18N.filtersAll)}</option>`;
+    const enumOptions = window.ProcessStatusEnum?.toSelectOptions?.() ?? [];
+    const options = processStatusOptions.length
+      ? processStatusOptions.map((x) => ({ value: x.id, label: x.label }))
+      : enumOptions.map((x) => ({ value: x.value, label: x.label }));
     options.forEach((o) => {
       const opt = document.createElement("option");
       opt.value = String(o.value);
-
-      // Apply same i18n override to dropdown labels
-      const i18nLabel = tryGetI18nStatusLabel(o.value);
-      opt.textContent = i18nLabel ? i18nLabel : o.label;
-
+      opt.textContent = o.label || `Status ${o.value}`;
       sel.appendChild(opt);
     });
   }
@@ -1042,11 +1141,12 @@ display: none !important;
 
     bindBulkEvents();
     bindSorting();
-    fillStatusFilter();
     installColumnFilters();
     initDateRangeFilter();
 
     (async function initSavedViews() {
+      await loadProcessStatusConfigs();
+      fillStatusFilter();
       await loadProcesses();
 
       const allKeys = getAllColumnKeys();

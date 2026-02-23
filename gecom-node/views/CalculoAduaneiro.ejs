@@ -1,0 +1,380 @@
+<style>
+  .ca-page { margin-top: 18px; }
+  .ca-layout { display: flex; gap: 14px; min-height: 680px; }
+  .ca-left { width: 32%; min-width: 300px; }
+  .ca-right { flex: 1; min-width: 0; }
+  .ca-card { border: 1px solid #e7eaec; border-radius: 4px; background: #fff; }
+  .ca-card-h { padding: 10px 12px; border-bottom: 1px solid #eef1f4; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .ca-card-b { padding: 12px; }
+  .ca-list { max-height: 640px; overflow: auto; }
+  .ca-list-item { border: 1px solid #eceff3; border-radius: 4px; padding: 10px; margin-bottom: 8px; cursor: pointer; }
+  .ca-list-item.active { border-color: #1ab394; background: #f4fffc; }
+  .ca-muted { color: #777; font-size: 12px; }
+  .ca-kpi { border: 1px solid #eef1f4; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; }
+  .ca-kpi .v { font-weight: 700; font-size: 16px; }
+  .ca-grid-actions .btn { margin-right: 4px; }
+  .ca-empty { padding: 28px 10px; text-align: center; color: #777; border: 1px dashed #d8dde3; border-radius: 4px; }
+  .ca-loading { font-size: 12px; color: #777; margin-left: 8px; }
+  .ca-table-wrap { overflow: auto; }
+  .ca-table-wrap table { min-width: 980px; }
+  .ca-pre { white-space: pre-wrap; max-height: 340px; overflow: auto; background: #f6f8fa; border: 1px solid #e6ebf1; border-radius: 4px; padding: 10px; }
+  @media (max-width: 991px) {
+    .ca-layout { display: block; }
+    .ca-left, .ca-right { width: 100%; min-width: 0; margin-bottom: 12px; }
+  }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight ca-page">
+  <div class="ca-layout">
+    <div class="ca-left">
+      <div class="ca-card">
+        <div class="ca-card-h">
+          <strong>Simulacoes</strong>
+          <button id="btnNewSimulation" type="button" class="btn btn-primary btn-xs">
+            <i class="fa fa-plus"></i> Nova
+          </button>
+        </div>
+        <div class="ca-card-b">
+          <div class="row" style="margin-bottom:8px;">
+            <div class="col-xs-6">
+              <select id="filterStatus" class="form-control input-sm">
+                <option value="">Status</option>
+                <option value="DRAFT">DRAFT</option>
+                <option value="FINAL">FINAL</option>
+                <option value="CONVERTED">CONVERTED</option>
+              </select>
+            </div>
+            <div class="col-xs-6">
+              <select id="filterType" class="form-control input-sm">
+                <option value="">Tipo</option>
+                <option value="IMPORT">IMPORT</option>
+                <option value="EXPORT">EXPORT</option>
+              </select>
+            </div>
+          </div>
+          <div class="ca-list" id="simList"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <button id="btnPrevPage" type="button" class="btn btn-white btn-xs"><i class="fa fa-chevron-left"></i></button>
+            <span id="listPageInfo" class="ca-muted">Pagina 1</span>
+            <button id="btnNextPage" type="button" class="btn btn-white btn-xs"><i class="fa fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ca-right">
+      <div id="editorEmpty" class="ca-empty">
+        Selecione uma simulacao para editar ou clique em Nova.
+      </div>
+
+      <div id="editorRoot" style="display:none;">
+        <div class="ca-card" style="margin-bottom:12px;">
+          <div class="ca-card-h">
+            <strong id="simTitle">Calculo Aduaneiro</strong>
+            <div>
+              <button id="btnSaveHeader" type="button" class="btn btn-success btn-xs"><i class="fa fa-save"></i> Salvar</button>
+              <button id="btnCalculate" type="button" class="btn btn-info btn-xs"><i class="fa fa-calculator"></i> Calcular</button>
+              <button id="btnDuplicate" type="button" class="btn btn-warning btn-xs"><i class="fa fa-clone"></i> Duplicar</button>
+              <button id="btnNewSimulationTop" type="button" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Nova Simulacao</button>
+            </div>
+          </div>
+          <div class="ca-card-b">
+            <div class="ca-muted" style="margin-bottom:8px;">Status da simulacao determina edicao de header/itens/custos (apenas DRAFT).</div>
+            <form id="simHeaderForm" onsubmit="return false;">
+              <input type="hidden" id="simId" />
+              <div class="row">
+                <div class="col-md-4 form-group">
+                  <label>Empresa</label>
+                  <select id="company_id" class="form-control input-sm"></select>
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Tipo</label>
+                  <select id="type" class="form-control input-sm">
+                    <option value="IMPORT">IMPORT</option>
+                    <option value="EXPORT">EXPORT</option>
+                  </select>
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Status</label>
+                  <select id="status" class="form-control input-sm">
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="FINAL">FINAL</option>
+                    <option value="CONVERTED">CONVERTED</option>
+                  </select>
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Modo</label>
+                  <select id="calculation_mode" class="form-control input-sm">
+                    <option value="MANUAL">MANUAL</option>
+                    <option value="RULES">RULES</option>
+                    <option value="TTCE">TTCE</option>
+                  </select>
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Moeda</label>
+                  <input id="currency" class="form-control input-sm" maxlength="3" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-2 form-group">
+                  <label>Cambio</label>
+                  <input id="exchange_rate" class="form-control input-sm js-decimal" data-decimals="6" />
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Incoterm</label>
+                  <input id="incoterm" class="form-control input-sm" maxlength="10" />
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Pais Origem (ISO2)</label>
+                  <input id="origin_country" class="form-control input-sm" maxlength="2" />
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>UF Destino</label>
+                  <input id="destination_state" class="form-control input-sm" maxlength="2" />
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Aliquota ICMS</label>
+                  <input id="icms_rate" class="form-control input-sm js-decimal" data-decimals="6" />
+                </div>
+                <div class="col-md-2 form-group">
+                  <label>Valor Aduaneiro</label>
+                  <input id="customs_value" class="form-control input-sm js-decimal" data-decimals="2" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 form-group">
+                  <label>Frete Internacional</label>
+                  <input id="freight_international" class="form-control input-sm js-decimal" data-decimals="2" />
+                </div>
+                <div class="col-md-4 form-group">
+                  <label>Seguro Internacional</label>
+                  <input id="insurance_international" class="form-control input-sm js-decimal" data-decimals="2" />
+                </div>
+                <div class="col-md-4 form-group">
+                  <label>Outros Acrescimos</label>
+                  <input id="other_additions" class="form-control input-sm js-decimal" data-decimals="2" />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="ca-card" style="margin-bottom:12px;">
+          <div class="ca-card-h">
+            <strong>Itens</strong>
+            <div>
+              <span id="itemsLoading" class="ca-loading" style="display:none;">carregando...</span>
+              <button id="btnAddItem" type="button" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Item</button>
+            </div>
+          </div>
+          <div class="ca-card-b ca-table-wrap">
+            <table class="table table-striped table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Descricao</th>
+                  <th>NCM</th>
+                  <th>Quantidade</th>
+                  <th>Preco Unit.</th>
+                  <th>Item Value</th>
+                  <th>Frete</th>
+                  <th>Seguro</th>
+                  <th>Valor Aduaneiro</th>
+                  <th>Notas</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody id="itemsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ca-card" style="margin-bottom:12px;">
+          <div class="ca-card-h">
+            <strong>Custos Adicionais</strong>
+            <div>
+              <span id="costsLoading" class="ca-loading" style="display:none;">carregando...</span>
+              <button id="btnAddCost" type="button" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Custo</button>
+            </div>
+          </div>
+          <div class="ca-card-b ca-table-wrap">
+            <table class="table table-striped table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Moeda</th>
+                  <th>Cambio</th>
+                  <th>Base ICMS</th>
+                  <th>Rateio</th>
+                  <th>Notas</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody id="costsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="ca-card" style="margin-bottom:12px;">
+              <div class="ca-card-h">
+                <strong>Resultado do Calculo</strong>
+                <span id="calcLoading" class="ca-loading" style="display:none;">calculando...</span>
+              </div>
+              <div class="ca-card-b">
+                <div class="ca-kpi">
+                  <div class="ca-muted">Total Tributos (BRL)</div>
+                  <div id="kpiTotalTaxes" class="v">R$ 0,00</div>
+                </div>
+                <div id="byTaxHost"></div>
+                <div class="ca-table-wrap">
+                  <table class="table table-bordered table-condensed">
+                    <thead>
+                      <tr>
+                        <th>Tributo</th>
+                        <th>Base</th>
+                        <th>Aliquota</th>
+                        <th>Valor</th>
+                        <th>Item</th>
+                      </tr>
+                    </thead>
+                    <tbody id="taxesTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="ca-card">
+              <div class="ca-card-h">
+                <strong>Consulta Rapida TTCE</strong>
+              </div>
+              <div class="ca-card-b">
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label>NCM</label>
+                    <input id="ttce_ncm" class="form-control input-sm" />
+                  </div>
+                  <div class="col-md-4 form-group">
+                    <label>Customs Value</label>
+                    <input id="ttce_customs_value" class="form-control input-sm js-decimal" data-decimals="2" />
+                  </div>
+                  <div class="col-md-4 form-group">
+                    <label>Moeda</label>
+                    <input id="ttce_currency" class="form-control input-sm" maxlength="3" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 form-group">
+                    <label>Pais Origem (ISO2)</label>
+                    <input id="ttce_origin_country" class="form-control input-sm" maxlength="2" />
+                  </div>
+                  <div class="col-md-6 form-group">
+                    <label>UF Destino</label>
+                    <input id="ttce_destination_state" class="form-control input-sm" maxlength="2" />
+                  </div>
+                </div>
+                <div style="margin-bottom:10px;">
+                  <button id="btnTtceLookup" type="button" class="btn btn-info btn-sm"><i class="fa fa-search"></i> Consultar TTCE</button>
+                  <span id="ttceLoading" class="ca-loading" style="display:none;">consultando...</span>
+                </div>
+                <div class="ca-table-wrap">
+                  <table class="table table-bordered table-condensed">
+                    <thead>
+                      <tr>
+                        <th>Tributo</th>
+                        <th>Base</th>
+                        <th>Aliquota</th>
+                        <th>Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ttceTaxesTbody"></tbody>
+                  </table>
+                </div>
+                <details style="margin-top:8px;">
+                  <summary>Raw tecnico</summary>
+                  <pre id="ttceRaw" class="ca-pre"></pre>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="itemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title" id="itemModalTitle">Item</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="item_id" />
+        <div class="form-group"><label>Descricao</label><input id="item_description" class="form-control" /></div>
+        <div class="row">
+          <div class="col-xs-6 form-group"><label>NCM</label><input id="item_ncm" class="form-control" /></div>
+          <div class="col-xs-6 form-group"><label>Quantidade</label><input id="item_quantity" class="form-control js-decimal" data-decimals="4" /></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 form-group"><label>Preco Unit.</label><input id="item_unit_price" class="form-control js-decimal" data-decimals="2" /></div>
+          <div class="col-xs-6 form-group"><label>Item Value</label><input id="item_item_value" class="form-control js-decimal" data-decimals="2" readonly /></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 form-group"><label>Frete</label><input id="item_freight_allocated" class="form-control js-decimal" data-decimals="2" /></div>
+          <div class="col-xs-6 form-group"><label>Seguro</label><input id="item_insurance_allocated" class="form-control js-decimal" data-decimals="2" /></div>
+        </div>
+        <div class="form-group"><label>Valor Aduaneiro</label><input id="item_customs_value_allocated" class="form-control js-decimal" data-decimals="2" /></div>
+        <div class="form-group"><label>Notas</label><textarea id="item_notes" class="form-control" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveItemModal">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="costModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title" id="costModalTitle">Custo</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cost_id" />
+        <div class="form-group"><label>Tipo</label><input id="cost_type" class="form-control" /></div>
+        <div class="row">
+          <div class="col-xs-6 form-group"><label>Valor</label><input id="cost_amount" class="form-control js-decimal" data-decimals="2" /></div>
+          <div class="col-xs-6 form-group"><label>Moeda</label><input id="cost_currency" class="form-control" maxlength="3" /></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 form-group"><label>Cambio</label><input id="cost_exchange_rate" class="form-control js-decimal" data-decimals="6" /></div>
+          <div class="col-xs-6 form-group">
+            <label>Base ICMS</label>
+            <select id="cost_is_in_icms_base" class="form-control">
+              <option value="true">Sim</option>
+              <option value="false">Nao</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Metodo de Rateio</label><input id="cost_allocation_method" class="form-control" /></div>
+        <div class="form-group"><label>Notas</label><textarea id="cost_notes" class="form-control" rows="2"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveCostModal">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/calculo-aduaneiro.js"></script>

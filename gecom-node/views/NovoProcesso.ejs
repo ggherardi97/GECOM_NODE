@@ -6,7 +6,13 @@
   .wizard-big.wizard > .content {
     min-height: 420px !important;
   }
-
+.wizard > .content > .body {
+    float: left;
+    position: absolute;
+    width: 100% !important;
+    height: 95%;
+    padding: 2.5%;
+}
   .muted {
     color: #888;
     font-size: 12px;
@@ -36,6 +42,10 @@
     vertical-align: middle !important;
   }
 
+  .transport-table td {
+    position: relative;
+  }
+
   .btn-xs2 {
     padding: 4px 8px;
     font-size: 12px;
@@ -56,6 +66,13 @@
     z-index: 999999 !important;
     max-height: 240px;
     overflow-y: auto;
+  }
+
+  .transport-table td .typeahead.dropdown-menu {
+    left: 0 !important;
+    top: calc(100% + 2px) !important;
+    min-width: 100%;
+    max-width: 100%;
   }
 
   /* ✅ Dropzone usability */
@@ -148,6 +165,14 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="row">
+                    <div class="form-group col-lg-6">
+                      <label>Valor total do processo</label>
+                      <input id="total_value" type="text" class="form-control currency-brl" placeholder="R$ 0,00" autocomplete="off">
+                    </div>
+                    <div class="form-group col-lg-6"></div>
+                  </div>
                 </div>
 
                 <div class="col-lg-3">
@@ -175,7 +200,7 @@
                 </div>
               </div>
 
-              <div class="table-responsive">
+              <div class="table-responsive" style="height: 100%;">
                 <table class="table table-bordered table-striped transport-table">
                   <thead>
                     <tr>
@@ -275,6 +300,8 @@
     users: [],
     transportTypes: [],
     transportStatuses: [],
+    processStatusConfigs: [],
+    processStatusByLegacy: new Map(),
     companiesById: new Map(),
     transportSeq: 0,
 
@@ -332,6 +359,23 @@
     return data;
   }
 
+  function parseUnsupportedProcessFieldsFromError(err) {
+    const msg = String(err?.message || "").toLowerCase();
+    const unsupported = [];
+    if (!msg) return unsupported;
+    if (msg.includes("total_value") && msg.includes("should not exist")) unsupported.push("total_value");
+    if (msg.includes("status_config_id") && msg.includes("should not exist")) unsupported.push("status_config_id");
+    return unsupported;
+  }
+
+  function stripUnsupportedProcessFields(payload, err) {
+    const unsupported = parseUnsupportedProcessFieldsFromError(err);
+    if (!unsupported.length) return null;
+    const next = { ...(payload || {}) };
+    unsupported.forEach((field) => { delete next[field]; });
+    return next;
+  }
+
   function parseDateBr(value) {
     const text = (value || "").trim();
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
@@ -366,6 +410,92 @@
     if (digits.length <= 6) return `(${ddd}) ${digits.slice(2)}`;
     if (digits.length <= 10) return `(${ddd}) ${part1}-${part2}`.replace(/-$/, "");
     return `(${ddd}) ${part1}-${part2}`;
+  }
+
+  function parseCurrencyPtBr(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return null;
+
+    const cleaned = raw.replace(/[^\d,.-]/g, "");
+    if (!cleaned) return null;
+
+    let normalized = cleaned;
+    const hasComma = normalized.includes(",");
+    const hasDot = normalized.includes(".");
+
+    if (hasComma && hasDot) {
+      normalized = normalized.replace(/\./g, "").replace(",", ".");
+    } else if (hasComma) {
+      normalized = normalized.replace(",", ".");
+    } else {
+      normalized = normalized.replace(/\.(?=\d{3}(\D|$))/g, "");
+    }
+
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function formatCurrencyBrl(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(n);
+  }
+
+  function formatDecimalPtBr(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    return new Intl.NumberFormat("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(n);
+  }
+
+  function initCurrencyInputMask($el) {
+    if (!$el || !$el.length) return;
+    if ($el.data("currency-mask-initialized")) return;
+    $el.data("currency-mask-initialized", true);
+
+    function applyMask(inputEl) {
+      const digits = String(inputEl.value || "").replace(/\D/g, "");
+      if (!digits) {
+        inputEl.value = "";
+        return;
+      }
+      const n = Number(digits) / 100;
+      if (!Number.isFinite(n)) {
+        inputEl.value = "";
+        return;
+      }
+      inputEl.value = formatCurrencyBrl(n);
+    }
+
+    $el.on("focus", function () {
+      // Mantém a máscara visível durante a digitação.
+      if ($(this).val()) applyMask(this);
+    });
+
+    $el.on("input", function () {
+      applyMask(this);
+    });
+
+    $el.on("blur", function () {
+      if ($(this).val()) applyMask(this);
+    });
+
+    if ($el.val()) applyMask($el.get(0));
+  }
+
+  function listToArray(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.rows)) return data.rows;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
   }
 
   document.addEventListener("input", function (ev) {
@@ -577,6 +707,48 @@
       warn.innerHTML = "Aviso: não foi possível carregar os status de transporte. Confirme se existe o endpoint <strong>/api/transport-statuses</strong>.";
     }
   }
+  async function loadProcessStatusConfigs() {
+    try {
+      const data = await apiGet("/api/status-configs?entity=PROCESS&active=true");
+      const list = listToArray(data);
+      state.processStatusConfigs = list
+        .map((row) => ({
+          id: String(row?.id || "").trim(),
+          label: String(row?.label || "").trim(),
+          color: String(row?.color || "").trim(),
+          legacy: Number(row?.legacy_int_value),
+          sort: Number(row?.sort_order || 0),
+        }))
+        .filter((x) => x.id && x.label)
+        .sort((a, b) => (a.sort - b.sort) || String(a.label).localeCompare(String(b.label), "pt-BR"));
+    } catch (e) {
+      console.warn("loadProcessStatusConfigs fallback:", e);
+      state.processStatusConfigs = [];
+    }
+
+    state.processStatusByLegacy = new Map();
+    state.processStatusConfigs.forEach((cfg) => {
+      if (!Number.isFinite(cfg.legacy)) return;
+      if (!state.processStatusByLegacy.has(cfg.legacy)) state.processStatusByLegacy.set(cfg.legacy, cfg);
+    });
+  }
+
+  function pickDefaultProcessStatusConfig() {
+    if (!Array.isArray(state.processStatusConfigs) || state.processStatusConfigs.length === 0) return null;
+    return (
+      state.processStatusByLegacy.get(0)?.id ||
+      state.processStatusByLegacy.get(1)?.id ||
+      state.processStatusConfigs[0]?.id ||
+      null
+    );
+  }
+
+  function pickLegacyStatusByConfigId(statusConfigId) {
+    const id = String(statusConfigId || "").trim();
+    if (!id) return null;
+    const cfg = state.processStatusConfigs.find((x) => x.id === id);
+    return Number.isFinite(cfg?.legacy) ? Number(cfg.legacy) : null;
+  }
 
   // =========================
   // Transports rows
@@ -597,11 +769,23 @@
         if (ta && ta.destroy) ta.destroy();
       } catch (_) {}
 
+      const $menuContainer = $input.closest("td, .form-group, .col-lg-6");
+      if ($menuContainer.length && $menuContainer.css("position") === "static") {
+        $menuContainer.css("position", "relative");
+      }
+
       // ✅ main fix: fitToElement keeps dropdown aligned with the input
       $input.typeahead({
         source: countries,
         autoSelect: true,
-        fitToElement: true
+        fitToElement: true,
+        minLength: 0,
+        appendTo: $menuContainer.length ? $menuContainer : null
+      });
+
+      $input.off(".countryTypeaheadFix");
+      $input.on("focus.countryTypeaheadFix", function () {
+        if (!String($input.val() || "").trim()) $input.typeahead("lookup");
       });
     });
   }
@@ -723,20 +907,6 @@
     const invalid = rows.find(r => !r.transport_company || !r.origin || !r.destination || !r.transport_type_id || !r.transport_status_id);
     if (invalid) return "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.";
 
-    for (const r of rows) {
-      const hasAnyTracking = !!(r.tracking_mode || r.tracking_provider || r.tracking_external_id);
-      if (!hasAnyTracking) continue;
-
-      if (!r.tracking_mode || !r.tracking_provider || !r.tracking_external_id) {
-        return "Se preencher tracking, informe Modo, Provider e External ID.";
-      }
-      if (r.tracking_mode === "AIR" && r.tracking_provider !== "FR24") {
-        return "Tracking AIR requer provider FR24.";
-      }
-      if (r.tracking_mode === "SEA" && r.tracking_provider !== "MARINETRAFFIC") {
-        return "Tracking SEA requer provider MARINETRAFFIC.";
-      }
-    }
     return null;
   }
 
@@ -746,15 +916,22 @@
   function buildProcessPayload() {
     const companyId = String($("#company_id").val() || "").trim();
     const contactId = String($("#primary_contact_id").val() || "").trim();
+    const statusConfigId = pickDefaultProcessStatusConfig();
+    const legacyStatus = pickLegacyStatusByConfigId(statusConfigId);
+    const totalValueRaw = parseCurrencyPtBr($("#total_value").val());
 
-    return {
-      status: 0,
+    const payload = {
+      status: legacyStatus != null ? legacyStatus : 0,
       company_id: companyId,
       primary_contact_id: contactId,
       invoice: String($("#invoice").val() || "").trim() || null,
       ship_date: toIsoZFromBr(document.getElementById("ship_date")?.value || "") || null,
-      process_type_id: String($("#process_type_id").val() || "").trim() || null
+      process_type_id: String($("#process_type_id").val() || "").trim() || null,
+      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null
     };
+
+    if (statusConfigId) payload.status_config_id = statusConfigId;
+    return payload;
   }
 
   async function ensureProcessCreated() {
@@ -767,7 +944,15 @@
 
     state.creating = true;
     try {
-      const created = await apiPost("/api/processes", payload);
+      let created;
+      try {
+        created = await apiPost("/api/processes", payload);
+      } catch (e) {
+        const compatPayload = stripUnsupportedProcessFields(payload, e);
+        if (!compatPayload) throw e;
+        console.warn("Backend ainda não aceita alguns campos de processo. Reenviando payload compatível.", e?.message || e);
+        created = await apiPost("/api/processes", compatPayload);
+      }
       const id = created?.id ? String(created.id) : (created?.process_id ? String(created.process_id) : null);
       if (!id) throw new Error("Processo criado, mas não retornou ID.");
       state.processId = id;
@@ -1299,6 +1484,7 @@
     }
 
     try { await loadProcessTypes(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os tipos de processo."); }
+    try { await loadProcessStatusConfigs(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os status de processo."); }
     try { await loadTransportTypes(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os tipos de transporte."); }
     try { await loadTransportStatuses(); } catch (e) { console.warn(e); bootWarnings.push("Não foi possível carregar os status de transporte."); }
 
@@ -1307,6 +1493,7 @@
 
     initDatePickers(document);
     initCountriesTypeahead(document);
+    initCurrencyInputMask($("#total_value"));
 
     setSelectDisabled("invoice", true);
     setSelectDisabled("primary_contact_id", true);

@@ -7,11 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Novo Processo links -->
-  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-  <link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
-  <link href="../Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
-  <link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
-  <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
 
   <!-- Ãcone -->
   <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
@@ -421,7 +421,7 @@
 
   <div id="wrapper">
     <!-- Sidebar -->
-      <nav class="navbar-default navbar-static-side" role="navigation">
+      <nav class="navbar-default navbar-static-side" role="navigation" style="position:fixed;">
       <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
           <li class="nav-header text-center">
@@ -454,18 +454,18 @@
           <li id="myActivitiesTab" style="display: none;">
             <a href="/MyActivities">
               <i class="fa fa-tasks"></i>
-              <span class="nav-label">Minhas Atividades</span>
+              <span class="nav-label" data-i18n="page.layout.menu.myActivities"><%= t('page.layout.menu.myActivities') %></span>
             </a>
           </li>
 
           <li id="aiHubTab" style="display: none;">
             <a href="/AI">
               <i class="fa fa-magic"></i>
-              <span class="nav-label">IA</span>
+              <span class="nav-label" data-i18n="page.layout.menu.ai">AI</span>
             </a>
           </li>
 
-          <li><a class="menuDivider" style="padding-top:20px;">Services</a></li>
+          <li><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.services"><%= t('page.layout.menu.services') %></a></li>
 
           <li id="clientTab" style="display: none;">
             <a href="/Clientes">
@@ -488,12 +488,19 @@
             </a>
           </li>
 
-          <li><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+          <li><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.sales"><%= t('page.layout.menu.sales') %></a></li>
 
           <li>
             <a href="/Invoices">
               <i class="fa fa-money"></i>
               <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li id="calculoAduaneiro">
+            <a href="/calculo-aduaneiro">
+              <i class="fa fa-balance-scale"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.customsCalculation"><%= t('page.layout.menu.customsCalculation') %></span>
             </a>
           </li>
 
@@ -511,11 +518,17 @@
             </a>
           </li>
 
-          <li id="configDivider" style="display: none;"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li id="configDivider" style="display: none;"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.settings"><%= t('page.layout.menu.settings') %></a></li>
           <li id='notificationList' style="display: none;">
             <a href="/Notifications">
               <i class="fa fa-bell"></i>
-              <span class="nav-label">Notificações</span>
+              <span class="nav-label" data-i18n="page.layout.menu.notifications"><%= t('page.layout.menu.notifications') %></span>
+            </a>
+          </li>
+          <li id="statusConfigsMenu" style="display: none;">
+            <a href="/configuracoes/status">
+              <i class="fa fa-sliders"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.statusConfigs"><%= t('page.layout.menu.statusConfigs') %></span>
             </a>
           </li>
         </ul>
@@ -895,9 +908,9 @@
           }
 
           function getSidebarAreaLabel(area) {
-            if (area === "sales") return "Sales";
-            if (area === "settings") return "Configurações";
-            return "Serviço";
+            if (area === "sales") return window.t ? window.t("page.layout.menu.sales", { defaultValue: "Sales" }) : "Sales";
+            if (area === "settings") return window.t ? window.t("page.layout.menu.settings", { defaultValue: "Configuracoes" }) : "Configuracoes";
+            return window.t ? window.t("page.layout.menu.services", { defaultValue: "Servico" }) : "Servico";
           }
 
           function getSidebarAreaIcon(area) {
@@ -996,6 +1009,18 @@
             );
           }
 
+          function isAdminUser() {
+            const role = String(window.__auth?.role || window.__auth?.user_role || "").trim().toLowerCase();
+            return (
+              window.__auth?.is_admin === true ||
+              window.__auth?.isAdmin === true ||
+              window.__auth?.user?.is_admin === true ||
+              window.__auth?.user?.isAdmin === true ||
+              role === "admin" ||
+              role === "administrator"
+            );
+          }
+
           function normalizeArrayResponse(data) {
             if (Array.isArray(data)) return data;
             if (Array.isArray(data?.data)) return data.data;
@@ -1050,9 +1075,8 @@
           }
 
           async function fetchTopNotifications(companyId) {
-            if (!companyId) return [];
             const q = new URLSearchParams();
-            q.set("company_id", String(companyId));
+            if (companyId) q.set("company_id", String(companyId));
             q.set("is_active", "true");
             q.set("include_expired", "true");
 
@@ -1075,7 +1099,9 @@
               });
               const data = await res.json().catch(() => ({}));
               if (!res.ok) return [];
-              return normalizeArrayResponse(data).filter(n => String(n?.company_id || n?.companyId || "") === String(companyId));
+              const rows = normalizeArrayResponse(data);
+              if (isAdminUser()) return rows;
+              return rows.filter(n => String(n?.company_id || n?.companyId || "") === String(companyId));
             }
           }
 
@@ -1097,15 +1123,15 @@
             badge.style.display = rows.length ? "inline-block" : "none";
 
             if (!rows.length) {
-              list.innerHTML = `<li><a href="#"><div>Nenhuma notificação ativa.</div></a></li>
+              list.innerHTML = `<li><a href="#"><div>${escapeHtml(window.t ? window.t("page.layout.topbar.noActiveNotifications", { defaultValue: "Nenhuma notificação ativa." }) : "Nenhuma notificação ativa.")}</div></a></li>
                                 <li class="divider"></li>
-                                <li><a href="/Notifications"><div class="text-center link-block">Ver todas</div></a></li>`;
+                                <li><a href="/Notifications"><div class="text-center link-block">${escapeHtml(window.t ? window.t("page.layout.topbar.viewAll", { defaultValue: "Ver todas" }) : "Ver todas")}</div></a></li>`;
               return;
             }
 
             list.innerHTML = rows.map(n => {
               const id = String(n?.id || "");
-              const title = escapeHtml(String(n?.title || "Notificação"));
+              const title = escapeHtml(String(n?.title || (window.t ? window.t("page.layout.topbar.defaultNotificationTitle", { defaultValue: "Notificação" }) : "Notificação")));
               const msg = escapeHtml(String(n?.message || "").trim() || "-");
               const when = formatDateTimePtBr(n?.created_at || n?.createdAt || n?.starts_at || n?.startsAt);
               const readClass = isReadNotification(n) ? "is-read" : "";
@@ -1124,15 +1150,15 @@
               `;
             }).join("") + `
               <li class="divider"></li>
-              <li><a href="/Notifications"><div class="text-center link-block">Ver todas</div></a></li>
+              <li><a href="/Notifications"><div class="text-center link-block">${escapeHtml(window.t ? window.t("page.layout.topbar.viewAll", { defaultValue: "Ver todas" }) : "Ver todas")}</div></a></li>
             `;
           }
 
           window.GECOM_NOTIFICATIONS = window.GECOM_NOTIFICATIONS || {};
           window.GECOM_NOTIFICATIONS.fetchTopByCompany = async function () {
             const companyId = pickCompanyId();
-            if (!companyId) return [];
-            const rows = await fetchTopNotificationsSafe(companyId);
+            if (!companyId && !isAdminUser()) return [];
+            const rows = await fetchTopNotificationsSafe(companyId || null);
             return buildTop5Notifications(rows);
           };
 
@@ -1969,12 +1995,14 @@
             }
             else if (window.__auth.isAdmin) {
               $("#myActivitiesTab").show();
+              $("#calculoAduaneiro").show();
               if (window.__features?.enableAI) $("#aiHubTab").show();
               $("#clientTab").show();
               $("#productTab").show();
               $("#leadsTab").show();
               $("#configDivider").show();
               $("#notificationList").show();
+              $("#statusConfigsMenu").show();
             }
 
           } catch (e) {
@@ -2163,7 +2191,7 @@
 
             const opts = options || {};
 
-            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "ConfirmaÃ§Ã£o");
+            modalTitle.textContent = opts.title || tt("page.clientDetails.globalModal.confirmTitle", "Confirmacao");
             modalBody.innerHTML = `<p>${String(message || "")}</p>`;
 
             btnSave.textContent = opts.okText || tt("page.clientDetails.globalModal.confirmOk", "Confirmar");

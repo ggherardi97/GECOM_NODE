@@ -23,6 +23,8 @@ const kanbanApi = require("./routes/kanbanApi");
 const leadsApi = require("./routes/leadsApi");
 const aiApi = require("./routes/aiApi");
 const serviceApiRoutes = require("./routes/serviceApi");
+const statusConfigsApiRoutes = require("./routes/statusConfigsApi");
+const tradeSimulationsApiRoutes = require("./routes/tradeSimulationsApi");
 const servicePagesRoutes = require("./routes/servicePages");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
@@ -114,6 +116,8 @@ app.use("/api", notificationsApi);
 app.use("/api", leadsApi);
 app.use("/api", aiApi);
 app.use("/api", serviceApiRoutes);
+app.use("/api", statusConfigsApiRoutes);
+app.use("/api", tradeSimulationsApiRoutes);
 app.use("/", servicePagesRoutes);
 
 // Backward-compatible alias for environments calling /cnpj/lookup without /api
@@ -136,6 +140,9 @@ app.get('/ProcessDetail', (req, res) => res.render('ProcessDetail'));
 app.get(['/Products', '/products'], (req, res) => res.render('Products'));
 app.get(['/Invoices', '/invoices'], (req, res) => res.render('Invoices'));
 app.get(['/NewInvoice', '/newinvoice'], (req, res) => res.render('NewInvoice'));
+app.get(['/calculo-aduaneiro', '/CalculoAduaneiro'], (req, res) => res.render('CalculoAduaneiro'));
+app.get('/calculo-aduaneiro/:id', (req, res) => res.render('CalculoAduaneiro'));
+app.get(['/configuracoes/status', '/Configuracoes/Status'], (req, res) => res.render('StatusConfigs'));
 app.get('/ProductDetail', (req, res) => res.render('ProductDetail'));
 app.get('/NewProduct', (req, res) => res.render('NewProduct'));
 app.get(['/MyActivities', '/my-activities', '/MinhasAtividades'], (req, res) => res.render('MyActivities'));

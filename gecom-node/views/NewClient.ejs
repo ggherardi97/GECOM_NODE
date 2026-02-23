@@ -196,6 +196,7 @@
                                     <th style="width:70px;"><%= t('page.newClient.access.table.primary') %></th>
                                     <th><%= t('page.newClient.access.table.nameRequired') %></th>
                                     <th><%= t('page.newClient.access.emailRequired') %></th>
+                                    <th style="width:170px;"><%= t('page.newClient.access.table.permission') %></th>
                                     <th><%= t('page.newClient.access.phone') %></th>
                                     <th style="width:150px;"><%= t('page.newClient.access.sendAccess') %></th>
                                     <th style="width:90px;"><%= t('page.newClient.access.actions') %></th>
@@ -536,6 +537,7 @@ function pickUserIdFromApiResponse(data) {
               const name = p.full_name || "";
               const email = p.email || "";
               const phone = p.phonenumber || "";
+              const role = normalizeUserRole(p.role);
               const send = (p.send_access !== false); // default true
 
               const tr = document.createElement("tr");
@@ -550,6 +552,13 @@ function pickUserIdFromApiResponse(data) {
         </td>
         <td>
           <input type="text" class="form-control" id="${rowId}_email" placeholder="<%= t('page.newClient.access.emailExample') %>" value="${escapeHtml(email)}" />
+        </td>
+        <td>
+          <select class="form-control" id="${rowId}_role">
+            <option value="USER" ${role === "USER" ? "selected" : ""}><%= t('page.newClient.access.roles.user') %></option>
+            <option value="MANAGER" ${role === "MANAGER" ? "selected" : ""}><%= t('page.newClient.access.roles.manager') %></option>
+            <option value="ADMIN" ${role === "ADMIN" ? "selected" : ""}><%= t('page.newClient.access.roles.admin') %></option>
+          </select>
         </td>
         <td>
           <input type="text" class="form-control" id="${rowId}_phone" placeholder="<%= t('page.newClient.access.placeholders.phoneExample') %>" value="${escapeHtml(phone)}" onkeyup="maskPhone(this)" maxlength="15" />
@@ -601,9 +610,10 @@ function pickUserIdFromApiResponse(data) {
                 const rowId = r.getAttribute("data-row-id");
                 const full_name = (document.getElementById(`${rowId}_name`)?.value || "").trim();
                 const email = (document.getElementById(`${rowId}_email`)?.value || "").trim();
+                const role = normalizeUserRole(document.getElementById(`${rowId}_role`)?.value);
                 const phonenumber = (document.getElementById(`${rowId}_phone`)?.value || "").trim();
                 const send_access = !!document.getElementById(`${rowId}_send`)?.checked;
-                return { rowId, full_name, email, phonenumber, send_access };
+                return { rowId, full_name, email, role, phonenumber, send_access };
               });
 
               return { users, primaryRowId };
@@ -626,6 +636,12 @@ function pickUserIdFromApiResponse(data) {
               if (hasDup) return "<%= t('page.newClient.messages.duplicateEmail') %>";
 
               return null;
+            }
+
+            function normalizeUserRole(value) {
+              const role = String(value || "").trim().toUpperCase();
+              if (role === "ADMIN" || role === "MANAGER") return role;
+              return "USER";
             }
 
             // ===================== Core rule: create company on step2 -> next =====================
@@ -702,7 +718,7 @@ function pickUserIdFromApiResponse(data) {
                   full_name: u.full_name,
                   email: u.email,
                   password: password,
-                  role: "USER",
+                  role: normalizeUserRole(u.role),
                   status: "ACTIVE",
                   phonenumber: u.phonenumber || null,
 

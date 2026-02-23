@@ -57,17 +57,17 @@
       <div class="ibox-title">
         <div class="header-row">
           <div>
-            <h5 style="margin-bottom:4px;" id="pageTitle">Nova Notificação</h5>
-            <div class="muted" id="subtitle">Preencha os campos e clique em Criar.</div>
+            <h5 style="margin-bottom:4px;" id="pageTitle"><%= t('page.notifications.editor.newTitle') %></h5>
+            <div class="muted" id="subtitle"><%= t('page.notifications.editor.newSubtitle') %></div>
           </div>
 
           <div class="toolbar-right">
             <a class="btn btn-sm btn-white" id="btnBackToNotifications" href="/Notifications">
-              <i class="fa fa-arrow-left"></i> Voltar
+              <i class="fa fa-arrow-left"></i> <%= t('page.notifications.actions.back') %>
             </a>
 
             <button id="btnSave" class="btn btn-sm btn-primary" disabled>
-              <i class="fa fa-plus"></i> Criar
+              <i class="fa fa-plus"></i> <%= t('page.notifications.actions.create') %>
             </button>
           </div>
         </div>
@@ -76,8 +76,8 @@
       <div class="ibox-content">
         <div class="tabs-container">
           <ul class="nav nav-tabs">
-            <li><a class="nav-link active" data-toggle="tab" href="#tab-main">Informações</a></li>
-            <li id="tab-system-nav"><a class="nav-link" data-toggle="tab" href="#tab-system">Sistema</a></li>
+            <li><a class="nav-link active" data-toggle="tab" href="#tab-main"><%= t('page.notifications.tabs.info') %></a></li>
+            <li id="tab-system-nav"><a class="nav-link" data-toggle="tab" href="#tab-system"><%= t('page.notifications.tabs.system') %></a></li>
           </ul>
 
           <div class="tab-content">
@@ -87,62 +87,62 @@
                 <div class="row">
                   <div class="col-lg-8">
                     <div class="form-row">
-                      <label>Mensagem *</label>
-                      <textarea id="message" class="form-control" rows="6" placeholder="Digite a mensagem da notificação"></textarea>
+                      <label><%= t('page.notifications.columns.message') %> *</label>
+                      <textarea id="message" class="form-control" rows="6" placeholder="<%= t('page.notifications.editor.messagePlaceholder') %>"></textarea>
                       <div class="muted" style="margin-top:6px;">
-                        Essa mensagem será exibida para todos os usuários da companhia selecionada.
+                        <%= t('page.notifications.editor.messageHint') %>
                       </div>
                     </div>
 
                     <div class="form-row">
-                      <label>Título</label>
-                      <input id="title" type="text" class="form-control" placeholder="Ex: Mudança de prazo / Aviso importante" maxlength="150" />
+                      <label><%= t('page.notifications.columns.title') %></label>
+                      <input id="title" type="text" class="form-control" placeholder="<%= t('page.notifications.editor.titlePlaceholder') %>" maxlength="150" />
                     </div>
 
                     <div class="form-row" id="startsAtRow">
-                      <label>Data de início</label>
+                      <label><%= t('page.notifications.columns.startsAt') %></label>
                       <input id="starts_at" type="datetime-local" class="form-control" />
-                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação aparece imediatamente.</div>
+                      <div class="muted" style="margin-top:6px;"><%= t('page.notifications.editor.startsAtHint') %></div>
                     </div>
 
                     <div class="form-row" id="expiresAtRow">
-                      <label>Data de expiração</label>
+                      <label><%= t('page.notifications.columns.expiresAt') %></label>
                       <input id="expires_at" type="datetime-local" class="form-control" />
-                      <div class="muted" style="margin-top:6px;">Se vazio, a notificação não expira.</div>
+                      <div class="muted" style="margin-top:6px;"><%= t('page.notifications.editor.expiresAtHint') %></div>
                     </div>
                   </div>
 
                   <div class="col-lg-4">
                     <div class="form-row" id="companyRow">
-                      <label>Companhia *</label>
+                      <label><%= t('page.notifications.editor.company') %> *</label>
                       <select id="company_id" class="form-control"></select>
-                      <div class="muted" style="margin-top:6px;">Selecione a companhia que irá receber a notificação.</div>
+                      <div class="muted" style="margin-top:6px;"><%= t('page.notifications.editor.companyHint') %></div>
                     </div>
 
                     <div class="form-row" id="severityRow">
-                      <label>Severidade</label>
+                      <label><%= t('page.notifications.columns.severity') %></label>
                       <select id="severity" class="form-control">
                         <option value="INFO" selected>Info</option>
-                        <option value="WARNING">Atenção</option>
-                        <option value="CRITICAL">Crítico</option>
+                        <option value="WARNING"><%= t('page.notifications.editor.severity.warning') %></option>
+                        <option value="CRITICAL"><%= t('page.notifications.editor.severity.critical') %></option>
                       </select>
                       <div class="muted" style="margin-top:6px;">
-                        Ajuda a destacar notificações importantes.
+                        <%= t('page.notifications.editor.severityHint') %>
                         <span class="badge-sev" id="sevBadge">INFO</span>
                       </div>
                     </div>
 
                     <div class="form-row" id="statusRow">
-                      <label>Status</label>
+                      <label><%= t('page.notifications.columns.active') %></label>
                       <select id="is_active" class="form-control">
-                        <option value="true" selected>Ativo</option>
-                        <option value="false">Inativo</option>
+                        <option value="true" selected><%= t('page.notifications.status.active') %></option>
+                        <option value="false"><%= t('page.notifications.status.inactive') %></option>
                       </select>
                     </div>
 
                     <div class="form-row">
                       <button id="btnMarkRead" class="btn btn-sm btn-white btn-block" style="display:none;">
-                        <i class="fa fa-check"></i> Marcar como lida (minha conta)
+                        <i class="fa fa-check"></i> <%= t('page.notifications.actions.markRead') %>
                       </button>
                     </div>
 
@@ -160,15 +160,15 @@
                     <div class="col-lg-9"><span id="sys_id">-</span></div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-3"><strong>Criado em</strong></div>
+                    <div class="col-lg-3"><strong><%= t('page.notifications.columns.createdAt') %></strong></div>
                     <div class="col-lg-9"><span id="sys_created_at">-</span></div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-3"><strong>Atualizado em</strong></div>
+                    <div class="col-lg-3"><strong><%= t('page.notifications.columns.updatedAt') %></strong></div>
                     <div class="col-lg-9"><span id="sys_updated_at">-</span></div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-3"><strong>Criado por</strong></div>
+                    <div class="col-lg-3"><strong><%= t('page.notifications.editor.createdBy') %></strong></div>
                     <div class="col-lg-9"><span id="sys_created_by">-</span></div>
                   </div>
                   <div class="row">
@@ -177,9 +177,7 @@
                   </div>
                 </div>
 
-                <div class="muted" style="margin-top:10px;">
-                  Campos do sistema são somente leitura.
-                </div>
+                <div class="muted" style="margin-top:10px;"><%= t('page.notifications.editor.systemReadonly') %></div>
               </div>
             </div>
 
@@ -231,7 +229,7 @@
     async function apiGet(url) {
       const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
+      if (!res.ok) throw new Error(data?.message || "<%= t('page.notifications.messages.requestFail') %>");
       return data;
     }
 
@@ -242,7 +240,7 @@
         body: JSON.stringify(body ?? {})
       });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
+      if (!res.ok) throw new Error(data?.message || "<%= t('page.notifications.messages.requestFail') %>");
       return data;
     }
 
@@ -253,7 +251,7 @@
         body: JSON.stringify(body ?? {})
       });
       const data = await readJsonSafe(res);
-      if (!res.ok) throw new Error(data?.message || "Request failed");
+      if (!res.ok) throw new Error(data?.message || "<%= t('page.notifications.messages.requestFail') %>");
       return data;
     }
 
@@ -296,14 +294,14 @@
     }
 
     function validate(model) {
-      if (!model.company_id) return "Companhia é obrigatória.";
-      if (!model.message) return "Mensagem é obrigatória.";
+      if (!model.company_id) return "<%= t('page.notifications.validation.companyRequired') %>";
+      if (!model.message) return "<%= t('page.notifications.validation.messageRequired') %>";
 
       if (model.starts_at && model.expires_at) {
         const s = new Date(model.starts_at);
         const e = new Date(model.expires_at);
         if (!Number.isNaN(s.getTime()) && !Number.isNaN(e.getTime()) && e <= s) {
-          return "A data de expiração precisa ser maior que a data de início.";
+          return "<%= t('page.notifications.validation.expiresAfterStarts') %>";
         }
       }
 
@@ -332,21 +330,21 @@
       $("#btnSave").hide().prop("disabled", true);
       $("#btnMarkRead").hide().prop("disabled", true);
       $("#subtitle").text("");
-      $("#pageTitle").text("Detalhes da Notificação");
+      $("#pageTitle").text("<%= t('page.notifications.editor.detailTitle') %>");
     }
 
     function setMode(isEdit) {
       if (isEdit) {
-        $("#pageTitle").text("Editar Notificação");
-        $("#subtitle").text("Altere os campos e clique em Salvar.");
-        $("#btnSave").html('<i class="fa fa-save"></i> Salvar');
-        $("#subpageName").text("Editar Notificação");
+        $("#pageTitle").text("<%= t('page.notifications.editor.editTitle') %>");
+        $("#subtitle").text("<%= t('page.notifications.editor.editSubtitle') %>");
+        $("#btnSave").html('<i class="fa fa-save"></i> <%= t('page.notifications.actions.save') %>');
+        $("#subpageName").text("<%= t('page.notifications.editor.editTitle') %>");
         $("#btnMarkRead").show();
       } else {
-        $("#pageTitle").text("Nova Notificação");
-        $("#subtitle").text("Preencha os campos e clique em Criar.");
-        $("#btnSave").html('<i class="fa fa-plus"></i> Criar');
-        $("#subpageName").text("Nova Notificação");
+        $("#pageTitle").text("<%= t('page.notifications.editor.newTitle') %>");
+        $("#subtitle").text("<%= t('page.notifications.editor.newSubtitle') %>");
+        $("#btnSave").html('<i class="fa fa-plus"></i> <%= t('page.notifications.actions.create') %>');
+        $("#subpageName").text("<%= t('page.notifications.editor.newTitle') %>");
         $("#btnMarkRead").hide();
       }
       if (!isAdmin) {
@@ -362,7 +360,7 @@ async function loadCompanies() {
 
   companies = [];
   const sel = $("#company_id");
-  sel.empty().append(`<option value="">Selecionar...</option>`);
+  sel.empty().append(`<option value=""><%= t('page.notifications.editor.select') %></option>`);
 
   list.forEach(c => {
     const id = String(c?.id || "").trim();
@@ -383,7 +381,7 @@ async function loadCompanies() {
   });
 
   if (companies.length === 0) {
-    sel.empty().append(`<option value="">(Nenhuma companhia encontrada)</option>`);
+    sel.empty().append(`<option value="">(<%= t('page.notifications.messages.noCompanies') %>)</option>`);
   }
 }
 
@@ -438,18 +436,18 @@ async function loadCompanies() {
       try {
         $("#btnMarkRead").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Marcando...');
         await apiPost(`/api/notifications/${encodeURIComponent(notificationId)}/read`, {});
-        alert("Notificação marcada como lida (para sua conta).");
+        alert("<%= t('page.notifications.messages.markReadSuccess') %>");
       } catch (e) {
         console.error(e);
-        alert("Falha ao marcar como lida.");
+        alert("<%= t('page.notifications.messages.markReadFail') %>");
       } finally {
-        $("#btnMarkRead").prop("disabled", false).html('<i class="fa fa-check"></i> Marcar como lida (minha conta)');
+        $("#btnMarkRead").prop("disabled", false).html('<i class="fa fa-check"></i> <%= t('page.notifications.actions.markRead') %>');
       }
     }
 
     pageLoad();
     async function pageLoad() {
-      $("#pageName").text("Notificações");
+      $("#pageName").text("<%= t('page.notifications.pageTitle') %>");
 
       try {
         await loadCompanies();
@@ -504,7 +502,7 @@ async function loadCompanies() {
 
             if (!isEdit) {
               const created = await apiPost("/api/notifications", payload);
-              alert("Notificação criada com sucesso.");
+              alert("<%= t('page.notifications.messages.createSuccess') %>");
 
               if (created?.id) {
                 window.location = `/NewNotification?id=${encodeURIComponent(created.id)}`;
@@ -516,7 +514,7 @@ async function loadCompanies() {
             }
 
             const updated = await apiPatch(`/api/notifications/${encodeURIComponent(notificationId)}`, payload);
-            alert("Notificação salva com sucesso.");
+            alert("<%= t('page.notifications.messages.saveSuccess') %>");
 
             // Refresh system tab info if backend returns it
             if (updated?.id) {
@@ -526,19 +524,19 @@ async function loadCompanies() {
             initialModel = getModel();
             updateSaveEnabled();
 
-            $("#btnSave").html('<i class="fa fa-save"></i> Salvar');
+            $("#btnSave").html('<i class="fa fa-save"></i> <%= t('page.notifications.actions.save') %>');
           } catch (e) {
             console.error(e);
             const isEdit = !!notificationId;
-            $("#btnSave").html(isEdit ? '<i class="fa fa-save"></i> Salvar' : '<i class="fa fa-plus"></i> Criar');
+            $("#btnSave").html(isEdit ? '<i class="fa fa-save"></i> <%= t('page.notifications.actions.save') %>' : '<i class="fa fa-plus"></i> <%= t('page.notifications.actions.create') %>');
             updateSaveEnabled();
-            alert(isEdit ? "Falha ao salvar a notificação." : "Falha ao criar a notificação.");
+            alert(isEdit ? "<%= t('page.notifications.messages.saveFail') %>" : "<%= t('page.notifications.messages.createFail') %>");
           }
         });
 
       } catch (e) {
         console.error(e);
-        alert("Falha ao carregar a página de Notificações.");
+        alert("<%= t('page.notifications.messages.pageLoadFail') %>");
       }
     }
   })();

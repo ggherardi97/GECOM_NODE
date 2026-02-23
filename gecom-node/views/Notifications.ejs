@@ -21,8 +21,8 @@
       <div class="ibox-title">
         <div id="notificationsSavedViewsHost"></div>
         <div class="ibox-tools">
-          <span class="sv-counters"><span id="notificationsCountLabel">Exibindo 0 de 0</span></span>
-          <a id="btnNewNotification" type="button" class="btn btn-sm btn-primary" href="/NewNotification"><i class="fa fa-plus"></i> Nova Notificação</a>
+          <span class="sv-counters"><span id="notificationsCountLabel"><%= t('page.notifications.list.showingCount', { shown: 0, total: 0 }) %></span></span>
+          <a id="btnNewNotification" type="button" class="btn btn-sm btn-primary" href="/NewNotification"><i class="fa fa-plus"></i> <%= t('page.notifications.actions.new') %></a>
         </div>
       </div>
 
@@ -31,33 +31,33 @@
           <table class="table table-striped" id="notificationsTable">
             <thead>
               <tr id="notificationsFiltersRow">
-                <th data-field="title"><input id="fTitle" type="text" class="form-control input-sm" placeholder="Filtrar por Título" /></th>
-                <th data-field="message"><input id="fMessage" type="text" class="form-control input-sm" placeholder="Filtrar por Mensagem" /></th>
-                <th data-field="severity"><input id="fSeverity" type="text" class="form-control input-sm" placeholder="Filtrar por Severidade" /></th>
+                <th data-field="title"><input id="fTitle" type="text" class="form-control input-sm" placeholder="<%= t('page.notifications.filters.byTitle') %>" /></th>
+                <th data-field="message"><input id="fMessage" type="text" class="form-control input-sm" placeholder="<%= t('page.notifications.filters.byMessage') %>" /></th>
+                <th data-field="severity"><input id="fSeverity" type="text" class="form-control input-sm" placeholder="<%= t('page.notifications.filters.bySeverity') %>" /></th>
                 <th data-field="is_active_text">
                   <select id="fActive" class="form-control input-sm">
-                    <option value="">Todos</option>
-                    <option value="yes">Ativo</option>
-                    <option value="no">Inativo</option>
+                    <option value=""><%= t('page.notifications.filters.all') %></option>
+                    <option value="yes"><%= t('page.notifications.status.active') %></option>
+                    <option value="no"><%= t('page.notifications.status.inactive') %></option>
                   </select>
                 </th>
                 <th data-field="is_read_text">
                   <select id="fRead" class="form-control input-sm">
-                    <option value="">Todas</option>
-                    <option value="yes">Lida</option>
-                    <option value="no">Não lida</option>
+                    <option value=""><%= t('page.notifications.filters.allFeminine') %></option>
+                    <option value="yes"><%= t('page.notifications.read.read') %></option>
+                    <option value="no"><%= t('page.notifications.read.unread') %></option>
                   </select>
                 </th>
                 <th data-field="in_window_text">
                   <select id="fWindow" class="form-control input-sm">
-                    <option value="">Todos</option>
-                    <option value="yes">Dentro da janela</option>
-                    <option value="no">Fora da janela</option>
+                    <option value=""><%= t('page.notifications.filters.all') %></option>
+                    <option value="yes"><%= t('page.notifications.window.in') %></option>
+                    <option value="no"><%= t('page.notifications.window.out') %></option>
                   </select>
                 </th>
                 <th class="sv-date-filter" data-field="starts_at_text">
                   <div class="input-group">
-                    <input id="startsAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <input id="startsAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
                     <span class="input-group-addon" id="startsAtRangeBtn"><i class="fa fa-calendar"></i></span>
                   </div>
                   <input id="startsAtFromFilter" type="hidden" />
@@ -65,7 +65,7 @@
                 </th>
                 <th class="sv-date-filter" data-field="expires_at_text">
                   <div class="input-group">
-                    <input id="expiresAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <input id="expiresAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
                     <span class="input-group-addon" id="expiresAtRangeBtn"><i class="fa fa-calendar"></i></span>
                   </div>
                   <input id="expiresAtFromFilter" type="hidden" />
@@ -73,7 +73,7 @@
                 </th>
                 <th class="sv-date-filter" data-field="created_at_text">
                   <div class="input-group">
-                    <input id="createdAtRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
+                    <input id="createdAtRangeFilter" type="text" class="form-control input-sm" placeholder="<%= t('page.layout.savedViews.dateRangePlaceholder') %>" autocomplete="off" />
                     <span class="input-group-addon" id="createdAtRangeBtn"><i class="fa fa-calendar"></i></span>
                   </div>
                   <input id="createdAtFromFilter" type="hidden" />
@@ -82,15 +82,15 @@
               </tr>
 
               <tr id="notificationsHeaderRow">
-                <th class="sortable" data-sort-key="title" data-field="title">Título <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="message" data-field="message">Mensagem <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="severity" data-field="severity">Severidade <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="is_active_text" data-field="is_active_text">Ativo <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="is_read_text" data-field="is_read_text">Lida <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="in_window_text" data-field="in_window_text">Janela Atual <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="starts_at_text" data-field="starts_at_text">Início <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="expires_at_text" data-field="expires_at_text">Expira em <span class="sort-indicator"></span></th>
-                <th class="sortable" data-sort-key="created_at_text" data-field="created_at_text">Criada em <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="title" data-field="title"><%= t('page.notifications.columns.title') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="message" data-field="message"><%= t('page.notifications.columns.message') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="severity" data-field="severity"><%= t('page.notifications.columns.severity') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_active_text" data-field="is_active_text"><%= t('page.notifications.columns.active') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="is_read_text" data-field="is_read_text"><%= t('page.notifications.columns.read') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="in_window_text" data-field="in_window_text"><%= t('page.notifications.columns.window') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="starts_at_text" data-field="starts_at_text"><%= t('page.notifications.columns.startsAt') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="expires_at_text" data-field="expires_at_text"><%= t('page.notifications.columns.expiresAt') %> <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text" data-field="created_at_text"><%= t('page.notifications.columns.createdAt') %> <span class="sort-indicator"></span></th>
               </tr>
             </thead>
             <tbody id="notificationsLines"></tbody>
@@ -108,10 +108,25 @@
 <script>
   (function () {
     const I18N = {
-      errorLoad: "Falha ao carregar notificações.",
-      errorSaveView: "Falha ao salvar a view.",
-      errorDeleteView: "Falha ao excluir a view.",
-      confirmDeleteView: "Excluir esta view?"
+      errorLoad: "<%= t('page.notifications.messages.loadFail') %>",
+      errorSaveView: "<%= t('page.notifications.messages.saveViewFail') %>",
+      errorDeleteView: "<%= t('page.notifications.messages.deleteViewFail') %>",
+      confirmDeleteView: "<%= t('page.layout.savedViews.deleteCurrentConfirm') %>",
+      pageTitle: "<%= t('page.notifications.pageTitle') %>",
+      showingCount: "<%= t('page.notifications.list.showingCount', { shown: '__SHOWN__', total: '__TOTAL__' }) %>",
+      notifDefaultTitle: "<%= t('page.notifications.defaults.title') %>",
+      statusActive: "<%= t('page.notifications.status.active') %>",
+      statusInactive: "<%= t('page.notifications.status.inactive') %>",
+      read: "<%= t('page.notifications.read.read') %>",
+      unread: "<%= t('page.notifications.read.unread') %>",
+      yes: "<%= t('page.notifications.common.yes') %>",
+      no: "<%= t('page.notifications.common.no') %>",
+      localeDateFormat: "<%= t('page.notifications.common.localeDateFormat') %>",
+      applyLabel: "<%= t('page.layout.savedViews.applyLabel') %>",
+      clearLabel: "<%= t('page.layout.savedViews.clearLabel') %>",
+      saveCurrentTitle: "<%= t('page.layout.savedViews.saveCurrentTitle') %>",
+      saveLabel: "<%= t('page.layout.savedViews.saveLabel') %>",
+      companyMissing: "<%= t('page.notifications.messages.companyMissing') %>"
     };
 
     let notifications = [];
@@ -245,14 +260,14 @@
       const win = inWindow(n, now);
       return {
         id: String(n?.id || ""),
-        title: String(n?.title || "Notificação"),
+        title: String(n?.title || I18N.notifDefaultTitle),
         message: String(n?.message || ""),
         severity: String(n?.severity || "INFO"),
-        is_active_text: isActive ? "Ativo" : "Inativo",
+        is_active_text: isActive ? I18N.statusActive : I18N.statusInactive,
         is_active_yesno: isActive ? "yes" : "no",
-        is_read_text: read ? "Lida" : "Não lida",
+        is_read_text: read ? I18N.read : I18N.unread,
         is_read_yesno: read ? "yes" : "no",
-        in_window_text: win ? "Sim" : "Não",
+        in_window_text: win ? I18N.yes : I18N.no,
         in_window_yesno: win ? "yes" : "no",
         starts_at_text: formatDateTimePtBr(n?.starts_at || n?.startsAt),
         starts_at_raw: (n?.starts_at || n?.startsAt || ""),
@@ -270,7 +285,11 @@
     }
 
     function setCounters(visibleCount, totalCount) {
-      $("#notificationsCountLabel").text(`Exibindo ${visibleCount} de ${totalCount}`);
+      $("#notificationsCountLabel").text(
+        I18N.showingCount
+          .replace("__SHOWN__", String(visibleCount))
+          .replace("__TOTAL__", String(totalCount))
+      );
     }
 
     function renderTableRespectingHeader() {
@@ -376,9 +395,9 @@
         if (title && !titleCell.includes(title)) return row.hide();
         if (message && !msgCell.includes(message)) return row.hide();
         if (severity && !sevCell.includes(severity)) return row.hide();
-        if (active && !activeCell.includes(active === "yes" ? "ativo" : "inativo")) return row.hide();
-        if (read && !readCell.includes(read === "yes" ? "lida" : "não")) return row.hide();
-        if (win && !winCell.includes(win === "yes" ? "sim" : "não")) return row.hide();
+        if (active && !activeCell.includes((active === "yes" ? I18N.statusActive : I18N.statusInactive).toLowerCase())) return row.hide();
+        if (read && !readCell.includes((read === "yes" ? I18N.read : I18N.unread).toLowerCase())) return row.hide();
+        if (win && !winCell.includes((win === "yes" ? I18N.yes : I18N.no).toLowerCase())) return row.hide();
         if (from || to) {
           const m = startsCell.match(/(\d{2})\/(\d{2})\/(\d{4})/);
           if (!m) return row.hide();
@@ -494,7 +513,7 @@
         linkedCalendars: false,
         showDropdowns: true,
         alwaysShowCalendars: true,
-        locale: { format: "DD/MM/YYYY", separator: " - ", applyLabel: "Aplicar", cancelLabel: "Limpar" }
+        locale: { format: I18N.localeDateFormat, separator: " - ", applyLabel: I18N.applyLabel, cancelLabel: I18N.clearLabel }
       });
 
       $range.off("apply.daterangepicker.sv").on("apply.daterangepicker.sv", function (_ev, picker) {
@@ -528,7 +547,7 @@
           linkedCalendars: false,
           showDropdowns: true,
           alwaysShowCalendars: true,
-          locale: { format: "DD/MM/YYYY", separator: " - ", applyLabel: "Aplicar", cancelLabel: "Limpar" }
+          locale: { format: I18N.localeDateFormat, separator: " - ", applyLabel: I18N.applyLabel, cancelLabel: I18N.clearLabel }
         });
 
         $el.off("apply.daterangepicker.sv").on("apply.daterangepicker.sv", function (_ev, picker) {
@@ -557,7 +576,7 @@
       const actions = host.find(".sv-actions").length ? host.find(".sv-actions").first() : host;
 
       if (!$("#btnSaveCurrentView").length) {
-        actions.append(`<button id="btnSaveCurrentView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="Salvar a view atual"><i class="fa fa-check"></i> Salvar</button>`);
+        actions.append(`<button id="btnSaveCurrentView" class="btn btn-white btn-xs sv-actionbar-btn" style="margin-left:8px;" title="${escapeHtml(I18N.saveCurrentTitle)}"><i class="fa fa-check"></i> ${escapeHtml(I18N.saveLabel)}</button>`);
       }
       // Keep only default small delete icon from SavedViewsGrid.
       $("#btnDeleteCurrentView").remove();
@@ -613,16 +632,17 @@
     }
 
     async function loadNotifications() {
-      const companyId = pickCompanyId();
-      if (!companyId) throw new Error("Company não identificado.");
       const admin = isAdminUser();
       const qs = new URLSearchParams();
       let endpoint = "/api/notifications/my";
 
       if (admin) {
-        qs.set("company_id", String(companyId));
         qs.set("include_expired", "true");
         endpoint = "/api/notifications/admin";
+      } else {
+        const companyId = pickCompanyId();
+        if (!companyId) throw new Error(I18N.companyMissing);
+        qs.set("company_id", String(companyId));
       }
 
       const query = qs.toString();
@@ -632,7 +652,7 @@
     }
 
     async function init() {
-      $("#pageName,#subpageName").text("Notificações");
+      $("#pageName,#subpageName").text(I18N.pageTitle);
       if (!isAdminUser()) {
         $("#btnNewNotification").hide();
       }

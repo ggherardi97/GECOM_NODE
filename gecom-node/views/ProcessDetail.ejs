@@ -1,4 +1,4 @@
-<style>
+﻿<style>
     .fa {
         margin-right: 5px;
     }
@@ -19,9 +19,8 @@
                                 <div class="col-lg-12">
                                     <div class="m-b-md">
                                         <a name="btn_act_new" href="javascript:void(0)"
-                                            class="btn btn-white btn-xs float-right" onclick="openEditProject()">Editar
-                                            projeto</a>
-                                        <h2 id="projectName">Processo</h2>
+                                            class="btn btn-white btn-xs float-right" onclick="openEditProject()"><%= t('page.processDetail.header.editProject') %></a>
+                                        <h2 id="projectName"><%= t('page.processDetail.header.process') %></h2>
                                     </div>
                                 </div>
                             </div>
@@ -30,7 +29,7 @@
                                 <div class="col-lg-6">
                                     <dl class="row mb-0">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Status:</dt>
+                                            <dt><%= t('page.processDetail.header.status') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1"><span class="label label-primary" id="state">-</span></dd>
@@ -39,7 +38,7 @@
 
                                     <dl class="row mb-0" style="display: none;">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Criado por:</dt>
+                                            <dt><%= t('page.processDetail.header.createdBy') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1" id="contactName">-</dd>
@@ -48,7 +47,7 @@
 
                                     <dl class="row mb-0">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Invoice:</dt>
+                                            <dt><%= t('page.processDetail.header.invoice') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1" id="invoiceNumber">-</dd>
@@ -57,7 +56,7 @@
 
                                     <dl class="row mb-0">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Cliente:</dt>
+                                            <dt><%= t('page.processDetail.header.client') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1">
@@ -70,7 +69,7 @@
                                 <div class="col-lg-6" id="cluster_info">
                                     <dl class="row mb-0">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Data Estimada de Entrega:</dt>
+                                            <dt><%= t('page.processDetail.header.estimatedDelivery') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1" id="shipDateText">-</dd>
@@ -79,10 +78,19 @@
 
                                     <dl class="row mb-0">
                                         <div class="col-sm-4 text-sm-right">
-                                            <dt>Início do Processo:</dt>
+                                            <dt><%= t('page.processDetail.header.start') %></dt>
                                         </div>
                                         <div class="col-sm-8 text-sm-left">
                                             <dd class="mb-1" id="createdOnText">-</dd>
+                                        </div>
+                                    </dl>
+
+                                    <dl class="row mb-0">
+                                        <div class="col-sm-4 text-sm-right">
+                                            <dt><%= t('page.processDetail.header.totalValue') %></dt>
+                                        </div>
+                                        <div class="col-sm-8 text-sm-left">
+                                            <dd class="mb-1" id="totalValueText">-</dd>
                                         </div>
                                     </dl>
 
@@ -94,7 +102,7 @@
                                 <div class="col-lg-12">
                                     <dl class="row mb-0">
                                         <div class="col-sm-2 text-sm-right">
-                                            <dt>Concluído:</dt>
+                                            <dt><%= t('page.processDetail.header.completed') %></dt>
                                         </div>
                                         <div class="col-sm-10 text-sm-left">
                                             <dd>
@@ -104,7 +112,7 @@
                                                     </div>
                                                 </div>
                                                 <small>
-                                                    Projeto concluído em <strong id="completedPercentText">0%</strong>.
+                                                    <%= t('page.processDetail.header.completedOn') %> <strong id="completedPercentText">0%</strong>.
                                                 </small>
                                             </dd>
                                         </div>
@@ -119,18 +127,18 @@
                                             <div class="panel-options">
                                                 <ul class="nav nav-tabs">
                                                     <li><a class="nav-link active" href="#tab-1"
-                                                            data-toggle="tab">Timeline</a></li>
+                                                            data-toggle="tab"><%= t('page.processDetail.sections.timeline') %></a></li>
                                                     <li id="history_timeline" style="display: none;"><a class="nav-link"
-                                                            href="#tab-2" data-toggle="tab">Histórico do Processo</a>
+                                                            href="#tab-2" data-toggle="tab"><%= t('page.processDetail.sections.history') %></a>
                                                     </li>
                                                     <li><a class="nav-link" href="#tab-3"
-                                                            data-toggle="tab">Transportes</a></li>
+                                                            data-toggle="tab"><%= t('page.processDetail.sections.transports') %></a></li>
                                                     <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
-                                                            data-toggle="tab">Trajetória</a></li>
+                                                            data-toggle="tab"><%= t('page.processDetail.sections.trajectory') %></a></li>
                                                     <li><a class="nav-link" href="#tab-5" onclick="loadMapLeft()"
-                                                            data-toggle="tab">Rastreamento Maritimo (BETA)</a></li>
+                                                            data-toggle="tab"><%= t('page.processDetail.sections.maritimeTrackingBeta') %></a></li>
                                                     <li><a class="nav-link" href="#tab-6" onclick="loadMapLeft()"
-                                                            data-toggle="tab">Rastreamento Aéreo (BETA)</a></li>
+                                                            data-toggle="tab"><%= t('page.processDetail.sections.airTrackingBeta') %></a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -157,10 +165,10 @@
                                                                             <i class="fa fa-briefcase"></i>
                                                                         </div>
                                                                         <div class="vertical-timeline-content">
-                                                                            <h2>Carregando...</h2>
-                                                                            <p>Buscando eventos do processo.</p>
+                                                                            <h2><%= t('page.processDetail.state.loading') %></h2>
+                                                                            <p><%= t('page.processDetail.state.fetchingEvents') %></p>
                                                                             <span
-                                                                                class="vertical-date"><small>—</small></span>
+                                                                                class="vertical-date"><small>â€”</small></span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -170,7 +178,7 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Histórico -->
+                                                <!-- HistÃ³rico -->
                                                 <div class="tab-pane" id="tab-2">
                                                     <div class="panel-body" style="padding-top:0px;">
                                                         
@@ -180,7 +188,7 @@
                                                         <div class="clearfix col-lg-4" style="margin-bottom: 10px;text-align: end;">
                                                             <button class="btn btn-sm btn-primary" name="btn_act_new"
                                                                 onclick="openAddEventModal()">
-                                                                Adicionar evento
+                                                                <%= t('page.processDetail.actions.addEvent') %>
                                                             </button>
                                                         </div>
 </div>
@@ -188,18 +196,18 @@
                                                             <table class="table table-striped table-bordered">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th style="width: 120px;">Status</th>
-                                                                        <th>Título</th>
-                                                                        <th style="width: 170px;">Começo</th>
-                                                                        <th style="width: 170px;">Fim</th>
-                                                                        <th>Descrição</th>
+                                                                        <th style="width: 120px;"><%= t('page.processDetail.tableEvents.status') %></th>
+                                                                        <th><%= t('page.processDetail.tableEvents.title') %></th>
+                                                                        <th style="width: 170px;"><%= t('page.processDetail.tableEvents.start') %></th>
+                                                                        <th style="width: 170px;"><%= t('page.processDetail.tableEvents.end') %></th>
+                                                                        <th><%= t('page.processDetail.tableEvents.description') %></th>
                                                                         <th style="width: 90px;text-align: center;">
-                                                                            Ações</th>
+                                                                            <%= t('page.processDetail.tableEvents.actions') %></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="historyLines">
                                                                     <tr>
-                                                                        <td colspan="6">Carregando...</td>
+                                                                        <td colspan="6"><%= t('page.processDetail.state.loading') %></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -214,27 +222,27 @@
                                                             <div class="clearfix" style="margin-bottom: 10px;float:inline-end;">
                                                                 <button class="btn btn-sm btn-primary"
                                                                     onclick="openAddTransportModal()" name="btn_act_new_manager">
-                                                                    Adicionar transporte
+                                                                    <%= t('page.processDetail.actions.addTransport') %>
                                                                 </button>
                                                             </div>
 
                                                             <table class="table table-striped table-bordered">
                                                                 <thead>
                                                                     <tr>
-                                                                         <th>Empresa</th>
-    <th>Tipo</th>
-    <th>Status</th>
-    <th>Origem</th>
-    <th>Destino</th>
-    <th>Previsão Saída</th>
-    <th>Previsão Chegada</th>
+                                                                         <th><%= t('page.processDetail.tableTransports.company') %></th>
+    <th><%= t('page.processDetail.tableTransports.type') %></th>
+    <th><%= t('page.processDetail.tableTransports.status') %></th>
+    <th><%= t('page.processDetail.tableTransports.origin') %></th>
+    <th><%= t('page.processDetail.tableTransports.destination') %></th>
+    <th><%= t('page.processDetail.tableTransports.etaDeparture') %></th>
+    <th><%= t('page.processDetail.tableTransports.etaArrival') %></th>
                                                                         <th style="width: 90px; text-align:center;">
-                                                                            Ações</th>
+                                                                            <%= t('page.processDetail.tableTransports.actions') %></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="transportsTbody">
                                                                     <tr>
-                                                                        <td colspan="7">Carregando...</td>
+                                                                        <td colspan="8"><%= t('page.processDetail.state.loading') %></td>
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
@@ -260,7 +268,7 @@
                                                 <div class="tab-pane"  id="tab-6">
                                                <div class="ibox">
   <div class="ibox-title">
-    <h5>Rastreamento Aéreo (Flightradar24)</h5>
+    <h5><%= t('page.processDetail.sections.airTrackingBeta') %> (Flightradar24)</h5>
   </div>
   <div class="ibox-content">
       <p class="m-b-sm">
@@ -289,20 +297,20 @@
                 </div>
             </div>
 
-            <!-- Lateral (mantida como está no layout original) -->
+            <!-- Lateral (mantida como estÃ¡ no layout original) -->
             <div class="col-lg-2">
                 <div class="wrapper wrapper-content project-manager">
-                    <h4>Descrição do Processo</h4>
-                    <div id="processCompanyLogoWrap" style="display:none; margin-bottom: 8px;height: 116px !important;">
-                        <img id="processCompanyLogo" src="" class="img-fluid" alt="Logo da companhia">
+                    <h4><%= t('page.processDetail.sections.description') %></h4>
+                    <div id="processCompanyLogoWrap" style="display:none; margin-bottom: 8px; max-width: 100%; height: 70px; overflow: hidden;">
+                        <img id="processCompanyLogo" src="" class="img-fluid" alt="Logo da companhia" style="max-width: 100%; max-height: 70px; width: auto; height: auto; object-fit: contain;">
                     </div>
                     <p class="small font-bold">
-                        <span><i class="fa fa-circle text-warning"></i>Prioridade Alta</span>
+                        <span><i class="fa fa-circle text-warning"></i><%= t('page.processDetail.header.highPriority') %></span>
                     </p>
                     <br />
                     <br />
-                    <h4>Documentos do processo</h4>
-<small id="processDocsHint" class="text-muted">Carregando documentos...</small>
+                    <h4><%= t('page.processDetail.sections.documents') %></h4>
+<small id="processDocsHint" class="text-muted"><%= t('page.processDetail.state.loadingDocuments') %></small>
 <br />
 <br />
 
@@ -312,19 +320,19 @@
 </div>
 
 <ul class="list-unstyled project-files" id="processDocsList">
-  <li class="text-muted">Carregando...</li>
+  <li class="text-muted"><%= t('page.processDetail.state.loading') %></li>
 </ul>
 
 <div class="m-t-md">
   <button type="button" class="btn btn-xs btn-primary" name="btn_act_new" onclick="openProcessUploadSideModal()">
-    <i class="fa fa-upload"></i> Adicionar Documentos
+    <i class="fa fa-upload"></i> <%= t('page.processDetail.actions.addDocuments') %>
   </button>
 </div>
                 </div>
             </div>
         </div>
 
-        <!-- Side Modal (mesmo padrão do ClientDetails) -->
+        <!-- Side Modal (mesmo padrÃ£o do ClientDetails) -->
         <div id="sideModalOverlay"
             style="position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:2050; display:none;"></div>
         <div id="sideModal"
@@ -340,8 +348,8 @@
             <div id="sideModalBody" style="padding:16px 18px; overflow:auto; flex:1;"></div>
             <div
                 style="padding:12px 18px; border-top:1px solid #e7eaec; display:flex; gap:8px; justify-content:flex-end;">
-                <button class="btn btn-white" id="sideModalCancel">Cancelar</button>
-                <button class="btn btn-primary" id="sideModalOk">Salvar</button>
+                <button class="btn btn-white" id="sideModalCancel"><%= t('page.processDetail.actions.cancel') %></button>
+                <button class="btn btn-primary" id="sideModalOk"><%= t('page.processDetail.actions.save') %></button>
             </div>
         </div>
 
@@ -358,41 +366,44 @@
                     let processId = null;
                     let processRaw = null;
                     let transportStatusesCache = null;
+                    let processStatusOptionsCache = null;
 const transportStatusById = new Map(); // id -> object
 const transportTypeById = new Map();
+const processStatusById = new Map();
+const processStatusByLegacy = new Map();
 
 const COUNTRIES = [
   "Brasil",
   "Argentina",
   "Chile",
-  "Colômbia",
-  "México",
+  "ColÃ´mbia",
+  "MÃ©xico",
   "Estados Unidos",
-  "Canadá",
+  "CanadÃ¡",
   "Portugal",
   "Espanha",
-  "França",
+  "FranÃ§a",
   "Alemanha",
-  "Itália",
+  "ItÃ¡lia",
   "Reino Unido",
   "Holanda",
-  "Bélgica",
-  "Suíça",
-  "Suécia",
+  "BÃ©lgica",
+  "SuÃ­Ã§a",
+  "SuÃ©cia",
   "Noruega",
   "Dinamarca",
-  "Polônia",
+  "PolÃ´nia",
   "Irlanda",
   "China",
-  "Japão",
+  "JapÃ£o",
   "Coreia do Sul",
-  "Índia",
-  "Emirados Árabes Unidos",
-  "Arábia Saudita",
+  "Ãndia",
+  "Emirados Ãrabes Unidos",
+  "ArÃ¡bia Saudita",
   "Turquia",
-  "Austrália",
-  "Nova Zelândia",
-  "África do Sul"
+  "AustrÃ¡lia",
+  "Nova ZelÃ¢ndia",
+  "Ãfrica do Sul"
 ];
 
 
@@ -402,6 +413,94 @@ function normalizeArrayResponse(data) {
   if (Array.isArray(data?.rows)) return data.rows;
   if (Array.isArray(data?.items)) return data.items;
   return [];
+}
+
+function normalizeStatusConfigId(value) {
+  const id = String(value || "").trim();
+  return id || "";
+}
+
+function getProcessStatusConfigId(raw) {
+  return normalizeStatusConfigId(
+    raw?.status_config_id ??
+    raw?.statusConfigId ??
+    raw?.status_config?.id ??
+    raw?.statusConfig?.id ??
+    ""
+  );
+}
+
+function getProcessStatusLegacyValue(raw) {
+  const n = Number(raw?.status);
+  return Number.isFinite(n) ? n : null;
+}
+
+function getProcessStatusDirect(raw) {
+  const direct = raw?.status_config || raw?.statusConfig || null;
+  return direct && typeof direct === "object" ? direct : null;
+}
+
+function getProcessStatusDisplay(raw) {
+  const direct = getProcessStatusDirect(raw);
+  const statusConfigId = getProcessStatusConfigId(raw);
+  const legacyStatus = getProcessStatusLegacyValue(raw);
+
+  const byId = statusConfigId ? processStatusById.get(statusConfigId) : null;
+  const byLegacy = legacyStatus != null ? processStatusByLegacy.get(legacyStatus) : null;
+
+  const label =
+    String(direct?.label || "").trim() ||
+    String(byId?.label || "").trim() ||
+    String(byLegacy?.label || "").trim() ||
+    (legacyStatus != null ? (window.ProcessStatusEnum?.getLabel(legacyStatus) || `Status ${legacyStatus}`) : "-");
+
+  const color =
+    String(direct?.color || "").trim() ||
+    String(byId?.color || "").trim() ||
+    String(byLegacy?.color || "").trim();
+
+  return {
+    label,
+    color,
+    statusConfigId,
+    legacyStatus,
+  };
+}
+
+async function loadProcessStatusConfigsCache() {
+  if (Array.isArray(processStatusOptionsCache) && processStatusOptionsCache.length > 0) return processStatusOptionsCache;
+
+  try {
+    const resp = await fetch("/api/status-configs?entity=PROCESS&active=true", {
+      method: "GET",
+      headers: { Accept: "application/json" }
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data?.message || "Falha ao carregar status de processo.");
+
+    processStatusOptionsCache = normalizeArrayResponse(data)
+      .map((row) => ({
+        id: String(row?.id || "").trim(),
+        label: String(row?.label || "").trim(),
+        color: String(row?.color || "").trim(),
+        legacy: Number(row?.legacy_int_value),
+        sort: Number(row?.sort_order || 0),
+      }))
+      .filter((x) => x.id && x.label)
+      .sort((a, b) => (a.sort - b.sort) || String(a.label).localeCompare(String(b.label), "pt-BR"));
+  } catch (e) {
+    console.warn("loadProcessStatusConfigsCache fallback:", e);
+    processStatusOptionsCache = [];
+  }
+
+  processStatusById.clear();
+  processStatusByLegacy.clear();
+  processStatusOptionsCache.forEach((opt) => {
+    processStatusById.set(opt.id, opt);
+    if (Number.isFinite(opt.legacy)) processStatusByLegacy.set(opt.legacy, opt);
+  });
+
+  return processStatusOptionsCache;
 }
 
 async function preloadTransportLookups() {
@@ -491,9 +590,9 @@ function applyPhoneMask($input) {
                     // Init
                     // =========================
                     $(document).ready(function () {
-                        $("#pageName").text("Detalhes do Processo");
-                        $("#subSecoundPageName").text("Detalhes do Processo");
-                        $("#subpageName").text("Processos");
+                        $("#pageName").text("<%= t('page.processDetail.pageTitle') %>");
+                        $("#subSecoundPageName").text("<%= t('page.processDetail.pageTitle') %>");
+                        $("#subpageName").text("<%= t('page.layout.menu.processes') %>");
                         $("#subpageName").attr("href", "Processos");
                         $("#path").show();
 
@@ -506,7 +605,7 @@ function applyPhoneMask($input) {
                             processId = url.searchParams.get("id");
 
                             if (!processId) {
-                                alert("Parâmetro ausente: id");
+                                alert("ParÃ¢metro ausente: id");
                                 return;
                             }
 
@@ -514,7 +613,7 @@ function applyPhoneMask($input) {
                             wireSideModal();
                         } catch (e) {
                             console.error("Init error:", e);
-                            alert("Erro ao iniciar a página.");
+                            alert("Erro ao iniciar a pÃ¡gina.");
                         }
                     });
 
@@ -526,8 +625,9 @@ function applyPhoneMask($input) {
                                 dataType: "json"
                             });
 
-                            // payload já vem com: transports[] e events[]
+                            // payload jÃ¡ vem com: transports[] e events[]
                             processRaw = result;
+                            await loadProcessStatusConfigsCache();
 
                             fillHeader(processRaw);
                             renderTimeline(processRaw?.events || []);
@@ -561,7 +661,7 @@ function applyPhoneMask($input) {
 
                     async function openAddTransportModal() {
                         if (!processId) {
-                            alert("Processo não encontrado.");
+                            alert("Processo nÃ£o encontrado.");
                             return;
                         }
 
@@ -626,7 +726,7 @@ function applyPhoneMask($input) {
   </div>
 
   <div class="form-group">
-    <label for="dtDeparture">Saída prevista</label>
+    <label for="dtDeparture">SaÃ­da prevista</label>
     <input id="dtDeparture" type="date" class="form-control" />
   </div>
 
@@ -679,7 +779,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
 
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
                         return data;
                     }
                     async function deleteTransport(transportId) {
@@ -713,7 +813,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
                         return data;
                     }
 
@@ -736,6 +836,73 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         return Math.max(0, Math.min(100, Math.round(n)));
                     }
 
+                    function parseCurrencyPtBr(value) {
+                        const raw = String(value || "").trim();
+                        if (!raw) return null;
+
+                        const cleaned = raw.replace(/[^\d,.-]/g, "");
+                        if (!cleaned) return null;
+
+                        let normalized = cleaned;
+                        const hasComma = normalized.includes(",");
+                        const hasDot = normalized.includes(".");
+
+                        if (hasComma && hasDot) {
+                            normalized = normalized.replace(/\./g, "").replace(",", ".");
+                        } else if (hasComma) {
+                            normalized = normalized.replace(",", ".");
+                        } else {
+                            normalized = normalized.replace(/\.(?=\d{3}(\D|$))/g, "");
+                        }
+
+                        const n = Number(normalized);
+                        return Number.isFinite(n) ? n : null;
+                    }
+
+                    function formatCurrencyBrl(value) {
+                        const n = Number(value);
+                        if (!Number.isFinite(n)) return "";
+                        return new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }).format(n);
+                    }
+
+                    function formatDecimalPtBr(value) {
+                        const n = Number(value);
+                        if (!Number.isFinite(n)) return "";
+                        return new Intl.NumberFormat("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }).format(n);
+                    }
+
+                    function bindCurrencyMask($el) {
+                        if (!$el || !$el.length) return;
+                        if ($el.data("currency-mask-init")) return;
+                        $el.data("currency-mask-init", true);
+
+                        $el.on("focus", function () {
+                            const n = parseCurrencyPtBr($(this).val());
+                            if (n == null) {
+                                $(this).val("");
+                                return;
+                            }
+                            $(this).val(formatDecimalPtBr(n));
+                        });
+
+                        $el.on("blur", function () {
+                            const n = parseCurrencyPtBr($(this).val());
+                            if (n == null) {
+                                $(this).val("");
+                                return;
+                            }
+                            $(this).val(formatCurrencyBrl(n));
+                        });
+                    }
+
                     // Date-only formatter (dd/mm/yyyy) SEM bug de timezone
                     function formatDateOnlyPtBR(iso) {
                         if (!iso) return "-";
@@ -751,9 +918,9 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                     }
 
                     function formatDateTimePtBR(iso) {
-                        if (!iso) return "—";
+                        if (!iso) return "â€”";
                         const d = new Date(iso);
-                        if (Number.isNaN(d.getTime())) return "—";
+                        if (Number.isNaN(d.getTime())) return "â€”";
                         return d.toLocaleString("pt-BR");
                     }
 
@@ -781,7 +948,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
                         return data;
                     }
 
@@ -794,7 +961,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
                         return data;
                     }
 
@@ -807,8 +974,37 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
                         return data;
+                    }
+
+                    function parseUnsupportedProcessFieldsFromError(err) {
+                        const msg = String(err?.message || "").toLowerCase();
+                        const unsupported = [];
+                        if (!msg) return unsupported;
+                        if (msg.includes("total_value") && msg.includes("should not exist")) unsupported.push("total_value");
+                        if (msg.includes("status_config_id") && msg.includes("should not exist")) unsupported.push("status_config_id");
+                        return unsupported;
+                    }
+
+                    function stripUnsupportedProcessFields(payload, err) {
+                        const unsupported = parseUnsupportedProcessFieldsFromError(err);
+                        if (!unsupported.length) return null;
+                        const next = { ...(payload || {}) };
+                        unsupported.forEach((field) => { delete next[field]; });
+                        return next;
+                    }
+
+                    async function patchProcessWithCompatibility(id, payload) {
+                        const url = `/api/processes/${encodeURIComponent(id)}`;
+                        try {
+                          return await apiPatch(url, payload);
+                        } catch (e) {
+                          const compatPayload = stripUnsupportedProcessFields(payload, e);
+                          if (!compatPayload) throw e;
+                          console.warn("Backend ainda não aceita alguns campos de processo no PATCH. Reenviando payload compatível.", e?.message || e);
+                          return apiPatch(url, compatPayload);
+                        }
                     }
 
                     async function fetchCompanyLogoObjectUrl(companyId) {
@@ -861,11 +1057,18 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const number = p?.process_number || "-";
                         $("#projectName").text(`${number}`);
 
-                        const status = p?.status;
-                        $("#state")
-                            .text(ProcessStatusEnum.getLabel(status))
-                            .removeClass()
-                            .addClass(`label ${ProcessStatusEnum.getCssClass(status)}`);
+                        const status = getProcessStatusDisplay(p);
+                        const $state = $("#state");
+                        $state.text(status.label || "-").removeClass().addClass("label");
+                        if (status.color) {
+                          $state.css({ backgroundColor: status.color, color: "#fff" });
+                        } else {
+                          $state.removeAttr("style");
+                          const cssClass = status.legacyStatus != null
+                            ? (window.ProcessStatusEnum?.getCssClass(status.legacyStatus) || "label-default")
+                            : "label-default";
+                          $state.addClass(cssClass);
+                        }
 
                         $("#contactName").text(p?.users?.full_name || "-");
                         $("#invoiceNumber").text(p?.invoice || "-");
@@ -878,6 +1081,9 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         // ship_date -> Data Estimada de Entrega
                         $("#shipDateText").text(formatDateOnlyPtBR(p?.ship_date));
                         $("#createdOnText").text(formatDateOnlyPtBR(p?.created_on));
+                        const totalValueRaw = p?.total_value ?? p?.totalValue ?? null;
+                        const totalValueParsed = parseCurrencyPtBr(totalValueRaw);
+                        $("#totalValueText").text(totalValueParsed == null ? "-" : formatCurrencyBrl(totalValueParsed));
 
                         const completed = clampPercent(p?.completed);
                         $("#completedBar").css("width", `${completed}%`);
@@ -890,13 +1096,13 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                     function typeToMeta(type) {
                         const t = Number(type ?? 0);
                         switch (t) {
-                            case 8: return { icon: "fa fa-briefcase", btn: null, label: "Informação", color: "#1ab394 !important" };
+                            case 8: return { icon: "fa fa-briefcase", btn: null, label: "InformaÃ§Ã£o", color: "#1ab394 !important" };
                             case 1: return { icon: "fa fa-file-text", btn: { text: "Download documento" }, label: "Documento", color: "#1c84c6 !important" };
-                            case 2: return { icon: "fa fa-phone", btn: null, label: "Reunião / Telefonema", color: "#f8ac59 !important" };
-                            case 3: return { icon: "fa fa-coffee", btn: null, label: "Reunião presencial / Café", color: "#23c6c8 !important" };
-                            case 4: return { icon: "fa fa-plane", btn: null, label: "Informação - Aérea", color: "#e1bb00 !important" };
-                            case 5: return { icon: "fa fa-ship", btn: null, label: "Informação - Marítimo", color: "#445fad !important" };
-                            case 6: return { icon: "fa fa-truck", btn: null, label: "Informação - terrestre", color: "#a17f72 !important" };
+                            case 2: return { icon: "fa fa-phone", btn: null, label: "ReuniÃ£o / Telefonema", color: "#f8ac59 !important" };
+                            case 3: return { icon: "fa fa-coffee", btn: null, label: "ReuniÃ£o presencial / CafÃ©", color: "#23c6c8 !important" };
+                            case 4: return { icon: "fa fa-plane", btn: null, label: "InformaÃ§Ã£o - AÃ©rea", color: "#e1bb00 !important" };
+                            case 5: return { icon: "fa fa-ship", btn: null, label: "InformaÃ§Ã£o - MarÃ­timo", color: "#445fad !important" };
+                            case 6: return { icon: "fa fa-truck", btn: null, label: "InformaÃ§Ã£o - terrestre", color: "#a17f72 !important" };
                             case 7: return { icon: "fa fa-check-circle-o", btn: null, label: "Processo finalizado", color: "#dc3545 !important" };
                             case 9: return { icon: "fa fa-envelope-o", btn: null, label: "Email", color: "#1c84c6 !important" };
                             default: return { icon: "fa fa-info-circle", btn: null, label: "Evento" };
@@ -916,8 +1122,8 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
           <div class="vertical-timeline-icon navy-bg"><i class="fa fa-briefcase"></i></div>
           <div class="vertical-timeline-content">
             <h2>Nenhum evento</h2>
-            <p>Não há eventos cadastrados para este processo.</p>
-            <span class="vertical-date"><small>—</small></span>
+            <p>NÃ£o hÃ¡ eventos cadastrados para este processo.</p>
+            <span class="vertical-date"><small>â€”</small></span>
           </div>
         </div>`;
                             return;
@@ -930,17 +1136,17 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                             const meta = typeToMeta(ev?.type);
                             const title = escapeHtml(ev?.title || "Evento");
                             const desc = escapeHtml(ev?.description || "");
-                            const start = ev?.start_time ? formatDateTimePtBR(ev.start_time) : "—";
+                            const start = ev?.start_time ? formatDateTimePtBR(ev.start_time) : "â€”";
                             const end = ev?.end_time ? formatDateTimePtBR(ev.end_time) : null;
 
-                            // Documento: mostrar botão, mas por enquanto sem upload: se não existir URL, desabilita
+                            // Documento: mostrar botÃ£o, mas por enquanto sem upload: se nÃ£o existir URL, desabilita
                             const docUrl = ev?.document_url || ev?.file_url || ev?.url || null;
                             let btnHtml = "";
                             if (meta.btn) {
                                 if (docUrl) {
                                     btnHtml = `<a href="${escapeHtml(docUrl)}" target="_blank" class="btn btn-sm btn-success">${escapeHtml(meta.btn.text)}</a>`;
                                 } else {
-                                    btnHtml = `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" onclick="alert('Documento ainda não disponível para download.')">${escapeHtml(meta.btn.text)}</a>`;
+                                    btnHtml = `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" onclick="alert('Documento ainda nÃ£o disponÃ­vel para download.')">${escapeHtml(meta.btn.text)}</a>`;
                                 }
                             }
 
@@ -956,7 +1162,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
           ${btnHtml}
           <span class="vertical-date">
             ${escapeHtml(meta.label)}<br>
-            <small>${escapeHtml(start)}${end ? ` — ${escapeHtml(end)}` : ""}</small>
+            <small>${escapeHtml(start)}${end ? ` â€” ${escapeHtml(end)}` : ""}</small>
           </span>
         </div>
       `;
@@ -981,12 +1187,12 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 
                         sorted.forEach((ev) => {
                             const isActive = Number(ev?.status ?? 0) === 0;
-                            const statusText = isActive ? "Ativo" : "Concluído";
+                            const statusText = isActive ? "Ativo" : "ConcluÃ­do";
                             const statusClass = isActive ? "label-primary" : "label-success";
 
                             const title = escapeHtml(ev?.title || "");
-                            const start = ev?.start_time ? escapeHtml(formatDateTimePtBR(ev.start_time)) : "—";
-                            const end = ev?.end_time ? escapeHtml(formatDateTimePtBR(ev.end_time)) : "—";
+                            const start = ev?.start_time ? escapeHtml(formatDateTimePtBR(ev.start_time)) : "â€”";
+                            const end = ev?.end_time ? escapeHtml(formatDateTimePtBR(ev.end_time)) : "â€”";
                             const desc = escapeHtml(ev?.description || "");
                             const eventId = String(ev?.id || "");
 
@@ -1018,7 +1224,7 @@ function renderTransports(list) {
 
   const rows = Array.isArray(list) ? list : [];
   if (rows.length === 0) {
-    // Agora são 8 colunas (incluindo Tipo)
+    // Agora sÃ£o 8 colunas (incluindo Tipo)
     tbody.innerHTML = `<tr><td colspan="8">Nenhum transporte encontrado.</td></tr>`;
     return;
   }
@@ -1042,9 +1248,9 @@ function renderTransports(list) {
     tr.innerHTML = `
       <td>${escapeHtml(t?.transport_company || "-")}</td>
       <td>${escapeHtml(typeName || "-")}</td>
+      <td>${escapeHtml(statusName || "-")}</td>
       <td>${escapeHtml(t?.origin || "-")}</td>
       <td>${escapeHtml(t?.destination || "-")}</td>
-      <td>${escapeHtml(statusName || "-")}</td>
       <td>${escapeHtml(formatDateOnlyPtBR(t?.departure_forecast))}</td>
       <td>${escapeHtml(formatDateOnlyPtBR(t?.arrival_forecast))}</td>
 
@@ -1068,7 +1274,7 @@ function renderTransports(list) {
                     function editTransportById(transportId) {
                         const t = (transportsCache || []).find(x => String(x?.id) === String(transportId));
                         if (!t) {
-                            alert("Transporte não encontrado.");
+                            alert("Transporte nÃ£o encontrado.");
                             return;
                         }
                         openEditTransportModal(t);
@@ -1157,7 +1363,7 @@ async function openEditTransportModal(t) {
     </div>
 
     <div class="form-group">
-      <label for="dtDeparture">Saída prevista</label>
+      <label for="dtDeparture">SaÃ­da prevista</label>
       <input id="dtDeparture" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.departure_forecast))}" />
     </div>
 
@@ -1198,16 +1404,69 @@ async function openEditTransportModal(t) {
                     // =========================
                     // Side modal: Edit process (PATCH)
                     // =========================
-                    function openEditProject() {
+                    async function openEditProject() {
                         if (!processRaw) return;
 
+                        await loadProcessStatusConfigsCache();
+
                         const completed = clampPercent(processRaw?.completed);
-                        const shipLocal = toDatetimeLocalValue(processRaw?.ship_date); // ✅ preenche com a data atual
-                        const status = Number(processRaw?.status ?? 0);
+                        const shipLocal = toDatetimeLocalValue(processRaw?.ship_date);
+                        const totalValueRaw =
+                          processRaw?.total_value ??
+                          processRaw?.totalValue ??
+                          null;
+                        const totalValueParsed = parseCurrencyPtBr(totalValueRaw);
+                        const totalValueText = totalValueParsed == null ? "" : formatCurrencyBrl(totalValueParsed);
+                        const statusInfo = getProcessStatusDisplay(processRaw);
+                        const currentStatusConfigId = statusInfo.statusConfigId;
+                        const currentLegacyStatus = statusInfo.legacyStatus;
+
+                        const defaultLegacyOptions = [
+                          { value: 0, label: "Rascunho" },
+                          { value: 1, label: "Em andamento" },
+                          { value: 2, label: "Proximo do prazo" },
+                          { value: 3, label: "Atrasado" },
+                          { value: 4, label: "Finalizado" },
+                        ];
+
+                        let statusOptions = [];
+                        if (Array.isArray(processStatusOptionsCache) && processStatusOptionsCache.length > 0) {
+                          statusOptions = processStatusOptionsCache.map((opt) => ({
+                            value: opt.id,
+                            label: opt.label,
+                            legacy: Number.isFinite(opt.legacy) ? opt.legacy : null,
+                          }));
+                        } else {
+                          statusOptions = defaultLegacyOptions.map((opt) => ({
+                            value: `legacy:${opt.value}`,
+                            label: opt.label,
+                            legacy: opt.value,
+                          }));
+                        }
+
+                        const hasCurrentByConfigId = currentStatusConfigId && statusOptions.some((opt) => String(opt.value) === currentStatusConfigId);
+                        const hasCurrentByLegacy = currentLegacyStatus != null && statusOptions.some((opt) => Number(opt.legacy) === Number(currentLegacyStatus));
+                        if (!hasCurrentByConfigId && !hasCurrentByLegacy && statusInfo.label) {
+                          statusOptions.push({
+                            value: currentStatusConfigId || `legacy:${currentLegacyStatus ?? 0}`,
+                            label: statusInfo.label,
+                            legacy: currentLegacyStatus,
+                          });
+                        }
+
+                        const statusOptionsHtml = statusOptions
+                          .map((opt, index) => {
+                            const isSelected =
+                              (currentStatusConfigId && String(opt.value) === currentStatusConfigId) ||
+                              (!currentStatusConfigId && currentLegacyStatus != null && Number(opt.legacy) === Number(currentLegacyStatus)) ||
+                              (!currentStatusConfigId && currentLegacyStatus == null && index === 0);
+                            return `<option value="${escapeHtml(String(opt.value))}" data-legacy="${escapeHtml(String(opt.legacy ?? ""))}" ${isSelected ? "selected" : ""}>${escapeHtml(String(opt.label))}</option>`;
+                          })
+                          .join("");
 
                         const html = `
       <div class="form-group">
-        <label for="txtCompleted">Concluído (0 a 100)</label>
+        <label for="txtCompleted">ConcluÃ­do (0 a 100)</label>
         <input id="txtCompleted" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(completed))}" />
       </div>
 
@@ -1217,14 +1476,13 @@ async function openEditTransportModal(t) {
       </div>
 
       <div class="form-group">
+        <label for="txtTotalValue">Valor total do processo</label>
+        <input id="txtTotalValue" type="text" class="form-control" value="${escapeHtml(totalValueText)}" placeholder="R$ 0,00" />
+      </div>
+
+      <div class="form-group">
         <label for="selStatus">Status</label>
-        <select id="selStatus" class="form-control">
-          <option value="0" ${status === 0 ? "selected" : ""}>Rascunho</option>
-          <option value="1" ${status === 1 ? "selected" : ""}>Em andamento</option>
-          <option value="2" ${status === 2 ? "selected" : ""}>Próximo do prazo</option>
-          <option value="3" ${status === 3 ? "selected" : ""}>Atrasado</option>
-          <option value="4" ${status === 4 ? "selected" : ""}>Finalizado</option>
-        </select>
+        <select id="selStatus" class="form-control">${statusOptionsHtml}</select>
       </div>
     `;
 
@@ -1232,16 +1490,42 @@ async function openEditTransportModal(t) {
                             title: "Editar projeto",
                             html,
                             onOk: async function () {
+                                const selectedValue = String($("#selStatus").val() || "").trim();
+                                const selectedLegacyRaw = $("#selStatus option:selected").data("legacy");
+                                const selectedLegacy = Number(selectedLegacyRaw);
+
                                 const payload = {
                                     completed: clampPercent($("#txtCompleted").val()),
-                                    status: Number($("#selStatus").val()),
                                     ship_date: $("#dtShip").val() ? new Date($("#dtShip").val()).toISOString() : null
                                 };
+                                const editedTotalValue = parseCurrencyPtBr($("#txtTotalValue").val());
+                                payload.total_value = Number.isFinite(editedTotalValue) ? Number(editedTotalValue.toFixed(2)) : null;
 
-                                await apiPatch(`/api/processes/${encodeURIComponent(processId)}`, payload);
+                                if (selectedValue && !selectedValue.startsWith("legacy:")) {
+                                  payload.status_config_id = selectedValue;
+                                }
+
+                                let legacyStatusToSend = null;
+                                if (Number.isFinite(selectedLegacy)) {
+                                  legacyStatusToSend = selectedLegacy;
+                                } else if (selectedValue.startsWith("legacy:")) {
+                                  const parsed = Number(selectedValue.slice("legacy:".length));
+                                  if (Number.isFinite(parsed)) legacyStatusToSend = parsed;
+                                } else if (currentLegacyStatus != null && Number.isFinite(Number(currentLegacyStatus))) {
+                                  legacyStatusToSend = Number(currentLegacyStatus);
+                                }
+
+                                if (legacyStatusToSend != null) payload.status = legacyStatusToSend;
+
+                                await patchProcessWithCompatibility(processId, payload);
                                 await loadProcessDetail(processId); // 1 GET
                             }
                         });
+                        setTimeout(() => {
+                            const $totalInput = $("#txtTotalValue");
+                            bindCurrencyMask($totalInput);
+                            $totalInput.trigger("blur");
+                        }, 0);
                     }
                     window.openEditProject = openEditProject;
 
@@ -1254,29 +1538,29 @@ async function openEditTransportModal(t) {
         <label for="selEventType">Tipo</label>
         <select id="selEventType" class="form-control">
           <option value="1">1 - Documento</option>
-          <option value="2">2 - Reunião / Telefonema</option>
-          <option value="3">3 - Reunião presencial / Café</option>
-          <option value="4">4 - Info Aéreo</option>
-          <option value="5">5 - Info Marítimo</option>
+          <option value="2">2 - ReuniÃ£o / Telefonema</option>
+          <option value="3">3 - ReuniÃ£o presencial / CafÃ©</option>
+          <option value="4">4 - Info AÃ©reo</option>
+          <option value="5">5 - Info MarÃ­timo</option>
           <option value="6">6 - Info terrestre</option>
           <option value="7">7 - Processo finalizado</option>
-          <option value="8">8 - Informação (Genérica)</option>
+          <option value="8">8 - InformaÃ§Ã£o (GenÃ©rica)</option>
           <option value="9">9 - Email</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label for="txtEventTitle">Título</label>
+        <label for="txtEventTitle">TÃ­tulo</label>
         <input id="txtEventTitle" class="form-control" />
       </div>
 
       <div class="form-group">
-        <label for="txtEventDescription">Descrição</label>
+        <label for="txtEventDescription">DescriÃ§Ã£o</label>
         <textarea id="txtEventDescription" class="form-control" rows="4"></textarea>
       </div>
 
       <div class="form-group">
-        <label for="dtStart">Início</label>
+        <label for="dtStart">InÃ­cio</label>
         <input id="dtStart" type="datetime-local" class="form-control" />
       </div>
 
@@ -1295,7 +1579,7 @@ async function openEditTransportModal(t) {
                                     related_table: "process",
                                     related_id: String(processId),
                                     type: Number($("#selEventType").val()),
-                                    title: String($("#txtEventTitle").val() || "").trim() || "(Sem título)",
+                                    title: String($("#txtEventTitle").val() || "").trim() || "(Sem tÃ­tulo)",
                                     description: String($("#txtEventDescription").val() || "").trim() || null,
                                     start_time: $("#dtStart").val() ? new Date($("#dtStart").val()).toISOString() : new Date().toISOString(),
                                     end_time: $("#dtEnd").val() ? new Date($("#dtEnd").val()).toISOString() : null
@@ -1430,8 +1714,8 @@ async function loadProcessDocuments() {
   const $list = $("#processDocsList");
 
   try {
-    $hint.text("Carregando documentos...");
-    $list.html('<li class="text-muted">Carregando...</li>');
+    $hint.text("<%= t('page.processDetail.state.loadingDocuments') %>");
+    $list.html('<li class="text-muted"><%= t("page.processDetail.state.loading") %></li>');
     $folderHeader.hide();
     processDocsFolder = null;
     processDocsItems = [];
@@ -1528,7 +1812,7 @@ async function openProcessDocById(id) {
     window.GECOM?.spinner?.show("Abrindo documento...");
     const dl = await apiGet("/api/documents/" + encodeURIComponent(String(item.id)) + "/presign-download");
     const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
-    if (!url) throw new Error("Não foi possível gerar o link de download.");
+    if (!url) throw new Error("NÃ£o foi possÃ­vel gerar o link de download.");
     window.open(url, "_blank", "noopener,noreferrer");
   } catch (e) {
     alert(e?.message || "Erro ao abrir documento.");
@@ -1556,7 +1840,7 @@ async function ensureProcessFolderExists() {
   if (processDocsFolder?.id) return processDocsFolder;
 
   const accountId = getAccountIdForCreate();
-  if (!accountId) throw new Error("Não foi possível identificar o account_id para criar documento.");
+  if (!accountId) throw new Error("NÃ£o foi possÃ­vel identificar o account_id para criar documento.");
 
   const processName = String(processRaw?.name || $("#projectName").text() || "Processo").trim();
 
@@ -1578,7 +1862,7 @@ async function ensureProcessFolderExists() {
 async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
   const folder = await ensureProcessFolderExists();
   const accountId = getAccountIdForCreate();
-  if (!accountId) throw new Error("Não foi possível identificar o account_id para enviar.");
+  if (!accountId) throw new Error("NÃ£o foi possÃ­vel identificar o account_id para enviar.");
 
   const fileName = file.name;
   const displayName = displayNameRaw || fileName;
@@ -1614,7 +1898,7 @@ async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
   const putHeaders = presign?.headers || { "Content-Type": mimeType };
   const objectKey = presign?.object_key || presign?.key || null;
 
-  if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
+  if (!putUrl) throw new Error("NÃ£o foi possÃ­vel gerar a URL de upload.");
 
   progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
 
@@ -1636,7 +1920,7 @@ async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
     size_bytes: file.size
   });
 
-  progressCb && progressCb(100, "Concluído!");
+  progressCb && progressCb(100, "ConcluÃ­do!");
   return docId;
 }
 
@@ -1658,7 +1942,7 @@ function openProcessUploadSideModal() {
         <label>Nome</label>
         <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
           placeholder="Vamos preencher automaticamente com o nome do arquivo" />
-        <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
+        <small class="text-muted">VocÃª pode alterar o nome antes de enviar.</small>
       </div>
 
       <div id="sm_uploadProgress" style="display:none;">
@@ -1744,46 +2028,46 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
       "Brasil": [-14.2350, -51.9253],
       "Brazil": [-14.2350, -51.9253],
       "China": [35.8617, 104.1954],
-      "Índia": [20.5937, 78.9629],
+      "Ãndia": [20.5937, 78.9629],
       "India": [20.5937, 78.9629],
       "Portugal": [39.3999, -8.2245],
-      "África do Sul": [-30.5595, 22.9375],
+      "Ãfrica do Sul": [-30.5595, 22.9375],
       "South Africa": [-30.5595, 22.9375],
       "Argentina": [-38.4161, -63.6167],
       "Chile": [-35.6751, -71.5430],
-      "Colômbia": [4.5709, -74.2973],
+      "ColÃ´mbia": [4.5709, -74.2973],
       "Colombia": [4.5709, -74.2973],
-      "México": [23.6345, -102.5528],
+      "MÃ©xico": [23.6345, -102.5528],
       "Mexico": [23.6345, -102.5528],
       "Estados Unidos": [37.0902, -95.7129],
       "United States": [37.0902, -95.7129],
-      "Canadá": [56.1304, -106.3468],
+      "CanadÃ¡": [56.1304, -106.3468],
       "Canada": [56.1304, -106.3468],
       "Espanha": [40.4637, -3.7492],
       "Spain": [40.4637, -3.7492],
-      "França": [46.2276, 2.2137],
+      "FranÃ§a": [46.2276, 2.2137],
       "France": [46.2276, 2.2137],
       "Alemanha": [51.1657, 10.4515],
       "Germany": [51.1657, 10.4515],
-      "Itália": [41.8719, 12.5674],
+      "ItÃ¡lia": [41.8719, 12.5674],
       "Italy": [41.8719, 12.5674],
       "Reino Unido": [55.3781, -3.4360],
       "United Kingdom": [55.3781, -3.4360],
       "Holanda": [52.1326, 5.2913],
       "Netherlands": [52.1326, 5.2913],
-      "Bélgica": [50.5039, 4.4699],
+      "BÃ©lgica": [50.5039, 4.4699],
       "Belgium": [50.5039, 4.4699],
-      "Suíça": [46.8182, 8.2275],
+      "SuÃ­Ã§a": [46.8182, 8.2275],
       "Switzerland": [46.8182, 8.2275],
-      "Japão": [36.2048, 138.2529],
+      "JapÃ£o": [36.2048, 138.2529],
       "Japan": [36.2048, 138.2529],
       "Coreia do Sul": [35.9078, 127.7669],
       "South Korea": [35.9078, 127.7669],
-      "Emirados Árabes Unidos": [23.4241, 53.8478],
+      "Emirados Ãrabes Unidos": [23.4241, 53.8478],
       "United Arab Emirates": [23.4241, 53.8478],
-      "Austrália": [-25.2744, 133.7751],
+      "AustrÃ¡lia": [-25.2744, 133.7751],
       "Australia": [-25.2744, 133.7751],
-      "Nova Zelândia": [-40.9006, 174.8860],
+      "Nova ZelÃ¢ndia": [-40.9006, 174.8860],
       "New Zealand": [-40.9006, 174.8860]
     };
 
@@ -1798,13 +2082,13 @@ function getTransportLineColor(transportType) {
 
   switch (type) {
     case 'maritimo':
-    case 'marítimo':
+    case 'marÃ­timo':
     case 'sea':
     case 'ocean':
       return '#1c84c6'; // azul
 
     case 'aereo':
-    case 'aéreo':
+    case 'aÃ©reo':
     case 'air':
       return '#1ab394'; // verde
 
@@ -1848,7 +2132,7 @@ function getTransportLineColor(transportType) {
       // Route line
       const latlngs = [o, d];
       const line = L.polyline(latlngs, { weight: 3 }).addTo(map);
-      line.bindPopup(`<b>${escapeHtml(r.origin)} → ${escapeHtml(r.destination)}</b><br/><small>Status: ${escapeHtml(r.status || "-")}</small>`);
+      line.bindPopup(`<b>${escapeHtml(r.origin)} â†’ ${escapeHtml(r.destination)}</b><br/><small>Status: ${escapeHtml(r.status || "-")}</small>`);
 
       allLatLngs.push(...latlngs);
     });
@@ -1860,3 +2144,6 @@ function getTransportLineColor(transportType) {
     }
   }, 500);
 }</script>
+
+
+

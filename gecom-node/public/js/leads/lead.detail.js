@@ -6,6 +6,9 @@
     lead: null,
     stages: [],
     activities: [],
+    statusOptions: [],
+    statusByConfigId: {},
+    statusByLegacy: {},
   };
 
   function t(key, fallback) {
@@ -35,6 +38,55 @@
     return [];
   }
 
+  function normalizeStatusConfigId(value) {
+    const id = String(value || "").trim();
+    return id || "";
+  }
+
+  function normalizeLeadLegacyStatus(value) {
+    const status = String(value || "").trim().toUpperCase();
+    return status || "";
+  }
+
+  function getLeadStatusConfigId(lead) {
+    return normalizeStatusConfigId(
+      lead?.status_config_id ??
+      lead?.statusConfigId ??
+      lead?.status_config?.id ??
+      lead?.statusConfig?.id ??
+      ""
+    );
+  }
+
+  function getLeadLegacyStatus(lead) {
+    const fromConfig = normalizeLeadLegacyStatus(
+      lead?.status_config?.legacy_lead_status ??
+      lead?.statusConfig?.legacy_lead_status ??
+      ""
+    );
+    if (fromConfig) return fromConfig;
+    return normalizeLeadLegacyStatus(lead?.status || "");
+  }
+
+  function getLeadStatusLabel(lead) {
+    const direct = String(lead?.status_config?.label || lead?.statusConfig?.label || "").trim();
+    if (direct) return direct;
+    const statusConfigId = getLeadStatusConfigId(lead);
+    if (statusConfigId && state.statusByConfigId[statusConfigId]?.label) return state.statusByConfigId[statusConfigId].label;
+    const legacy = getLeadLegacyStatus(lead);
+    return legacy || "-";
+  }
+
+  function getLeadStatusColor(lead) {
+    const direct = String(lead?.status_config?.color || lead?.statusConfig?.color || "").trim();
+    if (direct) return direct;
+    const statusConfigId = getLeadStatusConfigId(lead);
+    if (statusConfigId && state.statusByConfigId[statusConfigId]?.color) return String(state.statusByConfigId[statusConfigId].color || "").trim();
+    const legacy = getLeadLegacyStatus(lead);
+    if (legacy && state.statusByLegacy[legacy]?.color) return String(state.statusByLegacy[legacy].color || "").trim();
+    return "";
+  }
+
   function parseLeadIdFromPath() {
     const m = (window.location.pathname || "").match(/^\/leads\/([^/]+)\/?$/);
     return m && m[1] ? decodeURIComponent(m[1]) : "";
@@ -61,7 +113,14 @@
     const lead = state.lead || {};
     const title = lead?.name || lead?.title || `${lead?.first_name || ""} ${lead?.last_name || ""}`.trim() || "-";
     $("#leadDetailTitle").text(title);
-    $("#leadDetailStatus").text(lead?.status || "-");
+    const statusLabel = getLeadStatusLabel(lead);
+    const statusColor = getLeadStatusColor(lead);
+    $("#leadDetailStatus").text(statusLabel || "-");
+    if (statusColor) {
+      $("#leadDetailStatus").attr("style", `background-color:${statusColor};color:#fff;`);
+    } else {
+      $("#leadDetailStatus").removeAttr("style");
+    }
     $("#leadDetailStage").text(lead?.stage?.name || "-");
     $("#leadDetailOwner").text(lead?.owner_user?.full_name || lead?.owner_user_id || "-");
 
@@ -112,14 +171,29 @@
   }
 
   async function loadData() {
-    const [lead, stages, activities] = await Promise.all([
+    const [lead, stages, activities, statusConfigs] = await Promise.all([
       api.get(`/api/leads/${encodeURIComponent(state.leadId)}`),
       api.get("/api/leads/stages"),
       api.get(`/api/leads/${encodeURIComponent(state.leadId)}/activities`).catch(() => []),
+      api.get("/api/status-configs?entity=LEAD&active=true").catch(() => []),
     ]);
     state.lead = lead;
     state.stages = listToArray(stages);
     state.activities = listToArray(activities);
+    state.statusOptions = listToArray(statusConfigs)
+      .map((row) => ({
+        status_config_id: String(row?.id || "").trim(),
+        legacy_status: normalizeLeadLegacyStatus(row?.legacy_lead_status),
+        label: String(row?.label || "").trim(),
+        color: String(row?.color || "").trim(),
+      }))
+      .filter((x) => x.status_config_id && x.label);
+    state.statusByConfigId = {};
+    state.statusByLegacy = {};
+    state.statusOptions.forEach((x) => {
+      state.statusByConfigId[String(x.status_config_id)] = x;
+      if (x.legacy_status && !state.statusByLegacy[String(x.legacy_status)]) state.statusByLegacy[String(x.legacy_status)] = x;
+    });
   }
 
   async function moveStage() {
@@ -155,10 +229,13 @@
     const reason = window.prompt(t("page.leads.detail.lostReasonPrompt", "Informe o motivo da perda:"), "");
     if (reason == null) return;
     try {
-      await api.patch(`/api/leads/${encodeURIComponent(state.leadId)}`, {
-        status: "DISQUALIFIED",
+      const disqualified = state.statusByLegacy.DISQUALIFIED || state.statusByLegacy.LOST || null;
+      const payload = {
+        status: disqualified?.legacy_status || "DISQUALIFIED",
         disqualify_reason: String(reason || "").trim() || null,
-      });
+      };
+      if (disqualified?.status_config_id) payload.status_config_id = disqualified.status_config_id;
+      await api.patch(`/api/leads/${encodeURIComponent(state.leadId)}`, payload);
       await loadData();
       renderLead();
       renderTimeline();

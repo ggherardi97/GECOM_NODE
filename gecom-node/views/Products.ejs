@@ -94,7 +94,7 @@
   <div class="col-lg-12">
     <div class="ibox ">
       <div class="ibox-title">
-        <!-- ✅ Saved Views replaces title -->
+        <!-- Saved Views replaces title -->
         <div id="productsSavedViewsHost"></div>
 
         <div class="ibox-tools">
@@ -108,7 +108,7 @@
 
       <div class="ibox-content">
         <div class="row">
-          <!-- 🔥 Removido filtro global de ativo (evita forçar "Produtos Ativos") -->
+          <!-- Removido filtro global de ativo (evita forcar "Produtos Ativos") -->
           <div class="col-sm-3" style="display:none;">
             <select id="activeFilter" class="form-control input-sm">
               <option value="" selected><%= t('page.products.filters.all') %></option>
@@ -127,15 +127,15 @@
                 <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:60px;"></th>
 
                 <!-- IMPORTANT: data-field ties filters to columns (so reordering/views won't break filtering) -->
-                <th data-field="product_code"><input type="text" class="form-control input-sm" placeholder="Filtrar por Código" /></th>
+                <th data-field="product_code"><input type="text" class="form-control input-sm" placeholder="Filtrar por Codigo" /></th>
                 <th data-field="name"><input type="text" class="form-control input-sm" placeholder="Filtrar por Nome" /></th>
                 <th data-field="brand"><input type="text" class="form-control input-sm" placeholder="Filtrar por Brand" /></th>
                 <th data-field="unit"><input type="text" class="form-control input-sm" placeholder="Filtrar por Unidade" /></th>
                 <th data-field="currency_text"><input type="text" class="form-control input-sm" placeholder="Filtrar por Moeda" /></th>
-                <th data-field="default_unit_price"><input type="text" class="form-control input-sm" placeholder="Filtrar por Preço" /></th>
+                <th data-field="default_unit_price"><input type="text" class="form-control input-sm" placeholder="Filtrar por Preco" /></th>
                 <th data-field="default_tax_rate"><input type="text" class="form-control input-sm" placeholder="Filtrar por Imposto" /></th>
 
-                <!-- ✅ Active column filter: picklist -->
+                <!-- Active column filter: picklist -->
                 <th data-field="is_active_text">
                   <select id="activeColumnFilter" class="form-control input-sm">
                     <option value=""><%= t('page.products.filters.all') %></option>
@@ -144,7 +144,7 @@
                   </select>
                 </th>
 
-                <!-- ✅ Created filter: SINGLE input date RANGE + icon -->
+                <!-- Created filter: SINGLE input date RANGE + icon -->
                 <th class="sv-date-filter sv-date-range" data-field="created_at_text">
                   <div class="input-group">
                     <input id="createdOnRangeFilter" type="text" class="form-control input-sm" placeholder="dd/mm/aaaa - dd/mm/aaaa" autocomplete="off" />
@@ -162,7 +162,7 @@
 
               <!-- Header row -->
               <tr id="productsHeaderRow">
-                <!-- ✅ checkbox only (no #) -->
+                <!-- checkbox only (no #) -->
                 <th class="sv-fixed-col" data-field="__select" data-sv-fixed="left" style="width:60px;">
                   <label class="sv-select-wrap" style="margin:0;">
                     <input type="checkbox" id="selectAllProducts" />
@@ -1243,3 +1243,5 @@
     })();
   </script>
 <% %>
+
+

@@ -160,7 +160,7 @@
       "header": {
         "newInvoice": "New Invoice"
       },
-      "empty":{
+      "empty": {
         "noResults": "No invoices found"
       },
       "bulkDelete": {
@@ -401,6 +401,7 @@
       }
     },
     "processDetail": {
+      "pageTitle": "Process Details",
       "header": {
         "editProject": "Edit project",
         "process": "Process",
@@ -410,14 +411,18 @@
         "client": "Client:",
         "estimatedDelivery": "Estimated Delivery Date:",
         "start": "Process start:",
+        "totalValue": "Total process value:",
         "completed": "Completed:",
-        "completedOn": "Project completed on"
+        "completedOn": "Project completed on",
+        "highPriority": "High Priority"
       },
       "sections": {
         "timeline": "Timeline",
         "history": "Process history",
         "transports": "Transports",
         "trajectory": "Trajectory",
+        "maritimeTrackingBeta": "Maritime Tracking (BETA)",
+        "airTrackingBeta": "Air Tracking (BETA)",
         "description": "Process description",
         "documents": "Process documents"
       },
@@ -510,7 +515,15 @@
         "myDocuments": "My Documents",
         "invoices": "Invoices",
         "products": "Products",
-        "leads": "Leads"
+        "leads": "Leads",
+        "statusConfigs": "Entity Statuses",
+        "ai": "AI",
+        "customsCalculation": "Customs Calculation",
+        "myActivities": "My Activities",
+        "notifications": "Notifications",
+        "sales": "Sales",
+        "services": "Services",
+        "settings": "Settings"
       },
       "modal": {
         "cancel": "Cancel",
@@ -532,6 +545,11 @@
         "saveLabel": "Save",
         "deleteLabel": "Delete view",
         "deleteCurrentConfirm": "Delete selected view?"
+      },
+      "topbar": {
+        "defaultNotificationTitle": "Notification",
+        "noActiveNotifications": "No active notifications.",
+        "viewAll": "View all"
       }
     },
     "novoProcesso": {
@@ -1008,7 +1026,13 @@
         "setPrimaryStrong": "Primary",
         "table": {
           "primary": "Primary",
-          "nameRequired": "Name *"
+          "nameRequired": "Name *",
+          "permission": "Permission"
+        },
+        "roles": {
+          "user": "User",
+          "manager": "Manager",
+          "admin": "Admin"
         },
         "placeholders": {
           "fullName": "Full name",
@@ -1155,6 +1179,104 @@
       },
       "actions2": {
         "addDocuments": "Add Documents"
+      }
+    },
+    "notifications": {
+      "pageTitle": "Notifications",
+      "actions": {
+        "back": "Back",
+        "create": "Create",
+        "markRead": "Mark as read",
+        "new": "New Notification",
+        "save": "Save"
+      },
+      "columns": {
+        "active": "Active",
+        "createdAt": "Created at",
+        "expiresAt": "Expires at",
+        "message": "Message",
+        "read": "Read",
+        "severity": "Severity",
+        "startsAt": "Starts at",
+        "title": "Title",
+        "updatedAt": "Updated at",
+        "window": "In window"
+      },
+      "common": {
+        "localeDateFormat": "en-US",
+        "no": "No",
+        "yes": "Yes"
+      },
+      "defaults": {
+        "title": "Notification"
+      },
+      "editor": {
+        "company": "Company",
+        "companyHint": "Select the company that will receive this notification.",
+        "createdBy": "Created by",
+        "detailTitle": "Notification Details",
+        "editSubtitle": "Update notification data.",
+        "editTitle": "Edit Notification",
+        "expiresAtHint": "If empty, the notification will not expire.",
+        "messageHint": "Message shown to users.",
+        "messagePlaceholder": "Type the notification message",
+        "newSubtitle": "Create a new notification for users.",
+        "newTitle": "New Notification",
+        "select": "Select",
+        "severity": {
+          "critical": "Critical",
+          "warning": "Warning"
+        },
+        "severityHint": "Defines urgency level.",
+        "startsAtHint": "If empty, it will be considered immediately.",
+        "systemReadonly": "System fields are read-only.",
+        "titlePlaceholder": "Type a title (optional)"
+      },
+      "filters": {
+        "all": "All",
+        "allFeminine": "All",
+        "byMessage": "Filter by message",
+        "bySeverity": "Filter by severity",
+        "byTitle": "Filter by title"
+      },
+      "list": {
+        "showingCount": "{{shown}} of {{total}} shown"
+      },
+      "messages": {
+        "companyMissing": "Company not informed.",
+        "createFail": "Failed to create notification.",
+        "createSuccess": "Notification created successfully.",
+        "deleteViewFail": "Failed to delete view.",
+        "loadFail": "Failed to load notifications.",
+        "markReadFail": "Failed to mark notification as read.",
+        "markReadSuccess": "Notification marked as read.",
+        "noCompanies": "No companies found",
+        "pageLoadFail": "Failed to load notifications page.",
+        "requestFail": "Request failed.",
+        "saveFail": "Failed to save notification.",
+        "saveSuccess": "Notification saved successfully.",
+        "saveViewFail": "Failed to save view."
+      },
+      "read": {
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "tabs": {
+        "info": "Info",
+        "system": "System"
+      },
+      "validation": {
+        "companyRequired": "Company is required.",
+        "expiresAfterStarts": "Expiration date must be after start date.",
+        "messageRequired": "Message is required."
+      },
+      "window": {
+        "in": "Yes",
+        "out": "No"
       }
     }
   }

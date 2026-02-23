@@ -12,7 +12,7 @@
     filters: {
       q: "",
       owner_user_id: "",
-      status: "",
+      status_config_id: "",
       source: "",
       created_from: "",
       created_to: "",
@@ -26,6 +26,10 @@
       sort: [],
       pageSize: 20,
     },
+    statusOptions: [],
+    statusLabelMap: {},
+    statusByConfigId: {},
+    statusByLegacy: {},
   };
 
   function t(key, fallback) {
@@ -80,6 +84,67 @@
     return [];
   }
 
+  function normalizeStatusConfigId(value) {
+    const id = String(value || "").trim();
+    return id || "";
+  }
+
+  function normalizeLeadLegacyStatus(value) {
+    const status = String(value || "").trim().toUpperCase();
+    return status || "";
+  }
+
+  function getLeadStatusConfigId(lead) {
+    return normalizeStatusConfigId(
+      lead?.status_config_id ??
+      lead?.statusConfigId ??
+      lead?.status_config?.id ??
+      lead?.statusConfig?.id ??
+      ""
+    );
+  }
+
+  function getLeadLegacyStatus(lead) {
+    const fromConfig = normalizeLeadLegacyStatus(
+      lead?.status_config?.legacy_lead_status ??
+      lead?.statusConfig?.legacy_lead_status ??
+      ""
+    );
+    if (fromConfig) return fromConfig;
+    return normalizeLeadLegacyStatus(lead?.status || "");
+  }
+
+  function getLeadStatusLabel(lead) {
+    const direct = String(lead?.status_config?.label || lead?.statusConfig?.label || "").trim();
+    if (direct) return direct;
+    const statusConfigId = getLeadStatusConfigId(lead);
+    if (statusConfigId && state.statusByConfigId[statusConfigId]?.label) return state.statusByConfigId[statusConfigId].label;
+    const legacy = getLeadLegacyStatus(lead);
+    if (legacy && state.statusLabelMap[legacy]) return state.statusLabelMap[legacy];
+    return legacy || "-";
+  }
+
+  function getLeadStatusColor(lead) {
+    const direct = String(lead?.status_config?.color || lead?.statusConfig?.color || "").trim();
+    if (direct) return direct;
+    const statusConfigId = getLeadStatusConfigId(lead);
+    if (statusConfigId && state.statusByConfigId[statusConfigId]?.color) return String(state.statusByConfigId[statusConfigId].color || "").trim();
+    const legacy = getLeadLegacyStatus(lead);
+    if (legacy && state.statusByLegacy[legacy]?.color) return String(state.statusByLegacy[legacy].color || "").trim();
+    return "";
+  }
+
+  function getStatusFilterOptionByValue(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return null;
+    if (state.statusByConfigId[raw]) return state.statusByConfigId[raw];
+    if (raw.startsWith("legacy:")) {
+      const legacy = normalizeLeadLegacyStatus(raw.slice("legacy:".length));
+      if (legacy) return state.statusByLegacy[legacy] || null;
+    }
+    return null;
+  }
+
   function getLeadTitle(lead) {
     return lead?.name || lead?.title || `${lead?.first_name || ""} ${lead?.last_name || ""}`.trim() || "-";
   }
@@ -88,22 +153,18 @@
     return lead?.owner_user?.full_name || lead?.owner?.full_name || lead?.owner_name || lead?.owner_user_id || "";
   }
 
+  function getStatusLabel(value) {
+    const key = normalizeLeadLegacyStatus(value);
+    if (!key) return "-";
+    return state.statusLabelMap[key] || key;
+  }
+
   function renderStatusFilterOptions() {
     const sel = $("#leadListStatus");
     if (!sel.length) return;
-    const current = String(state.filters.status || "").toUpperCase();
-    const statuses = Array.from(new Set(state.leads.map((l) => String(l?.status || "").toUpperCase()).filter(Boolean)));
-    const preferredOrder = ["NEW", "WORKING", "NURTURING", "QUALIFIED", "CONVERTED", "WON", "DISQUALIFIED", "LOST"];
-    statuses.sort((a, b) => {
-      const ia = preferredOrder.indexOf(a);
-      const ib = preferredOrder.indexOf(b);
-      if (ia === -1 && ib === -1) return a.localeCompare(b);
-      if (ia === -1) return 1;
-      if (ib === -1) return -1;
-      return ia - ib;
-    });
+    const current = String(state.filters.status_config_id || "").trim();
     sel.empty().append(`<option value="">${esc(t("page.leads.filters.allStatus", "Todos os status"))}</option>`);
-    statuses.forEach((s) => sel.append(`<option value="${esc(s)}">${esc(s)}</option>`));
+    (state.statusOptions || []).forEach((s) => sel.append(`<option value="${esc(s.value)}">${esc(s.label)}</option>`));
     sel.val(current);
   }
 
@@ -115,7 +176,8 @@
   function matchesFilters(lead) {
     const q = normalizeForCompare(state.filters.q).trim();
     const owner = String(state.filters.owner_user_id || "").trim();
-    const status = normalizeForCompare(state.filters.status).trim();
+    const statusSelection = String(state.filters.status_config_id || "").trim();
+    const statusOption = getStatusFilterOptionByValue(statusSelection);
     const source = normalizeForCompare(state.filters.source).trim();
     const from = parsePtDate(state.filters.created_from, false);
     const to = parsePtDate(state.filters.created_to, true);
@@ -127,12 +189,18 @@
       lead?.phone,
       getOwner(lead),
       lead?.source,
-      lead?.status,
+      getLeadStatusLabel(lead),
     ].join(" "));
 
     if (q && !hay.includes(q)) return false;
     if (owner && String(lead?.owner_user_id || "") !== owner) return false;
-    if (status && normalizeForCompare(lead?.status) !== status) return false;
+    if (statusSelection) {
+      const leadStatusConfigId = getLeadStatusConfigId(lead);
+      const leadLegacyStatus = getLeadLegacyStatus(lead);
+      const byConfigMatch = statusOption?.status_config_id && leadStatusConfigId === String(statusOption.status_config_id);
+      const byLegacyMatch = statusOption?.legacy_status && leadLegacyStatus === String(statusOption.legacy_status);
+      if (!byConfigMatch && !byLegacyMatch) return false;
+    }
     if (source && normalizeForCompare(lead?.source) !== source) return false;
 
     if (from || to) {
@@ -202,6 +270,8 @@
     }
 
     pageRows.forEach((lead, idx) => {
+      const statusLabel = getLeadStatusLabel(lead);
+      const statusColor = getLeadStatusColor(lead);
       tbody.append(`
         <tr data-id="${esc(lead.id)}" class="lead-row">
           <td>${start + idx + 1}</td>
@@ -209,7 +279,7 @@
           <td>${esc(lead.company_name || "-")}</td>
           <td>${esc(lead.email || "-")}</td>
           <td>${esc(lead.phone || "-")}</td>
-          <td>${esc(lead.status || "-")}</td>
+          <td>${statusColor ? `<span class="label" style="background-color:${esc(statusColor)};color:#fff;">${esc(statusLabel)}</span>` : esc(statusLabel)}</td>
           <td>${esc(lead.stage?.name || "-")}</td>
           <td>${esc(getOwner(lead) || "-")}</td>
           <td>${esc(lead.source || "-")}</td>
@@ -238,7 +308,7 @@
     const f = [];
     if (state.filters.q) f.push({ field: "q", op: "contains", value: state.filters.q });
     if (state.filters.owner_user_id) f.push({ field: "owner_user_id", op: "eq", value: state.filters.owner_user_id });
-    if (state.filters.status) f.push({ field: "status", op: "eq", value: state.filters.status });
+    if (state.filters.status_config_id) f.push({ field: "status_config_id", op: "eq", value: state.filters.status_config_id });
     if (state.filters.source) f.push({ field: "source", op: "eq", value: state.filters.source });
     if (state.filters.created_from) f.push({ field: "created_at", op: "gte", value: state.filters.created_from });
     if (state.filters.created_to) f.push({ field: "created_at", op: "lte", value: state.filters.created_to });
@@ -246,7 +316,7 @@
   }
 
   function applyFiltersFromSavedView(def) {
-    state.filters = { q: "", owner_user_id: "", status: "", source: "", created_from: "", created_to: "" };
+    state.filters = { q: "", owner_user_id: "", status_config_id: "", source: "", created_from: "", created_to: "" };
     (def.filters || []).forEach((x) => {
       const field = String(x.field || "");
       const value = String(x.value || "");
@@ -254,7 +324,15 @@
       if (!value) return;
       if (field === "q") state.filters.q = value;
       if (field === "owner_user_id") state.filters.owner_user_id = value;
-      if (field === "status") state.filters.status = value;
+      if (field === "status_config_id") state.filters.status_config_id = value;
+      if (field === "status") {
+        const rawLegacy = String(value || "").trim();
+        const legacy = rawLegacy.startsWith("legacy:")
+          ? normalizeLeadLegacyStatus(rawLegacy.slice("legacy:".length))
+          : normalizeLeadLegacyStatus(rawLegacy);
+        const byLegacy = state.statusByLegacy[legacy];
+        state.filters.status_config_id = byLegacy?.value || (legacy ? `legacy:${legacy}` : "");
+      }
       if (field === "source") state.filters.source = value;
       if (field === "created_at" && op === "gte") state.filters.created_from = value;
       if (field === "created_at" && op === "lte") state.filters.created_to = value;
@@ -262,7 +340,7 @@
 
     $("#leadListSearch").val(state.filters.q);
     $("#leadListOwner").val(state.filters.owner_user_id);
-    $("#leadListStatus").val(state.filters.status);
+    $("#leadListStatus").val(state.filters.status_config_id);
     $("#leadListSource").val(state.filters.source);
     const range = state.filters.created_from && state.filters.created_to ? `${state.filters.created_from} - ${state.filters.created_to}` : "";
     $("#leadListCreatedRange").val(range);
@@ -298,8 +376,51 @@
     });
   }
 
+  async function loadStatusOptions() {
+    try {
+      const data = await api.get("/api/status-configs?entity=LEAD&active=true");
+      state.statusOptions = listToArray(data)
+        .map((row) => ({
+          value: String(row?.id || "").trim(),
+          status_config_id: String(row?.id || "").trim(),
+          legacy_status: normalizeLeadLegacyStatus(row?.legacy_lead_status),
+          label: String(row?.label || "").trim(),
+          color: String(row?.color || "").trim(),
+          sort: Number(row?.sort_order || 0),
+        }))
+        .filter((x) => x.value && x.label)
+        .sort((a, b) => a.sort - b.sort);
+    } catch (e) {
+      console.warn("loadStatusOptions leads list fallback:", e);
+      state.statusOptions = [];
+    }
+
+    if (!state.statusOptions.length) {
+      state.statusOptions = [
+        { value: "legacy:NEW", status_config_id: "", legacy_status: "NEW", label: "NEW", color: "", sort: 0 },
+        { value: "legacy:WORKING", status_config_id: "", legacy_status: "WORKING", label: "WORKING", color: "", sort: 1 },
+        { value: "legacy:QUALIFIED", status_config_id: "", legacy_status: "QUALIFIED", label: "QUALIFIED", color: "", sort: 2 },
+        { value: "legacy:DISQUALIFIED", status_config_id: "", legacy_status: "DISQUALIFIED", label: "DISQUALIFIED", color: "", sort: 3 },
+        { value: "legacy:CONVERTED", status_config_id: "", legacy_status: "CONVERTED", label: "CONVERTED", color: "", sort: 4 },
+      ];
+    }
+
+    state.statusByConfigId = {};
+    state.statusByLegacy = {};
+    state.statusLabelMap = {};
+    state.statusOptions.forEach((x) => {
+      if (x.status_config_id) state.statusByConfigId[String(x.status_config_id)] = x;
+      if (x.legacy_status && !state.statusByLegacy[String(x.legacy_status)]) state.statusByLegacy[String(x.legacy_status)] = x;
+      if (x.legacy_status && !state.statusLabelMap[String(x.legacy_status)]) state.statusLabelMap[String(x.legacy_status)] = x.label;
+    });
+  }
+
   async function loadLeads() {
-    const data = await api.get("/api/leads");
+    const qs = new URLSearchParams();
+    const selected = getStatusFilterOptionByValue(state.filters.status_config_id);
+    if (selected?.status_config_id) qs.set("status_config_id", String(selected.status_config_id));
+    const url = qs.toString() ? `/api/leads?${qs.toString()}` : "/api/leads";
+    const data = await api.get(url);
     state.leads = listToArray(data);
   }
 
@@ -367,9 +488,12 @@
       renderTable();
     });
     $("#leadListStatus").on("change", function () {
-      state.filters.status = String(this.value || "");
+      state.filters.status_config_id = String(this.value || "");
       state.page = 1;
-      renderTable();
+      loadLeads().then(() => renderTable()).catch((e) => {
+        console.error(e);
+        toast(e?.message || t("page.leads.messages.loadError", "Erro ao carregar leads"), "error");
+      });
     });
     $("#leadListSource").on("change", function () {
       state.filters.source = String(this.value || "");
@@ -377,11 +501,14 @@
       renderTable();
     });
     $("#leadListFiltersClear").on("click", function () {
-      state.filters = { q: "", owner_user_id: "", status: "", source: "", created_from: "", created_to: "" };
+      state.filters = { q: "", owner_user_id: "", status_config_id: "", source: "", created_from: "", created_to: "" };
       $("#leadListSearch,#leadListCreatedRange").val("");
       $("#leadListOwner,#leadListStatus,#leadListSource").val("");
       state.page = 1;
-      renderTable();
+      loadLeads().then(() => renderTable()).catch((e) => {
+        console.error(e);
+        toast(e?.message || t("page.leads.messages.loadError", "Erro ao carregar leads"), "error");
+      });
     });
   }
 
@@ -517,14 +644,28 @@
           $("#leadListPageSize").val(String(state.pageSize));
         }
         state.page = 1;
-        updateSortIndicators();
-        renderTable();
-        ensureSavedViewsExtraButtons();
+        loadLeads()
+          .then(() => {
+            updateSortIndicators();
+            renderTable();
+            ensureSavedViewsExtraButtons();
+          })
+          .catch((e) => {
+            console.error(e);
+            toast(e?.message || t("page.leads.messages.loadError", "Erro ao carregar leads"), "error");
+          });
       },
       onAfterApply: () => {
-        updateSortIndicators();
-        renderTable();
-        ensureSavedViewsExtraButtons();
+        loadLeads()
+          .then(() => {
+            updateSortIndicators();
+            renderTable();
+            ensureSavedViewsExtraButtons();
+          })
+          .catch((e) => {
+            console.error(e);
+            toast(e?.message || t("page.leads.messages.loadError", "Erro ao carregar leads"), "error");
+          });
       },
     }).catch((e) => {
       console.error(e);
@@ -539,7 +680,7 @@
     $("#subpageName").text(t("page.leads.list.title", "Leads - Lista"));
 
     try {
-      await Promise.all([loadOwners(), loadLeads()]);
+      await Promise.all([loadOwners(), loadLeads(), loadStatusOptions()]);
       renderStatusFilterOptions();
       bindRows();
       bindFilters();

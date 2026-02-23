@@ -7,6 +7,10 @@
     stages: [],
     owners: [],
     companies: [],
+    statusOptions: [],
+    statusByValue: {},
+    statusByConfigId: {},
+    statusByLegacy: {},
   };
 
   function t(key, fallback) {
@@ -43,6 +47,83 @@
     if (Array.isArray(data?.data)) return data.data;
     if (Array.isArray(data?.rows)) return data.rows;
     return [];
+  }
+
+  function normalizeStatusConfigId(value) {
+    const id = String(value || "").trim();
+    return id || "";
+  }
+
+  function normalizeLeadLegacyStatus(value) {
+    const status = String(value || "").trim().toUpperCase();
+    return status || "";
+  }
+
+  function getLeadStatusConfigId(lead) {
+    return normalizeStatusConfigId(
+      lead?.status_config_id ??
+      lead?.statusConfigId ??
+      lead?.status_config?.id ??
+      lead?.statusConfig?.id ??
+      ""
+    );
+  }
+
+  function getLeadLegacyStatus(lead) {
+    const fromConfig = normalizeLeadLegacyStatus(
+      lead?.status_config?.legacy_lead_status ??
+      lead?.statusConfig?.legacy_lead_status ??
+      ""
+    );
+    if (fromConfig) return fromConfig;
+    return normalizeLeadLegacyStatus(lead?.status || "");
+  }
+
+  function parseLegacyStatusFromSelection(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("legacy:")) return normalizeLeadLegacyStatus(raw.slice("legacy:".length));
+    const mapped = state.statusByValue[raw];
+    if (mapped?.legacy_status) return normalizeLeadLegacyStatus(mapped.legacy_status);
+    return normalizeLeadLegacyStatus(raw);
+  }
+
+  function indexStatusOptions() {
+    state.statusByValue = {};
+    state.statusByConfigId = {};
+    state.statusByLegacy = {};
+    (state.statusOptions || []).forEach((opt) => {
+      const value = String(opt?.value || "").trim();
+      if (!value) return;
+      state.statusByValue[value] = opt;
+      if (opt?.status_config_id) state.statusByConfigId[String(opt.status_config_id)] = opt;
+      if (opt?.legacy_status && !state.statusByLegacy[String(opt.legacy_status)]) {
+        state.statusByLegacy[String(opt.legacy_status)] = opt;
+      }
+    });
+  }
+
+  function getDefaultLeadStatusSelection() {
+    const preferred =
+      state.statusByLegacy.NEW ||
+      state.statusByLegacy.WORKING ||
+      state.statusByLegacy.QUALIFIED ||
+      state.statusOptions[0] ||
+      null;
+    return preferred ? String(preferred.value || "") : "";
+  }
+
+  function buildStatusPayloadFromSelection(value) {
+    const selected = String(value || "").trim();
+    const option = state.statusByValue[selected] || null;
+    const status_config_id = normalizeStatusConfigId(option?.status_config_id);
+    const legacy_status = option?.legacy_status ? normalizeLeadLegacyStatus(option.legacy_status) : parseLegacyStatusFromSelection(selected);
+
+    const payload = {};
+    if (status_config_id) payload.status_config_id = status_config_id;
+    if (legacy_status) payload.status = legacy_status;
+    else payload.status = "NEW";
+    return payload;
   }
 
   function normalizeLeadType(value) {
@@ -94,6 +175,8 @@
   }
 
   function readForm() {
+    const statusSelection = String($("#leadStatus").val() || "").trim();
+    const statusPayload = buildStatusPayloadFromSelection(statusSelection);
     return {
       name: String($("#leadName").val() || "").trim(),
       type: normalizeLeadType($("#leadType").val()),
@@ -104,7 +187,7 @@
       phone: String($("#leadPhone").val() || "").trim() || null,
       source: normalizeLeadSource($("#leadSource").val()),
       stage_id: String($("#leadStage").val() || "").trim() || null,
-      status: String($("#leadStatus").val() || "").trim() || "NEW",
+      ...statusPayload,
       owner_user_id: String($("#leadOwner").val() || "").trim() || null,
       estimated_value: parseMoneyInput($("#leadValue").val()),
       currency_code: String($("#leadCurrency").val() || "").trim() || "BRL",
@@ -123,7 +206,19 @@
     $("#leadPhone").val(lead?.phone || "");
     $("#leadSource").val(normalizeLeadSource(lead?.source) || "");
     $("#leadStage").val(lead?.stage_id || lead?.stage?.id || "");
-    $("#leadStatus").val(lead?.status || "NEW");
+    const statusConfigId = getLeadStatusConfigId(lead);
+    const legacyStatus = getLeadLegacyStatus(lead) || "NEW";
+    let selectedStatus = "";
+    if (statusConfigId) {
+      const byConfig = state.statusByConfigId[statusConfigId];
+      selectedStatus = byConfig?.value || statusConfigId;
+      ensureLeadStatusOption(selectedStatus, lead?.status_config?.label || byConfig?.label || selectedStatus, legacyStatus, statusConfigId);
+    } else {
+      const byLegacy = state.statusByLegacy[legacyStatus];
+      selectedStatus = byLegacy?.value || `legacy:${legacyStatus}`;
+      ensureLeadStatusOption(selectedStatus, byLegacy?.label || legacyStatus, legacyStatus, byLegacy?.status_config_id || "");
+    }
+    $("#leadStatus").val(selectedStatus || getDefaultLeadStatusSelection());
     $("#leadOwner").val(lead?.owner_user_id || "");
     $("#leadValue").val(lead?.estimated_value != null ? formatMoneyPtBr(lead.estimated_value) : "");
     $("#leadCurrency").val(lead?.currency_code || "BRL");
@@ -137,7 +232,13 @@
       return "Tipo invalido. Use COMPANY ou PERSON.";
     }
     if (!payload.stage_id) return t("page.leads.validation.stageRequired", "Estagio e obrigatorio");
-    if (!payload.status) return t("page.leads.validation.statusRequired", "Status e obrigatorio");
+    if (!payload.status_config_id && !payload.status) return t("page.leads.validation.statusRequired", "Status e obrigatorio");
+    if (state.statusOptions.length > 0) {
+      const selected = String($("#leadStatus").val() || "").trim();
+      if (selected && !state.statusByValue[selected]) {
+        return t("page.leads.validation.statusRequired", "Status e obrigatorio");
+      }
+    }
 
     if (payload.source && !["MANUAL", "WEBSITE", "INDICATION", "IMPORT", "OTHER"].includes(payload.source)) {
       return "Source invalido. Use MANUAL, WEBSITE, INDICATION, IMPORT ou OTHER.";
@@ -191,6 +292,82 @@
     } catch (e) {
       console.warn("loadCompanies warning:", e);
     }
+  }
+
+  function renderLeadStatuses(selectedValue) {
+    const sel = $("#leadStatus");
+    if (!sel.length) return;
+    sel.empty();
+
+    const options = state.statusOptions.length
+      ? state.statusOptions
+      : [
+          { value: "legacy:NEW", status_config_id: "", legacy_status: "NEW", label: t("page.leads.form.status.new", "Novo"), color: "" },
+          { value: "legacy:WORKING", status_config_id: "", legacy_status: "WORKING", label: t("page.leads.form.status.working", "Em andamento"), color: "" },
+          { value: "legacy:QUALIFIED", status_config_id: "", legacy_status: "QUALIFIED", label: t("page.leads.form.status.qualified", "Qualificado"), color: "" },
+          { value: "legacy:DISQUALIFIED", status_config_id: "", legacy_status: "DISQUALIFIED", label: t("page.leads.form.status.disqualified", "Desqualificado"), color: "" },
+          { value: "legacy:CONVERTED", status_config_id: "", legacy_status: "CONVERTED", label: t("page.leads.form.status.converted", "Convertido"), color: "" },
+        ];
+
+    options.forEach((s) => {
+      const value = String(s.value || "").trim();
+      if (!value) return;
+      const label = String(s.label || value);
+      const legacy = String(s.legacy_status || "").trim().toUpperCase();
+      const statusConfigId = String(s.status_config_id || "").trim();
+      sel.append(`<option value="${esc(value)}" data-legacy="${esc(legacy)}" data-status-config-id="${esc(statusConfigId)}">${esc(label)}</option>`);
+    });
+
+    if (selectedValue && sel.find(`option[value="${selectedValue}"]`).length) {
+      sel.val(selectedValue);
+      return;
+    }
+    const defaultValue = getDefaultLeadStatusSelection();
+    if (defaultValue && sel.find(`option[value="${defaultValue}"]`).length) sel.val(defaultValue);
+    else if (sel.find("option:first").length) sel.val(sel.find("option:first").val());
+  }
+
+  function ensureLeadStatusOption(value, label, legacyStatus, statusConfigId) {
+    const normalized = String(value || "").trim();
+    if (!normalized) return;
+    const sel = $("#leadStatus");
+    if (!sel.length) return;
+    if (sel.find(`option[value="${normalized}"]`).length) return;
+    sel.append(
+      `<option value="${esc(normalized)}" data-legacy="${esc(String(legacyStatus || "").trim().toUpperCase())}" data-status-config-id="${esc(String(statusConfigId || "").trim())}">${esc(String(label || normalized))}</option>`
+    );
+  }
+
+  async function loadStatusOptions() {
+    try {
+      const data = await api.get("/api/status-configs?entity=LEAD&active=true");
+      const list = listToArray(data);
+      state.statusOptions = list
+        .map((row) => ({
+          value: String(row?.id || "").trim(),
+          status_config_id: String(row?.id || "").trim(),
+          legacy_status: String(row?.legacy_lead_status || "").trim().toUpperCase(),
+          label: String(row?.label || "").trim(),
+          color: String(row?.color || "").trim(),
+          sort: Number(row?.sort_order || 0),
+        }))
+        .filter((x) => x.value && x.label)
+        .sort((a, b) => a.sort - b.sort);
+    } catch (e) {
+      console.warn("loadStatusOptions fallback:", e);
+      state.statusOptions = [];
+    }
+    if (!state.statusOptions.length) {
+      state.statusOptions = [
+        { value: "legacy:NEW", status_config_id: "", legacy_status: "NEW", label: t("page.leads.form.status.new", "Novo"), color: "", sort: 0 },
+        { value: "legacy:WORKING", status_config_id: "", legacy_status: "WORKING", label: t("page.leads.form.status.working", "Em andamento"), color: "", sort: 1 },
+        { value: "legacy:QUALIFIED", status_config_id: "", legacy_status: "QUALIFIED", label: t("page.leads.form.status.qualified", "Qualificado"), color: "", sort: 2 },
+        { value: "legacy:DISQUALIFIED", status_config_id: "", legacy_status: "DISQUALIFIED", label: t("page.leads.form.status.disqualified", "Desqualificado"), color: "", sort: 3 },
+        { value: "legacy:CONVERTED", status_config_id: "", legacy_status: "CONVERTED", label: t("page.leads.form.status.converted", "Convertido"), color: "", sort: 4 },
+      ];
+    }
+    indexStatusOptions();
+    renderLeadStatuses();
   }
 
   async function loadLead() {
@@ -294,17 +471,18 @@
     $("#subpageName").text(state.isEdit ? t("page.leads.form.editTitle", "Editar Lead") : t("page.leads.form.newTitle", "Novo Lead"));
 
     bindEvents();
+    initWizard();
 
     try {
-      await Promise.all([loadStages(), loadOwners(), loadCompanies()]);
+      await Promise.all([loadStages(), loadOwners(), loadCompanies(), loadStatusOptions()]);
       if (!state.isEdit) {
         $("#leadType").val("COMPANY");
-        if ($("#leadStatus option[value='NEW']").length) $("#leadStatus").val("NEW");
+        const defaultStatus = getDefaultLeadStatusSelection();
+        if (defaultStatus && $("#leadStatus option").length) $("#leadStatus").val(defaultStatus);
         if ($("#leadStage option:first").length) $("#leadStage").val($("#leadStage option:first").val());
       } else {
         await loadLead();
       }
-      initWizard();
     } catch (e) {
       console.error(e);
       toast(e?.message || t("page.leads.messages.loadError", "Erro ao carregar formulario"), "error");

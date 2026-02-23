@@ -203,7 +203,7 @@
         "total": "Total",
         "dueDate": "Vencimento"
       },
-      "empty":{
+      "empty": {
         "noResults": "Nenhum invoice encontrado"
       }
     },
@@ -401,6 +401,7 @@
       }
     },
     "processDetail": {
+      "pageTitle": "Detalhes do Processo",
       "header": {
         "editProject": "Editar projeto",
         "process": "Processo",
@@ -410,14 +411,18 @@
         "client": "Cliente:",
         "estimatedDelivery": "Data Estimada de Entrega:",
         "start": "Início do Processo:",
+        "totalValue": "Valor total do processo:",
         "completed": "Concluído:",
-        "completedOn": "Projeto concluído em"
+        "completedOn": "Projeto concluído em",
+        "highPriority": "Prioridade Alta"
       },
       "sections": {
         "timeline": "Timeline",
         "history": "Histórico do Processo",
         "transports": "Transportes",
         "trajectory": "Trajetória",
+        "maritimeTrackingBeta": "Rastreamento Marítimo (BETA)",
+        "airTrackingBeta": "Rastreamento Aéreo (BETA)",
         "description": "Descrição do Processo",
         "documents": "Documentos do processo"
       },
@@ -510,7 +515,15 @@
         "myDocuments": "Meus Documentos",
         "invoices": "Invoices",
         "products": "Produtos",
-        "leads": "Leads"
+        "leads": "Leads",
+        "statusConfigs": "Status das Entidades",
+        "ai": "AI",
+        "customsCalculation": "Calculo Aduaneiro",
+        "myActivities": "Minhas Atividades",
+        "notifications": "Notificacoes",
+        "sales": "Vendas",
+        "services": "Servicos",
+        "settings": "Configuracoes"
       },
       "modal": {
         "cancel": "Cancelar",
@@ -532,6 +545,11 @@
         "saveLabel": "Salvar",
         "deleteLabel": "Deletar view",
         "deleteCurrentConfirm": "Excluir a view selecionada?"
+      },
+      "topbar": {
+        "defaultNotificationTitle": "Notificacao",
+        "noActiveNotifications": "Nenhuma notificacao ativa.",
+        "viewAll": "Ver todas"
       }
     },
     "novoProcesso": {
@@ -1008,7 +1026,13 @@
         "setPrimaryStrong": "Principal",
         "table": {
           "primary": "Principal",
-          "nameRequired": "Nome *"
+          "nameRequired": "Nome *",
+          "permission": "Permissao"
+        },
+        "roles": {
+          "user": "User",
+          "manager": "Manager",
+          "admin": "Admin"
         },
         "placeholders": {
           "fullName": "Nome Completo",
@@ -1154,6 +1178,104 @@
       },
       "actions2": {
         "addDocuments": "Adicionar Documentos"
+      }
+    },
+    "notifications": {
+      "pageTitle": "Notificacoes",
+      "actions": {
+        "back": "Voltar",
+        "create": "Criar",
+        "markRead": "Marcar como lida",
+        "new": "Nova Notificacao",
+        "save": "Salvar"
+      },
+      "columns": {
+        "active": "Ativa",
+        "createdAt": "Criada em",
+        "expiresAt": "Expira em",
+        "message": "Mensagem",
+        "read": "Lida",
+        "severity": "Severidade",
+        "startsAt": "Inicio",
+        "title": "Titulo",
+        "updatedAt": "Atualizada em",
+        "window": "Na janela"
+      },
+      "common": {
+        "localeDateFormat": "pt-BR",
+        "no": "Nao",
+        "yes": "Sim"
+      },
+      "defaults": {
+        "title": "Notificacao"
+      },
+      "editor": {
+        "company": "Empresa",
+        "companyHint": "Selecione a empresa que recebera esta notificacao.",
+        "createdBy": "Criado por",
+        "detailTitle": "Detalhes da Notificacao",
+        "editSubtitle": "Atualize os dados da notificacao.",
+        "editTitle": "Editar Notificacao",
+        "expiresAtHint": "Se vazio, a notificacao nao expira.",
+        "messageHint": "Mensagem exibida para os usuarios.",
+        "messagePlaceholder": "Digite a mensagem da notificacao",
+        "newSubtitle": "Crie uma nova notificacao para os usuarios.",
+        "newTitle": "Nova Notificacao",
+        "select": "Selecione",
+        "severity": {
+          "critical": "Critica",
+          "warning": "Aviso"
+        },
+        "severityHint": "Define o nivel de urgencia.",
+        "startsAtHint": "Se vazio, sera considerada imediatamente.",
+        "systemReadonly": "Campos de sistema sao somente leitura.",
+        "titlePlaceholder": "Digite um titulo (opcional)"
+      },
+      "filters": {
+        "all": "Todas",
+        "allFeminine": "Todas",
+        "byMessage": "Filtrar por mensagem",
+        "bySeverity": "Filtrar por severidade",
+        "byTitle": "Filtrar por titulo"
+      },
+      "list": {
+        "showingCount": "{{shown}} de {{total}} exibidas"
+      },
+      "messages": {
+        "companyMissing": "Empresa nao informada.",
+        "createFail": "Falha ao criar notificacao.",
+        "createSuccess": "Notificacao criada com sucesso.",
+        "deleteViewFail": "Falha ao excluir view.",
+        "loadFail": "Falha ao carregar notificacoes.",
+        "markReadFail": "Falha ao marcar notificacao como lida.",
+        "markReadSuccess": "Notificacao marcada como lida.",
+        "noCompanies": "Nenhuma empresa encontrada",
+        "pageLoadFail": "Falha ao carregar pagina de notificacoes.",
+        "requestFail": "Falha na requisicao.",
+        "saveFail": "Falha ao salvar notificacao.",
+        "saveSuccess": "Notificacao salva com sucesso.",
+        "saveViewFail": "Falha ao salvar view."
+      },
+      "read": {
+        "read": "Lida",
+        "unread": "Nao lida"
+      },
+      "status": {
+        "active": "Ativa",
+        "inactive": "Inativa"
+      },
+      "tabs": {
+        "info": "Informacoes",
+        "system": "Sistema"
+      },
+      "validation": {
+        "companyRequired": "Empresa e obrigatoria.",
+        "expiresAfterStarts": "A data de expiracao deve ser maior que a data de inicio.",
+        "messageRequired": "Mensagem e obrigatoria."
+      },
+      "window": {
+        "in": "Sim",
+        "out": "Nao"
       }
     }
   }

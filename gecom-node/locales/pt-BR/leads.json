@@ -80,7 +80,25 @@
         "firstName": "Primeiro nome",
         "lastName": "Sobrenome",
         "notes": "Notas",
-        "selectOwner": "Selecione"
+        "selectOwner": "Selecione",
+        "type": "Tipo",
+        "typeCompany": "Empresa",
+        "typePerson": "Pessoa",
+        "status": {
+          "new": "Novo",
+          "working": "Em andamento",
+          "nurturing": "Nutricao",
+          "qualified": "Qualificado",
+          "converted": "Convertido",
+          "disqualified": "Desqualificado"
+        },
+        "source": {
+          "manual": "Manual",
+          "website": "Site",
+          "indication": "Indicacao",
+          "import": "Importacao",
+          "other": "Outro"
+        }
       },
       "validation": {
         "nameRequired": "Nome do lead é obrigatório.",

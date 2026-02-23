@@ -1,0 +1,517 @@
+<style>
+  .status-configs-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .status-color-sample {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid #dcdcdc;
+    vertical-align: middle;
+  }
+  .status-actions {
+    white-space: nowrap;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5>Status das Entidades</h5>
+      </div>
+      <div class="ibox-content">
+        <div class="status-configs-toolbar">
+          <div>
+            <button type="button" class="btn btn-primary btn-sm" id="btnSeedDefaults">
+              <i class="fa fa-refresh"></i> Semear padroes
+            </button>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <label for="activeFilter" style="margin:0;">Filtro ativo</label>
+            <select id="activeFilter" class="form-control input-sm" style="min-width: 140px;">
+              <option value="all">Todos</option>
+              <option value="true" selected>Ativos</option>
+              <option value="false">Inativos</option>
+            </select>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="statusTabs">
+          <li class="active"><a href="#tabProcess" data-toggle="tab" data-entity="PROCESS">Processos</a></li>
+          <li><a href="#tabLead" data-toggle="tab" data-entity="LEAD">Leads</a></li>
+          <li><a href="#tabInvoice" data-toggle="tab" data-entity="INVOICE">Invoices</a></li>
+        </ul>
+
+        <div class="tab-content" style="margin-top: 15px;">
+          <div id="tabProcess" class="tab-pane active">
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-success btn-sm btnNewStatus" data-entity="PROCESS">
+                <i class="fa fa-plus"></i> Novo status
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>code</th>
+                    <th>label</th>
+                    <th>color</th>
+                    <th>sort_order</th>
+                    <th>ativo</th>
+                    <th>legacy_int_value</th>
+                    <th>acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="rows-PROCESS"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabLead" class="tab-pane">
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-success btn-sm btnNewStatus" data-entity="LEAD">
+                <i class="fa fa-plus"></i> Novo status
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>code</th>
+                    <th>label</th>
+                    <th>color</th>
+                    <th>sort_order</th>
+                    <th>ativo</th>
+                    <th>legacy_lead_status</th>
+                    <th>acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="rows-LEAD"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabInvoice" class="tab-pane">
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-success btn-sm btnNewStatus" data-entity="INVOICE">
+                <i class="fa fa-plus"></i> Novo status
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>code</th>
+                    <th>label</th>
+                    <th>color</th>
+                    <th>sort_order</th>
+                    <th>ativo</th>
+                    <th>legacy_int_value</th>
+                    <th>acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="rows-INVOICE"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="statusConfigsMessage" class="alert" style="display:none; margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="statusConfigModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title" id="statusConfigModalTitle">Status</h4>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="statusCfgId" />
+        <input type="hidden" id="statusCfgEntity" />
+
+        <div class="form-group">
+          <label for="statusCfgCode">Code *</label>
+          <input id="statusCfgCode" type="text" class="form-control" maxlength="60" />
+        </div>
+        <div class="form-group">
+          <label for="statusCfgLabel">Label *</label>
+          <input id="statusCfgLabel" type="text" class="form-control" maxlength="120" />
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="statusCfgColor">Cor</label>
+              <input id="statusCfgColor" type="text" class="form-control" maxlength="7" placeholder="#64748B" />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="statusCfgSortOrder">Sort order</label>
+              <input id="statusCfgSortOrder" type="number" class="form-control" value="0" />
+            </div>
+          </div>
+        </div>
+        <div class="checkbox">
+          <label><input id="statusCfgActive" type="checkbox" checked /> Ativo</label>
+        </div>
+
+        <div id="legacyIntWrap" class="form-group">
+          <label for="statusCfgLegacyInt">legacy_int_value *</label>
+          <input id="statusCfgLegacyInt" type="number" class="form-control" />
+        </div>
+
+        <div id="legacyLeadWrap" class="form-group" style="display:none;">
+          <label for="statusCfgLegacyLead">legacy_lead_status *</label>
+          <select id="statusCfgLegacyLead" class="form-control">
+            <option value="">Selecione</option>
+            <option value="NEW">NEW</option>
+            <option value="WORKING">WORKING</option>
+            <option value="QUALIFIED">QUALIFIED</option>
+            <option value="DISQUALIFIED">DISQUALIFIED</option>
+            <option value="CONVERTED">CONVERTED</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveStatusConfig">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const ENTITY_PROCESS = "PROCESS";
+    const ENTITY_LEAD = "LEAD";
+    const ENTITY_INVOICE = "INVOICE";
+    const allEntities = [ENTITY_PROCESS, ENTITY_LEAD, ENTITY_INVOICE];
+
+    const state = {
+      activeFilter: "true",
+      currentEntity: ENTITY_PROCESS,
+      rows: {
+        PROCESS: [],
+        LEAD: [],
+        INVOICE: []
+      }
+    };
+
+    function esc(v) {
+      if (v == null) return "";
+      return String(v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function notify(message, type) {
+      const el = document.getElementById("statusConfigsMessage");
+      if (!el) return;
+      el.className = `alert alert-${type || "info"}`;
+      el.textContent = message || "";
+      el.style.display = message ? "block" : "none";
+    }
+
+    function parseErrorMessage(data, fallback) {
+      if (typeof data === "string" && data.trim()) return data.trim();
+      if (data && typeof data.message === "string" && data.message.trim()) return data.message.trim();
+      if (Array.isArray(data?.message) && data.message.length > 0) return String(data.message[0] || fallback);
+      return fallback;
+    }
+
+    async function apiFetch(url, options) {
+      const resp = await fetch(url, options || {});
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        throw new Error(parseErrorMessage(data, "Falha ao processar requisicao."));
+      }
+      return data;
+    }
+
+    function listToArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function sanitizeCode(value) {
+      return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^A-Z0-9_]/g, "");
+    }
+
+    function normalizeBool(v) {
+      if (typeof v === "boolean") return v;
+      if (typeof v === "number") return v === 1;
+      return String(v || "").trim().toLowerCase() === "true";
+    }
+
+    async function loadEntity(entity) {
+      const qs = new URLSearchParams();
+      qs.set("entity", entity);
+      if (state.activeFilter === "true" || state.activeFilter === "false") {
+        qs.set("active", state.activeFilter);
+      }
+      const data = await apiFetch(`/api/status-configs?${qs.toString()}`, { headers: { Accept: "application/json" } });
+      const rows = listToArray(data).sort((a, b) => Number(a?.sort_order || 0) - Number(b?.sort_order || 0));
+      state.rows[entity] = rows;
+      renderTable(entity);
+    }
+
+    async function loadAll() {
+      notify("");
+      await Promise.all(allEntities.map((entity) => loadEntity(entity)));
+    }
+
+    function getValueForEntity(row, entity) {
+      if (entity === ENTITY_LEAD) return row?.legacy_lead_status || "-";
+      return row?.legacy_int_value ?? "-";
+    }
+
+    function renderTable(entity) {
+      const tbody = document.getElementById(`rows-${entity}`);
+      if (!tbody) return;
+      const rows = state.rows[entity] || [];
+      tbody.innerHTML = "";
+      if (!rows.length) {
+        const colSpan = entity === ENTITY_LEAD ? 7 : 7;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}">Nenhum status encontrado.</td></tr>`;
+        return;
+      }
+
+      rows.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${esc(row?.code || "-")}</td>
+          <td>${esc(row?.label || "-")}</td>
+          <td><span class="status-color-sample" style="background:${esc(row?.color || "#64748B")}"></span> ${esc(row?.color || "")}</td>
+          <td>${esc(String(row?.sort_order ?? 0))}</td>
+          <td>
+            <input type="checkbox" class="js-toggle-active" data-id="${esc(row?.id)}" data-entity="${esc(entity)}" ${normalizeBool(row?.is_active) ? "checked" : ""} />
+          </td>
+          <td>${esc(String(getValueForEntity(row, entity)))}</td>
+          <td class="status-actions">
+            <button type="button" class="btn btn-xs btn-primary js-edit" data-id="${esc(row?.id)}" data-entity="${esc(entity)}"><i class="fa fa-pencil"></i></button>
+            <button type="button" class="btn btn-xs btn-danger js-delete" data-id="${esc(row?.id)}" data-entity="${esc(entity)}" data-system="${normalizeBool(row?.is_system) ? "1" : "0"}"><i class="fa fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openModal(entity, row) {
+      const isEdit = !!row;
+      $("#statusConfigModalTitle").text(isEdit ? "Editar status" : "Novo status");
+      $("#statusCfgId").val(isEdit ? String(row.id || "") : "");
+      $("#statusCfgEntity").val(entity);
+      $("#statusCfgCode").val(isEdit ? String(row.code || "") : "");
+      $("#statusCfgLabel").val(isEdit ? String(row.label || "") : "");
+      $("#statusCfgColor").val(isEdit ? String(row.color || "#64748B") : "#64748B");
+      $("#statusCfgSortOrder").val(isEdit ? Number(row.sort_order || 0) : 0);
+      $("#statusCfgActive").prop("checked", isEdit ? normalizeBool(row.is_active) : true);
+      $("#statusCfgLegacyInt").val(isEdit ? (row.legacy_int_value ?? "") : "");
+      $("#statusCfgLegacyLead").val(isEdit ? String(row.legacy_lead_status || "") : "");
+
+      if (entity === ENTITY_LEAD) {
+        $("#legacyLeadWrap").show();
+        $("#legacyIntWrap").hide();
+      } else {
+        $("#legacyLeadWrap").hide();
+        $("#legacyIntWrap").show();
+      }
+
+      $("#statusConfigModal").modal("show");
+    }
+
+    function readModalPayload() {
+      const entity = String($("#statusCfgEntity").val() || "").trim();
+      const code = sanitizeCode($("#statusCfgCode").val());
+      const label = String($("#statusCfgLabel").val() || "").trim();
+      const color = String($("#statusCfgColor").val() || "").trim() || "#64748B";
+      const sortOrder = Number($("#statusCfgSortOrder").val() || 0);
+      const isActive = !!$("#statusCfgActive").prop("checked");
+      const legacyIntValueRaw = String($("#statusCfgLegacyInt").val() || "").trim();
+      const legacyLeadStatus = String($("#statusCfgLegacyLead").val() || "").trim().toUpperCase();
+
+      if (!entity || !allEntities.includes(entity)) throw new Error("Entidade invalida.");
+      if (!code) throw new Error("Code e obrigatorio.");
+      if (!label) throw new Error("Label e obrigatorio.");
+      if (!/^#[0-9A-Fa-f]{6}$/.test(color)) throw new Error("Cor invalida. Use formato #RRGGBB.");
+
+      const payload = {
+        entity,
+        code,
+        label,
+        color,
+        sort_order: Number.isFinite(sortOrder) ? sortOrder : 0,
+        is_active: isActive
+      };
+
+      if (entity === ENTITY_LEAD) {
+        const allowed = ["NEW", "WORKING", "QUALIFIED", "DISQUALIFIED", "CONVERTED"];
+        if (!allowed.includes(legacyLeadStatus)) {
+          throw new Error("legacy_lead_status obrigatorio para LEAD.");
+        }
+        payload.legacy_lead_status = legacyLeadStatus;
+      } else {
+        const parsed = Number(legacyIntValueRaw);
+        if (!legacyIntValueRaw || !Number.isFinite(parsed)) {
+          throw new Error("legacy_int_value obrigatorio para PROCESS/INVOICE.");
+        }
+        payload.legacy_int_value = parsed;
+      }
+
+      return payload;
+    }
+
+    async function handleSave() {
+      try {
+        const id = String($("#statusCfgId").val() || "").trim();
+        const entity = String($("#statusCfgEntity").val() || "").trim();
+        const payload = readModalPayload();
+        if (id) {
+          await apiFetch(`/api/status-configs/${encodeURIComponent(id)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          await apiFetch("/api/status-configs", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify(payload)
+          });
+        }
+        $("#statusConfigModal").modal("hide");
+        await loadEntity(entity);
+        notify("Status salvo com sucesso.", "success");
+      } catch (error) {
+        notify(error?.message || "Falha ao salvar status.", "danger");
+      }
+    }
+
+    async function handleDelete(id, entity, isSystem) {
+      const askMessage = isSystem
+        ? "Este status é de sistema. Deseja tentar excluir mesmo assim?"
+        : "Deseja excluir este status?";
+      const ok = confirm(askMessage);
+      if (!ok) return;
+      try {
+        await apiFetch(`/api/status-configs/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Accept: "application/json" } });
+        await loadEntity(entity);
+        notify("Status removido com sucesso.", "success");
+      } catch (error) {
+        notify(error?.message || "Falha ao excluir status.", "danger");
+      }
+    }
+
+    async function handleToggleActive(id, entity, nextValue) {
+      try {
+        await apiFetch(`/api/status-configs/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ is_active: !!nextValue })
+        });
+        await loadEntity(entity);
+      } catch (error) {
+        notify(error?.message || "Falha ao atualizar status.", "danger");
+      }
+    }
+
+    function getRowById(entity, id) {
+      return (state.rows[entity] || []).find((x) => String(x?.id || "") === String(id || "")) || null;
+    }
+
+    function bindEvents() {
+      $("#statusTabs a[data-toggle='tab']").on("shown.bs.tab", function () {
+        state.currentEntity = String($(this).data("entity") || ENTITY_PROCESS);
+      });
+
+      $("#activeFilter").on("change", async function () {
+        state.activeFilter = String(this.value || "all");
+        await loadAll();
+      });
+
+      $("#btnSeedDefaults").on("click", async function () {
+        const btn = this;
+        btn.disabled = true;
+        try {
+          await apiFetch("/api/status-configs/seed-defaults", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({})
+          });
+          await loadAll();
+          notify("Padroes semeados com sucesso.", "success");
+        } catch (error) {
+          notify(error?.message || "Falha ao semear padroes.", "danger");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      $(".btnNewStatus").on("click", function () {
+        openModal(String($(this).data("entity") || ENTITY_PROCESS), null);
+      });
+
+      $("#btnSaveStatusConfig").on("click", handleSave);
+
+      $(".tab-content").on("click", ".js-edit", function () {
+        const entity = String($(this).data("entity") || "");
+        const id = String($(this).data("id") || "");
+        const row = getRowById(entity, id);
+        if (!row) return;
+        openModal(entity, row);
+      });
+
+      $(".tab-content").on("click", ".js-delete", function () {
+        const entity = String($(this).data("entity") || "");
+        const id = String($(this).data("id") || "");
+        const isSystem = String($(this).data("system") || "") === "1";
+        if (!id || !entity) return;
+        handleDelete(id, entity, isSystem);
+      });
+
+      $(".tab-content").on("change", ".js-toggle-active", function () {
+        const entity = String($(this).data("entity") || "");
+        const id = String($(this).data("id") || "");
+        const checked = !!this.checked;
+        handleToggleActive(id, entity, checked);
+      });
+
+      $("#statusCfgCode").on("input", function () {
+        this.value = sanitizeCode(this.value);
+      });
+    }
+
+    async function init() {
+      $("#pageName").text("Configuracoes");
+      $("#subpageName").text("Status das Entidades");
+      $("#path").show();
+      bindEvents();
+      await loadAll();
+    }
+
+    init().catch((error) => {
+      notify(error?.message || "Falha ao carregar configuracoes de status.", "danger");
+    });
+  })();
+</script>
