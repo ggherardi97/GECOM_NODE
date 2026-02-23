@@ -36,28 +36,48 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function formatDatePtBr(value) {
+function resolvePrintLocale(req) {
+  const raw = String(
+    req?.resolvedLanguage ||
+    req?.language ||
+    req?.locale ||
+    req?.i18n?.language ||
+    ""
+  ).trim().toLowerCase();
+
+  if (raw.startsWith("en")) return "en-US";
+  if (raw.startsWith("es")) return "es-ES";
+  return "pt-BR";
+}
+
+function formatDateByLocale(value, locale = "pt-BR") {
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("pt-BR");
+  return d.toLocaleDateString(locale);
 }
 
-function money(value, currencyCode) {
+function money(value, currencyCode, locale = "pt-BR") {
   const n = toNumber(value);
   try {
     if (currencyCode) {
-      return new Intl.NumberFormat("pt-BR", { style: "currency", currency: currencyCode }).format(n);
+      return new Intl.NumberFormat(locale, { style: "currency", currency: currencyCode }).format(n);
     }
   } catch (e) {
     // ignore invalid currency codes
   }
-  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  return new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 }
 
-function qtyFmt(value) {
+function qtyFmt(value, locale = "pt-BR") {
   const n = toNumber(value);
-  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 4 }).format(n);
+  return new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 4 }).format(n);
+}
+
+function percentFmt(rate, locale = "pt-BR") {
+  const n = Number(rate) * 100;
+  if (!Number.isFinite(n)) return "0%";
+  return `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}%`;
 }
 
 function escapeHtml(value) {
@@ -300,6 +320,7 @@ router.get("/invoices/:id/print", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const printLocale = resolvePrintLocale(req);
 
     if (!authHeader) {
       return res.status(401).send("Não autenticado.");
@@ -363,10 +384,10 @@ const lines = apiLines.map((l) => {
   return {
     product_name: l?.product_name || "Manual",
     description: l?.description || "",
-    quantityFmt: qtyFmt(qty),
-    unitPriceFmt: money(unitPrice, currencyCode),
-    taxFmt: `${(taxRate * 100).toFixed(2)}%`,
-    totalFmt: money(lineTotal, currencyCode),
+    quantityFmt: qtyFmt(qty, printLocale),
+    unitPriceFmt: money(unitPrice, currencyCode, printLocale),
+    taxFmt: percentFmt(taxRate, printLocale),
+    totalFmt: money(lineTotal, currencyCode, printLocale),
   };
 });
 
@@ -377,10 +398,10 @@ const headerDiscountAmount = grossSubtotal * (headerDiscountPercent / 100);
 const total = Math.max(0, (grossSubtotal - lineDiscountTotal - headerDiscountAmount) + taxTotal);
 
 const totals = {
-  subtotalFmt: money(grossSubtotal, currencyCode),
-  discountFmt: money(headerDiscountAmount, currencyCode),
-  taxFmt: money(taxTotal, currencyCode),
-  totalFmt: money(total, currencyCode),
+  subtotalFmt: money(grossSubtotal, currencyCode, printLocale),
+  discountFmt: money(headerDiscountAmount, currencyCode, printLocale),
+  taxFmt: money(taxTotal, currencyCode, printLocale),
+  totalFmt: money(total, currencyCode, printLocale),
 };
 
 
@@ -434,9 +455,10 @@ const viewModel = {
   companyLogoDataUri,
   from: buildFromCompanyBlock(senderCompany, senderFallbackName),
   notesHtml: formatInvoiceNotesForPrint(invoice?.notes),
-  invoiceDate: formatDatePtBr(invoice?.created_at || invoice?.invoice_date || invoice?.createdAt),
-  dueDate: formatDatePtBr(invoice?.due_at || invoice?.due_at),
+  invoiceDate: formatDateByLocale(invoice?.created_at || invoice?.invoice_date || invoice?.createdAt, printLocale),
+  dueDate: formatDateByLocale(invoice?.due_at || invoice?.due_at, printLocale),
   lines,
+  printLocale,
   totals, // ✅ usa o totals já calculado (subtotal, desconto, imposto, total)
 };
 

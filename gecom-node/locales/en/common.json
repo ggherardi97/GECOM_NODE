@@ -179,9 +179,17 @@
       "toolbar": {
         "selected": "Selected:",
         "sendToClient": "Send to client",
+        "generateInvoice": "Generate invoice",
         "delete": "Delete",
         "clearSelection": "Clear selection",
         "newInvoice": "New Invoice"
+      },
+      "actions": {
+        "clone": "Clone invoice"
+      },
+      "messages": {
+        "selectOneToClone": "Select only 1 invoice to clone.",
+        "selectOneToGenerate": "Select only 1 invoice to generate."
       },
       "filters": {
         "all": "All",
@@ -206,6 +214,41 @@
         "total": "Total",
         "quoteDate": "Quote date",
         "dueDate": "Due date"
+      }
+    },
+    "invoicePrint": {
+      "pageTitle": "Invoice - Print",
+      "actions": {
+        "close": "Close",
+        "edit": "Edit",
+        "applyEdit": "Apply edit",
+        "print": "Print"
+      },
+      "labels": {
+        "from": "From",
+        "to": "To",
+        "invoice": "Invoice",
+        "date": "Date",
+        "dueDate": "Due date",
+        "notes": "Notes",
+        "phone": "Phone",
+        "phoneShort": "P"
+      },
+      "columns": {
+        "item": "Item",
+        "quantity": "Qty",
+        "unitPrice": "Unit price",
+        "tax": "Tax",
+        "total": "Total"
+      },
+      "totals": {
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "tax": "Taxes",
+        "total": "Total"
+      },
+      "empty": {
+        "noLines": "No lines"
       }
     },
     "login": {
@@ -1243,6 +1286,9 @@
       },
       "list": {
         "showingCount": "{{shown}} of {{total}} shown"
+      },
+      "empty": {
+        "noResults": "No notifications found."
       },
       "messages": {
         "companyMissing": "Company not informed.",

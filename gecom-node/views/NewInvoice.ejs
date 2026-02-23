@@ -558,12 +558,8 @@
       });
 
       if ($el.val()) {
-        if (thousandsOnInput) {
-          $el.val(formatTypingMoneyLike($el.val()));
-        } else {
-          const n = parseNumberSafe($el.val(), null);
-          if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
-        }
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
       }
     }
 
@@ -1267,7 +1263,7 @@
                 }
                 $root.find("#il_unit_price").val(String(parseNumberSafe(item.defaultUnitPrice, 0)));
                 $root.find("#il_tax_rate").val(String(clamp01(item.defaultTaxRate)));
-                $root.find("#il_unit_price").trigger("input");
+                $root.find("#il_unit_price").trigger("blur");
                 $root.find("#il_tax_rate").trigger("blur");
               }
 
@@ -1303,8 +1299,8 @@
             $root.find("#il_quantity").val(String(toIntSafe(existing.quantity, 1)));
             $root.find("#il_tax_rate").val(String(clamp01(existing.tax_rate)));
             $root.find("#il_discount_amount").val(String(parseNumberSafe(existing.discount_amount, 0)));
-            $root.find("#il_unit_price").trigger("input");
-            $root.find("#il_discount_amount").trigger("input");
+            $root.find("#il_unit_price").trigger("blur");
+            $root.find("#il_discount_amount").trigger("blur");
             $root.find("#il_tax_rate").trigger("blur");
           }
 

@@ -179,9 +179,17 @@
       "toolbar": {
         "selected": "Seleccionados:",
         "sendToClient": "Enviar al cliente",
+        "generateInvoice": "Generar invoice",
         "delete": "Eliminar",
         "clearSelection": "Limpiar selección",
         "newInvoice": "Nuevo Invoice"
+      },
+      "actions": {
+        "clone": "Clonar invoice"
+      },
+      "messages": {
+        "selectOneToClone": "Selecciona solo 1 invoice para clonar.",
+        "selectOneToGenerate": "Selecciona solo 1 invoice para generar."
       },
       "filters": {
         "all": "Todos",
@@ -206,6 +214,41 @@
         "total": "Total",
         "quoteDate": "Fecha de cotización",
         "dueDate": "Vencimiento"
+      }
+    },
+    "invoicePrint": {
+      "pageTitle": "Invoice - Impresión",
+      "actions": {
+        "close": "Cerrar",
+        "edit": "Editar",
+        "applyEdit": "Aplicar edición",
+        "print": "Imprimir"
+      },
+      "labels": {
+        "from": "De",
+        "to": "Para",
+        "invoice": "Invoice",
+        "date": "Fecha",
+        "dueDate": "Vencimiento",
+        "notes": "Observaciones",
+        "phone": "Teléfono",
+        "phoneShort": "T"
+      },
+      "columns": {
+        "item": "Ítem",
+        "quantity": "Cant.",
+        "unitPrice": "Precio unit.",
+        "tax": "Impuesto",
+        "total": "Total"
+      },
+      "totals": {
+        "subtotal": "Sub Total",
+        "discount": "Descuento",
+        "tax": "Impuestos",
+        "total": "Total"
+      },
+      "empty": {
+        "noLines": "Sin líneas"
       }
     },
     "login": {
@@ -1243,6 +1286,9 @@
       },
       "list": {
         "showingCount": "{{shown}} de {{total}} mostradas"
+      },
+      "empty": {
+        "noResults": "No se encontraron notificaciones."
       },
       "messages": {
         "companyMissing": "Empresa no informada.",

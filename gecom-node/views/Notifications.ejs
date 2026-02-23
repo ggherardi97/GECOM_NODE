@@ -126,7 +126,8 @@
       clearLabel: "<%= t('page.layout.savedViews.clearLabel') %>",
       saveCurrentTitle: "<%= t('page.layout.savedViews.saveCurrentTitle') %>",
       saveLabel: "<%= t('page.layout.savedViews.saveLabel') %>",
-      companyMissing: "<%= t('page.notifications.messages.companyMissing') %>"
+      companyMissing: "<%= t('page.notifications.messages.companyMissing') %>",
+      noResults: "<%= t('page.notifications.empty.noResults') %>"
     };
 
     let notifications = [];
@@ -300,6 +301,15 @@
         .map(function () { return String($(this).data("field") || ""); })
         .get();
 
+      if (!Array.isArray(notifications) || notifications.length === 0) {
+        const cols = Math.max(1, visibleFields.length || 1);
+        tbody.append(
+          `<tr class="empty-row"><td colspan="${cols}" class="text-center text-muted">${escapeHtml(I18N.noResults)}</td></tr>`
+        );
+        setCounters(0, 0);
+        return;
+      }
+
       notifications.forEach((n) => {
         const r = buildRowModel(n);
         let cls = "";
@@ -367,6 +377,14 @@
     }
 
     function rerunAllFilters() {
+      if (!Array.isArray(notifications) || notifications.length === 0) {
+        $("#notificationsLines tr.empty-row").show();
+        setCounters(0, 0);
+        return;
+      }
+
+      $("#notificationsLines tr.empty-row-filter").remove();
+
       const title = String($("#fTitle").val() || "").trim().toLowerCase();
       const message = String($("#fMessage").val() || "").trim().toLowerCase();
       const severity = String($("#fSeverity").val() || "").trim().toLowerCase();
@@ -380,7 +398,7 @@
       const createdFrom = parseDatePtBR($("#createdAtFromFilter").val());
       const createdTo = parseDatePtBR($("#createdAtToFilter").val());
 
-      $("#notificationsLines tr").show().each(function () {
+      $("#notificationsLines tr").not(".empty-row").show().each(function () {
         const row = $(this);
         const titleCell = String(row.find("td[data-field='title']").text() || "").toLowerCase();
         const msgCell = String(row.find("td[data-field='message']").text() || "").toLowerCase();
@@ -423,7 +441,15 @@
         }
       });
 
-      setCounters($("#notificationsLines tr:visible").length, notifications.length);
+      const visibleCount = $("#notificationsLines tr:visible").not(".empty-row").length;
+      if (visibleCount === 0) {
+        const cols = Math.max(1, $("#notificationsHeaderRow th:visible").length || 1);
+        $("#notificationsLines").append(
+          `<tr class="empty-row empty-row-filter"><td colspan="${cols}" class="text-center text-muted">${escapeHtml(I18N.noResults)}</td></tr>`
+        );
+      }
+
+      setCounters(visibleCount, notifications.length);
     }
 
     function captureFiltersForSavedView() {

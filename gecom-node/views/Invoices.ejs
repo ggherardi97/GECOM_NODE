@@ -74,6 +74,9 @@ display: none !important;
           <button id="btnBulkSend" type="button" class="btn btn-success btn-sm">
             <i class="fa fa-send"></i> <%= t('page.invoices.toolbar.sendToClient') %>
           </button>
+          <button id="btnBulkGeneratePrint" type="button" class="btn btn-white btn-sm">
+            <i class="fa fa-file-pdf-o"></i> <%= t('page.invoices.toolbar.generateInvoice') %>
+          </button>
           <button id="btnBulkClone" type="button" class="btn btn-warning btn-sm">
             <i class="fa fa-clone"></i> <%= t('page.invoices.actions.clone') %>
           </button>
@@ -1264,12 +1267,30 @@ display: none !important;
   }
 
   const btnClone = document.getElementById("btnBulkClone");
+  const btnGeneratePrint = document.getElementById("btnBulkGeneratePrint");
+
+  if (btnGeneratePrint && isAdmin) {
+    btnGeneratePrint.addEventListener("click", function () {
+      const ids = Array.from(selectedInvoiceIds);
+      if (ids.length === 0) return;
+      if (ids.length > 1) {
+        alert("<%= t('page.invoices.messages.selectOneToGenerate') %>");
+        return;
+      }
+
+      const invoiceId = String(ids[0] || "").trim();
+      if (!invoiceId) return;
+      const url = `/api/invoices/${encodeURIComponent(invoiceId)}/print`;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  }
+
   if (btnClone && isAdmin) {
     btnClone.addEventListener("click", async function () {
       const ids = Array.from(selectedInvoiceIds);
       if (ids.length === 0) return;
       if (ids.length > 1) {
-        alert("Selecione apenas 1 invoice para clonar.");
+        alert("<%= t('page.invoices.messages.selectOneToClone') %>");
         return;
       }
 

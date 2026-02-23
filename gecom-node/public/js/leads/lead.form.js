@@ -174,6 +174,14 @@
     }).format(n);
   }
 
+  function formatMoneyTypingPtBr(value) {
+    const digits = String(value || "").replace(/\D/g, "");
+    if (!digits) return "";
+    const n = Number(digits) / 100;
+    if (!Number.isFinite(n)) return "";
+    return formatMoneyPtBr(n);
+  }
+
   function readForm() {
     const statusSelection = String($("#leadStatus").val() || "").trim();
     const statusPayload = buildStatusPayloadFromSelection(statusSelection);
@@ -452,8 +460,7 @@
     });
 
     $("#leadValue").on("input", function () {
-      const raw = String(this.value || "");
-      this.value = raw.replace(/[^\d.,]/g, "");
+      this.value = formatMoneyTypingPtBr(this.value);
     });
 
     $("#leadValue").on("blur", function () {

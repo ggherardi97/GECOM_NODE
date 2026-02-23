@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice - ImpressÃ£o</title>
+  <title><%= t('page.invoicePrint.pageTitle') %></title>
 
   <!-- Use absolute paths to avoid /Pages/... issues -->
   <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet">
@@ -40,9 +40,9 @@
     <div class="ibox-content p-xl">
 
       <div class="no-print" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;">
-        <button class="btn btn-white" onclick="window.close()"><i class="fa fa-times"></i> Fechar</button>
-        <button id="btnToggleEdit" class="btn btn-warning" type="button"><i class="fa fa-pencil"></i> Editar</button>
-        <button id="btnPrint" class="btn btn-primary" type="button"><i class="fa fa-print"></i> Imprimir</button>
+        <button class="btn btn-white" onclick="window.close()"><i class="fa fa-times"></i> <%= t('page.invoicePrint.actions.close') %></button>
+        <button id="btnToggleEdit" class="btn btn-warning" type="button"><i class="fa fa-pencil"></i> <%= t('page.invoicePrint.actions.edit') %></button>
+        <button id="btnPrint" class="btn btn-primary" type="button"><i class="fa fa-print"></i> <%= t('page.invoicePrint.actions.print') %></button>
       </div>
 
       <div class="row">
@@ -50,32 +50,32 @@
           <% if (companyLogoDataUri) { %>
             <img src="<%= companyLogoDataUri %>" alt="Company logo" class="company-logo-print" />
           <% } %>
-          <h5>De:</h5>
+          <h5><%= t('page.invoicePrint.labels.from') %></h5>
           <address id="fromDisplay">
             <strong><%= from?.name || "-" %></strong><br>
             <%= from?.addr1 || "-" %><br>
             <%= from?.addr2 || "" %>
-            <abbr title="Telefone">T:</abbr> <%= from?.phone || "-" %>
+            <abbr title="<%= t('page.invoicePrint.labels.phone') %>"><%= t('page.invoicePrint.labels.phoneShort') %>:</abbr> <%= from?.phone || "-" %>
           </address>
           <textarea id="fromEditor" class="form-control no-print edit-area" style="display:none;"></textarea>
         </div>
 
         <div class="col-sm-6 text-right">
-          <h4>Invoice</h4>
+          <h4><%= t('page.invoicePrint.labels.invoice') %></h4>
           <h4 class="text-navy mono"><%= invoice?.invoice_number || ("INV-" + String(invoice?.id || "").slice(0,8).toUpperCase()) %></h4>
 
-          <span>Para:</span>
+          <span><%= t('page.invoicePrint.labels.to') %>:</span>
           <address id="toDisplay">
             <strong><%= company?.company_name || "-" %></strong><br>
             <%= invoice?.billing_address_line1 || "-" %><br>
             <%= invoice?.billing_address_line2 || "" %>
-            <abbr title="Telefone">T:</abbr> <%= company?.phone || "-" %>
+            <abbr title="<%= t('page.invoicePrint.labels.phone') %>"><%= t('page.invoicePrint.labels.phoneShort') %>:</abbr> <%= company?.phone || "-" %>
           </address>
           <textarea id="toEditor" class="form-control no-print edit-area" style="display:none;"></textarea>
 
           <p>
-            <span><strong>Data:</strong> <%= invoiceDate || "-" %></span><br/>
-            <span><strong>Vencimento:</strong> <%= dueDate || "-" %></span>
+            <span><strong><%= t('page.invoicePrint.labels.date') %>:</strong> <%= invoiceDate || "-" %></span><br/>
+            <span><strong><%= t('page.invoicePrint.labels.dueDate') %>:</strong> <%= dueDate || "-" %></span>
           </p>
         </div>
       </div>
@@ -84,16 +84,16 @@
         <table class="table invoice-table">
           <thead>
             <tr>
-              <th>Item</th>
-              <th class="text-right">Qtd</th>
-              <th class="text-right">PreÃ§o Unit.</th>
-              <th class="text-right">Imposto</th>
-              <th class="text-right">Total</th>
+              <th><%= t('page.invoicePrint.columns.item') %></th>
+              <th class="text-right"><%= t('page.invoicePrint.columns.quantity') %></th>
+              <th class="text-right"><%= t('page.invoicePrint.columns.unitPrice') %></th>
+              <th class="text-right"><%= t('page.invoicePrint.columns.tax') %></th>
+              <th class="text-right"><%= t('page.invoicePrint.columns.total') %></th>
             </tr>
           </thead>
           <tbody>
             <% if (!lines || !lines.length) { %>
-              <tr><td colspan="5" class="text-center text-muted">Nenhuma linha</td></tr>
+              <tr><td colspan="5" class="text-center text-muted"><%= t('page.invoicePrint.empty.noLines') %></td></tr>
             <% } else { %>
               <% lines.forEach(function(l){ %>
                 <tr>
@@ -115,29 +115,29 @@
      <table class="table invoice-total">
   <tbody>
     <tr>
-      <td><strong>Sub Total :</strong></td>
+      <td><strong><%= t('page.invoicePrint.totals.subtotal') %>:</strong></td>
       <td class="text-right"><%= totals.subtotalFmt %></td>
     </tr>
 
     <tr>
-      <td><strong>Desconto :</strong></td>
+      <td><strong><%= t('page.invoicePrint.totals.discount') %>:</strong></td>
       <td class="text-right"><%= totals.discountFmt %></td>
     </tr>
 
     <tr>
-      <td><strong>Impostos :</strong></td>
+      <td><strong><%= t('page.invoicePrint.totals.tax') %>:</strong></td>
       <td class="text-right"><%= totals.taxFmt %></td>
     </tr>
 
     <tr>
-      <td><strong>Total :</strong></td>
+      <td><strong><%= t('page.invoicePrint.totals.total') %>:</strong></td>
       <td class="text-right"><%= totals.totalFmt %></td>
     </tr>
   </tbody>
 </table>
 
 
-      <div class="well m-t"><strong>ObservaÃ§Ãµes</strong>
+      <div class="well m-t"><strong><%= t('page.invoicePrint.labels.notes') %></strong>
         <div id="notesDisplay" style="margin-top:6px;"><%- notesHtml || "-" %></div>
         <textarea id="notesEditor" class="form-control no-print edit-notes" style="display:none;margin-top:8px;"></textarea>
       </div>
@@ -190,7 +190,7 @@
         toEditor.style.display = "";
         notesEditor.style.display = "";
 
-        btnToggleEdit.innerHTML = '<i class="fa fa-check"></i> Aplicar edição';
+        btnToggleEdit.innerHTML = '<i class="fa fa-check"></i> <%= t('page.invoicePrint.actions.applyEdit') %>';
         isEditing = true;
       }
 
@@ -207,7 +207,7 @@
         toEditor.style.display = "none";
         notesEditor.style.display = "none";
 
-        btnToggleEdit.innerHTML = '<i class="fa fa-pencil"></i> Editar';
+        btnToggleEdit.innerHTML = '<i class="fa fa-pencil"></i> <%= t('page.invoicePrint.actions.edit') %>';
         isEditing = false;
       }
 
