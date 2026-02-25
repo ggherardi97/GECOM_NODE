@@ -26,6 +26,13 @@ const serviceApiRoutes = require("./routes/serviceApi");
 const statusConfigsApiRoutes = require("./routes/statusConfigsApi");
 const tradeSimulationsApiRoutes = require("./routes/tradeSimulationsApi");
 const servicePagesRoutes = require("./routes/servicePages");
+const opportunitiesApiRoutes = require("./routes/opportunitiesApi");
+const contractsApiRoutes = require("./routes/contractsApi");
+const priceTablesApiRoutes = require("./routes/priceTablesApi");
+const salesApprovalsApiRoutes = require("./routes/salesApprovalsApi");
+const salesGoalsApiRoutes = require("./routes/salesGoalsApi");
+const billingApiRoutes = require("./routes/billingApi");
+const billingPagesRoutes = require("./routes/billingPages");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -118,6 +125,13 @@ app.use("/api", aiApi);
 app.use("/api", serviceApiRoutes);
 app.use("/api", statusConfigsApiRoutes);
 app.use("/api", tradeSimulationsApiRoutes);
+app.use("/api", opportunitiesApiRoutes);
+app.use("/api", contractsApiRoutes);
+app.use("/api", priceTablesApiRoutes);
+app.use("/api", salesApprovalsApiRoutes);
+app.use("/api", salesGoalsApiRoutes);
+app.use("/api", billingApiRoutes);
+app.use("/", billingPagesRoutes);
 app.use("/", servicePagesRoutes);
 
 // Backward-compatible alias for environments calling /cnpj/lookup without /api
@@ -154,6 +168,18 @@ app.get("/leads/new", (req, res) => res.render("leads/lead-form"));
 app.get("/leads/:id/edit", (req, res) => res.render("leads/lead-form"));
 app.get("/leads/:id", (req, res) => res.render("leads/lead-detail"));
 app.get("/leads", (req, res) => res.render("leads/leads-list"));
+app.get(['/Opportunities', '/opportunities'], (req, res) => res.render('Opportunities'));
+app.get(['/NewOpportunity', '/new-opportunity'], (req, res) => res.render('NewOpportunity'));
+app.get(['/Contracts', '/contracts'], (req, res) => res.render('Contracts'));
+app.get(['/NewContract', '/new-contract'], (req, res) => res.render('NewContract'));
+app.get(['/SalesApprovals', '/sales-approvals'], (req, res) => res.render('SalesApprovals'));
+app.get(['/NewSalesApproval', '/new-sales-approval'], (req, res) => res.render('NewSalesApproval'));
+app.get(['/PriceTables', '/price-tables'], (req, res) => res.render('PriceTables'));
+app.get(['/NewPriceTable', '/new-price-table'], (req, res) => res.render('NewPriceTable'));
+app.get(['/SalesGoals', '/sales-goals'], (req, res) => res.render('SalesGoals'));
+app.get(['/NewSalesGoal', '/new-sales-goal'], (req, res) => res.render('NewSalesGoal'));
+app.get(['/SalesCommissions', '/sales-commissions'], (req, res) => res.render('SalesCommissions'));
+app.get(['/NewSalesCommission', '/new-sales-commission'], (req, res) => res.render('NewSalesCommission'));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

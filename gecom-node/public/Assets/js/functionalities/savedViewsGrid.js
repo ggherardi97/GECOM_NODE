@@ -83,7 +83,7 @@
         onAfterApply: null,
 
         // fallback
-        fallbackViewName: "Default",
+        fallbackViewName: "",
         includeFallbackOption: true,
         fallbackDefinition: null,
       },
@@ -109,6 +109,42 @@
     if (!cfg.$filtersRow.length) throw new Error(`SavedViewsGrid.init: filters row not found: ${cfg.filtersRowSelector}`);
 
     return cfg;
+  }
+
+  function normalizeLang(lang) {
+    const raw = String(lang || "").toLowerCase();
+    if (raw.startsWith("en")) return "en";
+    if (raw.startsWith("es")) return "es";
+    return "pt";
+  }
+
+  function detectUiLang() {
+    try {
+      if (window.i18next) {
+        if (window.i18next.resolvedLanguage) return normalizeLang(window.i18next.resolvedLanguage);
+        if (window.i18next.language) return normalizeLang(window.i18next.language);
+      }
+    } catch (_) {}
+
+    const htmlLang = String(document?.documentElement?.lang || "").trim();
+    if (htmlLang) return normalizeLang(htmlLang);
+
+    return normalizeLang(String(navigator?.language || ""));
+  }
+
+  function resolveFallbackLabel(cfg) {
+    const explicit = String(cfg?.fallbackViewName ?? "").trim();
+    if (explicit) return explicit;
+
+    const lang = detectUiLang();
+    if (lang === "en") return "Default view";
+    if (lang === "es") return "Vista predeterminada";
+    return "Visualizacao padrao";
+  }
+
+  function shouldRenderFallbackOption(cfg, state) {
+    if (cfg.includeFallbackOption !== false) return true;
+    return !Array.isArray(state?.views) || state.views.length === 0;
   }
 
   function apiAuthHeaders() {
@@ -286,8 +322,8 @@
     const $picker = cfg.$host.find(".sv-picker");
     $picker.empty();
 
-    if (cfg.includeFallbackOption !== false) {
-      const fallbackName = cfg.fallbackViewName == null ? "Default" : String(cfg.fallbackViewName);
+    if (shouldRenderFallbackOption(cfg, state)) {
+      const fallbackName = resolveFallbackLabel(cfg);
       $picker.append(`<option value="__fallback__">${escapeHtml(fallbackName)}</option>`);
     }
 
@@ -301,6 +337,7 @@
   async function pickInitialView(cfg, state) {
     const $picker = cfg.$host.find(".sv-picker");
     const last = String(localStorage.getItem(`savedViews:last:${cfg.entityName}`) || "");
+    const hasFallbackOption = shouldRenderFallbackOption(cfg, state);
 
     let initialId = "";
     if (last && (state.views || []).some(v => String(v.id) === last)) {
@@ -323,7 +360,7 @@
       return;
     }
 
-    if (cfg.includeFallbackOption === false) {
+    if (cfg.includeFallbackOption === false && !hasFallbackOption) {
       const firstId = state.views?.[0]?.id;
       if (firstId != null) {
         $picker.val(String(firstId));
@@ -333,7 +370,7 @@
     }
 
     // no default => apply fallback
-    if (cfg.includeFallbackOption !== false) $picker.val("__fallback__");
+    if (hasFallbackOption) $picker.val("__fallback__");
     await applyFallback(cfg, state);
   }
 
@@ -352,7 +389,7 @@
 
   async function applyFallback(cfg, state) {
     state.currentViewId = null;
-    state.currentName = cfg.fallbackViewName || "Default";
+    state.currentName = resolveFallbackLabel(cfg);
 
     const def = cfg.fallbackDefinition || {
       columns: cfg.getAllColumnKeys(),
@@ -386,7 +423,7 @@
     const $picker = cfg.$host.find(".sv-picker");
     if (!opts.preservePickerValue) {
       if (viewId) $picker.val(String(viewId));
-      else if (cfg.includeFallbackOption !== false) $picker.val("__fallback__");
+      else if (shouldRenderFallbackOption(cfg, state)) $picker.val("__fallback__");
       else $picker.val("");
     }
 

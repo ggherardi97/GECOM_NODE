@@ -221,6 +221,29 @@
       display: none;
     }
 
+    .custom-module-option {
+      border: 1px solid #dfe8ee;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      min-height: 74px;
+      background: #fff;
+    }
+
+    .custom-module-option label {
+      margin: 0;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .custom-module-price {
+      color: #1a9d7b;
+      font-weight: 700;
+      font-size: 12px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
     .selected-plan-chip {
       display: inline-block;
       margin-bottom: 12px;
@@ -281,7 +304,13 @@
             Centralize processos, documentos, comunicação e rastreamento com visão executiva e controle operacional em tempo real.
           </p>
           <p class="wow fadeInUp" data-wow-delay="0.2s">
-            <button id="btnExperimentHero" class="btn btn-primary btn-lg">Experimentar</button>
+            <button
+              id="btnExperimentHero"
+              type="button"
+              class="btn btn-primary btn-lg"
+              onclick="if (window.__openRegisterPlans) { window.__openRegisterPlans(); } else { var hero = document.getElementById('heroSection'); var features = document.getElementById('featuresPublic'); var plans = document.getElementById('plansStage'); if (hero) hero.classList.add('section-hidden'); if (features) features.classList.add('section-hidden'); if (plans) plans.classList.add('is-active'); }">
+              Experimentar
+            </button>
             <a href="/LandingPage" class="btn btn-white btn-lg m-l-sm">Ver Detalhes</a>
           </p>
         </div>
@@ -339,54 +368,12 @@
       </div>
 
       <div id="plansListWrap" class="row m-t-lg plans-list-wrap">
-          <div class="col-md-4">
-            <div class="plan-card" data-plan-id="SMALL" data-plan-name="Plano Small">
-              <h3 class="plan-name">Plano Small</h3>
-              <div class="plan-price">R$ 950,00 <small>mensal</small></div>
-              <ul class="plan-list">
-                <li>1 módulo incluso</li>
-                <li>10 users</li>
-                <li>20GB de armazenamento</li>
-              </ul>
-              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Small</button>
-            </div>
+        <div id="dynamicPlansContainer" class="col-lg-12"></div>
+        <div class="col-lg-12">
+          <div class="disclaimer-box">
+            Desenvolvimentos customizados sao cobrados a parte.
           </div>
-
-          <div class="col-md-4">
-            <div class="plan-card" data-plan-id="MEDIUM" data-plan-name="Plano Medium">
-              <h3 class="plan-name">Plano Medium</h3>
-              <div class="plan-price">R$ 1.750,00 <small>mensal</small></div>
-              <ul class="plan-list">
-                <li>2 módulos inclusos</li>
-                <li>25 users</li>
-                <li>50GB de armazenamento</li>
-                <li>IA embutida</li>
-              </ul>
-              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Medium</button>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="plan-card" data-plan-id="PREMIUM" data-plan-name="Plano Premium">
-              <h3 class="plan-name">Plano Premium</h3>
-              <div class="plan-price">R$ 3.100,00 <small>mensal</small></div>
-              <ul class="plan-list">
-                <li>Todos os módulos</li>
-                <li>50 users</li>
-                <li>100GB de armazenamento</li>
-                <li>IA embutida</li>
-                <li>Cloudflare para arquivos e docs</li>
-                <li>Rastreamento de rotas (importação/exportação)</li>
-              </ul>
-              <button type="button" class="btn btn-outline btn-primary btn-plan plan-select-btn">Selecionar Premium</button>
-            </div>
-          </div>
-
-          <div class="col-lg-12">
-            <div class="disclaimer-box">
-              Desenvolvimentos customizados são cobrados à parte.
-            </div>
-          </div>
+        </div>
       </div>
 
       <div id="registerFormWrap" class="register-form-wrap">
@@ -399,6 +386,17 @@
               <span id="selectedPlanChip" class="selected-plan-chip"></span>
               <h3 style="margin-top:0;">Dados para ativação</h3>
               <p class="text-muted">Preencha os dados para criar seu ambiente completo pelo onboarding oficial.</p>
+
+              <div id="customPlanBuilder" class="well well-sm section-hidden">
+                <h4 style="margin-top:0;">Crie seu plano</h4>
+                <p class="text-muted" style="margin-bottom: 12px;">
+                  Selecione os modulos desejados para montar seu plano custom.
+                </p>
+                <div id="customModulesChecklist" class="row"></div>
+                <div class="text-right" style="margin-top: 10px;">
+                  <strong>Total mensal: <span id="customPlanTotal">R$ 0,00</span></strong>
+                </div>
+              </div>
 
               <form id="publicRegisterForm">
                 <div class="row">
@@ -560,300 +558,128 @@
   <script src="/Assets/inspinia/js/plugins/wow/wow.min.js"></script>
   <script src="/Assets/inspinia/js/plugins/sweetalert/sweetalert.min.js"></script>
 
+  <script src="/js/public-register.page.js"></script>
   <script>
     (function () {
-      const state = {
-        selectedPlanId: null,
-        selectedPlanName: null,
-        isSubmitting: false
-      };
-      const loaderMessages = [
-        "Estamos preparando seu ambiente...",
-        "Criando configurações de segurança...",
-        "Configurando empresa e usuário administrador...",
-        "Finalizando seu acesso inicial..."
-      ];
-      let loaderTimer = null;
-      let loaderMessageIndex = 0;
-
-      function showLandingStage() {
-        document.getElementById("heroSection")?.classList.remove("section-hidden");
-        document.getElementById("featuresPublic")?.classList.remove("section-hidden");
-        document.getElementById("plansStage")?.classList.remove("is-active");
+      function normalizeArray(data) {
+        if (Array.isArray(data)) return data;
+        if (data && Array.isArray(data.data)) return data.data;
+        if (data && Array.isArray(data.rows)) return data.rows;
+        if (data && Array.isArray(data.items)) return data.items;
+        return [];
       }
 
-      function showPlansStage() {
-        document.getElementById("heroSection")?.classList.add("section-hidden");
-        document.getElementById("featuresPublic")?.classList.add("section-hidden");
-        document.getElementById("plansStage")?.classList.add("is-active");
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      function esc(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
       }
 
-      function showPlanChooser() {
-        document.getElementById("plansListWrap")?.classList.remove("is-hidden");
-        document.getElementById("registerFormWrap")?.classList.remove("is-active");
+      function toMoney(value) {
+        var n = Number(value);
+        if (!Number.isFinite(n) || n < 0) n = 0;
+        return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       }
 
-      function normalizeString(value) {
-        return String(value || "").trim();
+      function revealPlansStage() {
+        var hero = document.getElementById("heroSection");
+        var features = document.getElementById("featuresPublic");
+        var plans = document.getElementById("plansStage");
+        if (hero) hero.classList.add("section-hidden");
+        if (features) features.classList.add("section-hidden");
+        if (plans) plans.classList.add("is-active");
       }
 
-      function slugifyCompanyName(name) {
-        const normalized = normalizeString(name)
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "")
-          .slice(0, 45);
+      function renderPublicPlans(plansData) {
+        var container = document.getElementById("dynamicPlansContainer");
+        if (!container) return;
 
-        if (normalized) return normalized;
-        return `tenant-${Date.now()}`;
-      }
+        var plans = normalizeArray(plansData);
+        var cards = "";
 
-      async function readJsonSafe(response) {
-        const text = await response.text().catch(() => "");
-        if (!text) return {};
-        try {
-          return JSON.parse(text);
-        } catch {
-          return { message: text };
-        }
-      }
+        plans.forEach(function (plan) {
+          var modules = normalizeArray(plan && plan.modules).map(function (moduleRow) {
+            var moduleName = (moduleRow && moduleRow.name_pt_br) || (moduleRow && moduleRow.code) || "Modulo";
+            return "<li>" + esc(moduleName) + "</li>";
+          }).join("");
 
-      async function postJson(url, payload) {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          },
-          credentials: "include",
-          body: JSON.stringify(payload || {})
+          cards += ''
+            + '<div class="col-lg-4 col-md-6">'
+            + '  <div class="plan-card" data-plan-id="' + esc(plan && plan.id) + '" data-plan-name="' + esc(plan && plan.name) + '" data-plan-type="standard">'
+            + '    <h3 class="plan-name">' + esc((plan && plan.name) || "Plano") + '</h3>'
+            + '    <div class="plan-price">' + esc(toMoney(plan && plan.monthly_price)) + ' <small>/mes</small></div>'
+            + '    <p class="text-muted">' + esc((plan && plan.description) || "Plano pronto para iniciar seu ambiente.") + '</p>'
+            + '    <ul class="plan-list">' + (modules || "<li>Sem modulos listados.</li>") + '</ul>'
+            + '    <button class="btn btn-primary btn-plan plan-select-btn" data-plan-id="' + esc(plan && plan.id) + '">Selecionar plano</button>'
+            + '  </div>'
+            + '</div>';
         });
 
-        const data = await readJsonSafe(response);
-        if (!response.ok) {
-          const error = new Error(data?.message || `Falha na chamada ${url}`);
-          error.status = response.status;
-          error.data = data;
-          throw error;
-        }
+        cards += ''
+          + '<div class="col-lg-4 col-md-6">'
+          + '  <div class="plan-card" data-plan-id="__CUSTOM__" data-plan-name="Plano custom" data-plan-type="custom">'
+          + '    <h3 class="plan-name">Crie seu plano</h3>'
+          + '    <div class="plan-price">Voce escolhe <small>modulo a modulo</small></div>'
+          + '    <p class="text-muted">Monte um plano sob medida escolhendo os modulos que precisa e veja o total mensal.</p>'
+          + '    <ul class="plan-list">'
+          + '      <li>Escolha os modulos desejados</li>'
+          + '      <li>Total mensal calculado automaticamente</li>'
+          + '      <li>Plano exclusivo associado ao seu tenant</li>'
+          + '    </ul>'
+          + '    <button class="btn btn-primary btn-plan plan-select-btn" data-plan-id="__CUSTOM__">Montar plano custom</button>'
+          + '  </div>'
+          + '</div>';
+
+        var emptyWarning = plans.length === 0
+          ? '<div class="col-lg-12"><div class="alert alert-warning">Nao ha planos prontos publicados. Voce ainda pode montar um plano custom.</div></div>'
+          : '';
+
+        container.innerHTML = '<div class="row">' + emptyWarning + cards + '</div>';
+      }
+
+      async function fetchJson(url) {
+        var response = await fetch(url, { credentials: "include", headers: { Accept: "application/json" } });
+        var text = await response.text().catch(function () { return ""; });
+        var data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
+        if (!response.ok) throw new Error((data && data.message) || ("Falha em " + url));
         return data;
       }
 
-      function renderPlanSelection(planCard) {
-        document.querySelectorAll(".plan-card").forEach((card) => card.classList.remove("selected"));
-        planCard.classList.add("selected");
-
-        state.selectedPlanId = normalizeString(planCard.getAttribute("data-plan-id"));
-        state.selectedPlanName = normalizeString(planCard.getAttribute("data-plan-name"));
-
-        const chip = document.getElementById("selectedPlanChip");
-        chip.textContent = `${state.selectedPlanName} selecionado`;
-
-        const categoryInput = document.getElementById("companyCategoryInput");
-        if (categoryInput && !normalizeString(categoryInput.value)) {
-          categoryInput.value = state.selectedPlanName;
+      async function fallbackOpenPlans() {
+        revealPlansStage();
+        var container = document.getElementById("dynamicPlansContainer");
+        if (container) {
+          container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-info">Carregando planos disponiveis...</div></div></div>';
         }
-
-        document.getElementById("plansListWrap")?.classList.add("is-hidden");
-        document.getElementById("registerFormWrap")?.classList.add("is-active");
-        document.getElementById("registerFormWrap")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-
-      async function syncCurrentUserFromMe() {
-        const meResp = await fetch("/api/auth/me", {
-          method: "GET",
-          headers: { "Accept": "application/json" },
-          credentials: "include"
-        });
-
-        const me = await readJsonSafe(meResp);
-        if (!meResp.ok || !me?.id) return;
-
-        localStorage.setItem("currentUser", JSON.stringify(me));
-        localStorage.setItem("currentUserId", String(me.id));
-        if (me.company_id != null) {
-          localStorage.setItem("companyId", String(me.company_id));
-        }
-      }
-
-      function setSubmitState(isLoading) {
-        state.isSubmitting = isLoading;
-        const btn = document.getElementById("confirmBtn");
-        if (!btn) return;
-
-        btn.disabled = isLoading;
-        btn.innerHTML = isLoading
-          ? '<i class="fa fa-spinner fa-spin"></i> Processando...'
-          : '<i class="fa fa-check"></i> Confirmar cadastro';
-
-        if (isLoading) {
-          showLoader();
-        } else {
-          hideLoader();
-        }
-      }
-
-      function showLoader() {
-        const overlay = document.getElementById("publicRegisterSpinner");
-        const textEl = document.getElementById("publicRegisterSpinnerText");
-        if (!overlay || !textEl) return;
-
-        loaderMessageIndex = 0;
-        textEl.textContent = loaderMessages[loaderMessageIndex];
-        overlay.classList.add("is-visible");
-        overlay.setAttribute("aria-hidden", "false");
-
-        if (loaderTimer) clearInterval(loaderTimer);
-        loaderTimer = setInterval(function () {
-          loaderMessageIndex = (loaderMessageIndex + 1) % loaderMessages.length;
-          textEl.textContent = loaderMessages[loaderMessageIndex];
-        }, 1900);
-      }
-
-      function hideLoader() {
-        const overlay = document.getElementById("publicRegisterSpinner");
-        if (!overlay) return;
-        overlay.classList.remove("is-visible");
-        overlay.setAttribute("aria-hidden", "true");
-
-        if (loaderTimer) {
-          clearInterval(loaderTimer);
-          loaderTimer = null;
-        }
-      }
-
-      function validateFormPayload() {
-        const companyName = normalizeString(document.getElementById("companyNameInput")?.value);
-        const userName = normalizeString(document.getElementById("userNameInput")?.value);
-        const email = normalizeString(document.getElementById("emailInput")?.value);
-        const phone = normalizeString(document.getElementById("phoneInput")?.value);
-        const password = normalizeString(document.getElementById("passwordInput")?.value);
-        const companyNumber = normalizeString(document.getElementById("companyNumberInput")?.value);
-        const companySector = normalizeString(document.getElementById("companySectorInput")?.value);
-        const companyCategory = normalizeString(document.getElementById("companyCategoryInput")?.value);
-        const street = normalizeString(document.getElementById("addressStreetInput")?.value);
-        const number = normalizeString(document.getElementById("addressNumberInput")?.value);
-        const city = normalizeString(document.getElementById("addressCityInput")?.value);
-        const stateUf = normalizeString(document.getElementById("addressStateInput")?.value);
-        const postalCode = normalizeString(document.getElementById("addressPostalCodeInput")?.value);
-        const country = normalizeString(document.getElementById("addressCountryInput")?.value);
-        const language = normalizeString(document.getElementById("companyLanguageInput")?.value) || "pt-BR";
-        const acceptTerms = !!document.getElementById("acceptTermsInput")?.checked;
-        const expectation = normalizeString(document.getElementById("expectationInput")?.value);
-
-        if (!state.selectedPlanId) throw new Error("Selecione um plano antes de confirmar.");
-        if (!companyName) throw new Error("Nome da empresa é obrigatório.");
-        if (!userName) throw new Error("Nome do utilizador é obrigatório.");
-        if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail válido.");
-        if (!phone) throw new Error("Telefone é obrigatório.");
-        if (!password || password.length < 8) throw new Error("A senha do admin deve ter no mínimo 8 caracteres.");
-        if (!companyNumber) throw new Error("CNPJ / Company Number é obrigatório.");
-        if (!companySector) throw new Error("Setor é obrigatório.");
-        if (!companyCategory) throw new Error("Categoria é obrigatória.");
-        if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereço.");
-        if (!acceptTerms) throw new Error("Você precisa aceitar os termos para continuar.");
-
-        return {
-          tenant_name: companyName,
-          tenant_slug: slugifyCompanyName(companyName),
-          company_name: companyName,
-          company_phone: phone,
-          company_number: companyNumber,
-          company_sector: companySector,
-          company_category: companyCategory,
-          company_address_street: street,
-          company_address_number: number,
-          company_address_city: city,
-          company_address_country: country,
-          company_address_state: stateUf,
-          company_address_postalcode: postalCode,
-          company_language: language,
-          admin_full_name: userName,
-          admin_email: email,
-          admin_password: password,
-          admin_phone: phone,
-          acept_terms: acceptTerms,
-          expectation
-        };
-      }
-
-      async function onSubmitForm(event) {
-        event.preventDefault();
-        if (state.isSubmitting) return;
 
         try {
-          const payload = validateFormPayload();
-          const signupPayload = {
-            tenant_name: payload.tenant_name,
-            tenant_slug: payload.tenant_slug,
-            company_name: payload.company_name,
-            company_phone: payload.company_phone,
-            company_number: payload.company_number,
-            company_sector: payload.company_sector,
-            company_category: payload.company_category,
-            company_address_street: payload.company_address_street,
-            company_address_number: payload.company_address_number,
-            company_address_city: payload.company_address_city,
-            company_address_country: payload.company_address_country,
-            company_address_state: payload.company_address_state,
-            company_address_postalcode: payload.company_address_postalcode,
-            company_language: payload.company_language,
-            admin_full_name: payload.admin_full_name,
-            admin_email: payload.admin_email,
-            admin_password: payload.admin_password,
-            admin_phone: payload.admin_phone,
-            acept_terms: payload.acept_terms
-          };
-
-          setSubmitState(true);
-          await postJson("/auth/signup", signupPayload);
-          await syncCurrentUserFromMe();
-
-          swal({
-            title: "Cadastro concluído!",
-            text: "Seu ambiente foi criado e sua sessão já está autenticada.",
-            type: "success"
-          }, function () {
-            window.location.href = "/Default";
-          });
+          var plans = await fetchJson("/api/public/billing/plans");
+          renderPublicPlans(plans);
         } catch (error) {
-          console.error("[PublicRegister] submit error:", error);
-          const msg = error?.message || "Não foi possível concluir o cadastro.";
-          swal("Falha no cadastro", msg, "error");
-        } finally {
-          setSubmitState(false);
+          if (container) {
+            container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-danger">Nao foi possivel carregar os planos.</div></div></div>';
+          }
         }
       }
 
-      function installEvents() {
-        document.getElementById("btnExperimentHero")?.addEventListener("click", function () {
-          showPlansStage();
-        });
-
-        document.querySelectorAll(".plan-select-btn").forEach((btn) => {
-          btn.addEventListener("click", function () {
-            const card = btn.closest(".plan-card");
-            if (!card) return;
-            renderPlanSelection(card);
-          });
-        });
-
-        document.getElementById("btnBackPlans")?.addEventListener("click", function () {
-          showPlanChooser();
-          document.getElementById("plansStage")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-
-        document.getElementById("publicRegisterForm")?.addEventListener("submit", onSubmitForm);
+      if (!window.__openRegisterPlans) {
+        window.__openRegisterPlans = fallbackOpenPlans;
       }
 
-      $(document).ready(function () {
-        new WOW().init();
-        installEvents();
-      });
+      var btn = document.getElementById("btnExperimentHero");
+      if (btn && !btn.__fallbackBindDone) {
+        btn.__fallbackBindDone = true;
+        btn.addEventListener("click", function (event) {
+          event.preventDefault();
+          window.__openRegisterPlans();
+        });
+      }
     })();
   </script>
 </body>
 </html>
+

@@ -1,0 +1,354 @@
+﻿<div class="row" style="margin-top:20px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <h5 id="salesCommissionFormTitle">Nova Comissao</h5>
+        <div>
+          <a href="/SalesCommissions" class="btn btn-white btn-sm">Voltar</a>
+          <button id="btnDeleteSalesCommission" class="btn btn-danger btn-sm" style="display:none;">Excluir</button>
+          <button id="btnSaveSalesCommission" class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Owner</label>
+              <select id="commissionOwnerUserId" class="form-control"></select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Meta relacionada</label>
+              <select id="commissionSalesGoalId" class="form-control"></select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Status</label>
+              <select id="commissionStatus" class="form-control">
+                <option value="PENDING">PENDING</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="PAID">PAID</option>
+                <option value="CANCELLED">CANCELLED</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Origem</label>
+              <select id="commissionSourceType" class="form-control">
+                <option value="MANUAL">MANUAL</option>
+                <option value="OPPORTUNITY">OPPORTUNITY</option>
+                <option value="INVOICE">INVOICE</option>
+                <option value="CONTRACT">CONTRACT</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="form-group">
+              <label>Source ID</label>
+              <input id="commissionSourceId" class="form-control" placeholder="ID da origem (invoice/opportunity/contract)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Base de calculo (valor)</label>
+              <input id="commissionBaseAmount" class="form-control" placeholder="0,00" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Percentual (0..1)</label>
+              <input id="commissionPercent" class="form-control" placeholder="0,1000" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Valor comissao</label>
+              <input id="commissionAmount" class="form-control" placeholder="0,00" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Vencimento</label>
+              <input id="commissionDueAt" type="date" class="form-control" />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Pago em</label>
+              <input id="commissionPaidAt" type="date" class="form-control" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Observacoes</label>
+              <textarea id="commissionNotes" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const state = { id: null };
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    function fmtDateInput(v) {
+      if (!v) return "";
+      return String(v).slice(0, 10);
+    }
+
+    function formatPtBrNumber(value, decimals) {
+      const n = Number(value || 0);
+      if (!Number.isFinite(n)) return "";
+      return n.toLocaleString("pt-BR", {
+        minimumFractionDigits: Number(decimals || 2),
+        maximumFractionDigits: Number(decimals || 2),
+      });
+    }
+
+    function recalcCommissionAmount() {
+      const base = Math.max(0, parseNumberSafe($("#commissionBaseAmount").val(), 0));
+      const percent = Math.max(0, Math.min(1, parseNumberSafe($("#commissionPercent").val(), 0)));
+      const amount = base * percent;
+      $("#commissionAmount").val(formatPtBrNumber(amount, 2));
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    async function loadUsers(selectedId) {
+      const usersData = await api("/api/users").catch(function () { return []; });
+      const users = normalizeArray(usersData);
+      $("#commissionOwnerUserId").html('<option value="">(usar usuario logado)</option>' + users.map(function (u) {
+        return '<option value="' + esc(u.id) + '">' + esc(u.full_name || u.email || u.id) + "</option>";
+      }).join(""));
+      if (selectedId) $("#commissionOwnerUserId").val(String(selectedId));
+    }
+
+    async function loadGoals(selectedId) {
+      const goalsData = await api("/api/sales-goals").catch(function () { return []; });
+      const goals = normalizeArray(goalsData);
+      $("#commissionSalesGoalId").html('<option value="">(sem meta)</option>' + goals.map(function (g) {
+        const label = [g.period_type, String(g.period_start || "").slice(0, 10), "-", String(g.period_end || "").slice(0, 10)]
+          .filter(Boolean).join(" ");
+        return '<option value="' + esc(g.id) + '">' + esc(label || g.id) + "</option>";
+      }).join(""));
+      if (selectedId) $("#commissionSalesGoalId").val(String(selectedId));
+    }
+
+    function collectPayload() {
+      return {
+        owner_user_id: String($("#commissionOwnerUserId").val() || "").trim() || null,
+        sales_goal_id: String($("#commissionSalesGoalId").val() || "").trim() || null,
+        status: String($("#commissionStatus").val() || "PENDING"),
+        source_type: String($("#commissionSourceType").val() || "MANUAL"),
+        source_id: String($("#commissionSourceId").val() || "").trim() || null,
+        base_amount: String(parseNumberSafe($("#commissionBaseAmount").val(), 0)),
+        percent: String(parseNumberSafe($("#commissionPercent").val(), 0)),
+        amount: String(parseNumberSafe($("#commissionAmount").val(), 0)),
+        due_at: String($("#commissionDueAt").val() || "").trim() || null,
+        paid_at: String($("#commissionPaidAt").val() || "").trim() || null,
+        notes: String($("#commissionNotes").val() || "").trim() || null,
+      };
+    }
+
+    async function loadById(id) {
+      const item = await api("/api/sales-commissions/" + encodeURIComponent(id));
+      $("#salesCommissionFormTitle").text("Editar Comissao");
+      await loadUsers(item?.owner_user_id || item?.owner_user?.id || "");
+      await loadGoals(item?.sales_goal_id || item?.sales_goal?.id || "");
+      $("#commissionStatus").val(item?.status || "PENDING");
+      $("#commissionSourceType").val(item?.source_type || "MANUAL");
+      $("#commissionSourceId").val(item?.source_id || "");
+      $("#commissionBaseAmount").val(item?.base_amount == null ? "0" : String(item.base_amount)).trigger("blur");
+      $("#commissionPercent").val(item?.percent == null ? "0" : String(item.percent)).trigger("blur");
+      $("#commissionAmount").val(item?.amount == null ? "0" : String(item.amount)).trigger("blur");
+      recalcCommissionAmount();
+      $("#commissionDueAt").val(fmtDateInput(item?.due_at));
+      $("#commissionPaidAt").val(fmtDateInput(item?.paid_at));
+      $("#commissionNotes").val(item?.notes || "");
+      $("#btnDeleteSalesCommission").show();
+    }
+
+    $("#btnSaveSalesCommission").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? ("/api/sales-commissions/" + encodeURIComponent(state.id)) : "/api/sales-commissions";
+        const method = isEdit ? "PATCH" : "POST";
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewSalesCommission?id=" + encodeURIComponent(id);
+        else window.location.href = "/SalesCommissions";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeleteSalesCommission").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir esta comissao?")) return;
+      try {
+        await api("/api/sales-commissions/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/SalesCommissions";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Commission");
+      $("#subpageName").text("Sales Commissions").attr("href", "/SalesCommissions");
+
+      bindDecimalMaskOnce($("#commissionBaseAmount"), { decimals: 2, min: 0, thousandsOnInput: true });
+      bindDecimalMaskOnce($("#commissionAmount"), { decimals: 2, min: 0, thousandsOnInput: true });
+      bindDecimalMaskOnce($("#commissionPercent"), { decimals: 4, min: 0, max: 1 });
+      $("#commissionBaseAmount, #commissionPercent").on("input blur change", recalcCommissionAmount);
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+      if (state.id) {
+        try { await loadById(state.id); }
+        catch (e) {
+          alert(e?.message || "Falha ao carregar");
+          window.location.href = "/SalesCommissions";
+        }
+      } else {
+        await loadUsers();
+        await loadGoals();
+        recalcCommissionAmount();
+      }
+    });
+  })();
+</script>

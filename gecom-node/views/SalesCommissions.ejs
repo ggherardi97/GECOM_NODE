@@ -1,0 +1,243 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #salesCommissionsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="salesCommissionsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshSalesCommissions" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewSalesCommission" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova Comissao</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="salesCommissionsBulkActions" class="bulk-actions">
+          <span><strong><span id="salesCommissionsSelectedCount">0</span></strong> selecionada(s)</span>
+          <button id="btnEditSelectedSalesCommission" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnDeleteSelectedSalesCommission" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionSalesCommission" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="salesCommissionsTable">
+            <thead>
+              <tr id="salesCommissionsFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="owner"><input data-filter="owner" class="form-control input-sm" placeholder="Filtrar Owner" /></th>
+                <th data-field="goal"><input data-filter="goal" class="form-control input-sm" placeholder="Filtrar Meta" /></th>
+                <th data-field="source"><input data-filter="source" class="form-control input-sm" placeholder="Filtrar Origem" /></th>
+                <th data-field="base"><input data-filter="base" class="form-control input-sm" placeholder="Filtrar Base" /></th>
+                <th data-field="percent"><input data-filter="percent" class="form-control input-sm" placeholder="Filtrar Percentual" /></th>
+                <th data-field="amount"><input data-filter="amount" class="form-control input-sm" placeholder="Filtrar Valor" /></th>
+                <th data-field="status"><input data-filter="status" class="form-control input-sm" placeholder="Filtrar Status" /></th>
+                <th data-field="due"><input data-filter="due" class="form-control input-sm" placeholder="Filtrar Vencimento" /></th>
+                <th data-field="paid"><input data-filter="paid" class="form-control input-sm" placeholder="Filtrar Pago em" /></th>
+              </tr>
+              <tr id="salesCommissionsHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllSalesCommissions" type="checkbox" /></th>
+                <th class="sortable" data-field="owner" data-sort-key="owner">Owner <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="goal" data-sort-key="goal">Meta <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="source" data-sort-key="source">Origem <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="base" data-sort-key="base">Base <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="percent" data-sort-key="percent">Percentual <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="amount" data-sort-key="amount">Valor <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="status" data-sort-key="status">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="due" data-sort-key="due">Vencimento <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="paid" data-sort-key="paid">Pago em <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="salesCommissionsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function dt(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    function money(v) {
+      const n = Number(v || 0);
+      if (!Number.isFinite(n)) return "0,00";
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      const goal = r?.sales_goal
+        ? [String(r.sales_goal.period_type || ""), dt(r.sales_goal.period_start), dt(r.sales_goal.period_end)].filter(Boolean).join(" ")
+        : "";
+      return {
+        owner: String(r?.owner_user?.full_name || ""),
+        goal,
+        source: [String(r?.source_type || ""), String(r?.source_id || "")].join(" ").trim(),
+        base: Number(r?.base_amount || 0),
+        percent: Number(r?.percent || 0),
+        amount: Number(r?.amount || 0),
+        status: String(r?.status || ""),
+        due: dt(r?.due_at),
+        paid: dt(r?.paid_at),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-sales-commission-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.owner || "-")}</td>
+          <td>${esc(v.goal || "-")}</td>
+          <td>${esc(r?.source_type || "-")}<br><small class="text-muted">${esc(r?.source_id || "")}</small></td>
+          <td>${money(v.base)}</td>
+          <td>${money(v.percent)}</td>
+          <td>${money(v.amount)}</td>
+          <td>${esc(v.status || "-")}</td>
+          <td>${esc(v.due || "-")}</td>
+          <td>${esc(v.paid || "-")}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#salesCommissionsSelectedCount").text(String(ids.length));
+      $("#salesCommissionsBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#salesCommissionsBody .js-sales-commission-row-check").length > 0 &&
+        $("#salesCommissionsBody .js-sales-commission-row-check").length === $("#salesCommissionsBody .js-sales-commission-row-check:checked").length;
+      $("#chkSelectAllSalesCommissions").prop("checked", allChecked);
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-sales-commission-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllSalesCommissions").on("change", function () {
+      const checked = !!this.checked;
+      $("#salesCommissionsBody .js-sales-commission-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#salesCommissionsBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-sales-commission-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewSalesCommission?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionSalesCommission").on("click", function () {
+      selectedIds.clear();
+      $("#salesCommissionsBody .js-sales-commission-row-check").prop("checked", false);
+      $("#chkSelectAllSalesCommissions").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedSalesCommission").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 comissao para editar.");
+      window.location.href = "/NewSalesCommission?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnDeleteSelectedSalesCommission").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir as comissoes selecionadas?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/sales-commissions/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Commissions");
+      $("#subpageName").text("Sales Commissions").attr("href", "/SalesCommissions");
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "sales_commissions",
+        hostSelector: "#salesCommissionsSavedViewsHost",
+        tableSelector: "#salesCommissionsTable",
+        filtersRowSelector: "#salesCommissionsFiltersRow",
+        headerRowSelector: "#salesCommissionsHeaderRow",
+        bodySelector: "#salesCommissionsBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhuma comissao encontrada.",
+        loadRows: async function () { return normalizeArray(await api("/api/sales-commissions")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshSalesCommissions").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

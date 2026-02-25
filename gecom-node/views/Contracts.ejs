@@ -1,0 +1,278 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #contractsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="contractsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshContracts" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewContract" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Novo Contrato</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="contractsBulkActions" class="bulk-actions">
+          <span><strong><span id="contractsSelectedCount">0</span></strong> selecionado(s)</span>
+          <button id="btnEditSelectedContract" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnGenerateSelectedContract" class="btn btn-success btn-sm"><i class="fa fa-file-text-o"></i> Gerar proposta</button>
+          <button id="btnDeleteSelectedContract" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionContract" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="contractsTable">
+            <thead>
+              <tr id="contractsFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="contract_number"><input data-filter="contract_number" class="form-control input-sm" placeholder="Filtrar Numero" /></th>
+                <th data-field="name"><input data-filter="name" class="form-control input-sm" placeholder="Filtrar Nome" /></th>
+                <th data-field="company"><input data-filter="company" class="form-control input-sm" placeholder="Filtrar Cliente" /></th>
+                <th data-field="status"><input data-filter="status" class="form-control input-sm" placeholder="Filtrar Status" /></th>
+                <th data-field="total"><input data-filter="total" class="form-control input-sm" placeholder="Filtrar Total" /></th>
+                <th data-field="owner"><input data-filter="owner" class="form-control input-sm" placeholder="Filtrar Owner" /></th>
+              </tr>
+              <tr id="contractsHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllContracts" type="checkbox" /></th>
+                <th class="sortable" data-field="contract_number" data-sort-key="contract_number">Numero <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="name" data-sort-key="name">Nome <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="company" data-sort-key="company">Cliente <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="status" data-sort-key="status">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="total" data-sort-key="total">Total <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="owner" data-sort-key="owner">Owner <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="contractsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+    const currencyById = {};
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function resolveCurrency(row) {
+      const rel = row?.currency || row?.currencies || null;
+      if (rel) return rel;
+      const currencyId = String(row?.currency_id || row?.currencyId || "").trim();
+      return currencyId ? (currencyById[currencyId] || null) : null;
+    }
+
+    function money(v, row) {
+      const n = Number(v || 0);
+      if (!Number.isFinite(n)) return "0,00";
+      const currency = resolveCurrency(row) || {};
+      const code = String(currency?.code || currency?.iso_code || currency?.currency_code || "").trim();
+      const symbol = String(currency?.symbol || "").trim();
+      try {
+        if (code) return new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(n);
+      } catch (e) {}
+      const formatted = n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return symbol ? `${symbol} ${formatted}` : formatted;
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    async function loadCurrencies() {
+      try {
+        const rows = normalizeArray(await api("/api/currencies?is_active=true"));
+        rows.forEach((row) => {
+          const id = String(row?.id || "").trim();
+          if (!id) return;
+          currencyById[id] = row;
+        });
+      } catch (e) {
+        // keep silent fallback
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      return {
+        contract_number: String(r?.contract_number || ""),
+        name: String(r?.name || ""),
+        company: String(r?.company?.company_name || ""),
+        status: String(r?.status || ""),
+        total: Number(r?.total || 0),
+        owner: String(r?.owner_user?.full_name || ""),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-contract-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.contract_number || "-")}</td>
+          <td>${esc(v.name || "-")}</td>
+          <td>${esc(v.company || "-")}</td>
+          <td>${esc(v.status || "-")}</td>
+          <td>${money(v.total, r)}</td>
+          <td>${esc(v.owner || "-")}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#contractsSelectedCount").text(String(ids.length));
+      $("#contractsBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#contractsBody .js-contract-row-check").length > 0 &&
+        $("#contractsBody .js-contract-row-check").length === $("#contractsBody .js-contract-row-check:checked").length;
+      $("#chkSelectAllContracts").prop("checked", allChecked);
+    }
+
+    async function generateInvoiceFromContract(id) {
+      if (!id) return;
+      if (!confirm("Gerar proposta (invoice) a partir deste contrato?")) return;
+      const result = await api("/api/contracts/" + encodeURIComponent(id) + "/generate-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+      if (invoiceId) {
+        const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+        if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+      }
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-contract-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllContracts").on("change", function () {
+      const checked = !!this.checked;
+      $("#contractsBody .js-contract-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#contractsBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-contract-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewContract?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionContract").on("click", function () {
+      selectedIds.clear();
+      $("#contractsBody .js-contract-row-check").prop("checked", false);
+      $("#chkSelectAllContracts").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedContract").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 contrato para editar.");
+      window.location.href = "/NewContract?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnGenerateSelectedContract").on("click", async function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 contrato para gerar proposta.");
+      try {
+        await generateInvoiceFromContract(ids[0]);
+        if (gridApi) await gridApi.reload();
+      } catch (e) {
+        alert(e?.message || "Falha ao gerar invoice");
+      }
+    });
+
+    $("#btnDeleteSelectedContract").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir os contratos selecionados?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/contracts/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Contracts");
+      $("#subpageName").text("Contracts").attr("href", "/Contracts");
+
+      await loadCurrencies();
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "contracts",
+        hostSelector: "#contractsSavedViewsHost",
+        tableSelector: "#contractsTable",
+        filtersRowSelector: "#contractsFiltersRow",
+        headerRowSelector: "#contractsHeaderRow",
+        bodySelector: "#contractsBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhum contrato encontrado.",
+        loadRows: async function () { return normalizeArray(await api("/api/contracts?fields=header")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshContracts").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

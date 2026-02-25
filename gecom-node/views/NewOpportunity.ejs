@@ -1,0 +1,1262 @@
+﻿<style>
+  .ibox-title { padding: 20px 90px 20px 15px; }
+  .table td, .table th { vertical-align: middle !important; }
+  .form-group { margin-bottom: 14px; }
+  .line-actions { white-space: nowrap; }
+  .money { font-family: monospace; }
+  .invoice-panel { min-height: 420px; }
+  .typeahead.dropdown-menu { max-height: 260px; overflow-y: auto; }
+  .timeline-box { max-height: 280px; overflow-y: auto; border: 1px solid #e7eaec; border-radius: 4px; padding: 8px; }
+  .timeline-item { padding: 8px; border-bottom: 1px solid #f1f1f1; }
+  .timeline-item:last-child { border-bottom: 0; }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0;">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5 id="oppFormTitle">Nova Opportunity</h5>
+          <div class="ibox-tools">
+            <a href="/Opportunities" class="btn btn-white btn-sm">Voltar</a>
+            <button id="btnDeleteOpp" class="btn btn-danger btn-sm" style="display:none;">
+              <i class="fa fa-trash"></i> Excluir
+            </button>
+            <button id="btnConvertOpp" class="btn btn-success btn-sm" style="display:none;">
+              <i class="fa fa-exchange"></i> Converter em Proposta
+            </button>
+            <button id="btnSaveOpp" class="btn btn-primary btn-sm">
+              <i class="fa fa-check"></i> Salvar
+            </button>
+          </div>
+        </div>
+
+        <div class="ibox-content">
+          <form onsubmit="return false;">
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Dados da Opportunity</strong></div>
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label>Nome *</label>
+                      <input id="oppName" class="form-control" />
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Status</label>
+                          <select id="oppStatus" class="form-control">
+                            <option value="OPEN">OPEN</option>
+                            <option value="PROPOSAL">PROPOSAL</option>
+                            <option value="WON">WON</option>
+                            <option value="LOST">LOST</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Moeda</label>
+                          <select id="oppCurrency" class="form-control"></select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Probabilidade (%)</label>
+                          <input id="oppProbability" class="form-control" value="0" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Desconto Header (%)</label>
+                          <input id="oppDiscountPercent" class="form-control" value="0" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-4">
+                        <div class="form-group">
+                          <label>Associar a</label>
+                          <select id="assocType" class="form-control">
+                            <option value="client">Cliente</option>
+                            <option value="lead">Lead</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-lg-8">
+                        <div class="form-group">
+                          <label>Cliente / Lead</label>
+                          <input id="assocSearch" class="form-control" autocomplete="off" placeholder="Digite para buscar" />
+                          <input id="assocId" type="hidden" />
+                          <small id="assocSelectedHint" class="text-muted">Nenhum selecionado.</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Descricao</label>
+                      <textarea id="oppDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Timeline (Eventos)</strong></div>
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label>Titulo</label>
+                      <input id="eventTitle" class="form-control" placeholder="Titulo do evento" />
+                    </div>
+                    <div class="form-group">
+                      <label>Descricao</label>
+                      <textarea id="eventDescription" class="form-control" rows="2" placeholder="Descricao"></textarea>
+                    </div>
+                    <button id="btnAddEvent" class="btn btn-default btn-xs" style="display:none; margin-bottom: 8px;">
+                      <i class="fa fa-plus"></i> Adicionar Evento
+                    </button>
+                    <div id="eventsBox" class="timeline-box"><div class="text-muted">Salve a opportunity para usar a timeline.</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-8">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong>Produtos</strong>
+                    <button id="btnAddLine" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add Produto</button>
+                  </div>
+                  <div class="panel-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered" id="oppLinesTable">
+                        <thead>
+                          <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:28%;">Produto</th>
+                            <th>Descricao</th>
+                            <th style="width:90px;">Un</th>
+                            <th style="width:95px;">Qtd</th>
+                            <th style="width:130px;">Preco</th>
+                            <th style="width:110px;">Taxa</th>
+                            <th style="width:110px;">Desc %</th>
+                            <th style="width:130px;">Total</th>
+                            <th style="width:60px;">Acoes</th>
+                          </tr>
+                        </thead>
+                        <tbody id="oppLinesBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Totais</strong></div>
+                  <div class="panel-body">
+                    <table class="table">
+                      <tr><th>Subtotal</th><td class="text-right money" id="totSubtotal">0,00</td></tr>
+                      <tr><th>Desconto Linhas</th><td class="text-right money" id="totLineDiscount">0,00</td></tr>
+                      <tr><th>Desconto Header</th><td class="text-right money" id="totHeaderDiscount">0,00</td></tr>
+                      <tr><th>Impostos</th><td class="text-right money" id="totTax">0,00</td></tr>
+                      <tr><th>Total</th><td class="text-right money" id="totGrand">0,00</td></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+<script>
+  (function () {
+    const state = {
+      id: null,
+      assocType: "client",
+      assocId: null,
+      leadIdFromRecord: null,
+      companies: [],
+      leads: [],
+      currencies: [],
+      products: [],
+      lines: [],
+    };
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function toIntSafe(value, fallback) {
+      const n = parseInt(String(value ?? "").trim(), 10);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function money(v) {
+      const n = parseNumberSafe(v, 0);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function calcLine(line) {
+      const qty = parseNumberSafe(line.quantity, 0);
+      const price = parseNumberSafe(line.unit_price, 0);
+      const rate = parseNumberSafe(line.tax_rate, 0);
+      const discPct = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
+
+      const gross = qty * price;
+      const lineDiscount = gross * (discPct / 100);
+      const base = Math.max(0, gross - lineDiscount);
+      const tax = base * rate;
+      const total = base + tax;
+      return { gross, lineDiscount, tax, total };
+    }
+
+    function renderTotals() {
+      let subtotal = 0;
+      let lineDiscount = 0;
+      let tax = 0;
+
+      state.lines.forEach((line) => {
+        const c = calcLine(line);
+        subtotal += c.gross;
+        lineDiscount += c.lineDiscount;
+        tax += c.tax;
+      });
+
+      const headerDiscountPct = Math.max(0, Math.min(100, parseNumberSafe($("#oppDiscountPercent").val(), 0)));
+      const headerDiscount = subtotal * (headerDiscountPct / 100);
+      const total = Math.max(0, subtotal - lineDiscount - headerDiscount + tax);
+
+      $("#totSubtotal").text(money(subtotal));
+      $("#totLineDiscount").text(money(lineDiscount));
+      $("#totHeaderDiscount").text(money(headerDiscount));
+      $("#totTax").text(money(tax));
+      $("#totGrand").text(money(total));
+    }
+
+    function getProductLabel(p) {
+      const code = String(p?.product_code || "").trim();
+      const name = String(p?.name || "").trim();
+      if (code && name) return code + " - " + name;
+      return name || code || "";
+    }
+
+    function getProductById(id) {
+      return state.products.find((p) => String(p.id) === String(id)) || null;
+    }
+
+    function getProductTypeaheadItems() {
+      return state.products.map((p) => ({
+        id: String(p.id),
+        label: getProductLabel(p),
+        name: String(p.name || ""),
+        unit: String(p.unit || "UN"),
+        unit_price: parseNumberSafe(p.default_unit_price, 0),
+        tax_rate: parseNumberSafe(p.default_tax_rate, 0),
+        _norm: normalizeText(getProductLabel(p)),
+      }));
+    }
+
+    function openOpportunityLineModal(mode, index) {
+      const isEdit = mode === "edit";
+      const existing = isEdit ? (state.lines[index] || null) : null;
+      const line = existing ? { ...existing } : {
+        product_id: null,
+        product_label: "",
+        description: "",
+        unit: "UN",
+        quantity: 1,
+        unit_price: 0,
+        tax_rate: 0,
+        discount_percent: 0,
+      };
+
+      function syncLineTotal($root) {
+        const tmp = Object.assign({}, line, {
+          unit_price: parseNumberSafe($root.find("#ol_unit_price").val(), 0),
+          quantity: parseNumberSafe($root.find("#ol_quantity").val(), 0),
+          tax_rate: parseNumberSafe($root.find("#ol_tax_rate").val(), 0),
+          discount_percent: parseNumberSafe($root.find("#ol_discount_percent").val(), 0),
+        });
+        const c = calcLine(tmp);
+        $root.find("#ol_line_total").val(money(c.total));
+      }
+
+      const html = `
+        <div class="form-group">
+          <label>Produto</label>
+          <input id="ol_product_name" type="text" class="form-control typeahead-product" autocomplete="off" placeholder="Pesquisar produto..." />
+          <input id="ol_product_id" type="hidden" />
+        </div>
+        <div class="form-group">
+          <label>Descricao</label>
+          <input id="ol_description" type="text" class="form-control" value="${esc(line.description || "")}" />
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Unidade</label>
+              <input id="ol_unit" type="text" class="form-control" value="${esc(line.unit || "UN")}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Quantidade</label>
+              <input id="ol_quantity" type="text" class="form-control" value="${esc(String(line.quantity ?? 1))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Preco unitario</label>
+              <input id="ol_unit_price" type="text" class="form-control" value="${esc(String(line.unit_price ?? 0))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Taxa (0..1)</label>
+              <input id="ol_tax_rate" type="text" class="form-control" value="${esc(String(line.tax_rate ?? 0))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Desconto %</label>
+              <input id="ol_discount_percent" type="text" class="form-control" value="${esc(String(line.discount_percent ?? 0))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Total da linha</label>
+              <input id="ol_line_total" type="text" class="form-control" readonly />
+            </div>
+          </div>
+        </div>
+      `;
+
+      window.SideModal.open({
+        title: isEdit ? "Editar linha" : "Adicionar linha",
+        okText: isEdit ? "Salvar" : "Adicionar",
+        cancelText: "Cancelar",
+        html,
+        onOpen: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          bindDecimalMaskOnce($root.find("#ol_quantity"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#ol_unit_price"), { decimals: 2, min: 0, thousandsOnInput: true });
+          bindDecimalMaskOnce($root.find("#ol_tax_rate"), { decimals: 4, min: 0, max: 1 });
+          bindDecimalMaskOnce($root.find("#ol_discount_percent"), { decimals: 2, min: 0, max: 100 });
+
+          const items = getProductTypeaheadItems();
+          const $prodName = $root.find("#ol_product_name");
+          const $prodId = $root.find("#ol_product_id");
+          try { $prodName.typeahead("destroy"); } catch (e) { }
+
+          $prodName.typeahead({
+            source: items,
+            autoSelect: true,
+            minLength: 0,
+            displayText: function (item) { return item.label; },
+            matcher: function (item) {
+              const q = normalizeText(this.query);
+              if (!q) return true;
+              return item._norm.includes(q);
+            },
+            afterSelect: function (item) {
+              $prodId.val(item.id);
+              $prodName.val(item.label);
+              if (!$root.find("#ol_description").val()) $root.find("#ol_description").val(item.name || "");
+              if (!$root.find("#ol_unit").val()) $root.find("#ol_unit").val(item.unit || "UN");
+              $root.find("#ol_unit_price").val(String(item.unit_price || 0)).trigger("blur");
+              $root.find("#ol_tax_rate").val(String(item.tax_rate || 0)).trigger("blur");
+              syncLineTotal($root);
+            }
+          });
+
+          $prodName.on("focus", function () {
+            if (!String($(this).val() || "").trim()) $(this).typeahead("lookup");
+          });
+
+          $prodName.on("input", function () {
+            $prodId.val("");
+          });
+
+          if (line.product_id) {
+            $prodId.val(String(line.product_id));
+            $prodName.val(line.product_label || "");
+          }
+
+          $root.find("#ol_quantity, #ol_unit_price, #ol_tax_rate, #ol_discount_percent")
+            .on("input change blur", function () { syncLineTotal($root); });
+          syncLineTotal($root);
+        },
+        onOk: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          const productId = String($root.find("#ol_product_id").val() || "").trim() || null;
+          const typedProduct = String($root.find("#ol_product_name").val() || "").trim();
+          const prod = productId ? getProductById(productId) : null;
+
+          if (!productId || !typedProduct) {
+            alert("Selecione um produto da lista.");
+            return true;
+          }
+
+          const updated = {
+            product_id: productId,
+            product_label: prod ? getProductLabel(prod) : typedProduct,
+            description: String($root.find("#ol_description").val() || "").trim(),
+            unit: String($root.find("#ol_unit").val() || "UN").trim() || "UN",
+            quantity: parseNumberSafe($root.find("#ol_quantity").val(), 0),
+            unit_price: parseNumberSafe($root.find("#ol_unit_price").val(), 0),
+            tax_rate: parseNumberSafe($root.find("#ol_tax_rate").val(), 0),
+            discount_percent: parseNumberSafe($root.find("#ol_discount_percent").val(), 0),
+          };
+
+          if (prod && !updated.description) updated.description = prod.name || "";
+          if (updated.quantity <= 0) {
+            alert("Quantidade deve ser maior que zero.");
+            return true;
+          }
+
+          if (isEdit) state.lines[index] = updated;
+          else state.lines.push(updated);
+          renderLines();
+          return false;
+        },
+      });
+    }
+
+    function renderLines() {
+      const html = state.lines.map((line, idx) => {
+        const c = calcLine(line);
+        const productName = line.product_label || "-";
+        return `
+          <tr data-idx="${idx}">
+            <td>${idx + 1}</td>
+            <td>${esc(productName)}</td>
+            <td>${esc(line.description || "-")}</td>
+            <td>${esc(line.unit || "UN")}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.quantity, 0)))}</td>
+            <td class="text-right">${money(line.unit_price || 0)}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.tax_rate, 0)))}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.discount_percent, 0)))}</td>
+            <td class="text-right money">${money(c.total)}</td>
+            <td class="line-actions">
+              <button class="btn btn-xs btn-default js-line-edit"><i class="fa fa-pencil"></i></button>
+              <button class="btn btn-xs btn-danger js-line-del"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#oppLinesBody").html(html || '<tr><td colspan="10" class="text-muted">Sem linhas.</td></tr>');
+
+      renderTotals();
+    }
+
+    function applyAssocTypeahead() {
+      const $input = $("#assocSearch");
+      const isClient = state.assocType === "client";
+      const items = (isClient ? state.companies : state.leads).map((x) => {
+        if (isClient) {
+          const label = String(x.company_name || "").trim();
+          return { id: String(x.id), label, _norm: normalizeText(label) };
+        }
+        const label = [x.name, x.company_name].filter(Boolean).join(" - ").trim() || String(x.id || "");
+        return { id: String(x.id), label, _norm: normalizeText(label) };
+      }).filter((x) => !!x.label);
+
+      try { $input.typeahead("destroy"); } catch (e) { }
+
+      $input.typeahead({
+        source: items,
+        autoSelect: true,
+        minLength: 0,
+        displayText: function (item) { return item.label; },
+        matcher: function (item) {
+          const q = normalizeText(this.query);
+          if (!q) return true;
+          return item._norm.includes(q);
+        },
+        afterSelect: function (item) {
+          state.assocId = String(item.id);
+          if (state.assocType === "lead") state.leadIdFromRecord = state.assocId;
+          $("#assocId").val(state.assocId);
+          $("#assocSearch").val(item.label);
+          $("#assocSelectedHint").text("Selecionado: " + item.label);
+        }
+      });
+
+      $input.off("focus.assoc").on("focus.assoc", function () {
+        if (!String($(this).val() || "").trim()) $(this).typeahead("lookup");
+      });
+
+      $input.off("input.assoc").on("input.assoc", function () {
+        state.assocId = null;
+        if (state.assocType === "lead") state.leadIdFromRecord = null;
+        $("#assocId").val("");
+        $("#assocSelectedHint").text("Nenhum selecionado.");
+      });
+    }
+
+    function collectPayload() {
+      const name = String($("#oppName").val() || "").trim();
+      if (!name) throw new Error("Nome e obrigatorio");
+
+      const payload = {
+        name,
+        description: String($("#oppDescription").val() || "").trim() || null,
+        status: String($("#oppStatus").val() || "OPEN"),
+        currency_id: String($("#oppCurrency").val() || "").trim() || null,
+        probability_percent: Math.max(0, Math.min(100, toIntSafe($("#oppProbability").val(), 0))),
+        discount_percent: Math.max(0, Math.min(100, parseNumberSafe($("#oppDiscountPercent").val(), 0))),
+        lines: state.lines.map((line) => ({
+          product_id: line.product_id || null,
+          description: String(line.description || "").trim() || null,
+          unit: String(line.unit || "UN").trim() || "UN",
+          quantity: String(parseNumberSafe(line.quantity, 0)),
+          unit_price: String(parseNumberSafe(line.unit_price, 0)),
+          tax_rate: String(parseNumberSafe(line.tax_rate, 0)),
+          discount_percent: parseNumberSafe(line.discount_percent, 0),
+        })),
+      };
+
+      if (state.assocType === "client" && state.assocId) payload.company_id = state.assocId;
+      if (state.assocType === "lead" && state.assocId) payload.lead_id = state.assocId;
+      return payload;
+    }
+
+    async function loadProductsByCurrency(currencyId) {
+      const qs = new URLSearchParams();
+      if (currencyId) qs.set("currency_id", String(currencyId));
+      const suffix = qs.toString() ? ("?" + qs.toString()) : "";
+      const products = await api("/api/products" + suffix).catch(() => []);
+      state.products = normalizeArray(products);
+    }
+
+    async function loadLookups() {
+      const [companies, leads, currencies] = await Promise.all([
+        api("/api/companies?fields=summary").catch(() => []),
+        api("/api/leads").catch(() => []),
+        api("/api/currencies?is_active=true").catch(() => []),
+      ]);
+
+      state.companies = normalizeArray(companies);
+      state.leads = normalizeArray(leads);
+      state.currencies = normalizeArray(currencies);
+
+      $("#oppCurrency").html('<option value="">(sem moeda)</option>' + state.currencies.map((c) => {
+        return '<option value="' + esc(c.id) + '">' + esc(c.code || "") + ' - ' + esc(c.name || "") + '</option>';
+      }).join(""));
+
+      await loadProductsByCurrency(String($("#oppCurrency").val() || "").trim());
+      applyAssocTypeahead();
+    }
+
+    async function loadTimeline(id) {
+      try {
+        const data = await api("/api/opportunities/" + encodeURIComponent(id) + "/events");
+        const rows = normalizeArray(data);
+        if (!rows.length) {
+          $("#eventsBox").html('<div class="text-muted">Sem eventos.</div>');
+          return;
+        }
+
+        $("#eventsBox").html(rows.map((ev) => {
+          const when = new Date(ev?.created_at || ev?.start_time || Date.now());
+          return `
+            <div class="timeline-item">
+              <div><strong>${esc(ev?.title || "Evento")}</strong></div>
+              <div>${esc(ev?.description || "")}</div>
+              <small class="text-muted">${esc(when.toLocaleString("pt-BR"))}</small>
+            </div>
+          `;
+        }).join(""));
+      } catch (e) {
+        $("#eventsBox").html('<div class="text-danger">Erro ao carregar timeline.</div>');
+      }
+    }
+
+    async function loadOpportunity(id) {
+      const opp = await api("/api/opportunities/" + encodeURIComponent(id));
+
+      $("#oppFormTitle").text("Editar Opportunity - " + String(opp?.name || ""));
+      $("#oppName").val(opp?.name || "");
+      $("#oppDescription").val(opp?.description || "");
+      $("#oppStatus").val(opp?.status || "OPEN");
+      $("#oppCurrency").val(String(opp?.currency_id || opp?.currency?.id || ""));
+      await loadProductsByCurrency(String($("#oppCurrency").val() || "").trim());
+      $("#oppProbability").val(String(opp?.probability_percent || 0));
+      $("#oppDiscountPercent").val(String(opp?.discount_percent || 0)).trigger("blur");
+
+      if (opp?.company_id || opp?.company?.id) {
+        state.assocType = "client";
+        state.assocId = String(opp.company_id || opp.company?.id);
+        state.leadIdFromRecord = String(opp?.lead_id || opp?.lead?.id || "").trim() || null;
+        $("#assocType").val("client");
+        applyAssocTypeahead();
+        const label = String(opp?.company?.company_name || "");
+        $("#assocSearch").val(label);
+        $("#assocId").val(state.assocId);
+        $("#assocSelectedHint").text("Selecionado: " + label);
+      } else if (opp?.lead_id || opp?.lead?.id) {
+        state.assocType = "lead";
+        state.assocId = String(opp.lead_id || opp.lead?.id);
+        state.leadIdFromRecord = String(opp.lead_id || opp.lead?.id);
+        $("#assocType").val("lead");
+        applyAssocTypeahead();
+        const label = [opp?.lead?.name, opp?.lead?.company_name].filter(Boolean).join(" - ");
+        $("#assocSearch").val(label);
+        $("#assocId").val(state.assocId);
+        $("#assocSelectedHint").text("Selecionado: " + label);
+      }
+
+      state.lines = normalizeArray(opp?.lines).map((l) => {
+        const pid = l?.product_id || l?.product?.id || null;
+        const prod = pid ? getProductById(pid) : null;
+        return {
+          product_id: pid,
+          product_label: prod ? getProductLabel(prod) : [l?.product?.product_code, l?.product?.name].filter(Boolean).join(" - "),
+          description: String(l?.description || ""),
+          unit: String(l?.unit || "UN"),
+          quantity: parseNumberSafe(l?.quantity, 1),
+          unit_price: parseNumberSafe(l?.unit_price, 0),
+          tax_rate: parseNumberSafe(l?.tax_rate, 0),
+          discount_percent: parseNumberSafe(l?.discount_percent, 0),
+        };
+      });
+
+      renderLines();
+
+      $("#btnDeleteOpp").show();
+      $("#btnConvertOpp").show();
+      $("#btnAddEvent").show();
+      await loadTimeline(id);
+    }
+
+    $(document).on("click", ".js-line-edit", function () {
+      const idx = toIntSafe($(this).closest("tr").data("idx"), -1);
+      if (idx < 0 || !state.lines[idx]) return;
+      openOpportunityLineModal("edit", idx);
+    });
+
+    $(document).on("click", ".js-line-del", function () {
+      const idx = toIntSafe($(this).closest("tr").data("idx"), -1);
+      if (idx < 0) return;
+      state.lines.splice(idx, 1);
+      renderLines();
+    });
+
+    $("#assocType").on("change", function () {
+      state.assocType = String($(this).val() || "client");
+      state.assocId = null;
+      if (state.assocType !== "lead") state.leadIdFromRecord = null;
+      $("#assocId").val("");
+      $("#assocSearch").val("");
+      $("#assocSelectedHint").text("Nenhum selecionado.");
+      applyAssocTypeahead();
+    });
+
+    $("#btnAddLine").on("click", function (e) {
+      e.preventDefault();
+      openOpportunityLineModal("new");
+    });
+
+    $("#oppDiscountPercent").on("input blur", function () {
+      renderTotals();
+    });
+
+    $("#oppCurrency").on("change", async function () {
+      await loadProductsByCurrency(String($(this).val() || "").trim());
+    });
+
+    $("#btnSaveOpp").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? "/api/opportunities/" + encodeURIComponent(state.id) : "/api/opportunities";
+        const method = isEdit ? "PATCH" : "POST";
+
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewOpportunity?id=" + encodeURIComponent(id);
+        else window.location.href = "/Opportunities";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeleteOpp").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir esta opportunity?")) return;
+      try {
+        await api("/api/opportunities/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/Opportunities";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    function isCompanyRequiredForConversionError(err) {
+      const msg = String(err?.message || "").toLowerCase();
+      return msg.includes("company is required to convert opportunity into invoice");
+    }
+
+    function normalizeEmail(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function isValidEmail(value) {
+      const email = normalizeEmail(value);
+      if (!email) return false;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function buildLeadContactName(lead) {
+      const first = String(lead?.first_name || "").trim();
+      const last = String(lead?.last_name || "").trim();
+      const full = [first, last].filter(Boolean).join(" ").trim();
+      if (full) return full;
+      const name = String(lead?.name || "").trim();
+      if (name) return name;
+      const company = String(lead?.company_name || "").trim();
+      if (company) return company;
+      return "Contato principal";
+    }
+
+    function generateTempPassword() {
+      const chunk = Math.random().toString(36).slice(2, 10);
+      const suffix = String(Date.now()).slice(-2);
+      return "Tmp@" + chunk + suffix;
+    }
+
+    async function ensurePrimaryContactUser(companyId, lead, draft) {
+      const email = normalizeEmail(draft?.contactEmail || lead?.email || "");
+      if (!email) return null;
+      if (!isValidEmail(email)) throw new Error("Informe um email valido para o contato principal.");
+
+      const fullName = String(draft?.contactName || buildLeadContactName(lead)).trim() || "Contato principal";
+      const phone = String(draft?.phone || lead?.phone || "").trim();
+
+      let existing = null;
+      try {
+        existing = await api("/api/users/by-email?email=" + encodeURIComponent(email));
+      } catch (e) {
+        const message = String(e?.message || "").toLowerCase();
+        if (!(message.includes("not found") || message.includes("nao encontrado") || message.includes("404"))) {
+          throw e;
+        }
+      }
+
+      if (existing?.id) {
+        const userId = String(existing.id).trim();
+        if (!userId) throw new Error("Falha ao validar contato principal.");
+
+        const existingCompanyId = String(existing?.company_id || "").trim();
+        if (existingCompanyId && existingCompanyId !== String(companyId)) {
+          throw new Error("Ja existe usuario com esse email em outro cliente. Informe outro email.");
+        }
+
+        await api("/api/users/" + encodeURIComponent(userId), {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: fullName,
+            phonenumber: phone || undefined,
+            company_id: String(companyId),
+          }),
+        });
+
+        return userId;
+      }
+
+      const created = await api("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          password: generateTempPassword(),
+          role: "USER",
+          status: "ACTIVE",
+          first_access: true,
+          phonenumber: phone || undefined,
+          company_id: String(companyId),
+        }),
+      });
+
+      const createdId = String(created?.id || "").trim();
+      if (!createdId) throw new Error("Nao foi possivel criar o contato principal.");
+      return createdId;
+    }
+
+    async function openLeadCompanyResolverModal(leadId, leadSnapshot) {
+      if (!leadId || !window.SideModal || typeof window.SideModal.open !== "function") return null;
+
+      return await new Promise((resolve) => {
+        let settled = false;
+        let loadedLead = leadSnapshot || null;
+        const done = (value) => {
+          if (settled) return;
+          settled = true;
+          resolve(value || null);
+        };
+
+        const html = `
+          <div class="alert alert-warning" style="padding:8px 10px;">
+            Esta oportunidade esta ligada a um lead sem cliente convertido. Selecione um cliente existente ou crie um novo.
+          </div>
+
+          <div class="form-group">
+            <label style="display:block; margin-bottom:6px;">
+              <input type="radio" name="lc_mode" value="existing" /> Vincular cliente existente
+            </label>
+            <label style="display:block; margin-bottom:0;">
+              <input type="radio" name="lc_mode" value="create" checked /> Criar cliente a partir do lead
+            </label>
+          </div>
+
+          <div id="lcExistingWrap" style="display:none;">
+            <div class="form-group">
+              <label>Cliente existente</label>
+              <select id="lc_existing_company_id" class="form-control"></select>
+            </div>
+          </div>
+
+          <div id="lcCreateWrap">
+            <div class="form-group">
+              <label>Nome da empresa *</label>
+              <input id="lc_company_name" class="form-control" />
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Telefone</label>
+                  <input id="lc_phone" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>CNPJ</label>
+                  <input id="lc_company_number" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Setor</label>
+                  <input id="lc_sector" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Email contato principal</label>
+                  <input id="lc_contact_email" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Cidade</label>
+                  <input id="lc_city" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Estado</label>
+                  <input id="lc_state" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome contato principal</label>
+              <input id="lc_contact_name" class="form-control" />
+            </div>
+          </div>
+        `;
+
+        window.SideModal.open({
+          title: "Converter lead em cliente",
+          okText: "Continuar",
+          cancelText: "Cancelar",
+          html,
+          onCancel: function () { done(null); },
+          onOpen: async function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+
+            const [companiesResp, leadResp] = await Promise.all([
+              api("/api/companies?fields=summary").catch(() => []),
+              (leadSnapshot && leadSnapshot.id ? Promise.resolve(leadSnapshot) : api("/api/leads/" + encodeURIComponent(leadId)).catch(() => null)),
+            ]);
+
+            const companies = normalizeArray(companiesResp);
+            const lead = leadResp || leadSnapshot || {};
+            loadedLead = lead;
+
+            const companyOptions = ['<option value="">Selecione...</option>'].concat(
+              companies.map((c) => `<option value="${esc(c.id)}">${esc(c.company_name || c.name || c.id)}</option>`)
+            );
+            $root.find("#lc_existing_company_id").html(companyOptions.join(""));
+
+            $root.find("#lc_company_name").val(String(lead?.company_name || lead?.name || "").trim());
+            $root.find("#lc_phone").val(String(lead?.phone || "").trim());
+            $root.find("#lc_company_number").val(String(lead?.company_number || "").trim());
+            $root.find("#lc_sector").val(String(lead?.sector || "").trim());
+            $root.find("#lc_city").val(String(lead?.address_city || "").trim());
+            $root.find("#lc_state").val(String(lead?.address_state || "").trim());
+            $root.find("#lc_contact_name").val(buildLeadContactName(lead));
+            $root.find("#lc_contact_email").val(normalizeEmail(lead?.email || ""));
+
+            function toggleMode() {
+              const mode = String($root.find("input[name='lc_mode']:checked").val() || "create");
+              $root.find("#lcExistingWrap").toggle(mode === "existing");
+              $root.find("#lcCreateWrap").toggle(mode !== "existing");
+            }
+
+            $root.find("input[name='lc_mode']").on("change", toggleMode);
+            toggleMode();
+          },
+          onOk: async function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+            const mode = String($root.find("input[name='lc_mode']:checked").val() || "create");
+            let companyId = "";
+            let contactUserId = null;
+
+            if (mode === "existing") {
+              companyId = String($root.find("#lc_existing_company_id").val() || "").trim();
+              if (!companyId) {
+                alert("Selecione um cliente existente.");
+                return true;
+              }
+            } else {
+              const companyName = String($root.find("#lc_company_name").val() || "").trim();
+              if (!companyName) {
+                alert("Informe o nome da empresa.");
+                return true;
+              }
+
+              const created = await api("/api/companies", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  company_name: companyName,
+                  phone: String($root.find("#lc_phone").val() || "").trim() || undefined,
+                  company_number: String($root.find("#lc_company_number").val() || "").trim() || undefined,
+                  sector: String($root.find("#lc_sector").val() || "").trim() || undefined,
+                  address_city: String($root.find("#lc_city").val() || "").trim() || undefined,
+                  address_state: String($root.find("#lc_state").val() || "").trim() || undefined,
+                }),
+              });
+              companyId = String(created?.id || "").trim();
+              if (!companyId) {
+                alert("Nao foi possivel criar o cliente.");
+                return true;
+              }
+            }
+
+            const contactName = String($root.find("#lc_contact_name").val() || "").trim() || buildLeadContactName(loadedLead);
+            const contactEmail = normalizeEmail($root.find("#lc_contact_email").val() || loadedLead?.email || "");
+            const phone = String($root.find("#lc_phone").val() || loadedLead?.phone || "").trim();
+
+            if (contactEmail && !isValidEmail(contactEmail)) {
+              alert("Informe um email valido para o contato principal.");
+              return true;
+            }
+
+            if (mode !== "existing" && contactEmail) {
+              contactUserId = await ensurePrimaryContactUser(companyId, loadedLead, {
+                contactName,
+                contactEmail,
+                phone,
+              });
+
+              if (contactUserId) {
+                await api("/api/companies/" + encodeURIComponent(companyId), {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ user_id: contactUserId }),
+                });
+              }
+            }
+
+            await api("/api/leads/" + encodeURIComponent(leadId) + "/convert", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                company_id: companyId,
+                contact_id: contactUserId || undefined,
+              }),
+            });
+
+            done({
+              company_id: companyId,
+              contact_user_id: contactUserId || null,
+            });
+            return false;
+          },
+        });
+      });
+    }
+
+    $("#btnConvertOpp").on("click", async function () {
+      if (!state.id) return;
+      const convertUrl = "/api/opportunities/" + encodeURIComponent(state.id) + "/convert-to-invoice";
+      let opp = null;
+      try {
+        opp = await api("/api/opportunities/" + encodeURIComponent(state.id));
+      } catch (_) {}
+
+      const leadId = String(
+        state.leadIdFromRecord ||
+        (state.assocType === "lead" ? state.assocId : "") ||
+        opp?.lead_id ||
+        opp?.lead?.id ||
+        ""
+      ).trim();
+      const hasCompany = !!String(
+        (state.assocType === "client" ? state.assocId : "") ||
+        opp?.company_id ||
+        opp?.company?.id ||
+        ""
+      ).trim();
+      let leadResolution = null;
+
+      if (leadId && !hasCompany) {
+        leadResolution = await openLeadCompanyResolverModal(leadId, opp?.lead || null);
+        if (!leadResolution?.company_id) return;
+      }
+
+      if (!confirm("Converter para proposta (invoice)?")) return;
+
+      const payload = {};
+      if (leadResolution?.company_id) payload.company_id = String(leadResolution.company_id);
+
+      try {
+        const result = await api(convertUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+        if (invoiceId) {
+          const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+          if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+        }
+        return;
+      } catch (e) {
+        if (!isCompanyRequiredForConversionError(e)) {
+          alert(e?.message || "Falha ao converter");
+          return;
+        }
+      }
+
+      if (!leadId) {
+        alert("Nao foi possivel converter sem cliente. Associe um cliente na oportunidade.");
+        return;
+      }
+
+      try {
+        if (!leadResolution?.company_id) {
+          leadResolution = await openLeadCompanyResolverModal(leadId, opp?.lead || null);
+        }
+        if (!leadResolution?.company_id) return;
+
+        const result = await api(convertUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ company_id: String(leadResolution.company_id) }),
+        });
+
+        const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+        if (invoiceId) {
+          const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+          if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+        }
+      } catch (e) {
+        alert(e?.message || "Falha ao converter");
+      }
+    });
+
+    $("#btnAddEvent").on("click", async function () {
+      if (!state.id) return;
+      const title = String($("#eventTitle").val() || "").trim();
+      const description = String($("#eventDescription").val() || "").trim();
+      if (!title) return alert("Informe o titulo do evento");
+
+      try {
+        await api("/api/opportunities/" + encodeURIComponent(state.id) + "/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, description }),
+        });
+        $("#eventTitle").val("");
+        $("#eventDescription").val("");
+        await loadTimeline(state.id);
+      } catch (e) {
+        alert(e?.message || "Falha ao adicionar evento");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Opportunity");
+      $("#subpageName").text("Opportunities").attr("href", "/Opportunities");
+
+      bindDecimalMaskOnce($("#oppDiscountPercent"), { decimals: 2, min: 0, max: 100 });
+      bindDecimalMaskOnce($("#oppProbability"), { decimals: 0, min: 0, max: 100 });
+
+      await loadLookups();
+      renderLines();
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+      if (state.id) {
+        try {
+          await loadOpportunity(state.id);
+        } catch (e) {
+          alert(e?.message || "Falha ao carregar opportunity");
+          window.location.href = "/Opportunities";
+        }
+      }
+    });
+  })();
+</script>

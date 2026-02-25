@@ -1,0 +1,242 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #priceTablesSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="priceTablesSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshPriceTables" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewPriceTable" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova Tabela</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="priceTablesBulkActions" class="bulk-actions">
+          <span><strong><span id="priceTablesSelectedCount">0</span></strong> selecionada(s)</span>
+          <button id="btnEditSelectedPriceTable" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnDeleteSelectedPriceTable" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionPriceTable" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="priceTablesTable">
+            <thead>
+              <tr id="priceTablesFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="name"><input data-filter="name" class="form-control input-sm" placeholder="Filtrar Nome" /></th>
+                <th data-field="currency"><input data-filter="currency" class="form-control input-sm" placeholder="Filtrar Moeda" /></th>
+                <th data-field="is_default"><input data-filter="is_default" class="form-control input-sm" placeholder="Filtrar Padrao" /></th>
+                <th data-field="is_active"><input data-filter="is_active" class="form-control input-sm" placeholder="Filtrar Ativa" /></th>
+                <th data-field="validity"><input data-filter="validity" class="form-control input-sm" placeholder="Filtrar Validade" /></th>
+                <th data-field="items"><input data-filter="items" class="form-control input-sm" placeholder="Filtrar Itens" /></th>
+              </tr>
+              <tr id="priceTablesHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllPriceTables" type="checkbox" /></th>
+                <th class="sortable" data-field="name" data-sort-key="name">Nome <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="currency" data-sort-key="currency">Moeda <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="is_default" data-sort-key="is_default">Padrao <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="is_active" data-sort-key="is_active">Ativa <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="validity" data-sort-key="validity">Validade <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="items" data-sort-key="items">Itens <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="priceTablesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+    const currencyById = {};
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function dt(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    async function loadCurrencies() {
+      try {
+        const rows = normalizeArray(await api("/api/currencies?is_active=true"));
+        rows.forEach((row) => {
+          const id = String(row?.id || "").trim();
+          if (!id) return;
+          currencyById[id] = row;
+        });
+      } catch (e) {
+        // keep silent fallback
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      const validity = dt(r?.valid_from) + " - " + dt(r?.valid_to);
+      const rel = r?.currency || r?.currencies || currencyById[String(r?.currency_id || "").trim()] || {};
+      const code = String(rel?.code || rel?.iso_code || rel?.currency_code || "").trim();
+      const symbol = String(rel?.symbol || "").trim();
+      return {
+        name: String(r?.name || ""),
+        currency: [code, symbol].filter(Boolean).join(" "),
+        is_default: r?.is_default ? "Sim" : "Nao",
+        is_active: r?.is_active ? "Sim" : "Nao",
+        validity,
+        items: Number(r?._count?.items || r?.items_count || 0),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-price-table-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.name || "-")}<br><small class="text-muted">${esc(r?.description || "")}</small></td>
+          <td>${esc(v.currency || "-")}</td>
+          <td>${esc(v.is_default)}</td>
+          <td>${esc(v.is_active)}</td>
+          <td>${esc(v.validity)}</td>
+          <td>${esc(v.items)}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#priceTablesSelectedCount").text(String(ids.length));
+      $("#priceTablesBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#priceTablesBody .js-price-table-row-check").length > 0 &&
+        $("#priceTablesBody .js-price-table-row-check").length === $("#priceTablesBody .js-price-table-row-check:checked").length;
+      $("#chkSelectAllPriceTables").prop("checked", allChecked);
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-price-table-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllPriceTables").on("change", function () {
+      const checked = !!this.checked;
+      $("#priceTablesBody .js-price-table-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#priceTablesBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-price-table-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewPriceTable?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionPriceTable").on("click", function () {
+      selectedIds.clear();
+      $("#priceTablesBody .js-price-table-row-check").prop("checked", false);
+      $("#chkSelectAllPriceTables").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedPriceTable").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 tabela para editar.");
+      window.location.href = "/NewPriceTable?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnDeleteSelectedPriceTable").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir as tabelas selecionadas?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/price-tables/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Price Tables");
+      $("#subpageName").text("Price Tables").attr("href", "/PriceTables");
+
+      await loadCurrencies();
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "price_tables",
+        hostSelector: "#priceTablesSavedViewsHost",
+        tableSelector: "#priceTablesTable",
+        filtersRowSelector: "#priceTablesFiltersRow",
+        headerRowSelector: "#priceTablesHeaderRow",
+        bodySelector: "#priceTablesBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhuma tabela encontrada.",
+        loadRows: async function () { return normalizeArray(await api("/api/price-tables?fields=header")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshPriceTables").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

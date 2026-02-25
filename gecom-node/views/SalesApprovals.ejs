@@ -1,0 +1,229 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #salesApprovalsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="salesApprovalsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshSalesApprovals" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewSalesApproval" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova Aprovacao</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="salesApprovalsBulkActions" class="bulk-actions">
+          <span><strong><span id="salesApprovalsSelectedCount">0</span></strong> selecionada(s)</span>
+          <button id="btnEditSelectedSalesApproval" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnDeleteSelectedSalesApproval" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionSalesApproval" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="salesApprovalsTable">
+            <thead>
+              <tr id="salesApprovalsFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="title"><input data-filter="title" class="form-control input-sm" placeholder="Filtrar Titulo" /></th>
+                <th data-field="entity"><input data-filter="entity" class="form-control input-sm" placeholder="Filtrar Entidade" /></th>
+                <th data-field="status"><input data-filter="status" class="form-control input-sm" placeholder="Filtrar Status" /></th>
+                <th data-field="amount"><input data-filter="amount" class="form-control input-sm" placeholder="Filtrar Valor" /></th>
+                <th data-field="requester"><input data-filter="requester" class="form-control input-sm" placeholder="Filtrar Solicitante" /></th>
+                <th data-field="requested_at"><input data-filter="requested_at" class="form-control input-sm" placeholder="Filtrar Solicitado em" /></th>
+              </tr>
+              <tr id="salesApprovalsHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllSalesApprovals" type="checkbox" /></th>
+                <th class="sortable" data-field="title" data-sort-key="title">Titulo <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="entity" data-sort-key="entity">Entidade <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="status" data-sort-key="status">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="amount" data-sort-key="amount">Valor <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="requester" data-sort-key="requester">Solicitante <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="requested_at" data-sort-key="requested_at">Solicitado em <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="salesApprovalsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function money(v) {
+      if (v == null || v === "") return "-";
+      const n = Number(v);
+      if (!Number.isFinite(n)) return String(v);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function dt(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleString("pt-BR");
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      return {
+        title: String(r?.title || ""),
+        entity: String(r?.entity_type || "") + " " + String(r?.entity_id || ""),
+        status: String(r?.status || ""),
+        amount: Number(r?.amount || 0),
+        requester: String(r?.requested_by_user?.full_name || ""),
+        requested_at: dt(r?.requested_at || r?.created_at),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-sales-approval-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.title || "-")}</td>
+          <td>${esc(r?.entity_type || "-")}<br><small class="text-muted">${esc(r?.entity_id || "")}</small></td>
+          <td>${esc(v.status || "-")}</td>
+          <td>${money(r?.amount)}</td>
+          <td>${esc(v.requester || "-")}</td>
+          <td>${esc(v.requested_at || "-")}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#salesApprovalsSelectedCount").text(String(ids.length));
+      $("#salesApprovalsBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#salesApprovalsBody .js-sales-approval-row-check").length > 0 &&
+        $("#salesApprovalsBody .js-sales-approval-row-check").length === $("#salesApprovalsBody .js-sales-approval-row-check:checked").length;
+      $("#chkSelectAllSalesApprovals").prop("checked", allChecked);
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-sales-approval-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllSalesApprovals").on("change", function () {
+      const checked = !!this.checked;
+      $("#salesApprovalsBody .js-sales-approval-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#salesApprovalsBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-sales-approval-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewSalesApproval?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionSalesApproval").on("click", function () {
+      selectedIds.clear();
+      $("#salesApprovalsBody .js-sales-approval-row-check").prop("checked", false);
+      $("#chkSelectAllSalesApprovals").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedSalesApproval").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 aprovacao para editar.");
+      window.location.href = "/NewSalesApproval?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnDeleteSelectedSalesApproval").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir as aprovacoes selecionadas?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/sales-approvals/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Approvals");
+      $("#subpageName").text("Sales Approvals").attr("href", "/SalesApprovals");
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "sales_approvals",
+        hostSelector: "#salesApprovalsSavedViewsHost",
+        tableSelector: "#salesApprovalsTable",
+        filtersRowSelector: "#salesApprovalsFiltersRow",
+        headerRowSelector: "#salesApprovalsHeaderRow",
+        bodySelector: "#salesApprovalsBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhum registro encontrado.",
+        loadRows: async function () { return normalizeArray(await api("/api/sales-approvals")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshSalesApprovals").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

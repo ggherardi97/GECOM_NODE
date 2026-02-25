@@ -1,0 +1,684 @@
+<style>
+  .ibox-title { padding: 20px 90px 20px 15px; }
+  .table td, .table th { vertical-align: middle !important; }
+  .form-group { margin-bottom: 14px; }
+  .line-actions { white-space: nowrap; }
+  .money { font-family: monospace; }
+  .invoice-panel { min-height: 420px; }
+  .typeahead.dropdown-menu { max-height: 260px; overflow-y: auto; }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0;">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5 id="priceTableFormTitle">Nova Tabela de Preco</h5>
+          <div class="ibox-tools">
+            <a href="/PriceTables" class="btn btn-white btn-sm">Voltar</a>
+            <button id="btnDeletePriceTable" class="btn btn-danger btn-sm" style="display:none;"><i class="fa fa-trash"></i> Excluir</button>
+            <button id="btnSavePriceTable" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> Salvar</button>
+          </div>
+        </div>
+
+        <div class="ibox-content">
+          <form onsubmit="return false;">
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Dados da Tabela</strong></div>
+                  <div class="panel-body">
+                    <div class="form-group">
+                      <label>Nome *</label>
+                      <input id="ptName" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Descricao</label>
+                      <input id="ptDescription" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Moeda</label>
+                      <select id="ptCurrency" class="form-control"></select>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Valido de</label>
+                          <input id="ptValidFrom" type="date" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Valido ate</label>
+                          <input id="ptValidTo" type="date" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label style="display:block; margin-bottom:6px;">
+                        <input id="ptIsDefault" type="checkbox" /> Padrao
+                      </label>
+                      <label style="display:block; margin-bottom:0;">
+                        <input id="ptIsActive" type="checkbox" checked /> Ativa
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-8">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong>Itens da Tabela</strong>
+                    <button id="btnAddPtItem" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add Item</button>
+                  </div>
+                  <div class="panel-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered" id="ptItemsTable">
+                        <thead>
+                          <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:30%;">Produto</th>
+                            <th style="width:110px;">Qtd Min</th>
+                            <th style="width:110px;">Qtd Max</th>
+                            <th style="width:130px;">Preco Unit</th>
+                            <th style="width:95px;">Desc %</th>
+                            <th style="width:130px;">Preco Final</th>
+                            <th>Observacoes</th>
+                            <th style="width:80px;">Acoes</th>
+                          </tr>
+                        </thead>
+                        <tbody id="ptItemsBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Resumo</strong></div>
+                  <div class="panel-body">
+                    <div>Total de itens: <strong id="ptItemsCount">0</strong></div>
+                    <div>Preco medio: <strong class="money" id="ptAvgPrice">0,00</strong></div>
+                    <div>Faixa media de desconto: <strong id="ptAvgDiscount">0,00%</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+<script>
+  (function () {
+    const state = {
+      id: null,
+      currencies: [],
+      products: [],
+      items: [],
+    };
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function getSelectedCurrency() {
+      const currencyId = String($("#ptCurrency").val() || "").trim();
+      if (!currencyId) return null;
+      return state.currencies.find((c) => String(c.id) === currencyId) || null;
+    }
+
+    function resolveCurrencyCode(cur) {
+      if (!cur) return "";
+      const code = String(cur.code || cur.iso_code || cur.currency_code || "").trim();
+      if (code) return code;
+      const symbol = String(cur.symbol || "").trim();
+      if (symbol === "R$") return "BRL";
+      if (symbol === "$") return "USD";
+      if (symbol === "\u20AC") return "EUR";
+      return "";
+    }
+
+    function money(v) {
+      const n = parseNumberSafe(v, 0);
+      const cur = getSelectedCurrency();
+      const code = resolveCurrencyCode(cur);
+      const decimals = Number.isFinite(Number(cur?.decimals)) ? Number(cur.decimals) : 2;
+
+      try {
+        if (code) {
+          return new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: code,
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+          }).format(n);
+        }
+      } catch (e) {}
+
+      const num = n.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+      const symbol = String(cur?.symbol || "").trim();
+      return symbol ? `${symbol} ${num}` : num;
+    }
+
+    function getProductLabel(p) {
+      const code = String(p?.product_code || "").trim();
+      const name = String(p?.name || "").trim();
+      if (code && name) return code + " - " + name;
+      return name || code || "";
+    }
+
+    function getProductById(id) {
+      return state.products.find((p) => String(p.id) === String(id)) || null;
+    }
+
+    function getProductTypeaheadItems() {
+      return state.products.map((p) => ({
+        id: String(p.id),
+        label: getProductLabel(p),
+        name: String(p.name || ""),
+        unit_price: parseNumberSafe(p.default_unit_price, 0),
+        _norm: normalizeText(getProductLabel(p)),
+      }));
+    }
+
+    function hasValue(v) {
+      return String(v ?? "").trim().length > 0;
+    }
+
+    function calcFinalPrice(item) {
+      const unit = parseNumberSafe(item?.unit_price, 0);
+      const discount = Math.max(0, Math.min(100, parseNumberSafe(item?.discount_percent, 0)));
+      return Math.max(0, unit - (unit * (discount / 100)));
+    }
+
+    function renderSummary() {
+      const count = state.items.length;
+      let avgPrice = 0;
+      let avgDiscount = 0;
+
+      if (count > 0) {
+        avgPrice = state.items.reduce((acc, it) => acc + parseNumberSafe(it.unit_price, 0), 0) / count;
+        avgDiscount = state.items.reduce((acc, it) => acc + parseNumberSafe(it.discount_percent, 0), 0) / count;
+      }
+
+      $("#ptItemsCount").text(String(count));
+      $("#ptAvgPrice").text(money(avgPrice));
+      $("#ptAvgDiscount").text(avgDiscount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%");
+    }
+
+    function openPriceTableItemModal(mode, index) {
+      const isEdit = mode === "edit";
+      const existing = isEdit ? (state.items[index] || null) : null;
+      const item = existing ? { ...existing } : {
+        product_id: null,
+        product_label: "",
+        min_quantity: 1,
+        max_quantity: "",
+        unit_price: 0,
+        discount_percent: 0,
+        notes: "",
+      };
+
+      function syncModalFinal($root) {
+        const tmp = {
+          unit_price: parseNumberSafe($root.find("#ptm_unit_price").val(), 0),
+          discount_percent: parseNumberSafe($root.find("#ptm_discount_percent").val(), 0),
+        };
+        $root.find("#ptm_final_price").val(money(calcFinalPrice(tmp)));
+      }
+
+      const html = `
+        <div class="form-group">
+          <label>Produto</label>
+          <input id="ptm_product_name" type="text" class="form-control typeahead-product" autocomplete="off" placeholder="Pesquisar produto..." />
+          <input id="ptm_product_id" type="hidden" />
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Qtd Min</label>
+              <input id="ptm_min_quantity" type="text" class="form-control" value="${esc(String(item.min_quantity ?? 1))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Qtd Max</label>
+              <input id="ptm_max_quantity" type="text" class="form-control" value="${esc(String(item.max_quantity ?? ""))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Preco Unitario</label>
+              <input id="ptm_unit_price" type="text" class="form-control money" value="${esc(String(item.unit_price ?? 0))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Desconto %</label>
+              <input id="ptm_discount_percent" type="text" class="form-control" value="${esc(String(item.discount_percent ?? 0))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="form-group">
+              <label>Preco Final</label>
+              <input id="ptm_final_price" type="text" class="form-control" readonly />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observacoes</label>
+          <input id="ptm_notes" type="text" class="form-control" value="${esc(String(item.notes || ""))}" />
+        </div>
+      `;
+
+      window.SideModal.open({
+        title: isEdit ? "Editar item" : "Adicionar item",
+        okText: isEdit ? "Salvar" : "Adicionar",
+        cancelText: "Cancelar",
+        html,
+        onOpen: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          bindDecimalMaskOnce($root.find("#ptm_min_quantity"), { decimals: 2, min: 0.01 });
+          bindDecimalMaskOnce($root.find("#ptm_max_quantity"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#ptm_unit_price"), { decimals: 2, min: 0, thousandsOnInput: true });
+          bindDecimalMaskOnce($root.find("#ptm_discount_percent"), { decimals: 2, min: 0, max: 100 });
+
+          const items = getProductTypeaheadItems();
+          const $prodName = $root.find("#ptm_product_name");
+          const $prodId = $root.find("#ptm_product_id");
+          try { $prodName.typeahead("destroy"); } catch (e) {}
+
+          $prodName.typeahead({
+            source: items,
+            autoSelect: true,
+            minLength: 0,
+            displayText: function (row) { return row.label; },
+            matcher: function (row) {
+              const q = normalizeText(this.query);
+              if (!q) return true;
+              return row._norm.includes(q);
+            },
+            afterSelect: function (row) {
+              $prodId.val(row.id);
+              $prodName.val(row.label);
+              if (!parseNumberSafe($root.find("#ptm_unit_price").val(), 0)) {
+                $root.find("#ptm_unit_price").val(String(row.unit_price || 0)).trigger("blur");
+              }
+              syncModalFinal($root);
+            }
+          });
+
+          $prodName.on("focus", function () {
+            if (!String($(this).val() || "").trim()) $(this).typeahead("lookup");
+          });
+
+          $prodName.on("input", function () {
+            $prodId.val("");
+          });
+
+          if (item.product_id) {
+            $prodId.val(String(item.product_id));
+            $prodName.val(item.product_label || "");
+          }
+
+          $root.find("#ptm_min_quantity, #ptm_max_quantity, #ptm_unit_price, #ptm_discount_percent")
+            .on("input change blur", function () { syncModalFinal($root); });
+          syncModalFinal($root);
+        },
+        onOk: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          const productId = String($root.find("#ptm_product_id").val() || "").trim() || null;
+          const typedProduct = String($root.find("#ptm_product_name").val() || "").trim();
+          const minQty = parseNumberSafe($root.find("#ptm_min_quantity").val(), 0);
+          const maxRaw = String($root.find("#ptm_max_quantity").val() || "").trim();
+          const maxQty = maxRaw ? parseNumberSafe(maxRaw, 0) : "";
+          const unitPrice = parseNumberSafe($root.find("#ptm_unit_price").val(), 0);
+          const discountPercent = parseNumberSafe($root.find("#ptm_discount_percent").val(), 0);
+          const prod = productId ? getProductById(productId) : null;
+
+          if (!productId || !typedProduct) {
+            alert("Selecione um produto da lista.");
+            return true;
+          }
+
+          if (minQty <= 0) {
+            alert("Qtd Min deve ser maior que zero.");
+            return true;
+          }
+
+          if (maxRaw && maxQty > 0 && maxQty < minQty) {
+            alert("Qtd Max deve ser maior ou igual a Qtd Min.");
+            return true;
+          }
+
+          const updated = {
+            product_id: productId,
+            product_label: prod ? getProductLabel(prod) : typedProduct,
+            min_quantity: minQty,
+            max_quantity: maxRaw ? maxQty : "",
+            unit_price: unitPrice,
+            discount_percent: Math.max(0, Math.min(100, discountPercent)),
+            notes: String($root.find("#ptm_notes").val() || "").trim(),
+          };
+
+          if (isEdit) state.items[index] = updated;
+          else state.items.push(updated);
+          renderItems();
+          return false;
+        },
+      });
+    }
+
+    function renderItems() {
+      const html = state.items.map((it, idx) => {
+        const finalPrice = calcFinalPrice(it);
+        const maxQtyText = hasValue(it.max_quantity) ? String(parseNumberSafe(it.max_quantity, 0)) : "-";
+        return `
+          <tr data-idx="${idx}">
+            <td>${idx + 1}</td>
+            <td>${esc(it.product_label || "-")}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(it.min_quantity, 0)))}</td>
+            <td class="text-right">${esc(maxQtyText)}</td>
+            <td class="text-right">${money(it.unit_price || 0)}</td>
+            <td class="text-right">${esc(parseNumberSafe(it.discount_percent, 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}%</td>
+            <td class="text-right money">${money(finalPrice)}</td>
+            <td>${esc(it.notes || "-")}</td>
+            <td class="line-actions">
+              <button class="btn btn-xs btn-default js-pt-edit"><i class="fa fa-pencil"></i></button>
+              <button class="btn btn-xs btn-danger js-pt-del"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#ptItemsBody").html(html || '<tr><td colspan="9" class="text-muted">Sem itens.</td></tr>');
+      renderSummary();
+    }
+
+    function collectPayload() {
+      const name = String($("#ptName").val() || "").trim();
+      if (!name) throw new Error("Nome obrigatorio");
+
+      return {
+        name,
+        description: String($("#ptDescription").val() || "").trim() || null,
+        currency_id: String($("#ptCurrency").val() || "").trim() || null,
+        is_default: $("#ptIsDefault").is(":checked"),
+        is_active: $("#ptIsActive").is(":checked"),
+        valid_from: String($("#ptValidFrom").val() || "").trim() || null,
+        valid_to: String($("#ptValidTo").val() || "").trim() || null,
+        items: state.items
+          .filter((it) => !!it.product_id)
+          .map((it) => ({
+            product_id: String(it.product_id),
+            min_quantity: String(parseNumberSafe(it.min_quantity, 0)),
+            max_quantity: hasValue(it.max_quantity) ? String(parseNumberSafe(it.max_quantity, 0)) : null,
+            unit_price: String(parseNumberSafe(it.unit_price, 0)),
+            discount_percent: parseNumberSafe(it.discount_percent, 0),
+            notes: String(it.notes || "").trim() || null,
+          })),
+      };
+    }
+
+    async function loadProductsByCurrency(currencyId) {
+      const qs = new URLSearchParams();
+      if (currencyId) qs.set("currency_id", String(currencyId));
+      const suffix = qs.toString() ? ("?" + qs.toString()) : "";
+      const products = await api("/api/products" + suffix).catch(() => []);
+      state.products = normalizeArray(products);
+    }
+
+    async function loadLookups(selectedCurrencyId) {
+      const currencies = await api("/api/currencies?is_active=true").catch(() => []);
+      state.currencies = normalizeArray(currencies);
+
+      $("#ptCurrency").html('<option value="">(sem moeda)</option>' + state.currencies.map((c) => {
+        return '<option value="' + esc(c.id) + '">' + esc(c.code || "") + ' - ' + esc(c.name || "") + '</option>';
+      }).join(""));
+
+      if (selectedCurrencyId) $("#ptCurrency").val(String(selectedCurrencyId));
+      await loadProductsByCurrency(String($("#ptCurrency").val() || "").trim());
+    }
+
+    async function loadById(id) {
+      const table = await api("/api/price-tables/" + encodeURIComponent(id));
+
+      $("#priceTableFormTitle").text("Editar Tabela - " + String(table?.name || ""));
+      $("#ptName").val(table?.name || "");
+      $("#ptDescription").val(table?.description || "");
+      $("#ptIsDefault").prop("checked", !!table?.is_default);
+      $("#ptIsActive").prop("checked", !!table?.is_active);
+      $("#ptValidFrom").val(table?.valid_from ? String(table.valid_from).slice(0, 10) : "");
+      $("#ptValidTo").val(table?.valid_to ? String(table.valid_to).slice(0, 10) : "");
+
+      await loadLookups(table?.currency_id || table?.currency?.id || "");
+
+      state.items = normalizeArray(table?.items).map((it) => {
+        const pid = it?.product_id || it?.product?.id || null;
+        const prod = pid ? getProductById(pid) : null;
+        return {
+          product_id: pid,
+          product_label: prod ? getProductLabel(prod) : [it?.product?.product_code, it?.product?.name].filter(Boolean).join(" - "),
+          min_quantity: parseNumberSafe(it?.min_quantity, 1),
+          max_quantity: it?.max_quantity == null ? "" : parseNumberSafe(it.max_quantity, 0),
+          unit_price: parseNumberSafe(it?.unit_price, 0),
+          discount_percent: parseNumberSafe(it?.discount_percent, 0),
+          notes: String(it?.notes || ""),
+        };
+      });
+
+      renderItems();
+      $("#btnDeletePriceTable").show();
+    }
+
+    $(document).on("click", ".js-pt-edit", function () {
+      const idx = parseInt(String($(this).closest("tr").data("idx") || "-1"), 10);
+      if (idx < 0 || !state.items[idx]) return;
+      openPriceTableItemModal("edit", idx);
+    });
+
+    $(document).on("click", ".js-pt-del", function () {
+      const idx = parseInt(String($(this).closest("tr").data("idx") || "-1"), 10);
+      if (idx < 0) return;
+      state.items.splice(idx, 1);
+      renderItems();
+    });
+
+    $("#btnAddPtItem").on("click", function (e) {
+      e.preventDefault();
+      openPriceTableItemModal("new");
+    });
+
+    $("#ptCurrency").on("change", async function () {
+      await loadProductsByCurrency(String($(this).val() || "").trim());
+      renderItems();
+    });
+
+    $("#btnSavePriceTable").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? ("/api/price-tables/" + encodeURIComponent(state.id)) : "/api/price-tables";
+        const method = isEdit ? "PATCH" : "POST";
+
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewPriceTable?id=" + encodeURIComponent(id);
+        else window.location.href = "/PriceTables";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeletePriceTable").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir esta tabela?")) return;
+      try {
+        await api("/api/price-tables/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/PriceTables";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Price Table");
+      $("#subpageName").text("Price Tables").attr("href", "/PriceTables");
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+
+      if (state.id) {
+        try {
+          await loadById(state.id);
+        } catch (e) {
+          alert(e?.message || "Falha ao carregar tabela");
+          window.location.href = "/PriceTables";
+        }
+      } else {
+        await loadLookups();
+        renderItems();
+      }
+    });
+  })();
+</script>

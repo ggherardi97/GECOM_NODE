@@ -1,0 +1,312 @@
+﻿<div class="row" style="margin-top:20px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <h5 id="salesGoalFormTitle">Nova Meta de Vendas</h5>
+        <div>
+          <a href="/SalesGoals" class="btn btn-white btn-sm">Voltar</a>
+          <button id="btnDeleteSalesGoal" class="btn btn-danger btn-sm" style="display:none;">Excluir</button>
+          <button id="btnSaveSalesGoal" class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Owner *</label>
+              <select id="goalOwnerUserId" class="form-control"></select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Periodo *</label>
+              <select id="goalPeriodType" class="form-control">
+                <option value="MONTHLY">MONTHLY</option>
+                <option value="QUARTERLY">QUARTERLY</option>
+                <option value="YEARLY">YEARLY</option>
+                <option value="CUSTOM">CUSTOM</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group" style="margin-top: 24px;">
+              <label style="display:block;">
+                <input id="goalIsActive" type="checkbox" checked />
+                Ativa
+              </label>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Moeda</label>
+              <select id="goalCurrencyId" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Inicio *</label>
+              <input id="goalPeriodStart" type="date" class="form-control" />
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Fim *</label>
+              <input id="goalPeriodEnd" type="date" class="form-control" />
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label>Meta (valor)</label>
+              <input id="goalTargetAmount" class="form-control" placeholder="0,00" />
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label>Atingido (valor)</label>
+              <input id="goalAchievedAmount" class="form-control" placeholder="0,00" />
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label>Comissao (0..1)</label>
+              <input id="goalCommissionPercent" class="form-control" placeholder="0,1000" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const state = { id: null };
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    async function loadUsers(selectedId) {
+      const usersData = await api("/api/users").catch(function () { return []; });
+      const users = normalizeArray(usersData);
+      $("#goalOwnerUserId").html('<option value="">Selecione</option>' + users.map(function (u) {
+        return '<option value="' + esc(u.id) + '">' + esc(u.full_name || u.email || u.id) + "</option>";
+      }).join(""));
+      if (selectedId) $("#goalOwnerUserId").val(String(selectedId));
+    }
+
+    async function loadCurrencies(selectedId) {
+      const data = await api("/api/currencies?is_active=true").catch(function () { return []; });
+      const rows = normalizeArray(data);
+      $("#goalCurrencyId").html('<option value="">(sem moeda)</option>' + rows.map(function (r) {
+        return '<option value="' + esc(r.id) + '">' + esc(r.code) + " - " + esc(r.name || "") + "</option>";
+      }).join(""));
+      if (selectedId) $("#goalCurrencyId").val(String(selectedId));
+    }
+
+    function collectPayload() {
+      const owner_user_id = String($("#goalOwnerUserId").val() || "").trim();
+      const period_type = String($("#goalPeriodType").val() || "").trim();
+      const period_start = String($("#goalPeriodStart").val() || "").trim();
+      const period_end = String($("#goalPeriodEnd").val() || "").trim();
+      if (!owner_user_id) throw new Error("Owner obrigatorio");
+      if (!period_type) throw new Error("Periodo obrigatorio");
+      if (!period_start) throw new Error("Inicio obrigatorio");
+      if (!period_end) throw new Error("Fim obrigatorio");
+
+      return {
+        owner_user_id,
+        period_type,
+        period_start,
+        period_end,
+        target_amount: String(parseNumberSafe($("#goalTargetAmount").val(), 0)),
+        achieved_amount: String(parseNumberSafe($("#goalAchievedAmount").val(), 0)),
+        commission_percent: String(parseNumberSafe($("#goalCommissionPercent").val(), 0)),
+        currency_id: String($("#goalCurrencyId").val() || "").trim() || null,
+        is_active: $("#goalIsActive").is(":checked"),
+      };
+    }
+
+    async function loadById(id) {
+      const goal = await api("/api/sales-goals/" + encodeURIComponent(id));
+      $("#salesGoalFormTitle").text("Editar Meta");
+      await loadUsers(goal?.owner_user_id || goal?.owner_user?.id || "");
+      await loadCurrencies(goal?.currency_id || goal?.currency?.id || "");
+      $("#goalPeriodType").val(goal?.period_type || "MONTHLY");
+      $("#goalPeriodStart").val(goal?.period_start ? String(goal.period_start).slice(0, 10) : "");
+      $("#goalPeriodEnd").val(goal?.period_end ? String(goal.period_end).slice(0, 10) : "");
+      $("#goalTargetAmount").val(goal?.target_amount == null ? "0" : String(goal.target_amount)).trigger("blur");
+      $("#goalAchievedAmount").val(goal?.achieved_amount == null ? "0" : String(goal.achieved_amount)).trigger("blur");
+      $("#goalCommissionPercent").val(goal?.commission_percent == null ? "0" : String(goal.commission_percent)).trigger("blur");
+      $("#goalIsActive").prop("checked", !!goal?.is_active);
+      $("#btnDeleteSalesGoal").show();
+    }
+
+    $("#btnSaveSalesGoal").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? ("/api/sales-goals/" + encodeURIComponent(state.id)) : "/api/sales-goals";
+        const method = isEdit ? "PATCH" : "POST";
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewSalesGoal?id=" + encodeURIComponent(id);
+        else window.location.href = "/SalesGoals";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeleteSalesGoal").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir esta meta?")) return;
+      try {
+        await api("/api/sales-goals/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/SalesGoals";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Goal");
+      $("#subpageName").text("Sales Goals").attr("href", "/SalesGoals");
+
+      bindDecimalMaskOnce($("#goalTargetAmount"), { decimals: 2, min: 0, thousandsOnInput: true });
+      bindDecimalMaskOnce($("#goalAchievedAmount"), { decimals: 2, min: 0, thousandsOnInput: true });
+      bindDecimalMaskOnce($("#goalCommissionPercent"), { decimals: 4, min: 0, max: 1 });
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+      if (state.id) {
+        try { await loadById(state.id); }
+        catch (e) {
+          alert(e?.message || "Falha ao carregar");
+          window.location.href = "/SalesGoals";
+        }
+      } else {
+        await loadUsers();
+        await loadCurrencies();
+      }
+    });
+  })();
+</script>

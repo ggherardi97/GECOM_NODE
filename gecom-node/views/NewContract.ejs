@@ -1,0 +1,862 @@
+﻿<style>
+  .ibox-title { padding: 20px 90px 20px 15px; }
+  .table td, .table th { vertical-align: middle !important; }
+  .form-group { margin-bottom: 14px; }
+  .line-actions { white-space: nowrap; }
+  .money { font-family: monospace; }
+  .invoice-panel { min-height: 420px; }
+  .typeahead.dropdown-menu { max-height: 260px; overflow-y: auto; }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight" style="margin-top: 0;">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="ibox">
+        <div class="ibox-title">
+          <h5 id="contractFormTitle">Novo Contrato</h5>
+          <div class="ibox-tools">
+            <a href="/Contracts" class="btn btn-white btn-sm">Voltar</a>
+            <button id="btnDeleteContract" class="btn btn-danger btn-sm" style="display:none;"><i class="fa fa-trash"></i> Excluir</button>
+            <button id="btnGenerateContractInvoice" class="btn btn-success btn-sm" style="display:none;"><i class="fa fa-file-text-o"></i> Gerar Proposta</button>
+            <button id="btnSaveContract" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> Salvar</button>
+          </div>
+        </div>
+
+        <div class="ibox-content">
+          <form onsubmit="return false;">
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Dados do Contrato</strong></div>
+                  <div class="panel-body">
+                    <div class="row">
+                      <div class="col-lg-5">
+                        <div class="form-group">
+                          <label>Numero</label>
+                          <input id="contractNumber" class="form-control" placeholder="auto" />
+                        </div>
+                      </div>
+                      <div class="col-lg-7">
+                        <div class="form-group">
+                          <label>Status</label>
+                          <select id="contractStatus" class="form-control">
+                            <option value="DRAFT">DRAFT</option>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="SUSPENDED">SUSPENDED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                            <option value="EXPIRED">EXPIRED</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Nome *</label>
+                      <input id="contractName" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Cliente *</label>
+                      <input id="contractCompanySearch" class="form-control" autocomplete="off" placeholder="Digite para buscar cliente" />
+                      <input id="contractCompanyId" type="hidden" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Lead (opcional)</label>
+                      <input id="contractLeadSearch" class="form-control" autocomplete="off" placeholder="Digite para buscar lead" />
+                      <input id="contractLeadId" type="hidden" />
+                    </div>
+
+                    <div class="form-group">
+                      <label>Opportunity (opcional)</label>
+                      <input id="contractOpportunitySearch" class="form-control" autocomplete="off" placeholder="Digite para buscar opportunity" />
+                      <input id="contractOpportunityId" type="hidden" />
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Moeda *</label>
+                          <select id="contractCurrency" class="form-control"></select>
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Desconto Header (%)</label>
+                          <input id="contractDiscountPercent" class="form-control" value="0" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Inicio</label>
+                          <input id="contractStart" type="date" class="form-control" />
+                        </div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="form-group">
+                          <label>Fim</label>
+                          <input id="contractEnd" type="date" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Termos</label>
+                      <textarea id="contractTerms" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Observacoes</label>
+                      <textarea id="contractNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-8">
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong>Produtos do Contrato</strong>
+                    <button id="btnAddContractLine" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> Add Produto</button>
+                  </div>
+                  <div class="panel-body">
+                    <div class="table-responsive">
+                      <table class="table table-striped table-bordered">
+                        <thead>
+                          <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:28%;">Produto</th>
+                            <th>Descricao</th>
+                            <th style="width:90px;">Un</th>
+                            <th style="width:95px;">Qtd</th>
+                            <th style="width:130px;">Preco</th>
+                            <th style="width:110px;">Taxa</th>
+                            <th style="width:110px;">Desc %</th>
+                            <th style="width:130px;">Total</th>
+                            <th style="width:60px;">Acoes</th>
+                          </tr>
+                        </thead>
+                        <tbody id="contractLinesBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel panel-default invoice-panel">
+                  <div class="panel-heading"><strong>Totais</strong></div>
+                  <div class="panel-body">
+                    <table class="table">
+                      <tr><th>Subtotal</th><td class="text-right money" id="contractSubtotal">0,00</td></tr>
+                      <tr><th>Desconto Linhas</th><td class="text-right money" id="contractLineDiscount">0,00</td></tr>
+                      <tr><th>Desconto Header</th><td class="text-right money" id="contractHeaderDiscount">0,00</td></tr>
+                      <tr><th>Impostos</th><td class="text-right money" id="contractTax">0,00</td></tr>
+                      <tr><th>Total Contrato</th><td class="text-right money" id="contractTotal">0,00</td></tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
+<script>
+  (function () {
+    const state = {
+      id: null,
+      companies: [],
+      leads: [],
+      opportunities: [],
+      currencies: [],
+      products: [],
+      lines: [],
+    };
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value || "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function toIntSafe(value, fallback) {
+      const n = parseInt(String(value ?? "").trim(), 10);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function money(v) {
+      const n = parseNumberSafe(v, 0);
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function calcLine(line) {
+      const qty = parseNumberSafe(line.quantity, 0);
+      const price = parseNumberSafe(line.unit_price, 0);
+      const rate = parseNumberSafe(line.tax_rate, 0);
+      const discPct = Math.max(0, Math.min(100, parseNumberSafe(line.discount_percent, 0)));
+      const gross = qty * price;
+      const disc = gross * (discPct / 100);
+      const base = Math.max(0, gross - disc);
+      const tax = base * rate;
+      return { gross, disc, tax, total: base + tax };
+    }
+
+    function renderTotals() {
+      let subtotal = 0;
+      let lineDiscount = 0;
+      let tax = 0;
+
+      state.lines.forEach((line) => {
+        const c = calcLine(line);
+        subtotal += c.gross;
+        lineDiscount += c.disc;
+        tax += c.tax;
+      });
+
+      const headerDiscountPct = Math.max(0, Math.min(100, parseNumberSafe($("#contractDiscountPercent").val(), 0)));
+      const headerDiscount = subtotal * (headerDiscountPct / 100);
+      const total = Math.max(0, subtotal - lineDiscount - headerDiscount + tax);
+
+      $("#contractSubtotal").text(money(subtotal));
+      $("#contractLineDiscount").text(money(lineDiscount));
+      $("#contractHeaderDiscount").text(money(headerDiscount));
+      $("#contractTax").text(money(tax));
+      $("#contractTotal").text(money(total));
+    }
+
+    function getProductLabel(p) {
+      const code = String(p?.product_code || "").trim();
+      const name = String(p?.name || "").trim();
+      if (code && name) return code + " - " + name;
+      return name || code || "";
+    }
+
+    function getProductById(id) {
+      return state.products.find((p) => String(p.id) === String(id)) || null;
+    }
+
+    function initTypeaheadInput($input, items, onSelect) {
+      if (!$input.length) return;
+      try { $input.typeahead("destroy"); } catch (e) { }
+
+      $input.typeahead({
+        source: items,
+        autoSelect: true,
+        minLength: 0,
+        displayText: function (item) { return item.label; },
+        matcher: function (item) {
+          const q = normalizeText(this.query);
+          if (!q) return true;
+          return item._norm.includes(q);
+        },
+        afterSelect: function (item) {
+          onSelect(item);
+        }
+      });
+
+      $input.off("focus.baseTa").on("focus.baseTa", function () {
+        if (!String($(this).val() || "").trim()) $(this).typeahead("lookup");
+      });
+    }
+
+    function setupHeaderTypeaheads() {
+      const companyItems = state.companies
+        .map((c) => ({ id: String(c.id), label: String(c.company_name || ""), _norm: normalizeText(c.company_name || "") }))
+        .filter((x) => !!x.label);
+
+      const leadItems = state.leads
+        .map((l) => ({
+          id: String(l.id),
+          label: [l.name, l.company_name].filter(Boolean).join(" - ") || String(l.id),
+          _norm: normalizeText([l.name, l.company_name].filter(Boolean).join(" - ") || l.id),
+        }));
+
+      const oppItems = state.opportunities
+        .map((o) => ({
+          id: String(o.id),
+          label: String(o.name || o.id),
+          _norm: normalizeText(o.name || o.id),
+        }));
+
+      initTypeaheadInput($("#contractCompanySearch"), companyItems, function (item) {
+        $("#contractCompanyId").val(item.id);
+        $("#contractCompanySearch").val(item.label);
+      });
+      $("#contractCompanySearch").off("input.company").on("input.company", function () { $("#contractCompanyId").val(""); });
+
+      initTypeaheadInput($("#contractLeadSearch"), leadItems, function (item) {
+        $("#contractLeadId").val(item.id);
+        $("#contractLeadSearch").val(item.label);
+      });
+      $("#contractLeadSearch").off("input.lead").on("input.lead", function () { $("#contractLeadId").val(""); });
+
+      initTypeaheadInput($("#contractOpportunitySearch"), oppItems, function (item) {
+        $("#contractOpportunityId").val(item.id);
+        $("#contractOpportunitySearch").val(item.label);
+      });
+      $("#contractOpportunitySearch").off("input.opp").on("input.opp", function () { $("#contractOpportunityId").val(""); });
+    }
+
+    function getProductTypeaheadItems() {
+      return state.products.map((p) => ({
+        id: String(p.id),
+        label: getProductLabel(p),
+        name: String(p.name || ""),
+        unit: String(p.unit || "UN"),
+        unit_price: parseNumberSafe(p.default_unit_price, 0),
+        tax_rate: parseNumberSafe(p.default_tax_rate, 0),
+        _norm: normalizeText(getProductLabel(p)),
+      }));
+    }
+
+    function openContractLineModal(mode, index) {
+      const isEdit = mode === "edit";
+      const existing = isEdit ? (state.lines[index] || null) : null;
+      const line = existing ? { ...existing } : {
+        product_id: null,
+        product_label: "",
+        description: "",
+        unit: "UN",
+        quantity: 1,
+        unit_price: 0,
+        tax_rate: 0,
+        discount_percent: 0,
+      };
+
+      function syncLineTotal($root) {
+        const tmp = Object.assign({}, line, {
+          unit_price: parseNumberSafe($root.find("#cl_unit_price").val(), 0),
+          quantity: parseNumberSafe($root.find("#cl_quantity").val(), 0),
+          tax_rate: parseNumberSafe($root.find("#cl_tax_rate").val(), 0),
+          discount_percent: parseNumberSafe($root.find("#cl_discount_percent").val(), 0),
+        });
+        const c = calcLine(tmp);
+        $root.find("#cl_line_total").val(money(c.total));
+      }
+
+      const html = `
+        <div class="form-group">
+          <label>Produto</label>
+          <input id="cl_product_name" type="text" class="form-control typeahead-product" autocomplete="off" placeholder="Pesquisar produto..." />
+          <input id="cl_product_id" type="hidden" />
+        </div>
+        <div class="form-group">
+          <label>Descricao</label>
+          <input id="cl_description" type="text" class="form-control" value="${esc(line.description || "")}" />
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Unidade</label>
+              <input id="cl_unit" type="text" class="form-control" value="${esc(line.unit || "UN")}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Quantidade</label>
+              <input id="cl_quantity" type="text" class="form-control" value="${esc(String(line.quantity ?? 1))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Preco unitario</label>
+              <input id="cl_unit_price" type="text" class="form-control" value="${esc(String(line.unit_price ?? 0))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Taxa (0..1)</label>
+              <input id="cl_tax_rate" type="text" class="form-control" value="${esc(String(line.tax_rate ?? 0))}" />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Desconto %</label>
+              <input id="cl_discount_percent" type="text" class="form-control" value="${esc(String(line.discount_percent ?? 0))}" />
+            </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group">
+              <label>Total da linha</label>
+              <input id="cl_line_total" type="text" class="form-control" readonly />
+            </div>
+          </div>
+        </div>
+      `;
+
+      window.SideModal.open({
+        title: isEdit ? "Editar linha" : "Adicionar linha",
+        okText: isEdit ? "Salvar" : "Adicionar",
+        cancelText: "Cancelar",
+        html,
+        onOpen: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          bindDecimalMaskOnce($root.find("#cl_quantity"), { decimals: 2, min: 0 });
+          bindDecimalMaskOnce($root.find("#cl_unit_price"), { decimals: 2, min: 0, thousandsOnInput: true });
+          bindDecimalMaskOnce($root.find("#cl_tax_rate"), { decimals: 4, min: 0, max: 1 });
+          bindDecimalMaskOnce($root.find("#cl_discount_percent"), { decimals: 2, min: 0, max: 100 });
+
+          const items = getProductTypeaheadItems();
+          const $prodName = $root.find("#cl_product_name");
+          const $prodId = $root.find("#cl_product_id");
+          try { $prodName.typeahead("destroy"); } catch (e) { }
+
+          $prodName.typeahead({
+            source: items,
+            autoSelect: true,
+            minLength: 0,
+            displayText: function (item) { return item.label; },
+            matcher: function (item) {
+              const q = normalizeText(this.query);
+              if (!q) return true;
+              return item._norm.includes(q);
+            },
+            afterSelect: function (item) {
+              $prodId.val(item.id);
+              $prodName.val(item.label);
+              if (!$root.find("#cl_description").val()) $root.find("#cl_description").val(item.name || "");
+              if (!$root.find("#cl_unit").val()) $root.find("#cl_unit").val(item.unit || "UN");
+              $root.find("#cl_unit_price").val(String(item.unit_price || 0)).trigger("blur");
+              $root.find("#cl_tax_rate").val(String(item.tax_rate || 0)).trigger("blur");
+              syncLineTotal($root);
+            }
+          });
+
+          $prodName.on("focus", function () {
+            if (!String($(this).val() || "").trim()) $(this).typeahead("lookup");
+          });
+
+          $prodName.on("input", function () {
+            $prodId.val("");
+          });
+
+          if (line.product_id) {
+            $prodId.val(String(line.product_id));
+            $prodName.val(line.product_label || "");
+          }
+
+          $root.find("#cl_quantity, #cl_unit_price, #cl_tax_rate, #cl_discount_percent")
+            .on("input change blur", function () { syncLineTotal($root); });
+          syncLineTotal($root);
+        },
+        onOk: function (ctx) {
+          const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+          const $root = $(rootEl);
+
+          const productId = String($root.find("#cl_product_id").val() || "").trim() || null;
+          const typedProduct = String($root.find("#cl_product_name").val() || "").trim();
+          const prod = productId ? getProductById(productId) : null;
+
+          if (!productId || !typedProduct) {
+            alert("Selecione um produto da lista.");
+            return true;
+          }
+
+          const updated = {
+            product_id: productId,
+            product_label: prod ? getProductLabel(prod) : typedProduct,
+            description: String($root.find("#cl_description").val() || "").trim(),
+            unit: String($root.find("#cl_unit").val() || "UN").trim() || "UN",
+            quantity: parseNumberSafe($root.find("#cl_quantity").val(), 0),
+            unit_price: parseNumberSafe($root.find("#cl_unit_price").val(), 0),
+            tax_rate: parseNumberSafe($root.find("#cl_tax_rate").val(), 0),
+            discount_percent: parseNumberSafe($root.find("#cl_discount_percent").val(), 0),
+          };
+
+          if (prod && !updated.description) updated.description = prod.name || "";
+          if (updated.quantity <= 0) {
+            alert("Quantidade deve ser maior que zero.");
+            return true;
+          }
+
+          if (isEdit) state.lines[index] = updated;
+          else state.lines.push(updated);
+          renderLines();
+          return false;
+        },
+      });
+    }
+
+    function renderLines() {
+      const html = state.lines.map((line, idx) => {
+        const c = calcLine(line);
+        return `
+          <tr data-idx="${idx}">
+            <td>${idx + 1}</td>
+            <td>${esc(line.product_label || "-")}</td>
+            <td>${esc(line.description || "-")}</td>
+            <td>${esc(line.unit || "UN")}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.quantity, 0)))}</td>
+            <td class="text-right">${money(line.unit_price || 0)}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.tax_rate, 0)))}</td>
+            <td class="text-right">${esc(String(parseNumberSafe(line.discount_percent, 0)))}</td>
+            <td class="text-right money">${money(c.total)}</td>
+            <td class="line-actions">
+              <button class="btn btn-xs btn-default js-line-edit"><i class="fa fa-pencil"></i></button>
+              <button class="btn btn-xs btn-danger js-line-del"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      $("#contractLinesBody").html(html || '<tr><td colspan="10" class="text-muted">Sem linhas.</td></tr>');
+
+      renderTotals();
+    }
+
+    async function loadProductsByCurrency(currencyId) {
+      const qs = new URLSearchParams();
+      if (currencyId) qs.set("currency_id", String(currencyId));
+      const suffix = qs.toString() ? ("?" + qs.toString()) : "";
+      const products = await api("/api/products" + suffix).catch(() => []);
+      state.products = normalizeArray(products);
+    }
+
+    async function loadLookups(selected) {
+      const [companies, leads, opportunities, currencies] = await Promise.all([
+        api("/api/companies?fields=summary").catch(() => []),
+        api("/api/leads").catch(() => []),
+        api("/api/opportunities?fields=summary").catch(() => []),
+        api("/api/currencies?is_active=true").catch(() => []),
+      ]);
+
+      state.companies = normalizeArray(companies);
+      state.leads = normalizeArray(leads);
+      state.opportunities = normalizeArray(opportunities);
+      state.currencies = normalizeArray(currencies);
+
+      $("#contractCurrency").html('<option value="">Selecione</option>' + state.currencies.map((c) => {
+        return '<option value="' + esc(c.id) + '">' + esc(c.code || "") + ' - ' + esc(c.name || "") + '</option>';
+      }).join(""));
+
+      if (selected) {
+        if (selected.currency_id) $("#contractCurrency").val(String(selected.currency_id));
+
+        if (selected.company_id) {
+          const c = state.companies.find((x) => String(x.id) === String(selected.company_id));
+          if (c) {
+            $("#contractCompanyId").val(String(c.id));
+            $("#contractCompanySearch").val(String(c.company_name || ""));
+          }
+        }
+
+        if (selected.lead_id) {
+          const l = state.leads.find((x) => String(x.id) === String(selected.lead_id));
+          if (l) {
+            $("#contractLeadId").val(String(l.id));
+            $("#contractLeadSearch").val([l.name, l.company_name].filter(Boolean).join(" - "));
+          }
+        }
+
+        if (selected.opportunity_id) {
+          const o = state.opportunities.find((x) => String(x.id) === String(selected.opportunity_id));
+          if (o) {
+            $("#contractOpportunityId").val(String(o.id));
+            $("#contractOpportunitySearch").val(String(o.name || o.id));
+          }
+        }
+      }
+
+      await loadProductsByCurrency(String($("#contractCurrency").val() || "").trim());
+      setupHeaderTypeaheads();
+    }
+
+    function collectPayload() {
+      const name = String($("#contractName").val() || "").trim();
+      const companyId = String($("#contractCompanyId").val() || "").trim();
+      const currencyId = String($("#contractCurrency").val() || "").trim();
+
+      if (!name) throw new Error("Nome e obrigatorio");
+      if (!companyId) throw new Error("Cliente e obrigatorio");
+      if (!currencyId) throw new Error("Moeda e obrigatoria");
+
+      return {
+        contract_number: String($("#contractNumber").val() || "").trim() || null,
+        name,
+        status: String($("#contractStatus").val() || "DRAFT"),
+        company_id: companyId,
+        lead_id: String($("#contractLeadId").val() || "").trim() || null,
+        opportunity_id: String($("#contractOpportunityId").val() || "").trim() || null,
+        currency_id: currencyId,
+        discount_percent: parseNumberSafe($("#contractDiscountPercent").val(), 0),
+        start_at: String($("#contractStart").val() || "").trim() || null,
+        end_at: String($("#contractEnd").val() || "").trim() || null,
+        terms: String($("#contractTerms").val() || "").trim() || null,
+        notes: String($("#contractNotes").val() || "").trim() || null,
+        lines: state.lines.map((line) => ({
+          product_id: line.product_id || null,
+          description: String(line.description || "").trim() || null,
+          quantity: String(parseNumberSafe(line.quantity, 0)),
+          unit_price: String(parseNumberSafe(line.unit_price, 0)),
+          tax_rate: String(parseNumberSafe(line.tax_rate, 0)),
+          discount_percent: parseNumberSafe(line.discount_percent, 0),
+          unit: String(line.unit || "UN"),
+        })),
+      };
+    }
+
+    async function loadContract(id) {
+      const c = await api("/api/contracts/" + encodeURIComponent(id));
+
+      $("#contractFormTitle").text("Editar Contrato - " + String(c?.contract_number || ""));
+      $("#contractNumber").val(c?.contract_number || "");
+      $("#contractName").val(c?.name || "");
+      $("#contractStatus").val(c?.status || "DRAFT");
+      $("#contractDiscountPercent").val(String(c?.discount_percent || 0)).trigger("blur");
+      $("#contractStart").val(c?.start_at ? String(c.start_at).slice(0, 10) : "");
+      $("#contractEnd").val(c?.end_at ? String(c.end_at).slice(0, 10) : "");
+      $("#contractTerms").val(c?.terms || "");
+      $("#contractNotes").val(c?.notes || "");
+
+      await loadLookups(c);
+
+      state.lines = normalizeArray(c?.lines).map((l) => {
+        const pid = l?.product_id || l?.product?.id || null;
+        const prod = pid ? getProductById(pid) : null;
+        return {
+          product_id: pid,
+          product_label: prod ? getProductLabel(prod) : [l?.product?.product_code, l?.product?.name].filter(Boolean).join(" - "),
+          description: String(l?.description || ""),
+          unit: String(l?.unit || "UN"),
+          quantity: parseNumberSafe(l?.quantity, 1),
+          unit_price: parseNumberSafe(l?.unit_price, 0),
+          tax_rate: parseNumberSafe(l?.tax_rate, 0),
+          discount_percent: parseNumberSafe(l?.discount_percent, 0),
+        };
+      });
+
+      renderLines();
+
+      $("#btnDeleteContract").show();
+      $("#btnGenerateContractInvoice").show();
+    }
+
+    $(document).on("click", ".js-line-edit", function () {
+      const idx = toIntSafe($(this).closest("tr").data("idx"), -1);
+      if (idx < 0 || !state.lines[idx]) return;
+      openContractLineModal("edit", idx);
+    });
+
+    $(document).on("click", ".js-line-del", function () {
+      const idx = toIntSafe($(this).closest("tr").data("idx"), -1);
+      if (idx < 0) return;
+      state.lines.splice(idx, 1);
+      renderLines();
+    });
+
+    $("#btnAddContractLine").on("click", function (e) {
+      e.preventDefault();
+      openContractLineModal("new");
+    });
+
+    $("#contractDiscountPercent").on("input blur", function () {
+      renderTotals();
+    });
+
+    $("#contractCurrency").on("change", async function () {
+      await loadProductsByCurrency(String($(this).val() || "").trim());
+    });
+
+    $("#btnSaveContract").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? "/api/contracts/" + encodeURIComponent(state.id) : "/api/contracts";
+        const method = isEdit ? "PATCH" : "POST";
+
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewContract?id=" + encodeURIComponent(id);
+        else window.location.href = "/Contracts";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeleteContract").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir este contrato?")) return;
+      try {
+        await api("/api/contracts/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/Contracts";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $("#btnGenerateContractInvoice").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Gerar proposta (invoice) para este contrato?")) return;
+      try {
+        const result = await api("/api/contracts/" + encodeURIComponent(state.id) + "/generate-invoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+        if (invoiceId) {
+          const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+          if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+        }
+      } catch (e) {
+        alert(e?.message || "Falha ao gerar invoice");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Contract");
+      $("#subpageName").text("Contracts").attr("href", "/Contracts");
+
+      bindDecimalMaskOnce($("#contractDiscountPercent"), { decimals: 2, min: 0, max: 100 });
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+
+      if (state.id) {
+        try {
+          await loadContract(state.id);
+        } catch (e) {
+          alert(e?.message || "Falha ao carregar contrato");
+          window.location.href = "/Contracts";
+        }
+      } else {
+        await loadLookups();
+        renderLines();
+      }
+    });
+  })();
+</script>

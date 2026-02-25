@@ -76,7 +76,7 @@
         height: 100%;
         z-index: 999999;
         background-color: #fafafa;
-        width: 430px;
+        width: 480px;
         /* parecido com quick create */
         padding: 20px;
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
@@ -106,6 +106,25 @@
 
       .dynamic-modal-body {
         margin-bottom: 20px;
+      }
+
+      /* Side modal form grid alignment (avoid clipped bootstrap rows) */
+      .dynamic-modal-body .row {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .dynamic-modal-body .row > [class*="col-"] {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+
+      .dynamic-modal-body .row > [class*="col-"]:first-child {
+        padding-left: 0;
+      }
+
+      .dynamic-modal-body .row > [class*="col-"]:last-child {
+        padding-right: 0;
       }
 
       .dynamic-modal-footer {
@@ -154,7 +173,7 @@
       }
 
       #side-menu {
-        /* height: calc(100vh - 96px); */
+            max-height: 77%;
         overflow-y: auto;
         overflow-x: hidden;
         padding-bottom: 12px;
@@ -293,8 +312,8 @@
       }
 
       .rounded-circle {
-        width: 65px !important;
-        height: 65px;
+        width: 55px !important;
+        height: 55px;
         border-radius: 50%;
         object-fit: cover;
         object-position: center;
@@ -421,7 +440,7 @@
 
   <div id="wrapper">
     <!-- Sidebar -->
-      <nav class="navbar-default navbar-static-side" role="navigation" style="position:fixed;">
+      <!-- <nav class="navbar-default navbar-static-side" role="navigation" style="position:fixed;">
       <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
           <li class="nav-header text-center">
@@ -533,10 +552,10 @@
           </li>
         </ul>
       </div>
-    </nav>
-    <!-- <nav class="navbar-default navbar-static-side" role="navigation" style="height: 100% !important;">
+    </nav> -->
+    <nav class="navbar-default navbar-static-side" role="navigation" style="height: 100% !important;position:fixed;">
       <div class="sidebar-collapse">
-        <ul class="nav metismenu" id="side-menu">
+        <ul class="nav metismenu">
           <li class="nav-header text-center">
             <div class="dropdown profile-element">
               <span>
@@ -556,31 +575,100 @@
             </div>
             <div class="logo-element">G+</div>
           </li>
-
-          <li data-areas="all">
+        </ul>
+        <ul class="nav metismenu" id="side-menu">
+                 
+          <li data-areas="home,all">
             <a href="/Default">
               <i class="fa fa-home"></i>
               <span class="nav-label" data-i18n="page.layout.menu.dashboard">Dashboard</span>
             </a>
           </li>
           
-          <li id="myActivitiesTab" style="display: none;" data-areas="all">
+          <li data-areas="home,all" id="myActivitiesTab" style="display: none;">
             <a href="/MyActivities">
               <i class="fa fa-tasks"></i>
               <span class="nav-label">Minhas Atividades</span>
             </a>
           </li>
 
-          <li id="aiHubTab" style="display: none;" data-areas="all">
+          <li data-areas="home,all" id="aiHubTab" style="display: none;">
             <a href="/AI">
               <i class="fa fa-magic"></i>
               <span class="nav-label">IA</span>
             </a>
           </li>
 
+          <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.services"><%= t('page.layout.menu.services') %></a></li>
+
+          <li   data-areas="home" id="clientTab" style="display: none;">
+            <a href="/Clientes">
+              <i class="fa fa-users"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
+            </a>
+          </li>
+
+          <li  data-areas="home" >
+            <a href="/Processos">
+              <i class="fa fa-file"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
+            </a>
+          </li>
+
+          <li  data-areas="home" >
+            <a href="/MyDocuments">
+              <i class="fa fa-folder"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.myDocuments">Meus Documentos</span>
+            </a>
+          </li>
+
+          <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.sales"><%= t('page.layout.menu.sales') %></a></li>
+
+          <li  data-areas="home" >
+            <a href="/Invoices">
+              <i class="fa fa-money"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li  data-areas="home"  id="calculoAduaneiro">
+            <a href="/calculo-aduaneiro">
+              <i class="fa fa-balance-scale"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.customsCalculation"><%= t('page.layout.menu.customsCalculation') %></span>
+            </a>
+          </li>
+
+          <li  data-areas="home"  id="productTab" style="display: none;">
+            <a href="/Products">
+              <i class="fa fa-cube"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+            </a>
+          </li>
+
+          <li  data-areas="home"  id="leadsTab" style="display: none;">
+            <a href="/leads/pipeline">
+              <i class="fa fa-filter"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
+            </a>
+          </li>
+
+          <li  data-areas="home"  id="configDivider" style="display: none;"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.settings"><%= t('page.layout.menu.settings') %></a></li>
+          <li  data-areas="home"  id='notificationList' style="display: none;">
+            <a href="/Notifications">
+              <i class="fa fa-bell"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.notifications"><%= t('page.layout.menu.notifications') %></span>
+            </a>
+          </li>
+          <li  data-areas="home" id="statusConfigsMenu" style="display: none;">
+            <a href="/configuracoes/status">
+              <i class="fa fa-sliders"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.statusConfigs"><%= t('page.layout.menu.statusConfigs') %></span>
+            </a>
+          </li>
+
           <li data-areas="service"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
 
-          <li id="clientTab" style="display: none;" data-areas="service">
+          <li id="clientTabService" style="display: none;" data-areas="service">
             <a href="/Clientes">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
@@ -659,21 +747,35 @@
             </a>
           </li>
 
-          <li id="productTab" style="display: none;" data-areas="sales">
+          <li data-areas="sales">
             <a href="/Products">
               <i class="fa fa-cube"></i>
               <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
             </a>
           </li>
 
-          <li id="leadsTab" style="display: none;" data-areas="sales">
+          <li data-areas="sales">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
             </a>
           </li>
 
-          <li id="configDivider" style="display: none;" data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li data-areas="sales">
+            <a href="/Opportunities">
+              <i class="fa fa-bullseye"></i>
+              <span class="nav-label">Opportunities</span>
+            </a>
+          </li>
+
+          <li data-areas="sales">
+            <a href="/Contracts">
+              <i class="fa fa-file-text-o"></i>
+              <span class="nav-label">Contracts</span>
+            </a>
+          </li>
+
+          <li data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
           <li data-areas="settings">
             <a href="/servico/sla/politicas">
               <i class="fa fa-shield"></i>
@@ -728,7 +830,32 @@
               <span class="nav-label">Tarefas - Tipos</span>
             </a>
           </li>
-          <li id='notificationList' style="display: none;" data-areas="settings">
+          <li data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+          <li data-areas="settings">
+            <a href="/SalesApprovals">
+              <i class="fa fa-check-square-o"></i>
+              <span class="nav-label">Aprovações</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/PriceTables">
+              <i class="fa fa-table"></i>
+              <span class="nav-label">Tabelas de Preço</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/SalesGoals">
+              <i class="fa fa-flag"></i>
+              <span class="nav-label">Metas</span>
+            </a>
+          </li>
+          <li data-areas="settings">
+            <a href="/SalesCommissions">
+              <i class="fa fa-percent"></i>
+              <span class="nav-label">Comissões</span>
+            </a>
+          </li>
+          <li style="display: none;" data-areas="settings">
             <a href="/Notifications">
               <i class="fa fa-bell"></i>
               <span class="nav-label">Notificações</span>
@@ -744,6 +871,9 @@
           </button>
           <div class="sidebar-area-panel" id="sidebarAreaPanel">
             <div class="sidebar-area-panel-title">Alterar área</div>
+            <a href="#" class="sidebar-area-option" data-area="home">
+              <span>Home</span><i class="fa fa-check"></i>
+            </a>
             <a href="#" class="sidebar-area-option" data-area="service">
               <span>Serviço</span><i class="fa fa-check"></i>
             </a>
@@ -756,7 +886,7 @@
           </div>
         </div>
       </div>
-    </nav> -->
+    </nav>
 
     <div id="page-wrapper" class="gray-bg">
       <div class="row border-bottom">
@@ -902,18 +1032,21 @@
 
           function normalizeSidebarArea(area) {
             const value = String(area || "").toLowerCase();
+            if (value === "home") return "home";
             if (value === "sales") return "sales";
             if (value === "settings") return "settings";
             return "service";
           }
 
           function getSidebarAreaLabel(area) {
+            if (area === "home") return "Home";
             if (area === "sales") return window.t ? window.t("page.layout.menu.sales", { defaultValue: "Sales" }) : "Sales";
             if (area === "settings") return window.t ? window.t("page.layout.menu.settings", { defaultValue: "Configuracoes" }) : "Configuracoes";
             return window.t ? window.t("page.layout.menu.services", { defaultValue: "Servico" }) : "Servico";
           }
 
           function getSidebarAreaIcon(area) {
+            if (area === "home") return "H";
             if (area === "sales") return "V";
             if (area === "settings") return "C";
             return "S";
@@ -958,7 +1091,7 @@
             const panel = document.getElementById("sidebarAreaPanel");
             if (!trigger || !panel) return;
 
-            let savedArea = "service";
+            let savedArea = "home";
             try {
               savedArea = normalizeSidebarArea(localStorage.getItem(SIDEBAR_AREA_KEY));
             } catch {}
@@ -1998,6 +2131,7 @@
               $("#calculoAduaneiro").show();
               if (window.__features?.enableAI) $("#aiHubTab").show();
               $("#clientTab").show();
+              $("#clientTabService").show();
               $("#productTab").show();
               $("#leadsTab").show();
               $("#configDivider").show();

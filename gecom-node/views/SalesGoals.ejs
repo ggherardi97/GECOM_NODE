@@ -1,0 +1,240 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #salesGoalsSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="salesGoalsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshSalesGoals" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewSalesGoal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova Meta</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="salesGoalsBulkActions" class="bulk-actions">
+          <span><strong><span id="salesGoalsSelectedCount">0</span></strong> selecionada(s)</span>
+          <button id="btnEditSelectedSalesGoal" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnDeleteSelectedSalesGoal" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionSalesGoal" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="salesGoalsTable">
+            <thead>
+              <tr id="salesGoalsFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="owner"><input data-filter="owner" class="form-control input-sm" placeholder="Filtrar Owner" /></th>
+                <th data-field="period"><input data-filter="period" class="form-control input-sm" placeholder="Filtrar Periodo" /></th>
+                <th data-field="start"><input data-filter="start" class="form-control input-sm" placeholder="Filtrar Inicio" /></th>
+                <th data-field="end"><input data-filter="end" class="form-control input-sm" placeholder="Filtrar Fim" /></th>
+                <th data-field="target"><input data-filter="target" class="form-control input-sm" placeholder="Filtrar Meta" /></th>
+                <th data-field="achieved"><input data-filter="achieved" class="form-control input-sm" placeholder="Filtrar Atingido" /></th>
+                <th data-field="commission"><input data-filter="commission" class="form-control input-sm" placeholder="Filtrar Comissao" /></th>
+                <th data-field="active"><input data-filter="active" class="form-control input-sm" placeholder="Filtrar Ativa" /></th>
+                <th data-field="commissions"><input data-filter="commissions" class="form-control input-sm" placeholder="Filtrar Qtd Comissoes" /></th>
+              </tr>
+              <tr id="salesGoalsHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllSalesGoals" type="checkbox" /></th>
+                <th class="sortable" data-field="owner" data-sort-key="owner">Owner <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="period" data-sort-key="period">Periodo <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="start" data-sort-key="start">Inicio <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="end" data-sort-key="end">Fim <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="target" data-sort-key="target">Meta <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="achieved" data-sort-key="achieved">Atingido <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="commission" data-sort-key="commission">Comissao <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="active" data-sort-key="active">Ativa <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="commissions" data-sort-key="commissions">Comissoes <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="salesGoalsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function dt(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("pt-BR");
+    }
+
+    function money(v) {
+      const n = Number(v || 0);
+      if (!Number.isFinite(n)) return "0,00";
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      return {
+        owner: String(r?.owner_user?.full_name || ""),
+        period: String(r?.period_type || ""),
+        start: dt(r?.period_start),
+        end: dt(r?.period_end),
+        target: Number(r?.target_amount || 0),
+        achieved: Number(r?.achieved_amount || 0),
+        commission: Number(r?.commission_percent || 0),
+        active: r?.is_active ? "Sim" : "Nao",
+        commissions: Number(r?._count?.commissions || 0),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-sales-goal-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.owner || "-")}</td>
+          <td>${esc(v.period || "-")}</td>
+          <td>${esc(v.start || "-")}</td>
+          <td>${esc(v.end || "-")}</td>
+          <td>${money(v.target)}</td>
+          <td>${money(v.achieved)}</td>
+          <td>${money(v.commission)}</td>
+          <td>${esc(v.active)}</td>
+          <td>${esc(v.commissions)}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#salesGoalsSelectedCount").text(String(ids.length));
+      $("#salesGoalsBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#salesGoalsBody .js-sales-goal-row-check").length > 0 &&
+        $("#salesGoalsBody .js-sales-goal-row-check").length === $("#salesGoalsBody .js-sales-goal-row-check:checked").length;
+      $("#chkSelectAllSalesGoals").prop("checked", allChecked);
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-sales-goal-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllSalesGoals").on("change", function () {
+      const checked = !!this.checked;
+      $("#salesGoalsBody .js-sales-goal-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#salesGoalsBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-sales-goal-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewSalesGoal?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionSalesGoal").on("click", function () {
+      selectedIds.clear();
+      $("#salesGoalsBody .js-sales-goal-row-check").prop("checked", false);
+      $("#chkSelectAllSalesGoals").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedSalesGoal").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 meta para editar.");
+      window.location.href = "/NewSalesGoal?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnDeleteSelectedSalesGoal").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir as metas selecionadas?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/sales-goals/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Goals");
+      $("#subpageName").text("Sales Goals").attr("href", "/SalesGoals");
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "sales_goals",
+        hostSelector: "#salesGoalsSavedViewsHost",
+        tableSelector: "#salesGoalsTable",
+        filtersRowSelector: "#salesGoalsFiltersRow",
+        headerRowSelector: "#salesGoalsHeaderRow",
+        bodySelector: "#salesGoalsBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhuma meta encontrada.",
+        loadRows: async function () { return normalizeArray(await api("/api/sales-goals")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshSalesGoals").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

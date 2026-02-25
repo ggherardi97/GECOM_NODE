@@ -47,6 +47,8 @@
           <li class="active"><a href="#tabProcess" data-toggle="tab" data-entity="PROCESS">Processos</a></li>
           <li><a href="#tabLead" data-toggle="tab" data-entity="LEAD">Leads</a></li>
           <li><a href="#tabInvoice" data-toggle="tab" data-entity="INVOICE">Invoices</a></li>
+          <li><a href="#tabOpportunity" data-toggle="tab" data-entity="OPPORTUNITY">Opportunities</a></li>
+          <li><a href="#tabContract" data-toggle="tab" data-entity="CONTRACT">Contracts</a></li>
         </ul>
 
         <div class="tab-content" style="margin-top: 15px;">
@@ -118,6 +120,54 @@
                   </tr>
                 </thead>
                 <tbody id="rows-INVOICE"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabOpportunity" class="tab-pane">
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-success btn-sm btnNewStatus" data-entity="OPPORTUNITY">
+                <i class="fa fa-plus"></i> Novo status
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>code</th>
+                    <th>label</th>
+                    <th>color</th>
+                    <th>sort_order</th>
+                    <th>ativo</th>
+                    <th>legacy_ref</th>
+                    <th>acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="rows-OPPORTUNITY"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabContract" class="tab-pane">
+            <div style="margin-bottom: 10px;">
+              <button type="button" class="btn btn-success btn-sm btnNewStatus" data-entity="CONTRACT">
+                <i class="fa fa-plus"></i> Novo status
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>code</th>
+                    <th>label</th>
+                    <th>color</th>
+                    <th>sort_order</th>
+                    <th>ativo</th>
+                    <th>legacy_ref</th>
+                    <th>acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="rows-CONTRACT"></tbody>
               </table>
             </div>
           </div>
@@ -196,7 +246,9 @@
     const ENTITY_PROCESS = "PROCESS";
     const ENTITY_LEAD = "LEAD";
     const ENTITY_INVOICE = "INVOICE";
-    const allEntities = [ENTITY_PROCESS, ENTITY_LEAD, ENTITY_INVOICE];
+    const ENTITY_OPPORTUNITY = "OPPORTUNITY";
+    const ENTITY_CONTRACT = "CONTRACT";
+    const allEntities = [ENTITY_PROCESS, ENTITY_LEAD, ENTITY_INVOICE, ENTITY_OPPORTUNITY, ENTITY_CONTRACT];
 
     const state = {
       activeFilter: "true",
@@ -204,7 +256,9 @@
       rows: {
         PROCESS: [],
         LEAD: [],
-        INVOICE: []
+        INVOICE: [],
+        OPPORTUNITY: [],
+        CONTRACT: []
       }
     };
 
@@ -283,7 +337,8 @@
 
     function getValueForEntity(row, entity) {
       if (entity === ENTITY_LEAD) return row?.legacy_lead_status || "-";
-      return row?.legacy_int_value ?? "-";
+      if (entity === ENTITY_PROCESS || entity === ENTITY_INVOICE) return row?.legacy_int_value ?? "-";
+      return row?.legacy_int_value ?? row?.legacy_lead_status ?? "-";
     }
 
     function renderTable(entity) {
@@ -292,7 +347,7 @@
       const rows = state.rows[entity] || [];
       tbody.innerHTML = "";
       if (!rows.length) {
-        const colSpan = entity === ENTITY_LEAD ? 7 : 7;
+        const colSpan = 7;
         tbody.innerHTML = `<tr><td colspan="${colSpan}">Nenhum status encontrado.</td></tr>`;
         return;
       }
@@ -333,9 +388,12 @@
       if (entity === ENTITY_LEAD) {
         $("#legacyLeadWrap").show();
         $("#legacyIntWrap").hide();
-      } else {
+      } else if (entity === ENTITY_PROCESS || entity === ENTITY_INVOICE) {
         $("#legacyLeadWrap").hide();
         $("#legacyIntWrap").show();
+      } else {
+        $("#legacyLeadWrap").hide();
+        $("#legacyIntWrap").hide();
       }
 
       $("#statusConfigModal").modal("show");
@@ -371,7 +429,7 @@
           throw new Error("legacy_lead_status obrigatorio para LEAD.");
         }
         payload.legacy_lead_status = legacyLeadStatus;
-      } else {
+      } else if (entity === ENTITY_PROCESS || entity === ENTITY_INVOICE) {
         const parsed = Number(legacyIntValueRaw);
         if (!legacyIntValueRaw || !Number.isFinite(parsed)) {
           throw new Error("legacy_int_value obrigatorio para PROCESS/INVOICE.");

@@ -397,7 +397,11 @@
 
       // -------------------- Rendering --------------------
       function buildRowModel(p) {
-        const currency = currencyCache.get(p.currency_id) || null;
+        const currency =
+          currencyCache.get(p.currency_id) ||
+          p?.currencies ||
+          p?.currency ||
+          null;
 
         const currencyText = currency
           ? `${currency.code}${currency.symbol ? " (" + currency.symbol + ")" : ""}`

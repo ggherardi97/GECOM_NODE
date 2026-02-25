@@ -1,0 +1,639 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .sv-actions { margin-left: unset !important; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable .sort-indicator { margin-left: 6px; font-size: 11px; opacity: .75; }
+  #opportunitiesSavedViewsHost .sv-bar { margin-top: -2px; }
+  .bulk-actions { display: none; align-items: center; gap: 8px; margin-bottom: 10px; }
+  th.sv-fixed-col, td.sv-fixed-col { display: table-cell !important; visibility: visible !important; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="opportunitiesSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshOpp" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <a href="/NewOpportunity" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova Opportunity</a>
+        </div>
+      </div>
+
+      <div class="ibox-content">
+        <div id="oppBulkActions" class="bulk-actions">
+          <span><strong><span id="oppSelectedCount">0</span></strong> selecionada(s)</span>
+          <button id="btnEditSelectedOpp" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</button>
+          <button id="btnConvertSelectedOpp" class="btn btn-success btn-sm"><i class="fa fa-exchange"></i> Converter</button>
+          <button id="btnDeleteSelectedOpp" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnClearSelectionOpp" class="btn btn-white btn-sm">Limpar</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="opportunitiesTable">
+            <thead>
+              <tr id="opportunitiesFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"></th>
+                <th data-field="name"><input data-filter="name" class="form-control input-sm" placeholder="Filtrar Nome" /></th>
+                <th data-field="company"><input data-filter="company" class="form-control input-sm" placeholder="Filtrar Cliente" /></th>
+                <th data-field="lead"><input data-filter="lead" class="form-control input-sm" placeholder="Filtrar Lead" /></th>
+                <th data-field="status"><input data-filter="status" class="form-control input-sm" placeholder="Filtrar Status" /></th>
+                <th data-field="total"><input data-filter="total" class="form-control input-sm" placeholder="Filtrar Total" /></th>
+                <th data-field="owner"><input data-filter="owner" class="form-control input-sm" placeholder="Filtrar Owner" /></th>
+                <th data-field="created_at"><input data-filter="created_at" class="form-control input-sm" placeholder="Filtrar Criado em" /></th>
+              </tr>
+              <tr id="opportunitiesHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left"><input id="chkSelectAllOpp" type="checkbox" /></th>
+                <th class="sortable" data-field="name" data-sort-key="name">Nome <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="company" data-sort-key="company">Cliente <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="lead" data-sort-key="lead">Lead <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="status" data-sort-key="status">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="total" data-sort-key="total">Total <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="owner" data-sort-key="owner">Owner <span class="sort-indicator"></span></th>
+                <th class="sortable" data-field="created_at" data-sort-key="created_at">Criado em <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="opportunitiesBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
+<script>
+  (function () {
+    const selectedIds = new Set();
+    const currencyById = {};
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function resolveCurrency(row) {
+      const rel = row?.currency || row?.currencies || null;
+      if (rel) return rel;
+      const currencyId = String(row?.currency_id || row?.currencyId || "").trim();
+      return currencyId ? (currencyById[currencyId] || null) : null;
+    }
+
+    function money(v, row) {
+      const n = Number(v || 0);
+      if (!Number.isFinite(n)) return "0,00";
+      const currency = resolveCurrency(row) || {};
+      const code = String(currency?.code || currency?.iso_code || currency?.currency_code || "").trim();
+      const symbol = String(currency?.symbol || "").trim();
+      try {
+        if (code) return new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(n);
+      } catch (e) {}
+      const formatted = n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return symbol ? `${symbol} ${formatted}` : formatted;
+    }
+
+    function dt(v) {
+      if (!v) return "-";
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleString("pt-BR");
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    async function loadCurrencies() {
+      try {
+        const rows = normalizeArray(await api("/api/currencies?is_active=true"));
+        rows.forEach((row) => {
+          const id = String(row?.id || "").trim();
+          if (!id) return;
+          currencyById[id] = row;
+        });
+      } catch (e) {
+        // keep silent fallback
+      }
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function rowToView(r) {
+      return {
+        name: String(r?.name || ""),
+        company: String(r?.company?.company_name || ""),
+        lead: String(r?.lead?.name || ""),
+        status: String(r?.status || ""),
+        total: Number(r?.total || 0),
+        owner: String(r?.owner_user?.full_name || ""),
+        created_at: dt(r?.created_at),
+      };
+    }
+
+    function renderRow(r) {
+      const id = String(r?.id || "");
+      const v = rowToView(r);
+      const checked = selectedIds.has(id) ? "checked" : "";
+      return `
+        <tr>
+          <td class="sv-fixed-col" data-field="__select"><input type="checkbox" class="js-opp-row-check" data-id="${esc(id)}" ${checked} /></td>
+          <td>${esc(v.name || "-")}</td>
+          <td>${esc(v.company || "-")}</td>
+          <td>${esc(v.lead || "-")}</td>
+          <td>${esc(v.status || "-")}</td>
+          <td>${money(v.total, r)}</td>
+          <td>${esc(v.owner || "-")}</td>
+          <td>${esc(v.created_at || "-")}</td>
+        </tr>
+      `;
+    }
+
+    function getSelectedIds() {
+      return Array.from(selectedIds);
+    }
+
+    function updateBulkActions() {
+      const ids = getSelectedIds();
+      $("#oppSelectedCount").text(String(ids.length));
+      $("#oppBulkActions").toggle(ids.length > 0);
+      const allChecked = $("#opportunitiesBody .js-opp-row-check").length > 0 &&
+        $("#opportunitiesBody .js-opp-row-check").length === $("#opportunitiesBody .js-opp-row-check:checked").length;
+      $("#chkSelectAllOpp").prop("checked", allChecked);
+    }
+
+    function isCompanyRequiredForConversionError(err) {
+      const msg = String(err?.message || "").toLowerCase();
+      return msg.includes("company is required to convert opportunity into invoice");
+    }
+
+    function normalizeEmail(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function isValidEmail(value) {
+      const email = normalizeEmail(value);
+      if (!email) return false;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function buildLeadContactName(lead) {
+      const first = String(lead?.first_name || "").trim();
+      const last = String(lead?.last_name || "").trim();
+      const full = [first, last].filter(Boolean).join(" ").trim();
+      if (full) return full;
+      const name = String(lead?.name || "").trim();
+      if (name) return name;
+      const company = String(lead?.company_name || "").trim();
+      if (company) return company;
+      return "Contato principal";
+    }
+
+    function generateTempPassword() {
+      const chunk = Math.random().toString(36).slice(2, 10);
+      const suffix = String(Date.now()).slice(-2);
+      return "Tmp@" + chunk + suffix;
+    }
+
+    async function ensurePrimaryContactUser(companyId, lead, draft) {
+      const email = normalizeEmail(draft?.contactEmail || lead?.email || "");
+      if (!email) return null;
+      if (!isValidEmail(email)) throw new Error("Informe um email valido para o contato principal.");
+
+      const fullName = String(draft?.contactName || buildLeadContactName(lead)).trim() || "Contato principal";
+      const phone = String(draft?.phone || lead?.phone || "").trim();
+
+      let existing = null;
+      try {
+        existing = await api("/api/users/by-email?email=" + encodeURIComponent(email));
+      } catch (e) {
+        const message = String(e?.message || "").toLowerCase();
+        if (!(message.includes("not found") || message.includes("nao encontrado") || message.includes("404"))) {
+          throw e;
+        }
+      }
+
+      if (existing?.id) {
+        const userId = String(existing.id).trim();
+        if (!userId) throw new Error("Falha ao validar contato principal.");
+
+        const existingCompanyId = String(existing?.company_id || "").trim();
+        if (existingCompanyId && existingCompanyId !== String(companyId)) {
+          throw new Error("Ja existe usuario com esse email em outro cliente. Informe outro email.");
+        }
+
+        await api("/api/users/" + encodeURIComponent(userId), {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: fullName,
+            phonenumber: phone || undefined,
+            company_id: String(companyId),
+          }),
+        });
+
+        return userId;
+      }
+
+      const created = await api("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          email,
+          password: generateTempPassword(),
+          role: "USER",
+          status: "ACTIVE",
+          first_access: true,
+          phonenumber: phone || undefined,
+          company_id: String(companyId),
+        }),
+      });
+
+      const createdId = String(created?.id || "").trim();
+      if (!createdId) throw new Error("Nao foi possivel criar o contato principal.");
+      return createdId;
+    }
+
+    async function openLeadCompanyResolverModal(leadId, leadSnapshot) {
+      if (!leadId || !window.SideModal || typeof window.SideModal.open !== "function") return null;
+
+      return await new Promise((resolve) => {
+        let settled = false;
+        let loadedLead = leadSnapshot || null;
+        const done = (value) => {
+          if (settled) return;
+          settled = true;
+          resolve(value || null);
+        };
+
+        const html = `
+          <div class="alert alert-warning" style="padding:8px 10px;">
+            Esta oportunidade esta ligada a um lead sem cliente convertido. Selecione um cliente existente ou crie um novo.
+          </div>
+
+          <div class="form-group">
+            <label style="display:block; margin-bottom:6px;">
+              <input type="radio" name="lc_mode" value="existing" /> Vincular cliente existente
+            </label>
+            <label style="display:block; margin-bottom:0;">
+              <input type="radio" name="lc_mode" value="create" checked /> Criar cliente a partir do lead
+            </label>
+          </div>
+
+          <div id="lcExistingWrap" style="display:none;">
+            <div class="form-group">
+              <label>Cliente existente</label>
+              <select id="lc_existing_company_id" class="form-control"></select>
+            </div>
+          </div>
+
+          <div id="lcCreateWrap">
+            <div class="form-group">
+              <label>Nome da empresa *</label>
+              <input id="lc_company_name" class="form-control" />
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Telefone</label>
+                  <input id="lc_phone" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>CNPJ</label>
+                  <input id="lc_company_number" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Setor</label>
+                  <input id="lc_sector" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Email contato principal</label>
+                  <input id="lc_contact_email" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Cidade</label>
+                  <input id="lc_city" class="form-control" />
+                </div>
+              </div>
+              <div class="col-xs-6">
+                <div class="form-group">
+                  <label>Estado</label>
+                  <input id="lc_state" class="form-control" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nome contato principal</label>
+              <input id="lc_contact_name" class="form-control" />
+            </div>
+          </div>
+        `;
+
+        window.SideModal.open({
+          title: "Converter lead em cliente",
+          okText: "Continuar",
+          cancelText: "Cancelar",
+          html,
+          onCancel: function () { done(null); },
+          onOpen: async function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+
+            const [companiesResp, leadResp] = await Promise.all([
+              api("/api/companies?fields=summary").catch(() => []),
+              (leadSnapshot && leadSnapshot.id ? Promise.resolve(leadSnapshot) : api("/api/leads/" + encodeURIComponent(leadId)).catch(() => null)),
+            ]);
+
+            const companies = normalizeArray(companiesResp);
+            const lead = leadResp || leadSnapshot || {};
+            loadedLead = lead;
+
+            const companyOptions = ['<option value="">Selecione...</option>'].concat(
+              companies.map((c) => `<option value="${esc(c.id)}">${esc(c.company_name || c.name || c.id)}</option>`)
+            );
+            $root.find("#lc_existing_company_id").html(companyOptions.join(""));
+
+            $root.find("#lc_company_name").val(String(lead?.company_name || lead?.name || "").trim());
+            $root.find("#lc_phone").val(String(lead?.phone || "").trim());
+            $root.find("#lc_company_number").val(String(lead?.company_number || "").trim());
+            $root.find("#lc_sector").val(String(lead?.sector || "").trim());
+            $root.find("#lc_city").val(String(lead?.address_city || "").trim());
+            $root.find("#lc_state").val(String(lead?.address_state || "").trim());
+            $root.find("#lc_contact_name").val(buildLeadContactName(lead));
+            $root.find("#lc_contact_email").val(normalizeEmail(lead?.email || ""));
+
+            function toggleMode() {
+              const mode = String($root.find("input[name='lc_mode']:checked").val() || "create");
+              $root.find("#lcExistingWrap").toggle(mode === "existing");
+              $root.find("#lcCreateWrap").toggle(mode !== "existing");
+            }
+
+            $root.find("input[name='lc_mode']").on("change", toggleMode);
+            toggleMode();
+          },
+          onOk: async function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+            const mode = String($root.find("input[name='lc_mode']:checked").val() || "create");
+
+            let companyId = "";
+            let contactUserId = null;
+
+            if (mode === "existing") {
+              companyId = String($root.find("#lc_existing_company_id").val() || "").trim();
+              if (!companyId) {
+                alert("Selecione um cliente existente.");
+                return true;
+              }
+            } else {
+              const companyName = String($root.find("#lc_company_name").val() || "").trim();
+              if (!companyName) {
+                alert("Informe o nome da empresa.");
+                return true;
+              }
+
+              const created = await api("/api/companies", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  company_name: companyName,
+                  phone: String($root.find("#lc_phone").val() || "").trim() || undefined,
+                  company_number: String($root.find("#lc_company_number").val() || "").trim() || undefined,
+                  sector: String($root.find("#lc_sector").val() || "").trim() || undefined,
+                  address_city: String($root.find("#lc_city").val() || "").trim() || undefined,
+                  address_state: String($root.find("#lc_state").val() || "").trim() || undefined,
+                }),
+              });
+
+              companyId = String(created?.id || "").trim();
+              if (!companyId) {
+                alert("Nao foi possivel criar o cliente.");
+                return true;
+              }
+            }
+
+            const contactName = String($root.find("#lc_contact_name").val() || "").trim() || buildLeadContactName(loadedLead);
+            const contactEmail = normalizeEmail($root.find("#lc_contact_email").val() || loadedLead?.email || "");
+            const phone = String($root.find("#lc_phone").val() || loadedLead?.phone || "").trim();
+
+            if (contactEmail && !isValidEmail(contactEmail)) {
+              alert("Informe um email valido para o contato principal.");
+              return true;
+            }
+
+            if (mode !== "existing" && contactEmail) {
+              contactUserId = await ensurePrimaryContactUser(companyId, loadedLead, {
+                contactName,
+                contactEmail,
+                phone,
+              });
+
+              if (contactUserId) {
+                await api("/api/companies/" + encodeURIComponent(companyId), {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ user_id: contactUserId }),
+                });
+              }
+            }
+
+            await api("/api/leads/" + encodeURIComponent(leadId) + "/convert", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                company_id: companyId,
+                contact_id: contactUserId || undefined,
+              }),
+            });
+
+            done({
+              company_id: companyId,
+              contact_user_id: contactUserId || null,
+            });
+            return false;
+          },
+        });
+      });
+    }
+
+    async function convertOpportunity(id) {
+      if (!id) return;
+      const convertUrl = "/api/opportunities/" + encodeURIComponent(id) + "/convert-to-invoice";
+      let opportunity = null;
+      try {
+        opportunity = await api("/api/opportunities/" + encodeURIComponent(id));
+      } catch (_) {}
+
+      const leadId = String(opportunity?.lead_id || opportunity?.lead?.id || "").trim();
+      const hasCompany = !!String(opportunity?.company_id || opportunity?.company?.id || "").trim();
+      let leadResolution = null;
+
+      if (leadId && !hasCompany) {
+        leadResolution = await openLeadCompanyResolverModal(leadId, opportunity?.lead || null);
+        if (!leadResolution?.company_id) return;
+      }
+
+      if (!confirm("Converter esta opportunity em proposta (invoice)?")) return;
+
+      const basePayload = {};
+      if (leadResolution?.company_id) basePayload.company_id = String(leadResolution.company_id);
+
+      try {
+        const result = await api(convertUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(basePayload),
+        });
+        const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+        if (invoiceId) {
+          const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+          if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+        }
+        return;
+      } catch (err) {
+        if (!isCompanyRequiredForConversionError(err)) throw err;
+      }
+
+      if (!leadId) throw new Error("Nao foi possivel converter sem cliente. Associe um cliente na oportunidade.");
+
+      if (!leadResolution?.company_id) {
+        leadResolution = await openLeadCompanyResolverModal(leadId, opportunity?.lead || null);
+      }
+      if (!leadResolution?.company_id) return;
+
+      const result = await api(convertUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_id: String(leadResolution.company_id) }),
+      });
+
+      const invoiceId = String(result?.invoice_id || result?.invoice?.id || "").trim();
+      if (invoiceId) {
+        const openNow = confirm("Proposta gerada com sucesso. Deseja abrir agora?");
+        if (openNow) window.location.href = "/NewInvoice?id=" + encodeURIComponent(invoiceId);
+      }
+    }
+
+    let gridApi = null;
+
+    $(document).on("change", ".js-opp-row-check", function () {
+      const id = String($(this).data("id") || "");
+      if (!id) return;
+      if (this.checked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBulkActions();
+    });
+
+    $("#chkSelectAllOpp").on("change", function () {
+      const checked = !!this.checked;
+      $("#opportunitiesBody .js-opp-row-check").each(function () {
+        const id = String($(this).data("id") || "");
+        $(this).prop("checked", checked);
+        if (!id) return;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkActions();
+    });
+
+    $(document).on("click", "#opportunitiesBody tr", function (e) {
+      const $target = $(e.target);
+      if ($target.closest("input,button,a,label,.dropdown-menu").length) return;
+      const id = String($(this).find(".js-opp-row-check").data("id") || "").trim();
+      if (!id) return;
+      window.location.href = "/NewOpportunity?id=" + encodeURIComponent(id);
+    });
+
+    $("#btnClearSelectionOpp").on("click", function () {
+      selectedIds.clear();
+      $("#opportunitiesBody .js-opp-row-check").prop("checked", false);
+      $("#chkSelectAllOpp").prop("checked", false);
+      updateBulkActions();
+    });
+
+    $("#btnEditSelectedOpp").on("click", function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 opportunity para editar.");
+      window.location.href = "/NewOpportunity?id=" + encodeURIComponent(ids[0]);
+    });
+
+    $("#btnConvertSelectedOpp").on("click", async function () {
+      const ids = getSelectedIds();
+      if (ids.length !== 1) return alert("Selecione exatamente 1 opportunity para converter.");
+      try {
+        await convertOpportunity(ids[0]);
+        if (gridApi) await gridApi.reload();
+      } catch (e) {
+        alert(e?.message || "Falha ao converter");
+      }
+    });
+
+    $("#btnDeleteSelectedOpp").on("click", async function () {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+      if (!confirm("Deseja excluir as opportunities selecionadas?")) return;
+      try {
+        for (const id of ids) {
+          await api("/api/opportunities/" + encodeURIComponent(id), { method: "DELETE" });
+        }
+        selectedIds.clear();
+        if (gridApi) await gridApi.reload();
+        updateBulkActions();
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Opportunities");
+      $("#subpageName").text("Opportunities").attr("href", "/Opportunities");
+
+      await loadCurrencies();
+
+      gridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "opportunities",
+        hostSelector: "#opportunitiesSavedViewsHost",
+        tableSelector: "#opportunitiesTable",
+        filtersRowSelector: "#opportunitiesFiltersRow",
+        headerRowSelector: "#opportunitiesHeaderRow",
+        bodySelector: "#opportunitiesBody",
+        loadingText: "Carregando...",
+        emptyText: "Nenhuma opportunity encontrada.",
+        loadRows: async function () { return normalizeArray(await api("/api/opportunities?fields=header")); },
+        rowToView,
+        renderRow,
+        onAfterRender: updateBulkActions,
+      });
+
+      $("#btnRefreshOpp").on("click", async function () {
+        if (gridApi) await gridApi.reload();
+      });
+    });
+  })();
+</script>

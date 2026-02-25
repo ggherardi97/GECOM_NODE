@@ -1,0 +1,402 @@
+<div class="row" style="margin-top:20px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <h5 id="salesApprovalFormTitle">Nova Aprovacao</h5>
+        <div>
+          <a href="/SalesApprovals" class="btn btn-white btn-sm">Voltar</a>
+          <button id="btnDeleteSalesApproval" class="btn btn-danger btn-sm" style="display:none;">Excluir</button>
+          <button id="btnSaveSalesApproval" class="btn btn-primary btn-sm">Salvar</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Entidade *</label>
+              <select id="approvalEntityType" class="form-control">
+                <option value="OPPORTUNITY">OPPORTUNITY</option>
+                <option value="INVOICE">INVOICE</option>
+                <option value="CONTRACT">CONTRACT</option>
+                <option value="PRICE_TABLE">PRICE_TABLE</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="form-group">
+              <label>Buscar entidade</label>
+              <input id="approvalEntityLookup" class="form-control" list="approvalEntityList" placeholder="Digite para buscar..." />
+              <datalist id="approvalEntityList"></datalist>
+              <small id="approvalEntityHint" class="text-muted">Selecione um item da lista para preencher o ID.</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Entity ID *</label>
+              <input id="approvalEntityId" class="form-control" placeholder="UUID da entidade" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-8">
+            <div class="form-group">
+              <label>Titulo *</label>
+              <input id="approvalTitle" class="form-control" />
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Status</label>
+              <select id="approvalStatus" class="form-control">
+                <option value="PENDING">PENDING</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="CANCELLED">CANCELLED</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-8">
+            <div class="form-group">
+              <label>Descricao</label>
+              <textarea id="approvalDescription" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label>Valor</label>
+              <input id="approvalAmount" class="form-control" placeholder="0.00" />
+              <small class="text-muted">Use formato decimal (ex: 1200.50).</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Opportunity relacionada (opcional)</label>
+              <input id="approvalOpportunityLookup" class="form-control" list="approvalOpportunityList" placeholder="Buscar opportunity..." />
+              <datalist id="approvalOpportunityList"></datalist>
+              <input id="approvalOpportunityId" type="hidden" />
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Observacao de resolucao</label>
+              <textarea id="approvalResolutionNote" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const state = {
+      id: null,
+      entityMap: {},
+      opportunityMap: {},
+    };
+
+    function esc(v) {
+      return String(v == null ? "" : v)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function qs() {
+      const p = new URLSearchParams(window.location.search);
+      return Object.fromEntries(p.entries());
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function parseNumberSafe(value, fallback) {
+      const raw = String(value ?? "").trim();
+      if (!raw) return fallback ?? 0;
+      const s = raw.replace(/\s+/g, "").replace(/[^\d,.\-]/g, "");
+
+      if (s.includes(".") && s.includes(",")) {
+        const normalized = s.replace(/\./g, "").replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      if (s.includes(",") && !s.includes(".")) {
+        const normalized = s.replace(",", ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : (fallback ?? 0);
+      }
+
+      const n = Number(s);
+      return Number.isFinite(n) ? n : (fallback ?? 0);
+    }
+
+    function bindDecimalMaskOnce(selector, options) {
+      const $el = $(selector);
+      if (!$el.length) return;
+      if ($el.data("decimal-mask")) return;
+      $el.data("decimal-mask", true);
+
+      const decimals = Number.isFinite(options?.decimals) ? options.decimals : 2;
+      const min = Number.isFinite(options?.min) ? options.min : null;
+      const max = Number.isFinite(options?.max) ? options.max : null;
+      const thousandsOnInput = !!options?.thousandsOnInput;
+
+      function normalize(val) {
+        const raw = String(val ?? "").trim();
+        if (!raw) return "";
+        let cleaned = raw.replace(/[^\d,.\-]/g, "");
+        cleaned = cleaned.replace(/(?!^)-/g, "");
+        if (cleaned.includes(".") && cleaned.includes(",")) {
+          return cleaned.replace(/\./g, "").replace(",", ".");
+        }
+        if (cleaned.includes(",") && !cleaned.includes(".")) {
+          return cleaned.replace(",", ".");
+        }
+        return cleaned;
+      }
+
+      function clamp(n) {
+        let out = n;
+        if (min != null) out = Math.max(min, out);
+        if (max != null) out = Math.min(max, out);
+        return out;
+      }
+
+      function formatPtBr(n) {
+        return new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(n);
+      }
+
+      function formatTypingMoneyLike(val) {
+        const digits = String(val ?? "").replace(/\D/g, "");
+        if (!digits) return "";
+        const n = Number(digits) / Math.pow(10, decimals);
+        if (!Number.isFinite(n)) return "";
+        return formatPtBr(clamp(n));
+      }
+
+      $el.on("input", function () {
+        if (thousandsOnInput) $(this).val(formatTypingMoneyLike($(this).val()));
+        else $(this).val(normalize($(this).val()));
+      });
+
+      $el.on("blur", function () {
+        const n = parseNumberSafe($(this).val(), null);
+        if (n == null || !Number.isFinite(n)) return;
+        $(this).val(formatPtBr(clamp(n)));
+      });
+
+      if ($el.val()) {
+        const n = parseNumberSafe($el.val(), null);
+        if (n != null && Number.isFinite(n)) $el.val(formatPtBr(clamp(n)));
+      }
+    }
+
+    async function api(url, opts) {
+      const resp = await fetch(url, Object.assign({ credentials: "include" }, opts || {}));
+      const text = await resp.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+      if (!resp.ok) throw new Error(data?.message || ("HTTP " + resp.status));
+      return data;
+    }
+
+    function getEntityLabel(entityType, row) {
+      if (entityType === "OPPORTUNITY") return String(row?.name || "");
+      if (entityType === "INVOICE") return String(row?.invoice_number || row?.number || row?.title || "");
+      if (entityType === "CONTRACT") return String(row?.contract_number || row?.name || "");
+      if (entityType === "PRICE_TABLE") return String(row?.name || "");
+      return String(row?.name || row?.title || row?.id || "");
+    }
+
+    async function searchEntities(term) {
+      const entityType = String($("#approvalEntityType").val() || "OPPORTUNITY");
+      const t = String(term || "").trim().toLowerCase();
+      state.entityMap = {};
+
+      let rows = [];
+      if (entityType === "OPPORTUNITY") rows = normalizeArray(await api("/api/opportunities?fields=summary"));
+      else if (entityType === "INVOICE") rows = normalizeArray(await api("/api/invoices?fields=summary"));
+      else if (entityType === "CONTRACT") rows = normalizeArray(await api("/api/contracts?fields=summary"));
+      else if (entityType === "PRICE_TABLE") rows = normalizeArray(await api("/api/price-tables?fields=summary"));
+      else rows = [];
+
+      const options = [];
+      rows
+        .filter((r) => {
+          const label = getEntityLabel(entityType, r);
+          if (!t) return true;
+          return label.toLowerCase().includes(t) || String(r?.id || "").toLowerCase().includes(t);
+        })
+        .slice(0, 50)
+        .forEach((r) => {
+          const label = getEntityLabel(entityType, r);
+          if (!label) return;
+          const opt = label + " | " + String(r?.id || "");
+          state.entityMap[opt] = String(r?.id || "");
+          options.push('<option value="' + esc(opt) + '"></option>');
+        });
+      $("#approvalEntityList").html(options.join(""));
+    }
+
+    async function searchOpportunities(term) {
+      const t = String(term || "").trim().toLowerCase();
+      state.opportunityMap = {};
+      const rows = normalizeArray(await api("/api/opportunities?fields=summary"));
+      const options = [];
+      rows
+        .filter((r) => {
+          const name = String(r?.name || "").toLowerCase();
+          if (!t) return true;
+          return name.includes(t) || String(r?.id || "").toLowerCase().includes(t);
+        })
+        .slice(0, 50)
+        .forEach((r) => {
+          const label = String(r?.name || "") + " | " + String(r?.id || "");
+          state.opportunityMap[label] = String(r?.id || "");
+          options.push('<option value="' + esc(label) + '"></option>');
+        });
+      $("#approvalOpportunityList").html(options.join(""));
+    }
+
+    function collectPayload() {
+      const entity_type = String($("#approvalEntityType").val() || "").trim();
+      const entity_id = String($("#approvalEntityId").val() || "").trim();
+      const title = String($("#approvalTitle").val() || "").trim();
+      if (!entity_type) throw new Error("Entidade obrigatoria");
+      if (!entity_id) throw new Error("Entity ID obrigatorio");
+      if (!title) throw new Error("Titulo obrigatorio");
+
+      const payload = {
+        entity_type,
+        entity_id,
+        title,
+        description: String($("#approvalDescription").val() || "").trim() || null,
+        amount: String(parseNumberSafe($("#approvalAmount").val(), 0)),
+        status: String($("#approvalStatus").val() || "PENDING"),
+        resolution_note: String($("#approvalResolutionNote").val() || "").trim() || null,
+      };
+
+      const opportunity_id = String($("#approvalOpportunityId").val() || "").trim();
+      if (opportunity_id) payload.opportunity_id = opportunity_id;
+
+      return payload;
+    }
+
+    async function loadById(id) {
+      const item = await api("/api/sales-approvals/" + encodeURIComponent(id));
+      $("#salesApprovalFormTitle").text("Editar Aprovacao");
+      $("#approvalEntityType").val(item?.entity_type || "OPPORTUNITY");
+      $("#approvalEntityId").val(item?.entity_id || "");
+      $("#approvalTitle").val(item?.title || "");
+      $("#approvalDescription").val(item?.description || "");
+      $("#approvalAmount").val(item?.amount == null ? "" : String(item.amount)).trigger("blur");
+      $("#approvalStatus").val(item?.status || "PENDING");
+      $("#approvalResolutionNote").val(item?.resolution_note || "");
+
+      if (item?.opportunity_id) {
+        $("#approvalOpportunityId").val(String(item.opportunity_id));
+        const label = (item?.opportunity?.name || "Opportunity") + " | " + item.opportunity_id;
+        $("#approvalOpportunityLookup").val(label);
+      }
+
+      $("#btnDeleteSalesApproval").show();
+    }
+
+    $("#approvalEntityType").on("change", function () {
+      $("#approvalEntityLookup").val("");
+      $("#approvalEntityId").val("");
+      $("#approvalEntityHint").text("Selecione um item da lista para preencher o ID.");
+      searchEntities("").catch(function () {});
+    });
+
+    $("#approvalEntityLookup").on("input", function () {
+      searchEntities($(this).val()).catch(function () {});
+    });
+
+    $("#approvalEntityLookup").on("change blur", function () {
+      const txt = String($(this).val() || "").trim();
+      const id = state.entityMap[txt] || "";
+      $("#approvalEntityId").val(id);
+      if (id) $("#approvalEntityHint").text("ID selecionado: " + id);
+      else $("#approvalEntityHint").text("Nao encontrado na lista. Informe o ID manualmente.");
+    });
+
+    $("#approvalOpportunityLookup").on("input", function () {
+      searchOpportunities($(this).val()).catch(function () {});
+    });
+
+    $("#approvalOpportunityLookup").on("change blur", function () {
+      const txt = String($(this).val() || "").trim();
+      const id = state.opportunityMap[txt] || "";
+      $("#approvalOpportunityId").val(id);
+    });
+
+    $("#btnSaveSalesApproval").on("click", async function () {
+      try {
+        const payload = collectPayload();
+        const isEdit = !!state.id;
+        const url = isEdit ? ("/api/sales-approvals/" + encodeURIComponent(state.id)) : "/api/sales-approvals";
+        const method = isEdit ? "PATCH" : "POST";
+        const saved = await api(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const id = saved?.id || state.id;
+        if (id) window.location.href = "/NewSalesApproval?id=" + encodeURIComponent(id);
+        else window.location.href = "/SalesApprovals";
+      } catch (e) {
+        alert(e?.message || "Falha ao salvar");
+      }
+    });
+
+    $("#btnDeleteSalesApproval").on("click", async function () {
+      if (!state.id) return;
+      if (!confirm("Deseja excluir esta aprovacao?")) return;
+      try {
+        await api("/api/sales-approvals/" + encodeURIComponent(state.id), { method: "DELETE" });
+        window.location.href = "/SalesApprovals";
+      } catch (e) {
+        alert(e?.message || "Falha ao excluir");
+      }
+    });
+
+    $(document).ready(async function () {
+      $("#pageName").text("Sales Approval");
+      $("#subpageName").text("Sales Approvals").attr("href", "/SalesApprovals");
+      bindDecimalMaskOnce($("#approvalAmount"), { decimals: 2, min: 0, thousandsOnInput: true });
+      await searchEntities("");
+      await searchOpportunities("");
+
+      const p = qs();
+      state.id = String(p.id || "").trim() || null;
+      if (state.id) {
+        try { await loadById(state.id); }
+        catch (e) {
+          alert(e?.message || "Falha ao carregar");
+          window.location.href = "/SalesApprovals";
+        }
+      }
+    });
+  })();
+</script>
