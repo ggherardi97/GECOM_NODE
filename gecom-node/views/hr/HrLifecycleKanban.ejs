@@ -1,0 +1,71 @@
+<style>
+  .hr-kanban-toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hr-kanban-board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; }
+  .hr-kanban-col {
+    background: #f8f9fb;
+    border: 1px solid #dfe5eb;
+    border-radius: 6px;
+    min-width: 280px;
+    max-width: 320px;
+    flex: 1;
+  }
+  .hr-kanban-col-header {
+    padding: 10px 12px;
+    border-bottom: 1px solid #dfe5eb;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hr-kanban-col-body {
+    min-height: 320px;
+    max-height: 68vh;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .hr-kanban-card {
+    background: #fff;
+    border: 1px solid #d9dee4;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: move;
+  }
+  .hr-kanban-card:hover { border-color: #1ab394; }
+  .hr-kanban-card h5 { margin: 0 0 6px 0; font-size: 13px; }
+  .hr-kanban-meta { color: #7a8793; font-size: 11px; }
+  .hr-kanban-empty { color: #9aa4ad; font-size: 12px; padding: 6px; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5><%= t('page.hr.lifecycleKanban.title') %></h5>
+        <div class="ibox-tools">
+          <button id="btnHrKanbanRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> <%= t('page.hr.common.refresh') %></button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="hr-kanban-toolbar">
+          <div style="min-width: 260px;">
+            <label><%= t('page.hr.fields.employee') %></label>
+            <select id="hrKanbanEmployee" class="form-control"></select>
+          </div>
+          <div style="min-width: 220px;">
+            <label><%= t('page.hr.fields.type') %></label>
+            <select id="hrKanbanType" class="form-control">
+              <option value="ONBOARDING"><%= t('page.hr.common.onboarding') %></option>
+              <option value="OFFBOARDING"><%= t('page.hr.common.offboarding') %></option>
+            </select>
+          </div>
+        </div>
+
+        <div id="hrKanbanBoard" class="hr-kanban-board"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/hr/hr.resources.js"></script>
+<script src="/js/hr/hr.lifecycle.kanban.page.js"></script>

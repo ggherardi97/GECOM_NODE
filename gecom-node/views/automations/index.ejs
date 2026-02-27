@@ -1,0 +1,584 @@
+<style>
+  .automation-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .automation-pill.active {
+    color: #1c7c5a;
+    background: #e9f8f2;
+  }
+
+  .automation-pill.inactive {
+    color: #8a3434;
+    background: #fdecec;
+  }
+
+  .bulk-actions {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    background: #f3f3f4;
+    margin-bottom: 10px;
+  }
+
+  .bulk-actions .count {
+    font-weight: 600;
+    margin-right: 8px;
+  }
+
+  .automation-row {
+    cursor: pointer;
+  }
+
+  #automationsSavedViewsHost .sv-actions {
+    margin-left: unset !important;
+  }
+
+  #automationsSavedViewsHost .sv-btn-ai {
+    display: none !important;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top:10px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="automationsSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnRefreshAutomations" class="btn btn-white btn-sm">
+            <i class="fa fa-refresh"></i> Atualizar
+          </button>
+          <a href="/automations/new" class="btn btn-primary btn-sm" name="btn_act_new">
+            <i class="fa fa-plus"></i> Nova Automação
+          </a>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="automationBulkActions" class="bulk-actions">
+          <span class="count">Selecionadas: <span id="selectedCount">0</span></span>
+          <button id="btnBulkOpen" class="btn btn-white btn-sm"><i class="fa fa-folder-open"></i> Abrir</button>
+          <button id="btnBulkRun" class="btn btn-primary btn-sm"><i class="fa fa-play"></i> Executar agora</button>
+          <button id="btnBulkActivate" class="btn btn-success btn-sm"><i class="fa fa-check"></i> Ativar</button>
+          <button id="btnBulkDeactivate" class="btn btn-warning btn-sm"><i class="fa fa-pause"></i> Desativar</button>
+          <button id="btnClearSelection" class="btn btn-white btn-sm">Limpar seleção</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="automationsTable">
+            <thead>
+              <tr id="automationsFiltersRow">
+                <th style="width:40px;" class="sv-fixed-col" data-field="__select" data-sv-fixed="left">
+                  <input id="chkSelectAllAutomations" type="checkbox" title="Selecionar todos" />
+                </th>
+                <th data-field="name">
+                  <input id="fltName" class="form-control input-sm" placeholder="Filtrar nome" />
+                </th>
+                <th data-field="entity_name">
+                  <input id="fltEntity" class="form-control input-sm" placeholder="Filtrar entidade" />
+                </th>
+                <th data-field="trigger_type">
+                  <input id="fltTrigger" class="form-control input-sm" placeholder="Filtrar trigger" />
+                </th>
+                <th data-field="is_active">
+                  <select id="fltStatus" class="form-control input-sm">
+                    <option value="">Todos</option>
+                    <option value="active">Ativa</option>
+                    <option value="inactive">Inativa</option>
+                  </select>
+                </th>
+                <th data-field="last_run">
+                  <input id="fltLastRun" class="form-control input-sm" placeholder="Filtrar último run" />
+                </th>
+              </tr>
+              <tr id="automationsHeaderRow">
+                <th style="width:40px;" class="sv-fixed-col" data-sort-key="__select" data-sv-fixed="left"></th>
+                <th class="sortable" data-sort="name" data-sort-key="name">Nome <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="entity_name" data-sort-key="entity_name">Entidade <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="trigger_type" data-sort-key="trigger_type">Trigger <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="is_active" data-sort-key="is_active">Status <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="last_run" data-sort-key="last_run">Último run <span class="sort-indicator"></span></th>
+              </tr>
+            </thead>
+            <tbody id="automationsBody">
+              <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const state = {
+      rows: [],
+      filtered: [],
+      selectedIds: new Set(),
+      sort: { key: 'name', dir: 'asc' },
+      filters: {
+        name: '',
+        entity_name: '',
+        trigger_type: '',
+        is_active: '',
+        last_run: '',
+      },
+      savedView: {
+        viewId: null,
+        name: '',
+        columns: [],
+        columns_order: [],
+        filters: [],
+        sort: [],
+      },
+    };
+
+    function esc(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function toBoolean(value) {
+      return value === true || value === 1 || String(value).toLowerCase() === 'true';
+    }
+
+    function fmtDate(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return '-';
+      return d.toLocaleString('pt-BR');
+    }
+
+    function triggerType(row) {
+      const trigger = row?.trigger_type || row?.workflow_json?.trigger?.type;
+      return String(trigger || '-').toUpperCase();
+    }
+
+    function getSelectedIds() {
+      return Array.from(state.selectedIds);
+    }
+
+    function getAllColumnKeys() {
+      return $('#automationsHeaderRow th.sortable')
+        .map(function () { return String($(this).data('sort-key') || ''); })
+        .get()
+        .filter(Boolean);
+    }
+
+    function updateSortIndicators() {
+      $('#automationsHeaderRow .sort-indicator').text('');
+      if (!state.sort.key) return;
+      const arrow = state.sort.dir === 'desc' ? '▼' : '▲';
+      $('#automationsHeaderRow th[data-sort="' + state.sort.key + '"] .sort-indicator').text(arrow);
+    }
+
+    function updateSelectionUi() {
+      const count = state.selectedIds.size;
+      $('#selectedCount').text(String(count));
+      $('#automationBulkActions').toggle(count > 0);
+      $('#btnBulkOpen').prop('disabled', count !== 1);
+
+      const visibleIds = state.filtered.map((row) => String(row.id || ''));
+      const selectedVisible = visibleIds.filter((id) => state.selectedIds.has(id)).length;
+      const allSelected = visibleIds.length > 0 && selectedVisible === visibleIds.length;
+      const noneSelected = selectedVisible === 0;
+
+      const chkAll = document.getElementById('chkSelectAllAutomations');
+      if (!chkAll) return;
+      chkAll.checked = allSelected;
+      chkAll.indeterminate = !allSelected && !noneSelected;
+    }
+
+    function sortRows(rows) {
+      const key = state.sort.key;
+      const dir = state.sort.dir === 'desc' ? -1 : 1;
+      if (!key) return rows.slice();
+
+      return rows.slice().sort((a, b) => {
+        let av = a?.[key];
+        let bv = b?.[key];
+
+        if (key === 'trigger_type') {
+          av = triggerType(a);
+          bv = triggerType(b);
+        }
+
+        if (key === 'is_active') {
+          av = toBoolean(av) ? 1 : 0;
+          bv = toBoolean(bv) ? 1 : 0;
+          return (av - bv) * dir;
+        }
+
+        if (key === 'last_run') {
+          av = av ? new Date(av).getTime() : 0;
+          bv = bv ? new Date(bv).getTime() : 0;
+          return (av - bv) * dir;
+        }
+
+        const as = String(av ?? '').toLowerCase();
+        const bs = String(bv ?? '').toLowerCase();
+        if (as < bs) return -1 * dir;
+        if (as > bs) return 1 * dir;
+        return 0;
+      });
+    }
+
+    function applyFilters() {
+      const f = state.filters;
+
+      const filtered = state.rows.filter((row) => {
+        const name = String(row?.name || '').toLowerCase();
+        const entityName = String(row?.entity_name || '').toLowerCase();
+        const trig = triggerType(row).toLowerCase();
+        const isActive = toBoolean(row?.is_active);
+        const lastRun = fmtDate(row?.last_run).toLowerCase();
+
+        if (f.name && !name.includes(f.name)) return false;
+        if (f.entity_name && !entityName.includes(f.entity_name)) return false;
+        if (f.trigger_type && !trig.includes(f.trigger_type)) return false;
+        if (f.last_run && !lastRun.includes(f.last_run)) return false;
+
+        if (f.is_active === 'active' && !isActive) return false;
+        if (f.is_active === 'inactive' && isActive) return false;
+
+        return true;
+      });
+
+      state.filtered = sortRows(filtered);
+      renderTable();
+      updateSortIndicators();
+      updateSelectionUi();
+    }
+
+    function renderTable() {
+      const body = $('#automationsBody');
+      if (!state.filtered.length) {
+        body.html('<tr><td colspan="6" class="text-center">Nenhuma automação encontrada.</td></tr>');
+        return;
+      }
+
+      const html = state.filtered
+        .map((row) => {
+          const id = String(row?.id || '');
+          const checked = state.selectedIds.has(id) ? 'checked' : '';
+          const isActive = toBoolean(row?.is_active);
+
+          return `
+            <tr class="automation-row js-automation-row" data-id="${esc(id)}">
+              <td class="sv-fixed-col" data-field="__select">
+                <input type="checkbox" class="js-row-check" data-id="${esc(id)}" ${checked} />
+              </td>
+              <td>${esc(row?.name || '-')}</td>
+              <td>${esc(row?.entity_name || '-')}</td>
+              <td>${esc(triggerType(row))}</td>
+              <td>
+                <span class="automation-pill ${isActive ? 'active' : 'inactive'}">
+                  ${isActive ? 'Ativa' : 'Inativa'}
+                </span>
+              </td>
+              <td>${esc(fmtDate(row?.last_run))}</td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      body.html(html);
+    }
+
+    async function api(url, options) {
+      const response = await fetch(url, Object.assign({ credentials: 'include' }, options || {}));
+      const text = await response.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.message || ('HTTP ' + response.status));
+      }
+
+      return data;
+    }
+
+    async function loadAutomations() {
+      const rows = normalizeArray(await api('/api/automations'));
+      state.rows = rows.map((row) => ({
+        ...row,
+        trigger_type: triggerType(row),
+      }));
+      applyFilters();
+    }
+
+    async function setActiveForSelected(active) {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+
+      for (const id of ids) {
+        await api('/api/automations/' + encodeURIComponent(id), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_active: !!active }),
+        });
+      }
+
+      await loadAutomations();
+    }
+
+    async function executeSelected() {
+      const ids = getSelectedIds();
+      if (!ids.length) return;
+
+      for (const id of ids) {
+        await api('/api/automations/' + encodeURIComponent(id) + '/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
+      }
+
+      await loadAutomations();
+      window.alert('Execução registrada para as automações selecionadas.');
+    }
+
+    function captureFiltersForSavedView() {
+      const out = [];
+      Object.entries(state.filters).forEach(([key, value]) => {
+        const val = String(value || '').trim();
+        if (!val) return;
+        out.push({ field: key, op: key === 'is_active' ? 'eq' : 'contains', value: val });
+      });
+      return out;
+    }
+
+    function applyFiltersFromSavedView(definition) {
+      state.filters = {
+        name: '',
+        entity_name: '',
+        trigger_type: '',
+        is_active: '',
+        last_run: '',
+      };
+
+      (definition?.filters || []).forEach((item) => {
+        const field = String(item?.field || '').trim();
+        if (!Object.prototype.hasOwnProperty.call(state.filters, field)) return;
+        state.filters[field] = String(item?.value || '').toLowerCase();
+      });
+
+      $('#fltName').val(state.filters.name || '');
+      $('#fltEntity').val(state.filters.entity_name || '');
+      $('#fltTrigger').val(state.filters.trigger_type || '');
+      $('#fltStatus').val(state.filters.is_active || '');
+      $('#fltLastRun').val(state.filters.last_run || '');
+    }
+
+    function applySortFromSavedView(definition) {
+      const first = Array.isArray(definition?.sort) ? definition.sort[0] : null;
+      const key = String(first?.field || '').trim();
+      const dir = String(first?.dir || 'asc').toLowerCase() === 'desc' ? 'desc' : 'asc';
+      if (!key) return;
+      state.sort.key = key;
+      state.sort.dir = dir;
+    }
+
+    async function initSavedViews() {
+      if (!window.SavedViewsGrid || typeof window.SavedViewsGrid.init !== 'function') return;
+
+      const allKeys = getAllColumnKeys();
+      state.savedView.columns = allKeys.slice();
+      state.savedView.columns_order = allKeys.slice();
+
+      await window.SavedViewsGrid.init({
+        entityName: 'automations',
+        hostSelector: '#automationsSavedViewsHost',
+        tableSelector: '#automationsTable',
+        headerRowSelector: '#automationsTable thead tr:eq(1)',
+        filtersRowSelector: '#automationsTable thead tr:eq(0)',
+        includeFallbackOption: false,
+        fallbackDefinition: { columns: allKeys.slice(), columns_order: allKeys.slice(), filters: [], sort: [] },
+        getAllColumnKeys: () => getAllColumnKeys(),
+        getCurrentState: () => {
+          const order = $('#automationsHeaderRow th.sortable')
+            .map(function () { return String($(this).data('sort-key') || ''); })
+            .get()
+            .filter(Boolean);
+
+          const visible = $('#automationsHeaderRow th.sortable:visible')
+            .map(function () { return String($(this).data('sort-key') || ''); })
+            .get()
+            .filter(Boolean);
+
+          state.savedView.columns_order = order.length ? order : state.savedView.columns_order;
+          state.savedView.columns = visible.length ? visible : state.savedView.columns;
+          state.savedView.filters = captureFiltersForSavedView();
+          state.savedView.sort = state.sort.key ? [{ field: state.sort.key, dir: state.sort.dir }] : [];
+          return Object.assign({}, state.savedView);
+        },
+        applyState: ({ viewId, name, definition }) => {
+          state.savedView.viewId = viewId;
+          state.savedView.name = name || '';
+          applyFiltersFromSavedView(definition || {});
+          applySortFromSavedView(definition || {});
+          applyFilters();
+        },
+        onAfterApply: () => {
+          applyFilters();
+        },
+      });
+    }
+
+    function bindEvents() {
+      $('#btnRefreshAutomations').on('click', async function () {
+        try {
+          await loadAutomations();
+        } catch (error) {
+          window.alert(error?.message || 'Falha ao carregar automações.');
+        }
+      });
+
+      $('#btnBulkOpen').on('click', function () {
+        const ids = getSelectedIds();
+        if (ids.length !== 1) return;
+        window.location.href = '/automations/' + encodeURIComponent(ids[0]) + '/builder';
+      });
+
+      $('#btnBulkRun').on('click', async function () {
+        try {
+          const confirmed = await window.confirm('Executar as automações selecionadas?');
+          if (!confirmed) return;
+          await executeSelected();
+        } catch (error) {
+          window.alert(error?.message || 'Falha ao executar automações.');
+        }
+      });
+
+      $('#btnBulkActivate').on('click', async function () {
+        try {
+          await setActiveForSelected(true);
+        } catch (error) {
+          window.alert(error?.message || 'Falha ao ativar automações.');
+        }
+      });
+
+      $('#btnBulkDeactivate').on('click', async function () {
+        try {
+          await setActiveForSelected(false);
+        } catch (error) {
+          window.alert(error?.message || 'Falha ao desativar automações.');
+        }
+      });
+
+      $('#btnClearSelection').on('click', function () {
+        state.selectedIds.clear();
+        updateSelectionUi();
+        renderTable();
+      });
+
+      $('#chkSelectAllAutomations').on('click', function (event) {
+        event.stopPropagation();
+        const shouldCheck = !!this.checked;
+        state.filtered.forEach((row) => {
+          const id = String(row?.id || '');
+          if (!id) return;
+          if (shouldCheck) state.selectedIds.add(id);
+          else state.selectedIds.delete(id);
+        });
+        renderTable();
+        updateSelectionUi();
+      });
+
+      $(document).on('click', '.js-row-check', function (event) {
+        event.stopPropagation();
+        const id = String($(this).data('id') || '').trim();
+        if (!id) return;
+        if (this.checked) state.selectedIds.add(id);
+        else state.selectedIds.delete(id);
+        updateSelectionUi();
+      });
+
+      $(document).on('click', '.js-automation-row', function (event) {
+        const target = event.target;
+        const isInteractive = !!(
+          target &&
+          (
+            target.tagName === 'INPUT' ||
+            target.tagName === 'BUTTON' ||
+            (typeof target.closest === 'function' && target.closest('button'))
+          )
+        );
+
+        if (isInteractive) {
+          return;
+        }
+
+        const id = String($(this).data('id') || '').trim();
+        if (!id) return;
+        window.location.href = '/automations/' + encodeURIComponent(id) + '/builder';
+      });
+
+      $('#automationsHeaderRow').on('click', 'th.sortable', function () {
+        const key = String($(this).data('sort') || '').trim();
+        if (!key) return;
+        if (state.sort.key === key) {
+          state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.sort.key = key;
+          state.sort.dir = 'asc';
+        }
+        applyFilters();
+      });
+
+      $('#fltName, #fltEntity, #fltTrigger, #fltLastRun').on('input', function () {
+        const key = $(this).attr('id') === 'fltName'
+          ? 'name'
+          : $(this).attr('id') === 'fltEntity'
+            ? 'entity_name'
+            : $(this).attr('id') === 'fltTrigger'
+              ? 'trigger_type'
+              : 'last_run';
+        state.filters[key] = String($(this).val() || '').trim().toLowerCase();
+        applyFilters();
+      });
+
+      $('#fltStatus').on('change', function () {
+        state.filters.is_active = String($(this).val() || '').trim().toLowerCase();
+        applyFilters();
+      });
+    }
+
+    $(document).ready(function () {
+      $('#masterHeader').hide();
+      $('#pageName').text('Automações');
+      $('#subpageName').text('Automações').attr('href', '/automations');
+      $('#path').hide();
+
+      bindEvents();
+      loadAutomations()
+        .then(initSavedViews)
+        .catch((error) => {
+          window.alert(error?.message || 'Falha ao carregar automações.');
+        });
+    });
+  })();
+</script>

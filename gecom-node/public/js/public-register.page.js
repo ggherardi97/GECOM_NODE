@@ -10,7 +10,9 @@
     plansLoaded: false,
     plans: [],
     modules: [],
-    customModuleIds: []
+    customModuleIds: [],
+    lastCnpjFetched: null,
+    cnpjLookupInFlight: false
   };
 
   const loaderMessages = [
@@ -64,6 +66,37 @@
     return amount;
   }
 
+  function onlyDigits(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
+
+  function formatCnpj(value) {
+    const digits = onlyDigits(value).slice(0, 14);
+    return digits
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  function formatCep(value) {
+    const digits = onlyDigits(value).slice(0, 8);
+    return digits.replace(/^(\d{5})(\d)/, "$1-$2");
+  }
+
+  function setIfEmpty(id, value) {
+    const el = getEl(id);
+    if (!el) return;
+    if (normalizeString(el.value).length > 0) return;
+    el.value = String(value == null ? "" : value);
+  }
+
+  function showCnpjLoading(isLoading) {
+    const el = getEl("companyCnpjHelp");
+    if (!el) return;
+    el.style.display = isLoading ? "block" : "none";
+  }
+
   function esc(value) {
     return String(value == null ? "" : value)
       .replace(/&/g, "&amp;")
@@ -99,6 +132,58 @@
 
     if (normalized) return normalized;
     return `tenant-${Date.now()}`;
+  }
+
+  async function fetchCompanyByCnpj(cnpjDigits) {
+    const response = await fetch(`/api/cnpj/lookup?cnpj=${encodeURIComponent(cnpjDigits)}`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "include"
+    });
+
+    const data = await readJsonSafe(response);
+    if (!response.ok) {
+      const message = data && data.message ? data.message : "Falha na consulta do CNPJ.";
+      throw new Error(message);
+    }
+    return data || {};
+  }
+
+  async function tryAutoFillFromCnpj(showAlertOnFail) {
+    const rawValue = getValue("companyNumberInput");
+    const cnpjDigits = onlyDigits(rawValue);
+    if (cnpjDigits.length !== 14) return;
+    if (state.lastCnpjFetched === cnpjDigits) return;
+    if (state.cnpjLookupInFlight) return;
+
+    state.cnpjLookupInFlight = true;
+    showCnpjLoading(true);
+    try {
+      const data = await fetchCompanyByCnpj(cnpjDigits);
+      state.lastCnpjFetched = cnpjDigits;
+
+      const activityText =
+        data && data.atividade_principal && data.atividade_principal.text
+          ? data.atividade_principal.text
+          : "";
+
+      setIfEmpty("companyNameInput", data.nome || data.fantasia || "");
+      setIfEmpty("companySectorInput", activityText);
+      setIfEmpty("addressStreetInput", data.logradouro || "");
+      setIfEmpty("addressNumberInput", data.numero || "");
+      setIfEmpty("addressCityInput", data.municipio || "");
+      setIfEmpty("addressStateInput", data.uf || "");
+      if (data.cep) setIfEmpty("addressPostalCodeInput", formatCep(data.cep));
+      setIfEmpty("addressCountryInput", "Brasil");
+    } catch (error) {
+      if (showAlertOnFail) {
+        const message = error && error.message ? error.message : "Nao foi possivel consultar o CNPJ.";
+        showMessage("Falha no CNPJ", message, "error");
+      }
+    } finally {
+      state.cnpjLookupInFlight = false;
+      showCnpjLoading(false);
+    }
   }
 
   function toPublicPlan(raw) {
@@ -604,11 +689,33 @@
     });
 
     const form = getEl("publicRegisterForm");
-    if (form) form.addEventListener("submit", onSubmitForm);
+    if (form) {
+      form.addEventListener("submit", onSubmitForm);
+      form.__mainSubmitBound = true;
+    }
+
+    const cnpjInput = getEl("companyNumberInput");
+    if (cnpjInput) {
+      cnpjInput.addEventListener("input", function () {
+        const masked = formatCnpj(cnpjInput.value);
+        cnpjInput.value = masked;
+      });
+      cnpjInput.addEventListener("blur", function () {
+        tryAutoFillFromCnpj(false);
+      });
+    }
+
+    const cnpjBtn = getEl("btnLookupCnpj");
+    if (cnpjBtn) {
+      cnpjBtn.addEventListener("click", function () {
+        tryAutoFillFromCnpj(true);
+      });
+    }
   }
 
   async function bootstrap() {
     window.__openRegisterPlans = openPlansFromHero;
+    window.__publicRegisterMainReady = true;
     installEvents();
 
     if (window.WOW) {

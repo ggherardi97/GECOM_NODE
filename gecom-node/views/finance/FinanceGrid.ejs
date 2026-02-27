@@ -1,0 +1,75 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .bulk-actions { display:none; align-items:center; gap:8px; margin-bottom:10px; }
+  #financeGridHeader th.sortable { cursor: pointer; user-select:none; }
+  #financeGridBody tr { cursor: pointer; }
+  #financeSavedViewsHost .sv-bar { margin-top: -2px; }
+  #financeSavedViewsHost .sv-actions { margin-left: unset !important; }
+  .finance-invalid {
+    border-color: #ed5565 !important;
+    box-shadow: 0 0 0 1px rgba(237, 85, 101, 0.12);
+    background: #fff7f8;
+  }
+  .finance-lookup-wrap { position: relative; }
+  .finance-lookup-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 99999;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #d9dee4;
+    border-radius: 4px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  .finance-lookup-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f2f4;
+    cursor: pointer;
+  }
+  .finance-lookup-item:last-child { border-bottom: 0; }
+  .finance-lookup-item:hover { background: #f5f9fc; }
+  .finance-lookup-empty { padding: 8px 10px; color: #777; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="financeSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnFinanceRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> <%= t('page.finance.common.refresh') %></button>
+          <button id="btnFinanceNew" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> <%= t('page.finance.common.new') %></button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="financeBulkActions" class="bulk-actions">
+          <span><strong id="financeSelectedCount">0</strong> <%= t('page.finance.common.selected') %></span>
+          <button id="btnFinanceQuickEdit" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> <%= t('page.finance.common.quickEdit') %></button>
+          <button id="btnFinanceDelete" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> <%= t('page.finance.common.delete') %></button>
+          <button id="btnFinanceClearSelection" class="btn btn-white btn-sm"><%= t('page.finance.common.clearSelection') %></button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="financeGridTable">
+            <thead>
+              <tr id="financeGridFilters"></tr>
+              <tr id="financeGridHeader"></tr>
+            </thead>
+            <tbody id="financeGridBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__financePage = <%- safeJson(financePage) %>;
+</script>
+<script src="/Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="/js/finance/finance.resources.js"></script>
+<script src="/js/finance/finance.grid.page.js"></script>

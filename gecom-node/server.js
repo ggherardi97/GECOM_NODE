@@ -33,6 +33,12 @@ const salesApprovalsApiRoutes = require("./routes/salesApprovalsApi");
 const salesGoalsApiRoutes = require("./routes/salesGoalsApi");
 const billingApiRoutes = require("./routes/billingApi");
 const billingPagesRoutes = require("./routes/billingPages");
+const automationsApiRoutes = require("./routes/automationsApi");
+const financeApiRoutes = require("./routes/financeApi");
+const financePagesRoutes = require("./routes/financePages");
+const hrApiRoutes = require("./routes/hrApi");
+const hrPagesRoutes = require("./routes/hrPages");
+const scarletDriveRoutes = require("./routes/scarletDrive");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -131,8 +137,14 @@ app.use("/api", priceTablesApiRoutes);
 app.use("/api", salesApprovalsApiRoutes);
 app.use("/api", salesGoalsApiRoutes);
 app.use("/api", billingApiRoutes);
+app.use("/api", automationsApiRoutes);
+app.use("/api", financeApiRoutes);
+app.use("/api", hrApiRoutes);
 app.use("/", billingPagesRoutes);
 app.use("/", servicePagesRoutes);
+app.use("/", financePagesRoutes);
+app.use("/", hrPagesRoutes);
+app.use("/", scarletDriveRoutes);
 
 // Backward-compatible alias for environments calling /cnpj/lookup without /api
 app.get("/cnpj/lookup", (req, res) => {
@@ -180,6 +192,9 @@ app.get(['/SalesGoals', '/sales-goals'], (req, res) => res.render('SalesGoals'))
 app.get(['/NewSalesGoal', '/new-sales-goal'], (req, res) => res.render('NewSalesGoal'));
 app.get(['/SalesCommissions', '/sales-commissions'], (req, res) => res.render('SalesCommissions'));
 app.get(['/NewSalesCommission', '/new-sales-commission'], (req, res) => res.render('NewSalesCommission'));
+app.get('/automations', (req, res) => res.render('automations/index'));
+app.get('/automations/new', (req, res) => res.render('automations/new'));
+app.get('/automations/:id/builder', (req, res) => res.render('automations/builder'));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));

@@ -1,0 +1,217 @@
+﻿<div class="row animated fadeInRight" style="margin-top:25px;">
+  <div class="col-lg-8">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5>Nova Automação</h5>
+      </div>
+      <div class="ibox-content">
+        <form id="automationCreateForm" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Nome</label>
+            <div class="col-sm-9">
+              <input id="name" type="text" class="form-control" placeholder="Ex: Lead criado -> Webhook" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Descrição</label>
+            <div class="col-sm-9">
+              <textarea id="description" class="form-control" rows="3" placeholder="Descrição opcional"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Entidade</label>
+            <div class="col-sm-9">
+              <select id="entityName" class="form-control" required>
+                <option value="">Carregando entidades...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Trigger</label>
+            <div class="col-sm-9">
+              <select id="triggerType" class="form-control" required>
+                <option value="MANUAL">MANUAL</option>
+                <option value="ENTITY_EVENT">ENTITY_EVENT</option>
+                <option value="SCHEDULE">SCHEDULE</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="entityEventConfig" style="display:none;">
+            <div class="form-group">
+              <label class="col-sm-3 control-label">Evento</label>
+              <div class="col-sm-9">
+                <select id="eventType" class="form-control">
+                  <option value="CREATE">CREATE</option>
+                  <option value="UPDATE">UPDATE</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="col-sm-3 control-label">Campo alterado</label>
+              <div class="col-sm-9">
+                <input id="fieldChanged" type="text" class="form-control" placeholder="Opcional (ex: status)" />
+              </div>
+            </div>
+          </div>
+
+          <div id="scheduleConfig" style="display:none;">
+            <div class="form-group">
+              <label class="col-sm-3 control-label">Cron</label>
+              <div class="col-sm-9">
+                <input id="cron" type="text" class="form-control" placeholder="0 9 * * *" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-9 col-sm-offset-3">
+              <a href="/automations" class="btn btn-default">Cancelar</a>
+              <button id="btnCreateAutomation" type="submit" class="btn btn-primary">
+                <i class="fa fa-save"></i> Criar e abrir Builder
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const state = {
+      entities: [],
+    };
+
+    async function api(url, options) {
+      const response = await fetch(url, Object.assign({ credentials: 'include' }, options || {}));
+      const text = await response.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
+      if (!response.ok) {
+        throw new Error(data?.message || ('HTTP ' + response.status));
+      }
+
+      return data;
+    }
+
+    function esc(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function normalizeArray(data) {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.rows)) return data.rows;
+      if (Array.isArray(data?.items)) return data.items;
+      return [];
+    }
+
+    function renderEntityOptions() {
+      const options = state.entities.length
+        ? state.entities
+            .map((entity) => `<option value="${esc(entity.name)}">${esc(entity.label || entity.name)}</option>`)
+            .join('')
+        : '<option value="leads">Leads</option><option value="invoices">Invoices</option>';
+
+      $('#entityName').html(options);
+    }
+
+    async function loadEntities() {
+      const rows = normalizeArray(await api('/api/automations/metadata/entities'));
+      state.entities = rows
+        .map((row) => ({
+          name: String(row?.name || '').trim().toLowerCase(),
+          label: String(row?.label || '').trim(),
+        }))
+        .filter((row) => row.name);
+
+      renderEntityOptions();
+    }
+
+    function toggleTriggerConfig() {
+      const triggerType = String($('#triggerType').val() || 'MANUAL').toUpperCase();
+      $('#entityEventConfig').toggle(triggerType === 'ENTITY_EVENT');
+      $('#scheduleConfig').toggle(triggerType === 'SCHEDULE');
+    }
+
+    function buildPayload() {
+      const name = String($('#name').val() || '').trim();
+      const description = String($('#description').val() || '').trim();
+      const entityName = String($('#entityName').val() || '').trim().toLowerCase();
+      const triggerType = String($('#triggerType').val() || 'MANUAL').trim().toUpperCase();
+
+      const triggerConfig = {};
+      if (triggerType === 'ENTITY_EVENT') {
+        triggerConfig.entityName = entityName;
+        triggerConfig.eventType = String($('#eventType').val() || 'CREATE').trim().toUpperCase();
+        const fieldChanged = String($('#fieldChanged').val() || '').trim();
+        if (fieldChanged) triggerConfig.fieldChanged = fieldChanged;
+      }
+
+      if (triggerType === 'SCHEDULE') {
+        const cron = String($('#cron').val() || '').trim();
+        if (cron) triggerConfig.cron = cron;
+      }
+
+      return {
+        name,
+        description: description || null,
+        entity_name: entityName,
+        trigger_type: triggerType,
+        trigger_config: triggerConfig,
+        is_active: true,
+      };
+    }
+
+    $(document).ready(function () {
+      $('#masterHeader').hide();
+      $('#pageName').text('Nova Automação');
+      $('#subpageName').text('Automações').attr('href', '/automations');
+      $('#path').show();
+      $('#subSecoundPageName').text('Nova').attr('href', '/automations/new');
+
+      toggleTriggerConfig();
+      $('#triggerType').on('change', toggleTriggerConfig);
+
+      loadEntities().catch(() => {
+        renderEntityOptions();
+      });
+
+      $('#automationCreateForm').on('submit', async function (event) {
+        event.preventDefault();
+
+        try {
+          const payload = buildPayload();
+          const created = await api('/api/automations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const id = String(created?.id || '').trim();
+          if (!id) throw new Error('Automação criada sem ID retornado.');
+
+          window.location.href = '/automations/' + encodeURIComponent(id) + '/builder';
+        } catch (error) {
+          window.alert(error?.message || 'Falha ao criar automação.');
+        }
+      });
+    });
+  })();
+</script>
+

@@ -402,10 +402,25 @@
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
+                      <label for="companyNumberInput">CNPJ / Company Number</label>
+                      <div class="input-group">
+                        <input id="companyNumberInput" type="text" class="form-control" maxlength="18" placeholder="12.345.678/0001-90" required />
+                        <span class="input-group-btn">
+                          <button id="btnLookupCnpj" type="button" class="btn btn-default">Buscar CNPJ</button>
+                        </span>
+                      </div>
+                      <small id="companyCnpjHelp" class="text-muted" style="display:none;">Consultando CNPJ...</small>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
                       <label for="companyNameInput">Nome da empresa</label>
                       <input id="companyNameInput" type="text" class="form-control" required />
                     </div>
                   </div>
+                </div>
+
+                <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
                       <label for="userNameInput">Nome do utilizador</label>
@@ -423,8 +438,8 @@
                   </div>
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label for="phoneInput">Telefone</label>
-                      <input id="phoneInput" type="text" class="form-control" maxlength="20" required />
+                      <label for="passwordInput">Senha inicial do admin</label>
+                      <input id="passwordInput" type="password" class="form-control" minlength="8" required />
                     </div>
                   </div>
                 </div>
@@ -432,14 +447,8 @@
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label for="passwordInput">Senha inicial do admin</label>
-                      <input id="passwordInput" type="password" class="form-control" minlength="8" required />
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="companyNumberInput">CNPJ / Company Number</label>
-                      <input id="companyNumberInput" type="text" class="form-control" placeholder="12.345.678/0001-90" required />
+                      <label for="phoneInput">Telefone</label>
+                      <input id="phoneInput" type="text" class="form-control" maxlength="20" required />
                     </div>
                   </div>
                 </div>
@@ -561,12 +570,84 @@
   <script src="/js/public-register.page.js"></script>
   <script>
     (function () {
+      var fallbackState = {
+        plans: [],
+        modules: [],
+        customModuleIds: [],
+        selectedPlanId: "",
+        selectedPlanType: "",
+        selectedPlanName: "",
+        cnpjLookupInFlight: false,
+        isSubmitting: false
+      };
+
       function normalizeArray(data) {
         if (Array.isArray(data)) return data;
         if (data && Array.isArray(data.data)) return data.data;
         if (data && Array.isArray(data.rows)) return data.rows;
         if (data && Array.isArray(data.items)) return data.items;
         return [];
+      }
+
+      function normalizeString(value) {
+        return String(value == null ? "" : value).trim();
+      }
+
+      function onlyDigits(value) {
+        return String(value == null ? "" : value).replace(/\D/g, "");
+      }
+
+      function formatCnpj(value) {
+        var digits = onlyDigits(value).slice(0, 14);
+        return digits
+          .replace(/^(\d{2})(\d)/, "$1.$2")
+          .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2");
+      }
+
+      function formatCep(value) {
+        var digits = onlyDigits(value).slice(0, 8);
+        return digits.replace(/^(\d{5})(\d)/, "$1-$2");
+      }
+
+      function byId(id) {
+        return document.getElementById(id);
+      }
+
+      function safeClosest(target, selector) {
+        if (!target) return null;
+        if (typeof target.closest === "function") return target.closest(selector);
+        if (target.parentElement && typeof target.parentElement.closest === "function") {
+          return target.parentElement.closest(selector);
+        }
+        return null;
+      }
+
+      function getValue(id) {
+        var el = byId(id);
+        return el ? String(el.value == null ? "" : el.value) : "";
+      }
+
+      function setIfEmpty(id, value) {
+        var el = byId(id);
+        if (!el) return;
+        if (normalizeString(el.value).length > 0) return;
+        el.value = String(value == null ? "" : value);
+      }
+
+      function showMessage(title, text, type) {
+        if (typeof window.swal === "function") {
+          window.swal(title, text, type);
+          return;
+        }
+        window.alert(title + ": " + text);
+      }
+
+      function showCnpjLoading(isLoading) {
+        var el = byId("companyCnpjHelp");
+        if (!el) return;
+        el.style.display = isLoading ? "block" : "none";
       }
 
       function esc(value) {
@@ -585,16 +666,130 @@
       }
 
       function revealPlansStage() {
-        var hero = document.getElementById("heroSection");
-        var features = document.getElementById("featuresPublic");
-        var plans = document.getElementById("plansStage");
+        var hero = byId("heroSection");
+        var features = byId("featuresPublic");
+        var plans = byId("plansStage");
         if (hero) hero.classList.add("section-hidden");
         if (features) features.classList.add("section-hidden");
         if (plans) plans.classList.add("is-active");
       }
 
+      function showPlansChooserFallback() {
+        var listWrap = byId("plansListWrap");
+        var formWrap = byId("registerFormWrap");
+        if (listWrap) listWrap.classList.remove("is-hidden");
+        if (formWrap) formWrap.classList.remove("is-active");
+      }
+
+      function renderCustomModulesFallback() {
+        var checklist = byId("customModulesChecklist");
+        if (!checklist) return;
+
+        var modules = fallbackState.modules.slice();
+        modules.sort(function (a, b) {
+          var priceA = Number(a && a.monthly_price || 0);
+          var priceB = Number(b && b.monthly_price || 0);
+          if (priceA !== priceB) return priceA - priceB;
+          var nameA = String((a && a.name_pt_br) || (a && a.code) || "");
+          var nameB = String((b && b.name_pt_br) || (b && b.code) || "");
+          return nameA.localeCompare(nameB, "pt-BR");
+        });
+
+        if (modules.length === 0) {
+          checklist.innerHTML = '<div class="col-sm-12"><span class="text-muted">Nenhum modulo publico disponivel.</span></div>';
+          var totalEmpty = byId("customPlanTotal");
+          if (totalEmpty) totalEmpty.textContent = toMoney(0);
+          return;
+        }
+
+        checklist.innerHTML = modules.map(function (moduleRow) {
+          var moduleId = moduleRow && moduleRow.id ? String(moduleRow.id) : "";
+          var checked = fallbackState.customModuleIds.indexOf(moduleId) >= 0 ? "checked" : "";
+          var name = (moduleRow && moduleRow.name_pt_br) || (moduleRow && moduleRow.code) || "Modulo";
+          var description = (moduleRow && moduleRow.description_pt_br) || "";
+          var price = toMoney(moduleRow && moduleRow.monthly_price);
+          return ''
+            + '<div class="col-sm-6">'
+            + '  <div class="custom-module-option">'
+            + '    <label>'
+            + '      <input type="checkbox" class="fallback-custom-module" value="' + esc(moduleId) + '" ' + checked + ' />'
+            + '      <strong>' + esc(name) + '</strong><br />'
+            + '      <span class="text-muted">' + esc(description) + '</span><br />'
+            + '      <span class="custom-module-price">' + esc(price) + '/mes</span>'
+            + '    </label>'
+            + '  </div>'
+            + '</div>';
+        }).join("");
+
+        updateCustomTotalFallback();
+      }
+
+      function updateCustomTotalFallback() {
+        var total = fallbackState.customModuleIds.reduce(function (sum, moduleId) {
+          var moduleRow = fallbackState.modules.find(function (item) {
+            return String(item && item.id) === String(moduleId);
+          });
+          return sum + Number(moduleRow && moduleRow.monthly_price || 0);
+        }, 0);
+
+        var totalEl = byId("customPlanTotal");
+        if (totalEl) totalEl.textContent = toMoney(total);
+
+        var chip = byId("selectedPlanChip");
+        var category = byId("companyCategoryInput");
+        if (chip && category && String(category.value || "").toLowerCase() === "plano custom") {
+          chip.textContent = "Plano custom - " + toMoney(total) + "/mes";
+        }
+      }
+
+      function selectPlanFallback(card) {
+        if (!card) return;
+
+        Array.prototype.forEach.call(document.querySelectorAll(".plan-card"), function (node) {
+          node.classList.remove("selected");
+        });
+        card.classList.add("selected");
+
+        var planType = String(card.getAttribute("data-plan-type") || "standard");
+        var planName = String(card.getAttribute("data-plan-name") || "Plano");
+        var planPrice = Number(card.getAttribute("data-plan-price") || 0);
+        var planId = String(card.getAttribute("data-plan-id") || "");
+        var isCustom = planType === "custom";
+
+        fallbackState.selectedPlanId = planId;
+        fallbackState.selectedPlanType = isCustom ? "custom" : "standard";
+        fallbackState.selectedPlanName = planName;
+
+        var chip = byId("selectedPlanChip");
+        if (chip) {
+          if (isCustom) {
+            chip.textContent = "Plano custom - " + toMoney(0) + "/mes";
+          } else {
+            chip.textContent = planName + " - " + toMoney(planPrice) + "/mes";
+          }
+        }
+
+        var category = byId("companyCategoryInput");
+        if (category) category.value = isCustom ? "Plano custom" : planName;
+
+        var customBuilder = byId("customPlanBuilder");
+        if (customBuilder) customBuilder.classList.toggle("section-hidden", !isCustom);
+
+        if (isCustom) {
+          renderCustomModulesFallback();
+        }
+
+        var listWrap = byId("plansListWrap");
+        var formWrap = byId("registerFormWrap");
+        if (listWrap) listWrap.classList.add("is-hidden");
+        if (formWrap) {
+          formWrap.classList.add("is-active");
+          formWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
       function renderPublicPlans(plansData) {
-        var container = document.getElementById("dynamicPlansContainer");
+        var container = byId("dynamicPlansContainer");
         if (!container) return;
 
         var plans = normalizeArray(plansData);
@@ -608,7 +803,7 @@
 
           cards += ''
             + '<div class="col-lg-4 col-md-6">'
-            + '  <div class="plan-card" data-plan-id="' + esc(plan && plan.id) + '" data-plan-name="' + esc(plan && plan.name) + '" data-plan-type="standard">'
+            + '  <div class="plan-card" data-plan-id="' + esc(plan && plan.id) + '" data-plan-name="' + esc(plan && plan.name) + '" data-plan-type="standard" data-plan-price="' + esc(plan && plan.monthly_price) + '">'
             + '    <h3 class="plan-name">' + esc((plan && plan.name) || "Plano") + '</h3>'
             + '    <div class="plan-price">' + esc(toMoney(plan && plan.monthly_price)) + ' <small>/mes</small></div>'
             + '    <p class="text-muted">' + esc((plan && plan.description) || "Plano pronto para iniciar seu ambiente.") + '</p>'
@@ -620,7 +815,7 @@
 
         cards += ''
           + '<div class="col-lg-4 col-md-6">'
-          + '  <div class="plan-card" data-plan-id="__CUSTOM__" data-plan-name="Plano custom" data-plan-type="custom">'
+          + '  <div class="plan-card" data-plan-id="__CUSTOM__" data-plan-name="Plano custom" data-plan-type="custom" data-plan-price="0">'
           + '    <h3 class="plan-name">Crie seu plano</h3>'
           + '    <div class="plan-price">Voce escolhe <small>modulo a modulo</small></div>'
           + '    <p class="text-muted">Monte um plano sob medida escolhendo os modulos que precisa e veja o total mensal.</p>'
@@ -649,15 +844,216 @@
         return data;
       }
 
+      function slugifyCompanyName(name) {
+        var normalized = normalizeString(name)
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 45);
+        return normalized || ("tenant-" + Date.now());
+      }
+
+      async function syncCurrentUserFromMeFallback() {
+        try {
+          var response = await fetch("/api/auth/me", {
+            method: "GET",
+            headers: { Accept: "application/json" },
+            credentials: "include"
+          });
+          var text = await response.text().catch(function () { return ""; });
+          var data = {};
+          try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
+          if (!response.ok || !data || !data.id) return;
+          localStorage.setItem("currentUser", JSON.stringify(data));
+          localStorage.setItem("currentUserId", String(data.id));
+          if (data.company_id != null) localStorage.setItem("companyId", String(data.company_id));
+        } catch (_error) {
+          // best effort
+        }
+      }
+
+      async function fetchCompanyByCnpjFallback(cnpjDigits) {
+        var response = await fetch("/api/cnpj/lookup?cnpj=" + encodeURIComponent(cnpjDigits), {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "include"
+        });
+
+        var text = await response.text().catch(function () { return ""; });
+        var data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
+        if (!response.ok) throw new Error((data && data.message) || "Falha na consulta do CNPJ.");
+        return data || {};
+      }
+
+      async function tryAutoFillFromCnpjFallback(showAlertOnFail) {
+        var cnpjDigits = onlyDigits(getValue("companyNumberInput"));
+        if (cnpjDigits.length !== 14) return;
+        if (fallbackState.cnpjLookupInFlight) return;
+
+        fallbackState.cnpjLookupInFlight = true;
+        showCnpjLoading(true);
+        try {
+          var data = await fetchCompanyByCnpjFallback(cnpjDigits);
+          var activityText = (data && data.atividade_principal && data.atividade_principal.text)
+            ? data.atividade_principal.text
+            : "";
+
+          setIfEmpty("companyNameInput", data.nome || data.fantasia || "");
+          setIfEmpty("companySectorInput", activityText);
+          setIfEmpty("addressStreetInput", data.logradouro || "");
+          setIfEmpty("addressNumberInput", data.numero || "");
+          setIfEmpty("addressCityInput", data.municipio || "");
+          setIfEmpty("addressStateInput", data.uf || "");
+          if (data.cep) setIfEmpty("addressPostalCodeInput", formatCep(data.cep));
+          setIfEmpty("addressCountryInput", "Brasil");
+        } catch (error) {
+          if (showAlertOnFail) {
+            showMessage("Falha no CNPJ", (error && error.message) || "Nao foi possivel consultar o CNPJ.", "error");
+          }
+        } finally {
+          fallbackState.cnpjLookupInFlight = false;
+          showCnpjLoading(false);
+        }
+      }
+
+      function setSubmitStateFallback(isLoading) {
+        fallbackState.isSubmitting = isLoading;
+        var btn = byId("confirmBtn");
+        if (!btn) return;
+        btn.disabled = isLoading;
+        btn.innerHTML = isLoading
+          ? '<i class="fa fa-spinner fa-spin"></i> Processando...'
+          : '<i class="fa fa-check"></i> Confirmar cadastro';
+      }
+
+      function validateFallbackPayload() {
+        var companyName = normalizeString(getValue("companyNameInput"));
+        var userName = normalizeString(getValue("userNameInput"));
+        var email = normalizeString(getValue("emailInput"));
+        var phone = normalizeString(getValue("phoneInput"));
+        var password = normalizeString(getValue("passwordInput"));
+        var companyNumber = normalizeString(getValue("companyNumberInput"));
+        var companySector = normalizeString(getValue("companySectorInput"));
+        var companyCategory = normalizeString(getValue("companyCategoryInput"));
+        var street = normalizeString(getValue("addressStreetInput"));
+        var number = normalizeString(getValue("addressNumberInput"));
+        var city = normalizeString(getValue("addressCityInput"));
+        var stateUf = normalizeString(getValue("addressStateInput"));
+        var postalCode = normalizeString(getValue("addressPostalCodeInput"));
+        var country = normalizeString(getValue("addressCountryInput"));
+        var language = normalizeString(getValue("companyLanguageInput")) || "pt-BR";
+        var acceptTermsEl = byId("acceptTermsInput");
+        var acceptTerms = !!(acceptTermsEl && acceptTermsEl.checked);
+
+        if (!fallbackState.selectedPlanId || !fallbackState.selectedPlanType) throw new Error("Selecione um plano antes de confirmar.");
+        if (!companyName) throw new Error("Nome da empresa e obrigatorio.");
+        if (!userName) throw new Error("Nome do utilizador e obrigatorio.");
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail valido.");
+        if (!phone) throw new Error("Telefone e obrigatorio.");
+        if (!password || password.length < 8) throw new Error("A senha do admin deve ter no minimo 8 caracteres.");
+        if (!companyNumber) throw new Error("CNPJ / Company Number e obrigatorio.");
+        if (!companySector) throw new Error("Setor e obrigatorio.");
+        if (!companyCategory) throw new Error("Categoria e obrigatoria.");
+        if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereco.");
+        if (!acceptTerms) throw new Error("Voce precisa aceitar os termos para continuar.");
+        if (fallbackState.selectedPlanType === "custom" && fallbackState.customModuleIds.length === 0) {
+          throw new Error("Selecione ao menos um modulo para o plano custom.");
+        }
+
+        var payload = {
+          tenant_name: companyName,
+          tenant_slug: slugifyCompanyName(companyName),
+          company_name: companyName,
+          company_phone: phone,
+          company_number: companyNumber,
+          company_sector: companySector,
+          company_category: companyCategory,
+          company_address_street: street,
+          company_address_number: number,
+          company_address_city: city,
+          company_address_country: country,
+          company_address_state: stateUf,
+          company_address_postalcode: postalCode,
+          company_language: language,
+          admin_full_name: userName,
+          admin_email: email,
+          admin_password: password,
+          admin_phone: phone,
+          acept_terms: acceptTerms
+        };
+
+        if (fallbackState.selectedPlanType === "custom") {
+          payload.custom_module_ids = fallbackState.customModuleIds.slice();
+        } else {
+          payload.selected_plan_id = fallbackState.selectedPlanId;
+        }
+
+        return payload;
+      }
+
+      async function submitFallback(event) {
+        if (event) event.preventDefault();
+        if (fallbackState.isSubmitting) return;
+        var form = byId("publicRegisterForm");
+        if (form && form.__mainSubmitBound) return;
+
+        try {
+          var payload = validateFallbackPayload();
+          setSubmitStateFallback(true);
+
+          var response = await fetch("/auth/signup", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify(payload)
+          });
+
+          var text = await response.text().catch(function () { return ""; });
+          var data = {};
+          try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
+          if (!response.ok) throw new Error((data && data.message) || "Nao foi possivel concluir o cadastro.");
+
+          await syncCurrentUserFromMeFallback();
+          if (typeof window.swal === "function") {
+            window.swal({
+              title: "Cadastro concluido!",
+              text: "Seu ambiente foi criado e sua sessao ja esta autenticada.",
+              type: "success"
+            }, function () {
+              window.location.href = "/Default";
+            });
+          } else {
+            window.location.href = "/Default";
+          }
+        } catch (error) {
+          showMessage("Falha no cadastro", (error && error.message) || "Nao foi possivel concluir o cadastro.", "error");
+        } finally {
+          setSubmitStateFallback(false);
+        }
+      }
+
       async function fallbackOpenPlans() {
         revealPlansStage();
-        var container = document.getElementById("dynamicPlansContainer");
+        var container = byId("dynamicPlansContainer");
         if (container) {
           container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-info">Carregando planos disponiveis...</div></div></div>';
         }
 
         try {
-          var plans = await fetchJson("/api/public/billing/plans");
+          var responses = await Promise.all([
+            fetchJson("/api/public/billing/plans"),
+            fetchJson("/api/public/billing/modules")
+          ]);
+          var plans = responses[0];
+          var modules = responses[1];
+          fallbackState.plans = normalizeArray(plans);
+          fallbackState.modules = normalizeArray(modules);
           renderPublicPlans(plans);
         } catch (error) {
           if (container) {
@@ -670,7 +1066,7 @@
         window.__openRegisterPlans = fallbackOpenPlans;
       }
 
-      var btn = document.getElementById("btnExperimentHero");
+      var btn = byId("btnExperimentHero");
       if (btn && !btn.__fallbackBindDone) {
         btn.__fallbackBindDone = true;
         btn.addEventListener("click", function (event) {
@@ -678,6 +1074,66 @@
           window.__openRegisterPlans();
         });
       }
+
+      var backBtn = byId("btnBackPlans");
+      if (backBtn && !backBtn.__fallbackBindDone) {
+        backBtn.__fallbackBindDone = true;
+        backBtn.addEventListener("click", function () {
+          showPlansChooserFallback();
+        });
+      }
+
+      var form = byId("publicRegisterForm");
+      if (form && !form.__fallbackSubmitBound) {
+        form.__fallbackSubmitBound = true;
+        form.addEventListener("submit", submitFallback);
+      }
+
+      var cnpjInput = byId("companyNumberInput");
+      if (cnpjInput && !cnpjInput.__fallbackBindDone) {
+        cnpjInput.__fallbackBindDone = true;
+        cnpjInput.addEventListener("input", function () {
+          cnpjInput.value = formatCnpj(cnpjInput.value);
+        });
+        cnpjInput.addEventListener("blur", function () {
+          tryAutoFillFromCnpjFallback(false);
+        });
+      }
+
+      var cnpjBtn = byId("btnLookupCnpj");
+      if (cnpjBtn && !cnpjBtn.__fallbackBindDone) {
+        cnpjBtn.__fallbackBindDone = true;
+        cnpjBtn.addEventListener("click", function () {
+          tryAutoFillFromCnpjFallback(true);
+        });
+      }
+
+      document.addEventListener("click", function (event) {
+        var selectButton = safeClosest(event.target, ".plan-select-btn");
+        if (!selectButton) return;
+        event.preventDefault();
+        var card = safeClosest(selectButton, ".plan-card");
+        selectPlanFallback(card);
+      });
+
+      document.addEventListener("change", function (event) {
+        var moduleCheckbox = safeClosest(event.target, ".fallback-custom-module");
+        if (!moduleCheckbox) return;
+        var moduleId = String(moduleCheckbox.value || "");
+        if (!moduleId) return;
+
+        if (moduleCheckbox.checked) {
+          if (fallbackState.customModuleIds.indexOf(moduleId) < 0) {
+            fallbackState.customModuleIds.push(moduleId);
+          }
+        } else {
+          fallbackState.customModuleIds = fallbackState.customModuleIds.filter(function (id) {
+            return id !== moduleId;
+          });
+        }
+
+        updateCustomTotalFallback();
+      });
     })();
   </script>
 </body>

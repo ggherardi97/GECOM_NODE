@@ -567,7 +567,29 @@
         "notifications": "Notificacoes",
         "sales": "Vendas",
         "services": "Servicos",
-        "settings": "Configuracoes"
+        "finance": "Financeiro",
+        "settings": "Configuracoes",
+        "financeReceivables": "Contas a Receber",
+        "financePayables": "Contas a Pagar",
+        "financeBanks": "Caixa e Bancos",
+        "financeMovements": "Movimentos Bancarios",
+        "financeCashFlow": "Fluxo de Caixa",
+        "financeCategories": "Categorias Financeiras",
+        "financeCostCenters": "Centros de Custo",
+        "hr": "RH",
+        "hrDepartments": "Departamentos",
+        "hrPositions": "Cargos",
+        "hrWorkLocations": "Locais de trabalho",
+        "hrEmployees": "Colaboradores",
+        "hrAssignments": "Alocacoes",
+        "hrWorkSchedules": "Jornadas",
+        "hrLeaveTypes": "Tipos de ausencia",
+        "hrLeaveRequests": "Solicitacoes",
+        "hrSkills": "Skills",
+        "hrCertifications": "Certificacoes",
+        "hrLifecycleTemplates": "Templates lifecycle",
+        "hrEmployeeLifecycles": "Lifecycles colaborador",
+        "hrLifecycleKanban": "Kanban lifecycle"
       },
       "modal": {
         "cancel": "Cancelar",
@@ -594,6 +616,157 @@
         "defaultNotificationTitle": "Notificacao",
         "noActiveNotifications": "Nenhuma notificacao ativa.",
         "viewAll": "Ver todas"
+      }
+    },
+    "finance": {
+      "costCenters": {
+        "title": "Centros de Custo"
+      },
+      "categories": {
+        "title": "Categorias Financeiras"
+      },
+      "bankAccounts": {
+        "title": "Caixa e Bancos"
+      },
+      "bankMovements": {
+        "title": "Movimentos Bancarios"
+      },
+      "receivables": {
+        "title": "Contas a Receber"
+      },
+      "payables": {
+        "title": "Contas a Pagar"
+      },
+      "cashFlow": {
+        "title": "Fluxo de Caixa Projetado",
+        "openingBalance": "Saldo inicial",
+        "openingBalanceHelp": "Saldo acumulado antes do periodo selecionado.",
+        "totalIncoming": "Total de entradas",
+        "totalIncomingHelp": "Somatorio de recebimentos previstos no periodo.",
+        "totalOutgoing": "Total de saidas",
+        "totalOutgoingHelp": "Somatorio de pagamentos previstos no periodo.",
+        "closingBalance": "Saldo final",
+        "closingBalanceHelp": "Saldo inicial + entradas - saidas no periodo.",
+        "dailyProjection": "Projecao diaria",
+        "dailyProjectionHelp": "Tabela detalhada do periodo selecionado.",
+        "lineChartTitle": "Linha - proximos 10 dias",
+        "lineChartHelp": "Evolucao de saldo, entradas e saidas para os 10 dias iniciais da projecao.",
+        "paymentMethodsTitle": "Distribuicao por forma de pagamento",
+        "paymentMethodsHelp": "Quantidade de pagamentos por metodo no periodo.",
+        "noPaymentData": "Sem dados",
+        "incoming": "Entradas",
+        "outgoing": "Saidas",
+        "net": "Liquido",
+        "projectedBalance": "Saldo projetado"
+      },
+      "tabs": {
+        "basic": "Dados basicos",
+        "relations": "Relacionamentos",
+        "schedule": "Prazos",
+        "amounts": "Valores",
+        "reconciliation": "Conciliacao",
+        "references": "Referencias",
+        "notes": "Observacoes",
+        "settings": "Configuracoes",
+        "more": "Mais campos"
+      },
+      "common": {
+        "refresh": "Atualizar",
+        "new": "Novo",
+        "selected": "selecionado(s)",
+        "quickEdit": "Edicao rapida",
+        "delete": "Excluir",
+        "clearSelection": "Limpar",
+        "filter": "Filtrar",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "back": "Voltar",
+        "tips": "Dicas",
+        "quickEditHint": "Use a selecao de linhas no grid para editar ou excluir em lote.",
+        "payments": "Pagamentos",
+        "newPayment": "Novo pagamento",
+        "editPayment": "Editar pagamento",
+        "confirmDeleteOne": "Deseja excluir este registro?",
+        "confirmDeleteMany": "Deseja excluir os registros selecionados?",
+        "confirmDeletePayment": "Deseja excluir este pagamento?",
+        "empty": "Nenhum registro encontrado.",
+        "required": "e obrigatorio",
+        "actions": "Acoes",
+        "noPayments": "Sem pagamentos.",
+        "saveBeforePayments": "Salve primeiro o registro.",
+        "generateFromInvoice": "Gerar por invoice",
+        "generate": "Gerar",
+        "yes": "Sim",
+        "no": "Nao",
+        "selectOne": "Selecione exatamente um registro.",
+        "lookupPlaceholder": "Clique para ver recentes ou digite para buscar",
+        "lookupEmpty": "Nenhum registro encontrado.",
+        "fillRequired": "Preencha os campos obrigatorios"
+      },
+      "fields": {
+        "code": "Codigo",
+        "name": "Nome",
+        "description": "Descricao",
+        "active": "Ativo",
+        "kind": "Tipo",
+        "costCenter": "Centro de custo",
+        "parentCategory": "Categoria pai",
+        "bank": "Banco",
+        "agency": "Agencia",
+        "accountNumber": "Conta",
+        "currency": "Moeda",
+        "currentBalance": "Saldo atual",
+        "openingBalance": "Saldo inicial",
+        "allowNegative": "Permitir saldo negativo",
+        "reconciliationDate": "Data de conciliacao",
+        "dateTime": "Data/Hora",
+        "type": "Tipo",
+        "amount": "Valor",
+        "category": "Categoria",
+        "referenceTable": "Tabela de referencia",
+        "referenceId": "ID de referencia",
+        "reconciled": "Conciliado",
+        "reconciliationNote": "Observacao de conciliacao",
+        "titleNumber": "Titulo",
+        "company": "Empresa",
+        "dueDate": "Vencimento",
+        "originalAmount": "Valor original",
+        "outstandingAmount": "Saldo em aberto",
+        "status": "Status",
+        "invoice": "Invoice",
+        "document": "Documento",
+        "issueDate": "Emissao",
+        "installmentNumber": "Parcela",
+        "installmentTotal": "Total de parcelas",
+        "notes": "Observacoes",
+        "payableNumber": "Titulo",
+        "paymentDate": "Data do pagamento",
+        "paymentMethod": "Forma de pagamento",
+        "bankAccount": "Conta bancaria",
+        "reference": "Referencia",
+        "interestAmount": "Juros",
+        "discountAmount": "Desconto",
+        "feeAmount": "Tarifa",
+        "date": "Data",
+        "from": "De",
+        "to": "Ate",
+        "accountType": "Tipo de conta",
+        "invoiceId": "Invoice ID",
+        "intervalDays": "Intervalo (dias)",
+        "firstDueDate": "Primeiro vencimento"
+      },
+      "messages": {
+        "invoiceIdRequired": "Informe o invoice id."
+      },
+      "paymentMethod": {
+        "pix": "PIX",
+        "creditCard": "Cartao de credito",
+        "debitCard": "Cartao de debito",
+        "bankTransfer": "Transferencia bancaria",
+        "boleto": "Boleto",
+        "cash": "Dinheiro",
+        "check": "Cheque",
+        "other": "Outros"
       }
     },
     "novoProcesso": {
@@ -1324,6 +1497,194 @@
       "window": {
         "in": "Sim",
         "out": "Nao"
+      }
+    },
+    "hr": {
+      "common": {
+        "refresh": "Atualizar",
+        "new": "Novo",
+        "selected": "Selecionados",
+        "quickEdit": "Edicao rapida",
+        "delete": "Excluir",
+        "clearSelection": "Limpar selecao",
+        "back": "Voltar",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "actions": "Acoes",
+        "yes": "Sim",
+        "no": "Nao",
+        "fillRequired": "Preencha os campos obrigatorios",
+        "lookupPlaceholder": "Clique para ver recentes ou digite para buscar",
+        "lookupEmpty": "Nenhum registro encontrado.",
+        "tips": "Dicas",
+        "quickEditHint": "Use os lookups para relacionamentos e preencha por abas para manter o cadastro organizado.",
+        "error": "Erro",
+        "onboarding": "Onboarding",
+        "offboarding": "Offboarding",
+        "generateFromInvoice": "Gerar",
+        "payments": "Pagamentos",
+        "newPayment": "Novo pagamento",
+        "more": "Mais"
+      },
+      "tabs": {
+        "basic": "Principal",
+        "general": "Dados gerais",
+        "contact": "Contato",
+        "structure": "Estrutura",
+        "notes": "Observacoes",
+        "rules": "Regras",
+        "approval": "Aprovacao",
+        "more": "Mais"
+      },
+      "fields": {
+        "name": "Nome",
+        "code": "Codigo",
+        "description": "Descricao",
+        "manager": "Gestor",
+        "parentDepartment": "Departamento pai",
+        "level": "Nivel",
+        "isLeadership": "Lideranca",
+        "color": "Cor",
+        "isDefault": "Padrao",
+        "sortOrder": "Ordem",
+        "employeeNumber": "Matricula",
+        "fullName": "Nome completo",
+        "preferredName": "Nome social",
+        "employmentStatus": "Status empregaticio",
+        "user": "Usuario vinculado",
+        "workEmail": "Email corporativo",
+        "workPhone": "Telefone corporativo",
+        "mobilePhone": "Celular",
+        "birthDate": "Data de nascimento",
+        "gender": "Genero",
+        "maritalStatus": "Estado civil",
+        "documentType": "Tipo de documento",
+        "documentNumber": "Numero do documento",
+        "nationality": "Nacionalidade",
+        "notes": "Observacoes",
+        "employee": "Colaborador",
+        "department": "Departamento",
+        "position": "Cargo",
+        "workLocation": "Local de trabalho",
+        "startDate": "Data de inicio",
+        "endDate": "Data final",
+        "costCenter": "Centro de custo",
+        "weeklyMinutes": "Minutos semanais",
+        "workSchedule": "Jornada",
+        "requiresApproval": "Requer aprovacao",
+        "allowHourly": "Permite por hora",
+        "isPaid": "Remunerado",
+        "countsAsVacation": "Conta como ferias",
+        "maxDaysPerYear": "Maximo dias/ano",
+        "leaveType": "Tipo de ausencia",
+        "startDateTime": "Inicio",
+        "endDateTime": "Fim",
+        "approver": "Aprovador",
+        "reason": "Motivo",
+        "decisionReason": "Motivo da decisao",
+        "skillCategory": "Categoria",
+        "skill": "Skill",
+        "proficiencyLevel": "Nivel de proficiencia",
+        "yearsExperience": "Anos de experiencia",
+        "issuer": "Emissor",
+        "validityMonths": "Validade (meses)",
+        "certification": "Certificacao",
+        "issuedAt": "Emitido em",
+        "expiresAt": "Vencimento",
+        "certificateNumber": "Numero do certificado",
+        "type": "Tipo",
+        "lifecycleTemplate": "Template",
+        "stage": "Etapa",
+        "title": "Titulo",
+        "responsibleRole": "Responsavel (papel)",
+        "dueDaysAfterStart": "Dias apos inicio",
+        "requiresAttachment": "Exige anexo",
+        "isMandatory": "Obrigatorio",
+        "targetEndDate": "Data alvo de conclusao",
+        "lifecycleInstance": "Instancia",
+        "responsibleEmployee": "Responsavel",
+        "dueDate": "Prazo",
+        "status": "Status",
+        "wipLimit": "Limite WIP",
+        "templateTask": "Tarefa do template",
+        "paymentDate": "Data",
+        "amount": "Valor",
+        "paymentMethod": "Forma de pagamento",
+        "bankAccount": "Conta",
+        "reference": "Referencia"
+      },
+      "departments": {
+        "title": "Departamentos"
+      },
+      "positions": {
+        "title": "Cargos"
+      },
+      "workLocations": {
+        "title": "Locais de trabalho"
+      },
+      "employmentStatuses": {
+        "title": "Status empregaticios"
+      },
+      "documentTypes": {
+        "title": "Tipos de documento"
+      },
+      "maritalStatuses": {
+        "title": "Estados civis"
+      },
+      "employees": {
+        "title": "Colaboradores"
+      },
+      "assignments": {
+        "title": "Alocacoes"
+      },
+      "workSchedules": {
+        "title": "Jornadas"
+      },
+      "employeeScheduleAssignments": {
+        "title": "Alocacoes de jornada"
+      },
+      "leaveTypes": {
+        "title": "Tipos de ausencia"
+      },
+      "leaveRequests": {
+        "title": "Solicitacoes de ausencia"
+      },
+      "skillCategories": {
+        "title": "Categorias de skills"
+      },
+      "skills": {
+        "title": "Skills"
+      },
+      "employeeSkills": {
+        "title": "Skills por colaborador"
+      },
+      "certifications": {
+        "title": "Certificacoes"
+      },
+      "employeeCertifications": {
+        "title": "Certificacoes por colaborador"
+      },
+      "lifecycleTemplates": {
+        "title": "Templates de onboarding/offboarding"
+      },
+      "lifecycleStages": {
+        "title": "Etapas de lifecycle"
+      },
+      "lifecycleTasks": {
+        "title": "Tarefas de lifecycle"
+      },
+      "employeeLifecycles": {
+        "title": "Lifecycles por colaborador"
+      },
+      "employeeLifecycleTasks": {
+        "title": "Tarefas de lifecycle por colaborador"
+      },
+      "lifecycleKanban": {
+        "title": "Kanban onboarding/offboarding",
+        "noData": "Nenhum lifecycle ativo encontrado para os filtros.",
+        "noStages": "Template sem colunas configuradas.",
+        "emptyColumn": "Sem tarefas",
+        "editTask": "Editar tarefa"
       }
     }
   }

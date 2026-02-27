@@ -1,0 +1,168 @@
+<style>
+  #masterHeader { display: none !important; }
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .cashflow-kpi { font-size: 20px; font-weight: 700; }
+  .cashflow-kpi-title { font-size: 12px; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  .cashflow-kpi-help { font-size: 12px; color: #8a97a5; margin-top: 4px; min-height: 32px; }
+  .cashflow-layout { margin-top: 12px; }
+  .cashflow-panel {
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+    background: #fff;
+    margin-bottom: 14px;
+  }
+  .cashflow-panel-header {
+    border-bottom: 1px solid #eef1f4;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: #34495e;
+  }
+  .cashflow-panel-subtitle {
+    font-size: 12px;
+    color: #7b8a97;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .cashflow-panel-body { padding: 10px 12px; }
+  .cashflow-table-wrap {
+    max-height: 540px;
+    overflow: auto;
+  }
+  #financeCashFlowTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #fff;
+  }
+  .cashflow-chart-wrap {
+    position: relative;
+    height: 240px;
+  }
+  .cashflow-methods-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0 0;
+  }
+  .cashflow-methods-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid #f0f2f4;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+  .cashflow-empty-row {
+    color: #7f8c99;
+    text-align: center;
+  }
+</style>
+
+<div class="row animated fadeInRight cashflow-layout">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5><%= t('page.finance.cashFlow.title') %></h5>
+        <div class="ibox-tools">
+          <button id="btnCashFlowRefresh" class="btn btn-primary btn-sm"><i class="fa fa-refresh"></i> <%= t('page.finance.common.refresh') %></button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-md-3">
+            <label><%= t('page.finance.fields.from') %></label>
+            <input id="cfFrom" type="date" class="form-control" />
+          </div>
+          <div class="col-md-3">
+            <label><%= t('page.finance.fields.to') %></label>
+            <input id="cfTo" type="date" class="form-control" />
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row text-center">
+          <div class="col-md-3">
+            <div class="cashflow-kpi-title"><%= t('page.finance.cashFlow.openingBalance') %></div>
+            <div id="cfOpening" class="cashflow-kpi">0,00</div>
+            <div class="cashflow-kpi-help"><%= t('page.finance.cashFlow.openingBalanceHelp') %></div>
+          </div>
+          <div class="col-md-3">
+            <div class="cashflow-kpi-title"><%= t('page.finance.cashFlow.totalIncoming') %></div>
+            <div id="cfIncoming" class="cashflow-kpi">0,00</div>
+            <div class="cashflow-kpi-help"><%= t('page.finance.cashFlow.totalIncomingHelp') %></div>
+          </div>
+          <div class="col-md-3">
+            <div class="cashflow-kpi-title"><%= t('page.finance.cashFlow.totalOutgoing') %></div>
+            <div id="cfOutgoing" class="cashflow-kpi">0,00</div>
+            <div class="cashflow-kpi-help"><%= t('page.finance.cashFlow.totalOutgoingHelp') %></div>
+          </div>
+          <div class="col-md-3">
+            <div class="cashflow-kpi-title"><%= t('page.finance.cashFlow.closingBalance') %></div>
+            <div id="cfClosing" class="cashflow-kpi">0,00</div>
+            <div class="cashflow-kpi-help"><%= t('page.finance.cashFlow.closingBalanceHelp') %></div>
+          </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+          <div class="col-lg-6 col-md-12">
+            <div class="cashflow-panel">
+              <div class="cashflow-panel-header">
+                <%= t('page.finance.cashFlow.dailyProjection') %>
+                <div class="cashflow-panel-subtitle"><%= t('page.finance.cashFlow.dailyProjectionHelp') %></div>
+              </div>
+              <div class="cashflow-panel-body">
+                <div class="table-responsive cashflow-table-wrap">
+                  <table id="financeCashFlowTable" class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th><%= t('page.finance.fields.date') %></th>
+                        <th class="text-right"><%= t('page.finance.cashFlow.incoming') %></th>
+                        <th class="text-right"><%= t('page.finance.cashFlow.outgoing') %></th>
+                        <th class="text-right"><%= t('page.finance.cashFlow.net') %></th>
+                        <th class="text-right"><%= t('page.finance.cashFlow.projectedBalance') %></th>
+                      </tr>
+                    </thead>
+                    <tbody id="financeCashFlowBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-12">
+            <div class="cashflow-panel">
+              <div class="cashflow-panel-header">
+                <%= t('page.finance.cashFlow.lineChartTitle') %>
+                <div class="cashflow-panel-subtitle"><%= t('page.finance.cashFlow.lineChartHelp') %></div>
+              </div>
+              <div class="cashflow-panel-body">
+                <div class="cashflow-chart-wrap">
+                  <canvas id="cfTrendChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="cashflow-panel">
+              <div class="cashflow-panel-header">
+                <%= t('page.finance.cashFlow.paymentMethodsTitle') %>
+                <div class="cashflow-panel-subtitle"><%= t('page.finance.cashFlow.paymentMethodsHelp') %></div>
+              </div>
+              <div class="cashflow-panel-body">
+                <div class="cashflow-chart-wrap">
+                  <canvas id="cfMethodsChart"></canvas>
+                </div>
+                <ul id="cfMethodsList" class="cashflow-methods-list"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+<script src="/js/finance/finance.resources.js"></script>
+<script src="/js/finance/finance.cashflow.page.js"></script>

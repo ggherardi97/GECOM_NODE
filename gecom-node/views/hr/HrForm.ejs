@@ -1,0 +1,104 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .form-group { margin-bottom: 12px; }
+  .panel-heading strong { font-size: 13px; }
+  .hr-form-tabs { margin-bottom: 12px; }
+  .hr-form-tabs > li > a { padding: 8px 12px; }
+  .hr-required { color: #ed5565; margin-left: 4px; }
+  .hr-invalid {
+    border-color: #ed5565 !important;
+    box-shadow: 0 0 0 1px rgba(237, 85, 101, 0.12);
+    background: #fff7f8;
+  }
+  .hr-lookup-wrap { position: relative; }
+  .hr-lookup-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 99999;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #d9dee4;
+    border-radius: 4px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  .hr-lookup-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f2f4;
+    cursor: pointer;
+  }
+  .hr-lookup-item:last-child { border-bottom: 0; }
+  .hr-lookup-item:hover { background: #f5f9fc; }
+  .hr-lookup-empty {
+    padding: 8px 10px;
+    color: #777;
+  }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5><%= t(hrPage.titleKey) %></h5>
+        <div class="ibox-tools">
+          <button id="btnHrBack" class="btn btn-white btn-sm"><%= t('page.hr.common.back') %></button>
+          <button id="btnHrNew" class="btn btn-default btn-sm" style="display:none;"><i class="fa fa-plus"></i> <%= t('page.hr.common.new') %></button>
+          <button id="btnHrGenerateFromInvoice" class="btn btn-warning btn-sm" style="display:none;"><%= t('page.hr.common.generateFromInvoice') %></button>
+          <button id="btnHrDelete" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> <%= t('page.hr.common.delete') %></button>
+          <button id="btnHrSave" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> <%= t('page.hr.common.save') %></button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="row">
+          <div class="col-md-8">
+            <div id="hrFormFields"></div>
+          </div>
+          <div class="col-md-4">
+            <div class="panel panel-default">
+              <div class="panel-heading"><strong><%= t('page.hr.common.tips') %></strong></div>
+              <div class="panel-body">
+                <p class="text-muted"><%= t('page.hr.common.quickEditHint') %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="hrPaymentsWrap" style="display:none; margin-top: 20px;">
+          <div class="panel panel-default">
+            <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center;">
+              <strong><%= t('page.hr.common.payments') %></strong>
+              <button id="btnHrAddPayment" class="btn btn-primary btn-xs"><i class="fa fa-plus"></i> <%= t('page.hr.common.newPayment') %></button>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th><%= t('page.hr.fields.paymentDate') %></th>
+                      <th><%= t('page.hr.fields.amount') %></th>
+                      <th><%= t('page.hr.fields.paymentMethod') %></th>
+                      <th><%= t('page.hr.fields.bankAccount') %></th>
+                      <th><%= t('page.hr.fields.reference') %></th>
+                      <th style="width:90px;"><%= t('page.hr.common.actions') %></th>
+                    </tr>
+                  </thead>
+                  <tbody id="hrPaymentsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__hrPage = <%- safeJson(hrPage) %>;
+</script>
+<script src="/js/hr/hr.resources.js"></script>
+<script src="/js/hr/hr.form.page.js"></script>
+
