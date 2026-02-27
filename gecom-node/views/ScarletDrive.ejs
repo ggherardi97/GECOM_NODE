@@ -264,6 +264,26 @@
       color: #8cf1ba;
     }
 
+    .table-toolbar {
+      margin-top: 10px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .table-toolbar .field {
+      min-width: 220px;
+      margin: 0;
+    }
+
+    .filter-summary {
+      color: var(--text-soft);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
     .table-wrap {
       margin-top: 14px;
       overflow-x: auto;
@@ -358,6 +378,15 @@
         width: 100%;
         text-align: center;
       }
+
+      .table-toolbar .field {
+        min-width: 100%;
+      }
+
+      .filter-summary {
+        width: 100%;
+        white-space: normal;
+      }
     }
   </style>
 </head>
@@ -410,6 +439,18 @@
           <button id="addBtn" type="submit" class="btn btn-add">Adicionar +</button>
         </form>
         <div id="feedback" class="feedback"></div>
+        <div class="table-toolbar">
+          <div class="field">
+            <label for="filterHost">Filtrar por convidado por</label>
+            <select id="filterHost">
+              <option value="">Todos</option>
+              <% scarletHosts.forEach(function(host) { %>
+                <option value="<%= host %>"><%= host %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div id="filterSummary" class="filter-summary">Mostrando todos os convidados.</div>
+        </div>
 
         <div class="table-wrap">
           <table>
@@ -456,6 +497,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     (function () {
       const HOSTS = <%- JSON.stringify(scarletHosts) %>;
@@ -468,6 +510,8 @@
       const guestHost = document.getElementById("guestHost");
       const guestPaid = document.getElementById("guestPaid");
       const guestConfirmed = document.getElementById("guestConfirmed");
+      const filterHost = document.getElementById("filterHost");
+      const filterSummary = document.getElementById("filterSummary");
       const feedback = document.getElementById("feedback");
       const tableBody = document.getElementById("guestsTableBody");
       const totalCounter = document.getElementById("totalCounter");
@@ -475,6 +519,7 @@
 
       let confirmedChart = null;
       let paidChart = null;
+      let latestPayload = null;
 
       function setFeedback(message, mode) {
         feedback.textContent = message || "";
@@ -484,6 +529,39 @@
 
       function parseJson(response) {
         return response.json().catch(() => ({}));
+      }
+
+      function namesAreEqual(left, right) {
+        const a = String(left || "").trim();
+        const b = String(right || "").trim();
+        if (!a || !b) return false;
+        return a.localeCompare(b, "pt-BR", { sensitivity: "base" }) === 0;
+      }
+
+      function hasDuplicateGuestName(name, ignoreId) {
+        if (!latestPayload || !Array.isArray(latestPayload.guests)) {
+          return false;
+        }
+        return latestPayload.guests.some((guest) => {
+          if (ignoreId != null && Number(guest.id) === Number(ignoreId)) {
+            return false;
+          }
+          return namesAreEqual(guest.name, name);
+        });
+      }
+
+      function showDuplicateNameAlert(name) {
+        const text = "Ja existe convidado com esse nome: " + String(name || "").trim();
+        if (window.Swal && typeof window.Swal.fire === "function") {
+          return window.Swal.fire({
+            icon: "warning",
+            title: "Nome duplicado",
+            text,
+            confirmButtonText: "Ok",
+          });
+        }
+        window.alert(text);
+        return Promise.resolve();
       }
 
       async function request(url, options) {
@@ -538,6 +616,22 @@
 
       function renderTotal(counters, limits) {
         totalCounter.innerHTML = "Total: <strong>" + counters.total + "</strong> / " + limits.maxGuests;
+      }
+
+      function getFilteredGuests(guests) {
+        const selectedHost = String(filterHost.value || "").trim();
+        if (!selectedHost) return guests;
+        return guests.filter((guest) => guest.invitedBy === selectedHost);
+      }
+
+      function renderFilterSummary(filteredCount, totalCount) {
+        const selectedHost = String(filterHost.value || "").trim();
+        if (!selectedHost) {
+          filterSummary.textContent = "Mostrando todos os convidados (" + totalCount + ").";
+          return;
+        }
+        filterSummary.textContent =
+          "Mostrando " + filteredCount + " de " + totalCount + " convidados de " + selectedHost + ".";
       }
 
       function renderCharts(counters) {
@@ -643,10 +737,18 @@
             nameInput.value = guest.name || "";
             return;
           }
+          if (hasDuplicateGuestName(nextValue, guest.id)) {
+            nameInput.value = guest.name || "";
+            showDuplicateNameAlert(nextValue);
+            return;
+          }
           try {
             nameInput.disabled = true;
             await updateGuest(guest.id, { name: nextValue });
           } catch (error) {
+            if (error.code === "DUPLICATE_NAME") {
+              showDuplicateNameAlert(nextValue);
+            }
             setFeedback(error.message, "error");
             nameInput.value = guest.name || "";
           } finally {
@@ -761,7 +863,11 @@
       }
 
       function renderAll(data) {
-        renderTable(data.guests || []);
+        latestPayload = data || { guests: [], counters: { total: 0, byHost: {}, paid: { yes: 0, no: 0 }, confirmed: { yes: 0, no: 0 } }, limits: { maxGuests: 0 } };
+        const guests = Array.isArray(latestPayload.guests) ? latestPayload.guests : [];
+        const filteredGuests = getFilteredGuests(guests);
+        renderTable(filteredGuests);
+        renderFilterSummary(filteredGuests.length, guests.length);
         renderTotal(data.counters, data.limits);
         renderHostChips(data.counters);
         renderCharts(data.counters);
@@ -777,6 +883,11 @@
         const name = String(guestName.value || "").trim();
         if (!name) {
           setFeedback("Informe o nome do convidado.", "error");
+          return;
+        }
+        if (hasDuplicateGuestName(name)) {
+          await showDuplicateNameAlert(name);
+          guestName.focus();
           return;
         }
 
@@ -799,10 +910,18 @@
           guestName.focus();
           setFeedback("Convidado adicionado com sucesso.", "success");
         } catch (error) {
+          if (error.code === "DUPLICATE_NAME") {
+            await showDuplicateNameAlert(name);
+          }
           setFeedback(error.message, "error");
         } finally {
           addBtn.disabled = false;
         }
+      });
+
+      filterHost.addEventListener("change", () => {
+        if (!latestPayload) return;
+        renderAll(latestPayload);
       });
 
       loadList().catch((error) => {

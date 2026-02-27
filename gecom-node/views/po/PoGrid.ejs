@@ -1,0 +1,77 @@
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .bulk-actions { display:none; align-items:center; gap:8px; margin-bottom:10px; }
+  #poGridHeader th.sortable { cursor: pointer; user-select:none; }
+  #poGridBody tr { cursor: pointer; }
+  #poSavedViewsHost .sv-bar { margin-top: -2px; }
+  #poSavedViewsHost .sv-actions { margin-left: unset !important; }
+  .po-invalid {
+    border-color: #ed5565 !important;
+    box-shadow: 0 0 0 1px rgba(237, 85, 101, 0.12);
+    background: #fff7f8;
+  }
+  .po-lookup-wrap { position: relative; }
+  .po-lookup-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 2px);
+    z-index: 99999;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #d9dee4;
+    border-radius: 4px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  .po-lookup-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f2f4;
+    cursor: pointer;
+  }
+  .po-lookup-item:last-child { border-bottom: 0; }
+  .po-lookup-item:hover { background: #f5f9fc; }
+  .po-lookup-empty { padding: 8px 10px; color: #777; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <div id="poSavedViewsHost"></div>
+        <div class="ibox-tools">
+          <button id="btnPoRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> <%= t('page.po.common.refresh') %></button>
+          <button id="btnPoNew" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> <%= t('page.po.common.new') %></button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="poBulkActions" class="bulk-actions">
+          <span><strong id="poSelectedCount">0</strong> <%= t('page.po.common.selected') %></span>
+          <button id="btnPoQuickEdit" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> <%= t('page.po.common.quickEdit') %></button>
+          <button id="btnPoBulkUpdate" class="btn btn-warning btn-sm"><i class="fa fa-random"></i> <%= t('page.po.common.bulkUpdate') %></button>
+          <button id="btnPoDelete" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> <%= t('page.po.common.delete') %></button>
+          <button id="btnPoClearSelection" class="btn btn-white btn-sm"><%= t('page.po.common.clearSelection') %></button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="poGridTable">
+            <thead>
+              <tr id="poGridFilters"></tr>
+              <tr id="poGridHeader"></tr>
+            </thead>
+            <tbody id="poGridBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__poPage = <%- safeJson(poPage) %>;
+</script>
+<script src="/Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="/js/po/po.resources.js"></script>
+<script src="/js/po/po.grid.page.js"></script>
+

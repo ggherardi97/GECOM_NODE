@@ -577,6 +577,7 @@
         "financeCategories": "Financial Categories",
         "financeCostCenters": "Cost Centers",
         "hr": "RH",
+        "projectOperations": "Project & Operations",
         "hrDepartments": "Departamentos",
         "hrPositions": "Cargos",
         "hrWorkLocations": "Locais de trabalho",
@@ -589,7 +590,17 @@
         "hrCertifications": "Certificacoes",
         "hrLifecycleTemplates": "Templates lifecycle",
         "hrEmployeeLifecycles": "Lifecycles colaborador",
-        "hrLifecycleKanban": "Kanban lifecycle"
+        "hrLifecycleKanban": "Kanban lifecycle",
+        "poProjects": "Projects",
+        "poProjectProcesses": "Projects x Processes",
+        "poMilestones": "Milestones",
+        "poDeliverables": "Deliverables",
+        "poChecklists": "Checklists",
+        "poChecklistItems": "Checklist items",
+        "poWorkOrders": "Work Orders",
+        "poWorkOrderAssignments": "Assignments",
+        "poWorkOrderAppointments": "Appointments",
+        "poConfigurations": "Configurations"
       },
       "modal": {
         "cancel": "Cancel",
@@ -1686,6 +1697,119 @@
         "noStages": "Template sem colunas configuradas.",
         "emptyColumn": "Sem tarefas",
         "editTask": "Editar tarefa"
+      }
+    },
+    "po": {
+      "common": {
+        "refresh": "Refresh",
+        "new": "New",
+        "selected": "Selected",
+        "quickEdit": "Quick edit",
+        "delete": "Delete",
+        "clearSelection": "Clear selection",
+        "back": "Back",
+        "save": "Save",
+        "cancel": "Cancel",
+        "actions": "Actions",
+        "yes": "Yes",
+        "no": "No",
+        "fillRequired": "Fill required fields",
+        "lookupPlaceholder": "Click for recent items or type to search",
+        "lookupEmpty": "No records found.",
+        "tips": "Tips",
+        "quickEditHint": "Use lookups for relations and organize data by tabs.",
+        "confirmDeleteMany": "Delete selected records?",
+        "confirmDeleteOne": "Delete this record?",
+        "selectOne": "Select exactly one record.",
+        "empty": "No records found.",
+        "filter": "Filter",
+        "more": "More"
+      },
+      "tabs": {
+        "basic": "Main",
+        "general": "General",
+        "planning": "Planning",
+        "notes": "Notes",
+        "amounts": "Amounts",
+        "assignment": "Assignment",
+        "links": "Links",
+        "more": "More"
+      },
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "color": "Color",
+        "isDefault": "Default",
+        "sortOrder": "Sort order",
+        "description": "Description",
+        "status": "Status",
+        "owner": "Owner",
+        "company": "Company",
+        "startDate": "Start date",
+        "targetEndDate": "Target end date",
+        "actualEndDate": "Actual end date",
+        "project": "Project",
+        "process": "Process",
+        "title": "Title",
+        "dueDate": "Due date",
+        "valueAmount": "Amount",
+        "currency": "Currency",
+        "checklist": "Checklist",
+        "isRequired": "Required",
+        "assignedUser": "Assigned user",
+        "priority": "Priority",
+        "plannedStart": "Planned start",
+        "plannedEnd": "Planned end",
+        "actualStart": "Actual start",
+        "actualEnd": "Actual end",
+        "estimatedHours": "Estimated hours",
+        "workOrder": "Work order",
+        "resource": "Resource",
+        "role": "Role",
+        "allocationPercent": "Allocation (%)",
+        "plannedHours": "Planned hours",
+        "appointment": "Appointment",
+        "startDateTime": "Start",
+        "itemsCount": "Items"
+      },
+      "projectStatuses": {
+        "title": "Project statuses"
+      },
+      "deliverableStatuses": {
+        "title": "Deliverable statuses"
+      },
+      "workOrderStatuses": {
+        "title": "Work order statuses"
+      },
+      "resourceRoles": {
+        "title": "Resource roles"
+      },
+      "projects": {
+        "title": "Projects"
+      },
+      "projectProcesses": {
+        "title": "Projects x processes"
+      },
+      "milestones": {
+        "title": "Process milestones"
+      },
+      "deliverables": {
+        "title": "Process deliverables"
+      },
+      "checklists": {
+        "title": "Process checklists"
+      },
+      "checklistItems": {
+        "title": "Checklist items"
+      },
+      "workOrders": {
+        "title": "Work orders"
+      },
+      "workOrderAssignments": {
+        "title": "Work order assignments"
+      },
+      "workOrderAppointments": {
+        "title": "Work order appointments"
       }
     }
   }

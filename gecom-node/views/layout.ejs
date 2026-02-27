@@ -906,6 +906,68 @@
             </a>
           </li>
 
+          <li data-areas="po"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.projectOperations"><%= t('page.layout.menu.projectOperations') %></a></li>
+          <li data-areas="po">
+            <a href="/POProjects">
+              <i class="fa fa-folder-open"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poProjects"><%= t('page.layout.menu.poProjects') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POProjectProcesses">
+              <i class="fa fa-link"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poProjectProcesses"><%= t('page.layout.menu.poProjectProcesses') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POMilestones">
+              <i class="fa fa-flag"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poMilestones"><%= t('page.layout.menu.poMilestones') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/PODeliverables">
+              <i class="fa fa-dropbox"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poDeliverables"><%= t('page.layout.menu.poDeliverables') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POChecklists">
+              <i class="fa fa-list-ul"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poChecklists"><%= t('page.layout.menu.poChecklists') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POChecklistItems">
+              <i class="fa fa-check-square-o"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poChecklistItems"><%= t('page.layout.menu.poChecklistItems') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POWorkOrders">
+              <i class="fa fa-wrench"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poWorkOrders"><%= t('page.layout.menu.poWorkOrders') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POWorkOrderAssignments">
+              <i class="fa fa-users"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poWorkOrderAssignments"><%= t('page.layout.menu.poWorkOrderAssignments') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POWorkOrderAppointments">
+              <i class="fa fa-calendar"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poWorkOrderAppointments"><%= t('page.layout.menu.poWorkOrderAppointments') %></span>
+            </a>
+          </li>
+          <li data-areas="po">
+            <a href="/POProjectStatuses">
+              <i class="fa fa-sliders"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poConfigurations"><%= t('page.layout.menu.poConfigurations') %></span>
+            </a>
+          </li>
+
           <li data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
           <li data-areas="settings">
             <a href="/servico/sla/politicas">
@@ -1016,6 +1078,9 @@
             </a>
             <a href="#" class="sidebar-area-option" data-area="hr">
               <span data-i18n="page.layout.menu.hr"><%= t('page.layout.menu.hr') %></span><i class="fa fa-check"></i>
+            </a>
+            <a href="#" class="sidebar-area-option" data-area="po">
+              <span data-i18n="page.layout.menu.projectOperations"><%= t('page.layout.menu.projectOperations') %></span><i class="fa fa-check"></i>
             </a>
             <a href="#" class="sidebar-area-option" data-area="settings">
               <span>Configurações</span><i class="fa fa-check"></i>
@@ -1173,6 +1238,7 @@
             if (value === "sales") return "sales";
             if (value === "finance") return "finance";
             if (value === "hr") return "hr";
+            if (value === "po") return "po";
             if (value === "settings") return "settings";
             return "service";
           }
@@ -1182,6 +1248,7 @@
             if (area === "sales") return window.t ? window.t("page.layout.menu.sales", { defaultValue: "Sales" }) : "Sales";
             if (area === "finance") return window.t ? window.t("page.layout.menu.finance", { defaultValue: "Financeiro" }) : "Financeiro";
             if (area === "hr") return window.t ? window.t("page.layout.menu.hr", { defaultValue: "RH" }) : "RH";
+            if (area === "po") return window.t ? window.t("page.layout.menu.projectOperations", { defaultValue: "Project & Operations" }) : "Project & Operations";
             if (area === "settings") return window.t ? window.t("page.layout.menu.settings", { defaultValue: "Configuracoes" }) : "Configuracoes";
             return window.t ? window.t("page.layout.menu.services", { defaultValue: "Servico" }) : "Servico";
           }
@@ -1191,6 +1258,7 @@
             if (area === "sales") return "V";
             if (area === "finance") return "F";
             if (area === "hr") return "R";
+            if (area === "po") return "P";
             if (area === "settings") return "C";
             return "S";
           }

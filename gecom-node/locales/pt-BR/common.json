@@ -577,6 +577,7 @@
         "financeCategories": "Categorias Financeiras",
         "financeCostCenters": "Centros de Custo",
         "hr": "RH",
+        "projectOperations": "Project & Operations",
         "hrDepartments": "Departamentos",
         "hrPositions": "Cargos",
         "hrWorkLocations": "Locais de trabalho",
@@ -589,7 +590,17 @@
         "hrCertifications": "Certificacoes",
         "hrLifecycleTemplates": "Templates lifecycle",
         "hrEmployeeLifecycles": "Lifecycles colaborador",
-        "hrLifecycleKanban": "Kanban lifecycle"
+        "hrLifecycleKanban": "Kanban lifecycle",
+        "poProjects": "Projetos",
+        "poProjectProcesses": "Projetos x Processos",
+        "poMilestones": "Marcos",
+        "poDeliverables": "Entregas",
+        "poChecklists": "Checklists",
+        "poChecklistItems": "Itens de checklist",
+        "poWorkOrders": "Work Orders",
+        "poWorkOrderAssignments": "Alocacoes",
+        "poWorkOrderAppointments": "Agendamentos",
+        "poConfigurations": "Configuracoes"
       },
       "modal": {
         "cancel": "Cancelar",
@@ -1685,6 +1696,119 @@
         "noStages": "Template sem colunas configuradas.",
         "emptyColumn": "Sem tarefas",
         "editTask": "Editar tarefa"
+      }
+    },
+    "po": {
+      "common": {
+        "refresh": "Atualizar",
+        "new": "Novo",
+        "selected": "Selecionados",
+        "quickEdit": "Edicao rapida",
+        "delete": "Excluir",
+        "clearSelection": "Limpar selecao",
+        "back": "Voltar",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "actions": "Acoes",
+        "yes": "Sim",
+        "no": "Nao",
+        "fillRequired": "Preencha os campos obrigatorios",
+        "lookupPlaceholder": "Clique para ver recentes ou digite para buscar",
+        "lookupEmpty": "Nenhum registro encontrado.",
+        "tips": "Dicas",
+        "quickEditHint": "Use os lookups para relacionamentos e organize os dados por abas.",
+        "confirmDeleteMany": "Deseja excluir os registros selecionados?",
+        "confirmDeleteOne": "Deseja excluir este registro?",
+        "selectOne": "Selecione exatamente um registro.",
+        "empty": "Nenhum registro encontrado.",
+        "filter": "Filtrar",
+        "more": "Mais"
+      },
+      "tabs": {
+        "basic": "Principal",
+        "general": "Geral",
+        "planning": "Planejamento",
+        "notes": "Observacoes",
+        "amounts": "Valores",
+        "assignment": "Atribuicao",
+        "links": "Relacionamentos",
+        "more": "Mais"
+      },
+      "fields": {
+        "name": "Nome",
+        "code": "Codigo",
+        "color": "Cor",
+        "isDefault": "Padrao",
+        "sortOrder": "Ordem",
+        "description": "Descricao",
+        "status": "Status",
+        "owner": "Responsavel",
+        "company": "Empresa",
+        "startDate": "Data de inicio",
+        "targetEndDate": "Previsao de termino",
+        "actualEndDate": "Termino real",
+        "project": "Projeto",
+        "process": "Processo",
+        "title": "Titulo",
+        "dueDate": "Vencimento",
+        "valueAmount": "Valor",
+        "currency": "Moeda",
+        "checklist": "Checklist",
+        "isRequired": "Obrigatorio",
+        "assignedUser": "Usuario responsavel",
+        "priority": "Prioridade",
+        "plannedStart": "Inicio planejado",
+        "plannedEnd": "Fim planejado",
+        "actualStart": "Inicio real",
+        "actualEnd": "Fim real",
+        "estimatedHours": "Horas estimadas",
+        "workOrder": "Work order",
+        "resource": "Recurso",
+        "role": "Papel",
+        "allocationPercent": "Alocacao (%)",
+        "plannedHours": "Horas planejadas",
+        "appointment": "Agendamento",
+        "startDateTime": "Inicio",
+        "itemsCount": "Itens"
+      },
+      "projectStatuses": {
+        "title": "Status de projetos"
+      },
+      "deliverableStatuses": {
+        "title": "Status de entregas"
+      },
+      "workOrderStatuses": {
+        "title": "Status de work orders"
+      },
+      "resourceRoles": {
+        "title": "Papeis de recurso"
+      },
+      "projects": {
+        "title": "Projetos"
+      },
+      "projectProcesses": {
+        "title": "Projetos x processos"
+      },
+      "milestones": {
+        "title": "Marcos por processo"
+      },
+      "deliverables": {
+        "title": "Entregas por processo"
+      },
+      "checklists": {
+        "title": "Checklists por processo"
+      },
+      "checklistItems": {
+        "title": "Itens de checklist"
+      },
+      "workOrders": {
+        "title": "Work orders"
+      },
+      "workOrderAssignments": {
+        "title": "Alocacoes de work order"
+      },
+      "workOrderAppointments": {
+        "title": "Agendamentos de work order"
       }
     }
   }

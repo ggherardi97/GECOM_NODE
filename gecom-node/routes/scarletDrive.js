@@ -60,6 +60,16 @@ function parseName(value) {
   return name;
 }
 
+function hasDuplicateName(guests, name, ignoreId) {
+  return guests.some((guest) => {
+    if (ignoreId != null && Number(guest.id) === Number(ignoreId)) {
+      return false;
+    }
+    const currentName = String(guest.name || "").trim();
+    return currentName.localeCompare(name, "pt-BR", { sensitivity: "base" }) === 0;
+  });
+}
+
 function sanitizeState(parsed) {
   if (!parsed || typeof parsed !== "object") {
     return { nextId: 1, guests: [] };
@@ -167,6 +177,10 @@ function applyCreate(state, body) {
   const isPaid = parseBoolean(body.isPaid ?? body.pago ?? false, "isPaid");
   const isConfirmed = parseBoolean(body.isConfirmed ?? body.confirmed ?? false, "isConfirmed");
 
+  if (hasDuplicateName(state.guests, name)) {
+    throw badRequest("Ja existe convidado com esse nome.", "DUPLICATE_NAME");
+  }
+
   enforceAddLimits(state, invitedBy);
 
   const now = new Date().toISOString();
@@ -198,7 +212,11 @@ function applyUpdate(state, id, body) {
   const updated = { ...current };
 
   if (Object.prototype.hasOwnProperty.call(body, "name")) {
-    updated.name = parseName(body.name);
+    const nextName = parseName(body.name);
+    if (hasDuplicateName(state.guests, nextName, current.id)) {
+      throw badRequest("Ja existe convidado com esse nome.", "DUPLICATE_NAME");
+    }
+    updated.name = nextName;
   }
 
   if (Object.prototype.hasOwnProperty.call(body, "invitedBy")) {
