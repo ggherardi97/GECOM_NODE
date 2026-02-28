@@ -46,6 +46,9 @@
   <script src="/js/gecom-ai.js"></script>
   <script src="/Assets/js/enums/globalEnum.js"></script>
   <script src="/Assets/js/authContext.js"></script>
+  <script>
+    window.__billingBootstrapMode = <%= (typeof billingBootstrapMode !== 'undefined' && billingBootstrapMode) ? 'true' : 'false' %>;
+  </script>
 
   <!-- i18next -->
   <!-- <script src="/Assets/inspinia/js/plugins/i18next/i18next.min.js"></script> -->
@@ -1559,6 +1562,7 @@
           }
 
           async function fetchTenantTheme() {
+            if (window.__billingBootstrapMode === true) return null;
             try {
               const resp = await fetch("/api/admin/theme", {
                 method: "GET",
@@ -1601,6 +1605,7 @@
           }
 
           async function fetchTenantMenuConfig() {
+            if (window.__billingBootstrapMode === true) return null;
             try {
               const resp = await fetch("/api/admin/menu", {
                 method: "GET",
@@ -1615,6 +1620,7 @@
           }
 
           async function fetchTenantModuleAccess() {
+            if (window.__billingBootstrapMode === true) return null;
             try {
               const resp = await fetch("/api/me/modules", {
                 method: "GET",
@@ -2376,6 +2382,7 @@
           // Prevent double-installation
           if (window.__authFetchInterceptorInstalled) return;
           window.__authFetchInterceptorInstalled = true;
+          const isBillingBootstrapMode = window.__billingBootstrapMode === true;
 
           // ---------------- Global Spinner (counter-based) ----------------
           const spinnerOverlay = document.getElementById("globalSpinner");
@@ -2439,6 +2446,7 @@
 
           // ---------------- Session expired modal (Bootstrap GlobalModal) ----------------
           function openSessionExpiredModal() {
+            if (isBillingBootstrapMode) return;
             // Avoid opening multiple times
             if (window.__gecomSessionExpiredShown) return;
             window.__gecomSessionExpiredShown = true;
@@ -2576,7 +2584,7 @@
             try {
               let response = await originalFetch(input, safeInit);
 
-              if (response.status !== 401) return response;
+              if (response.status !== 401 || isBillingBootstrapMode) return response;
 
               try {
                 await refreshAccessToken();
@@ -2616,6 +2624,7 @@
           }
 
           async function sessionPing() {
+            if (isBillingBootstrapMode) return;
             if (!hasCurrentUser()) return;
 
             try {
@@ -2651,10 +2660,11 @@
           }
 
           document.addEventListener("visibilitychange", () => {
+            if (isBillingBootstrapMode) return;
             if (document.visibilityState === "visible") sessionPing();
           });
 
-          startSessionPing();
+          if (!isBillingBootstrapMode) startSessionPing();
         })();
       </script>
 
