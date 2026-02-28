@@ -1,4 +1,5 @@
 (function () {
+  const MODULE_AREA_OPTIONS = ["service", "sales", "finance", "hr", "po"];
   const state = {
     modules: [],
     plans: [],
@@ -42,6 +43,29 @@
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) return 0;
     return parsed;
+  }
+
+  function normalizeAreaKeys(value) {
+    const items = Array.isArray(value) ? value : [];
+    const normalized = items
+      .map((item) => String(item || "").trim().toLowerCase())
+      .filter((item) => MODULE_AREA_OPTIONS.includes(item));
+    return Array.from(new Set(normalized));
+  }
+
+  function formatAreaLabel(area) {
+    if (area === "service") return "Servicos";
+    if (area === "sales") return "Vendas";
+    if (area === "finance") return "Financeiro";
+    if (area === "hr") return "RH";
+    if (area === "po") return "Project & Operations";
+    return area;
+  }
+
+  function formatAreaKeys(value) {
+    const keys = normalizeAreaKeys(value);
+    if (!keys.length) return "-";
+    return keys.map((area) => formatAreaLabel(area)).join(", ");
   }
 
   function formatMoneyBRL(value) {
@@ -113,6 +137,7 @@
               <strong>${esc(row.name_pt_br)}</strong><br />
               <span class="billing-muted">${esc(row.description_pt_br || "")}</span>
             </td>
+            <td>${esc(formatAreaKeys(row.area_keys || row.area_keys_json))}</td>
             <td>${esc(formatMoneyBRL(row.monthly_price))}</td>
             <td>${esc(activeLabel)}</td>
             <td>
@@ -128,7 +153,7 @@
       })
       .join("");
 
-    $("#billingModulesBody").html(rows || '<tr><td colspan="5">Nenhum modulo cadastrado.</td></tr>');
+    $("#billingModulesBody").html(rows || '<tr><td colspan="6">Nenhum modulo cadastrado.</td></tr>');
   }
 
   function renderPlansList() {
@@ -390,6 +415,13 @@
     $("#billingModuleDescription").val(isEdit ? module.description_pt_br || "" : "");
     $("#billingModulePrice").val(isEdit ? toMoneyNumber(module.monthly_price) : 0);
     $("#billingModuleActive").prop("checked", isEdit ? !!module.is_active : true);
+    const areaKeys = normalizeAreaKeys(
+      isEdit ? module.area_keys || module.area_keys_json : ["service"],
+    );
+    $(".billing-module-area").prop("checked", false);
+    areaKeys.forEach((key) => {
+      $(`.billing-module-area[value="${key}"]`).prop("checked", true);
+    });
     $("#billingModuleModal").modal("show");
   }
 
@@ -431,10 +463,19 @@
       description_pt_br: String($("#billingModuleDescription").val() || "").trim() || null,
       is_active: $("#billingModuleActive").is(":checked"),
       monthly_price: toMoneyNumber($("#billingModulePrice").val()),
+      area_keys: normalizeAreaKeys(
+        $(".billing-module-area:checked")
+          .toArray()
+          .map((el) => String($(el).val() || "")),
+      ),
     };
 
     if (!payload.code || !payload.name_pt_br) {
       showToast("warning", "Preencha codigo e nome do modulo.");
+      return;
+    }
+    if (!payload.area_keys.length) {
+      showToast("warning", "Selecione ao menos uma area para o modulo.");
       return;
     }
 

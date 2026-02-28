@@ -14,8 +14,8 @@
   <link href="/Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
 
   <!-- Ãcone -->
-  <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
-  <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link id="gecomFaviconShortcut" rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link id="gecomFavicon" rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
 
   <!-- CSS -->
   <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
@@ -54,6 +54,54 @@
 
   <%- typeof headerLink !=='undefined' ? headerLink : '' %>
     <style>
+      :root {
+        --gecom-primary: #1ab394;
+        --gecom-nav-bg: #2f4050;
+        --gecom-nav-text: #a7b1c2;
+        --gecom-topbar-bg: #ffffff;
+      }
+
+      .btn-primary,
+      .label-primary,
+      .badge-primary {
+        background-color: var(--gecom-primary) !important;
+        border-color: var(--gecom-primary) !important;
+      }
+
+      .navbar-default,
+      .navbar-static-side,
+      .sidebar-collapse,
+      .sidebar-area-switcher {
+        background-color: var(--gecom-nav-bg) !important;
+      }
+
+      .nav > li > a,
+      .nav.metismenu > li > a > .nav-label,
+      .nav.metismenu .menuDivider {
+        color: var(--gecom-nav-text) !important;
+      }
+
+      .nav-header .dropdown-toggle span,
+      .nav-header .logo-element {
+        color: #fff !important;
+      }
+
+      .navbar-static-top {
+        background-color: var(--gecom-topbar-bg) !important;
+      }
+
+      body.gecom-layout-dark #page-wrapper,
+      body.gecom-layout-dark .gray-bg {
+        background-color: #1f252b !important;
+      }
+
+      body.gecom-layout-dark .wrapper-content,
+      body.gecom-layout-dark .ibox-content,
+      body.gecom-layout-dark .ibox-title {
+        background-color: #2a3138 !important;
+        color: #d7dde3 !important;
+      }
+
       body.mini-navbar .menuDivider {
         display: none !important;
       }
@@ -205,6 +253,10 @@
       }
 
       .sidebar-area-hidden {
+        display: none !important;
+      }
+
+      .sidebar-module-hidden {
         display: none !important;
       }
 
@@ -598,17 +650,18 @@
               <span class="nav-label">IA</span>
             </a>
           </li>
+          <li id="tenantMenuMountPoint" data-areas="home,all" style="display:none !important;"></li>
 
           <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.services"><%= t('page.layout.menu.services') %></a></li>
 
-          <li   data-areas="home" id="clientTab" style="display: none;">
+          <li data-managed="tenant" data-home-template="1" data-entity="companies" data-areas="home" id="clientTab" style="display: none;">
             <a href="/Clientes">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
             </a>
           </li>
 
-          <li  data-areas="home" >
+          <li data-managed="tenant" data-home-template="1" data-entity="processes" data-areas="home">
             <a href="/Processos">
               <i class="fa fa-file"></i>
               <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
@@ -624,7 +677,7 @@
 
           <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.sales"><%= t('page.layout.menu.sales') %></a></li>
 
-          <li  data-areas="home" >
+          <li data-managed="tenant" data-home-template="1" data-entity="invoices" data-areas="home">
             <a href="/Invoices">
               <i class="fa fa-money"></i>
               <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
@@ -638,14 +691,14 @@
             </a>
           </li>
 
-          <li  data-areas="home"  id="productTab" style="display: none;">
+          <li data-managed="tenant" data-home-template="1" data-entity="products" data-areas="home" id="productTab" style="display: none;">
             <a href="/Products">
               <i class="fa fa-cube"></i>
               <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
             </a>
           </li>
 
-          <li  data-areas="home"  id="leadsTab" style="display: none;">
+          <li data-managed="tenant" data-home-template="1" data-entity="leads" data-areas="home" id="leadsTab" style="display: none;">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
@@ -672,17 +725,23 @@
               <span class="nav-label" data-i18n="page.layout.menu.statusConfigs"><%= t('page.layout.menu.statusConfigs') %></span>
             </a>
           </li>
+          <li data-areas="home,settings" id="configMainMenu" style="display: none;">
+            <a href="/configuracoes">
+              <i class="fa fa-cogs"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.settingsCenter"><%= t('page.layout.menu.settingsCenter', { defaultValue: 'Configuracoes' }) %></span>
+            </a>
+          </li>
 
           <li data-areas="service"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
 
-          <li id="clientTabService" style="display: none;" data-areas="service">
+          <li data-managed="tenant" data-entity="companies" id="clientTabService" style="display: none;" data-areas="service">
             <a href="/Clientes">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
             </a>
           </li>
 
-          <li data-areas="service">
+          <li data-managed="tenant" data-entity="processes" data-areas="service">
             <a href="/Processos">
               <i class="fa fa-file"></i>
               <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
@@ -747,35 +806,35 @@
 
           <li data-areas="sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
 
-          <li data-areas="sales">
+          <li data-managed="tenant" data-entity="invoices" data-areas="sales">
             <a href="/Invoices">
               <i class="fa fa-money"></i>
               <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
             </a>
           </li>
 
-          <li data-areas="sales">
+          <li data-managed="tenant" data-entity="products" data-areas="sales">
             <a href="/Products">
               <i class="fa fa-cube"></i>
               <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
             </a>
           </li>
 
-          <li data-areas="sales">
+          <li data-managed="tenant" data-entity="leads" data-areas="sales">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
             </a>
           </li>
 
-          <li data-areas="sales">
+          <li data-managed="tenant" data-entity="opportunities" data-areas="sales">
             <a href="/Opportunities">
               <i class="fa fa-bullseye"></i>
               <span class="nav-label">Opportunities</span>
             </a>
           </li>
 
-          <li data-areas="sales">
+          <li data-managed="tenant" data-entity="contracts" data-areas="sales">
             <a href="/Contracts">
               <i class="fa fa-file-text-o"></i>
               <span class="nav-label">Contracts</span>
@@ -783,13 +842,13 @@
           </li>
 
           <li data-areas="finance"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.finance"><%= t('page.layout.menu.finance') %></a></li>
-          <li data-areas="finance">
+          <li data-managed="tenant" data-entity="financial_receivables" data-areas="finance">
             <a href="/FinanceReceivables">
               <i class="fa fa-arrow-circle-o-down"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeReceivables"><%= t('page.layout.menu.financeReceivables') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-managed="tenant" data-entity="financial_payables" data-areas="finance">
             <a href="/FinancePayables">
               <i class="fa fa-arrow-circle-o-up"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financePayables"><%= t('page.layout.menu.financePayables') %></span>
@@ -845,7 +904,7 @@
               <span class="nav-label" data-i18n="page.layout.menu.hrWorkLocations"><%= t('page.layout.menu.hrWorkLocations') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-managed="tenant" data-entity="hr_employees" data-areas="hr">
             <a href="/HREmployees">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrEmployees"><%= t('page.layout.menu.hrEmployees') %></span>
@@ -943,7 +1002,7 @@
               <span class="nav-label" data-i18n="page.layout.menu.poChecklistItems"><%= t('page.layout.menu.poChecklistItems') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-managed="tenant" data-entity="po_work_orders" data-areas="po">
             <a href="/POWorkOrders">
               <i class="fa fa-wrench"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poWorkOrders"><%= t('page.layout.menu.poWorkOrders') %></span>
@@ -968,81 +1027,81 @@
             </a>
           </li>
 
-          <li data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
-          <li data-areas="settings">
+          <li data-areas="settings,service"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
+          <li data-areas="settings,service">
             <a href="/servico/sla/politicas">
               <i class="fa fa-shield"></i>
               <span class="nav-label">SLA - Políticas</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/sla/kpis">
               <i class="fa fa-line-chart"></i>
               <span class="nav-label">SLA - KPIs</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/sla/instancias">
               <i class="fa fa-clone"></i>
               <span class="nav-label">SLA - Instâncias</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/sla/instancias-kpi">
               <i class="fa fa-sliders"></i>
               <span class="nav-label">SLA - Instâncias KPI</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/sla/eventos">
               <i class="fa fa-bolt"></i>
               <span class="nav-label">SLA - Eventos</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/calendarios">
               <i class="fa fa-calendar"></i>
               <span class="nav-label">Calendários</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/calendarios/regras">
               <i class="fa fa-calendar-plus-o"></i>
               <span class="nav-label">Calendários - Regras</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/calendarios/excecoes">
               <i class="fa fa-calendar-times-o"></i>
               <span class="nav-label">Calendários - Exceções</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,service">
             <a href="/servico/tarefas/tipos">
               <i class="fa fa-list-alt"></i>
               <span class="nav-label">Tarefas - Tipos</span>
             </a>
           </li>
-          <li data-areas="settings"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
-          <li data-areas="settings">
+          <li data-areas="settings,sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+          <li data-areas="settings,sales">
             <a href="/SalesApprovals">
               <i class="fa fa-check-square-o"></i>
               <span class="nav-label">Aprovações</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,sales">
             <a href="/PriceTables">
               <i class="fa fa-table"></i>
               <span class="nav-label">Tabelas de Preço</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,sales">
             <a href="/SalesGoals">
               <i class="fa fa-flag"></i>
               <span class="nav-label">Metas</span>
             </a>
           </li>
-          <li data-areas="settings">
+          <li data-areas="settings,sales">
             <a href="/SalesCommissions">
               <i class="fa fa-percent"></i>
               <span class="nav-label">Comissões</span>
@@ -1064,27 +1123,7 @@
           </button>
           <div class="sidebar-area-panel" id="sidebarAreaPanel">
             <div class="sidebar-area-panel-title">Alterar área</div>
-            <a href="#" class="sidebar-area-option" data-area="home">
-              <span>Home</span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="service">
-              <span>Serviço</span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="sales">
-              <span>Sales</span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="finance">
-              <span data-i18n="page.layout.menu.finance"><%= t('page.layout.menu.finance') %></span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="hr">
-              <span data-i18n="page.layout.menu.hr"><%= t('page.layout.menu.hr') %></span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="po">
-              <span data-i18n="page.layout.menu.projectOperations"><%= t('page.layout.menu.projectOperations') %></span><i class="fa fa-check"></i>
-            </a>
-            <a href="#" class="sidebar-area-option" data-area="settings">
-              <span>Configurações</span><i class="fa fa-check"></i>
-            </a>
+            <div id="sidebarAreaOptions"></div>
           </div>
         </div>
       </div>
@@ -1231,36 +1270,148 @@
       <script>
         (function () {
           const SIDEBAR_AREA_KEY = "gecom.sidebar.area";
+          const sidebarAreaLabels = new Map();
+          const tenantManagedNodesByEntity = new Map();
+          let tenantManagedReady = false;
+          const FIXED_MODULE_AREAS = new Set(["service", "sales", "finance", "hr", "po"]);
+          let enabledModuleAreas = new Set(["service", "sales", "finance", "hr", "po"]);
 
-          function normalizeSidebarArea(area) {
-            const value = String(area || "").toLowerCase();
-            if (value === "home") return "home";
-            if (value === "sales") return "sales";
-            if (value === "finance") return "finance";
-            if (value === "hr") return "hr";
-            if (value === "po") return "po";
-            if (value === "settings") return "settings";
-            return "service";
+          function normalizeText(value) {
+            return String(value == null ? "" : value).trim();
           }
 
-          function getSidebarAreaLabel(area) {
+          function safeHtml(value) {
+            return String(value == null ? "" : value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+
+          async function readJsonSafe(resp) {
+            const text = await resp.text().catch(() => "");
+            if (!text) return {};
+            try {
+              return JSON.parse(text);
+            } catch {
+              return {};
+            }
+          }
+
+          function inferAreaFromModuleCode(code) {
+            const normalized = normalizeText(code).toUpperCase();
+            const out = [];
+            const include = (area) => {
+              if (!out.includes(area)) out.push(area);
+            };
+
+            if (normalized.includes("SERVICE") || normalized.includes("SUPPORT") || normalized.includes("HELPDESK") || normalized.includes("OPS")) include("service");
+            if (normalized.includes("SALES") || normalized.includes("CRM") || normalized.includes("COMMERCIAL")) include("sales");
+            if (normalized.includes("FINANCE") || normalized.includes("FINANCIAL")) include("finance");
+            if (normalized.includes("HR") || normalized.includes("HUMAN") || normalized.includes("PEOPLE")) include("hr");
+            if (normalized.includes("PROJECT") || normalized.includes("OPERATIONS") || normalized.includes("PO_")) include("po");
+            return out;
+          }
+
+          function normalizeEnabledAreasPayload(payload) {
+            const explicitAreas = Array.isArray(payload?.enabledAreas) ? payload.enabledAreas : [];
+            const byModules = Array.isArray(payload?.enabledModules) ? payload.enabledModules : [];
+
+            const areas = explicitAreas.length
+              ? explicitAreas
+              : byModules.flatMap((code) => inferAreaFromModuleCode(code));
+
+            const normalized = areas
+              .map((area) => normalizeText(area).toLowerCase())
+              .filter((area) => FIXED_MODULE_AREAS.has(area));
+
+            return new Set(normalized);
+          }
+
+          function isAreaEnabled(area) {
+            const normalized = normalizeText(area).toLowerCase();
+            if (!FIXED_MODULE_AREAS.has(normalized)) return true;
+            return enabledModuleAreas.has(normalized);
+          }
+
+          function isItemAllowedByModuleAreas(areaTokens) {
+            const moduleTokens = areaTokens.filter((token) => FIXED_MODULE_AREAS.has(token));
+            if (!moduleTokens.length) return true;
+            return moduleTokens.every((token) => enabledModuleAreas.has(token));
+          }
+
+          function defaultAreaLabel(area) {
             if (area === "home") return "Home";
+            if (area === "service") return window.t ? window.t("page.layout.menu.services", { defaultValue: "Servicos" }) : "Servicos";
             if (area === "sales") return window.t ? window.t("page.layout.menu.sales", { defaultValue: "Sales" }) : "Sales";
             if (area === "finance") return window.t ? window.t("page.layout.menu.finance", { defaultValue: "Financeiro" }) : "Financeiro";
             if (area === "hr") return window.t ? window.t("page.layout.menu.hr", { defaultValue: "RH" }) : "RH";
             if (area === "po") return window.t ? window.t("page.layout.menu.projectOperations", { defaultValue: "Project & Operations" }) : "Project & Operations";
             if (area === "settings") return window.t ? window.t("page.layout.menu.settings", { defaultValue: "Configuracoes" }) : "Configuracoes";
-            return window.t ? window.t("page.layout.menu.services", { defaultValue: "Servico" }) : "Servico";
+            const clean = normalizeText(area);
+            if (!clean) return "Home";
+            return clean.charAt(0).toUpperCase() + clean.slice(1);
+          }
+
+          function getSidebarAreaLabel(area) {
+            return sidebarAreaLabels.get(area) || defaultAreaLabel(area);
           }
 
           function getSidebarAreaIcon(area) {
-            if (area === "home") return "H";
-            if (area === "sales") return "V";
-            if (area === "finance") return "F";
-            if (area === "hr") return "R";
-            if (area === "po") return "P";
-            if (area === "settings") return "C";
-            return "S";
+            const label = getSidebarAreaLabel(area);
+            const clean = String(label || area || "S").replace(/[^A-Za-z0-9]/g, "");
+            return clean ? clean.charAt(0).toUpperCase() : "S";
+          }
+
+          function getSidebarAreaIds() {
+            const ids = [];
+            document.querySelectorAll("#side-menu [data-areas]").forEach((item) => {
+              const raw = normalizeText(item.getAttribute("data-areas"));
+              if (!raw) return;
+              raw
+                .split(",")
+                .map((token) => normalizeText(token).toLowerCase())
+                .filter(Boolean)
+                .forEach((token) => {
+                  if (token === "all") return;
+                  if (!isAreaEnabled(token)) return;
+                  if (!ids.includes(token)) ids.push(token);
+                });
+            });
+            if (!ids.length) ids.push("home");
+            return ids;
+          }
+
+          function normalizeSidebarArea(area) {
+            const value = normalizeText(area).toLowerCase();
+            const allAreas = getSidebarAreaIds();
+            if (allAreas.includes(value)) return value;
+            if (allAreas.includes("home")) return "home";
+            return allAreas[0];
+          }
+
+          function renderSidebarAreaOptions(currentArea) {
+            const container = document.getElementById("sidebarAreaOptions");
+            if (!container) return;
+
+            const areaIds = getSidebarAreaIds();
+            container.innerHTML = areaIds
+              .map(
+                (area) => `<a href="#" class="sidebar-area-option${area === currentArea ? " is-active" : ""}" data-area="${safeHtml(area)}">
+                  <span>${safeHtml(getSidebarAreaLabel(area))}</span><i class="fa fa-check"></i>
+                </a>`,
+              )
+              .join("");
+
+            container.querySelectorAll(".sidebar-area-option[data-area]").forEach((option) => {
+              option.addEventListener("click", function (ev) {
+                ev.preventDefault();
+                const area = normalizeSidebarArea(option.getAttribute("data-area"));
+                applySidebarArea(area);
+                setSidebarPanelOpen(false);
+              });
+            });
           }
 
           function applySidebarArea(area) {
@@ -1269,7 +1420,10 @@
             items.forEach((item) => {
               const raw = String(item.getAttribute("data-areas") || "");
               const areas = raw.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
-              const visible = areas.includes("all") || areas.includes(currentArea);
+              const moduleAllowed = isItemAllowedByModuleAreas(areas);
+              const visibleByArea = areas.includes("all") || areas.includes(currentArea);
+              const visible = moduleAllowed && visibleByArea;
+              item.classList.toggle("sidebar-module-hidden", !moduleAllowed);
               item.classList.toggle("sidebar-area-hidden", !visible);
             });
 
@@ -1278,8 +1432,7 @@
             if (areaLabel) areaLabel.textContent = getSidebarAreaLabel(currentArea);
             if (areaIcon) areaIcon.textContent = getSidebarAreaIcon(currentArea);
 
-            const options = document.querySelectorAll(".sidebar-area-option[data-area]");
-            options.forEach((option) => {
+            document.querySelectorAll(".sidebar-area-option[data-area]").forEach((option) => {
               const optionArea = normalizeSidebarArea(option.getAttribute("data-area"));
               option.classList.toggle("is-active", optionArea === currentArea);
             });
@@ -1287,6 +1440,204 @@
             try {
               localStorage.setItem(SIDEBAR_AREA_KEY, currentArea);
             } catch {}
+          }
+
+          function initTenantManagedMenuNodes() {
+            if (tenantManagedReady) return;
+            tenantManagedReady = true;
+
+            const nodes = Array.from(
+              document.querySelectorAll("#side-menu li[data-managed='tenant'][data-home-template='1'][data-entity]"),
+            );
+            nodes.forEach((node) => {
+              const entity = normalizeText(node.getAttribute("data-entity")).toLowerCase();
+              if (!entity) return;
+              if (!tenantManagedNodesByEntity.has(entity)) {
+                tenantManagedNodesByEntity.set(entity, node);
+                return;
+              }
+              node.remove();
+            });
+          }
+
+          function createTenantMenuNode(item) {
+            const li = document.createElement("li");
+            li.setAttribute("data-managed", "tenant");
+            li.setAttribute("data-entity", normalizeText(item?.entity).toLowerCase());
+            li.setAttribute("data-generated", "1");
+            li.innerHTML = `<a href="${safeHtml(normalizeText(item?.route) || "#")}">
+              <i class="fa ${safeHtml(normalizeText(item?.icon) || "fa-circle-o")}"></i>
+              <span class="nav-label">${safeHtml(normalizeText(item?.label) || normalizeText(item?.entity) || "Item")}</span>
+            </a>`;
+            return li;
+          }
+
+          function renderTenantMenu(config) {
+            initTenantManagedMenuNodes();
+
+            const sideMenu = document.getElementById("side-menu");
+            const mountPoint = document.getElementById("tenantMenuMountPoint");
+            if (!sideMenu || !mountPoint) return;
+
+            const areas = Array.isArray(config?.areas) ? config.areas : [];
+            if (!areas.length) return;
+
+            const RESERVED_FIXED_AREAS = new Set(["service", "sales", "finance", "hr", "po", "settings"]);
+
+            sidebarAreaLabels.clear();
+            sidebarAreaLabels.set("home", "Home");
+            areas.forEach((area) => {
+              const areaId = normalizeText(area?.id).toLowerCase();
+              const areaLabel = normalizeText(area?.label);
+              if (!areaId || !areaLabel) return;
+              if (RESERVED_FIXED_AREAS.has(areaId) && areaId !== "home") return;
+              sidebarAreaLabels.set(areaId, areaId === "home" ? "Home" : areaLabel);
+            });
+
+            document
+              .querySelectorAll("#side-menu li[data-generated='1'], #side-menu li[data-managed-divider='tenant']")
+              .forEach((node) => {
+                node.remove();
+              });
+
+            tenantManagedNodesByEntity.forEach((node) => {
+              if (node.parentElement === sideMenu) sideMenu.removeChild(node);
+            });
+
+            const fragment = document.createDocumentFragment();
+            const usedEntityByArea = new Set();
+
+            areas
+              .slice()
+              .sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0))
+              .forEach((area) => {
+                const areaId = normalizeText(area?.id).toLowerCase();
+                if (!areaId) return;
+                if (RESERVED_FIXED_AREAS.has(areaId) && areaId !== "home") return;
+
+                if (areaId !== "home") {
+                  const divider = document.createElement("li");
+                  divider.setAttribute("data-areas", areaId);
+                  divider.setAttribute("data-managed-divider", "tenant");
+                  divider.innerHTML = `<a class="menuDivider" style="padding-top:20px;">${safeHtml(
+                    normalizeText(area?.label) || areaId,
+                  )}</a>`;
+                  fragment.appendChild(divider);
+                }
+
+                const items = Array.isArray(area?.items) ? area.items.slice() : [];
+                items
+                  .sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0))
+                  .forEach((item) => {
+                    const entity = normalizeText(item?.entity).toLowerCase();
+                    if (!entity) return;
+                    const areaEntityKey = `${areaId}::${entity}`;
+                    if (usedEntityByArea.has(areaEntityKey)) return;
+                    usedEntityByArea.add(areaEntityKey);
+
+                    const templateNode = areaId === "home" ? tenantManagedNodesByEntity.get(entity) : null;
+                    const li = templateNode || createTenantMenuNode(item);
+                    const a = li.querySelector("a");
+                    const icon = li.querySelector("i.fa");
+                    const label = li.querySelector(".nav-label");
+
+                    li.setAttribute("data-areas", areaId);
+                    li.setAttribute("data-managed", "tenant");
+                    li.setAttribute("data-entity", entity);
+                    li.setAttribute("data-generated", "1");
+                    if (!templateNode) li.removeAttribute("id");
+
+                    if (a) a.setAttribute("href", normalizeText(item?.route) || "#");
+                    if (icon) icon.className = `fa ${normalizeText(item?.icon) || "fa-circle-o"}`;
+                    if (label) label.textContent = normalizeText(item?.label) || normalizeText(item?.entity) || "Item";
+
+                    fragment.appendChild(li);
+                  });
+              });
+
+            sideMenu.insertBefore(fragment, mountPoint.nextSibling);
+          }
+
+          async function fetchTenantTheme() {
+            try {
+              const resp = await fetch("/api/admin/theme", {
+                method: "GET",
+                headers: { Accept: "application/json" },
+              });
+              if (!resp.ok) return null;
+              return await readJsonSafe(resp);
+            } catch {
+              return null;
+            }
+          }
+
+          function applyTenantTheme(theme) {
+            const t = theme || {};
+            const root = document.documentElement;
+            root.style.setProperty("--gecom-primary", normalizeText(t.primary_color) || "#1ab394");
+            root.style.setProperty("--gecom-nav-bg", normalizeText(t.nav_bg_color) || "#2f4050");
+            root.style.setProperty("--gecom-nav-text", normalizeText(t.nav_text_color) || "#a7b1c2");
+            root.style.setProperty("--gecom-topbar-bg", normalizeText(t.topbar_bg_color) || "#ffffff");
+
+            const mode = normalizeText(t.layout_mode).toUpperCase();
+            document.body.classList.toggle("gecom-layout-dark", mode === "DARK");
+
+            const favicon = normalizeText(t.favicon_url);
+            if (favicon) {
+              const ico1 = document.getElementById("gecomFavicon");
+              const ico2 = document.getElementById("gecomFaviconShortcut");
+              if (ico1) ico1.setAttribute("href", favicon);
+              if (ico2) ico2.setAttribute("href", favicon);
+            }
+
+            const logoUrl = normalizeText(t.logo_url);
+            document.querySelectorAll(".logo-element").forEach((el) => {
+              if (logoUrl) {
+                el.innerHTML = `<img src="${safeHtml(logoUrl)}" alt="Logo" style="max-width:26px;max-height:26px;" />`;
+                return;
+              }
+              el.textContent = "G+";
+            });
+          }
+
+          async function fetchTenantMenuConfig() {
+            try {
+              const resp = await fetch("/api/admin/menu", {
+                method: "GET",
+                headers: { Accept: "application/json" },
+              });
+              if (!resp.ok) return null;
+              const payload = await readJsonSafe(resp);
+              return payload?.config_json || null;
+            } catch {
+              return null;
+            }
+          }
+
+          async function fetchTenantModuleAccess() {
+            try {
+              const resp = await fetch("/api/me/modules", {
+                method: "GET",
+                headers: { Accept: "application/json" },
+              });
+              if (!resp.ok) return null;
+              return await readJsonSafe(resp);
+            } catch {
+              return null;
+            }
+          }
+
+          async function applyTenantThemeAndMenu() {
+            const [theme, menu, moduleAccess] = await Promise.all([
+              fetchTenantTheme(),
+              fetchTenantMenuConfig(),
+              fetchTenantModuleAccess(),
+            ]);
+            const nextEnabledAreas = normalizeEnabledAreasPayload(moduleAccess || {});
+            enabledModuleAreas =
+              moduleAccess == null ? new Set(["service", "sales", "finance", "hr", "po"]) : nextEnabledAreas;
+            if (theme) applyTenantTheme(theme);
+            if (menu) renderTenantMenu(menu);
           }
 
           function setSidebarPanelOpen(open) {
@@ -1297,29 +1648,24 @@
             trigger.setAttribute("aria-expanded", open ? "true" : "false");
           }
 
-          function initSidebarAreaSwitcher() {
+          async function initSidebarAreaSwitcher() {
             const trigger = document.getElementById("sidebarAreaTrigger");
             const panel = document.getElementById("sidebarAreaPanel");
             if (!trigger || !panel) return;
+
+            await applyTenantThemeAndMenu();
 
             let savedArea = "home";
             try {
               savedArea = normalizeSidebarArea(localStorage.getItem(SIDEBAR_AREA_KEY));
             } catch {}
+
+            renderSidebarAreaOptions(savedArea);
             applySidebarArea(savedArea);
 
             trigger.addEventListener("click", function () {
               const isOpen = panel.classList.contains("is-open");
               setSidebarPanelOpen(!isOpen);
-            });
-
-            document.querySelectorAll(".sidebar-area-option[data-area]").forEach((option) => {
-              option.addEventListener("click", function (ev) {
-                ev.preventDefault();
-                const area = normalizeSidebarArea(option.getAttribute("data-area"));
-                applySidebarArea(area);
-                setSidebarPanelOpen(false);
-              });
             });
 
             document.addEventListener("click", function (ev) {
@@ -1513,12 +1859,12 @@
 
           if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
-              initSidebarAreaSwitcher();
+              initSidebarAreaSwitcher().catch(console.error);
               window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
               persistSidebarState();
             });
           } else {
-            initSidebarAreaSwitcher();
+            initSidebarAreaSwitcher().catch(console.error);
             window.GECOM_NOTIFICATIONS.renderTopBar().catch(console.error);
             persistSidebarState();
           }
@@ -2350,6 +2696,7 @@
               $("#configDivider").show();
               $("#notificationList").show();
               $("#statusConfigsMenu").show();
+              $("#configMainMenu").show();
             }
 
           } catch (e) {
@@ -2568,6 +2915,8 @@
 </body>
 
 </html>
+
+
 
 
 

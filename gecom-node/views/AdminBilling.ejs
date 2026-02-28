@@ -1,4 +1,7 @@
 <link href="/Assets/inspinia/css/plugins/toastr/toastr.min.css" rel="stylesheet" />
+<%
+  const bootstrapMode = !!billingBootstrapMode;
+%>
 <style>
   .billing-card { margin-bottom: 20px; }
   .billing-muted { color: #888; font-size: 12px; }
@@ -15,11 +18,18 @@
         <h5>Administracao de Planos e Modulos</h5>
       </div>
       <div class="ibox-content">
+        <% if (bootstrapMode) { %>
+          <div class="alert alert-warning">
+            Modo bootstrap ativo. Esta sessao temporaria permite criar e editar apenas modulos e planos.
+          </div>
+        <% } %>
         <ul class="nav nav-tabs" id="billingTabs">
           <li class="active"><a href="#tab-modulos" data-toggle="tab">Modulos</a></li>
           <li><a href="#tab-planos" data-toggle="tab">Planos</a></li>
-          <li><a href="#tab-assinatura" data-toggle="tab">Assinatura do Tenant</a></li>
-          <li><a href="#tab-overrides" data-toggle="tab">Overrides do Tenant</a></li>
+          <% if (!bootstrapMode) { %>
+            <li><a href="#tab-assinatura" data-toggle="tab">Assinatura do Tenant</a></li>
+            <li><a href="#tab-overrides" data-toggle="tab">Overrides do Tenant</a></li>
+          <% } %>
         </ul>
 
         <div class="tab-content" style="padding-top: 15px;">
@@ -34,6 +44,7 @@
                   <tr>
                     <th>Codigo</th>
                     <th>Nome</th>
+                    <th>Areas</th>
                     <th>Preco mensal</th>
                     <th>Ativo</th>
                     <th style="width: 170px;">Acoes</th>
@@ -97,6 +108,7 @@
             </div>
           </div>
 
+          <% if (!bootstrapMode) { %>
           <div class="tab-pane" id="tab-assinatura">
             <div class="well well-sm">
               <div class="row">
@@ -172,6 +184,7 @@
               </table>
             </div>
           </div>
+          <% } %>
         </div>
       </div>
     </div>
@@ -202,6 +215,27 @@
         <div class="form-group">
           <label>Preco mensal (R$)</label>
           <input id="billingModulePrice" type="number" step="0.01" min="0" class="form-control" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Areas do modulo</label>
+          <div class="row">
+            <div class="col-xs-6">
+              <label class="checkbox-inline"><input type="checkbox" class="billing-module-area" value="service" /> Servicos</label>
+            </div>
+            <div class="col-xs-6">
+              <label class="checkbox-inline"><input type="checkbox" class="billing-module-area" value="sales" /> Vendas</label>
+            </div>
+            <div class="col-xs-6" style="margin-top:6px;">
+              <label class="checkbox-inline"><input type="checkbox" class="billing-module-area" value="finance" /> Financeiro</label>
+            </div>
+            <div class="col-xs-6" style="margin-top:6px;">
+              <label class="checkbox-inline"><input type="checkbox" class="billing-module-area" value="hr" /> RH</label>
+            </div>
+            <div class="col-xs-12" style="margin-top:6px;">
+              <label class="checkbox-inline"><input type="checkbox" class="billing-module-area" value="po" /> Project & Operations</label>
+            </div>
+          </div>
+          <p class="billing-muted" style="margin-top:6px;">Somente essas areas ficam visiveis para tenants com este modulo ativo.</p>
         </div>
         <div class="checkbox">
           <label><input id="billingModuleActive" type="checkbox" checked /> Ativo</label>

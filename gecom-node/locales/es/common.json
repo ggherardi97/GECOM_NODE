@@ -569,6 +569,7 @@
         "services": "Servicios",
         "finance": "Finanzas",
         "settings": "Configuraciones",
+        "settingsCenter": "Configuraciones",
         "financeReceivables": "Cuentas por Cobrar",
         "financePayables": "Cuentas por Pagar",
         "financeBanks": "Caja y Bancos",
@@ -627,6 +628,103 @@
         "defaultNotificationTitle": "Notificacion",
         "noActiveNotifications": "No hay notificaciones activas.",
         "viewAll": "Ver todas"
+      }
+    },
+    "settings": {
+      "title": "Configuraciones",
+      "tabs": {
+        "menu": "Menu lateral",
+        "theme": "Apariencia",
+        "status": "Estados de entidades",
+        "options": "Option Sets",
+        "email": "Integraciones de correo"
+      },
+      "common": {
+        "save": "Guardar",
+        "reload": "Recargar",
+        "cancel": "Cancelar",
+        "label": "Etiqueta",
+        "loading": "Cargando..."
+      },
+      "menu": {
+        "newArea": "Nueva area",
+        "areas": "Areas",
+        "areaEditor": "Editor del area",
+        "selectAreaHelp": "Seleccione un area para editar.",
+        "noAreas": "Sin areas.",
+        "noItemsInArea": "Sin items en esta area.",
+        "areaId": "ID del area",
+        "item": "Item",
+        "confirmDeleteArea": "Desea eliminar esta area?",
+        "entityAlreadyInArea": "Esta entidad ya esta en el area."
+      },
+      "theme": {
+        "primaryColor": "Color primario",
+        "navBgColor": "Color de fondo del menu",
+        "navTextColor": "Color del texto del menu",
+        "topbarBgColor": "Color de la topbar",
+        "layoutMode": "Modo de layout",
+        "logoUrl": "URL del logo",
+        "faviconUrl": "URL del favicon",
+        "preview": {
+          "topbar": "Topbar",
+          "menu": "Menu",
+          "primaryButton": "Boton primario"
+        }
+      },
+      "options": {
+        "load": "Cargar",
+        "newSet": "Nuevo option set",
+        "sets": "Option Sets",
+        "entity": "Entidad",
+        "field": "Campo",
+        "options": "Opciones",
+        "value": "Value",
+        "label": "Label",
+        "color": "Color",
+        "sortOrder": "Orden",
+        "addOption": "Agregar opcion",
+        "active": "Activo",
+        "actions": "Acciones",
+        "noSets": "Sin option sets.",
+        "selectSet": "Seleccione un option set.",
+        "noOptions": "Sin opciones.",
+        "promptLabel": "Label de la opcion:",
+        "promptColor": "Color (#RRGGBB):",
+        "promptSortOrder": "Orden:",
+        "selectEntityAndField": "Seleccione entidad y campo.",
+        "valueLabelRequired": "Value y label son obligatorios."
+      },
+      "email": {
+        "new": "Nueva integracion",
+        "edit": "Editar integracion",
+        "provider": "Provider",
+        "displayName": "Nombre",
+        "senderEmail": "Correo remitente",
+        "smtp": "SMTP",
+        "active": "Activo",
+        "testSmtp": "Probar SMTP",
+        "smtpHost": "SMTP Host",
+        "smtpPort": "SMTP Port",
+        "smtpUser": "SMTP User",
+        "smtpPassword": "SMTP Password",
+        "clientId": "Client ID",
+        "clientSecret": "Client Secret",
+        "tenantDomain": "Tenant Domain",
+        "noIntegrations": "No hay integraciones registradas.",
+        "nameAndSenderRequired": "Nombre y correo remitente son obligatorios.",
+        "smtpTestSuccess": "Prueba SMTP ejecutada con exito."
+      },
+      "messages": {
+        "menuSaved": "Menu guardado con exito.",
+        "themeSaved": "Tema guardado con exito.",
+        "optionSetCreated": "Option set creado con exito.",
+        "optionCreated": "Opcion creada.",
+        "optionUpdated": "Opcion actualizada.",
+        "optionStatusUpdated": "Estado de la opcion actualizado.",
+        "emailIntegrationUpdated": "Integracion actualizada.",
+        "emailIntegrationSaved": "Integracion guardada con exito.",
+        "loadFailed": "No fue posible cargar las configuraciones."
       }
     },
     "finance": {

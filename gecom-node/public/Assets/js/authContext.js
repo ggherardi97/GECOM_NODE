@@ -88,7 +88,9 @@
   const isPublic =
     path === "/" ||
     path.includes("landingpage") ||
-    path.includes("publicprocessdetail");
+    path.includes("publicprocessdetail") ||
+    path === "/admin/billing" ||
+    path === "/admin/plans-modules";
 
   if (!isPublic) {
     window.Auth.requireLogin();
