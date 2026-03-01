@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const BOOTSTRAP_USER = process.env.BILLING_BOOTSTRAP_USER || "portaladmin";
 const BOOTSTRAP_PASSWORD = process.env.BILLING_BOOTSTRAP_PASSWORD || "Q!w2E#r4T%";
+const BOOTSTRAP_COOKIE = "gecom_billing_bootstrap";
 
 function getBackendBaseUrl() {
   const baseUrl = process.env.BACKEND_API_BASE_URL || process.env.API_BASE_URL;
@@ -46,6 +47,13 @@ async function readJsonSafe(response) {
 
 async function requireAdminPage(req, res, next) {
   if (hasValidBootstrapCredentials(req)) {
+    res.cookie(BOOTSTRAP_COOKIE, "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: String(process.env.NODE_ENV || "").toLowerCase() === "production",
+      maxAge: 1000 * 60 * 60 * 8, // 8h
+      path: "/",
+    });
     res.locals.billingBootstrapMode = true;
     res.locals.billingAdminUser = {
       role: "ADMIN",
@@ -79,6 +87,7 @@ async function requireAdminPage(req, res, next) {
     }
 
     res.locals.billingBootstrapMode = false;
+    res.clearCookie(BOOTSTRAP_COOKIE, { path: "/" });
     res.locals.billingAdminUser = user;
     return next();
   } catch (error) {
