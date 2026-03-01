@@ -4,6 +4,7 @@ const router = express.Router();
 const BOOTSTRAP_USER = process.env.BILLING_BOOTSTRAP_USER || "portaladmin";
 const BOOTSTRAP_PASSWORD = process.env.BILLING_BOOTSTRAP_PASSWORD || "Q!w2E#r4T%";
 const BOOTSTRAP_COOKIE = "gecom_billing_bootstrap";
+const LOOP_GUARD_HEADER = "x-gecom-bff-hop";
 
 function getBackendBaseUrl() {
   const baseUrl = process.env.BACKEND_API_BASE_URL || process.env.API_BASE_URL;
@@ -65,6 +66,14 @@ function appendQueryParams(url, query) {
 }
 
 async function proxyJson(req, res, config) {
+  // Prevent recursive proxy loops when BACKEND_API_BASE_URL points to the same public domain.
+  if (String(req.headers?.[LOOP_GUARD_HEADER] || "") === "1") {
+    return res.status(508).json({
+      message:
+        "Loop detectado no proxy de billing. Configure BACKEND_API_BASE_URL/API_BASE_URL do frontend para URL interna do backend.",
+    });
+  }
+
   const bearerAuth = getBearerAuthHeader(req);
   const basicAuth = config.allowBasicAuth ? getBasicAuthHeader(req) : null;
   const authHeader = bearerAuth || basicAuth || null;
@@ -72,6 +81,7 @@ async function proxyJson(req, res, config) {
     method: config.method,
     headers: {
       Accept: "application/json",
+      [LOOP_GUARD_HEADER]: "1",
       ...(config.withBody ? { "Content-Type": "application/json" } : {}),
       ...(authHeader ? { Authorization: authHeader } : {}),
     },
