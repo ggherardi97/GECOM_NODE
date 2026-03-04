@@ -20,6 +20,7 @@
         currentViewId: null,
         currentName: "",
         fallbackApplied: false,
+        currentDefinition: null,
       };
       registry.set(String(cfg.entityName), { cfg, state });
 
@@ -45,7 +46,8 @@
       if (!instance || !instance.cfg) return null;
 
       const raw = instance.cfg.getCurrentState() || {};
-      return normalizeDefinition(raw);
+      const merged = mergeDefinitions(instance.state?.currentDefinition, raw);
+      return normalizeDefinition(merged);
     },
 
     async applyExternalDefinition(entityName, definition, nameLabel) {
@@ -394,6 +396,7 @@
     const def = cfg.fallbackDefinition || {
       columns: cfg.getAllColumnKeys(),
       columns_order: cfg.getAllColumnKeys(),
+      columns_widths: {},
       filters: [],
       sort: [],
       pageSize: 0,
@@ -406,6 +409,7 @@
   async function applyDefinition(cfg, state, viewId, name, definition, options) {
     const opts = Object.assign({ preservePickerValue: false }, options || {});
     const safeDefinition = sanitizeDefinitionForGrid(cfg, definition);
+    state.currentDefinition = safeDefinition;
 
     // 1) Apply columns FIRST (no cloning, keep fixed cols)
     applyColumns(cfg, safeDefinition);
@@ -445,11 +449,44 @@
     return {
       columns: Array.isArray(src.columns) ? src.columns : [],
       columns_order: Array.isArray(src.columns_order) ? src.columns_order : [],
+      columns_widths: src?.columns_widths && typeof src.columns_widths === "object" ? src.columns_widths : {},
       filters: Array.isArray(src.filters) ? src.filters : [],
       sort: Array.isArray(src.sort) ? src.sort : [],
       pageSize: Number(src.pageSize || 0) || 0,
       quickSearch: String(src.quickSearch || ""),
     };
+  }
+
+  function mergeDefinitions(base, override) {
+    const left = normalizeDefinition(base || {});
+    const rightRaw = override || {};
+    const right = normalizeDefinition(rightRaw);
+    const has = (key) => Object.prototype.hasOwnProperty.call(rightRaw, key);
+    return {
+      columns: has("columns") ? right.columns : left.columns,
+      columns_order: has("columns_order") ? right.columns_order : left.columns_order,
+      columns_widths: Object.assign({}, left.columns_widths || {}, right.columns_widths || {}),
+      filters: has("filters") ? right.filters : left.filters,
+      sort: has("sort") ? right.sort : left.sort,
+      pageSize: has("pageSize") ? (Number(right.pageSize || 0) || 0) : (Number(left.pageSize || 0) || 0),
+      quickSearch: has("quickSearch") ? String(right.quickSearch || "") : String(left.quickSearch || ""),
+    };
+  }
+
+  function sanitizeColumnsWidths(allKeys, raw) {
+    const out = {};
+    if (!raw || typeof raw !== "object") return out;
+    const existing = new Set((allKeys || []).map((k) => String(k || "")));
+
+    Object.entries(raw).forEach(([key, value]) => {
+      const col = String(key || "");
+      if (!existing.has(col)) return;
+      const n = Number(String(value).replace(",", "."));
+      if (!Number.isFinite(n) || n <= 0) return;
+      out[col] = Math.max(1, Math.min(100, Number(n.toFixed(2))));
+    });
+
+    return out;
   }
 
   function sanitizeDefinitionForGrid(cfg, definition) {
@@ -474,6 +511,7 @@
     return {
       columns: columns.length ? columns : allKeys.slice(),
       columns_order: columnsOrder.length ? columnsOrder : (columns.length ? columns.slice() : allKeys.slice()),
+      columns_widths: sanitizeColumnsWidths(allKeys, src.columns_widths),
       filters: Array.isArray(src.filters) ? src.filters : [],
       sort: Array.isArray(src.sort) ? src.sort : [],
       pageSize: Number(src.pageSize || 0) || 0,
@@ -486,6 +524,7 @@
     const def = definition || {};
     const columns = Array.isArray(def.columns) ? def.columns.slice() : [];
     const order = Array.isArray(def.columns_order) ? def.columns_order.slice() : [];
+    const widths = def.columns_widths || {};
 
     // Fixed columns (must never be hidden or moved)
     // Mark any TH with data-sv-fixed="left" or "right"
@@ -515,6 +554,9 @@
 
     // Hide/show only data columns (sortable ones, keyed)
     setColumnVisibility(cfg, visibleSet, fixed);
+
+    // Apply custom widths if user configured percentages
+    applyColumnWidths(cfg, widths);
 
     // keep fixed always visible
     enforceFixedColumns(cfg);
@@ -709,6 +751,48 @@
     });
   }
 
+  function applyColumnWidths(cfg, widthsMap) {
+    const widths = widthsMap && typeof widthsMap === "object" ? widthsMap : {};
+    const $header = cfg.$headerRow.children("th");
+    const $filter = cfg.$filtersRow.children("th");
+
+    $header.each(function (idx) {
+      const $th = $(this);
+      const key = String($th.data("sort-key") || "");
+      const hasFixed = String($th.attr("data-sv-fixed") || "").trim().length > 0;
+      const n = Number(widths[key]);
+      const hasWidth = key && Number.isFinite(n) && n > 0 && !hasFixed;
+      const pct = hasWidth ? `${Math.max(1, Math.min(100, n))}%` : "";
+
+      $th.css("width", pct);
+      $th.css("min-width", pct);
+      $th.css("max-width", pct);
+
+      const $f = $filter.eq(idx);
+      if ($f.length) {
+        $f.css("width", pct);
+        $f.css("min-width", pct);
+        $f.css("max-width", pct);
+      }
+    });
+
+    cfg.$table.find("tbody tr").each(function () {
+      const $cells = $(this).children("td");
+      $header.each(function (idx) {
+        const key = String($header.eq(idx).data("sort-key") || "");
+        const hasFixed = String($header.eq(idx).attr("data-sv-fixed") || "").trim().length > 0;
+        const n = Number(widths[key]);
+        const hasWidth = key && Number.isFinite(n) && n > 0 && !hasFixed;
+        const pct = hasWidth ? `${Math.max(1, Math.min(100, n))}%` : "";
+        const $td = $cells.eq(idx);
+        if (!$td.length) return;
+        $td.css("width", pct);
+        $td.css("min-width", pct);
+        $td.css("max-width", pct);
+      });
+    });
+  }
+
   // -------------------- Modals --------------------
   function openSaveAsModal(cfg, state) {
     ensureSaveAsModal();
@@ -728,14 +812,16 @@
 
           const setAsDefault = $("#sv_setDefaultChk").is(":checked");
           const currentState = cfg.getCurrentState();
+          const merged = sanitizeDefinitionForGrid(cfg, mergeDefinitions(state.currentDefinition, currentState));
 
           const definition_json = {
-            columns: currentState.columns || [],
-            columns_order: currentState.columns_order || [],
-            filters: currentState.filters || [],
-            sort: currentState.sort || [],
-            pageSize: currentState.pageSize || 0,
-            quickSearch: currentState.quickSearch || "",
+            columns: merged.columns || [],
+            columns_order: merged.columns_order || [],
+            columns_widths: merged.columns_widths || {},
+            filters: merged.filters || [],
+            sort: merged.sort || [],
+            pageSize: merged.pageSize || 0,
+            quickSearch: merged.quickSearch || "",
           };
 
           const created = await apiPost("/api/saved-views", {
@@ -814,13 +900,15 @@
     ensureColumnsModal();
 
     const allKeys = cfg.getAllColumnKeys();
-    const current = cfg.getCurrentState();
+    const current = sanitizeDefinitionForGrid(cfg, mergeDefinitions(state.currentDefinition, cfg.getCurrentState()));
 
     // fixed columns are not part of keys list; they stay fixed anyway
     const visible = new Set((current.columns || []).map(x => String(x || "")));
-    const order = Array.isArray(current.columns_order) && current.columns_order.length
+    const preferredOrder = Array.isArray(current.columns_order) && current.columns_order.length
       ? current.columns_order.map(x => String(x || ""))
       : allKeys.slice();
+    const order = preferredOrder.concat(allKeys.filter((k) => !preferredOrder.includes(k)));
+    const widths = sanitizeColumnsWidths(allKeys, current.columns_widths || {});
 
     const $list = $("#sv_columnsList");
     $list.empty();
@@ -830,6 +918,7 @@
       if (!allKeys.includes(k)) return;
 
       const checked = visible.has(k) ? "checked" : "";
+      const widthValue = Number.isFinite(Number(widths[k])) ? String(widths[k]) : "";
       $list.append(`
         <li class="sv-col-item" data-key="${escapeHtml(k)}" style="display:flex; align-items:center; gap:10px; padding:6px 8px; border:1px solid #e7eaec; border-radius:6px; margin-bottom:6px; background:#fff;">
           <span class="sv-grip" style="cursor:move;"><i class="fa fa-bars"></i></span>
@@ -837,14 +926,20 @@
             <input type="checkbox" class="sv-col-visible" ${checked} />
             <span style="font-family:monospace; font-size:12px;">${escapeHtml(k)}</span>
           </label>
+          <div style="display:flex; align-items:center; gap:4px; min-width:88px;">
+            <input type="number" class="form-control input-sm sv-col-width" min="1" max="100" step="0.5" value="${escapeHtml(widthValue)}" placeholder="auto" style="width:72px; height:28px; padding:2px 6px;" />
+            <span class="text-muted" style="font-size:11px;">%</span>
+          </div>
         </li>
       `);
     });
 
-    // Enable drag drop if available
-    if ($.fn.sortable) {
-      $list.sortable({ handle: ".sv-grip", tolerance: "pointer" });
+    const prevCleanup = $("#sv_columnsModal").data("svReorderCleanup");
+    if (typeof prevCleanup === "function") {
+      try { prevCleanup(); } catch {}
     }
+    const cleanupReorder = setupColumnsReorder($list);
+    $("#sv_columnsModal").data("svReorderCleanup", cleanupReorder);
 
     $("#sv_confirmColumns")
       .off("click.sv")
@@ -861,9 +956,21 @@
             .get()
             .filter(Boolean);
 
+          const nextWidths = {};
+          $("#sv_columnsList .sv-col-item").each(function () {
+            const key = String($(this).attr("data-key") || "").trim();
+            if (!key) return;
+            const raw = String($(this).find(".sv-col-width").val() || "").trim();
+            if (!raw) return;
+            const n = Number(raw.replace(",", "."));
+            if (!Number.isFinite(n) || n <= 0) return;
+            nextWidths[key] = Math.max(1, Math.min(100, Number(n.toFixed(2))));
+          });
+
           const next = Object.assign({}, current, {
             columns_order: nextOrder,
             columns: nextVisible,
+            columns_widths: nextWidths,
           });
 
           // Apply columns locally (no save yet)
@@ -875,10 +982,12 @@
             definition: next,
             _fromColumnsModal: true,
           });
+          state.currentDefinition = sanitizeDefinitionForGrid(cfg, next);
 
           $("#sv_columnsModal").modal("hide");
 
           if (typeof cfg.onAfterApply === "function") cfg.onAfterApply();
+          applyColumns(cfg, state.currentDefinition);
           enforceFixedColumns(cfg);
         } catch (e) {
           console.error(e);
@@ -905,7 +1014,7 @@
 
             <div class="modal-body">
               <p class="text-muted" style="margin-bottom:10px;">
-                Arraste para reordenar e marque para exibir.
+                Arraste para reordenar, marque para exibir e ajuste a largura em percentual.
               </p>
               <ul id="sv_columnsList" style="list-style:none; padding-left:0; margin:0;"></ul>
             </div>
@@ -918,6 +1027,65 @@
         </div>
       </div>
     `);
+  }
+
+  function setupColumnsReorder($list) {
+    if (!$list || !$list.length) return function () {};
+
+    if ($.fn.sortable) {
+      $list.sortable({ handle: ".sv-grip", tolerance: "pointer" });
+      return function () {
+        try { $list.sortable("destroy"); } catch {}
+      };
+    }
+
+    if (window.Sortable && typeof window.Sortable.create === "function") {
+      const instance = window.Sortable.create($list.get(0), {
+        handle: ".sv-grip",
+        animation: 120,
+      });
+      return function () {
+        try { instance.destroy(); } catch {}
+      };
+    }
+
+    let dragging = null;
+    $list.find(".sv-col-item").attr("draggable", "true");
+
+    $list.off(".svdnd");
+    $list.on("dragstart.svdnd", ".sv-col-item", function (e) {
+      dragging = this;
+      this.classList.add("sv-dragging");
+      try {
+        const dt = e.originalEvent?.dataTransfer;
+        if (dt) {
+          dt.effectAllowed = "move";
+          dt.setData("text/plain", String($(this).attr("data-key") || ""));
+        }
+      } catch {}
+    });
+
+    $list.on("dragover.svdnd", ".sv-col-item", function (e) {
+      e.preventDefault();
+      if (!dragging || dragging === this) return;
+      const rect = this.getBoundingClientRect();
+      const next = (e.originalEvent?.clientY || 0) > rect.top + (rect.height / 2);
+      this.parentNode.insertBefore(dragging, next ? this.nextSibling : this);
+    });
+
+    $list.on("drop.svdnd", ".sv-col-item", function (e) {
+      e.preventDefault();
+    });
+
+    $list.on("dragend.svdnd", ".sv-col-item", function () {
+      this.classList.remove("sv-dragging");
+      dragging = null;
+    });
+
+    return function () {
+      $list.off(".svdnd");
+      $list.find(".sv-col-item").removeAttr("draggable").removeClass("sv-dragging");
+    };
   }
 
   function escapeHtml(value) {

@@ -269,6 +269,7 @@
 
   (function () {
     const DEFAULT_AVATAR = "/Assets/inspinia/img/user.png";
+    let tenantAccessRoles = [];
 
     // -------------------- Utils --------------------
     function escapeHtml(value) {
@@ -364,6 +365,134 @@
       return v === "INACTIVE" ? "INACTIVE" : "ACTIVE";
     }
 
+    function normalizeLegacyRole(role) {
+      const r = String(role || "").trim().toUpperCase();
+      if (r === "ADMIN") return "ADMIN";
+      if (r === "MANAGER") return "MANAGER";
+      if (r === "CUSTOMER") return "CUSTOMER";
+      return "USER";
+    }
+
+    function mapAccessCodeToLegacyRole(code) {
+      const c = String(code || "").trim().toUpperCase();
+      if (c === "ADMIN") return "ADMIN";
+      if (c === "MANAGER") return "MANAGER";
+      if (c === "CUSTOMER") return "CUSTOMER";
+      return "USER";
+    }
+
+    function getRoleSelectValueFromLegacyRole(role) {
+      return `legacy:${normalizeLegacyRole(role)}`;
+    }
+
+    function parseRoleSelection(value) {
+      const raw = String(value || "").trim();
+      if (raw.startsWith("access:")) {
+        const roleId = raw.slice("access:".length);
+        const role = tenantAccessRoles.find((item) => String(item?.id || "") === roleId);
+        return {
+          mode: "access",
+          roleId: roleId || null,
+          legacyRole: mapAccessCodeToLegacyRole(role?.code),
+        };
+      }
+
+      if (raw.startsWith("legacy:")) {
+        return {
+          mode: "legacy",
+          roleId: null,
+          legacyRole: normalizeLegacyRole(raw.slice("legacy:".length)),
+        };
+      }
+
+      return {
+        mode: "legacy",
+        roleId: null,
+        legacyRole: normalizeLegacyRole(raw),
+      };
+    }
+
+    function extractUserIdFromResponse(data) {
+      return data?.id || data?.user_id || data?.data?.id || data?.data?.user_id || data?.user?.id || null;
+    }
+
+    function buildRoleOptionsHtml(selectedValue, includeAdminFallback = true) {
+      const selected = String(selectedValue || "").trim();
+      if (Array.isArray(tenantAccessRoles) && tenantAccessRoles.length > 0) {
+        return tenantAccessRoles
+          .filter((role) => role && role.is_active !== false)
+          .map((role) => {
+            const value = `access:${role.id}`;
+            const roleCode = String(role.code || "").toUpperCase();
+            const roleName = String(role.name || roleCode || "Role");
+            const isSelected = value === selected ? "selected" : "";
+            return `<option value="${escapeHtml(value)}" ${isSelected}>${escapeHtml(roleName)} (${escapeHtml(roleCode)})</option>`;
+          })
+          .join("");
+      }
+
+      const fallbackRoles = includeAdminFallback ? ["USER", "MANAGER", "ADMIN"] : ["USER", "MANAGER"];
+      return fallbackRoles
+        .map((role) => {
+          const value = `legacy:${role}`;
+          const isSelected = value === selected ? "selected" : "";
+          return `<option value="${escapeHtml(value)}" ${isSelected}>${escapeHtml(role)}</option>`;
+        })
+        .join("");
+    }
+
+    function resolveDefaultRoleSelectValue(fallbackLegacyRole) {
+      const fallback = normalizeLegacyRole(fallbackLegacyRole || "USER");
+      if (!Array.isArray(tenantAccessRoles) || tenantAccessRoles.length === 0) {
+        return getRoleSelectValueFromLegacyRole(fallback);
+      }
+
+      const preferred = tenantAccessRoles.find(
+        (role) => String(role?.code || "").trim().toUpperCase() === fallback && role?.is_active !== false,
+      );
+      if (preferred?.id) return `access:${preferred.id}`;
+
+      const firstActive = tenantAccessRoles.find((role) => role && role.is_active !== false);
+      if (firstActive?.id) return `access:${firstActive.id}`;
+
+      return getRoleSelectValueFromLegacyRole(fallback);
+    }
+
+    async function fetchTenantAccessRolesSafe() {
+      try {
+        const data = await apiGet("/api/admin/access/roles");
+        tenantAccessRoles = Array.isArray(data?.items) ? data.items : [];
+      } catch (error) {
+        tenantAccessRoles = [];
+      }
+      return tenantAccessRoles;
+    }
+
+    async function resolveUserRoleSelectValue(userId, fallbackLegacyRole) {
+      const fallback = resolveDefaultRoleSelectValue(fallbackLegacyRole || "USER");
+      if (!Array.isArray(tenantAccessRoles) || tenantAccessRoles.length === 0 || !userId) {
+        return fallback;
+      }
+
+      try {
+        const details = await apiGet("/api/admin/access/users/" + encodeURIComponent(userId) + "/roles");
+        const selectedRole = Array.isArray(details?.roles) ? details.roles.find((role) => role?.selected) : null;
+        if (selectedRole?.id) return `access:${selectedRole.id}`;
+      } catch (error) {
+        // keep fallback
+      }
+
+      return fallback;
+    }
+
+    async function syncUserAccessRoles(userId, roleSelection) {
+      const parsed = parseRoleSelection(roleSelection);
+      if (!userId || !parsed.roleId || parsed.mode !== "access") return;
+      await apiPut("/api/admin/access/users/" + encodeURIComponent(userId) + "/roles", {
+        role_ids: [parsed.roleId],
+      });
+    }
+
     // -------------------- Profile picture cache --------------------
     function getCachedProfilePicture(userId) {
       try {
@@ -410,6 +539,17 @@
     async function apiPatch(url, body) {
       const res = await fetch(url, {
         method: "PATCH",
+        headers: { "Accept": "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const data = await readJsonSafe(res);
+      if (!res.ok) throw new Error(data?.message || "Erro ao atualizar");
+      return data;
+    }
+
+    async function apiPut(url, body) {
+      const res = await fetch(url, {
+        method: "PUT",
         headers: { "Accept": "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(body || {})
       });
@@ -793,12 +933,15 @@
 
       const auth = getAuth();
       if (!isAdminOrManager(auth)) {
-        alert("Manager/Admin conseguem gerenciar usuários da empresa.");
+        alert("Manager/Admin conseguem gerenciar usuarios da empresa.");
         return;
       }
 
       const companyId = getMyCompanyId(auth);
-      if (!companyId) { alert("Não foi possível identificar seu company_id."); return; }
+      if (!companyId) { alert("Nao foi possivel identificar seu company_id."); return; }
+
+      const defaultRoleValue = resolveDefaultRoleSelectValue("USER");
+      const roleOptionsHtml = buildRoleOptionsHtml(defaultRoleValue, false);
 
       const html = `
         <div class="form-group">
@@ -817,10 +960,9 @@
         </div>
 
         <div class="form-group">
-          <label for="selNewUserRole">Permissão</label>
+          <label for="selNewUserRole">Permissao</label>
           <select id="selNewUserRole" class="form-control">
-            <option value="USER" selected>User</option>
-            <option value="MANAGER">Manager</option>
+            ${roleOptionsHtml}
           </select>
         </div>
 
@@ -843,19 +985,20 @@
       `;
 
       SideModal.open({
-        title: "Novo usuário",
+        title: "Novo usuario",
         html: html,
         onOk: async function () {
           try {
             const fullName = normalizeString($("#txtNewUserName").val());
             const email = normalizeString($("#txtNewUserEmail").val());
             const phone = normalizePhone($("#txtNewUserPhone").val());
-            const role = normalizeString($("#selNewUserRole").val()) || "USER";
+            const roleSelection = normalizeString($("#selNewUserRole").val()) || defaultRoleValue;
+            const parsedRole = parseRoleSelection(roleSelection);
             const status = mapSelectValueToApiStatus($("#selNewUserStatus").val());
             const firstAccess = $("#chkFirstAccess").is(":checked") === true;
 
             if (!isNonEmptyString(fullName)) { alert("Informe o Nome."); return; }
-            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email válido."); return; }
+            if (!isNonEmptyString(email) || !isValidEmail(email)) { alert("Informe um Email valido."); return; }
 
             const tempPassword = generateTempPassword();
 
@@ -863,24 +1006,27 @@
               full_name: fullName,
               email: email,
               password: tempPassword,
-              role: role === "ADMIN" ? "ADMIN" : (role === "MANAGER" ? "MANAGER" : "USER"),
+              role: parsedRole.legacyRole,
               phonenumber: phone,
               first_access: firstAccess,
               company_id: companyId,
               status: status
             };
 
-            await apiPost("/api/users", payload);
+            const created = await apiPost("/api/users", payload);
+            const createdUserId = extractUserIdFromResponse(created);
+            if (createdUserId) {
+              await syncUserAccessRoles(createdUserId, roleSelection);
+            }
 
             location.reload();
           } catch (e) {
             console.error(e);
-            alert(e?.message || "Erro ao criar usuário.");
+            alert(e?.message || "Erro ao criar usuario.");
           }
         }
       });
     }
-
     window.openNewCompanyUser = openNewCompanyUser;
 
     async function openEditCompanyUser(index) {
@@ -888,7 +1034,7 @@
 
       const auth = getAuth();
       if (!isAdminOrManager(auth)) {
-        alert("Manager/Admin conseguem gerenciar usuários da empresa.");
+        alert("Manager/Admin conseguem gerenciar usuarios da empresa.");
         return;
       }
 
@@ -900,11 +1046,13 @@
         fullName: normalizeString(u?.full_name ?? u?.fullName ?? ""),
         email: normalizeString(u?.email ?? ""),
         phone: normalizePhone(u?.phonenumber ?? u?.phone ?? ""),
-        role: normalizeString(u?.role ?? "USER"),
+        role: normalizeLegacyRole(u?.role ?? "USER"),
         status: normalizeString(u?.status ?? "ACTIVE")
       };
 
       const statusValue = normalizeStatusToSelectValue(original.status);
+      const initialRoleSelection = await resolveUserRoleSelectValue(u.id, original.role);
+      const roleOptionsHtml = buildRoleOptionsHtml(initialRoleSelection, true);
 
       const html = `
         <div class="form-group">
@@ -923,11 +1071,9 @@
         </div>
 
         <div class="form-group">
-          <label for="txtRole">Permissão</label>
+          <label for="txtRole">Permissao</label>
           <select id="txtRole" class="form-control">
-            <option value="USER" ${original.role.toUpperCase() === "USER" ? "selected" : ""}>User</option>
-            <option value="MANAGER" ${original.role.toUpperCase() === "MANAGER" ? "selected" : ""}>Manager</option>
-            <option value="ADMIN" ${original.role.toUpperCase() === "ADMIN" ? "selected" : ""}>Admin</option>
+            ${roleOptionsHtml}
           </select>
         </div>
 
@@ -940,20 +1086,22 @@
         </div>
 
         <small class="text-muted">
-          Dica: para foto do usuário, use "${I18N_PROFILE.editMyData}" logado nesse usuário (por enquanto).
+          Dica: para foto do usuario, use "${I18N_PROFILE.editMyData}" logado nesse usuario (por enquanto).
         </small>
       `;
 
       SideModal.open({
-        title: "Editar usuário",
+        title: "Editar usuario",
         html: html,
         onOk: async function () {
           try {
+            const currentRoleSelection = normalizeString($("#txtRole").val()) || initialRoleSelection;
+            const parsedRole = parseRoleSelection(currentRoleSelection);
             const current = {
               fullName: $("#txtName").val(),
               email: $("#txtEmail").val(),
               phone: $("#txtPhoneNumber").val(),
-              role: $("#txtRole").val(),
+              role: parsedRole.legacyRole,
               status: mapSelectValueToApiStatus($("#selStatus").val())
             };
 
@@ -970,23 +1118,30 @@
                 { key: "fullName", read: () => current.fullName, normalize: normalizeString, write: (p, v) => { p.full_name = v; } },
                 { key: "email", read: () => current.email, normalize: normalizeString, write: (p, v) => { p.email = v; } },
                 { key: "phone", read: () => current.phone, normalize: normalizePhone, write: (p, v) => { p.phonenumber = v; } },
-                { key: "role", read: () => current.role, normalize: normalizeString, write: (p, v) => { p.role = v; } },
+                { key: "role", read: () => current.role, normalize: normalizeString, write: (p, v) => { p.role = normalizeLegacyRole(v); } },
                 { key: "status", read: () => current.status, normalize: normalizeString, write: (p, v) => { p.status = v; } },
               ]
             );
 
-            if (!diff.hasChanges) return;
+            const roleSelectionChanged = String(currentRoleSelection) !== String(initialRoleSelection);
+            if (!diff.hasChanges && !roleSelectionChanged) return;
 
-            await apiPatch("/api/users/" + encodeURIComponent(u.id), diff.payload);
+            if (diff.hasChanges) {
+              await apiPatch("/api/users/" + encodeURIComponent(u.id), diff.payload);
+            }
+
+            if (roleSelectionChanged) {
+              await syncUserAccessRoles(u.id, currentRoleSelection);
+            }
+
             location.reload();
           } catch (e) {
             console.error(e);
-            alert(e?.message || "Erro ao salvar usuário.");
+            alert(e?.message || "Erro ao salvar usuario.");
           }
         }
       });
     }
-
     window.openEditCompanyUser = openEditCompanyUser;
 
     async function deleteCompanyUser(index) {
@@ -1051,6 +1206,7 @@
         const canManage = isAdminOrManager(auth);
         if (canManage) {
           $("#tabUsersLi").show();
+          await fetchTenantAccessRolesSafe();
 
           // List company users
           if (companyId) {
@@ -1078,3 +1234,5 @@
     });
   })();
 </script>
+
+

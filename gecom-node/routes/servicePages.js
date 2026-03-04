@@ -16,6 +16,7 @@ router.get("/servico/assuntos", controller.assuntos);
 router.get("/servico/calendarios", controller.calendarios);
 router.get("/servico/calendarios/regras", controller.calendariosRegras);
 router.get("/servico/calendarios/excecoes", controller.calendariosExcecoes);
+router.get("/servico/agenda", controller.agendaAtividades);
 router.get("/servico/recursos", controller.recursos);
 router.get("/servico/recursos/agendamentos", controller.recursosAgendamentos);
 router.get("/servico/tarefas", controller.tarefas);

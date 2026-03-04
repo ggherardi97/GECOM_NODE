@@ -63,7 +63,7 @@
   }
 
   function boolLabel(value) {
-    return value ? tt("page.hr.common.yes", "Sim") : tt("page.hr.common.no", "Nao");
+    return value ? tt("page.hr.common.yes", "Sim") : tt("page.hr.common.no", "Não");
   }
 
   const resources = {
@@ -559,6 +559,345 @@
       },
     },
   };
+
+  const relatedResourcesByKey = {
+    departments: [
+      {
+        id: "assignments",
+        label: "Alocações",
+        api: "/api/hr/department-assignments",
+        filter: "department_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "position.name", label: "Cargo" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "end_date", label: "Fim", format: "date" },
+        ],
+      },
+    ],
+    positions: [
+      {
+        id: "assignments",
+        label: "Alocações",
+        api: "/api/hr/department-assignments",
+        filter: "position_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "department.name", label: "Departamento" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "end_date", label: "Fim", format: "date" },
+        ],
+      },
+    ],
+    workLocations: [
+      {
+        id: "assignments",
+        label: "Alocações",
+        api: "/api/hr/department-assignments",
+        filter: "work_location_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "department.name", label: "Departamento" },
+          { key: "position.name", label: "Cargo" },
+          { key: "start_date", label: "Início", format: "date" },
+        ],
+      },
+    ],
+    employmentStatuses: [
+      {
+        id: "employees",
+        label: "Colaboradores",
+        api: "/api/hr/employees",
+        filter: "employment_status_id",
+        columns: [
+          { key: "employee_number", label: "Matrícula" },
+          { key: "full_name", label: "Nome" },
+          { key: "email_work", label: "Email" },
+          { key: "is_active", label: "Ativo", format: "bool" },
+        ],
+      },
+    ],
+    documentTypes: [
+      {
+        id: "employees",
+        label: "Colaboradores",
+        api: "/api/hr/employees",
+        filter: "document_type_id",
+        columns: [
+          { key: "employee_number", label: "Matrícula" },
+          { key: "full_name", label: "Nome" },
+          { key: "document_number", label: "Documento" },
+          { key: "is_active", label: "Ativo", format: "bool" },
+        ],
+      },
+    ],
+    maritalStatuses: [
+      {
+        id: "employees",
+        label: "Colaboradores",
+        api: "/api/hr/employees",
+        filter: "marital_status_id",
+        columns: [
+          { key: "employee_number", label: "Matrícula" },
+          { key: "full_name", label: "Nome" },
+          { key: "email_work", label: "Email" },
+          { key: "is_active", label: "Ativo", format: "bool" },
+        ],
+      },
+    ],
+    employees: [
+      {
+        id: "assignments",
+        label: "Alocações",
+        api: "/api/hr/department-assignments",
+        filter: "employee_id",
+        columns: [
+          { key: "department.name", label: "Departamento" },
+          { key: "position.name", label: "Cargo" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "end_date", label: "Fim", format: "date" },
+        ],
+      },
+      {
+        id: "scheduleAssignments",
+        label: "Jornadas",
+        api: "/api/hr/employee-schedule-assignments",
+        filter: "employee_id",
+        columns: [
+          { key: "work_schedule.name", label: "Jornada" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "end_date", label: "Fim", format: "date" },
+        ],
+      },
+      {
+        id: "leaveRequests",
+        label: "Ausências",
+        api: "/api/hr/leave-requests",
+        filter: "employee_id",
+        columns: [
+          { key: "leave_type.name", label: "Tipo" },
+          { key: "start_datetime", label: "Início", format: "datetime" },
+          { key: "end_datetime", label: "Fim", format: "datetime" },
+          { key: "status", label: "Status" },
+        ],
+      },
+      {
+        id: "employeeSkills",
+        label: "Skills",
+        api: "/api/hr/employee-skills",
+        filter: "employee_id",
+        columns: [
+          { key: "skill.name", label: "Skill" },
+          { key: "proficiency_level", label: "Nível" },
+          { key: "years_experience", label: "Anos" },
+        ],
+      },
+      {
+        id: "employeeCertifications",
+        label: "Certificações",
+        api: "/api/hr/employee-certifications",
+        filter: "employee_id",
+        columns: [
+          { key: "certification.name", label: "Certificação" },
+          { key: "issued_at", label: "Emissão", format: "date" },
+          { key: "expires_at", label: "Validade", format: "date" },
+          { key: "status", label: "Status" },
+        ],
+      },
+      {
+        id: "employeeLifecycles",
+        label: "Lifecycles",
+        api: "/api/hr/lifecycle/employee-lifecycles",
+        filter: "employee_id",
+        columns: [
+          { key: "template.name", label: "Template" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "target_end_date", label: "Fim planejado", format: "date" },
+          { key: "status", label: "Status" },
+        ],
+      },
+      {
+        id: "responsibleTasks",
+        label: "Tarefas do Responsável",
+        api: "/api/hr/lifecycle/employee-lifecycle-tasks",
+        filter: "responsible_employee_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "status", label: "Status" },
+          { key: "due_date", label: "Prazo", format: "date" },
+        ],
+      },
+    ],
+    workSchedules: [
+      {
+        id: "scheduleAssignments",
+        label: "Colaboradores na jornada",
+        api: "/api/hr/employee-schedule-assignments",
+        filter: "work_schedule_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "end_date", label: "Fim", format: "date" },
+        ],
+      },
+    ],
+    leaveTypes: [
+      {
+        id: "leaveRequests",
+        label: "Solicitações",
+        api: "/api/hr/leave-requests",
+        filter: "leave_type_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "start_datetime", label: "Início", format: "datetime" },
+          { key: "end_datetime", label: "Fim", format: "datetime" },
+          { key: "status", label: "Status" },
+        ],
+      },
+    ],
+    skillCategories: [
+      {
+        id: "skills",
+        label: "Skills",
+        api: "/api/hr/skills",
+        filter: "category_id",
+        columns: [
+          { key: "name", label: "Nome" },
+          { key: "description", label: "Descrição" },
+          { key: "is_active", label: "Ativo", format: "bool" },
+        ],
+      },
+    ],
+    skills: [
+      {
+        id: "employeeSkills",
+        label: "Colaboradores com a skill",
+        api: "/api/hr/employee-skills",
+        filter: "skill_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "proficiency_level", label: "Nível" },
+          { key: "years_experience", label: "Anos" },
+        ],
+      },
+    ],
+    certifications: [
+      {
+        id: "employeeCertifications",
+        label: "Colaboradores certificados",
+        api: "/api/hr/employee-certifications",
+        filter: "certification_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "issued_at", label: "Emissão", format: "date" },
+          { key: "expires_at", label: "Validade", format: "date" },
+          { key: "status", label: "Status" },
+        ],
+      },
+    ],
+    lifecycleTemplates: [
+      {
+        id: "stages",
+        label: "Etapas",
+        api: "/api/hr/lifecycle/stages",
+        filter: "template_id",
+        columns: [
+          { key: "name", label: "Etapa" },
+          { key: "sort_order", label: "Ordem" },
+          { key: "is_active", label: "Ativo", format: "bool" },
+        ],
+      },
+      {
+        id: "tasks",
+        label: "Tarefas de template",
+        api: "/api/hr/lifecycle/tasks",
+        filter: "template_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "responsible_role", label: "Responsável" },
+          { key: "sort_order", label: "Ordem" },
+        ],
+      },
+      {
+        id: "instances",
+        label: "Instâncias de colaborador",
+        api: "/api/hr/lifecycle/employee-lifecycles",
+        filter: "template_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "start_date", label: "Início", format: "date" },
+          { key: "status", label: "Status" },
+        ],
+      },
+    ],
+    lifecycleStages: [
+      {
+        id: "tasksByStage",
+        label: "Tarefas na etapa",
+        api: "/api/hr/lifecycle/tasks",
+        filter: "stage_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "responsible_role", label: "Responsável" },
+          { key: "sort_order", label: "Ordem" },
+        ],
+      },
+      {
+        id: "lifecyclesCurrentStage",
+        label: "Lifecycles na etapa",
+        api: "/api/hr/lifecycle/employee-lifecycles",
+        filter: "current_stage_id",
+        columns: [
+          { key: "employee.full_name", label: "Colaborador" },
+          { key: "template.name", label: "Template" },
+          { key: "status", label: "Status" },
+        ],
+      },
+      {
+        id: "employeeTasksByStage",
+        label: "Tarefas de colaborador na etapa",
+        api: "/api/hr/lifecycle/employee-lifecycle-tasks",
+        filter: "stage_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "status", label: "Status" },
+          { key: "due_date", label: "Prazo", format: "date" },
+        ],
+      },
+    ],
+    lifecycleTasks: [
+      {
+        id: "employeeTasksFromTemplateTask",
+        label: "Tarefas de colaborador derivadas",
+        api: "/api/hr/lifecycle/employee-lifecycle-tasks",
+        filter: "template_task_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "status", label: "Status" },
+          { key: "due_date", label: "Prazo", format: "date" },
+        ],
+      },
+    ],
+    employeeLifecycles: [
+      {
+        id: "tasks",
+        label: "Tarefas",
+        api: "/api/hr/lifecycle/employee-lifecycle-tasks",
+        filter: "employee_lifecycle_id",
+        columns: [
+          { key: "title", label: "Título" },
+          { key: "stage.name", label: "Etapa" },
+          { key: "status", label: "Status" },
+          { key: "due_date", label: "Prazo", format: "date" },
+        ],
+      },
+    ],
+  };
+
+  Object.entries(relatedResourcesByKey).forEach(([key, related]) => {
+    if (!resources[key]) return;
+    resources[key].relatedResources = Array.isArray(related) ? related.slice() : [];
+  });
 
   global.HrResources = {
     resources,

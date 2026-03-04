@@ -1,3 +1,8 @@
+<style>
+  .badgeLabel {
+    background-color: unset !important;
+  }
+</style>
 <div class="row">
   <!-- LEFT -->
   <div class="col-lg-3">
@@ -649,7 +654,7 @@ list.forEach(function (item) {
 
   const relatedHtml =
     isRoot && relatedName
-      ? `<span class="related-badge label label-primary" style='width: 95%;
+      ? `<span class="badgeLabel related-badge label label-primary" style='width: 95%;
     overflow: hidden;' title="${escapeHtml(relatedLabelPrefix(relatedTable))}">
            <i class="fa ${relatedIcon(relatedTable)}"></i>${escapeHtml(relatedName)}
          </span>`

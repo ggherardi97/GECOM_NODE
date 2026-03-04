@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const api = window.ServiceApi;
   const cfg = window.__SERVICE_PAGE_CONFIG || {};
 
@@ -154,7 +154,7 @@
       const indicator = th.find(".sort-indicator");
       if (!key || !indicator.length) return;
       if (state.sort.key !== key) indicator.text("");
-      else indicator.text(state.sort.dir === "asc" ? "▲" : "▼");
+      else indicator.text(state.sort.dir === "asc" ? "^" : "v");
     });
   }
 
@@ -352,6 +352,19 @@
     return v;
   }
 
+  function parseJsonFieldValue(field, rawValue) {
+    if (!field?.parseAsJson) return rawValue;
+    if (rawValue == null) return null;
+    if (typeof rawValue === "object") return rawValue;
+    const text = String(rawValue).trim();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`JSON invalido no campo: ${field.label || field.name}`);
+    }
+  }
+
   function validateForm(payload) {
     const required = (cfg.requiredFields || []).concat(getFields().filter((f) => f.required).map((f) => f.name));
     const unique = Array.from(new Set(required));
@@ -364,7 +377,8 @@
     getFields().forEach((f) => {
       const el = fieldElement(f.name);
       if (!el.length) return;
-      const value = normalizeValue(f.type, el.val(), el.is(":checked"));
+      const normalized = normalizeValue(f.type, el.val(), el.is(":checked"));
+      const value = parseJsonFieldValue(f, normalized);
       if (value != null) payload[f.name] = value;
     });
 
@@ -395,6 +409,14 @@
       } else if (f.type === "datetime-local" && v) {
         const d = new Date(v);
         el.val(Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 16));
+      } else if (f.parseAsJson) {
+        if (v == null || v === "") {
+          el.val("");
+        } else if (typeof v === "string") {
+          el.val(v);
+        } else {
+          el.val(JSON.stringify(v, null, 2));
+        }
       } else {
         el.val(v == null ? "" : String(v));
       }
@@ -658,3 +680,4 @@
 
   $(document).ready(init);
 })();
+

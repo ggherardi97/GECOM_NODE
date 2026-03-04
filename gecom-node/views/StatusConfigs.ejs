@@ -20,7 +20,7 @@
   }
 </style>
 
-<div class="row animated fadeInRight" style="margin-top:25px;">
+<div id="statusConfigsRoot" class="row animated fadeInRight" style="margin-top:25px;">
   <div class="col-lg-12">
     <div class="ibox">
       <div class="ibox-title">
@@ -470,7 +470,7 @@
       const askMessage = isSystem
         ? "Este status é de sistema. Deseja tentar excluir mesmo assim?"
         : "Deseja excluir este status?";
-      const ok = confirm(askMessage);
+      const ok = await openConfigConfirm(askMessage);
       if (!ok) return;
       try {
         await apiFetch(`/api/status-configs/${encodeURIComponent(id)}`, { method: "DELETE", headers: { Accept: "application/json" } });
@@ -496,6 +496,40 @@
 
     function getRowById(entity, id) {
       return (state.rows[entity] || []).find((x) => String(x?.id || "") === String(id || "")) || null;
+    }
+
+    function openConfigConfirm(message) {
+      const $modal = $("#cfgConfirmModal");
+      const $ok = $("#btnCfgConfirmModalOk");
+      if (!$modal.length || !$ok.length) {
+        return Promise.resolve(confirm(message));
+      }
+
+      $("#cfgConfirmModalTitle").text("Confirmar");
+      $("#cfgConfirmModalMessage").text(message || "Deseja continuar?");
+      $ok.text("Confirmar").removeClass("btn-primary btn-success btn-warning").addClass("btn-danger");
+
+      return new Promise((resolve) => {
+        let done = false;
+        const finish = (value) => {
+          if (done) return;
+          done = true;
+          $ok.off("click.statusconfirm");
+          $modal.off("hidden.bs.modal.statusconfirm");
+          resolve(Boolean(value));
+        };
+
+        $ok.on("click.statusconfirm", function () {
+          finish(true);
+          $modal.modal("hide");
+        });
+
+        $modal.on("hidden.bs.modal.statusconfirm", function () {
+          finish(false);
+        });
+
+        $modal.modal("show");
+      });
     }
 
     function bindEvents() {
@@ -532,7 +566,7 @@
 
       $("#btnSaveStatusConfig").on("click", handleSave);
 
-      $(".tab-content").on("click", ".js-edit", function () {
+      $("#statusConfigsRoot .tab-content").on("click", ".js-edit", function () {
         const entity = String($(this).data("entity") || "");
         const id = String($(this).data("id") || "");
         const row = getRowById(entity, id);
@@ -540,7 +574,7 @@
         openModal(entity, row);
       });
 
-      $(".tab-content").on("click", ".js-delete", function () {
+      $("#statusConfigsRoot .tab-content").on("click", ".js-delete", function () {
         const entity = String($(this).data("entity") || "");
         const id = String($(this).data("id") || "");
         const isSystem = String($(this).data("system") || "") === "1";
@@ -548,7 +582,7 @@
         handleDelete(id, entity, isSystem);
       });
 
-      $(".tab-content").on("change", ".js-toggle-active", function () {
+      $("#statusConfigsRoot .tab-content").on("change", ".js-toggle-active", function () {
         const entity = String($(this).data("entity") || "");
         const id = String($(this).data("id") || "");
         const checked = !!this.checked;

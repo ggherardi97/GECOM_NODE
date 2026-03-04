@@ -1,3 +1,7 @@
+﻿<% contentFor('headerLink') %>
+  <link href="/Assets/inspinia/css/plugins/fullcalendar/fullcalendar.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/fullcalendar/fullcalendar.print.css" rel="stylesheet" media="print">
+<% %>
 <style>
   .ibox-title { padding: 15px 60px 8px 15px; }
 
@@ -73,9 +77,30 @@
   .inspinia-timeline .timeline-item .date { width: 110px; }
   .inspinia-timeline .timeline-item .content { width: calc(100% - 110px); }
 
-  /* AQUI resolve o gráfico “espremidinho” do Meus Processos */
+  /* AQUI resolve o gráfico "espremidinho" do Meus Processos */
   .dash-chart-wrap-company { height: 260px; }
   #lineChartCompany { width: 100% !important; height: 100% !important; display:block; }
+
+  .dash-module-chart-wrap { height: 280px; }
+  .dash-module-table td, .dash-module-table th { vertical-align: middle; }
+  .dash-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 16px;
+    background: #eef5ff;
+    color: #1c84c6;
+    font-weight: 600;
+  }
+
+  #hrVacationCalendar {
+    min-height: 580px;
+  }
+
+  #hrVacationCalendar .fc-event {
+    border: none;
+  }
 </style>
 
 <div class="wrapper wrapper-content">
@@ -311,7 +336,7 @@
   </div>
 
   <!-- =========================================================
-       VIEW 2: MEUS PROCESSOS (dashboard “da empresa logada”)
+       VIEW 2: MEUS PROCESSOS (dashboard "da empresa logada")
   ========================================================== -->
   <div id="dashMyProcessesWrap" style="display:none;padding-top: 0px;">
 
@@ -336,7 +361,7 @@
 
               <div class="m-t-md">
                 <div class="dash-chart-wrap-company">
-                  <!-- REMOVIDO height="70" para não “espremir” -->
+                  <!-- REMOVIDO height="70" para não "espremer" -->
                   <canvas id="lineChartCompany"></canvas>
                 </div>
               </div>
@@ -455,6 +480,178 @@
 
   </div>
 
+  <!-- =========================================================
+       VIEW 3: FINANCEIRO
+  ========================================================== -->
+  <div id="dashFinanceWrap" style="display:none;">
+    <div class="row dash-kpi">
+      <div class="col-lg-3">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Contas a receber em aberto</h5></div>
+          <div class="ibox-content"><h2 class="no-margins" id="kpiFinanceReceivablesOpen">R$ 0,00</h2></div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Contas a pagar em aberto</h5></div>
+          <div class="ibox-content"><h2 class="no-margins" id="kpiFinancePayablesOpen">R$ 0,00</h2></div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Saldo projetado</h5></div>
+          <div class="ibox-content"><h2 class="no-margins" id="kpiFinanceNet">R$ 0,00</h2></div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Títulos vencidos</h5></div>
+          <div class="ibox-content"><h2 class="no-margins" id="kpiFinanceOverdueCount">0</h2></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Fluxo previsto por mês (aberto)</h5></div>
+          <div class="ibox-content">
+            <div class="dash-module-chart-wrap"><canvas id="financeCashChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Próximos vencimentos</h5></div>
+          <div class="ibox-content">
+            <div class="table-responsive">
+              <table class="table table-striped dash-module-table">
+                <thead><tr><th>Tipo</th><th>Título</th><th>Venc.</th><th>Valor</th></tr></thead>
+                <tbody id="financeUpcomingTbody"><tr><td colspan="4">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       VIEW 4: RH
+  ========================================================== -->
+  <div id="dashHrWrap" style="display:none;">
+    <div class="row dash-kpi">
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Colaboradores</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesTotal">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Ativos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesActive">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Solicitações de ausência pendentes</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrPendingLeaves">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Tarefas de lifecycle em aberto</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrOpenLifecycleTasks">0</h2></div></div></div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Alocação por departamento</h5></div>
+          <div class="ibox-content">
+            <div class="dash-module-chart-wrap"><canvas id="hrDepartmentChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Ausências pendentes</h5></div>
+          <div class="ibox-content">
+            <div class="table-responsive">
+              <table class="table table-striped dash-module-table">
+                <thead><tr><th>Colaborador</th><th>Período</th><th>Status</th></tr></thead>
+                <tbody id="hrLeavePendingTbody"><tr><td colspan="3">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Previsão de férias</h5></div>
+          <div class="ibox-content">
+            <div id="hrVacationCalendar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       VIEW 5: SERVICES
+  ========================================================== -->
+  <div id="dashServicesWrap" style="display:none;">
+    <div class="row dash-kpi">
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Incidentes abertos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiSvcOpenIncidents">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Incidentes vencidos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiSvcOverdueIncidents">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Tarefas abertas</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiSvcOpenTasks">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>SLA em breach</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiSvcBreachedSla">0</h2></div></div></div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Incidentes por status</h5></div>
+          <div class="ibox-content"><div class="dash-module-chart-wrap"><canvas id="servicesStatusChart"></canvas></div></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Carga por fila</h5></div>
+          <div class="ibox-content">
+            <div class="table-responsive">
+              <table class="table table-striped dash-module-table">
+                <thead><tr><th>Fila</th><th>Tickets</th></tr></thead>
+                <tbody id="servicesQueueLoadTbody"><tr><td colspan="2">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       VIEW 6: PROJECT & OPERATIONS
+  ========================================================== -->
+  <div id="dashPoWrap" style="display:none;">
+    <div class="row dash-kpi">
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Projetos ativos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiPoActiveProjects">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Work Orders abertas</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiPoOpenWorkOrders">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Entregas próximas (15 dias)</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiPoDueSoonDeliverables">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Marcos vencidos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiPoOverdueMilestones">0</h2></div></div></div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Work Orders por status</h5></div>
+          <div class="ibox-content"><div class="dash-module-chart-wrap"><canvas id="poWorkOrdersStatusChart"></canvas></div></div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="ibox">
+          <div class="ibox-title"><h5>Próximas entregas</h5></div>
+          <div class="ibox-content">
+            <div class="table-responsive">
+              <table class="table table-striped dash-module-table">
+                <thead><tr><th>Entrega</th><th>Prazo</th><th>Status</th></tr></thead>
+                <tbody id="poUpcomingDeliverablesTbody"><tr><td colspan="3">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <% contentFor('scripts') %>
@@ -463,6 +660,8 @@
 
 <script src="../Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
 <script src="../Assets/inspinia/js/plugins/chartJs/Chart.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/fullcalendar/moment.min.js"></script>
+<script src="../Assets/inspinia/js/plugins/fullcalendar/fullcalendar.min.js"></script>
 
 <script>
   function redirectToProcessDetail(id) {
@@ -512,11 +711,29 @@
     }
 
     // -------------------- Dashboard view model --------------------
-    var DASH_VIEW = { billing: "billing", my: "my" };
+    var DASH_VIEW = {
+      billing: "billing",
+      my: "my",
+      finance: "finance",
+      hr: "hr",
+      services: "services",
+      po: "po",
+    };
     var isAdmin = isAdminUser();
 
     // Admin: default billing | Non-admin: default my
     var selectedDashView = isAdmin ? DASH_VIEW.billing : DASH_VIEW.my;
+    var dashboardWrapByView = {};
+    dashboardWrapByView[DASH_VIEW.billing] = "#dashBillingWrap";
+    dashboardWrapByView[DASH_VIEW.my] = "#dashMyProcessesWrap";
+    dashboardWrapByView[DASH_VIEW.finance] = "#dashFinanceWrap";
+    dashboardWrapByView[DASH_VIEW.hr] = "#dashHrWrap";
+    dashboardWrapByView[DASH_VIEW.services] = "#dashServicesWrap";
+    dashboardWrapByView[DASH_VIEW.po] = "#dashPoWrap";
+    try {
+      var requestedDashView = String(new URLSearchParams(window.location.search || "").get("view") || "").trim().toLowerCase();
+      if (dashboardWrapByView[requestedDashView]) selectedDashView = requestedDashView;
+    } catch (e) { }
 
     // -------------------- Picker --------------------
     function buildDashPicker() {
@@ -525,44 +742,37 @@
 
       $sel.empty();
 
-      if (isAdmin) {
-        $sel.append(`<option value="${DASH_VIEW.billing}"><%= t('page.dashboard.pageTitle') %></option>`);
-        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
-        $sel.prop("disabled", false);
+      if (isAdmin) $sel.append(`<option value="${DASH_VIEW.billing}"><%= t('page.dashboard.pageTitle') %></option>`);
+      $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
+      $sel.append(`<option value="${DASH_VIEW.finance}">Financeiro</option>`);
+      $sel.append(`<option value="${DASH_VIEW.hr}">RH</option>`);
+      $sel.append(`<option value="${DASH_VIEW.services}">Services</option>`);
+      $sel.append(`<option value="${DASH_VIEW.po}">Project & Operations</option>`);
 
-        // garante visível
-        $sel.closest(".dash-filterbar").show();
-      } else {
-        // Non-admin: ONLY my
-        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
-        $sel.val(DASH_VIEW.my);
-        $sel.prop("disabled", true);
-
-        // Se você quer esconder o picker inteiro:
-        $sel.closest(".dash-filterbar").hide();
-      }
-
-      // Important: set value AFTER options
+      $sel.prop("disabled", false);
+      $sel.closest(".dash-filterbar").show();
       $sel.val(selectedDashView);
     }
 
     // -------------------- View toggle --------------------
-    var myProcessesLoadedOnce = false;
-
     function setView(viewName) {
-      if (viewName === DASH_VIEW.my) {
-        $("#dashBillingWrap").hide();
-        $("#dashMyProcessesWrap").show();
-        $("#yearFilterWrap").hide();
-        return;
-      }
+      var view = dashboardWrapByView[viewName] ? viewName : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
 
-      $("#dashMyProcessesWrap").hide();
-      $("#dashBillingWrap").show();
-      $("#yearFilterWrap").show();
+      Object.keys(dashboardWrapByView).forEach(function (key) {
+        var selector = dashboardWrapByView[key];
+        if (!selector) return;
+        if (key === view) $(selector).show();
+        else $(selector).hide();
+      });
+
+      if (view === DASH_VIEW.billing) $("#yearFilterWrap").show();
+      else $("#yearFilterWrap").hide();
+
+      if (view === DASH_VIEW.hr && typeof $("#hrVacationCalendar").fullCalendar === "function") {
+        try { $("#hrVacationCalendar").fullCalendar("render"); } catch (e) { }
+      }
     }
 
-    // Orchestrator
     function loadDashboard() {
       setView(selectedDashView);
 
@@ -570,21 +780,31 @@
         loadBillingDashboard();
         return;
       }
-
-      // my
-      if (!myProcessesLoadedOnce) {
-        myProcessesLoadedOnce = true;
+      if (selectedDashView === DASH_VIEW.my) {
         loadMyProcessesDashboard();
-      } else {
-        // se você quiser sempre recarregar ao trocar, deixe assim:
-        loadMyProcessesDashboard();
+        return;
+      }
+      if (selectedDashView === DASH_VIEW.finance) {
+        loadFinanceDashboard();
+        return;
+      }
+      if (selectedDashView === DASH_VIEW.hr) {
+        loadHrDashboard();
+        return;
+      }
+      if (selectedDashView === DASH_VIEW.services) {
+        loadServicesDashboard();
+        return;
+      }
+      if (selectedDashView === DASH_VIEW.po) {
+        loadProjectOperationsDashboard();
       }
     }
 
-    // ✅ FIX: event delegation (pega change mesmo se plugin mexer no select)
     $(document).on("change", "#dashboardPicker", function () {
       var v = String($(this).val() || "");
-      selectedDashView = (v === DASH_VIEW.my) ? DASH_VIEW.my : DASH_VIEW.billing;
+      if (dashboardWrapByView[v]) selectedDashView = v;
+      else selectedDashView = isAdmin ? DASH_VIEW.billing : DASH_VIEW.my;
       loadDashboard();
     });
 
@@ -637,6 +857,116 @@
       if (Array.isArray(data?.rows)) return data.rows;
       if (Array.isArray(data?.items)) return data.items;
       return [];
+    }
+
+    async function fetchJsonOrEmpty(url) {
+      try {
+        return await fetchJson(url);
+      } catch (e) {
+        console.warn("Dashboard request failed:", url, e?.message || e);
+        return [];
+      }
+    }
+
+    function parseDateSafe(value) {
+      if (!value) return null;
+      var d = new Date(value);
+      if (Number.isNaN(d.getTime())) return null;
+      return d;
+    }
+
+    function toStatusText(row) {
+      var raw =
+        row?.status?.code ??
+        row?.status?.name ??
+        row?.status ??
+        row?.state ??
+        row?.situation ??
+        "";
+      return String(raw || "").trim().toUpperCase();
+    }
+
+    function isOpenLikeStatus(statusText) {
+      var s = String(statusText || "").toUpperCase();
+      if (!s) return true;
+      return !(
+        s.includes("CLOSE") ||
+        s.includes("FECH") ||
+        s.includes("CANCEL") ||
+        s.includes("DONE") ||
+        s.includes("RESOLV") ||
+        s.includes("PAGO") ||
+        s.includes("PAID") ||
+        s.includes("COMPLET")
+      );
+    }
+
+    function pickAnyDate(row) {
+      return (
+        row?.due_date ||
+        row?.dueDate ||
+        row?.due_at ||
+        row?.dueAt ||
+        row?.target_end_date ||
+        row?.targetEndDate ||
+        row?.start_date ||
+        row?.startDate ||
+        row?.created_at ||
+        row?.createdAt ||
+        row?.updated_at ||
+        row?.updatedAt ||
+        null
+      );
+    }
+
+    function pickAnyTitle(row) {
+      return (
+        row?.name ||
+        row?.title ||
+        row?.code ||
+        row?.number ||
+        row?.title_number ||
+        row?.payable_number ||
+        row?.employee?.full_name ||
+        row?.full_name ||
+        "-"
+      );
+    }
+
+    function pickMoney(row) {
+      var original = toNumber(
+        row?.outstanding_amount ??
+        row?.outstandingAmount ??
+        row?.open_amount ??
+        row?.openAmount ??
+        row?.original_amount ??
+        row?.originalAmount ??
+        row?.amount ??
+        row?.value ??
+        row?.total ??
+        0
+      );
+      if (row?.outstanding_amount != null || row?.outstandingAmount != null) return original;
+
+      var paid = toNumber(row?.paid_amount ?? row?.paidAmount ?? 0);
+      var computed = original - paid;
+      if (Number.isFinite(computed) && computed > 0) return computed;
+      return original;
+    }
+
+    function sumBy(items, picker) {
+      return (Array.isArray(items) ? items : []).reduce(function (acc, item) {
+        return acc + toNumber(picker(item));
+      }, 0);
+    }
+
+    function renderTableRows($tbody, rowsHtml, colspan, emptyText) {
+      if (!$tbody || !$tbody.length) return;
+      if (rowsHtml && rowsHtml.length) {
+        $tbody.html(rowsHtml);
+        return;
+      }
+      $tbody.html(`<tr><td colspan="${colspan}">${emptyText}</td></tr>`);
     }
 
     // -------- Invoice helpers (billing) --------
@@ -751,7 +1081,7 @@
     function setSortIndicator() {
       $(".sortable .sort-indicator").text("");
       var th = $('.sortable[data-sort="' + sortState.key + '"]');
-      th.find(".sort-indicator").text(sortState.dir === "asc" ? "▲" : "▼");
+      th.find(".sort-indicator").text(sortState.dir === "asc" ? "â–²" : "â–¼");
     }
 
     function applySort(items) {
@@ -802,7 +1132,7 @@
       var end = Math.min(total, start + pageSize);
       var pageItems = viewProcesses.slice(start, end);
 
-      $("#processesCount").text("Mostrando " + (total ? (start + 1) : 0) + "–" + end + " de " + total);
+      $("#processesCount").text("Mostrando " + (total ? (start + 1) : 0) + "â€“" + end + " de " + total);
 
       var $tbody = $("#processesTbody");
       $tbody.empty();
@@ -1036,7 +1366,7 @@ async function loadBillingDashboard() {
       $("#monthlyRevenue").text(moneyCurrencyPtBr(monthSumAll, "BRL"));
       $("#annualRevenue").text(moneyCurrencyPtBr(yearSumAll, "BRL"));
 
-      // ✅ RESTORE DELTAS (avoid null/NaN)
+      // âœ… RESTORE DELTAS (avoid null/NaN)
       // If you had these numbers coming from DB/settings before, plug them here later.
       var estimatedMonthly = 30000;       // same as your old script
       var estimatedYear = 30000 * 12;
@@ -1414,10 +1744,436 @@ async function loadBillingDashboard() {
       }
     }
 
+    var financeCashChart = null;
+    var hrDepartmentChart = null;
+    var servicesStatusChart = null;
+    var poStatusChart = null;
+    var hrVacationCalendarReady = false;
+
+    function destroyChart(chart) {
+      if (!chart) return null;
+      try { chart.destroy(); } catch (e) { }
+      return null;
+    }
+
+    function buildOrUpdateChart(current, canvasId, config) {
+      var el = document.getElementById(canvasId);
+      if (!el) return current;
+      current = destroyChart(current);
+      var ctx = el.getContext("2d");
+      return new Chart(ctx, config);
+    }
+
+    function normalizeFoldedText(value) {
+      var raw = String(value || "");
+      try {
+        raw = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      } catch (e) { }
+      return raw.trim().toUpperCase();
+    }
+
+    function isVacationLeaveRequest(row) {
+      var status = toStatusText(row);
+      if (status.includes("CANCEL") || status.includes("REJECT")) return false;
+
+      var leaveType = row?.leave_type || row?.leaveType || {};
+      var code = normalizeFoldedText(leaveType?.code || row?.leave_type_code || row?.leaveTypeCode);
+      var name = normalizeFoldedText(leaveType?.name || row?.leave_type_name || row?.leaveTypeName);
+      return code.includes("FERI") || code.includes("VACAT") || name.includes("FERI") || name.includes("VACAT");
+    }
+
+    function toIsoDate(value) {
+      var d = parseDateSafe(value);
+      if (!d) return null;
+      return d.toISOString().slice(0, 10);
+    }
+
+    function toLeaveDateRange(row) {
+      var startRaw = row?.start_datetime || row?.start_date || row?.startDate || row?.startDateTime || null;
+      var endRaw = row?.end_datetime || row?.end_date || row?.endDate || row?.endDateTime || startRaw;
+      var start = parseDateSafe(startRaw);
+      var end = parseDateSafe(endRaw || startRaw);
+      if (!start) return null;
+      if (!end) end = start;
+
+      var startIso = toIsoDate(start);
+      var endExclusive = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1);
+      var endIso = toIsoDate(endExclusive);
+      if (!startIso || !endIso) return null;
+      return { startIso: startIso, endIso: endIso };
+    }
+
+    function buildHrVacationEvents(leaves) {
+      return (Array.isArray(leaves) ? leaves : [])
+        .filter(isVacationLeaveRequest)
+        .map(function (row) {
+          var range = toLeaveDateRange(row);
+          if (!range) return null;
+          var employee = row?.employee?.full_name || row?.employee_name || "Colaborador";
+          var leaveType = row?.leave_type || row?.leaveType || {};
+          var leaveTypeName = leaveType?.name || row?.leave_type_name || "Férias";
+          var color = leaveType?.color || "#23c6c8";
+          return {
+            title: String(employee) + " - " + String(leaveTypeName),
+            start: range.startIso,
+            end: range.endIso,
+            allDay: true,
+            color: color,
+          };
+        })
+        .filter(function (item) { return !!item; });
+    }
+
+    function renderHrVacationCalendar(leaves) {
+      var $calendar = $("#hrVacationCalendar");
+      if (!$calendar.length) return;
+      if (typeof $calendar.fullCalendar !== "function") return;
+
+      var events = buildHrVacationEvents(leaves);
+      if (!hrVacationCalendarReady) {
+        $calendar.fullCalendar({
+          defaultView: "month",
+          header: {
+            left: "prev,next today",
+            center: "title",
+            right: "month",
+          },
+          buttonText: {
+            today: "Hoje",
+            month: "Mês",
+          },
+          editable: false,
+          eventLimit: true,
+          events: events,
+        });
+        hrVacationCalendarReady = true;
+        return;
+      }
+
+      $calendar.fullCalendar("removeEvents");
+      $calendar.fullCalendar("addEventSource", events);
+      $calendar.fullCalendar("rerenderEvents");
+    }
+
+    function isFinancialOpen(row) {
+      var st = toStatusText(row);
+      if (st === "CANCELED" || st === "CANCELLED") return false;
+      if (st === "PAID" || st === "PAGO") return false;
+      return pickMoney(row) > 0;
+    }
+
+    async function loadFinanceDashboard() {
+      var year = new Date().getFullYear();
+      var nowDate = new Date();
+      try {
+        var responses = await Promise.all([
+          fetchJsonOrEmpty("/api/finance/receivables"),
+          fetchJsonOrEmpty("/api/finance/payables"),
+        ]);
+
+        var receivables = normalizeArrayResponse(responses[0]);
+        var payables = normalizeArrayResponse(responses[1]);
+
+        var recOpen = receivables.filter(isFinancialOpen);
+        var payOpen = payables.filter(isFinancialOpen);
+
+        var recOpenSum = sumBy(recOpen, pickMoney);
+        var payOpenSum = sumBy(payOpen, pickMoney);
+        var overdueCount = recOpen.concat(payOpen).filter(function (row) {
+          var due = parseDateSafe(pickAnyDate(row));
+          return due && due < nowDate;
+        }).length;
+
+        $("#kpiFinanceReceivablesOpen").text(moneyCurrencyPtBr(recOpenSum, "BRL"));
+        $("#kpiFinancePayablesOpen").text(moneyCurrencyPtBr(payOpenSum, "BRL"));
+        $("#kpiFinanceNet").text(moneyCurrencyPtBr(recOpenSum - payOpenSum, "BRL"));
+        $("#kpiFinanceOverdueCount").text(String(overdueCount));
+
+        var inByMonth = new Array(12).fill(0);
+        var outByMonth = new Array(12).fill(0);
+        recOpen.forEach(function (row) {
+          var d = parseDateSafe(pickAnyDate(row));
+          if (!d || d.getFullYear() !== year) return;
+          inByMonth[d.getMonth()] += pickMoney(row);
+        });
+        payOpen.forEach(function (row) {
+          var d = parseDateSafe(pickAnyDate(row));
+          if (!d || d.getFullYear() !== year) return;
+          outByMonth[d.getMonth()] += pickMoney(row);
+        });
+
+        financeCashChart = buildOrUpdateChart(financeCashChart, "financeCashChart", {
+          type: "line",
+          data: {
+            labels: monthsPt,
+            datasets: [
+              { label: "Entradas", borderColor: "rgba(26,179,148,1)", backgroundColor: "rgba(26,179,148,.12)", data: inByMonth },
+              { label: "Saídas", borderColor: "rgba(220,53,69,1)", backgroundColor: "rgba(220,53,69,.10)", data: outByMonth },
+            ],
+          },
+          options: { responsive: true, maintainAspectRatio: false },
+        });
+
+        var upcoming = recOpen.map(function (row) {
+          return { kind: "Receber", title: pickAnyTitle(row), due: parseDateSafe(pickAnyDate(row)), amount: pickMoney(row) };
+        }).concat(payOpen.map(function (row) {
+          return { kind: "Pagar", title: pickAnyTitle(row), due: parseDateSafe(pickAnyDate(row)), amount: pickMoney(row) };
+        }));
+
+        upcoming = upcoming
+          .filter(function (row) { return !!row.due; })
+          .sort(function (a, b) { return a.due - b.due; })
+          .slice(0, 8);
+
+        var rows = upcoming.map(function (row) {
+          var kindClass = row.kind === "Receber" ? "label label-info" : "label label-danger";
+          return `<tr>
+            <td><span class="${kindClass}">${escapeHtml(row.kind)}</span></td>
+            <td>${escapeHtml(row.title)}</td>
+            <td>${escapeHtml(formatDatePtBr(row.due))}</td>
+            <td>${escapeHtml(moneyCurrencyPtBr(row.amount, "BRL"))}</td>
+          </tr>`;
+        }).join("");
+
+        renderTableRows($("#financeUpcomingTbody"), rows, 4, "Sem títulos próximos.");
+      } catch (e) {
+        console.error("Finance dashboard error:", e);
+        renderTableRows($("#financeUpcomingTbody"), "", 4, "Erro ao carregar dados financeiros.");
+      }
+    }
+
+    async function loadHrDashboard() {
+      try {
+        var responses = await Promise.all([
+          fetchJsonOrEmpty("/api/hr/employees"),
+          fetchJsonOrEmpty("/api/hr/leave-requests"),
+          fetchJsonOrEmpty("/api/hr/department-assignments"),
+          fetchJsonOrEmpty("/api/hr/employee-lifecycle-tasks"),
+        ]);
+        var employees = normalizeArrayResponse(responses[0]);
+        var leaves = normalizeArrayResponse(responses[1]);
+        var assignments = normalizeArrayResponse(responses[2]);
+        var lifecycleTasks = normalizeArrayResponse(responses[3]);
+
+        var activeEmployees = employees.filter(function (row) {
+          if (row?.is_active === false) return false;
+          var st = toStatusText(row?.employment_status || row);
+          if (st.includes("INAT") || st.includes("INACT") || st.includes("TERM")) return false;
+          return true;
+        });
+
+        var pendingLeaves = leaves.filter(function (row) {
+          var st = toStatusText(row);
+          return st.includes("PEND") || st.includes("DRAFT") || st.includes("SUBMIT");
+        });
+
+        var openLifecycleTasks = lifecycleTasks.filter(function (row) {
+          return isOpenLikeStatus(toStatusText(row));
+        });
+
+        $("#kpiHrEmployeesTotal").text(String(employees.length));
+        $("#kpiHrEmployeesActive").text(String(activeEmployees.length));
+        $("#kpiHrPendingLeaves").text(String(pendingLeaves.length));
+        $("#kpiHrOpenLifecycleTasks").text(String(openLifecycleTasks.length));
+
+        var deptCounts = {};
+        assignments.forEach(function (row) {
+          var label = String(row?.department?.name || row?.department_name || row?.department_id || "Sem departamento");
+          deptCounts[label] = (deptCounts[label] || 0) + 1;
+        });
+        var deptLabels = Object.keys(deptCounts).sort(function (a, b) { return deptCounts[b] - deptCounts[a]; }).slice(0, 8);
+        var deptValues = deptLabels.map(function (k) { return deptCounts[k]; });
+
+        hrDepartmentChart = buildOrUpdateChart(hrDepartmentChart, "hrDepartmentChart", {
+          type: "bar",
+          data: {
+            labels: deptLabels,
+            datasets: [{ label: "Colaboradores", backgroundColor: "rgba(28,132,198,0.7)", borderColor: "rgba(28,132,198,1)", data: deptValues }],
+          },
+          options: { responsive: true, maintainAspectRatio: false, legend: { display: false } },
+        });
+
+        var leaveRows = pendingLeaves
+          .slice()
+          .sort(function (a, b) { return new Date(pickAnyDate(b) || 0) - new Date(pickAnyDate(a) || 0); })
+          .slice(0, 7)
+          .map(function (row) {
+            var employee = row?.employee?.full_name || row?.employee_name || "-";
+            var start = formatDatePtBr(row?.start_datetime || row?.start_date || row?.startDate);
+            var end = formatDatePtBr(row?.end_datetime || row?.end_date || row?.endDate);
+            var status = toStatusText(row) || "-";
+            return `<tr>
+              <td>${escapeHtml(employee)}</td>
+              <td>${escapeHtml(start)} - ${escapeHtml(end)}</td>
+              <td><span class="dash-pill">${escapeHtml(status)}</span></td>
+            </tr>`;
+          })
+          .join("");
+
+        renderTableRows($("#hrLeavePendingTbody"), leaveRows, 3, "Sem solicitações pendentes.");
+        renderHrVacationCalendar(leaves);
+      } catch (e) {
+        console.error("HR dashboard error:", e);
+        renderTableRows($("#hrLeavePendingTbody"), "", 3, "Erro ao carregar dados de RH.");
+        renderHrVacationCalendar([]);
+      }
+    }
+
+    async function loadServicesDashboard() {
+      var nowDate = new Date();
+      try {
+        var responses = await Promise.all([
+          fetchJsonOrEmpty("/api/service/incidents"),
+          fetchJsonOrEmpty("/api/service/tasks"),
+          fetchJsonOrEmpty("/api/service/sla/instance-kpis"),
+          fetchJsonOrEmpty("/api/service/queues"),
+        ]);
+        var incidents = normalizeArrayResponse(responses[0]);
+        var tasks = normalizeArrayResponse(responses[1]);
+        var slaKpis = normalizeArrayResponse(responses[2]);
+        var queues = normalizeArrayResponse(responses[3]);
+
+        var openIncidents = incidents.filter(function (row) { return isOpenLikeStatus(toStatusText(row)); });
+        var overdueIncidents = openIncidents.filter(function (row) {
+          var due = parseDateSafe(row?.due_at || row?.dueAt || row?.target_at || row?.targetAt);
+          return due && due < nowDate;
+        });
+        var openTasks = tasks.filter(function (row) { return isOpenLikeStatus(toStatusText(row)); });
+        var breachedSla = slaKpis.filter(function (row) {
+          var st = toStatusText(row);
+          return st.includes("BREACH") || st.includes("FAILED");
+        });
+
+        $("#kpiSvcOpenIncidents").text(String(openIncidents.length));
+        $("#kpiSvcOverdueIncidents").text(String(overdueIncidents.length));
+        $("#kpiSvcOpenTasks").text(String(openTasks.length));
+        $("#kpiSvcBreachedSla").text(String(breachedSla.length));
+
+        var statusCounts = {};
+        incidents.forEach(function (row) {
+          var st = toStatusText(row) || "SEM STATUS";
+          statusCounts[st] = (statusCounts[st] || 0) + 1;
+        });
+        var statusLabels = Object.keys(statusCounts);
+        var statusValues = statusLabels.map(function (k) { return statusCounts[k]; });
+
+        servicesStatusChart = buildOrUpdateChart(servicesStatusChart, "servicesStatusChart", {
+          type: "doughnut",
+          data: {
+            labels: statusLabels,
+            datasets: [{ data: statusValues, backgroundColor: ["#1ab394", "#1c84c6", "#f8ac59", "#ed5565", "#23c6c8", "#999"] }],
+          },
+          options: { responsive: true, maintainAspectRatio: false, legend: { position: "bottom" } },
+        });
+
+        var queueNameById = {};
+        queues.forEach(function (q) {
+          queueNameById[String(q?.id || "")] = q?.name || q?.code || "Fila";
+        });
+        var queueCounts = {};
+        openIncidents.forEach(function (row) {
+          var queueId = String(row?.queue_id || row?.queue?.id || "");
+          var name = queueNameById[queueId] || row?.queue?.name || "Sem fila";
+          queueCounts[name] = (queueCounts[name] || 0) + 1;
+        });
+        var queueRows = Object.keys(queueCounts)
+          .sort(function (a, b) { return queueCounts[b] - queueCounts[a]; })
+          .slice(0, 8)
+          .map(function (name) { return `<tr><td>${escapeHtml(name)}</td><td>${queueCounts[name]}</td></tr>`; })
+          .join("");
+
+        renderTableRows($("#servicesQueueLoadTbody"), queueRows, 2, "Sem filas com incidentes abertos.");
+      } catch (e) {
+        console.error("Services dashboard error:", e);
+        renderTableRows($("#servicesQueueLoadTbody"), "", 2, "Erro ao carregar dados de Services.");
+      }
+    }
+
+    async function loadProjectOperationsDashboard() {
+      var nowDate = new Date();
+      var dueSoonLimit = new Date(nowDate.getTime() + (15 * 24 * 60 * 60 * 1000));
+      try {
+        var responses = await Promise.all([
+          fetchJsonOrEmpty("/api/project-operations/projects"),
+          fetchJsonOrEmpty("/api/project-operations/work-orders"),
+          fetchJsonOrEmpty("/api/project-operations/deliverables"),
+          fetchJsonOrEmpty("/api/project-operations/milestones"),
+        ]);
+        var projects = normalizeArrayResponse(responses[0]);
+        var workOrders = normalizeArrayResponse(responses[1]);
+        var deliverables = normalizeArrayResponse(responses[2]);
+        var milestones = normalizeArrayResponse(responses[3]);
+
+        var activeProjects = projects.filter(function (row) { return isOpenLikeStatus(toStatusText(row)); });
+        var openWorkOrders = workOrders.filter(function (row) { return isOpenLikeStatus(toStatusText(row)); });
+
+        var dueSoonDeliverables = deliverables.filter(function (row) {
+          var due = parseDateSafe(row?.due_date || row?.dueDate || row?.target_end_date || row?.targetEndDate);
+          if (!due) return false;
+          if (!isOpenLikeStatus(toStatusText(row))) return false;
+          return due >= nowDate && due <= dueSoonLimit;
+        });
+
+        var overdueMilestones = milestones.filter(function (row) {
+          var due = parseDateSafe(row?.due_date || row?.dueDate || row?.target_end_date || row?.targetEndDate);
+          if (!due) return false;
+          return due < nowDate && isOpenLikeStatus(toStatusText(row));
+        });
+
+        $("#kpiPoActiveProjects").text(String(activeProjects.length));
+        $("#kpiPoOpenWorkOrders").text(String(openWorkOrders.length));
+        $("#kpiPoDueSoonDeliverables").text(String(dueSoonDeliverables.length));
+        $("#kpiPoOverdueMilestones").text(String(overdueMilestones.length));
+
+        var woStatusCounts = {};
+        workOrders.forEach(function (row) {
+          var st = toStatusText(row) || "SEM STATUS";
+          woStatusCounts[st] = (woStatusCounts[st] || 0) + 1;
+        });
+        var woLabels = Object.keys(woStatusCounts);
+        var woValues = woLabels.map(function (k) { return woStatusCounts[k]; });
+
+        poStatusChart = buildOrUpdateChart(poStatusChart, "poWorkOrdersStatusChart", {
+          type: "bar",
+          data: {
+            labels: woLabels,
+            datasets: [{ label: "Work Orders", backgroundColor: "rgba(102,16,242,0.65)", borderColor: "rgba(102,16,242,1)", data: woValues }],
+          },
+          options: { responsive: true, maintainAspectRatio: false, legend: { display: false } },
+        });
+
+        var deliverableRows = dueSoonDeliverables
+          .slice()
+          .sort(function (a, b) {
+            return new Date(a?.due_date || a?.dueDate || 0) - new Date(b?.due_date || b?.dueDate || 0);
+          })
+          .slice(0, 8)
+          .map(function (row) {
+            var title = row?.name || row?.title || row?.code || "-";
+            var due = formatDatePtBr(row?.due_date || row?.dueDate || row?.target_end_date || row?.targetEndDate);
+            var status = toStatusText(row) || "-";
+            return `<tr>
+              <td>${escapeHtml(title)}</td>
+              <td>${escapeHtml(due)}</td>
+              <td><span class="dash-pill">${escapeHtml(status)}</span></td>
+            </tr>`;
+          })
+          .join("");
+
+        renderTableRows($("#poUpcomingDeliverablesTbody"), deliverableRows, 3, "Sem entregas próximas.");
+      } catch (e) {
+        console.error("Project & Operations dashboard error:", e);
+        renderTableRows($("#poUpcomingDeliverablesTbody"), "", 3, "Erro ao carregar dados de Project & Operations.");
+      }
+    }
+
     // -------------------- Init --------------------
     buildDashPicker();
     setSortIndicator();
     loadDashboard();
   });
 </script>
+
+
+
 

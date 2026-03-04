@@ -36,6 +36,40 @@
     padding: 8px 10px;
     color: #777;
   }
+  .hr-related-wrap { margin-top: 8px; }
+  .hr-related-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .hr-related-list {
+    max-height: 65vh;
+    overflow-y: auto;
+    border: 1px solid #e7eaec;
+    border-radius: 4px;
+  }
+  .hr-related-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 0;
+    border-bottom: 1px solid #edf1f5;
+    border-radius: 0 !important;
+    font-size: 12px;
+  }
+  .hr-related-item:last-child { border-bottom: 0; }
+  .hr-related-item.active,
+  .hr-related-item.active:hover,
+  .hr-related-item.active:focus {
+    background: #1ab394;
+    border-color: #1ab394;
+    color: #fff;
+  }
+  .hr-related-row-clickable { cursor: pointer; }
+  .hr-related-row-clickable:hover { background: #f5f9fc; }
+  #hrFormMainRow.hr-related-mode #hrTipsCol { display: none; }
+  #hrFormMainRow.hr-related-mode #hrFormMainCol { width: 100%; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -52,11 +86,11 @@
         </div>
       </div>
       <div class="ibox-content">
-        <div class="row">
-          <div class="col-md-8">
+        <div class="row" id="hrFormMainRow">
+          <div class="col-md-8" id="hrFormMainCol">
             <div id="hrFormFields"></div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4" id="hrTipsCol">
             <div class="panel panel-default">
               <div class="panel-heading"><strong><%= t('page.hr.common.tips') %></strong></div>
               <div class="panel-body">
@@ -85,7 +119,11 @@
                       <th style="width:90px;"><%= t('page.hr.common.actions') %></th>
                     </tr>
                   </thead>
-                  <tbody id="hrPaymentsBody"></tbody>
+                  <tbody id="hrPaymentsBody">
+                    <tr>
+                      <td colspan="6" class="text-muted">Nenhum registro encontrado.</td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
             </div>

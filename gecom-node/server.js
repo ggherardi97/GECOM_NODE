@@ -41,6 +41,7 @@ const hrPagesRoutes = require("./routes/hrPages");
 const poApiRoutes = require("./routes/poApi");
 const poPagesRoutes = require("./routes/poPages");
 const adminApiRoutes = require("./routes/adminApi");
+const calendarActivitiesApiRoutes = require("./routes/calendarActivitiesApi");
 const adminPagesRoutes = require("./routes/adminPages");
 const scarletDriveRoutes = require("./routes/scarletDrive");
 
@@ -49,6 +50,61 @@ const usersApiRoutes = require(usersApiPath);
 const tenantsApiRoutes = require("./routes/tenantsApi");
 
 const app = express();
+
+function getBackendBaseUrl() {
+  const baseUrl = process.env.BACKEND_API_BASE_URL || process.env.API_BASE_URL;
+  if (!baseUrl) return null;
+  return String(baseUrl).replace(/\/$/, "");
+}
+
+function getAuthHeaderFromReq(req) {
+  const headerAuth = req.headers.authorization;
+  if (headerAuth && headerAuth.startsWith("Bearer ")) return headerAuth;
+  const token = req.cookies?.token || req.cookies?.access_token;
+  if (token) return `Bearer ${token}`;
+  return null;
+}
+
+async function readJsonSafe(response) {
+  const text = await response.text().catch(() => "");
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+}
+
+async function fetchPublishedLandingPage(req) {
+  const baseUrl = getBackendBaseUrl();
+  if (!baseUrl) return null;
+
+  const authHeader = getAuthHeaderFromReq(req);
+  if (!authHeader) return null;
+
+  try {
+    const response = await fetch(`${baseUrl}/admin/landing-page/published`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: authHeader,
+      },
+    });
+
+    if (!response.ok) return null;
+    const data = await readJsonSafe(response);
+    const publishedHtml = String(data?.published_html || "").trim();
+    if (!publishedHtml) return null;
+
+    return {
+      published_html: publishedHtml,
+      published_css: String(data?.published_css || ""),
+    };
+  } catch (error) {
+    console.error("Failed to fetch published landing page:", error);
+    return null;
+  }
+}
 
 /* ---------- View engine (EJS + layouts) ---------- */
 app.use(expressLayouts);
@@ -146,6 +202,7 @@ app.use("/api", financeApiRoutes);
 app.use("/api", hrApiRoutes);
 app.use("/api", poApiRoutes);
 app.use("/api", adminApiRoutes);
+app.use("/api", calendarActivitiesApiRoutes);
 app.use("/", billingPagesRoutes);
 app.use("/", servicePagesRoutes);
 app.use("/", financePagesRoutes);
@@ -167,6 +224,7 @@ app.get('/ClientDetails', (req, res) => res.render('ClientDetails'));
 app.get('/NewClient', (req, res) => res.render('NewClient'));
 app.get('/MyDocuments', (req, res) => res.render('MyDocuments'));
 app.get('/Default', (req, res) => res.render('Default'));
+app.get('/DashboardRH', (req, res) => res.redirect('/Default?view=hr'));
 app.get(['/AI', '/ai'], (req, res) => res.render('AI'));
 app.get('/Processos', (req, res) => res.render('Processos'));
 app.get('/NovoProcesso', (req, res) => res.render('NovoProcesso'));
@@ -206,7 +264,23 @@ app.get('/automations/:id/builder', (req, res) => res.render('automations/builde
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
-app.get('/LandingPage', (req, res) => res.render('LandingPage', { layout: false }));
+app.get('/LandingPage', async (req, res) => {
+  const forceDefaultTemplate = String(req.query?.template || "").trim() === "1";
+  if (forceDefaultTemplate) {
+    return res.render("LandingPage", { layout: false });
+  }
+
+  const published = await fetchPublishedLandingPage(req);
+  if (published?.published_html) {
+    return res.render("LandingPageCustom", {
+      layout: false,
+      landingPageHtml: published.published_html,
+      landingPageCss: published.published_css || "",
+    });
+  }
+
+  return res.render("LandingPage", { layout: false });
+});
 app.get(['/cadastro', '/register'], (req, res) => res.render('PublicRegister', { layout: false }));
 
 /* ---------- 404 e erro genérico (opcional, mas útil) ---------- */

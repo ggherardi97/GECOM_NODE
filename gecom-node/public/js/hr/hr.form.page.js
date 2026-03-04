@@ -7,11 +7,40 @@
   const params = new URLSearchParams(window.location.search || "");
   const state = {
     id: String(params.get("id") || "").trim() || null,
+    prefill: {},
     lookups: {},
     currentRow: null,
     payments: [],
     tabs: [],
     fieldToTab: {},
+    relatedDefs: [],
+    relatedActiveKey: "",
+    relatedCache: {},
+  };
+
+  const relatedFormPathByApi = {
+    "/api/hr/departments": "/NewHRDepartment",
+    "/api/hr/positions": "/NewHRPosition",
+    "/api/hr/work-locations": "/NewHRWorkLocation",
+    "/api/hr/employment-statuses": "/NewHREmploymentStatus",
+    "/api/hr/document-types": "/NewHRDocumentType",
+    "/api/hr/marital-statuses": "/NewHRMaritalStatus",
+    "/api/hr/employees": "/NewHREmployee",
+    "/api/hr/department-assignments": "/NewHRAssignment",
+    "/api/hr/work-schedules": "/NewHRWorkSchedule",
+    "/api/hr/employee-schedule-assignments": "/NewHREmployeeScheduleAssignment",
+    "/api/hr/leave-types": "/NewHRLeaveType",
+    "/api/hr/leave-requests": "/NewHRLeaveRequest",
+    "/api/hr/skill-categories": "/NewHRSkillCategory",
+    "/api/hr/skills": "/NewHRSkill",
+    "/api/hr/employee-skills": "/NewHREmployeeSkill",
+    "/api/hr/certifications": "/NewHRCertification",
+    "/api/hr/employee-certifications": "/NewHREmployeeCertification",
+    "/api/hr/lifecycle/templates": "/NewHRLifecycleTemplate",
+    "/api/hr/lifecycle/stages": "/NewHRLifecycleStage",
+    "/api/hr/lifecycle/tasks": "/NewHRLifecycleTask",
+    "/api/hr/lifecycle/employee-lifecycles": "/NewHREmployeeLifecycle",
+    "/api/hr/lifecycle/employee-lifecycle-tasks": "/NewHREmployeeLifecycleTask",
   };
 
   function api(url, opts) {
@@ -74,6 +103,64 @@
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
   }
+
+  function normalizeApiPath(value) {
+    return String(value || "")
+      .trim()
+      .split("?")[0]
+      .replace(/\/+$/g, "");
+  }
+
+  function resolveRelatedFormPath(def) {
+    const api = normalizeApiPath(def?.api);
+    if (!api) return "";
+    return String(relatedFormPathByApi[api] || "").trim();
+  }
+
+  function relatedRecordId(row) {
+    const id = row?.id;
+    const text = String(id == null ? "" : id).trim();
+    return text || "";
+  }
+
+  function buildRelatedEditUrl(def, row) {
+    const formPath = resolveRelatedFormPath(def);
+    const id = typeof row === "string" ? String(row || "").trim() : relatedRecordId(row);
+    if (!formPath || !id) return "";
+    return `${formPath}?id=${encodeURIComponent(id)}`;
+  }
+
+  function buildRelatedNewUrl(def) {
+    const formPath = resolveRelatedFormPath(def);
+    const filter = String(def?.filter || "").trim();
+    if (!formPath || !filter || !state.id) return "";
+    const url = new URL(formPath, window.location.origin);
+    url.searchParams.set(filter, String(state.id));
+    return `${url.pathname}?${url.searchParams.toString()}`;
+  }
+
+  function buildPrefillFromQuery() {
+    const fields = Array.isArray(config.formFields) ? config.formFields : [];
+    const byName = new Map(fields.map((field) => [String(field?.name || "").trim(), field]));
+    const prefill = {};
+    params.forEach((rawValue, rawKey) => {
+      const key = String(rawKey || "").trim();
+      if (!key || key === "id") return;
+      const field = byName.get(key);
+      if (!field) return;
+
+      const value = String(rawValue == null ? "" : rawValue).trim();
+      if (field.type === "checkbox") {
+        const normalized = value.toLowerCase();
+        prefill[key] = ["1", "true", "t", "yes", "sim", "on"].includes(normalized);
+        return;
+      }
+      prefill[key] = value;
+    });
+    return prefill;
+  }
+
+  state.prefill = buildPrefillFromQuery();
 
   function isIntegerField(field) {
     if (field?.type !== "number") return false;
@@ -250,6 +337,269 @@
     return keep;
   }
 
+  function getRelatedPaneId() {
+    return "hrTab_related";
+  }
+
+  function getRelatedDefinitions() {
+    const defs = Array.isArray(config.relatedResources) ? config.relatedResources : [];
+    return defs
+      .map((def, idx) => ({
+        key: String(def?.id || `related_${idx + 1}`).trim(),
+        label: String(def?.label || `Relacionado ${idx + 1}`).trim(),
+        api: String(def?.api || "").trim(),
+        filter: String(def?.filter || "").trim(),
+        query: def?.query && typeof def.query === "object" ? Object.assign({}, def.query) : {},
+        columns: Array.isArray(def?.columns) ? def.columns.slice() : [],
+      }))
+      .filter((def) => def.key && def.api && def.filter);
+  }
+
+  function relatedDefinitionByKey(key) {
+    const normalized = String(key || "").trim();
+    if (!normalized) return null;
+    return (state.relatedDefs || []).find((def) => String(def.key) === normalized) || null;
+  }
+
+  function pathValue(row, path) {
+    const normalized = String(path || "").trim();
+    if (!normalized) return null;
+    const parts = normalized.split(".");
+    let current = row;
+    for (const part of parts) {
+      if (current == null) return null;
+      current = current?.[part];
+    }
+    return current;
+  }
+
+  function formatDateBr(value) {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    return d.toLocaleDateString("pt-BR");
+  }
+
+  function formatDateTimeBr(value) {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    return d.toLocaleString("pt-BR");
+  }
+
+  function formatRelatedValue(raw, column) {
+    const format = String(column?.format || "").trim().toLowerCase();
+    if (format === "date") return formatDateBr(raw);
+    if (format === "datetime") return formatDateTimeBr(raw);
+    if (format === "bool") return raw ? tt("page.hr.common.yes", "Sim") : tt("page.hr.common.no", "Não");
+    if (Array.isArray(raw)) {
+      if (!raw.length) return "-";
+      return raw
+        .slice(0, 3)
+        .map((item) => lookupLabel(item))
+        .join(", ");
+    }
+    if (raw && typeof raw === "object") return lookupLabel(raw) || "-";
+    const text = String(raw == null ? "" : raw).trim();
+    return text || "-";
+  }
+
+  function inferRelatedColumns(rows) {
+    const first = rows?.[0];
+    if (!first || typeof first !== "object") return [];
+    return Object.keys(first)
+      .filter((key) => !["id", "tenant_id", "deleted_at", "created_at", "updated_at"].includes(String(key)))
+      .slice(0, 6)
+      .map((key) => ({ key, label: key }));
+  }
+
+  function relatedRequestUrl(def) {
+    const params = new URLSearchParams();
+    params.set(def.filter, String(state.id || ""));
+    const extra = def.query || {};
+    Object.entries(extra).forEach(([key, value]) => {
+      const name = String(key || "").trim();
+      const text = String(value == null ? "" : value).trim();
+      if (!name || !text) return;
+      params.set(name, text);
+    });
+    if (!params.has("page_size")) params.set("page_size", "100");
+    const base = String(def.api || "").trim();
+    if (!base) return "";
+    return `${base}${base.includes("?") ? "&" : "?"}${params.toString()}`;
+  }
+
+  function renderRelatedPane() {
+    return `
+      <div class="row hr-related-wrap">
+        <div class="col-md-4">
+          <div class="list-group hr-related-list" id="hrRelatedList"></div>
+        </div>
+        <div class="col-md-8">
+          <div class="panel panel-default">
+            <div class="panel-heading hr-related-header">
+              <strong id="hrRelatedTitle">${esc(tt("page.hr.tabs.related", "Relacionados"))}</strong>
+              <button type="button" id="btnHrRelatedNew" class="btn btn-primary btn-xs" style="display:none;">
+                <i class="fa fa-plus"></i> ${esc(tt("page.hr.common.new", "Novo"))}
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-condensed">
+                  <thead id="hrRelatedHead"></thead>
+                  <tbody id="hrRelatedBody">
+                    <tr><td class="text-muted">${esc(tt("page.hr.common.selectOne", "Selecione uma relação ao lado."))}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRelatedList() {
+    const $list = $("#hrRelatedList");
+    if (!$list.length) return;
+    const defs = state.relatedDefs || [];
+    if (!defs.length) {
+      $list.html(`<div class="text-muted" style="padding:10px;">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</div>`);
+      return;
+    }
+    const html = defs
+      .map((def) => {
+        const active = String(def.key) === String(state.relatedActiveKey || "") ? " active" : "";
+        const count = Array.isArray(state.relatedCache?.[def.key]) ? state.relatedCache[def.key].length : null;
+        return `
+          <button type="button" class="list-group-item hr-related-item${active} js-hr-related-item" data-related-key="${esc(def.key)}">
+            <span>${esc(def.label)}</span>
+            ${count == null ? "" : `<span class="badge">${esc(String(count))}</span>`}
+          </button>
+        `;
+      })
+      .join("");
+    $list.html(html);
+  }
+
+  function renderRelatedTable(def, rows) {
+    const $head = $("#hrRelatedHead");
+    const $body = $("#hrRelatedBody");
+    if (!$head.length || !$body.length) return;
+    const targetFormPath = resolveRelatedFormPath(def);
+
+    const columns = Array.isArray(def?.columns) && def.columns.length ? def.columns : inferRelatedColumns(rows);
+    if (!columns.length) {
+      $head.html("");
+      $body.html(`<tr><td class="text-muted">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</td></tr>`);
+      return;
+    }
+
+    $head.html(`<tr>${columns.map((col) => `<th>${esc(col?.label || col?.key || "-")}</th>`).join("")}</tr>`);
+
+    if (!Array.isArray(rows) || !rows.length) {
+      $body.html(`<tr><td colspan="${esc(String(columns.length))}" class="text-muted">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</td></tr>`);
+      return;
+    }
+
+    const html = rows
+      .map((row) => {
+        const rowId = relatedRecordId(row);
+        const clickable = !!(targetFormPath && rowId);
+        const rowClass = clickable ? "js-hr-related-row hr-related-row-clickable" : "";
+        const cells = columns
+          .map((column) => {
+            const raw = pathValue(row, column?.key);
+            return `<td>${esc(formatRelatedValue(raw, column))}</td>`;
+          })
+          .join("");
+        return `<tr class="${rowClass}" data-row-id="${esc(rowId)}">${cells}</tr>`;
+      })
+      .join("");
+    $body.html(html);
+  }
+
+  function setRelatedActive(defKey) {
+    const def = relatedDefinitionByKey(defKey);
+    if (!def) return;
+    state.relatedActiveKey = def.key;
+    renderRelatedList();
+    $("#hrRelatedTitle").text(def.label || tt("page.hr.tabs.related", "Relacionados"));
+    const newUrl = buildRelatedNewUrl(def);
+    const $newButton = $("#btnHrRelatedNew");
+    if ($newButton.length) {
+      $newButton.attr("data-related-key", def.key);
+      if (newUrl) $newButton.show();
+      else $newButton.hide();
+    }
+
+    const cached = state.relatedCache?.[def.key];
+    if (Array.isArray(cached)) {
+      renderRelatedTable(def, cached);
+      return;
+    }
+
+    $("#hrRelatedHead").html("");
+    $("#hrRelatedBody").html(`<tr><td class="text-muted">${esc(tt("page.hr.common.loading", "Carregando..."))}</td></tr>`);
+    const url = relatedRequestUrl(def);
+    if (!url) {
+      $("#hrRelatedBody").html(`<tr><td class="text-muted">URL inválida</td></tr>`);
+      return;
+    }
+
+    api(url)
+      .then((data) => {
+        const rows = normalizeArray(data);
+        state.relatedCache[def.key] = rows;
+        if (String(state.relatedActiveKey || "") !== String(def.key)) return;
+        renderRelatedList();
+        renderRelatedTable(def, rows);
+      })
+      .catch((error) => {
+        if (String(state.relatedActiveKey || "") !== String(def.key)) return;
+        $("#hrRelatedHead").html("");
+        $("#hrRelatedBody").html(`<tr><td class="text-danger">${esc(error?.message || "Erro ao carregar relacionados")}</td></tr>`);
+      });
+  }
+
+  function bindRelatedWidgets($scope) {
+    const defs = state.relatedDefs || [];
+    if (!$scope || !$scope.length || !defs.length || !state.id) return;
+
+    renderRelatedList();
+
+    $scope.off("click.finrelateditem", "#hrRelatedList .js-hr-related-item");
+    $scope.on("click.finrelateditem", "#hrRelatedList .js-hr-related-item", function () {
+      const key = String($(this).data("related-key") || "").trim();
+      if (!key) return;
+      setRelatedActive(key);
+    });
+
+    $scope.off("click.finrelatedrow", "#hrRelatedBody .js-hr-related-row");
+    $scope.on("click.finrelatedrow", "#hrRelatedBody .js-hr-related-row", function () {
+      const rowId = String($(this).data("row-id") || "").trim();
+      const def = relatedDefinitionByKey(state.relatedActiveKey);
+      if (!def || !rowId) return;
+      const url = buildRelatedEditUrl(def, rowId);
+      if (!url) return;
+      window.location.href = url;
+    });
+
+    $scope.off("click.finrelatednew", "#btnHrRelatedNew");
+    $scope.on("click.finrelatednew", "#btnHrRelatedNew", function () {
+      const key = String($(this).attr("data-related-key") || state.relatedActiveKey || "").trim();
+      const def = relatedDefinitionByKey(key);
+      if (!def) return;
+      const url = buildRelatedNewUrl(def);
+      if (!url) return;
+      window.location.href = url;
+    });
+
+    const firstKey = defs.find((def) => def?.key)?.key || "";
+    const targetKey = relatedDefinitionByKey(state.relatedActiveKey)?.key || firstKey;
+    if (targetKey) setRelatedActive(targetKey);
+  }
+
   function requiredMark(field) {
     return field.required ? `<span class="hr-required">*</span>` : "";
   }
@@ -353,6 +703,8 @@
 
   function renderFormTabs(row) {
     const tabs = buildFormTabs();
+    const relatedDefs = state.id ? getRelatedDefinitions() : [];
+    state.relatedDefs = relatedDefs;
     state.tabs = tabs;
     state.fieldToTab = {};
     tabs.forEach((tab) => {
@@ -361,14 +713,14 @@
       });
     });
 
-    const nav = tabs
+    let nav = tabs
       .map((tab, idx) => {
         const active = idx === 0 ? "active" : "";
         return `<li class="${active}"><a href="#${esc(tab.paneId)}" data-toggle="tab">${esc(tt(tab.label, tab.id))}</a></li>`;
       })
       .join("");
 
-    const panes = tabs
+    let panes = tabs
       .map((tab, idx) => {
         const active = idx === 0 ? "tab-pane active" : "tab-pane";
         const fieldsHtml = tab.fields
@@ -380,6 +732,11 @@
         return `<div class="${active}" id="${esc(tab.paneId)}"><div class="row">${fieldsHtml}</div></div>`;
       })
       .join("");
+
+    if (relatedDefs.length) {
+      nav += `<li><a href="#${esc(getRelatedPaneId())}" data-toggle="tab">${esc(tt("page.hr.tabs.related", "Relacionados"))}</a></li>`;
+      panes += `<div class="tab-pane" id="${esc(getRelatedPaneId())}">${renderRelatedPane()}</div>`;
+    }
 
     return `
       <ul class="nav nav-tabs hr-form-tabs" id="hrFormTabs">${nav}</ul>
@@ -542,6 +899,25 @@
     $(`#hrFormTabs a[href="#${id}"]`).closest("li").addClass("active");
     $(".hr-tab-content .tab-pane").removeClass("active");
     $(`#${id}`).addClass("active");
+    setRelatedLayoutMode(id === getRelatedPaneId());
+  }
+
+  function setRelatedLayoutMode(enabled) {
+    const $row = $("#hrFormMainRow");
+    const $mainCol = $("#hrFormMainCol");
+    const $tipsCol = $("#hrTipsCol");
+    if (!$row.length || !$mainCol.length || !$tipsCol.length) return;
+
+    if (enabled) {
+      $row.addClass("hr-related-mode");
+      $mainCol.removeClass("col-md-8").addClass("col-md-12");
+      $tipsCol.hide();
+      return;
+    }
+
+    $row.removeClass("hr-related-mode");
+    $mainCol.removeClass("col-md-12").addClass("col-md-8");
+    $tipsCol.show();
   }
 
   function bindTabClicks($scope) {
@@ -592,10 +968,20 @@
       if (withTabs) activateTabByField(first.name);
       focusField(first.name, prefix, $scope);
       const names = missing.map((field) => tt(field.label, field.name)).join(", ");
-      throw new Error(`${tt("page.hr.common.fillRequired", "Preencha os campos obrigatorios")}: ${names}`);
+      throw new Error(`${tt("page.hr.common.fillRequired", "Preencha os campos obrigatórios")}: ${names}`);
     }
 
     return payload;
+  }
+
+  function defaultWorkScheduleJson() {
+    return {
+      mon: { start: "09:00", end: "18:00", break: 60 },
+      tue: { start: "09:00", end: "18:00", break: 60 },
+      wed: { start: "09:00", end: "18:00", break: 60 },
+      thu: { start: "09:00", end: "18:00", break: 60 },
+      fri: { start: "09:00", end: "18:00", break: 60 },
+    };
   }
 
   function bindValidationClear($scope, prefix, fields) {
@@ -631,10 +1017,12 @@
     const fields = config.formFields || [];
     $("#hrFormFields").html(renderFormTabs(row || {}));
     const $scope = $("#hrFormFields");
+    setRelatedLayoutMode(false);
     bindTabClicks($scope);
     bindLookupWidgets($scope, "ff", fields);
     bindMoneyMasks($scope, "ff", fields);
     bindValidationClear($scope, "ff", fields);
+    bindRelatedWidgets($scope);
   }
 
   function renderPayments() {
@@ -663,7 +1051,7 @@
       .join("");
 
     $("#hrPaymentsBody").html(
-      html || `<tr><td colspan="6" class="text-muted">${esc(tt("page.hr.common.noPayments", "Sem pagamentos."))}</td></tr>`,
+      html || `<tr><td colspan="6" class="text-muted">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</td></tr>`,
     );
   }
 
@@ -680,6 +1068,8 @@
     const row = await api(`${config.apiBase}/${encodeURIComponent(id)}`);
     state.currentRow = row;
     state.payments = normalizeArray(row?.payments);
+    state.relatedCache = {};
+    state.relatedActiveKey = "";
     renderMainForm(row);
     renderPayments();
   }
@@ -801,6 +1191,9 @@
       const $scope = $("#hrFormFields");
       const payload = collectPayload(config.formFields || [], "ff", $scope, true);
       const isEdit = !!state.id;
+      if (!isEdit && page.key === "workSchedules") {
+        payload.schedule_json = defaultWorkScheduleJson();
+      }
       if (!isEdit && config.forceActiveOnCreate === true) {
         payload.is_active = true;
       }
@@ -856,11 +1249,11 @@
 
   $(document).ready(async function () {
     if (typeof waitForI18nReady === "function") await waitForI18nReady();
-    $("#pageName").text(tt(page.titleKey, "Hriro"));
-    $("#subpageName").text(tt(page.titleKey, "Hriro")).attr("href", page.gridPath);
+    $("#pageName").text(tt(page.titleKey, "RH"));
+    $("#subpageName").text(tt(page.titleKey, "RH")).attr("href", page.gridPath);
 
     await loadLookups();
-    renderMainForm({});
+    renderMainForm(state.id ? {} : state.prefill || {});
 
     if (state.id) {
       $("#btnHrDelete").show();

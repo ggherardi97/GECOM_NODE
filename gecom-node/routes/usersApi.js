@@ -373,6 +373,32 @@ router.get("/auth/me", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+/* -------------------- GET /api/me/access -------------------- */
+/**
+ * Forwards to BACKEND: GET {BACKEND_API_BASE_URL}/me/access
+ * Uses bearer token from Authorization header or access_token cookie.
+ */
+router.get("/me/access", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/me/access`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/me/access error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
 /* -------------------- GET /api/users/:id/profile-picture -------------------- */
 /**
  * Forwards to BACKEND: GET {BACKEND}/users/:id/profile-picture

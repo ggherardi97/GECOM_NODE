@@ -1,10 +1,21 @@
 (function () {
   const MODULE_AREA_OPTIONS = ["service", "sales", "finance", "hr", "po"];
+  const MODULE_AREA_LABELS = {
+    service: "Servicos",
+    sales: "Sales",
+    finance: "Financeiro",
+    hr: "RH",
+    po: "Project & Operations",
+  };
+  const MODULE_ACCESS_CACHE_KEY = "gecom.billing.moduleAccess.v1";
   const state = {
     modules: [],
     plans: [],
     selectedPlanId: null,
     selectedPlanModules: [],
+    areaEntityConfig: { areas: [] },
+    areaEntityOptions: [],
+    selectedAreaConfigId: null,
     selectedTenant: null,
     tenantSubscription: null,
     tenantResolvedModules: [],
@@ -54,12 +65,7 @@
   }
 
   function formatAreaLabel(area) {
-    if (area === "service") return "Servicos";
-    if (area === "sales") return "Vendas";
-    if (area === "finance") return "Financeiro";
-    if (area === "hr") return "RH";
-    if (area === "po") return "Project & Operations";
-    return area;
+    return MODULE_AREA_LABELS[area] || area;
   }
 
   function formatAreaKeys(value) {
@@ -406,6 +412,254 @@
     renderTenantOverridesTable();
   }
 
+  function normalizeEntityName(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (!normalized) return null;
+    if (!/^[a-z_][a-z0-9_]*$/.test(normalized)) return null;
+    return normalized;
+  }
+
+  function normalizeAreaEntityConfig(config, availableEntities) {
+    const sourceAreas = Array.isArray(config?.areas) ? config.areas : [];
+    const sourceById = new Map(
+      sourceAreas
+        .map((row) => [String(row?.id || "").trim().toLowerCase(), row])
+        .filter(([id]) => MODULE_AREA_OPTIONS.includes(id)),
+    );
+
+    const mappedAreas = MODULE_AREA_OPTIONS.map((area, idx) => {
+      const source = sourceById.get(area) || {};
+      const rawEntities = Array.isArray(source?.entities) ? source.entities : [];
+      const entities = rawEntities
+        .map((item) => normalizeEntityName(item))
+        .filter((item) => !!item);
+
+      return {
+        id: area,
+        label: String(source?.label || formatAreaLabel(area)).trim() || formatAreaLabel(area),
+        order: Number(source?.order || (idx + 1) * 10),
+        entities,
+      };
+    });
+
+    const hasEntities = mappedAreas.some((area) => area.entities.length > 0);
+    if (!hasEntities && Array.isArray(availableEntities)) {
+      availableEntities.forEach((entity) => {
+        const area = String(entity?.area || "").trim().toLowerCase();
+        const name = normalizeEntityName(entity?.name);
+        if (!name || !MODULE_AREA_OPTIONS.includes(area)) return;
+        const areaRow = mappedAreas.find((row) => row.id === area);
+        if (!areaRow) return;
+        if (!areaRow.entities.includes(name)) areaRow.entities.push(name);
+      });
+    }
+
+    const seenEntities = new Set();
+    mappedAreas.forEach((area) => {
+      area.entities = area.entities.filter((entity) => {
+        if (seenEntities.has(entity)) return false;
+        seenEntities.add(entity);
+        return true;
+      });
+    });
+
+    return { areas: mappedAreas };
+  }
+
+  function getSelectedAreaEntityConfig() {
+    const selected = (state.areaEntityConfig?.areas || []).find(
+      (row) => String(row.id) === String(state.selectedAreaConfigId || ""),
+    );
+    return selected || null;
+  }
+
+  function renderAreaEntityConfigList() {
+    const areas = Array.isArray(state.areaEntityConfig?.areas) ? state.areaEntityConfig.areas : [];
+    if (!areas.length) {
+      $("#billingAreaConfigList").html('<li class="billing-muted" style="cursor:default;">Nenhuma area disponivel.</li>');
+      $("#billingAreaConfigEditor").html('<p class="billing-muted">Nenhuma area para editar.</p>');
+      return;
+    }
+
+    if (!state.selectedAreaConfigId || !areas.some((row) => String(row.id) === String(state.selectedAreaConfigId))) {
+      state.selectedAreaConfigId = areas[0].id;
+    }
+
+    const html = areas
+      .map((area) => {
+        const active = String(area.id) === String(state.selectedAreaConfigId) ? "active" : "";
+        const count = Array.isArray(area.entities) ? area.entities.length : 0;
+        return `
+          <li class="${active}" data-area-id="${esc(area.id)}">
+            <strong>${esc(area.label || formatAreaLabel(area.id))}</strong><br />
+            <span class="billing-muted">${esc(area.id)} | ${esc(String(count))} tabela(s)</span>
+          </li>
+        `;
+      })
+      .join("");
+
+    $("#billingAreaConfigList").html(html);
+    $("#billingAreaConfigList [data-area-id]").off("click").on("click", function () {
+      state.selectedAreaConfigId = String($(this).data("area-id") || "");
+      renderAreaEntityConfigList();
+    });
+
+    renderAreaEntityConfigEditor();
+  }
+
+  function renderAreaEntityConfigEditor() {
+    const area = getSelectedAreaEntityConfig();
+    if (!area) {
+      $("#billingAreaConfigEditor").html('<p class="billing-muted">Selecione uma area para editar.</p>');
+      return;
+    }
+
+    const optionsByName = new Map(
+      (state.areaEntityOptions || [])
+        .map((item) => [String(item?.name || "").trim().toLowerCase(), item])
+        .filter(([name]) => !!name),
+    );
+
+    const areaByEntity = new Map();
+    (state.areaEntityConfig?.areas || []).forEach((row) => {
+      (Array.isArray(row.entities) ? row.entities : []).forEach((entity) => {
+        areaByEntity.set(String(entity), String(row.id));
+      });
+    });
+
+    const addOptions = (state.areaEntityOptions || [])
+      .map((item) => {
+        const name = normalizeEntityName(item?.name);
+        if (!name) return null;
+        if ((area.entities || []).includes(name)) return null;
+
+        const currentArea = String(areaByEntity.get(name) || "").trim();
+        const currentAreaLabel =
+          currentArea && currentArea !== area.id
+            ? ` | atualmente em ${formatAreaLabel(currentArea)}`
+            : "";
+        const label = String(item?.label || name).trim() || name;
+        return `<option value="${esc(name)}">${esc(label)} (${esc(name)})${esc(currentAreaLabel)}</option>`;
+      })
+      .filter((row) => !!row)
+      .join("");
+
+    const entitiesHtml = (area.entities || []).length
+      ? area.entities
+          .map((entity) => {
+            const meta = optionsByName.get(entity) || {};
+            const label = String(meta?.label || entity).trim() || entity;
+            return `
+              <li>
+                <div>
+                  <strong>${esc(label)}</strong><br />
+                  <span class="billing-muted">${esc(entity)}</span>
+                </div>
+                <button type="button" class="btn btn-xs btn-danger js-billing-remove-area-entity" data-entity="${esc(entity)}">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </li>
+            `;
+          })
+          .join("")
+      : '<li class="billing-muted" style="justify-content:flex-start;">Sem tabelas nesta area.</li>';
+
+    $("#billingAreaConfigEditor").html(`
+      <div class="row">
+        <div class="col-md-4 form-group">
+          <label>Area ID</label>
+          <input type="text" class="form-control" id="billingAreaConfigId" value="${esc(area.id)}" readonly />
+        </div>
+        <div class="col-md-8 form-group">
+          <label>Nome da area</label>
+          <input type="text" class="form-control" id="billingAreaConfigLabel" value="${esc(area.label || formatAreaLabel(area.id))}" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom:10px;">
+        <div class="col-md-9 form-group">
+          <label>Tabela</label>
+          <select id="billingAreaConfigAddEntitySelect" class="form-control">
+            ${addOptions || '<option value="">Sem tabelas disponiveis</option>'}
+          </select>
+        </div>
+        <div class="col-md-3 form-group" style="padding-top:24px;">
+          <button type="button" class="btn btn-success btn-sm" id="btnBillingAddAreaEntity">
+            <i class="fa fa-plus"></i> Adicionar
+          </button>
+        </div>
+      </div>
+
+      <ul id="billingAreaConfigEntityList" class="billing-entity-list">${entitiesHtml}</ul>
+    `);
+
+    $("#billingAreaConfigLabel").off("input").on("input", function () {
+      area.label = String($(this).val() || "").trim() || formatAreaLabel(area.id);
+      renderAreaEntityConfigList();
+    });
+
+    $("#btnBillingAddAreaEntity").off("click").on("click", function () {
+      const entity = normalizeEntityName($("#billingAreaConfigAddEntitySelect").val());
+      if (!entity) return;
+
+      (state.areaEntityConfig.areas || []).forEach((row) => {
+        row.entities = (row.entities || []).filter((item) => String(item) !== entity);
+      });
+      area.entities = Array.isArray(area.entities) ? area.entities : [];
+      area.entities.push(entity);
+
+      renderAreaEntityConfigList();
+    });
+
+    $("#billingAreaConfigEntityList .js-billing-remove-area-entity").off("click").on("click", function () {
+      const entity = normalizeEntityName($(this).data("entity"));
+      if (!entity) return;
+      area.entities = (area.entities || []).filter((item) => String(item) !== entity);
+      renderAreaEntityConfigList();
+    });
+  }
+
+  async function loadAreaEntityConfig() {
+    const [configPayload, entitiesPayload] = await Promise.all([
+      apiRequest("GET", "/api/admin/billing/area-entity-config"),
+      apiRequest("GET", "/api/admin/billing/area-entity-config/entities"),
+    ]);
+
+    state.areaEntityOptions = normalizeArray(entitiesPayload)
+      .map((item) => ({
+        name: normalizeEntityName(item?.name),
+        label: String(item?.label || "").trim(),
+        area: String(item?.area || "").trim().toLowerCase(),
+      }))
+      .filter((item) => !!item.name);
+
+    state.areaEntityConfig = normalizeAreaEntityConfig(configPayload?.config_json || {}, state.areaEntityOptions);
+    if (!state.selectedAreaConfigId) state.selectedAreaConfigId = state.areaEntityConfig?.areas?.[0]?.id || null;
+    renderAreaEntityConfigList();
+  }
+
+  async function saveAreaEntityConfig() {
+    const normalized = normalizeAreaEntityConfig(state.areaEntityConfig || {}, state.areaEntityOptions);
+    const payload = {
+      areas: (normalized.areas || []).map((area, idx) => ({
+        id: area.id,
+        label: String(area.label || formatAreaLabel(area.id)).trim() || formatAreaLabel(area.id),
+        order: Number(area.order || (idx + 1) * 10),
+        entities: (area.entities || []).map((entity) => String(entity)),
+      })),
+    };
+
+    const saved = await apiRequest("PUT", "/api/admin/billing/area-entity-config", payload);
+    state.areaEntityConfig = normalizeAreaEntityConfig(saved?.config_json || payload, state.areaEntityOptions);
+    showToast("success", "Configuração de tabelas por área salva.");
+
+    try {
+      localStorage.removeItem(MODULE_ACCESS_CACHE_KEY);
+    } catch {}
+
+    renderAreaEntityConfigList();
+  }
+
   function openModuleModal(module) {
     const isEdit = !!module?.id;
     $("#billingModuleModalTitle").text(isEdit ? "Editar modulo" : "Novo modulo");
@@ -740,6 +994,22 @@
       }
     });
 
+    $("#btnBillingAreaConfigReload").on("click", async () => {
+      try {
+        await loadAreaEntityConfig();
+      } catch (error) {
+        showToast("error", error.message || "Falha ao carregar configuracao de tabelas por area.");
+      }
+    });
+
+    $("#btnBillingAreaConfigSave").on("click", async () => {
+      try {
+        await saveAreaEntityConfig();
+      } catch (error) {
+        showToast("error", error.message || "Falha ao salvar configuracao de tabelas por area.");
+      }
+    });
+
     $("#btnBuscarTenant").on("click", async () => {
       try {
         await searchTenants();
@@ -805,7 +1075,7 @@
       $("#subpageName").text("Planos e Modulos").attr("href", "/admin/billing");
 
       bindEvents();
-      await Promise.all([loadModules(), loadPlans()]);
+      await Promise.all([loadModules(), loadPlans(), loadAreaEntityConfig()]);
     } catch (error) {
       showToast("error", error.message || "Falha ao inicializar pagina de billing.");
     }

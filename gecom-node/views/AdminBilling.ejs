@@ -9,6 +9,16 @@
   .billing-list-group { max-height: 360px; overflow-y: auto; }
   .billing-inline-actions { display: flex; gap: 6px; align-items: center; }
   .billing-inline-actions input[type="number"] { width: 90px; }
+  .billing-config-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .billing-config-layout { display:grid; grid-template-columns: 300px 1fr; gap: 14px; }
+  .billing-config-card { border:1px solid #e7eaec; border-radius:4px; background:#fff; }
+  .billing-config-card-head { padding:10px 12px; border-bottom:1px solid #e7eaec; font-weight:600; }
+  .billing-config-card-body { padding:12px; }
+  .billing-area-list { list-style:none; margin:0; padding:0; min-height:90px; max-height:360px; overflow:auto; }
+  .billing-area-list li { border:1px solid #e7eaec; border-radius:4px; padding:8px 10px; margin-bottom:8px; cursor:pointer; background:#fff; }
+  .billing-area-list li.active { border-color:#1ab394; background:#f3fbfa; }
+  .billing-entity-list { list-style:none; margin:0; padding:0; max-height:360px; overflow:auto; }
+  .billing-entity-list li { display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid #e7eaec; border-radius:4px; padding:8px 10px; margin-bottom:8px; background:#fff; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -26,6 +36,7 @@
         <ul class="nav nav-tabs" id="billingTabs">
           <li class="active"><a href="#tab-modulos" data-toggle="tab">Modulos</a></li>
           <li><a href="#tab-planos" data-toggle="tab">Planos</a></li>
+          <li><a href="#tab-area-entities" data-toggle="tab">Tabelas por Area</a></li>
           <% if (!bootstrapMode) { %>
             <li><a href="#tab-assinatura" data-toggle="tab">Assinatura do Tenant</a></li>
             <li><a href="#tab-overrides" data-toggle="tab">Overrides do Tenant</a></li>
@@ -103,6 +114,32 @@
                     </thead>
                     <tbody id="billingPlanModulesBody"></tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-area-entities">
+            <div class="billing-config-toolbar">
+              <div>
+                <button id="btnBillingAreaConfigSave" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Salvar</button>
+                <button id="btnBillingAreaConfigReload" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Recarregar</button>
+              </div>
+              <span class="billing-muted">Defina a qual area cada tabela pertence para controlar menu e automacoes por contrato.</span>
+            </div>
+
+            <div class="billing-config-layout">
+              <div class="billing-config-card">
+                <div class="billing-config-card-head">Areas</div>
+                <div class="billing-config-card-body">
+                  <ul id="billingAreaConfigList" class="billing-area-list"></ul>
+                </div>
+              </div>
+
+              <div class="billing-config-card">
+                <div class="billing-config-card-head">Editor da Area</div>
+                <div id="billingAreaConfigEditor" class="billing-config-card-body">
+                  <p class="billing-muted">Selecione uma area para editar.</p>
                 </div>
               </div>
             </div>

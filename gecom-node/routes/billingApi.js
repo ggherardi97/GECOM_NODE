@@ -1,4 +1,5 @@
 const express = require("express");
+const { createProxyHandler } = require("../services/apiProxy");
 
 const router = express.Router();
 const BOOTSTRAP_USER = process.env.BILLING_BOOTSTRAP_USER || "portaladmin";
@@ -134,6 +135,46 @@ router.get("/public/billing/plans", async (req, res) => {
   }
 });
 
+router.get("/public/bootstrap/billing/area-entity-config", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "GET",
+      url: backendUrl("/public/bootstrap/billing/area-entity-config"),
+      allowBasicAuth: true,
+    });
+  } catch (error) {
+    console.error("GET /api/public/bootstrap/billing/area-entity-config error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/public/bootstrap/billing/area-entity-config/entities", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "GET",
+      url: backendUrl("/public/bootstrap/billing/area-entity-config/entities"),
+      allowBasicAuth: true,
+    });
+  } catch (error) {
+    console.error("GET /api/public/bootstrap/billing/area-entity-config/entities error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.put("/public/bootstrap/billing/area-entity-config", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "PUT",
+      url: backendUrl("/public/bootstrap/billing/area-entity-config"),
+      withBody: true,
+      allowBasicAuth: true,
+    });
+  } catch (error) {
+    console.error("PUT /api/public/bootstrap/billing/area-entity-config error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 router.post("/admin/billing/modules", async (req, res) => {
   try {
     return await proxyJson(req, res, {
@@ -190,6 +231,46 @@ router.get("/admin/billing/plans", async (req, res) => {
     });
   } catch (error) {
     console.error("GET /api/admin/billing/plans error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/admin/billing/area-entity-config", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "GET",
+      url: backendUrl(billingBackendPath(req, "/area-entity-config")),
+      allowBasicAuth: shouldUseBootstrapBilling(req),
+    });
+  } catch (error) {
+    console.error("GET /api/admin/billing/area-entity-config error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/admin/billing/area-entity-config/entities", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "GET",
+      url: backendUrl(billingBackendPath(req, "/area-entity-config/entities")),
+      allowBasicAuth: shouldUseBootstrapBilling(req),
+    });
+  } catch (error) {
+    console.error("GET /api/admin/billing/area-entity-config/entities error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.put("/admin/billing/area-entity-config", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "PUT",
+      url: backendUrl(billingBackendPath(req, "/area-entity-config")),
+      withBody: true,
+      allowBasicAuth: shouldUseBootstrapBilling(req),
+    });
+  } catch (error) {
+    console.error("PUT /api/admin/billing/area-entity-config error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -365,16 +446,6 @@ router.get("/admin/tenants/search", async (req, res) => {
   }
 });
 
-router.get("/me/modules", async (req, res) => {
-  try {
-    return await proxyJson(req, res, {
-      method: "GET",
-      url: backendUrl("/me/modules"),
-    });
-  } catch (error) {
-    console.error("GET /api/me/modules error:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
+router.get("/me/modules", createProxyHandler({ backendPath: "/me/modules" }));
 
 module.exports = router;

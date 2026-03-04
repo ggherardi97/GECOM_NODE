@@ -633,21 +633,21 @@
         </ul>
         <ul class="nav metismenu" id="side-menu">
                  
-          <li data-areas="home,all">
+          <li data-areas="home">
             <a href="/Default">
               <i class="fa fa-home"></i>
               <span class="nav-label" data-i18n="page.layout.menu.dashboard">Dashboard</span>
             </a>
           </li>
           
-          <li data-areas="home,all" id="myActivitiesTab" style="display: none;">
+          <li data-areas="home" id="myActivitiesTab">
             <a href="/MyActivities">
               <i class="fa fa-tasks"></i>
-              <span class="nav-label">Minhas Atividades</span>
+              <span class="nav-label" data-i18n="page.layout.menu.myActivities"><%= t('page.layout.menu.myActivities') %></span>
             </a>
           </li>
 
-          <li data-areas="home,all" id="aiHubTab" style="display: none;">
+          <li data-areas="home" id="aiHubTab">
             <a href="/AI">
               <i class="fa fa-magic"></i>
               <span class="nav-label">IA</span>
@@ -655,465 +655,529 @@
           </li>
           <li id="tenantMenuMountPoint" data-areas="home,all" style="display:none !important;"></li>
 
-          <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.services"><%= t('page.layout.menu.services') %></a></li>
+          <li data-areas="home" data-module-areas="service" data-divider-id="home-operations"><a class="menuDivider" style="padding-top:20px;">Operações</a></li>
 
-          <li data-managed="tenant" data-home-template="1" data-entity="companies" data-areas="home" id="clientTab" style="display: none;">
+          <li data-areas="home" data-module-areas="service" data-divider-parent="home-operations" id="clientTab">
             <a href="/Clientes">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-home-template="1" data-entity="processes" data-areas="home">
+          <li data-areas="home" data-module-areas="service" data-divider-parent="home-operations">
             <a href="/Processos">
               <i class="fa fa-file"></i>
               <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
             </a>
           </li>
 
-          <li  data-areas="home" >
+          <li data-areas="home" data-module-areas="service" data-divider-parent="home-operations" id="myDocumentsTab">
             <a href="/MyDocuments">
               <i class="fa fa-folder"></i>
               <span class="nav-label" data-i18n="page.layout.menu.myDocuments">Meus Documentos</span>
             </a>
           </li>
-
-          <li  data-areas="home" ><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.sales"><%= t('page.layout.menu.sales') %></a></li>
-
-          <li data-managed="tenant" data-home-template="1" data-entity="invoices" data-areas="home">
-            <a href="/Invoices">
-              <i class="fa fa-money"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+          <li data-areas="home" data-module-areas="service" data-divider-parent="home-operations" id="homeAgendaAtividadesTab">
+            <a href="/servico/agenda">
+              <i class="fa fa-calendar"></i>
+              <span class="nav-label">Agenda de Atividades</span>
             </a>
           </li>
 
-          <li  data-areas="home"  id="calculoAduaneiro">
-            <a href="/calculo-aduaneiro">
-              <i class="fa fa-balance-scale"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.customsCalculation"><%= t('page.layout.menu.customsCalculation') %></span>
-            </a>
-          </li>
+          <li data-areas="home" data-module-areas="sales" data-divider-id="home-sales"><a class="menuDivider" style="padding-top:20px;">Vendas</a></li>
 
-          <li data-managed="tenant" data-home-template="1" data-entity="products" data-areas="home" id="productTab" style="display: none;">
-            <a href="/Products">
-              <i class="fa fa-cube"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
-            </a>
-          </li>
-
-          <li data-managed="tenant" data-home-template="1" data-entity="leads" data-areas="home" id="leadsTab" style="display: none;">
+          <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales" id="leadsTab">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
             </a>
           </li>
 
-          <li data-areas="home,sales" id="automationsTab" style="display: none;">
-            <a href="/automations">
-              <i class="fa fa-bolt"></i>
-              <span class="nav-label">Automações</span>
+          <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales">
+            <a href="/Opportunities">
+              <i class="fa fa-bullseye"></i>
+              <span class="nav-label">Opportunity</span>
             </a>
           </li>
 
-          <li  data-areas="home"  id="configDivider" style="display: none;"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.settings"><%= t('page.layout.menu.settings') %></a></li>
-          <li  data-areas="home"  id='notificationList' style="display: none;">
+          <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales">
+            <a href="/Invoices">
+              <i class="fa fa-money"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales" id="productTab">
+            <a href="/Products">
+              <i class="fa fa-cube"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+            </a>
+          </li>
+
+          <li data-areas="home" id="configDivider" data-divider-id="home-settings"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li data-areas="home" data-divider-parent="home-settings" id='notificationList'>
             <a href="/Notifications">
               <i class="fa fa-bell"></i>
               <span class="nav-label" data-i18n="page.layout.menu.notifications"><%= t('page.layout.menu.notifications') %></span>
             </a>
           </li>
-          <li  data-areas="home" id="statusConfigsMenu" style="display: none;">
-            <a href="/configuracoes/status">
-              <i class="fa fa-sliders"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.statusConfigs"><%= t('page.layout.menu.statusConfigs') %></span>
-            </a>
-          </li>
-          <li data-areas="home,settings" id="configMainMenu" style="display: none;">
+          <li data-areas="home" data-divider-parent="home-settings" id="configMainMenu">
             <a href="/configuracoes">
               <i class="fa fa-cogs"></i>
               <span class="nav-label" data-i18n="page.layout.menu.settingsCenter"><%= t('page.layout.menu.settingsCenter', { defaultValue: 'Configuracoes' }) %></span>
             </a>
           </li>
 
-          <li data-areas="service"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
+          <li data-areas="service" data-divider-id="service-main"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
 
-          <li data-managed="tenant" data-entity="companies" id="clientTabService" style="display: none;" data-areas="service">
+          <li id="clientTabService" data-areas="service" data-divider-parent="service-main">
             <a href="/Clientes">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.clients">Clientes</span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-entity="processes" data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/Processos">
               <i class="fa fa-file"></i>
               <span class="nav-label" data-i18n="page.layout.menu.processes">Processos</span>
             </a>
           </li>
 
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/MyDocuments">
               <i class="fa fa-folder"></i>
               <span class="nav-label" data-i18n="page.layout.menu.myDocuments">Meus Documentos</span>
             </a>
           </li>
 
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/incidentes">
               <i class="fa fa-ticket"></i>
               <span class="nav-label">Incidentes</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/filas">
               <i class="fa fa-random"></i>
               <span class="nav-label">Filas</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/filas/membros">
               <i class="fa fa-users"></i>
               <span class="nav-label">Filas - Membros</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/ativos">
               <i class="fa fa-desktop"></i>
               <span class="nav-label">Ativos</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/assuntos">
               <i class="fa fa-tags"></i>
               <span class="nav-label">Assuntos</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/recursos">
               <i class="fa fa-cogs"></i>
               <span class="nav-label">Recursos</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/recursos/agendamentos">
               <i class="fa fa-calendar-check-o"></i>
               <span class="nav-label">Recursos - Agendamentos</span>
             </a>
           </li>
-          <li data-areas="service">
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/tarefas">
               <i class="fa fa-tasks"></i>
               <span class="nav-label">Tarefas</span>
             </a>
           </li>
-
-          <li data-areas="sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
-
-          <li data-managed="tenant" data-entity="invoices" data-areas="sales">
-            <a href="/Invoices">
-              <i class="fa fa-money"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+          <li data-areas="service" data-divider-parent="service-main">
+            <a href="/servico/agenda">
+              <i class="fa fa-calendar"></i>
+              <span class="nav-label">Calendário</span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-entity="products" data-areas="sales">
-            <a href="/Products">
-              <i class="fa fa-cube"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+          <li data-areas="service" data-divider-id="service-sla"><a class="menuDivider" style="padding-top:20px;">SLA</a></li>
+          <li data-areas="service" data-divider-parent="service-sla">
+            <a href="/servico/sla/politicas">
+              <i class="fa fa-shield"></i>
+              <span class="nav-label">SLA - Políticas</span>
+            </a>
+          </li>
+          <li data-areas="service" data-divider-parent="service-sla">
+            <a href="/servico/sla/kpis">
+              <i class="fa fa-line-chart"></i>
+              <span class="nav-label">SLA - KPIs</span>
+            </a>
+          </li>
+          <li data-areas="service" data-divider-parent="service-sla">
+            <a href="/servico/sla/instancias">
+              <i class="fa fa-clone"></i>
+              <span class="nav-label">SLA - Instâncias</span>
+            </a>
+          </li>
+          <li data-areas="service" data-divider-parent="service-sla">
+            <a href="/servico/sla/instancias-kpi">
+              <i class="fa fa-sliders"></i>
+              <span class="nav-label">SLA - Instâncias KPI</span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-entity="leads" data-areas="sales">
+          <li data-areas="sales" data-divider-id="sales-main"><a class="menuDivider" style="padding-top:20px;">Vendas</a></li>
+
+          <li data-areas="sales" data-divider-parent="sales-main">
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-entity="opportunities" data-areas="sales">
+          <li data-areas="sales" data-divider-parent="sales-main">
             <a href="/Opportunities">
               <i class="fa fa-bullseye"></i>
               <span class="nav-label">Opportunities</span>
             </a>
           </li>
 
-          <li data-managed="tenant" data-entity="contracts" data-areas="sales">
+          <li data-areas="sales" data-divider-parent="sales-main">
+            <a href="/Invoices">
+              <i class="fa fa-money"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.invoices">Invoices</span>
+            </a>
+          </li>
+
+          <li data-areas="sales" data-divider-parent="sales-main">
             <a href="/Contracts">
               <i class="fa fa-file-text-o"></i>
               <span class="nav-label">Contracts</span>
             </a>
           </li>
 
-          <li data-areas="finance"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.finance"><%= t('page.layout.menu.finance') %></a></li>
-          <li data-managed="tenant" data-entity="financial_receivables" data-areas="finance">
+          <li data-areas="sales" data-divider-id="sales-settings"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li data-areas="sales" data-divider-parent="sales-settings">
+            <a href="/Products">
+              <i class="fa fa-cube"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.products">Produtos</span>
+            </a>
+          </li>
+          <li data-areas="sales" data-divider-parent="sales-settings">
+            <a href="/SalesApprovals">
+              <i class="fa fa-check-square-o"></i>
+              <span class="nav-label">Aprovações</span>
+            </a>
+          </li>
+          <li data-areas="sales" data-divider-parent="sales-settings">
+            <a href="/PriceTables">
+              <i class="fa fa-table"></i>
+              <span class="nav-label">Tabelas de Preço</span>
+            </a>
+          </li>
+          <li data-areas="sales" data-divider-parent="sales-settings">
+            <a href="/SalesGoals">
+              <i class="fa fa-flag"></i>
+              <span class="nav-label">Metas</span>
+            </a>
+          </li>
+          <li data-areas="sales" data-divider-parent="sales-settings">
+            <a href="/SalesCommissions">
+              <i class="fa fa-percent"></i>
+              <span class="nav-label">Comissões</span>
+            </a>
+          </li>
+
+          <li data-areas="finance" data-divider-id="finance-main"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.finance"><%= t('page.layout.menu.finance') %></a></li>
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceReceivables">
               <i class="fa fa-arrow-circle-o-down"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeReceivables"><%= t('page.layout.menu.financeReceivables') %></span>
             </a>
           </li>
-          <li data-managed="tenant" data-entity="financial_payables" data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinancePayables">
               <i class="fa fa-arrow-circle-o-up"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financePayables"><%= t('page.layout.menu.financePayables') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceBankAccounts">
               <i class="fa fa-university"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeBanks"><%= t('page.layout.menu.financeBanks') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceBankMovements">
               <i class="fa fa-exchange"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeMovements"><%= t('page.layout.menu.financeMovements') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceCashFlow">
               <i class="fa fa-line-chart"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeCashFlow"><%= t('page.layout.menu.financeCashFlow') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceCategories">
               <i class="fa fa-tags"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeCategories"><%= t('page.layout.menu.financeCategories') %></span>
             </a>
           </li>
-          <li data-areas="finance">
+          <li data-areas="finance" data-divider-parent="finance-main">
             <a href="/FinanceCostCenters">
               <i class="fa fa-sitemap"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeCostCenters"><%= t('page.layout.menu.financeCostCenters') %></span>
             </a>
           </li>
 
-          <li data-areas="hr"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.hr"><%= t('page.layout.menu.hr') %></a></li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-id="hr-main"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.hr"><%= t('page.layout.menu.hr') %></a></li>
+          <li data-areas="hr" data-divider-parent="hr-main">
+            <a href="/DashboardRH">
+              <i class="fa fa-dashboard"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.dashboard"><%= t('page.layout.menu.dashboard') %></span>
+            </a>
+          </li>
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRDepartments">
               <i class="fa fa-sitemap"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrDepartments"><%= t('page.layout.menu.hrDepartments') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRPositions">
               <i class="fa fa-briefcase"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrPositions"><%= t('page.layout.menu.hrPositions') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRWorkLocations">
               <i class="fa fa-map-marker"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrWorkLocations"><%= t('page.layout.menu.hrWorkLocations') %></span>
             </a>
           </li>
-          <li data-managed="tenant" data-entity="hr_employees" data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HREmployees">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrEmployees"><%= t('page.layout.menu.hrEmployees') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRAssignments">
               <i class="fa fa-random"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrAssignments"><%= t('page.layout.menu.hrAssignments') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRWorkSchedules">
               <i class="fa fa-calendar"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrWorkSchedules"><%= t('page.layout.menu.hrWorkSchedules') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRLeaveTypes">
               <i class="fa fa-list"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrLeaveTypes"><%= t('page.layout.menu.hrLeaveTypes') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRLeaveRequests">
               <i class="fa fa-plane"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrLeaveRequests"><%= t('page.layout.menu.hrLeaveRequests') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRSkills">
               <i class="fa fa-graduation-cap"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrSkills"><%= t('page.layout.menu.hrSkills') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRCertifications">
               <i class="fa fa-certificate"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrCertifications"><%= t('page.layout.menu.hrCertifications') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRLifecycleTemplates">
               <i class="fa fa-columns"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrLifecycleTemplates"><%= t('page.layout.menu.hrLifecycleTemplates') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HREmployeeLifecycles">
               <i class="fa fa-tasks"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrEmployeeLifecycles"><%= t('page.layout.menu.hrEmployeeLifecycles') %></span>
             </a>
           </li>
-          <li data-areas="hr">
+          <li data-areas="hr" data-divider-parent="hr-main">
             <a href="/HRLifecycleKanban">
               <i class="fa fa-th-large"></i>
               <span class="nav-label" data-i18n="page.layout.menu.hrLifecycleKanban"><%= t('page.layout.menu.hrLifecycleKanban') %></span>
             </a>
           </li>
 
-          <li data-areas="po"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.projectOperations"><%= t('page.layout.menu.projectOperations') %></a></li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-id="po-main"><a class="menuDivider" style="padding-top:20px;" data-i18n="page.layout.menu.projectOperations"><%= t('page.layout.menu.projectOperations') %></a></li>
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POProjects">
               <i class="fa fa-folder-open"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poProjects"><%= t('page.layout.menu.poProjects') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POProjectProcesses">
               <i class="fa fa-link"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poProjectProcesses"><%= t('page.layout.menu.poProjectProcesses') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POMilestones">
               <i class="fa fa-flag"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poMilestones"><%= t('page.layout.menu.poMilestones') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/PODeliverables">
               <i class="fa fa-dropbox"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poDeliverables"><%= t('page.layout.menu.poDeliverables') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POChecklists">
               <i class="fa fa-list-ul"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poChecklists"><%= t('page.layout.menu.poChecklists') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POChecklistItems">
               <i class="fa fa-check-square-o"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poChecklistItems"><%= t('page.layout.menu.poChecklistItems') %></span>
             </a>
           </li>
-          <li data-managed="tenant" data-entity="po_work_orders" data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POWorkOrders">
               <i class="fa fa-wrench"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poWorkOrders"><%= t('page.layout.menu.poWorkOrders') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POWorkOrderAssignments">
               <i class="fa fa-users"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poWorkOrderAssignments"><%= t('page.layout.menu.poWorkOrderAssignments') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POWorkOrderAppointments">
               <i class="fa fa-calendar"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poWorkOrderAppointments"><%= t('page.layout.menu.poWorkOrderAppointments') %></span>
             </a>
           </li>
-          <li data-areas="po">
+          <li data-areas="po" data-divider-parent="po-main">
             <a href="/POProjectStatuses">
               <i class="fa fa-sliders"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poConfigurations"><%= t('page.layout.menu.poConfigurations') %></span>
             </a>
           </li>
 
-          <li data-areas="settings,service"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
-          <li data-areas="settings,service">
+          <li data-areas="settings" data-divider-id="settings-core"><a class="menuDivider" style="padding-top:20px;">Configurações</a></li>
+          <li data-areas="settings" data-divider-parent="settings-core">
+            <a href="/configuracoes">
+              <i class="fa fa-cogs"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.settingsCenter"><%= t('page.layout.menu.settingsCenter', { defaultValue: 'Configuracoes' }) %></span>
+            </a>
+          </li>
+
+          <li data-areas="settings,service" data-divider-id="settings-service"><a class="menuDivider" style="padding-top:20px;">Serviço</a></li>
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/sla/politicas">
               <i class="fa fa-shield"></i>
               <span class="nav-label">SLA - Políticas</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/sla/kpis">
               <i class="fa fa-line-chart"></i>
               <span class="nav-label">SLA - KPIs</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/sla/instancias">
               <i class="fa fa-clone"></i>
               <span class="nav-label">SLA - Instâncias</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/sla/instancias-kpi">
               <i class="fa fa-sliders"></i>
               <span class="nav-label">SLA - Instâncias KPI</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/sla/eventos">
               <i class="fa fa-bolt"></i>
               <span class="nav-label">SLA - Eventos</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/calendarios">
               <i class="fa fa-calendar"></i>
               <span class="nav-label">Calendários</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
+            <a href="/servico/agenda">
+              <i class="fa fa-calendar-check-o"></i>
+              <span class="nav-label">Calendário - Atividades</span>
+            </a>
+          </li>
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/calendarios/regras">
               <i class="fa fa-calendar-plus-o"></i>
               <span class="nav-label">Calendários - Regras</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/calendarios/excecoes">
               <i class="fa fa-calendar-times-o"></i>
               <span class="nav-label">Calendários - Exceções</span>
             </a>
           </li>
-          <li data-areas="settings,service">
+          <li data-areas="settings,service" data-divider-parent="settings-service">
             <a href="/servico/tarefas/tipos">
               <i class="fa fa-list-alt"></i>
               <span class="nav-label">Tarefas - Tipos</span>
             </a>
           </li>
-          <li data-areas="settings,sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
-          <li data-areas="settings,sales">
+          <li data-areas="settings,sales" data-divider-id="settings-sales"><a class="menuDivider" style="padding-top:20px;">Sales</a></li>
+          <li data-areas="settings,sales" data-divider-parent="settings-sales">
             <a href="/SalesApprovals">
               <i class="fa fa-check-square-o"></i>
               <span class="nav-label">Aprovações</span>
             </a>
           </li>
-          <li data-areas="settings,sales">
+          <li data-areas="settings,sales" data-divider-parent="settings-sales">
             <a href="/PriceTables">
               <i class="fa fa-table"></i>
               <span class="nav-label">Tabelas de Preço</span>
             </a>
           </li>
-          <li data-areas="settings,sales">
+          <li data-areas="settings,sales" data-divider-parent="settings-sales">
             <a href="/SalesGoals">
               <i class="fa fa-flag"></i>
               <span class="nav-label">Metas</span>
             </a>
           </li>
-          <li data-areas="settings,sales">
+          <li data-areas="settings,sales" data-divider-parent="settings-sales">
             <a href="/SalesCommissions">
               <i class="fa fa-percent"></i>
               <span class="nav-label">Comissões</span>
-            </a>
-          </li>
-          <li style="display: none;" data-areas="settings">
-            <a href="/Notifications">
-              <i class="fa fa-bell"></i>
-              <span class="nav-label">Notificações</span>
             </a>
           </li>
 
@@ -1273,11 +1337,17 @@
       <script>
         (function () {
           const SIDEBAR_AREA_KEY = "gecom.sidebar.area";
+          const MODULE_ACCESS_CACHE_KEY = "gecom.billing.moduleAccess.v1";
+          const MODULE_ACCESS_CACHE_TTL_MS = 1000 * 60 * 3;
+          const DEV_FORCE_ALL_MENUS_KEY = "gecom.dev.forceAllMenus";
           const sidebarAreaLabels = new Map();
           const tenantManagedNodesByEntity = new Map();
           let tenantManagedReady = false;
+          const SIDEBAR_AREA_ORDER = ["home", "service", "sales", "finance", "hr", "po", "settings"];
           const FIXED_MODULE_AREAS = new Set(["service", "sales", "finance", "hr", "po"]);
           let enabledModuleAreas = new Set(["service", "sales", "finance", "hr", "po"]);
+          let tenantDefaultArea = "home";
+          window.__billingGlobalAreaConfig = window.__billingGlobalAreaConfig || null;
 
           function normalizeText(value) {
             return String(value == null ? "" : value).trim();
@@ -1291,6 +1361,21 @@
               .replace(/"/g, "&quot;")
               .replace(/'/g, "&#039;");
           }
+
+          function shouldForceAllMenusForLocalTest() {
+            const host = String(window.location?.hostname || "").toLowerCase();
+            const isLocalHost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+            if (!isLocalHost) return false;
+            try {
+              const raw = normalizeText(localStorage.getItem(DEV_FORCE_ALL_MENUS_KEY)).toLowerCase();
+              if (!raw) return false;
+              return ["1", "true", "yes", "on"].includes(raw);
+            } catch {
+              return false;
+            }
+          }
+
+          const FORCE_ALL_MENUS_LOCAL_TEST = shouldForceAllMenusForLocalTest();
 
           async function readJsonSafe(resp) {
             const text = await resp.text().catch(() => "");
@@ -1312,7 +1397,7 @@
             if (normalized.includes("SERVICE") || normalized.includes("SUPPORT") || normalized.includes("HELPDESK") || normalized.includes("OPS")) include("service");
             if (normalized.includes("SALES") || normalized.includes("CRM") || normalized.includes("COMMERCIAL")) include("sales");
             if (normalized.includes("FINANCE") || normalized.includes("FINANCIAL")) include("finance");
-            if (normalized.includes("HR") || normalized.includes("HUMAN") || normalized.includes("PEOPLE")) include("hr");
+            if (normalized.includes("RH") || normalized.includes("HR") || normalized.includes("HUMAN") || normalized.includes("PEOPLE")) include("hr");
             if (normalized.includes("PROJECT") || normalized.includes("OPERATIONS") || normalized.includes("PO_")) include("po");
             return out;
           }
@@ -1321,9 +1406,9 @@
             const explicitAreas = Array.isArray(payload?.enabledAreas) ? payload.enabledAreas : [];
             const byModules = Array.isArray(payload?.enabledModules) ? payload.enabledModules : [];
 
-            const areas = explicitAreas.length
-              ? explicitAreas
-              : byModules.flatMap((code) => inferAreaFromModuleCode(code));
+            const areas = explicitAreas.concat(
+              byModules.flatMap((code) => inferAreaFromModuleCode(code)),
+            );
 
             const normalized = areas
               .map((area) => normalizeText(area).toLowerCase())
@@ -1333,15 +1418,99 @@
           }
 
           function isAreaEnabled(area) {
+            if (FORCE_ALL_MENUS_LOCAL_TEST) return true;
             const normalized = normalizeText(area).toLowerCase();
             if (!FIXED_MODULE_AREAS.has(normalized)) return true;
             return enabledModuleAreas.has(normalized);
           }
 
-          function isItemAllowedByModuleAreas(areaTokens) {
-            const moduleTokens = areaTokens.filter((token) => FIXED_MODULE_AREAS.has(token));
+          function resolveAuthTenantId() {
+            return normalizeText(
+              window.__auth?.tenant_id ||
+                window.__auth?.tenantId ||
+                window.__auth?.user?.tenant_id ||
+                window.__auth?.user?.tenantId ||
+                "",
+            );
+          }
+
+          function getSidebarAreaStorageKey() {
+            const tenantId = resolveAuthTenantId();
+            if (!tenantId) return SIDEBAR_AREA_KEY;
+            return `${SIDEBAR_AREA_KEY}.${tenantId}`;
+          }
+
+          function getStoredSidebarAreaRaw() {
+            try {
+              const scopedKey = getSidebarAreaStorageKey();
+              const scoped = normalizeText(localStorage.getItem(scopedKey));
+              if (scoped) return scoped;
+
+              const legacy = normalizeText(localStorage.getItem(SIDEBAR_AREA_KEY));
+              if (!legacy) return "";
+              if (scopedKey !== SIDEBAR_AREA_KEY) {
+                try {
+                  localStorage.setItem(scopedKey, legacy);
+                  localStorage.removeItem(SIDEBAR_AREA_KEY);
+                } catch {}
+              }
+              return legacy;
+            } catch {
+              return "";
+            }
+          }
+
+          function setStoredSidebarArea(area) {
+            const normalized = normalizeText(area).toLowerCase();
+            if (!normalized) return;
+            try {
+              localStorage.setItem(getSidebarAreaStorageKey(), normalized);
+            } catch {}
+          }
+
+          function parseModuleAreaTokens(value) {
+            return String(value || "")
+              .split(",")
+              .map((token) => normalizeText(token).toLowerCase())
+              .filter((token) => FIXED_MODULE_AREAS.has(token));
+          }
+
+          function getItemModuleTokens(item, areaTokens) {
+            const explicit = parseModuleAreaTokens(item?.getAttribute?.("data-module-areas"));
+            if (explicit.length) return explicit;
+            return (areaTokens || []).filter((token) => FIXED_MODULE_AREAS.has(token));
+          }
+
+          function isItemAllowedByModuleAreas(moduleTokens) {
+            if (FORCE_ALL_MENUS_LOCAL_TEST) return true;
             if (!moduleTokens.length) return true;
             return moduleTokens.every((token) => enabledModuleAreas.has(token));
+          }
+
+          function revealAllStaticMenuNodes() {
+            document.querySelectorAll("#side-menu li[data-areas]").forEach((item) => {
+              item.style.display = "";
+              item.classList.remove("sidebar-module-hidden");
+              item.classList.remove("sidebar-area-hidden");
+            });
+          }
+
+          function refreshDividerVisibility() {
+            const allItems = Array.from(document.querySelectorAll("#side-menu li[data-areas]"));
+            const dividerNodes = allItems.filter((node) => normalizeText(node.getAttribute("data-divider-id")));
+            dividerNodes.forEach((dividerNode) => {
+              const dividerId = normalizeText(dividerNode.getAttribute("data-divider-id"));
+              if (!dividerId) return;
+              const children = allItems.filter(
+                (node) => normalizeText(node.getAttribute("data-divider-parent")) === dividerId,
+              );
+              const hasVisibleChild = children.some(
+                (node) =>
+                  !node.classList.contains("sidebar-area-hidden") &&
+                  !node.classList.contains("sidebar-module-hidden"),
+              );
+              dividerNode.classList.toggle("sidebar-area-hidden", !hasVisibleChild);
+            });
           }
 
           function defaultAreaLabel(area) {
@@ -1369,6 +1538,21 @@
 
           function getSidebarAreaIds() {
             const ids = [];
+            const pushArea = (value) => {
+              const token = normalizeText(value).toLowerCase();
+              if (!token) return;
+              if (!isAreaEnabled(token)) return;
+              if (!ids.includes(token)) ids.push(token);
+            };
+
+            SIDEBAR_AREA_ORDER.forEach((area) => {
+              if (!FIXED_MODULE_AREAS.has(area)) return;
+              if (!enabledModuleAreas.has(area)) return;
+              pushArea(area);
+            });
+
+            Array.from(sidebarAreaLabels.keys()).forEach((area) => pushArea(area));
+
             document.querySelectorAll("#side-menu [data-areas]").forEach((item) => {
               const raw = normalizeText(item.getAttribute("data-areas"));
               if (!raw) return;
@@ -1378,12 +1562,18 @@
                 .filter(Boolean)
                 .forEach((token) => {
                   if (token === "all") return;
-                  if (!isAreaEnabled(token)) return;
-                  if (!ids.includes(token)) ids.push(token);
+                  pushArea(token);
                 });
             });
             if (!ids.length) ids.push("home");
-            return ids;
+            return ids.slice().sort((a, b) => {
+              const ai = SIDEBAR_AREA_ORDER.indexOf(a);
+              const bi = SIDEBAR_AREA_ORDER.indexOf(b);
+              if (ai === -1 && bi === -1) return a.localeCompare(b);
+              if (ai === -1) return 1;
+              if (bi === -1) return -1;
+              return ai - bi;
+            });
           }
 
           function normalizeSidebarArea(area) {
@@ -1423,12 +1613,14 @@
             items.forEach((item) => {
               const raw = String(item.getAttribute("data-areas") || "");
               const areas = raw.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean);
-              const moduleAllowed = isItemAllowedByModuleAreas(areas);
+              const moduleTokens = getItemModuleTokens(item, areas);
+              const moduleAllowed = isItemAllowedByModuleAreas(moduleTokens);
               const visibleByArea = areas.includes("all") || areas.includes(currentArea);
               const visible = moduleAllowed && visibleByArea;
               item.classList.toggle("sidebar-module-hidden", !moduleAllowed);
               item.classList.toggle("sidebar-area-hidden", !visible);
             });
+            refreshDividerVisibility();
 
             const areaLabel = document.getElementById("sidebarAreaLabel");
             const areaIcon = document.getElementById("sidebarAreaIcon");
@@ -1440,9 +1632,7 @@
               option.classList.toggle("is-active", optionArea === currentArea);
             });
 
-            try {
-              localStorage.setItem(SIDEBAR_AREA_KEY, currentArea);
-            } catch {}
+            setStoredSidebarArea(currentArea);
           }
 
           function initTenantManagedMenuNodes() {
@@ -1450,7 +1640,7 @@
             tenantManagedReady = true;
 
             const nodes = Array.from(
-              document.querySelectorAll("#side-menu li[data-managed='tenant'][data-home-template='1'][data-entity]"),
+              document.querySelectorAll("#side-menu li[data-managed='tenant'][data-entity]"),
             );
             nodes.forEach((node) => {
               const entity = normalizeText(node.getAttribute("data-entity")).toLowerCase();
@@ -1475,6 +1665,15 @@
             return li;
           }
 
+          function createTenantAreaDivider(areaId, areaLabel) {
+            const li = document.createElement("li");
+            li.setAttribute("data-managed-divider", "tenant");
+            li.setAttribute("data-generated", "1");
+            li.setAttribute("data-areas", normalizeText(areaId).toLowerCase() || "home");
+            li.innerHTML = `<a class="menuDivider" style="padding-top:20px;">${safeHtml(normalizeText(areaLabel) || "Area")}</a>`;
+            return li;
+          }
+
           function renderTenantMenu(config) {
             initTenantManagedMenuNodes();
 
@@ -1483,82 +1682,103 @@
             if (!sideMenu || !mountPoint) return;
 
             const areas = Array.isArray(config?.areas) ? config.areas : [];
-            if (!areas.length) return;
-
-            const RESERVED_FIXED_AREAS = new Set(["service", "sales", "finance", "hr", "po", "settings"]);
+            const normalizedAreas = areas
+              .map((area, areaIndex) => {
+                const id = normalizeText(area?.id).toLowerCase() || `area_${areaIndex + 1}`;
+                if (!id) return null;
+                return {
+                  id,
+                  label: id === "home" ? "Home" : normalizeText(area?.label) || defaultAreaLabel(id),
+                  order: Number(area?.order || 0),
+                  items: Array.isArray(area?.items) ? area.items.slice() : [],
+                };
+              })
+              .filter(Boolean)
+              .sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0));
+            if (!normalizedAreas.length) return;
 
             sidebarAreaLabels.clear();
-            sidebarAreaLabels.set("home", "Home");
-            areas.forEach((area) => {
-              const areaId = normalizeText(area?.id).toLowerCase();
-              const areaLabel = normalizeText(area?.label);
-              if (!areaId || !areaLabel) return;
-              if (RESERVED_FIXED_AREAS.has(areaId) && areaId !== "home") return;
-              sidebarAreaLabels.set(areaId, areaId === "home" ? "Home" : areaLabel);
+
+            const staticItems = Array.from(sideMenu.querySelectorAll("li[data-areas]"));
+            const shouldPreserveStaticNode = (node) => {
+              if (node === mountPoint) return true;
+              const href = normalizeText(node.querySelector("a")?.getAttribute("href")).toLowerCase();
+              if (href === "/default") return true;
+              const tokens = normalizeText(node.getAttribute("data-areas"))
+                .toLowerCase()
+                .split(",")
+                .map((token) => normalizeText(token))
+                .filter(Boolean);
+              const isTenantManaged = normalizeText(node.getAttribute("data-managed")).toLowerCase() === "tenant";
+              return tokens.includes("settings") && !isTenantManaged;
+            };
+            staticItems.forEach((node) => {
+              if (shouldPreserveStaticNode(node)) return;
+              node.remove();
             });
 
-            document
-              .querySelectorAll("#side-menu li[data-generated='1'], #side-menu li[data-managed-divider='tenant']")
-              .forEach((node) => {
-                node.remove();
-              });
-
-            tenantManagedNodesByEntity.forEach((node) => {
-              if (node.parentElement === sideMenu) sideMenu.removeChild(node);
+            document.querySelectorAll("#side-menu li[data-generated='1'], #side-menu li[data-managed-divider='tenant']").forEach((node) => {
+              node.remove();
             });
 
             const fragment = document.createDocumentFragment();
-            const usedEntityByArea = new Set();
+            const usedTemplateEntities = new Set();
+            const usedAreaEntityKeys = new Set();
 
-            areas
-              .slice()
-              .sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0))
-              .forEach((area) => {
-                const areaId = normalizeText(area?.id).toLowerCase();
-                if (!areaId) return;
-                if (RESERVED_FIXED_AREAS.has(areaId) && areaId !== "home") return;
+            normalizedAreas.forEach((area) => {
+              const areaId = normalizeText(area?.id).toLowerCase();
+              if (!areaId) return;
+              const areaLabel = areaId === "home" ? "Home" : normalizeText(area?.label) || defaultAreaLabel(areaId);
+              sidebarAreaLabels.set(areaId, areaLabel);
 
-                if (areaId !== "home") {
-                  const divider = document.createElement("li");
-                  divider.setAttribute("data-areas", areaId);
-                  divider.setAttribute("data-managed-divider", "tenant");
-                  divider.innerHTML = `<a class="menuDivider" style="padding-top:20px;">${safeHtml(
-                    normalizeText(area?.label) || areaId,
-                  )}</a>`;
-                  fragment.appendChild(divider);
-                }
+              const items = (Array.isArray(area?.items) ? area.items.slice() : []).sort(
+                (a, b) => Number(a?.order || 0) - Number(b?.order || 0),
+              );
+              if (!items.length) return;
 
-                const items = Array.isArray(area?.items) ? area.items.slice() : [];
-                items
-                  .sort((a, b) => Number(a?.order || 0) - Number(b?.order || 0))
-                  .forEach((item) => {
-                    const entity = normalizeText(item?.entity).toLowerCase();
-                    if (!entity) return;
-                    const areaEntityKey = `${areaId}::${entity}`;
-                    if (usedEntityByArea.has(areaEntityKey)) return;
-                    usedEntityByArea.add(areaEntityKey);
+              if (areaId !== "home") {
+                fragment.appendChild(createTenantAreaDivider(areaId, areaLabel));
+              }
 
-                    const templateNode = areaId === "home" ? tenantManagedNodesByEntity.get(entity) : null;
-                    const li = templateNode || createTenantMenuNode(item);
-                    const a = li.querySelector("a");
-                    const icon = li.querySelector("i.fa");
-                    const label = li.querySelector(".nav-label");
+              items.forEach((item) => {
+                const entity = normalizeText(item?.entity).toLowerCase();
+                if (!entity) return;
 
-                    li.setAttribute("data-areas", areaId);
-                    li.setAttribute("data-managed", "tenant");
-                    li.setAttribute("data-entity", entity);
-                    li.setAttribute("data-generated", "1");
-                    if (!templateNode) li.removeAttribute("id");
+                const key = `${areaId}::${entity}`;
+                if (usedAreaEntityKeys.has(key)) return;
+                usedAreaEntityKeys.add(key);
 
-                    if (a) a.setAttribute("href", normalizeText(item?.route) || "#");
-                    if (icon) icon.className = `fa ${normalizeText(item?.icon) || "fa-circle-o"}`;
-                    if (label) label.textContent = normalizeText(item?.label) || normalizeText(item?.entity) || "Item";
+                const templateNode = tenantManagedNodesByEntity.get(entity) || null;
+                const canUseTemplate = !!templateNode && !usedTemplateEntities.has(entity);
+                const li = canUseTemplate ? templateNode : createTenantMenuNode(item);
+                if (canUseTemplate) usedTemplateEntities.add(entity);
 
-                    fragment.appendChild(li);
-                  });
+                const a = li.querySelector("a");
+                const icon = li.querySelector("i.fa");
+                const label = li.querySelector(".nav-label");
+
+                li.setAttribute("data-areas", areaId);
+                li.setAttribute("data-managed", "tenant");
+                li.setAttribute("data-entity", entity);
+                li.setAttribute("data-generated", "1");
+                if (!canUseTemplate) li.removeAttribute("id");
+                li.style.display = "";
+                li.classList.remove("sidebar-area-hidden");
+                li.classList.remove("sidebar-module-hidden");
+
+                if (a) a.setAttribute("href", normalizeText(item?.route) || "#");
+                if (icon) icon.className = `fa ${normalizeText(item?.icon) || "fa-circle-o"}`;
+                if (label) label.textContent = normalizeText(item?.label) || normalizeText(item?.entity) || "Item";
+
+                fragment.appendChild(li);
               });
+            });
 
-            sideMenu.insertBefore(fragment, mountPoint.nextSibling);
+            if (mountPoint.nextSibling) {
+              sideMenu.insertBefore(fragment, mountPoint.nextSibling);
+            } else {
+              sideMenu.appendChild(fragment);
+            }
           }
 
           async function fetchTenantTheme() {
@@ -1622,12 +1842,48 @@
           async function fetchTenantModuleAccess() {
             if (window.__billingBootstrapMode === true) return null;
             try {
+              const raw = localStorage.getItem(MODULE_ACCESS_CACHE_KEY);
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                const savedAt = Number(parsed?.savedAt || 0);
+                const cachedTenant = normalizeText(parsed?.tenantId || parsed?.payload?.tenant_id);
+                const currentTenant = normalizeText(
+                  window.__auth?.tenant_id ||
+                    window.__auth?.tenantId ||
+                    window.__auth?.user?.tenant_id ||
+                    window.__auth?.user?.tenantId,
+                );
+                const sameTenant = !!currentTenant && !!cachedTenant && currentTenant === cachedTenant;
+                if (currentTenant && cachedTenant && !sameTenant) {
+                  try { localStorage.removeItem(MODULE_ACCESS_CACHE_KEY); } catch {}
+                }
+                if (savedAt > 0 && Date.now() - savedAt <= MODULE_ACCESS_CACHE_TTL_MS && sameTenant) {
+                  return parsed?.payload || null;
+                }
+              }
+            } catch {}
+
+            try {
               const resp = await fetch("/api/me/modules", {
                 method: "GET",
                 headers: { Accept: "application/json" },
               });
-              if (!resp.ok) return null;
-              return await readJsonSafe(resp);
+              if (!resp.ok) {
+                try { localStorage.removeItem(MODULE_ACCESS_CACHE_KEY); } catch {}
+                return null;
+              }
+              const payload = await readJsonSafe(resp);
+              try {
+                localStorage.setItem(
+                  MODULE_ACCESS_CACHE_KEY,
+                  JSON.stringify({
+                    savedAt: Date.now(),
+                    tenantId: normalizeText(payload?.tenant_id),
+                    payload,
+                  }),
+                );
+              } catch {}
+              return payload;
             } catch {
               return null;
             }
@@ -1640,10 +1896,77 @@
               fetchTenantModuleAccess(),
             ]);
             const nextEnabledAreas = normalizeEnabledAreasPayload(moduleAccess || {});
-            enabledModuleAreas =
-              moduleAccess == null ? new Set(["service", "sales", "finance", "hr", "po"]) : nextEnabledAreas;
+            enabledModuleAreas = moduleAccess == null ? new Set() : nextEnabledAreas;
+            if (FORCE_ALL_MENUS_LOCAL_TEST) {
+              enabledModuleAreas = new Set(["service", "sales", "finance", "hr", "po"]);
+            }
+            window.__billingGlobalAreaConfig = moduleAccess?.areaEntityConfig || null;
+            tenantDefaultArea = normalizeText(menu?.default_area || "home").toLowerCase() || "home";
             if (theme) applyTenantTheme(theme);
-            if (menu) renderTenantMenu(menu);
+            if (FORCE_ALL_MENUS_LOCAL_TEST) {
+              revealAllStaticMenuNodes();
+            }
+          }
+
+          function normalizePathForCompare(value) {
+            try {
+              const url = new URL(String(value || ""), window.location.origin);
+              return String(url.pathname || "/").replace(/\/+$/, "").toLowerCase() || "/";
+            } catch {
+              return "";
+            }
+          }
+
+          function inferSidebarAreaFromCurrentPath(preferredAreaRaw) {
+            const currentPath = normalizePathForCompare(window.location.pathname || "/");
+            if (!currentPath) return "";
+
+            const links = Array.from(document.querySelectorAll("#side-menu li[data-areas] > a[href]"));
+            const preferredArea = normalizeText(preferredAreaRaw).toLowerCase();
+            let bestArea = "";
+            let bestScore = -1;
+
+            for (const link of links) {
+              const href = normalizeText(link.getAttribute("href"));
+              if (!href || href === "#") continue;
+              const linkPath = normalizePathForCompare(href);
+              if (!linkPath || linkPath !== currentPath) continue;
+
+              const li = link.closest("li[data-areas]");
+              const areaTokens = normalizeText(li?.getAttribute("data-areas"))
+                .split(",")
+                .map((token) => normalizeText(token).toLowerCase())
+                .filter((token) => token && token !== "all" && isAreaEnabled(token));
+              if (!areaTokens.length) continue;
+
+              areaTokens.forEach((token) => {
+                let score = 0;
+                if (token === preferredArea) score += 100;
+                if (areaTokens.length === 1) score += 20;
+                if (token === "settings" && currentPath.startsWith("/configuracoes")) score += 30;
+                if (token === "home" && currentPath === "/default") score += 30;
+                if (score > bestScore) {
+                  bestScore = score;
+                  bestArea = token;
+                }
+              });
+            }
+            return bestArea;
+          }
+
+          function bindSidebarAreaPersistenceOnMenuClicks() {
+            document.addEventListener("click", function (ev) {
+              const link = ev.target && ev.target.closest ? ev.target.closest("#side-menu li[data-areas] > a[href]") : null;
+              if (!link) return;
+              const li = link.closest("li[data-areas]");
+              if (!li) return;
+              const areaToken = normalizeText(li.getAttribute("data-areas"))
+                .split(",")
+                .map((token) => normalizeText(token).toLowerCase())
+                .find((token) => token && token !== "all" && isAreaEnabled(token));
+              if (!areaToken) return;
+              setStoredSidebarArea(areaToken);
+            });
           }
 
           function setSidebarPanelOpen(open) {
@@ -1660,10 +1983,22 @@
             if (!trigger || !panel) return;
 
             await applyTenantThemeAndMenu();
+            bindSidebarAreaPersistenceOnMenuClicks();
 
             let savedArea = "home";
             try {
-              savedArea = normalizeSidebarArea(localStorage.getItem(SIDEBAR_AREA_KEY));
+              const persisted = normalizeText(getStoredSidebarAreaRaw()).toLowerCase();
+              const areaFromPath = normalizeText(inferSidebarAreaFromCurrentPath(persisted)).toLowerCase();
+              if (areaFromPath) {
+                savedArea = normalizeSidebarArea(areaFromPath);
+              } else {
+                if (persisted) {
+                  savedArea = normalizeSidebarArea(persisted);
+                } else {
+                  const preferred = normalizeText(tenantDefaultArea).toLowerCase();
+                  savedArea = normalizeSidebarArea(preferred || "home");
+                }
+              }
             } catch {}
 
             renderSidebarAreaOptions(savedArea);
@@ -2692,22 +3027,9 @@
             }
             else if (window.__auth.isManager) {
               $('button[name="btn_act_new_manager"]').hide();
-              $("#automationsTab").show();
             }
-            else if (window.__auth.isAdmin) {
-              $("#myActivitiesTab").show();
-              $("#calculoAduaneiro").show();
-              if (window.__features?.enableAI) $("#aiHubTab").show();
-              $("#clientTab").show();
-              $("#clientTabService").show();
-              $("#productTab").show();
-              $("#leadsTab").show();
-              $("#automationsTab").show();
-              $("#configDivider").show();
-              $("#notificationList").show();
-              $("#statusConfigsMenu").show();
-              $("#configMainMenu").show();
-            }
+
+            if (!window.__features?.enableAI) $("#aiHubTab").hide();
 
           } catch (e) {
             console.warn("Failed to load currentUser from localStorage:", e);

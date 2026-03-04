@@ -324,9 +324,8 @@
       })
       .join("");
 
-    $("#hrGridBody").html(
-      bodyHtml || `<tr><td colspan="${(visibleKeys.length || 0) + 1}" class="text-muted">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</td></tr>`,
-    );
+    const emptyHtml = `<tr><td colspan="${(visibleKeys.length || 0) + 1}" class="text-muted">${esc(tt("page.hr.common.empty", "Nenhum registro encontrado."))}</td></tr>`;
+    $("#hrGridBody").html(bodyHtml || emptyHtml);
     $("#hrSelectedCount").text(String(state.selectedIds.size));
     $("#hrBulkActions").toggle(state.selectedIds.size > 0);
     syncSelectAllCheckbox();
@@ -570,12 +569,20 @@
   }
 
   async function loadRows() {
-    state.rows = normalizeArray(await api(config.apiBase));
-    const existingIds = new Set(state.rows.map((row) => String(row?.id || "")).filter(Boolean));
-    Array.from(state.selectedIds).forEach((id) => {
-      if (!existingIds.has(id)) state.selectedIds.delete(id);
-    });
-    renderTable();
+    try {
+      state.rows = normalizeArray(await api(config.apiBase));
+      const existingIds = new Set(state.rows.map((row) => String(row?.id || "")).filter(Boolean));
+      Array.from(state.selectedIds).forEach((id) => {
+        if (!existingIds.has(id)) state.selectedIds.delete(id);
+      });
+      renderTable();
+    } catch (error) {
+      console.error("Erro ao carregar grid RH:", error);
+      state.rows = [];
+      state.filteredRows = [];
+      state.selectedIds.clear();
+      renderTable();
+    }
   }
 
   function setupHeaders() {
