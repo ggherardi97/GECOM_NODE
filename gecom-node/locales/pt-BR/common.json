@@ -1382,6 +1382,7 @@
         "labels": {
           "cnpjRequired": "CNPJ *",
           "cpfRequired": "CPF *",
+          "internationalNumberRequired": "Numero internacional *",
           "foreignNumberRequired": "Numero Estrangeiro *",
           "personType": "Tipo de pessoa",
           "clientOrigin": "Origem do cliente",
@@ -1392,13 +1393,16 @@
         "placeholders": {
           "cnpj": "00.000.000/0000-00",
           "cpf": "000.000.000-00",
+          "internationalNumber": "Digite o numero internacional",
           "foreignNumber": "Digite o numero estrangeiro"
         },
         "personTypes": {
+          "company": "Empresa",
           "legal": "Pessoa Juridica",
           "individual": "Pessoa Fisica"
         },
         "origins": {
+          "nationalBrazil": "Nacional (Brasil)",
           "national": "Nacional",
           "international": "Internacional"
         },

@@ -24,6 +24,18 @@ async function signup(payload) {
     });
 }
 
+async function signupPaymentPrepare(payload) {
+    return apiClient.post("/auth/signup/payment/prepare", payload, {
+        withCredentials: true
+    });
+}
+
+async function signupPaymentComplete(payload) {
+    return apiClient.post("/auth/signup/payment/complete", payload, {
+        withCredentials: true
+    });
+}
+
 async function forgotPassword(email) {
     return apiClient.post("/auth/forgot-password", { email });
 }
@@ -40,6 +52,8 @@ async function resetPassword({ userId, token, newPassword, confirmPassword }) {
 module.exports = {
     login,
     signup,
+    signupPaymentPrepare,
+    signupPaymentComplete,
     refresh,
     forgotPassword,
     resetPassword

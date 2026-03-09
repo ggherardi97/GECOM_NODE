@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Cadastro GECOM - escolha seu plano e comece a usar a plataforma." />
   <meta name="author" content="GECOM" />
+  <meta name="google-maps-key" content="<%= googleKey || '' %>" />
   <title>GECOM | Cadastro</title>
 
   <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
@@ -20,7 +21,77 @@
   <style>
     body.register-marketing {
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
       background: linear-gradient(145deg, #f8fbfd 0%, #f0f5f8 45%, #e9f3ef 100%);
+    }
+
+    .register-tech-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .register-tech-track {
+      position: absolute;
+      left: 0;
+      width: 200%;
+      display: flex;
+      color: rgba(35, 89, 123, 0.15);
+      animation: registerTechScroll 150s linear infinite;
+      will-change: transform;
+    }
+
+    .register-tech-track--one {
+      top: 14%;
+      font-size: 34px;
+      animation-duration: 140s;
+    }
+
+    .register-tech-track--two {
+      top: 46%;
+      font-size: 28px;
+      color: rgba(22, 129, 112, 0.13);
+      animation-duration: 180s;
+      animation-direction: reverse;
+    }
+
+    .register-tech-track--three {
+      top: 76%;
+      font-size: 30px;
+      color: rgba(60, 95, 132, 0.12);
+      animation-duration: 210s;
+    }
+
+    .register-tech-seq {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 24px;
+    }
+
+    .register-tech-seq i {
+      opacity: .9;
+      transform: rotate(-4deg);
+    }
+
+    @keyframes registerTechScroll {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    #heroSection,
+    #featuresPublic,
+    #plansStage {
+      position: relative;
+      z-index: 1;
     }
 
     .top-login-link {
@@ -193,6 +264,13 @@
       margin-top: 30px;
     }
 
+    .register-form-col {
+      float: none;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 980px;
+    }
+
     .register-form-wrap.is-active {
       display: block;
     }
@@ -265,9 +343,64 @@
       margin-bottom: 10px;
     }
 
+    .trial-hint {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #e8fbf5;
+      color: #1a7b58;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .payment-step {
+      border: 1px solid #e7edf2;
+      border-radius: 10px;
+      padding: 18px;
+      background: #f9fcfe;
+      margin-top: 18px;
+    }
+
+    .payment-card-element {
+      border: 1px solid #dbe5ec;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fff;
+      min-height: 46px;
+    }
+
+    .payment-card-error {
+      min-height: 18px;
+      margin-top: 8px;
+      color: #cc5965;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .payment-coupon-help {
+      display: block;
+      margin-top: 6px;
+      color: #6a7880;
+      font-size: 12px;
+    }
+
     @media (max-width: 991px) {
       .hero-title {
         font-size: 34px;
+      }
+
+      .register-tech-track--one {
+        font-size: 24px;
+      }
+
+      .register-tech-track--two {
+        font-size: 20px;
+      }
+
+      .register-tech-track--three {
+        font-size: 22px;
       }
 
       .hero-wrap {
@@ -278,9 +411,98 @@
         padding-top: 94px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .register-tech-track {
+        animation: none;
+      }
+    }
   </style>
 </head>
 <body class="register-marketing">
+  <div class="register-tech-bg" aria-hidden="true">
+    <div class="register-tech-track register-tech-track--one">
+      <div class="register-tech-seq">
+        <i class="fa fa-cloud"></i>
+        <i class="fa fa-database"></i>
+        <i class="fa fa-cogs"></i>
+        <i class="fa fa-shield"></i>
+        <i class="fa fa-line-chart"></i>
+        <i class="fa fa-code"></i>
+        <i class="fa fa-server"></i>
+        <i class="fa fa-envelope-o"></i>
+        <i class="fa fa-sitemap"></i>
+        <i class="fa fa-lock"></i>
+      </div>
+      <div class="register-tech-seq" aria-hidden="true">
+        <i class="fa fa-cloud"></i>
+        <i class="fa fa-database"></i>
+        <i class="fa fa-cogs"></i>
+        <i class="fa fa-shield"></i>
+        <i class="fa fa-line-chart"></i>
+        <i class="fa fa-code"></i>
+        <i class="fa fa-server"></i>
+        <i class="fa fa-envelope-o"></i>
+        <i class="fa fa-sitemap"></i>
+        <i class="fa fa-lock"></i>
+      </div>
+    </div>
+
+    <div class="register-tech-track register-tech-track--two">
+      <div class="register-tech-seq">
+        <i class="fa fa-bar-chart"></i>
+        <i class="fa fa-rocket"></i>
+        <i class="fa fa-exchange"></i>
+        <i class="fa fa-terminal"></i>
+        <i class="fa fa-bolt"></i>
+        <i class="fa fa-tablet"></i>
+        <i class="fa fa-wifi"></i>
+        <i class="fa fa-cube"></i>
+        <i class="fa fa-briefcase"></i>
+        <i class="fa fa-pie-chart"></i>
+      </div>
+      <div class="register-tech-seq" aria-hidden="true">
+        <i class="fa fa-bar-chart"></i>
+        <i class="fa fa-rocket"></i>
+        <i class="fa fa-exchange"></i>
+        <i class="fa fa-terminal"></i>
+        <i class="fa fa-bolt"></i>
+        <i class="fa fa-tablet"></i>
+        <i class="fa fa-wifi"></i>
+        <i class="fa fa-cube"></i>
+        <i class="fa fa-briefcase"></i>
+        <i class="fa fa-pie-chart"></i>
+      </div>
+    </div>
+
+    <div class="register-tech-track register-tech-track--three">
+      <div class="register-tech-seq">
+        <i class="fa fa-gears"></i>
+        <i class="fa fa-desktop"></i>
+        <i class="fa fa-upload"></i>
+        <i class="fa fa-download"></i>
+        <i class="fa fa-random"></i>
+        <i class="fa fa-globe"></i>
+        <i class="fa fa-tasks"></i>
+        <i class="fa fa-calendar"></i>
+        <i class="fa fa-file-text-o"></i>
+        <i class="fa fa-check-square-o"></i>
+      </div>
+      <div class="register-tech-seq" aria-hidden="true">
+        <i class="fa fa-gears"></i>
+        <i class="fa fa-desktop"></i>
+        <i class="fa fa-upload"></i>
+        <i class="fa fa-download"></i>
+        <i class="fa fa-random"></i>
+        <i class="fa fa-globe"></i>
+        <i class="fa fa-tasks"></i>
+        <i class="fa fa-calendar"></i>
+        <i class="fa fa-file-text-o"></i>
+        <i class="fa fa-check-square-o"></i>
+      </div>
+    </div>
+  </div>
+
   <a class="top-login-link" href="/" title="Login" aria-label="Ir para login">
     <i class="fa fa-sign-in"></i>
   </a>
@@ -303,6 +525,9 @@
           <p class="hero-subtitle wow fadeInUp" data-wow-delay="0.1s">
             Centralize processos, documentos, comunicação e rastreamento com visão executiva e controle operacional em tempo real.
           </p>
+          <div class="trial-hint wow fadeInUp" data-wow-delay="0.15s">
+            Teste gratuito por 7 dias, sem fidelidade.
+          </div>
           <p class="wow fadeInUp" data-wow-delay="0.2s">
             <button
               id="btnExperimentHero"
@@ -371,14 +596,14 @@
         <div id="dynamicPlansContainer" class="col-lg-12"></div>
         <div class="col-lg-12">
           <div class="disclaimer-box">
-            Desenvolvimentos customizados sao cobrados a parte.
+            Após 7 dias você será cobrado automaticamente de acordo com o plano selecionado.
           </div>
         </div>
       </div>
 
       <div id="registerFormWrap" class="register-form-wrap">
         <div class="row">
-          <div class="col-lg-8 col-lg-offset-2">
+          <div class="col-lg-10 col-md-12 register-form-col">
             <div class="register-form-card">
               <button type="button" id="btnBackPlans" class="back-plan-btn">
                 <i class="fa fa-arrow-left"></i> Voltar e alterar plano
@@ -482,6 +707,21 @@
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
+                      <label for="addressPostalCodeInput">CEP</label>
+                      <input id="addressPostalCodeInput" type="text" class="form-control" placeholder="09271-400" required />
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="addressCountryInput">País</label>
+                      <input id="addressCountryInput" type="text" class="form-control" value="Brasil" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
                       <label for="addressStreetInput">Rua / Avenida</label>
                       <input id="addressStreetInput" type="text" class="form-control" placeholder="Avenida Paulista" required />
                     </div>
@@ -505,21 +745,6 @@
                     <div class="form-group">
                       <label for="addressStateInput">Estado</label>
                       <input id="addressStateInput" type="text" class="form-control" placeholder="SP" required />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="addressPostalCodeInput">CEP</label>
-                      <input id="addressPostalCodeInput" type="text" class="form-control" placeholder="09271-400" required />
-                    </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="addressCountryInput">País</label>
-                      <input id="addressCountryInput" type="text" class="form-control" value="Brasil" required />
                     </div>
                   </div>
                 </div>
@@ -560,10 +785,42 @@
 
                 <div class="text-right">
                   <button id="confirmBtn" type="submit" class="btn btn-primary btn-lg">
-                    <i class="fa fa-check"></i> Confirmar cadastro
+                    <i class="fa fa-arrow-right"></i> Continuar para pagamento
                   </button>
                 </div>
               </form>
+
+              <div id="paymentStepWrap" class="payment-step section-hidden">
+                <h4 style="margin-top:0;">Pagamento do plano</h4>
+                <p class="text-muted" style="margin-bottom:10px;">
+                  Informe um cartao de credito ou debito para validar sua assinatura. A cobranca inicia apos 7 dias de teste.
+                </p>
+                <div class="form-group">
+                  <label for="paymentCouponInput">Cupom de desconto (opcional)</label>
+                  <input
+                    id="paymentCouponInput"
+                    type="text"
+                    class="form-control"
+                    maxlength="40"
+                    placeholder="Ex: MEUCUPOM" />                  
+                </div>
+                <div id="paymentNoChargeHint" class="alert alert-success section-hidden">
+                  Cupom NEVERPAY aplicado. Nenhum cartao sera cobrado neste cadastro.
+                </div>
+                <div id="paymentCardGroup" class="form-group">
+                  <label for="paymentCardElement">Dados do cartao</label>
+                  <div id="paymentCardElement" class="payment-card-element"></div>
+                  <div id="paymentCardError" class="payment-card-error" aria-live="polite"></div>
+                </div>
+                <div class="text-right">
+                  <button type="button" id="paymentBackBtn" class="btn btn-white">
+                    <i class="fa fa-arrow-left"></i> Voltar aos dados
+                  </button>
+                  <button type="button" id="paymentConfirmBtn" class="btn btn-primary">
+                    <i class="fa fa-lock"></i> Validar cartão e concluir cadastro
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -578,9 +835,33 @@
   <script src="/Assets/inspinia/js/plugins/wow/wow.min.js"></script>
   <script src="/Assets/inspinia/js/plugins/sweetalert/sweetalert.min.js"></script>
 
-  <script src="/js/public-register.page.js"></script>
+  <script>
+    window.__PUBLIC_REGISTER_GOOGLE_KEY = <%- JSON.stringify(googleKey || "") %>;
+  </script>
+  <script src="/js/public-register.page.js?v=20260309b"></script>
+  <script>
+    document.addEventListener("click", function (event) {
+      if (window.__publicRegisterHandlersReady) return;
+
+      var target = event && event.target;
+      if (!target || typeof target.closest !== "function") return;
+
+      var btn = target.closest(".plan-select-btn");
+      if (!btn) return;
+
+      var card = btn.closest(".plan-card");
+      if (!card) return;
+
+      if (typeof window.__publicOpenRegisterForSelection === "function") {
+        event.preventDefault();
+        window.__publicOpenRegisterForSelection(card);
+      }
+    });
+  </script>
   <script>
     (function () {
+      if (window.__publicRegisterMainScriptLoaded) return;
+      if (window.__publicRegisterHandlersReady) return;
       var fallbackState = {
         plans: [],
         modules: [],
@@ -589,7 +870,11 @@
         selectedPlanType: "",
         selectedPlanName: "",
         cnpjLookupInFlight: false,
-        isSubmitting: false
+        isSubmitting: false,
+        lastPostalLookup: null,
+        postalLookupInFlight: false,
+        googleApiLoading: null,
+        googleGeocoder: null
       };
 
       function normalizeArray(data) {
@@ -639,6 +924,133 @@
         return digits.replace(/^(\d{5})(\d)/, "$1-$2");
       }
 
+      function getGoogleMapsKeyFallback() {
+        var direct = normalizeString(window.__PUBLIC_REGISTER_GOOGLE_KEY);
+        if (direct) return direct;
+        var meta = document.querySelector('meta[name="google-maps-key"]');
+        return normalizeString(meta && meta.content ? meta.content : "");
+      }
+
+      function loadGoogleMapsApiFallback() {
+        if (window.google && window.google.maps) return Promise.resolve(true);
+        if (fallbackState.googleApiLoading) return fallbackState.googleApiLoading;
+
+        var key = getGoogleMapsKeyFallback();
+        if (!key) return Promise.resolve(false);
+
+        fallbackState.googleApiLoading = new Promise(function (resolve) {
+          var script = document.createElement("script");
+          script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(key) + "&libraries=places";
+          script.async = true;
+          script.defer = true;
+          script.onload = function () {
+            resolve(!!(window.google && window.google.maps));
+          };
+          script.onerror = function () {
+            resolve(false);
+          };
+          document.head.appendChild(script);
+        }).then(function (loaded) {
+          if (!loaded) fallbackState.googleApiLoading = null;
+          return loaded;
+        });
+
+        return fallbackState.googleApiLoading;
+      }
+
+      async function ensureGoogleGeocoderFallback() {
+        var loaded = await loadGoogleMapsApiFallback();
+        if (!loaded || !window.google || !window.google.maps || !window.google.maps.Geocoder) return null;
+        if (!fallbackState.googleGeocoder) {
+          fallbackState.googleGeocoder = new window.google.maps.Geocoder();
+        }
+        return fallbackState.googleGeocoder;
+      }
+
+      function readGoogleAddressComponentFallback(components, type, useShortName) {
+        var list = Array.isArray(components) ? components : [];
+        var component = list.find(function (entry) {
+          return Array.isArray(entry && entry.types) && entry.types.indexOf(type) >= 0;
+        });
+        if (!component) return "";
+        if (useShortName) return normalizeString(component.short_name);
+        return normalizeString(component.long_name);
+      }
+
+      function extractAddressFromGooglePlaceFallback(place) {
+        var components = Array.isArray(place && place.address_components) ? place.address_components : [];
+        var city =
+          readGoogleAddressComponentFallback(components, "locality", false) ||
+          readGoogleAddressComponentFallback(components, "administrative_area_level_2", false) ||
+          readGoogleAddressComponentFallback(components, "sublocality_level_1", false);
+
+        return {
+          street: readGoogleAddressComponentFallback(components, "route", false),
+          number: readGoogleAddressComponentFallback(components, "street_number", false),
+          city: city,
+          stateUf: readGoogleAddressComponentFallback(components, "administrative_area_level_1", true),
+          postalCode: formatCep(readGoogleAddressComponentFallback(components, "postal_code", false)),
+          country: readGoogleAddressComponentFallback(components, "country", false) || "Brasil"
+        };
+      }
+
+      function applyAddressDataIfEmptyFallback(data) {
+        if (!data) return;
+        if (data.street) setIfEmpty("addressStreetInput", data.street);
+        if (data.number) setIfEmpty("addressNumberInput", data.number);
+        if (data.city) setIfEmpty("addressCityInput", data.city);
+        if (data.stateUf) setIfEmpty("addressStateInput", data.stateUf);
+        if (data.postalCode) setIfEmpty("addressPostalCodeInput", data.postalCode);
+        if (data.country) setIfEmpty("addressCountryInput", data.country);
+      }
+
+      async function geocodePostalCodeFallback(postalDigits) {
+        var response = await fetch("/api/public/google/geocode/postal?postalCode=" + encodeURIComponent(postalDigits), {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "include"
+        });
+
+        var text = await response.text().catch(function () { return ""; });
+        var data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
+        if (!response.ok) {
+          var err = new Error((data && data.message) || "CEP nao encontrado no Google.");
+          err.status = response.status;
+          throw err;
+        }
+
+        return data || {};
+      }
+
+      async function tryAutoFillFromPostalCodeFallback(showAlertOnFail) {
+        var postalInput = byId("addressPostalCodeInput");
+        if (!postalInput) return;
+
+        var postalDigits = onlyDigits(postalInput.value);
+        if (postalDigits.length !== 8) return;
+        if (fallbackState.postalLookupInFlight) return;
+        if (fallbackState.lastPostalLookup === postalDigits) return;
+
+        fallbackState.postalLookupInFlight = true;
+        try {
+          var addressData = await geocodePostalCodeFallback(postalDigits);
+          addressData.postalCode = formatCep(postalDigits);
+          applyAddressDataIfEmptyFallback(addressData);
+          fallbackState.lastPostalLookup = postalDigits;
+        } catch (_error) {
+          if (showAlertOnFail) {
+            showMessage("Endereco", "Nao foi possivel auto preencher pelo CEP. Continue manualmente.", "warning");
+          }
+        } finally {
+          fallbackState.postalLookupInFlight = false;
+        }
+      }
+
+      async function installGoogleAddressAutocompleteFallback() {
+        return;
+      }
+
       function byId(id) {
         return document.getElementById(id);
       }
@@ -670,6 +1082,22 @@
           return;
         }
         window.alert(title + ": " + text);
+      }
+
+      function getFriendlyCnpjErrorMessageFallback(error) {
+        var fallback = "Por motivos de seguranca, digite seus dados manualmente.";
+        var status = Number(error && error.status);
+        var raw = normalizeString(error && error.message ? error.message : "");
+        var lower = raw.toLowerCase();
+
+        if (status === 429 || status === 403 || status === 503) return fallback;
+        if (!lower) return fallback;
+
+        var hints = ["limite", "limit", "quota", "rate", "429", "too many", "exced", "temporar"];
+        var matched = hints.some(function (hint) { return lower.indexOf(hint) >= 0; });
+        if (matched) return fallback;
+
+        return raw;
       }
 
       function showCnpjLoading(isLoading) {
@@ -944,7 +1372,11 @@
         var text = await response.text().catch(function () { return ""; });
         var data = {};
         try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
-        if (!response.ok) throw new Error((data && data.message) || "Falha na consulta do CNPJ.");
+        if (!response.ok) {
+          var err = new Error((data && data.message) || "Falha na consulta do CNPJ.");
+          err.status = response.status;
+          throw err;
+        }
         return data || {};
       }
 
@@ -973,7 +1405,7 @@
           setIfEmpty("addressCountryInput", "Brasil");
         } catch (error) {
           if (showAlertOnFail) {
-            showMessage("Falha no CNPJ", (error && error.message) || "Nao foi possivel consultar o CNPJ.", "error");
+            showMessage("Falha no CNPJ", getFriendlyCnpjErrorMessageFallback(error), "error");
           }
         } finally {
           fallbackState.cnpjLookupInFlight = false;
@@ -1177,6 +1609,18 @@
         });
       }
 
+      var postalInput = byId("addressPostalCodeInput");
+      if (postalInput && !postalInput.__fallbackBindDone) {
+        postalInput.__fallbackBindDone = true;
+        postalInput.addEventListener("input", function () {
+          postalInput.value = formatCep(postalInput.value);
+          fallbackState.lastPostalLookup = null;
+        });
+        postalInput.addEventListener("blur", function () {
+          tryAutoFillFromPostalCodeFallback(false);
+        });
+      }
+
       document.querySelectorAll('input[name="personTypeInput"]').forEach(function (radio) {
         if (radio.__fallbackBindDone) return;
         radio.__fallbackBindDone = true;
@@ -1213,6 +1657,8 @@
 
         updateCustomTotalFallback();
       });
+
+      window.__publicRegisterHandlersReady = true;
     })();
   </script>
 </body>

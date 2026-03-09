@@ -47,6 +47,36 @@ router.post("/signup", async (req, res) => {
     }
 });
 
+router.post("/signup/payment/prepare", async (req, res) => {
+    try {
+        const apiResponse = await authService.signupPaymentPrepare(req.body ?? {});
+        forwardSetCookie(apiResponse, res);
+        return res.status(apiResponse.status).json(apiResponse.data);
+    }
+    catch (error) {
+        const status = error.response?.status || 500;
+        const data = error.response?.data || { message: "Internal server error" };
+
+        console.error("Signup payment prepare error:", status, data);
+        return res.status(status).json(data);
+    }
+});
+
+router.post("/signup/payment/complete", async (req, res) => {
+    try {
+        const apiResponse = await authService.signupPaymentComplete(req.body ?? {});
+        forwardSetCookie(apiResponse, res);
+        return res.status(apiResponse.status).json(apiResponse.data);
+    }
+    catch (error) {
+        const status = error.response?.status || 500;
+        const data = error.response?.data || { message: "Internal server error" };
+
+        console.error("Signup payment complete error:", status, data);
+        return res.status(status).json(data);
+    }
+});
+
 router.post("/refresh-token", async (req, res) => {
     try {
         const refreshToken = req.cookies?.refresh_token;

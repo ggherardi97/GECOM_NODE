@@ -4,7 +4,51 @@
   }
 
   .wizard-big.wizard>.content {
-    min-height: 350px !important;
+    min-height: 560px !important;
+  }
+
+  #form-p-0 {
+    min-height: 520px;
+  }
+
+  .newclient-switch-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  .newclient-switch-item {
+    flex: 1 1 240px;
+    min-width: 240px;
+  }
+
+  .newclient-switch-item>label {
+    margin-bottom: 6px;
+  }
+
+  .newclient-option-set {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .newclient-option-btn {
+    min-width: 120px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .newclient-option-btn.is-active {
+    color: #fff;
+    background-color: #1ab394;
+    border-color: #1ab394;
+  }
+
+  .newclient-option-btn:focus,
+  .newclient-option-btn:active:focus {
+    outline: none;
+    box-shadow: none;
   }
 
   .users-table th,
@@ -68,38 +112,46 @@
                         <div class="row">
                           <div class="col-lg-4">
                             <div class="form-group">
-                              <label><%= t('page.newClient.client.labels.personType') %></label>
-                              <div>
-                                <label class="radio-inline">
-                                  <input type="radio" name="personType" id="personTypePj" value="PJ" checked>
-                                  <%= t('page.newClient.client.personTypes.legal') %>
-                                </label>
-                                <label class="radio-inline">
-                                  <input type="radio" name="personType" id="personTypePf" value="PF">
-                                  <%= t('page.newClient.client.personTypes.individual') %>
-                                </label>
+                              <div class="newclient-switch-row">
+                                <div class="newclient-switch-item">
+                                  <label><%= t('page.newClient.client.labels.personType') %></label>
+                                  <div class="newclient-option-set" data-target="personTypeValue">
+                                    <button type="button" class="btn btn-default btn-xs newclient-option-btn is-active" data-value="PJ">
+                                      <%= t('page.newClient.client.personTypes.company') %>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-xs newclient-option-btn" data-value="PF">
+                                      <%= t('page.newClient.client.personTypes.individual') %>
+                                    </button>
+                                  </div>
+                                  <input type="hidden" id="personTypeValue" name="personType" value="PJ">
+                                </div>
+
+                                <div class="newclient-switch-item" id="clientOriginGroup">
+                                  <label><%= t('page.newClient.client.labels.clientOrigin') %></label>
+                                  <div class="newclient-option-set" data-target="clientOriginValue">
+                                    <button type="button" class="btn btn-default btn-xs newclient-option-btn is-active" data-value="NATIONAL">
+                                      <%= t('page.newClient.client.origins.nationalBrazil') %>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-xs newclient-option-btn" data-value="INTERNATIONAL">
+                                      <%= t('page.newClient.client.origins.international') %>
+                                    </button>
+                                  </div>
+                                  <input type="hidden" id="clientOriginValue" name="clientOrigin" value="NATIONAL">
+                                </div>
                               </div>
                             </div>
 
-                            <div class="form-group" id="clientOriginGroup">
-                              <label><%= t('page.newClient.client.labels.clientOrigin') %></label>
-                              <div>
-                                <label class="radio-inline">
-                                  <input type="radio" name="clientOrigin" id="clientOriginNational" value="NATIONAL" checked>
-                                  <%= t('page.newClient.client.origins.national') %>
-                                </label>
-                                <label class="radio-inline">
-                                  <input type="radio" name="clientOrigin" id="clientOriginInternational" value="INTERNATIONAL">
-                                  <%= t('page.newClient.client.origins.international') %>
-                                </label>
-                              </div>
-                            </div>
-
-                            <div class="form-group">
+                            <div class="form-group" id="companyDocumentGroup">
                               <label id="companyDocumentLabel"><%= t('page.newClient.client.labels.cnpjRequired') %></label>
                               <input id="cnpj" name="cnpj" onkeyup="maskCompanyDocument(this)" type="text"
                                 class="form-control required" maxlength="18" placeholder="<%= t('page.newClient.client.placeholders.cnpj') %>">
                               <small id="cnpjHelp" style="display:none; color:#999;"><%= t('page.newClient.client.state.fetchingCnpj') %></small>
+                            </div>
+
+                            <div class="form-group" id="cpfGroup" style="display:none;">
+                              <label><%= t('page.newClient.client.labels.cpfRequired') %></label>
+                              <input id="cpf" name="cpf" onkeyup="maskCPF(this)" type="text"
+                                class="form-control required" maxlength="14" placeholder="<%= t('page.newClient.client.placeholders.cpf') %>">
                             </div>
 
                             <div class="form-group">
@@ -290,13 +342,13 @@
             }
 
             function getPersonType() {
-              const checked = document.querySelector('input[name="personType"]:checked');
-              return String(checked?.value || "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
+              const value = document.getElementById("personTypeValue")?.value;
+              return String(value || "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
             }
 
             function getClientOrigin() {
-              const checked = document.querySelector('input[name="clientOrigin"]:checked');
-              return String(checked?.value || "NATIONAL").toUpperCase() === "INTERNATIONAL"
+              const value = document.getElementById("clientOriginValue")?.value;
+              return String(value || "NATIONAL").toUpperCase() === "INTERNATIONAL"
                 ? "INTERNATIONAL"
                 : "NATIONAL";
             }
@@ -311,6 +363,56 @@
 
             function isCnpjLookupEnabled() {
               return isLegalEntity() && isNationalClient();
+            }
+
+            function refreshOptionSetVisual(targetId) {
+              const input = document.getElementById(targetId);
+              if (!input) return;
+              const value = String(input.value || "").toUpperCase();
+              const buttons = document.querySelectorAll(`.newclient-option-set[data-target="${targetId}"] .newclient-option-btn`);
+              buttons.forEach((btn) => {
+                const active = String(btn.dataset.value || "").toUpperCase() === value;
+                btn.classList.toggle("is-active", active);
+                btn.classList.toggle("btn-primary", active);
+                btn.classList.toggle("btn-default", !active);
+              });
+            }
+
+            function setClientTypeSelectValue(selectId, value, emitChange) {
+              const input = document.getElementById(selectId);
+              if (!input) return;
+              const nextValue = String(value || "").toUpperCase();
+              if (input.value !== nextValue) input.value = nextValue;
+              refreshOptionSetVisual(selectId);
+              if (emitChange) {
+                window.__newClientState.lastCnpjFetched = null;
+                applyClientDocumentMode();
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+              }
+            }
+
+            function setClientTypeSelectDisabled(selectId, isDisabled) {
+              const buttons = document.querySelectorAll(`.newclient-option-set[data-target="${selectId}"] .newclient-option-btn`);
+              buttons.forEach((btn) => {
+                btn.disabled = !!isDisabled;
+              });
+            }
+
+            function attachOptionSetListeners() {
+              if (window.__newClientOptionSetDelegated) return;
+              window.__newClientOptionSetDelegated = true;
+
+              document.addEventListener("click", function (event) {
+                const btn = event.target?.closest?.(".newclient-option-set .newclient-option-btn");
+                if (!btn) return;
+                if (btn.disabled) return;
+
+                const targetId = btn.closest(".newclient-option-set")?.dataset?.target;
+                const value = btn.dataset.value;
+                if (!targetId || !value) return;
+
+                setClientTypeSelectValue(targetId, value, true);
+              }, true);
             }
 
             function showPostalLoading(isLoading) {
@@ -521,6 +623,11 @@ function pickUserIdFromApiResponse(data) {
               element.value = formatCNPJ(element.value);
             }
 
+            function maskCPF(element) {
+              if (!element) return;
+              element.value = formatCPF(element.value);
+            }
+
             function maskCompanyDocument(element) {
               if (!element) return;
 
@@ -543,30 +650,36 @@ function pickUserIdFromApiResponse(data) {
             }
             window.maskPhone = maskPhone;
             window.maskCNPJ = maskCNPJ;
+            window.maskCPF = maskCPF;
             window.maskCompanyDocument = maskCompanyDocument;
             window.maskCEP = maskCEP;
 
             function applyClientDocumentMode() {
               const labelEl = document.getElementById("companyDocumentLabel");
               const docInput = document.getElementById("cnpj");
-              const originGroup = document.getElementById("clientOriginGroup");
+              const cpfInput = document.getElementById("cpf");
+              const cnpjGroup = document.getElementById("companyDocumentGroup");
+              const cpfGroup = document.getElementById("cpfGroup");
 
               if (!labelEl || !docInput) return;
 
               if (!isLegalEntity()) {
-                if (originGroup) originGroup.style.display = "none";
-                const nationalEl = document.getElementById("clientOriginNational");
-                if (nationalEl) nationalEl.checked = true;
+                setClientTypeSelectValue("clientOriginValue", "NATIONAL", false);
+                setClientTypeSelectDisabled("clientOriginValue", true);
+                if (cnpjGroup) cnpjGroup.style.display = "none";
+                if (cpfGroup) cpfGroup.style.display = "";
+                docInput.disabled = true;
+                if (cpfInput) cpfInput.disabled = false;
 
-                labelEl.textContent = "<%= t('page.newClient.client.labels.cpfRequired') %>";
-                docInput.placeholder = "<%= t('page.newClient.client.placeholders.cpf') %>";
-                docInput.maxLength = 14;
-                docInput.value = formatCPF(docInput.value);
                 showCnpjLoading(false);
                 return;
               }
 
-              if (originGroup) originGroup.style.display = "";
+              setClientTypeSelectDisabled("clientOriginValue", false);
+              if (cnpjGroup) cnpjGroup.style.display = "";
+              if (cpfGroup) cpfGroup.style.display = "none";
+              docInput.disabled = false;
+              if (cpfInput) cpfInput.disabled = true;
 
               if (isNationalClient()) {
                 labelEl.textContent = "<%= t('page.newClient.client.labels.cnpjRequired') %>";
@@ -574,8 +687,8 @@ function pickUserIdFromApiResponse(data) {
                 docInput.maxLength = 18;
                 docInput.value = formatCNPJ(docInput.value);
               } else {
-                labelEl.textContent = "<%= t('page.newClient.client.labels.foreignNumberRequired') %>";
-                docInput.placeholder = "<%= t('page.newClient.client.placeholders.foreignNumber') %>";
+                labelEl.textContent = "<%= t('page.newClient.client.labels.internationalNumberRequired') %>";
+                docInput.placeholder = "<%= t('page.newClient.client.placeholders.internationalNumber') %>";
                 docInput.maxLength = 40;
                 docInput.value = String(docInput.value || "").trim();
                 showCnpjLoading(false);
@@ -583,7 +696,7 @@ function pickUserIdFromApiResponse(data) {
             }
 
             function attachClientTypeListeners() {
-              const inputs = document.querySelectorAll('input[name="personType"], input[name="clientOrigin"]');
+              const inputs = document.querySelectorAll("#personTypeValue, #clientOriginValue");
               inputs.forEach((el) => {
                 if (el.__clientTypeBindDone) return;
                 el.__clientTypeBindDone = true;
@@ -595,19 +708,19 @@ function pickUserIdFromApiResponse(data) {
             }
 
             function validateClientDocument() {
-              const docValue = getValue("cnpj");
-              const docDigits = onlyDigits(docValue);
-
               if (!isLegalEntity()) {
-                if (docDigits.length !== 11) return "<%= t('page.newClient.messages.invalidCpf') %>";
+                const cpfDigits = onlyDigits(getValue("cpf"));
+                if (cpfDigits.length !== 11) return "<%= t('page.newClient.messages.invalidCpf') %>";
                 return null;
               }
 
               if (isNationalClient()) {
+                const docDigits = onlyDigits(getValue("cnpj"));
                 if (docDigits.length !== 14) return "<%= t('page.newClient.messages.invalidCnpj') %>";
                 return null;
               }
 
+              const docValue = getValue("cnpj");
               if (!docValue) return "<%= t('page.newClient.messages.invalidForeignNumber') %>";
               return null;
             }
@@ -807,8 +920,8 @@ function pickUserIdFromApiResponse(data) {
                   company_name: getValue("companyname"),
                   // ✅ user_id removed
                   phone: getValue("phone"),
-                  company_number: getValue("cnpj"),
-                  cpf: isLegalEntity() ? null : getValue("cnpj"),
+                  company_number: isLegalEntity() ? getValue("cnpj") : null,
+                  cpf: isLegalEntity() ? null : getValue("cpf"),
                   sector: getValue("setor"),
                   category: getSelectedCategoryText(),
 
@@ -914,6 +1027,9 @@ function pickUserIdFromApiResponse(data) {
 
               attachPostalAutoFill();
               installCnpjAutoFill();
+              refreshOptionSetVisual("personTypeValue");
+              refreshOptionSetVisual("clientOriginValue");
+              attachOptionSetListeners();
               attachClientTypeListeners();
               applyClientDocumentMode();
 

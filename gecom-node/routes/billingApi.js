@@ -446,6 +446,10 @@ router.get("/admin/tenants/search", async (req, res) => {
   }
 });
 
+router.get("/me/billing/summary", createProxyHandler({ backendPath: "/me/billing/summary" }));
+router.post("/me/billing/upgrade", createProxyHandler({ backendPath: "/me/billing/upgrade" }));
+router.post("/me/billing/cancel", createProxyHandler({ backendPath: "/me/billing/cancel" }));
+router.post("/me/billing/custom-request", createProxyHandler({ backendPath: "/me/billing/custom-request" }));
 router.get("/me/modules", createProxyHandler({ backendPath: "/me/modules" }));
 
 module.exports = router;

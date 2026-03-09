@@ -14,6 +14,7 @@ const authRoutes = require('./routes/auth');
 const companiesApiRoutes = require("./routes/companiesApi");
 const processApiRoutes = require("./routes/processApi");
 const cnpjApiRoutes = require('./routes/cnpjApi');
+const googleGeocodeApiRoutes = require('./routes/googleGeocodeApi');
 const invoicesApiRoutes = require('./routes/invoicesApi');
 const productsApiRoutes = require('./routes/productsApi');
 const currenciesApiRoutes = require('./routes/currenciesApi');
@@ -174,6 +175,7 @@ app.use("/api", usersApiRoutes);
 app.use("/api", tenantsApiRoutes);
 app.use("/api", processApiRoutes);
 app.use('/api', cnpjApiRoutes);
+app.use('/api', googleGeocodeApiRoutes);
 app.use('/api', invoicesApiRoutes);
 app.use('/api', productsApiRoutes);
 app.use('/api', currenciesApiRoutes);
@@ -285,7 +287,12 @@ app.get('/LandingPage', async (req, res) => {
 
   return res.render("LandingPage", { layout: false });
 });
-app.get(['/cadastro', '/register'], (req, res) => res.render('PublicRegister', { layout: false }));
+app.get(['/cadastro', '/register'], (req, res) =>
+  res.render('PublicRegister', {
+    layout: false,
+    googleKey: String(process.env.GOOGLE_KEY || ""),
+  }),
+);
 
 /* ---------- 404 e erro genérico (opcional, mas útil) ---------- */
 app.use((req, res) => res.status(404).send('Not Found'));

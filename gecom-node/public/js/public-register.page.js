@@ -1,4 +1,5 @@
 (function () {
+  window.__publicRegisterMainScriptLoaded = true;
   const CUSTOM_PLAN_ID = "__CUSTOM__";
 
   const state = {
@@ -12,7 +13,23 @@
     modules: [],
     customModuleIds: [],
     lastCnpjFetched: null,
-    cnpjLookupInFlight: false
+    cnpjLookupInFlight: false,
+    lastPostalLookup: null,
+    postalLookupInFlight: false,
+    googleApiLoading: null,
+    googleGeocoder: null,
+    googleAddressAutocompleteReady: false,
+    stripeJsLoading: null,
+    stripe: null,
+    stripeElements: null,
+    stripeCardElement: null,
+    paymentSessionId: null,
+    paymentClientSecret: null,
+    paymentPublishableKey: null,
+    paymentRequiresCard: true,
+    paymentCouponCode: "",
+    cachedSignupPayload: null,
+    isFinalizingPayment: false
   };
 
   const loaderMessages = [
@@ -24,6 +41,11 @@
 
   let loaderTimer = null;
   let loaderMessageIndex = 0;
+
+  // Ensure hero CTA always has an action, even if bootstrap fails later.
+  window.__openRegisterPlans = function () {
+    return openPlansFromHero();
+  };
 
   function getEl(id) {
     return document.getElementById(id);
@@ -70,6 +92,10 @@
     return String(value || "").replace(/\D/g, "");
   }
 
+  function getPaymentCouponCode() {
+    return normalizeString(getValue("paymentCouponInput")).toUpperCase();
+  }
+
   function getPersonType() {
     const checked = document.querySelector('input[name="personTypeInput"]:checked');
     return String(checked && checked.value ? checked.value : "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
@@ -99,6 +125,275 @@
   function formatCep(value) {
     const digits = onlyDigits(value).slice(0, 8);
     return digits.replace(/^(\d{5})(\d)/, "$1-$2");
+  }
+
+  function getGoogleMapsKey() {
+    const direct = normalizeString(window.__PUBLIC_REGISTER_GOOGLE_KEY);
+    if (direct) return direct;
+    const meta = document.querySelector('meta[name="google-maps-key"]');
+    return normalizeString(meta && meta.content ? meta.content : "");
+  }
+
+  function loadGoogleMapsApi() {
+    if (window.google && window.google.maps) return Promise.resolve(true);
+    if (state.googleApiLoading) return state.googleApiLoading;
+
+    const key = getGoogleMapsKey();
+    if (!key) return Promise.resolve(false);
+
+    state.googleApiLoading = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = function () {
+        resolve(!!(window.google && window.google.maps));
+      };
+      script.onerror = function () {
+        resolve(false);
+      };
+      document.head.appendChild(script);
+    }).then((loaded) => {
+      if (!loaded) state.googleApiLoading = null;
+      return loaded;
+    });
+
+    return state.googleApiLoading;
+  }
+
+  async function ensureGoogleGeocoder() {
+    const loaded = await loadGoogleMapsApi();
+    if (!loaded || !window.google || !window.google.maps || !window.google.maps.Geocoder) return null;
+
+    if (!state.googleGeocoder) {
+      state.googleGeocoder = new window.google.maps.Geocoder();
+    }
+    return state.googleGeocoder;
+  }
+
+  function readGoogleAddressComponent(components, type, useShortName) {
+    const list = Array.isArray(components) ? components : [];
+    const component = list.find((entry) => Array.isArray(entry.types) && entry.types.includes(type));
+    if (!component) return "";
+    if (useShortName) return normalizeString(component.short_name);
+    return normalizeString(component.long_name);
+  }
+
+  function extractAddressFromGooglePlace(place) {
+    const components = Array.isArray(place && place.address_components) ? place.address_components : [];
+    const city =
+      readGoogleAddressComponent(components, "locality", false) ||
+      readGoogleAddressComponent(components, "administrative_area_level_2", false) ||
+      readGoogleAddressComponent(components, "sublocality_level_1", false);
+
+    return {
+      street: readGoogleAddressComponent(components, "route", false),
+      number: readGoogleAddressComponent(components, "street_number", false),
+      city,
+      stateUf: readGoogleAddressComponent(components, "administrative_area_level_1", true),
+      postalCode: formatCep(readGoogleAddressComponent(components, "postal_code", false)),
+      country: readGoogleAddressComponent(components, "country", false) || "Brasil"
+    };
+  }
+
+  function applyAddressDataIfEmpty(addressData) {
+    if (!addressData) return;
+    if (addressData.street) setIfEmpty("addressStreetInput", addressData.street);
+    if (addressData.number) setIfEmpty("addressNumberInput", addressData.number);
+    if (addressData.city) setIfEmpty("addressCityInput", addressData.city);
+    if (addressData.stateUf) setIfEmpty("addressStateInput", addressData.stateUf);
+    if (addressData.postalCode) setIfEmpty("addressPostalCodeInput", addressData.postalCode);
+    if (addressData.country) setIfEmpty("addressCountryInput", addressData.country);
+  }
+
+  async function geocodePostalCode(postalDigits) {
+    const response = await fetch(
+      `/api/public/google/geocode/postal?postalCode=${encodeURIComponent(postalDigits)}`,
+      {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        credentials: "include"
+      }
+    );
+
+    const data = await readJsonSafe(response);
+    if (!response.ok) {
+      const message = data && data.message ? data.message : "CEP nao encontrado no Google.";
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
+    }
+    return data || {};
+  }
+
+  async function tryAutoFillFromPostalCode(showAlertOnFail) {
+    const postalInput = getEl("addressPostalCodeInput");
+    if (!postalInput) return;
+
+    const postalDigits = onlyDigits(postalInput.value);
+    if (postalDigits.length !== 8) return;
+    if (state.postalLookupInFlight) return;
+    if (state.lastPostalLookup === postalDigits) return;
+
+    state.postalLookupInFlight = true;
+    try {
+      const addressData = await geocodePostalCode(postalDigits);
+      addressData.postalCode = formatCep(postalDigits);
+      applyAddressDataIfEmpty(addressData);
+      state.lastPostalLookup = postalDigits;
+    } catch (error) {
+      if (showAlertOnFail) {
+        showMessage("Endereco", "Nao foi possivel auto preencher pelo CEP. Continue manualmente.", "warning");
+      }
+    } finally {
+      state.postalLookupInFlight = false;
+    }
+  }
+
+  async function installGoogleAddressAutocomplete() {
+    return false;
+  }
+
+  function setPaymentError(message) {
+    const errorEl = getEl("paymentCardError");
+    if (!errorEl) return;
+    errorEl.textContent = normalizeString(message || "");
+  }
+
+  function applyPaymentModeUi(requiresCard, appliedCouponCode) {
+    state.paymentRequiresCard = !!requiresCard;
+    const normalizedCoupon = normalizeString(appliedCouponCode).toUpperCase();
+
+    const cardGroup = getEl("paymentCardGroup");
+    if (cardGroup) {
+      cardGroup.classList.toggle("section-hidden", !state.paymentRequiresCard);
+    }
+
+    const noChargeHint = getEl("paymentNoChargeHint");
+    if (noChargeHint) {
+      const showHint = !state.paymentRequiresCard && normalizedCoupon === "NEVERPAY";
+      noChargeHint.classList.toggle("section-hidden", !showHint);
+    }
+
+    if (!state.paymentRequiresCard) {
+      setPaymentError("");
+    }
+
+    const confirmBtn = getEl("paymentConfirmBtn");
+    if (confirmBtn && !state.isFinalizingPayment) {
+      confirmBtn.innerHTML = getPaymentButtonLabel(false);
+    }
+  }
+
+  function getPaymentButtonLabel(isLoading) {
+    if (isLoading) {
+      return state.paymentRequiresCard
+        ? '<i class="fa fa-spinner fa-spin"></i> Validando...'
+        : '<i class="fa fa-spinner fa-spin"></i> Concluindo...';
+    }
+
+    return state.paymentRequiresCard
+      ? '<i class="fa fa-lock"></i> Validar cartao e concluir cadastro'
+      : '<i class="fa fa-check"></i> Concluir cadastro sem cobranca';
+  }
+
+  function resetPaymentStep() {
+    state.paymentSessionId = null;
+    state.paymentClientSecret = null;
+    state.paymentRequiresCard = true;
+    state.paymentCouponCode = "";
+    state.cachedSignupPayload = null;
+    state.isFinalizingPayment = false;
+    setPaymentError("");
+    applyPaymentModeUi(true, "");
+
+    const couponInput = getEl("paymentCouponInput");
+    if (couponInput) couponInput.value = "";
+
+    const paymentWrap = getEl("paymentStepWrap");
+    if (paymentWrap) paymentWrap.classList.add("section-hidden");
+
+    const confirmBtn = getEl("confirmBtn");
+    if (confirmBtn) confirmBtn.classList.remove("section-hidden");
+  }
+
+  function showPaymentStep() {
+    const paymentWrap = getEl("paymentStepWrap");
+    if (paymentWrap) paymentWrap.classList.remove("section-hidden");
+
+    const confirmBtn = getEl("confirmBtn");
+    if (confirmBtn) confirmBtn.classList.add("section-hidden");
+
+    if (paymentWrap) {
+      paymentWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function showDataStep() {
+    const paymentWrap = getEl("paymentStepWrap");
+    if (paymentWrap) paymentWrap.classList.add("section-hidden");
+
+    const confirmBtn = getEl("confirmBtn");
+    if (confirmBtn) confirmBtn.classList.remove("section-hidden");
+  }
+
+  function setPaymentSubmitState(isLoading) {
+    state.isFinalizingPayment = isLoading;
+    const btn = getEl("paymentConfirmBtn");
+    if (!btn) return;
+
+    btn.disabled = isLoading;
+    btn.innerHTML = getPaymentButtonLabel(isLoading);
+  }
+
+  function loadStripeJs() {
+    if (window.Stripe) return Promise.resolve(true);
+    if (state.stripeJsLoading) return state.stripeJsLoading;
+
+    state.stripeJsLoading = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://js.stripe.com/v3/";
+      script.async = true;
+      script.onload = function () {
+        resolve(!!window.Stripe);
+      };
+      script.onerror = function () {
+        resolve(false);
+      };
+      document.head.appendChild(script);
+    }).then((ok) => {
+      if (!ok) state.stripeJsLoading = null;
+      return ok;
+    });
+
+    return state.stripeJsLoading;
+  }
+
+  async function ensureStripeCardElement(publishableKey) {
+    const key = normalizeString(publishableKey);
+    if (!key) throw new Error("Stripe publishable key nao disponivel.");
+
+    const loaded = await loadStripeJs();
+    if (!loaded || !window.Stripe) {
+      throw new Error("Nao foi possivel carregar o Stripe.js.");
+    }
+
+    if (!state.stripe || state.paymentPublishableKey !== key) {
+      state.paymentPublishableKey = key;
+      state.stripe = window.Stripe(key);
+      state.stripeElements = state.stripe.elements({ locale: "pt-BR" });
+      state.stripeCardElement = null;
+    }
+
+    if (!state.stripeCardElement) {
+      state.stripeCardElement = state.stripeElements.create("card", {
+        hidePostalCode: true,
+      });
+      state.stripeCardElement.mount("#paymentCardElement");
+      state.stripeCardElement.on("change", function (event) {
+        setPaymentError(event && event.error ? event.error.message : "");
+      });
+    }
   }
 
   function setIfEmpty(id, value) {
@@ -171,6 +466,21 @@
     window.alert(`${title}: ${text}`);
   }
 
+  function getFriendlyCnpjErrorMessage(error) {
+    const fallback = "Por motivos de seguranca, digite seus dados manualmente.";
+    const status = Number(error && error.status);
+    const raw = normalizeString(error && error.message ? error.message : "");
+    const lower = raw.toLowerCase();
+
+    if (status === 429 || status === 403 || status === 503) return fallback;
+    if (!lower) return fallback;
+
+    const limitHints = ["limite", "limit", "quota", "rate", "429", "too many", "exced", "temporar"];
+    if (limitHints.some((hint) => lower.includes(hint))) return fallback;
+
+    return raw;
+  }
+
   function slugifyCompanyName(name) {
     const normalized = normalizeString(name)
       .normalize("NFD")
@@ -194,7 +504,9 @@
     const data = await readJsonSafe(response);
     if (!response.ok) {
       const message = data && data.message ? data.message : "Falha na consulta do CNPJ.";
-      throw new Error(message);
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
     }
     return data || {};
   }
@@ -229,7 +541,7 @@
       setIfEmpty("addressCountryInput", "Brasil");
     } catch (error) {
       if (showAlertOnFail) {
-        const message = error && error.message ? error.message : "Nao foi possivel consultar o CNPJ.";
+        const message = getFriendlyCnpjErrorMessage(error);
         showMessage("Falha no CNPJ", message, "error");
       }
     } finally {
@@ -295,6 +607,7 @@
   function showPlanChooser() {
     const listWrap = getEl("plansListWrap");
     const formWrap = getEl("registerFormWrap");
+    resetPaymentStep();
     if (listWrap) listWrap.classList.remove("is-hidden");
     if (formWrap) formWrap.classList.remove("is-active");
   }
@@ -523,6 +836,7 @@
 
     toggleCustomBuilder(state.selectedPlanType === "custom");
     updateCustomPlanTotal();
+    resetPaymentStep();
 
     const listWrap = getEl("plansListWrap");
     const formWrap = getEl("registerFormWrap");
@@ -532,6 +846,7 @@
       formWrap.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
+  window.__publicOpenRegisterForSelection = openRegisterForSelection;
 
   async function syncCurrentUserFromMe() {
     const meResp = await fetch("/api/auth/me", {
@@ -557,8 +872,8 @@
 
     btn.disabled = isLoading;
     btn.innerHTML = isLoading
-      ? '<i class="fa fa-spinner fa-spin"></i> Processando...'
-      : '<i class="fa fa-check"></i> Confirmar cadastro';
+      ? '<i class="fa fa-spinner fa-spin"></i> Preparando pagamento...'
+      : '<i class="fa fa-arrow-right"></i> Continuar para pagamento';
 
     if (isLoading) {
       showLoader();
@@ -672,35 +987,178 @@
     return payload;
   }
 
+  async function prepareSignupPaymentSession(signupPayload, couponCode, clearCardField) {
+    const normalizedCoupon = normalizeString(couponCode).toUpperCase();
+    const preparePayload = Object.assign({}, signupPayload || {});
+    if (normalizedCoupon) {
+      preparePayload.coupon_code = normalizedCoupon;
+    }
+
+    const paymentSession = await postJson("/auth/signup/payment/prepare", preparePayload);
+    if (!paymentSession || !paymentSession.session_id) {
+      throw new Error("Falha ao iniciar etapa de pagamento.");
+    }
+
+    state.cachedSignupPayload = signupPayload;
+    state.paymentSessionId = normalizeString(paymentSession.session_id);
+    state.paymentCouponCode = normalizedCoupon;
+
+    const requiresPayment = paymentSession.requires_payment !== false;
+    applyPaymentModeUi(requiresPayment, normalizedCoupon);
+
+    if (!requiresPayment) {
+      state.paymentClientSecret = null;
+      return paymentSession;
+    }
+
+    state.paymentClientSecret = normalizeString(paymentSession.setup_intent_client_secret);
+    if (!state.paymentClientSecret) {
+      throw new Error("Nao foi possivel preparar a validacao do cartao.");
+    }
+
+    await ensureStripeCardElement(paymentSession.stripe_publishable_key);
+    if (clearCardField && state.stripeCardElement && typeof state.stripeCardElement.clear === "function") {
+      state.stripeCardElement.clear();
+    }
+
+    return paymentSession;
+  }
+
   async function onSubmitForm(event) {
     event.preventDefault();
     if (state.isSubmitting) return;
 
     try {
       const signupPayload = validateFormPayload();
+      const couponCode = getPaymentCouponCode();
       setSubmitState(true);
-
-      await postJson("/auth/signup", signupPayload);
-      await syncCurrentUserFromMe();
-
-      swal({
-        title: "Cadastro concluido!",
-        text: "Seu ambiente foi criado e sua sessao ja esta autenticada.",
-        type: "success"
-      }, function () {
-        window.location.href = "/Default";
-      });
+      await prepareSignupPaymentSession(signupPayload, couponCode, true);
+      setPaymentError("");
+      showPaymentStep();
     } catch (error) {
       console.error("[PublicRegister] submit error:", error);
-      const msg = error && error.message ? error.message : "Nao foi possivel concluir o cadastro.";
+      const msg = error && error.message ? error.message : "Nao foi possivel iniciar o pagamento.";
       showMessage("Falha no cadastro", msg, "error");
     } finally {
       setSubmitState(false);
     }
   }
 
+  async function completeSignupWithPayment() {
+    if (state.isFinalizingPayment) return;
+
+    try {
+      setPaymentSubmitState(true);
+      showLoader();
+      setPaymentError("");
+
+      const signupPayload = validateFormPayload();
+      const couponCode = getPaymentCouponCode();
+      await prepareSignupPaymentSession(signupPayload, couponCode, false);
+
+      if (!state.paymentSessionId) {
+        throw new Error("Sessao de pagamento invalida. Tente novamente.");
+      }
+
+      if (!state.paymentRequiresCard) {
+        await postJson("/auth/signup/payment/complete", {
+          session_id: state.paymentSessionId,
+        });
+
+        await syncCurrentUserFromMe();
+        swal({
+          title: "Cadastro concluido!",
+          text: "Seu ambiente foi criado e sua sessao ja esta autenticada.",
+          type: "success"
+        }, function () {
+          window.location.href = "/Default";
+        });
+        return;
+      }
+
+      if (!state.stripe || !state.paymentClientSecret || !state.stripeCardElement) {
+        throw new Error("Nao foi possivel iniciar validacao do cartao. Recarregue a tela e tente novamente.");
+      }
+
+      const billingName = normalizeString(getValue("userNameInput")) || normalizeString(getValue("companyNameInput"));
+      const billingEmail = normalizeString(getValue("emailInput"));
+      const billingPhone = normalizeString(getValue("phoneInput"));
+      const billingAddress = {
+        line1: normalizeString(getValue("addressStreetInput")) || undefined,
+        city: normalizeString(getValue("addressCityInput")) || undefined,
+        state: normalizeString(getValue("addressStateInput")) || undefined,
+        postal_code: onlyDigits(getValue("addressPostalCodeInput")) || undefined,
+        country: "BR",
+      };
+
+      const stripeResult = await state.stripe.confirmCardSetup(state.paymentClientSecret, {
+        payment_method: {
+          card: state.stripeCardElement,
+          billing_details: {
+            name: billingName || undefined,
+            email: billingEmail || undefined,
+            phone: billingPhone || undefined,
+            address: billingAddress,
+          },
+        },
+      });
+
+      if (stripeResult.error) {
+        throw new Error(stripeResult.error.message || "Cartao nao validado. Verifique os dados.");
+      }
+
+      const setupIntent = stripeResult && stripeResult.setupIntent ? stripeResult.setupIntent : null;
+      if (!setupIntent || setupIntent.status !== "succeeded") {
+        throw new Error("Cartao nao validado pelo Stripe.");
+      }
+
+      const paymentMethodId =
+        typeof setupIntent.payment_method === "string"
+          ? setupIntent.payment_method
+          : (setupIntent.payment_method && setupIntent.payment_method.id) || "";
+      if (!paymentMethodId) {
+        throw new Error("Metodo de pagamento nao encontrado no setup intent.");
+      }
+
+      await postJson("/auth/signup/payment/complete", {
+        session_id: state.paymentSessionId,
+        setup_intent_id: setupIntent.id,
+        payment_method_id: paymentMethodId,
+      });
+
+      await syncCurrentUserFromMe();
+      swal({
+        title: "Cadastro concluido!",
+        text: "Seu ambiente foi criado com trial de 7 dias e sua sessao ja esta autenticada.",
+        type: "success"
+      }, function () {
+        window.location.href = "/Default";
+      });
+    } catch (error) {
+      console.error("[PublicRegister] payment complete error:", error);
+      const fallbackMsg = state.paymentRequiresCard
+        ? "Nao foi possivel validar o cartao."
+        : "Nao foi possivel concluir o cadastro.";
+      const msg = error && error.message ? error.message : fallbackMsg;
+      if (state.paymentRequiresCard) {
+        setPaymentError(msg);
+      } else {
+        setPaymentError("");
+      }
+      showMessage("Falha no pagamento", msg, "error");
+    } finally {
+      hideLoader();
+      setPaymentSubmitState(false);
+    }
+  }
+
   async function openPlansFromHero() {
     showPlansStage();
+    if (state.plansLoaded) {
+      renderPlansGrid();
+      return;
+    }
+
     renderPlansLoading();
     try {
       await loadPublicCatalog(false);
@@ -712,6 +1170,8 @@
   }
 
   function installEvents() {
+    if (window.__publicRegisterHandlersReady) return;
+
     const heroButton = getEl("btnExperimentHero");
     if (heroButton) heroButton.addEventListener("click", openPlansFromHero);
 
@@ -757,6 +1217,28 @@
       form.__mainSubmitBound = true;
     }
 
+    const paymentBackBtn = getEl("paymentBackBtn");
+    if (paymentBackBtn) {
+      paymentBackBtn.addEventListener("click", function () {
+        showDataStep();
+        setPaymentError("");
+      });
+    }
+
+    const paymentConfirmBtn = getEl("paymentConfirmBtn");
+    if (paymentConfirmBtn) {
+      paymentConfirmBtn.addEventListener("click", function () {
+        completeSignupWithPayment();
+      });
+    }
+
+    const paymentCouponInput = getEl("paymentCouponInput");
+    if (paymentCouponInput) {
+      paymentCouponInput.addEventListener("blur", function () {
+        paymentCouponInput.value = normalizeString(paymentCouponInput.value).toUpperCase();
+      });
+    }
+
     const cnpjInput = getEl("companyNumberInput");
     if (cnpjInput) {
       cnpjInput.addEventListener("input", function () {
@@ -775,9 +1257,22 @@
       });
     }
 
+    const postalInput = getEl("addressPostalCodeInput");
+    if (postalInput) {
+      postalInput.addEventListener("input", function () {
+        postalInput.value = formatCep(postalInput.value);
+        state.lastPostalLookup = null;
+      });
+      postalInput.addEventListener("blur", function () {
+        tryAutoFillFromPostalCode(false);
+      });
+    }
+
     document.querySelectorAll('input[name="personTypeInput"]').forEach(function (radio) {
       radio.addEventListener("change", applyPersonTypeMode);
     });
+
+    window.__publicRegisterHandlersReady = true;
   }
 
   async function bootstrap() {
@@ -785,6 +1280,11 @@
     window.__publicRegisterMainReady = true;
     installEvents();
     applyPersonTypeMode();
+    resetPaymentStep();
+    showLandingStage();
+    installGoogleAddressAutocomplete().catch(function (error) {
+      console.warn("[PublicRegister] Google address autocomplete unavailable:", error);
+    });
 
     if (window.WOW) {
       try {
@@ -799,15 +1299,19 @@
     } catch (error) {
       console.error("[PublicRegister] preload catalog error:", error);
     }
-
-    showLandingStage();
   }
 
-  if (window.jQuery && typeof window.jQuery === "function") {
-    window.jQuery(bootstrap);
-  } else if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", bootstrap);
+  function startBootstrapOnce() {
+    if (window.__publicRegisterMainBootstrapped) return;
+    window.__publicRegisterMainBootstrapped = true;
+    Promise.resolve(bootstrap()).catch(function (error) {
+      console.error("[PublicRegister] bootstrap fatal error:", error);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startBootstrapOnce, { once: true });
   } else {
-    bootstrap();
+    startBootstrapOnce();
   }
 })();

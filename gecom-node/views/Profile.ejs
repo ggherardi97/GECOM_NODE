@@ -193,6 +193,7 @@
                     <ul class="nav nav-tabs">
                       <li><a class="nav-link active" href="#tab-1" data-toggle="tab"><%= t('page.profile.tabs.myProfile') %></a></li>
                       <li id="tabUsersLi" style="display:none;"><a class="nav-link" href="#tab-2" data-toggle="tab"><%= t('page.profile.tabs.companyUsers') %></a></li>
+                      <li id="tabMyPlanLi" style="display:none;"><a class="nav-link" href="#tab-3" data-toggle="tab">Meu plano</a></li>
                     </ul>
                   </div>
                 </div>
@@ -241,6 +242,82 @@
 
                       <div class="row" id="companyUsersContainer">
                         <!-- Cards renderizados aqui -->
+                      </div>
+                    </div>
+
+                    <!-- TAB 3 - Meu plano -->
+                    <div class="tab-pane" id="tab-3">
+                      <div class="row">
+                        <div class="col-lg-12">
+                          <div class="alert alert-info" id="myPlanAlertInfo" style="display:none;"></div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <div class="ibox" style="margin-bottom:15px;">
+                            <div class="ibox-title">
+                              <h5>Plano atual</h5>
+                            </div>
+                            <div class="ibox-content">
+                              <p><strong>Plano:</strong> <span id="myPlanName">-</span></p>
+                              <p><strong>Status:</strong> <span id="myPlanStatus">-</span></p>
+                              <p><strong>Valor:</strong> <span id="myPlanPrice">-</span></p>
+                              <p><strong>Teste restante:</strong> <span id="myPlanTrialDays">-</span></p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                          <div class="ibox" style="margin-bottom:15px;">
+                            <div class="ibox-title">
+                              <h5>Alterar plano</h5>
+                            </div>
+                            <div class="ibox-content">
+                              <div class="form-group">
+                                <label for="myPlanUpgradeSelect">Upgrade / Downgrade</label>
+                                <select id="myPlanUpgradeSelect" class="form-control"></select>
+                              </div>
+                              <div class="text-right">
+                                <button type="button" id="btnMyPlanUpgrade" class="btn btn-primary btn-sm">
+                                  <i class="fa fa-level-up"></i> Atualizar plano
+                                </button>
+                              </div>
+                              <hr />
+                              <div class="text-right">
+                                <button type="button" id="btnMyPlanCancel" class="btn btn-danger btn-sm">
+                                  <i class="fa fa-ban"></i> Cancelar assinatura
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-lg-12">
+                          <div class="ibox" style="margin-bottom:0;">
+                            <div class="ibox-title">
+                              <h5>Desenvolvimento personalizado</h5>
+                            </div>
+                            <div class="ibox-content">
+                              <p class="text-muted">Descreva o que você precisa e nossa equipe comercial vai analisar.</p>
+                              <div class="form-group">
+                                <label for="myPlanCustomSubject">Assunto (opcional)</label>
+                                <input id="myPlanCustomSubject" type="text" class="form-control" maxlength="255" />
+                              </div>
+                              <div class="form-group">
+                                <label for="myPlanCustomMessage">Mensagem</label>
+                                <textarea id="myPlanCustomMessage" class="form-control" rows="5" maxlength="5000"></textarea>
+                              </div>
+                              <div class="text-right">
+                                <button type="button" id="btnMyPlanSendRequest" class="btn btn-success btn-sm">
+                                  <i class="fa fa-send"></i> Enviar solicitação
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1232,6 +1309,233 @@
         init();
       }
     });
+  })();
+</script>
+
+<script>
+  (function () {
+    function normalizeString(value) {
+      return String(value == null ? "" : value).trim();
+    }
+
+    function toMoney(value) {
+      const amount = Number(value || 0);
+      if (!Number.isFinite(amount)) return "R$ 0,00";
+      return amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value == null ? "" : String(value);
+    }
+
+    function setAlert(message, type) {
+      const el = document.getElementById("myPlanAlertInfo");
+      if (!el) return;
+      const msg = normalizeString(message);
+      if (!msg) {
+        el.style.display = "none";
+        el.className = "alert alert-info";
+        el.textContent = "";
+        return;
+      }
+      el.style.display = "";
+      el.className = "alert " + (type || "alert-info");
+      el.textContent = msg;
+    }
+
+    async function readJsonSafe(response) {
+      const text = await response.text().catch(function () { return ""; });
+      if (!text) return {};
+      try { return JSON.parse(text); } catch (_error) { return { message: text }; }
+    }
+
+    async function apiRequest(method, url, payload) {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: payload ? JSON.stringify(payload) : undefined
+      });
+      const data = await readJsonSafe(response);
+      if (!response.ok) {
+        throw new Error((data && data.message) || "Falha na operacao.");
+      }
+      return data || {};
+    }
+
+    function getCurrentAuthUser() {
+      try {
+        const raw = localStorage.getItem("currentUser");
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    async function resolveAuthUser() {
+      const fromStorage = getCurrentAuthUser();
+      if (fromStorage && fromStorage.id) return fromStorage;
+      try {
+        return await apiRequest("GET", "/api/users/me");
+      } catch (_error) {
+        return null;
+      }
+    }
+
+    function buildStatusLabel(status) {
+      const s = normalizeString(status).toUpperCase();
+      if (s === "TRIAL") return "Trial";
+      if (s === "ACTIVE") return "Ativo";
+      if (s === "SUSPENDED") return "Suspenso";
+      if (s === "CANCELED") return "Cancelado";
+      return s || "-";
+    }
+
+    function renderPlanSummary(summary) {
+      const current = summary && summary.current ? summary.current : null;
+      const plans = Array.isArray(summary && summary.plans) ? summary.plans : [];
+
+      setText("myPlanName", current && current.plan_name ? current.plan_name : "-");
+      setText("myPlanStatus", buildStatusLabel(current && current.status));
+      setText("myPlanPrice", current ? toMoney(current.monthly_price) + "/mes" : "-");
+      setText(
+        "myPlanTrialDays",
+        current && String(current.status || "").toUpperCase() === "TRIAL"
+          ? (String(current.trial_days_left || 0) + " dia(s)")
+          : "Nao aplicavel",
+      );
+
+      const select = document.getElementById("myPlanUpgradeSelect");
+      if (select) {
+        const currentId = normalizeString(current && current.plan_id);
+        const options = plans
+          .map(function (plan) {
+            const planId = normalizeString(plan && plan.id);
+            const selected = planId === currentId ? " selected" : "";
+            return '<option value="' + planId + '"' + selected + ">" +
+              normalizeString(plan && plan.name) + " - " + toMoney(plan && plan.monthly_price) + '/mes</option>';
+          })
+          .join("");
+        select.innerHTML = options || '<option value="">Sem planos disponiveis</option>';
+      }
+    }
+
+    async function loadSummary() {
+      const summary = await apiRequest("GET", "/api/me/billing/summary");
+      renderPlanSummary(summary);
+      return summary;
+    }
+
+    async function handleUpgradeClick() {
+      const select = document.getElementById("myPlanUpgradeSelect");
+      const planId = normalizeString(select && select.value);
+      if (!planId) {
+        setAlert("Selecione um plano para atualizar.", "alert-warning");
+        return;
+      }
+
+      setAlert("Atualizando plano...", "alert-info");
+      await apiRequest("POST", "/api/me/billing/upgrade", { plan_id: planId });
+      await loadSummary();
+      setAlert("Plano atualizado com sucesso.", "alert-success");
+    }
+
+    async function handleCancelClick() {
+      const status = normalizeString(document.getElementById("myPlanStatus")?.textContent || "").toUpperCase();
+      const isTrial = status === "TRIAL";
+      const message = isTrial
+        ? "Cancelar agora e encerrar o trial?"
+        : "Cancelar assinatura ao final do periodo atual?";
+      if (!window.confirm(message)) return;
+
+      setAlert("Processando cancelamento...", "alert-info");
+      await apiRequest("POST", "/api/me/billing/cancel", { immediate: isTrial });
+      await loadSummary();
+      setAlert("Cancelamento solicitado com sucesso.", "alert-success");
+    }
+
+    async function handleSendCustomRequest() {
+      const subject = normalizeString(document.getElementById("myPlanCustomSubject")?.value);
+      const message = normalizeString(document.getElementById("myPlanCustomMessage")?.value);
+      if (!message || message.length < 10) {
+        setAlert("Escreva uma mensagem mais detalhada (minimo 10 caracteres).", "alert-warning");
+        return;
+      }
+
+      setAlert("Enviando solicitacao...", "alert-info");
+      await apiRequest("POST", "/api/me/billing/custom-request", {
+        subject: subject || null,
+        message: message,
+      });
+      const messageEl = document.getElementById("myPlanCustomMessage");
+      if (messageEl) messageEl.value = "";
+      const subjectEl = document.getElementById("myPlanCustomSubject");
+      if (subjectEl) subjectEl.value = "";
+      setAlert("Solicitacao enviada com sucesso. Retornaremos em breve.", "alert-success");
+    }
+
+    async function initMyPlanTab() {
+      const authUser = await resolveAuthUser();
+      const role = normalizeString(authUser && authUser.role).toUpperCase();
+      const isAdmin = role === "ADMIN";
+      const tabLi = document.getElementById("tabMyPlanLi");
+      if (!tabLi) return;
+
+      if (!isAdmin) {
+        tabLi.style.display = "none";
+        return;
+      }
+
+      tabLi.style.display = "";
+      try {
+        await loadSummary();
+      } catch (error) {
+        setAlert((error && error.message) || "Falha ao carregar dados do plano.", "alert-danger");
+      }
+
+      const upgradeBtn = document.getElementById("btnMyPlanUpgrade");
+      if (upgradeBtn && !upgradeBtn.__bindDone) {
+        upgradeBtn.__bindDone = true;
+        upgradeBtn.addEventListener("click", function () {
+          handleUpgradeClick().catch(function (error) {
+            setAlert((error && error.message) || "Falha ao atualizar plano.", "alert-danger");
+          });
+        });
+      }
+
+      const cancelBtn = document.getElementById("btnMyPlanCancel");
+      if (cancelBtn && !cancelBtn.__bindDone) {
+        cancelBtn.__bindDone = true;
+        cancelBtn.addEventListener("click", function () {
+          handleCancelClick().catch(function (error) {
+            setAlert((error && error.message) || "Falha ao cancelar assinatura.", "alert-danger");
+          });
+        });
+      }
+
+      const sendBtn = document.getElementById("btnMyPlanSendRequest");
+      if (sendBtn && !sendBtn.__bindDone) {
+        sendBtn.__bindDone = true;
+        sendBtn.addEventListener("click", function () {
+          handleSendCustomRequest().catch(function (error) {
+            setAlert((error && error.message) || "Falha ao enviar solicitacao.", "alert-danger");
+          });
+        });
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
+        initMyPlanTab().catch(function () { });
+      });
+    } else {
+      initMyPlanTab().catch(function () { });
+    }
   })();
 </script>
 
