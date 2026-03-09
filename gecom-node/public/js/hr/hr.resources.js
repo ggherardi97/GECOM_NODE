@@ -62,6 +62,12 @@
     return d.toLocaleString("pt-BR");
   }
 
+  function toMoney(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "0,00";
+    return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   function boolLabel(value) {
     return value ? tt("page.hr.common.yes", "Sim") : tt("page.hr.common.no", "Não");
   }
@@ -905,6 +911,7 @@
     waitForI18nReady,
     esc,
     normalizeArray,
+    toMoney,
     toDateBr,
     toDateTimeBr,
     boolLabel,

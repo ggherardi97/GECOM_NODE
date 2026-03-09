@@ -1381,12 +1381,26 @@
         "nextHint": "Ao avançar para o próximo passo, você preencherá os dados opcionais.",
         "labels": {
           "cnpjRequired": "CNPJ *",
+          "cpfRequired": "CPF *",
+          "foreignNumberRequired": "Numero Estrangeiro *",
+          "personType": "Tipo de pessoa",
+          "clientOrigin": "Origem do cliente",
           "sector": "Setor",
           "size": "Porte",
           "status": "Status"
         },
         "placeholders": {
-          "cnpj": "00.000.000/0000-00"
+          "cnpj": "00.000.000/0000-00",
+          "cpf": "000.000.000-00",
+          "foreignNumber": "Digite o numero estrangeiro"
+        },
+        "personTypes": {
+          "legal": "Pessoa Juridica",
+          "individual": "Pessoa Fisica"
+        },
+        "origins": {
+          "national": "Nacional",
+          "international": "Internacional"
         },
         "state": {
           "fetchingCnpj": "Buscando dados do CNPJ..."
@@ -1408,6 +1422,9 @@
       "messages": {
         "cnpjLookupFail": "Falha ao consultar CNPJ.",
         "cnpjAutoFillFail": "Não foi possível buscar os dados do CNPJ.",
+        "invalidCnpj": "Informe um CNPJ valido com 14 digitos.",
+        "invalidCpf": "Informe um CPF valido com 11 digitos.",
+        "invalidForeignNumber": "Informe o Numero Estrangeiro.",
         "createUserFail": "Falha ao criar usuário.",
         "patchUserFail": "Falha ao atualizar usuário.",
         "createCompanyFail": "Falha ao criar company.",

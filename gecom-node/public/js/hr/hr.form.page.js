@@ -18,6 +18,13 @@
     relatedCache: {},
   };
 
+  function moneyLabel(value) {
+    if (typeof toMoney === "function") return toMoney(value);
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "0,00";
+    return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   const relatedFormPathByApi = {
     "/api/hr/departments": "/NewHRDepartment",
     "/api/hr/positions": "/NewHRPosition",
@@ -54,6 +61,59 @@
       }
       if (!resp.ok) throw new Error(data?.message || `HTTP ${resp.status}`);
       return data;
+    });
+  }
+
+  function buildPagedUrl(rawUrl, page, pageSize) {
+    const nextPage = Number(page);
+    const nextPageSize = Number(pageSize);
+    try {
+      const u = new URL(String(rawUrl || ""), window.location.origin);
+      if (!u.searchParams.get("page_size") && Number.isFinite(nextPageSize) && nextPageSize > 0) {
+        u.searchParams.set("page_size", String(nextPageSize));
+      }
+      if (Number.isFinite(nextPage) && nextPage > 0) {
+        u.searchParams.set("page", String(nextPage));
+      }
+      return `${u.pathname}${u.search}${u.hash || ""}`;
+    } catch {
+      const glue = String(rawUrl || "").includes("?") ? "&" : "?";
+      const pagePart = Number.isFinite(nextPage) && nextPage > 0 ? `page=${encodeURIComponent(String(nextPage))}` : "";
+      const sizePart =
+        Number.isFinite(nextPageSize) && nextPageSize > 0
+          ? `page_size=${encodeURIComponent(String(nextPageSize))}`
+          : "";
+      const suffix = [sizePart, pagePart].filter(Boolean).join("&");
+      return `${rawUrl}${suffix ? `${glue}${suffix}` : ""}`;
+    }
+  }
+
+  async function fetchLookupRows(rawUrl) {
+    const firstUrl = buildPagedUrl(rawUrl, 1, 200);
+    const firstResponse = await api(firstUrl);
+    const firstItems = normalizeArray(firstResponse);
+    const total = Number(firstResponse?.total);
+    const pageSize = Number(firstResponse?.page_size || firstResponse?.pageSize || firstItems.length || 0);
+    if (!Number.isFinite(total) || !Number.isFinite(pageSize) || pageSize <= 0 || firstItems.length >= total) {
+      return firstItems;
+    }
+
+    const out = firstItems.slice();
+    const totalPages = Math.min(Math.ceil(total / pageSize), 30);
+    for (let page = 2; page <= totalPages; page += 1) {
+      const nextResponse = await api(buildPagedUrl(firstUrl, page, pageSize));
+      const rows = normalizeArray(nextResponse);
+      if (!rows.length) break;
+      out.push(...rows);
+    }
+
+    const seen = new Set();
+    return out.filter((item) => {
+      const id = String(item?.id || "").trim();
+      if (!id) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
     });
   }
 
@@ -804,12 +864,26 @@
       }
 
       function openRecent() {
-        const rows = sortRecent(state.lookups[lookupKey] || []).slice(0, 5);
+        const rows = sortRecent(getLookupSourceRows()).slice(0, 5);
         renderLookupMenu($menu, rows);
       }
 
+      function getLookupSourceRows() {
+        const source = Array.isArray(state.lookups[lookupKey]) ? state.lookups[lookupKey] : [];
+        // Keep stage choices scoped to the selected template in employee lifecycle form.
+        if (page.key === "employeeLifecycles" && lookupKey === "lifecycleStages") {
+          const templateId = String($scope.find(`#${prefix}_template_id`).val() || "").trim();
+          if (!templateId) return source;
+          return source.filter((item) => {
+            const rowTemplateId = String(item?.template_id || item?.template?.id || "").trim();
+            return rowTemplateId === templateId;
+          });
+        }
+        return source;
+      }
+
       function search(term) {
-        const source = state.lookups[lookupKey] || [];
+        const source = getLookupSourceRows();
         const q = normalizeText(term);
         if (!q) {
           openRecent();
@@ -1006,11 +1080,48 @@
     const sources = config.lookupSources || {};
     for (const [key, url] of Object.entries(sources)) {
       try {
-        state.lookups[key] = normalizeArray(await api(url));
+        state.lookups[key] = await fetchLookupRows(url);
       } catch {
         state.lookups[key] = [];
       }
     }
+  }
+
+  function bindEmployeeLifecycleStageSync($scope) {
+    if (page.key !== "employeeLifecycles") return;
+    const $templateInput = $scope.find("#ff_template_id__lookup");
+    const $templateHidden = $scope.find("#ff_template_id");
+    const $stageInput = $scope.find("#ff_current_stage_id__lookup");
+    const $stageHidden = $scope.find("#ff_current_stage_id");
+    if (!$templateInput.length || !$templateHidden.length || !$stageInput.length || !$stageHidden.length) return;
+
+    let previousTemplateId = String($templateHidden.val() || "").trim();
+
+    function clearStageIfMismatched() {
+      const templateId = String($templateHidden.val() || "").trim();
+      const stageId = String($stageHidden.val() || "").trim();
+      if (!stageId) {
+        previousTemplateId = templateId;
+        return;
+      }
+
+      const stage = (state.lookups.lifecycleStages || []).find((item) => String(item?.id || "").trim() === stageId);
+      const stageTemplateId = String(stage?.template_id || stage?.template?.id || "").trim();
+      const changedTemplate = templateId !== previousTemplateId;
+      previousTemplateId = templateId;
+      if (!changedTemplate) return;
+      if (!templateId || !stageTemplateId || stageTemplateId === templateId) return;
+
+      $stageHidden.val("");
+      $stageInput.val("");
+    }
+
+    $templateInput.off(".finstage").on("input.finstage blur.finstage change.finstage", function () {
+      setTimeout(clearStageIfMismatched, 0);
+    });
+    $scope.find("#ff_template_id__menu").off(".finstage").on("mousedown.finstage", ".hr-lookup-item", function () {
+      setTimeout(clearStageIfMismatched, 0);
+    });
   }
 
   function renderMainForm(row) {
@@ -1022,6 +1133,7 @@
     bindLookupWidgets($scope, "ff", fields);
     bindMoneyMasks($scope, "ff", fields);
     bindValidationClear($scope, "ff", fields);
+    bindEmployeeLifecycleStageSync($scope);
     bindRelatedWidgets($scope);
   }
 
@@ -1038,7 +1150,7 @@
         const bank = payment?.bank_account?.name || "-";
         return `<tr data-id="${esc(payment.id)}">
           <td>${esc(toDateTimeBr(payment.payment_date))}</td>
-          <td>${esc(toMoney(payment.amount))}</td>
+          <td>${esc(moneyLabel(payment.amount))}</td>
           <td>${esc(payment.payment_method || "-")}</td>
           <td>${esc(bank)}</td>
           <td>${esc(payment.reference || "-")}</td>

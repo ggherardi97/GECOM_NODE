@@ -70,6 +70,15 @@
     return String(value || "").replace(/\D/g, "");
   }
 
+  function getPersonType() {
+    const checked = document.querySelector('input[name="personTypeInput"]:checked');
+    return String(checked && checked.value ? checked.value : "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
+  }
+
+  function isLegalEntity() {
+    return getPersonType() === "PJ";
+  }
+
   function formatCnpj(value) {
     const digits = onlyDigits(value).slice(0, 14);
     return digits
@@ -77,6 +86,14 @@
       .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
       .replace(/\.(\d{3})(\d)/, ".$1/$2")
       .replace(/(\d{4})(\d)/, "$1-$2");
+  }
+
+  function formatCpf(value) {
+    const digits = onlyDigits(value).slice(0, 11);
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
   }
 
   function formatCep(value) {
@@ -95,6 +112,39 @@
     const el = getEl("companyCnpjHelp");
     if (!el) return;
     el.style.display = isLoading ? "block" : "none";
+  }
+
+  function applyPersonTypeMode() {
+    const isPj = isLegalEntity();
+    const input = getEl("companyNumberInput");
+    const label = getEl("companyNumberLabel");
+    const btn = getEl("btnLookupCnpj");
+    const help = getEl("companyCnpjHelp");
+
+    if (!input || !label || !btn) return;
+
+    state.lastCnpjFetched = null;
+    state.cnpjLookupInFlight = false;
+    showCnpjLoading(false);
+
+    if (isPj) {
+      label.textContent = "CNPJ";
+      input.placeholder = "12.345.678/0001-90";
+      input.maxLength = 18;
+      input.value = formatCnpj(input.value);
+      btn.style.display = "";
+      btn.disabled = false;
+      if (help) help.textContent = "Consultando CNPJ...";
+      return;
+    }
+
+    label.textContent = "CPF";
+    input.placeholder = "000.000.000-00";
+    input.maxLength = 14;
+    input.value = formatCpf(input.value);
+    btn.style.display = "none";
+    btn.disabled = true;
+    if (help) help.textContent = "Consulta automatica disponivel apenas para CNPJ.";
   }
 
   function esc(value) {
@@ -150,6 +200,8 @@
   }
 
   async function tryAutoFillFromCnpj(showAlertOnFail) {
+    if (!isLegalEntity()) return;
+
     const rawValue = getValue("companyNumberInput");
     const cnpjDigits = onlyDigits(rawValue);
     if (cnpjDigits.length !== 14) return;
@@ -552,6 +604,8 @@
     const phone = normalizeString(getValue("phoneInput"));
     const password = normalizeString(getValue("passwordInput"));
     const companyNumber = normalizeString(getValue("companyNumberInput"));
+    const companyNumberDigits = onlyDigits(companyNumber);
+    const personType = getPersonType();
     const companySector = normalizeString(getValue("companySectorInput"));
     const companyCategory = normalizeString(getValue("companyCategoryInput"));
     const street = normalizeString(getValue("addressStreetInput"));
@@ -569,7 +623,12 @@
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail valido.");
     if (!phone) throw new Error("Telefone e obrigatorio.");
     if (!password || password.length < 8) throw new Error("A senha do admin deve ter no minimo 8 caracteres.");
-    if (!companyNumber) throw new Error("CNPJ / Company Number e obrigatorio.");
+    if (personType === "PJ" && companyNumberDigits.length !== 14) {
+      throw new Error("Informe um CNPJ valido com 14 digitos.");
+    }
+    if (personType === "PF" && companyNumberDigits.length !== 11) {
+      throw new Error("Informe um CPF valido com 11 digitos.");
+    }
     if (!companySector) throw new Error("Setor e obrigatorio.");
     if (!companyCategory) throw new Error("Categoria e obrigatoria.");
     if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereco.");
@@ -599,6 +658,10 @@
       admin_phone: phone,
       acept_terms: acceptTerms
     };
+
+    if (personType === "PF") {
+      payload.company_cpf = companyNumber;
+    }
 
     if (state.selectedPlanType === "custom") {
       payload.custom_module_ids = state.customModuleIds.slice();
@@ -697,26 +760,31 @@
     const cnpjInput = getEl("companyNumberInput");
     if (cnpjInput) {
       cnpjInput.addEventListener("input", function () {
-        const masked = formatCnpj(cnpjInput.value);
+        const masked = isLegalEntity() ? formatCnpj(cnpjInput.value) : formatCpf(cnpjInput.value);
         cnpjInput.value = masked;
       });
       cnpjInput.addEventListener("blur", function () {
-        tryAutoFillFromCnpj(false);
+        if (isLegalEntity()) tryAutoFillFromCnpj(false);
       });
     }
 
     const cnpjBtn = getEl("btnLookupCnpj");
     if (cnpjBtn) {
       cnpjBtn.addEventListener("click", function () {
-        tryAutoFillFromCnpj(true);
+        if (isLegalEntity()) tryAutoFillFromCnpj(true);
       });
     }
+
+    document.querySelectorAll('input[name="personTypeInput"]').forEach(function (radio) {
+      radio.addEventListener("change", applyPersonTypeMode);
+    });
   }
 
   async function bootstrap() {
     window.__openRegisterPlans = openPlansFromHero;
     window.__publicRegisterMainReady = true;
     installEvents();
+    applyPersonTypeMode();
 
     if (window.WOW) {
       try {

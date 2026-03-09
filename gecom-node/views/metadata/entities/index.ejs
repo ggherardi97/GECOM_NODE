@@ -1,0 +1,285 @@
+﻿<style>
+  .md-page-shell {
+    --md-accent: #1ab394;
+    --md-accent-soft: #e8f8f4;
+    --md-surface: #ffffff;
+    --md-border: #e3ebf0;
+    --md-text-soft: #6f808f;
+  }
+
+  .md-page-shell .md-main-card {
+    border-radius: 14px;
+    border: 1px solid var(--md-border);
+    box-shadow: 0 16px 30px rgba(19, 35, 52, 0.08);
+    overflow: hidden;
+  }
+
+  .md-page-shell .ibox-title {
+    border-bottom: 1px solid var(--md-border);
+    background: linear-gradient(180deg, #f8fbfd 0%, #f2f7fb 100%);
+    padding: 15px 16px;
+  }
+
+  .md-page-shell .ibox-content {
+    background: var(--md-surface);
+    padding: 16px;
+  }
+
+  .md-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .md-page-title {
+    margin: 0;
+    color: #243648;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .md-page-subtitle {
+    margin-top: 4px;
+    color: var(--md-text-soft);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .md-grid-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .md-grid-actions .btn {
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .md-status-pill {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .md-status-pill.core {
+    color: #265f95;
+    background: #eaf3ff;
+  }
+
+  .md-status-pill.custom {
+    color: #1f7a63;
+    background: #e9f8f2;
+  }
+
+  .md-status-pill.active {
+    color: #1c7c5a;
+    background: #e9f8f2;
+  }
+
+  .md-status-pill.inactive {
+    color: #8a3434;
+    background: #fdecec;
+  }
+
+  .md-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .md-search-row .input-group {
+    max-width: 470px;
+    width: 100%;
+  }
+
+  .md-search-row .form-control,
+  .md-search-row .btn {
+    border-radius: 8px;
+  }
+
+  .md-search-state {
+    min-height: 24px;
+    margin-bottom: 10px;
+  }
+
+  .md-search-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #246457;
+    background: var(--md-accent-soft);
+  }
+
+  .md-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .md-pager-meta {
+    font-size: 12px;
+    color: var(--md-text-soft);
+    font-weight: 600;
+  }
+
+  .md-pager-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .md-pager-actions .btn {
+    border-radius: 8px;
+    min-width: 34px;
+  }
+
+  #metadataEntitiesTable tbody tr {
+    cursor: pointer;
+  }
+
+  #metadataEntitiesTable thead th {
+    background: #f7fafc;
+  }
+
+  @media (max-width: 991px) {
+    .md-page-title {
+      font-size: 18px;
+    }
+  }
+</style>
+
+<div class="row animated fadeInRight md-page-shell" style="margin-top:10px;">
+  <div class="col-lg-12">
+    <div class="ibox md-main-card">
+      <div class="ibox-title">
+        <div class="md-page-header">
+          <div>
+            <h5 class="md-page-title">Designer de Tabelas e Formulários</h5>
+            <div class="md-page-subtitle">Gerencie entidades, campos, formulários e publicação.</div>
+          </div>
+          <div class="md-grid-actions" style="margin-bottom:0;">
+            <button type="button" class="btn btn-white btn-sm" id="btnMdRefresh">
+              <i class="fa fa-refresh"></i> Atualizar
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="btnMdNewEntity">
+              <i class="fa fa-plus"></i> Novo (CUSTOM)
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div class="md-search-row">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="mdSearchName"
+              placeholder="Pesquisar por nome de exibição ou nome interno"
+              autocomplete="off"
+            />
+            <span class="input-group-btn">
+              <button class="btn btn-white" type="button" id="btnMdSearchClear">
+                <i class="fa fa-times"></i> Limpar
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <div class="md-search-state" id="mdSearchState"></div>
+
+        <div class="md-grid-actions">
+          <button type="button" class="btn btn-white btn-sm" id="btnMdOpenDesigner">
+            <i class="fa fa-pencil"></i> Abrir Designer
+          </button>
+          <button type="button" class="btn btn-success btn-sm" id="btnMdPublish">
+            <i class="fa fa-bullhorn"></i> Publicar
+          </button>
+          <button type="button" class="btn btn-info btn-sm" id="btnMdClone">
+            <i class="fa fa-copy"></i> Clonar (CUSTOM)
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" id="btnMdArchive">
+            <i class="fa fa-archive"></i> Arquivar (CUSTOM)
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered" id="metadataEntitiesTable">
+            <thead>
+              <tr>
+                <th style="width:40px;">
+                  <input type="checkbox" id="mdChkAll" />
+                </th>
+                <th>Nome</th>
+                <th>Nome interno</th>
+                <th>Tipo</th>
+                <th>Schema Editável</th>
+                <th>Campo Editável</th>
+                <th>Form Editável</th>
+                <th>Versão publicada</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="mdEntitiesBody">
+              <tr><td colspan="9" class="text-center">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="md-pager" id="mdPagerWrap" style="display:none;">
+          <div class="md-pager-meta" id="mdPagerMeta"></div>
+          <div class="md-pager-actions" id="mdPagerActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="mdEntityModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title">Nova Entidade CUSTOM</h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome de exibição</label>
+          <input type="text" id="mdEntityDisplayName" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Nome interno</label>
+          <input type="text" id="mdEntityName" class="form-control" placeholder="custom_orders" />
+        </div>
+        <div class="form-group">
+          <label>Nome físico da tabela</label>
+          <input type="text" id="mdEntityPhysicalTableName" class="form-control" placeholder="custom_orders" />
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="mdEntityDescription" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnMdSaveEntity">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin/metadata-designer.index.page.js"></script>

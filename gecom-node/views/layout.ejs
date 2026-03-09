@@ -727,6 +727,12 @@
               <span class="nav-label" data-i18n="page.layout.menu.settingsCenter"><%= t('page.layout.menu.settingsCenter', { defaultValue: 'Configuracoes' }) %></span>
             </a>
           </li>
+          <li data-areas="home,settings" data-divider-parent="home-settings" id="metadataDesignerMenuHome">
+            <a href="/configuracoes/metadata-designer">
+              <i class="fa fa-table"></i>
+              <span class="nav-label">Designer de Tabelas e Formulários</span>
+            </a>
+          </li>
 
           <li data-areas="service" data-divider-id="service-main"><a class="menuDivider" style="padding-top:20px;">Services</a></li>
 
@@ -1091,6 +1097,12 @@
             <a href="/configuracoes">
               <i class="fa fa-cogs"></i>
               <span class="nav-label" data-i18n="page.layout.menu.settingsCenter"><%= t('page.layout.menu.settingsCenter', { defaultValue: 'Configuracoes' }) %></span>
+            </a>
+          </li>
+          <li data-areas="settings" data-divider-parent="settings-core" id="metadataDesignerMenuSettings">
+            <a href="/configuracoes/metadata-designer">
+              <i class="fa fa-table"></i>
+              <span class="nav-label">Designer de Tabelas e Formulários</span>
             </a>
           </li>
 
@@ -3027,6 +3039,13 @@
             }
             else if (window.__auth.isManager) {
               $('button[name="btn_act_new_manager"]').hide();
+            }
+
+            const role = String(user?.role || window.__auth?.role || "").trim().toUpperCase();
+            const isAdmin = role === "ADMIN" || window.__auth?.isAdmin === true || window.__auth?.is_admin === true;
+            if (!isAdmin) {
+              $("#metadataDesignerMenuHome").hide();
+              $("#metadataDesignerMenuSettings").hide();
             }
 
             if (!window.__features?.enableAI) $("#aiHubTab").hide();

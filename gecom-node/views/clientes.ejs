@@ -304,7 +304,7 @@ display: none !important;
       UserId: userId,
 
       CreatedOn: company.created_on ?? company.createdAt ?? company.created_at ?? "",
-      CompanyNumber: company.company_number ?? "",
+      CompanyNumber: company.company_number ?? company.cpf ?? "",
       Sector: sector && String(sector).trim() ? String(sector).trim() : "<%= t('page.clients.defaults.sector') %>",
       NumberOfInvoices: company.number_of_invoices ?? "",
     };

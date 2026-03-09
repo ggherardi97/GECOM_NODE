@@ -43,6 +43,8 @@ const poPagesRoutes = require("./routes/poPages");
 const adminApiRoutes = require("./routes/adminApi");
 const calendarActivitiesApiRoutes = require("./routes/calendarActivitiesApi");
 const adminPagesRoutes = require("./routes/adminPages");
+const metadataDesignerApiRoutes = require("./routes/metadataDesignerApi");
+const metadataDesignerPagesRoutes = require("./routes/metadataDesignerPages");
 const scarletDriveRoutes = require("./routes/scarletDrive");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
@@ -203,12 +205,14 @@ app.use("/api", hrApiRoutes);
 app.use("/api", poApiRoutes);
 app.use("/api", adminApiRoutes);
 app.use("/api", calendarActivitiesApiRoutes);
+app.use("/api", metadataDesignerApiRoutes);
 app.use("/", billingPagesRoutes);
 app.use("/", servicePagesRoutes);
 app.use("/", financePagesRoutes);
 app.use("/", hrPagesRoutes);
 app.use("/", poPagesRoutes);
 app.use("/", adminPagesRoutes);
+app.use("/", metadataDesignerPagesRoutes);
 app.use("/", scarletDriveRoutes);
 
 // Backward-compatible alias for environments calling /cnpj/lookup without /api

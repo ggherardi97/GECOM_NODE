@@ -26,6 +26,13 @@
     },
   };
 
+  function moneyLabel(value) {
+    if (typeof toMoney === "function") return toMoney(value);
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "0,00";
+    return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   function api(url, opts) {
     return fetch(url, Object.assign({ credentials: "include" }, opts || {}))
       .then(async (resp) => {
@@ -39,6 +46,59 @@
         if (!resp.ok) throw new Error(data?.message || `HTTP ${resp.status}`);
         return data;
       });
+  }
+
+  function buildPagedUrl(rawUrl, page, pageSize) {
+    const nextPage = Number(page);
+    const nextPageSize = Number(pageSize);
+    try {
+      const u = new URL(String(rawUrl || ""), window.location.origin);
+      if (!u.searchParams.get("page_size") && Number.isFinite(nextPageSize) && nextPageSize > 0) {
+        u.searchParams.set("page_size", String(nextPageSize));
+      }
+      if (Number.isFinite(nextPage) && nextPage > 0) {
+        u.searchParams.set("page", String(nextPage));
+      }
+      return `${u.pathname}${u.search}${u.hash || ""}`;
+    } catch {
+      const glue = String(rawUrl || "").includes("?") ? "&" : "?";
+      const pagePart = Number.isFinite(nextPage) && nextPage > 0 ? `page=${encodeURIComponent(String(nextPage))}` : "";
+      const sizePart =
+        Number.isFinite(nextPageSize) && nextPageSize > 0
+          ? `page_size=${encodeURIComponent(String(nextPageSize))}`
+          : "";
+      const suffix = [sizePart, pagePart].filter(Boolean).join("&");
+      return `${rawUrl}${suffix ? `${glue}${suffix}` : ""}`;
+    }
+  }
+
+  async function fetchLookupRows(rawUrl) {
+    const firstUrl = buildPagedUrl(rawUrl, 1, 200);
+    const firstResponse = await api(firstUrl);
+    const firstItems = normalizeArray(firstResponse);
+    const total = Number(firstResponse?.total);
+    const pageSize = Number(firstResponse?.page_size || firstResponse?.pageSize || firstItems.length || 0);
+    if (!Number.isFinite(total) || !Number.isFinite(pageSize) || pageSize <= 0 || firstItems.length >= total) {
+      return firstItems;
+    }
+
+    const out = firstItems.slice();
+    const totalPages = Math.min(Math.ceil(total / pageSize), 30);
+    for (let page = 2; page <= totalPages; page += 1) {
+      const nextResponse = await api(buildPagedUrl(firstUrl, page, pageSize));
+      const rows = normalizeArray(nextResponse);
+      if (!rows.length) break;
+      out.push(...rows);
+    }
+
+    const seen = new Set();
+    return out.filter((item) => {
+      const id = String(item?.id || "").trim();
+      if (!id) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
   }
 
   function lookupLabel(item) {
@@ -276,7 +336,7 @@
     if (String(col.key).includes("date") && String(value).includes("T")) return toDateTimeBr(value);
     if (String(col.key).includes("date")) return toDateBr(value);
     if (typeof value === "boolean") return boolLabel(value);
-    if (typeof value === "number") return toMoney(value);
+    if (typeof value === "number") return moneyLabel(value);
     return String(value);
   }
 
@@ -337,7 +397,7 @@
     const entries = Object.entries(sources);
     for (const [key, url] of entries) {
       try {
-        state.lookups[key] = normalizeArray(await api(url));
+        state.lookups[key] = await fetchLookupRows(url);
       } catch {
         state.lookups[key] = [];
       }

@@ -101,6 +101,103 @@
   #hrVacationCalendar .fc-event {
     border: none;
   }
+
+  #dashHrWrap .hr-kpi-card,
+  #dashHrWrap .hr-panel-card,
+  #dashHrWrap .hr-calendar-card {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e3eaf0;
+    box-shadow: 0 14px 28px rgba(22, 33, 49, 0.08);
+  }
+
+  #dashHrWrap .hr-kpi-card .ibox-title,
+  #dashHrWrap .hr-panel-card .ibox-title,
+  #dashHrWrap .hr-calendar-card .ibox-title {
+    background: linear-gradient(180deg, #f8fbfd 0%, #f2f7fa 100%);
+    border-bottom: 1px solid #e3eaf0;
+    padding: 14px 16px;
+  }
+
+  #dashHrWrap .hr-kpi-card .ibox-content {
+    padding: 16px 16px 18px;
+    background: #fff;
+  }
+
+  #dashHrWrap .hr-kpi-card .ibox-title h5 {
+    font-size: 12px;
+    letter-spacing: .2px;
+    color: #5f7385;
+    font-weight: 700;
+  }
+
+  #dashHrWrap .hr-kpi-card .no-margins {
+    font-size: 34px;
+    font-weight: 700;
+    color: #243445;
+  }
+
+  #dashHrWrap .hr-panel-card .ibox-content,
+  #dashHrWrap .hr-calendar-card .ibox-content {
+    background: #fff;
+  }
+
+  #dashHrWrap .hr-calendar-card .ibox-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #dashHrWrap .hr-calendar-help {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6a7e8f;
+    background: #eaf8f5;
+    border-radius: 999px;
+    padding: 5px 10px;
+  }
+
+  #hrVacationCalendar {
+    min-height: 580px;
+    border: 1px solid #e5edf2;
+    border-radius: 12px;
+    padding: 10px 10px 2px;
+    background: #fbfdfe;
+  }
+
+  #hrVacationCalendar .fc-toolbar h2 {
+    color: #2a3c4f;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #hrVacationCalendar .fc-button {
+    border-radius: 8px;
+    border: 1px solid #d5e0e8;
+    background: #fff;
+    color: #3a4d61;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  #hrVacationCalendar .fc-button.fc-state-active,
+  #hrVacationCalendar .fc-button:hover {
+    background: #eef8f5;
+    border-color: #c5e1d9;
+    color: #207965;
+  }
+
+  #hrVacationCalendar .fc-today {
+    background: #f2faf7 !important;
+  }
+
+  #hrVacationCalendar .fc-event {
+    border: none;
+    border-radius: 8px;
+    padding: 2px 6px;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(15, 28, 45, 0.12);
+  }
 </style>
 
 <div class="wrapper wrapper-content">
@@ -542,15 +639,15 @@
   ========================================================== -->
   <div id="dashHrWrap" style="display:none;">
     <div class="row dash-kpi">
-      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Colaboradores</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesTotal">0</h2></div></div></div>
-      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Ativos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesActive">0</h2></div></div></div>
-      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Solicitações de ausência pendentes</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrPendingLeaves">0</h2></div></div></div>
-      <div class="col-lg-3"><div class="ibox"><div class="ibox-title"><h5>Tarefas de lifecycle em aberto</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrOpenLifecycleTasks">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox hr-kpi-card"><div class="ibox-title"><h5>Colaboradores</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesTotal">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox hr-kpi-card"><div class="ibox-title"><h5>Ativos</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrEmployeesActive">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox hr-kpi-card"><div class="ibox-title"><h5>Solicitações de ausência pendentes</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrPendingLeaves">0</h2></div></div></div>
+      <div class="col-lg-3"><div class="ibox hr-kpi-card"><div class="ibox-title"><h5>Tarefas de lifecycle em aberto</h5></div><div class="ibox-content"><h2 class="no-margins" id="kpiHrOpenLifecycleTasks">0</h2></div></div></div>
     </div>
 
     <div class="row">
       <div class="col-lg-8">
-        <div class="ibox">
+        <div class="ibox hr-panel-card">
           <div class="ibox-title"><h5>Alocação por departamento</h5></div>
           <div class="ibox-content">
             <div class="dash-module-chart-wrap"><canvas id="hrDepartmentChart"></canvas></div>
@@ -558,7 +655,7 @@
         </div>
       </div>
       <div class="col-lg-4">
-        <div class="ibox">
+        <div class="ibox hr-panel-card">
           <div class="ibox-title"><h5>Ausências pendentes</h5></div>
           <div class="ibox-content">
             <div class="table-responsive">
@@ -574,8 +671,11 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <div class="ibox">
-          <div class="ibox-title"><h5>Previsão de férias</h5></div>
+        <div class="ibox hr-calendar-card">
+          <div class="ibox-title">
+            <h5>Previsão de férias</h5>
+            <span class="hr-calendar-help"><i class="fa fa-calendar"></i> visão mensal</span>
+          </div>
           <div class="ibox-content">
             <div id="hrVacationCalendar"></div>
           </div>

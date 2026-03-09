@@ -4,21 +4,63 @@
 <% %>
 
 <style>
+  .cal-activities-layout {
+    --cal-accent: #1ab394;
+    --cal-accent-soft: #e6f7f3;
+    --cal-surface: #ffffff;
+    --cal-border: #e5ebef;
+    --cal-text-soft: #70808e;
+    --cal-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+  }
+
+  .cal-activities-layout .cal-main-card,
+  .cal-activities-layout .cal-side-card {
+    border-radius: 14px;
+    border: 1px solid var(--cal-border);
+    box-shadow: var(--cal-shadow);
+    overflow: hidden;
+  }
+
   .cal-activities-layout .ibox-title {
-    padding: 14px 15px;
+    border-bottom: 1px solid var(--cal-border);
+    background: linear-gradient(180deg, #f9fcfd 0%, #f3f7fa 100%);
+    padding: 16px 18px;
+  }
+
+  .cal-activities-layout .ibox-content {
+    background: var(--cal-surface);
+    padding: 16px 18px;
   }
 
   .cal-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
     flex-wrap: wrap;
   }
 
+  .cal-toolbar-title h5 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: #263442;
+  }
+
+  .cal-toolbar-title small {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--cal-text-soft);
+    font-weight: 500;
+  }
+
   .cal-toolbar .btn-group .dropdown-menu {
-    max-height: 280px;
+    max-height: 300px;
     overflow-y: auto;
+    border-radius: 10px;
+    border-color: var(--cal-border);
   }
 
   .cal-toolbar-actions {
@@ -27,43 +69,123 @@
     gap: 8px;
   }
 
+  .cal-toolbar-actions .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 7px 12px;
+  }
+
+  .cal-toolbar-actions .btn-primary {
+    background: linear-gradient(135deg, #1ab394 0%, #18a085 100%);
+    border-color: #199f87;
+  }
+
+  .cal-toolbar-actions .btn-white {
+    border-color: #d5dfe6;
+    color: #415265;
+  }
+
+  .cal-calendar-tip {
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--cal-accent-soft);
+    color: #207a6a;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   #calendarActivities {
-    min-height: 680px;
+    min-height: 690px;
+  }
+
+  #calendarActivities .fc-toolbar {
+    margin-bottom: 14px;
+  }
+
+  #calendarActivities .fc-toolbar h2 {
+    color: #2a3a4c;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #calendarActivities .fc-button {
+    border-radius: 8px;
+    border: 1px solid #d6e0e7;
+    background: #fff;
+    color: #334a5f;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  #calendarActivities .fc-button.fc-state-active,
+  #calendarActivities .fc-button:hover {
+    background: #f1f8f6;
+    border-color: #bfded6;
+    color: #1d7c69;
+  }
+
+  #calendarActivities .fc-today {
+    background: #f4fcfa !important;
+  }
+
+  #calendarActivities .fc-event {
+    border: 0;
+    border-radius: 8px;
+    padding: 2px 6px;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(19, 33, 68, 0.12);
   }
 
   .activity-filters {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   .activity-filter-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    border: 1px solid #e7eaec;
-    border-radius: 4px;
-    padding: 8px 10px;
+    border: 1px solid var(--cal-border);
+    border-radius: 10px;
+    padding: 10px 11px;
     background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  }
+
+  .activity-filter-item:hover {
+    border-color: #c7d7e1;
+    box-shadow: 0 8px 18px rgba(31, 45, 61, 0.08);
+    transform: translateY(-1px);
   }
 
   .activity-filter-color {
     width: 12px;
     height: 12px;
-    border-radius: 3px;
+    border-radius: 4px;
     display: inline-block;
   }
 
   .activity-filter-label {
     flex: 1;
     font-size: 13px;
-    color: #3a3a3a;
+    color: #314356;
+    font-weight: 600;
   }
 
   .activity-filter-actions {
     margin-top: 12px;
     display: flex;
     gap: 8px;
+  }
+
+  .activity-filter-actions .btn {
+    border-radius: 8px;
+    font-weight: 600;
   }
 
   .activity-side-overlay {
@@ -86,7 +208,7 @@
     max-width: calc(100vw - 20px);
     height: 100vh;
     background: #fff;
-    box-shadow: -4px 0 22px rgba(0, 0, 0, .18);
+    box-shadow: -12px 0 28px rgba(18, 33, 49, .24);
     z-index: 1000009;
     transition: right .2s ease;
     display: flex;
@@ -98,25 +220,31 @@
   }
 
   .activity-side-head {
-    border-bottom: 1px solid #e7eaec;
-    padding: 14px 16px;
+    border-bottom: 1px solid var(--cal-border);
+    padding: 16px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: linear-gradient(180deg, #f8fbfd 0%, #f3f8fb 100%);
   }
 
   .activity-side-body {
-    padding: 14px 16px;
+    padding: 16px 18px;
     overflow-y: auto;
     flex: 1;
   }
 
   .activity-side-footer {
-    border-top: 1px solid #e7eaec;
-    padding: 12px 16px;
+    border-top: 1px solid var(--cal-border);
+    padding: 12px 18px;
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+  }
+
+  .activity-side-footer .btn {
+    border-radius: 8px;
+    font-weight: 600;
   }
 
   .activity-form-error {
@@ -151,16 +279,23 @@
     #calendarActivities {
       min-height: 560px;
     }
+
+    .cal-toolbar-title h5 {
+      font-size: 16px;
+    }
   }
 </style>
 
 <div class="wrapper wrapper-content cal-activities-layout">
   <div class="row animated fadeInDown">
     <div class="col-lg-9">
-      <div class="ibox">
+      <div class="ibox cal-main-card">
         <div class="ibox-title">
           <div class="cal-toolbar">
-            <h5 style="margin:0;">Calendário de Atividades</h5>
+            <div class="cal-toolbar-title">
+              <h5>Agenda de Atividades</h5>
+              <small>Visualize compromissos, tarefas e eventos em um único calendário.</small>
+            </div>
             <div class="cal-toolbar-actions">
               <div class="btn-group">
                 <button id="calendarAddBtn" data-toggle="dropdown" class="btn btn-primary dropdown-toggle" type="button">
@@ -175,15 +310,22 @@
           </div>
         </div>
         <div class="ibox-content">
+          <div class="cal-calendar-tip">
+            <i class="fa fa-info-circle"></i>
+            Clique em um evento para abrir detalhes.
+          </div>
           <div id="calendarActivities"></div>
         </div>
       </div>
     </div>
 
     <div class="col-lg-3">
-      <div class="ibox">
+      <div class="ibox cal-side-card">
         <div class="ibox-title">
-          <h5 style="margin:0;">Tipos de Atividades</h5>
+          <div class="cal-toolbar-title">
+            <h5>Tipos de Atividade</h5>
+            <small>Use os filtros para focar nos eventos relevantes.</small>
+          </div>
         </div>
         <div class="ibox-content">
           <div id="activityFilters" class="activity-filters"></div>

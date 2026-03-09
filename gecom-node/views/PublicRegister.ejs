@@ -402,7 +402,18 @@
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <label for="companyNumberInput">CNPJ / Company Number</label>
+                      <label>Tipo de pessoa</label>
+                      <div>
+                        <label class="radio-inline">
+                          <input type="radio" name="personTypeInput" value="PJ" checked> Pessoa Juridica
+                        </label>
+                        <label class="radio-inline">
+                          <input type="radio" name="personTypeInput" value="PF"> Pessoa Fisica
+                        </label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label id="companyNumberLabel" for="companyNumberInput">CNPJ</label>
                       <div class="input-group">
                         <input id="companyNumberInput" type="text" class="form-control" maxlength="18" placeholder="12.345.678/0001-90" required />
                         <span class="input-group-btn">
@@ -597,6 +608,15 @@
         return String(value == null ? "" : value).replace(/\D/g, "");
       }
 
+      function getPersonTypeFallback() {
+        var checked = document.querySelector('input[name="personTypeInput"]:checked');
+        return String(checked && checked.value ? checked.value : "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
+      }
+
+      function isLegalEntityFallback() {
+        return getPersonTypeFallback() === "PJ";
+      }
+
       function formatCnpj(value) {
         var digits = onlyDigits(value).slice(0, 14);
         return digits
@@ -604,6 +624,14 @@
           .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
           .replace(/\.(\d{3})(\d)/, ".$1/$2")
           .replace(/(\d{4})(\d)/, "$1-$2");
+      }
+
+      function formatCpf(value) {
+        var digits = onlyDigits(value).slice(0, 11);
+        return digits
+          .replace(/^(\d{3})(\d)/, "$1.$2")
+          .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/, ".$1-$2");
       }
 
       function formatCep(value) {
@@ -648,6 +676,38 @@
         var el = byId("companyCnpjHelp");
         if (!el) return;
         el.style.display = isLoading ? "block" : "none";
+      }
+
+      function applyPersonTypeFallbackMode() {
+        var isPj = isLegalEntityFallback();
+        var input = byId("companyNumberInput");
+        var label = byId("companyNumberLabel");
+        var btn = byId("btnLookupCnpj");
+        var help = byId("companyCnpjHelp");
+
+        if (!input || !label || !btn) return;
+
+        fallbackState.cnpjLookupInFlight = false;
+        showCnpjLoading(false);
+
+        if (isPj) {
+          label.textContent = "CNPJ";
+          input.placeholder = "12.345.678/0001-90";
+          input.maxLength = 18;
+          input.value = formatCnpj(input.value);
+          btn.style.display = "";
+          btn.disabled = false;
+          if (help) help.textContent = "Consultando CNPJ...";
+          return;
+        }
+
+        label.textContent = "CPF";
+        input.placeholder = "000.000.000-00";
+        input.maxLength = 14;
+        input.value = formatCpf(input.value);
+        btn.style.display = "none";
+        btn.disabled = true;
+        if (help) help.textContent = "Consulta automatica disponivel apenas para CNPJ.";
       }
 
       function esc(value) {
@@ -889,6 +949,8 @@
       }
 
       async function tryAutoFillFromCnpjFallback(showAlertOnFail) {
+        if (!isLegalEntityFallback()) return;
+
         var cnpjDigits = onlyDigits(getValue("companyNumberInput"));
         if (cnpjDigits.length !== 14) return;
         if (fallbackState.cnpjLookupInFlight) return;
@@ -936,6 +998,8 @@
         var phone = normalizeString(getValue("phoneInput"));
         var password = normalizeString(getValue("passwordInput"));
         var companyNumber = normalizeString(getValue("companyNumberInput"));
+        var companyNumberDigits = onlyDigits(companyNumber);
+        var personType = getPersonTypeFallback();
         var companySector = normalizeString(getValue("companySectorInput"));
         var companyCategory = normalizeString(getValue("companyCategoryInput"));
         var street = normalizeString(getValue("addressStreetInput"));
@@ -954,7 +1018,8 @@
         if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail valido.");
         if (!phone) throw new Error("Telefone e obrigatorio.");
         if (!password || password.length < 8) throw new Error("A senha do admin deve ter no minimo 8 caracteres.");
-        if (!companyNumber) throw new Error("CNPJ / Company Number e obrigatorio.");
+        if (personType === "PJ" && companyNumberDigits.length !== 14) throw new Error("Informe um CNPJ valido com 14 digitos.");
+        if (personType === "PF" && companyNumberDigits.length !== 11) throw new Error("Informe um CPF valido com 11 digitos.");
         if (!companySector) throw new Error("Setor e obrigatorio.");
         if (!companyCategory) throw new Error("Categoria e obrigatoria.");
         if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereco.");
@@ -984,6 +1049,10 @@
           admin_phone: phone,
           acept_terms: acceptTerms
         };
+
+        if (personType === "PF") {
+          payload.company_cpf = companyNumber;
+        }
 
         if (fallbackState.selectedPlanType === "custom") {
           payload.custom_module_ids = fallbackState.customModuleIds.slice();
@@ -1093,10 +1162,10 @@
       if (cnpjInput && !cnpjInput.__fallbackBindDone) {
         cnpjInput.__fallbackBindDone = true;
         cnpjInput.addEventListener("input", function () {
-          cnpjInput.value = formatCnpj(cnpjInput.value);
+          cnpjInput.value = isLegalEntityFallback() ? formatCnpj(cnpjInput.value) : formatCpf(cnpjInput.value);
         });
         cnpjInput.addEventListener("blur", function () {
-          tryAutoFillFromCnpjFallback(false);
+          if (isLegalEntityFallback()) tryAutoFillFromCnpjFallback(false);
         });
       }
 
@@ -1104,9 +1173,19 @@
       if (cnpjBtn && !cnpjBtn.__fallbackBindDone) {
         cnpjBtn.__fallbackBindDone = true;
         cnpjBtn.addEventListener("click", function () {
-          tryAutoFillFromCnpjFallback(true);
+          if (isLegalEntityFallback()) tryAutoFillFromCnpjFallback(true);
         });
       }
+
+      document.querySelectorAll('input[name="personTypeInput"]').forEach(function (radio) {
+        if (radio.__fallbackBindDone) return;
+        radio.__fallbackBindDone = true;
+        radio.addEventListener("change", function () {
+          applyPersonTypeFallbackMode();
+        });
+      });
+
+      applyPersonTypeFallbackMode();
 
       document.addEventListener("click", function (event) {
         var selectButton = safeClosest(event.target, ".plan-select-btn");

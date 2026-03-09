@@ -68,8 +68,36 @@
                         <div class="row">
                           <div class="col-lg-4">
                             <div class="form-group">
-                              <label><%= t('page.newClient.client.labels.cnpjRequired') %></label>
-                              <input id="cnpj" name="cnpj" onkeyup="maskCNPJ(this)" type="text"
+                              <label><%= t('page.newClient.client.labels.personType') %></label>
+                              <div>
+                                <label class="radio-inline">
+                                  <input type="radio" name="personType" id="personTypePj" value="PJ" checked>
+                                  <%= t('page.newClient.client.personTypes.legal') %>
+                                </label>
+                                <label class="radio-inline">
+                                  <input type="radio" name="personType" id="personTypePf" value="PF">
+                                  <%= t('page.newClient.client.personTypes.individual') %>
+                                </label>
+                              </div>
+                            </div>
+
+                            <div class="form-group" id="clientOriginGroup">
+                              <label><%= t('page.newClient.client.labels.clientOrigin') %></label>
+                              <div>
+                                <label class="radio-inline">
+                                  <input type="radio" name="clientOrigin" id="clientOriginNational" value="NATIONAL" checked>
+                                  <%= t('page.newClient.client.origins.national') %>
+                                </label>
+                                <label class="radio-inline">
+                                  <input type="radio" name="clientOrigin" id="clientOriginInternational" value="INTERNATIONAL">
+                                  <%= t('page.newClient.client.origins.international') %>
+                                </label>
+                              </div>
+                            </div>
+
+                            <div class="form-group">
+                              <label id="companyDocumentLabel"><%= t('page.newClient.client.labels.cnpjRequired') %></label>
+                              <input id="cnpj" name="cnpj" onkeyup="maskCompanyDocument(this)" type="text"
                                 class="form-control required" maxlength="18" placeholder="<%= t('page.newClient.client.placeholders.cnpj') %>">
                               <small id="cnpjHelp" style="display:none; color:#999;"><%= t('page.newClient.client.state.fetchingCnpj') %></small>
                             </div>
@@ -261,6 +289,30 @@
               return String(value || "").replace(/\D/g, "");
             }
 
+            function getPersonType() {
+              const checked = document.querySelector('input[name="personType"]:checked');
+              return String(checked?.value || "PJ").toUpperCase() === "PF" ? "PF" : "PJ";
+            }
+
+            function getClientOrigin() {
+              const checked = document.querySelector('input[name="clientOrigin"]:checked');
+              return String(checked?.value || "NATIONAL").toUpperCase() === "INTERNATIONAL"
+                ? "INTERNATIONAL"
+                : "NATIONAL";
+            }
+
+            function isLegalEntity() {
+              return getPersonType() === "PJ";
+            }
+
+            function isNationalClient() {
+              return getClientOrigin() === "NATIONAL";
+            }
+
+            function isCnpjLookupEnabled() {
+              return isLegalEntity() && isNationalClient();
+            }
+
             function showPostalLoading(isLoading) {
               const el = document.getElementById("postalHelp");
               if (!el) return;
@@ -320,6 +372,8 @@ function pickUserIdFromApiResponse(data) {
               const opts = options || {};
               const showAlert = !!opts.showAlert;
 
+              if (!isCnpjLookupEnabled()) return;
+
               const cnpjDigits = onlyDigits(getValue("cnpj"));
               if (cnpjDigits.length !== 14) return;
 
@@ -365,6 +419,7 @@ function pickUserIdFromApiResponse(data) {
               document.addEventListener("keyup", function (ev) {
                 const target = ev.target;
                 if (!target || target.id !== "cnpj") return;
+                if (!isCnpjLookupEnabled()) return;
 
                 const digits = onlyDigits(target.value);
                 if (digits.length !== 14) return;
@@ -378,6 +433,7 @@ function pickUserIdFromApiResponse(data) {
               document.addEventListener("blur", function (ev) {
                 const target = ev.target;
                 if (!target || target.id !== "cnpj") return;
+                if (!isCnpjLookupEnabled()) return;
                 tryAutoFillFromCnpj({ showAlert: true });
               }, true);
             }
@@ -444,14 +500,41 @@ function pickUserIdFromApiResponse(data) {
                 element.value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
               }
             }
+            function formatCNPJ(value) {
+              let raw = String(value || "").replace(/\D/g, "").slice(0, 14);
+              raw = raw.replace(/^(\d{2})(\d)/, "$1.$2");
+              raw = raw.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+              raw = raw.replace(/\.(\d{3})(\d)/, ".$1/$2");
+              raw = raw.replace(/(\d{4})(\d)/, "$1-$2");
+              return raw;
+            }
+
+            function formatCPF(value) {
+              let raw = String(value || "").replace(/\D/g, "").slice(0, 11);
+              raw = raw.replace(/^(\d{3})(\d)/, "$1.$2");
+              raw = raw.replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3");
+              raw = raw.replace(/\.(\d{3})(\d)/, ".$1-$2");
+              return raw;
+            }
+
             function maskCNPJ(element) {
-              let value = element.value;
-              value = value.replace(/\D/g, '');
-              value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-              value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-              value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-              value = value.replace(/(\d{4})(\d)/, "$1-$2");
-              element.value = value;
+              element.value = formatCNPJ(element.value);
+            }
+
+            function maskCompanyDocument(element) {
+              if (!element) return;
+
+              if (!isLegalEntity()) {
+                element.value = formatCPF(element.value);
+                return;
+              }
+
+              if (isNationalClient()) {
+                element.value = formatCNPJ(element.value);
+                return;
+              }
+
+              element.value = String(element.value || "").trimStart();
             }
             function maskCEP(element) {
               let v = String(element.value || "").replace(/\D/g, "").slice(0, 8);
@@ -460,7 +543,74 @@ function pickUserIdFromApiResponse(data) {
             }
             window.maskPhone = maskPhone;
             window.maskCNPJ = maskCNPJ;
+            window.maskCompanyDocument = maskCompanyDocument;
             window.maskCEP = maskCEP;
+
+            function applyClientDocumentMode() {
+              const labelEl = document.getElementById("companyDocumentLabel");
+              const docInput = document.getElementById("cnpj");
+              const originGroup = document.getElementById("clientOriginGroup");
+
+              if (!labelEl || !docInput) return;
+
+              if (!isLegalEntity()) {
+                if (originGroup) originGroup.style.display = "none";
+                const nationalEl = document.getElementById("clientOriginNational");
+                if (nationalEl) nationalEl.checked = true;
+
+                labelEl.textContent = "<%= t('page.newClient.client.labels.cpfRequired') %>";
+                docInput.placeholder = "<%= t('page.newClient.client.placeholders.cpf') %>";
+                docInput.maxLength = 14;
+                docInput.value = formatCPF(docInput.value);
+                showCnpjLoading(false);
+                return;
+              }
+
+              if (originGroup) originGroup.style.display = "";
+
+              if (isNationalClient()) {
+                labelEl.textContent = "<%= t('page.newClient.client.labels.cnpjRequired') %>";
+                docInput.placeholder = "<%= t('page.newClient.client.placeholders.cnpj') %>";
+                docInput.maxLength = 18;
+                docInput.value = formatCNPJ(docInput.value);
+              } else {
+                labelEl.textContent = "<%= t('page.newClient.client.labels.foreignNumberRequired') %>";
+                docInput.placeholder = "<%= t('page.newClient.client.placeholders.foreignNumber') %>";
+                docInput.maxLength = 40;
+                docInput.value = String(docInput.value || "").trim();
+                showCnpjLoading(false);
+              }
+            }
+
+            function attachClientTypeListeners() {
+              const inputs = document.querySelectorAll('input[name="personType"], input[name="clientOrigin"]');
+              inputs.forEach((el) => {
+                if (el.__clientTypeBindDone) return;
+                el.__clientTypeBindDone = true;
+                el.addEventListener("change", function () {
+                  window.__newClientState.lastCnpjFetched = null;
+                  applyClientDocumentMode();
+                });
+              });
+            }
+
+            function validateClientDocument() {
+              const docValue = getValue("cnpj");
+              const docDigits = onlyDigits(docValue);
+
+              if (!isLegalEntity()) {
+                if (docDigits.length !== 11) return "<%= t('page.newClient.messages.invalidCpf') %>";
+                return null;
+              }
+
+              if (isNationalClient()) {
+                if (docDigits.length !== 14) return "<%= t('page.newClient.messages.invalidCnpj') %>";
+                return null;
+              }
+
+              if (!docValue) return "<%= t('page.newClient.messages.invalidForeignNumber') %>";
+              return null;
+            }
 
             // ===================== API calls =====================
             async function apiCreateUser(payload) {
@@ -658,6 +808,7 @@ function pickUserIdFromApiResponse(data) {
                   // ✅ user_id removed
                   phone: getValue("phone"),
                   company_number: getValue("cnpj"),
+                  cpf: isLegalEntity() ? null : getValue("cnpj"),
                   sector: getValue("setor"),
                   category: getSelectedCategoryText(),
 
@@ -763,6 +914,8 @@ function pickUserIdFromApiResponse(data) {
 
               attachPostalAutoFill();
               installCnpjAutoFill();
+              attachClientTypeListeners();
+              applyClientDocumentMode();
 
               // initial table
               ensureAtLeastOneRow();
@@ -785,6 +938,14 @@ function pickUserIdFromApiResponse(data) {
                   form.validate().settings.ignore = ":disabled,:hidden";
                   const ok = form.valid();
                   if (!ok) return false;
+
+                  if (currentIndex === 0) {
+                    const documentValidationMessage = validateClientDocument();
+                    if (documentValidationMessage) {
+                      showAlertOnce(documentValidationMessage);
+                      return false;
+                    }
+                  }
 
                   // ✅ when leaving Step 2 (Dados Opcionais) to Step 3 (Acesso): create company
                   // Step indexes: 0 Cliente, 1 Dados Opcionais, 2 Acesso
