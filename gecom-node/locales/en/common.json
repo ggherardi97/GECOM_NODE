@@ -269,7 +269,9 @@
         "accessNumberHelp": "Enter the number provided by our team below.",
         "access": "Access",
         "backToLogin": "Back to login",
-        "sendResetEmail": "Send reset email"
+        "sendResetEmail": "Send reset email",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password"
       },
       "forgot": {
         "title": "Forgot your password?",

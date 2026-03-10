@@ -269,7 +269,9 @@
         "accessNumberHelp": "Escribe abajo el número proporcionado por nuestro equipo.",
         "access": "Acceder",
         "backToLogin": "Volver al inicio de sesión",
-        "sendResetEmail": "Enviar correo de restablecimiento"
+        "sendResetEmail": "Enviar correo de restablecimiento",
+        "showPassword": "Mostrar contrase\u00f1a",
+        "hidePassword": "Ocultar contrase\u00f1a"
       },
       "forgot": {
         "title": "¿Olvidaste tu contraseña?",

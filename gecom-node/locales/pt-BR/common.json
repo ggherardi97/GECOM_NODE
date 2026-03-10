@@ -269,7 +269,9 @@
         "accessNumberHelp": "Digite abaixo o número fornecido por nosso time.",
         "access": "Acessar",
         "backToLogin": "Voltar para o login",
-        "sendResetEmail": "Enviar email de reset"
+        "sendResetEmail": "Enviar email de reset",
+        "showPassword": "Mostrar senha",
+        "hidePassword": "Ocultar senha"
       },
       "forgot": {
         "title": "Esqueceu a senha?",

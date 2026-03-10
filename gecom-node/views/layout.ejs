@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>GECOM - Portal</title>
+  <title id="portalPageTitle">GECOM - Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Novo Processo links -->
@@ -62,6 +62,34 @@
         --gecom-nav-bg: #2f4050;
         --gecom-nav-text: #a7b1c2;
         --gecom-topbar-bg: #ffffff;
+        --gecom-card-border: #deebf3;
+        --gecom-card-shadow: 0 16px 32px rgba(19, 35, 52, 0.08);
+        --gecom-card-title-bg: linear-gradient(180deg, #f8fbfd 0%, #f2f7fb 100%);
+      }
+
+      .ibox {
+        border: 1px solid var(--gecom-card-border);
+        border-radius: 14px;
+        box-shadow: var(--gecom-card-shadow);
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .ibox > .ibox-title {
+        border-bottom: 1px solid var(--gecom-card-border);
+        background: var(--gecom-card-title-bg);
+        padding: 15px 16px;
+      }
+
+      .ibox > .ibox-title h5 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: .2px;
+      }
+
+      .ibox > .ibox-content {
+        padding: 16px;
+        background: #fff;
       }
 
       .btn-primary,
@@ -103,6 +131,16 @@
       body.gecom-layout-dark .ibox-title {
         background-color: #2a3138 !important;
         color: #d7dde3 !important;
+      }
+
+      body.gecom-layout-dark .ibox {
+        border-color: #3d4854;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+        background: #2a3138;
+      }
+
+      body.gecom-layout-dark .ibox > .ibox-title {
+        border-bottom-color: #3d4854;
       }
 
       body.mini-navbar .menuDivider {
@@ -475,11 +513,92 @@
 <body>
   <script>
     (function () {
+      function buildRocketFaviconDataUri() {
+        const svg =
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
+          "<rect width='64' height='64' rx='12' fill='#0f2c45'/>" +
+          "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='36'>&#x1F680;</text>" +
+          "</svg>";
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+      }
+
+      function resolvePortalBrand() {
+        const host = String(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+        if (host.includes("convert-plus.com")) return "convert";
+        if (host.includes("portalgecom.log.br")) return "gecom";
+        return "convert";
+      }
+
+      function getBrandConfig(brand) {
+        if (brand === "gecom") {
+          return {
+            name: "GECOM",
+            miniLogo: "G+",
+            portalTitle: "GECOM - Portal",
+            favicon: "/Pages/favicon.ico",
+          };
+        }
+        return {
+          name: "Convert Plus",
+          miniLogo: "C+",
+          portalTitle: "Convert Plus - Portal",
+          favicon: buildRocketFaviconDataUri(),
+        };
+      }
+
+      function applyHeadBranding(config) {
+        const titleText = String(document.title || "").trim();
+        const replacedTitle = titleText ? titleText.replace(/GECOM|Convert Plus/gi, config.name) : "";
+        document.title = replacedTitle || config.portalTitle;
+
+        document.querySelectorAll("#gecomFavicon, #gecomFaviconShortcut").forEach((el) => {
+          el.setAttribute("href", config.favicon);
+        });
+      }
+
+      function applyDefaultSidebarMiniLogo() {
+        const shortName = String(window.__portalBrandMiniLogo || "C+");
+        document.querySelectorAll(".logo-element").forEach((el) => {
+          if (!el || el.querySelector("img")) return;
+          el.textContent = shortName;
+        });
+      }
+
+      function applyBrandNameLabels() {
+        const brandName = String(window.__portalBrandDisplayName || "Convert Plus");
+        document.querySelectorAll(".portal-brand-name").forEach((el) => {
+          el.textContent = brandName;
+        });
+      }
+
+      try {
+        const brand = resolvePortalBrand();
+        const config = getBrandConfig(brand);
+        window.__portalBrand = brand;
+        window.__portalBrandDisplayName = config.name;
+        window.__portalBrandMiniLogo = config.miniLogo;
+        window.__portalBrandFavicon = config.favicon;
+        window.__portalBrandPortalTitle = config.portalTitle;
+        applyHeadBranding(config);
+        document.body.setAttribute("data-portal-brand", brand);
+      } catch {}
+
       try {
         if (localStorage.getItem("gecom.sidebar.collapsed") === "1") {
           document.body.classList.add("mini-navbar");
         }
       } catch {}
+
+      function applyPortalBrandVisuals() {
+        applyBrandNameLabels();
+        applyDefaultSidebarMiniLogo();
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyPortalBrandVisuals);
+      } else {
+        applyPortalBrandVisuals();
+      }
     })();
   </script>
   <!-- Global Spinner Overlay -->
@@ -506,7 +625,7 @@
 
               <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
-                <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
+                <span class="text-muted text-xs block"><span class="portal-brand-name">GECOM</span> <b class="caret"></b></span>
               </a>
 
               <ul class="dropdown-menu animated fadeInRight m-t-xs">
@@ -619,7 +738,7 @@
 
               <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                 <span id="currentUserName" class="block m-t-xs font-bold">User Name</span>
-                <span class="text-muted text-xs block">GECOM <b class="caret"></b></span>
+                <span class="text-muted text-xs block"><span class="portal-brand-name">GECOM</span> <b class="caret"></b></span>
               </a>
 
               <ul class="dropdown-menu animated fadeInRight m-t-xs">
@@ -1818,21 +1937,33 @@
             const mode = normalizeText(t.layout_mode).toUpperCase();
             document.body.classList.toggle("gecom-layout-dark", mode === "DARK");
 
-            const favicon = normalizeText(t.favicon_url);
-            if (favicon) {
-              const ico1 = document.getElementById("gecomFavicon");
-              const ico2 = document.getElementById("gecomFaviconShortcut");
-              if (ico1) ico1.setAttribute("href", favicon);
-              if (ico2) ico2.setAttribute("href", favicon);
-            }
-
+            const forcedPortalBrand = normalizeText(window.__portalBrand).toLowerCase();
+            const forcedBrandName = normalizeText(window.__portalBrandDisplayName) || "Convert Plus";
+            const forcedMiniLogo = normalizeText(window.__portalBrandMiniLogo) || "C+";
+            const forcedBrandFavicon = normalizeText(window.__portalBrandFavicon) || "/Pages/favicon.ico";
+            const tenantFavicon = normalizeText(t.favicon_url);
             const logoUrl = normalizeText(t.logo_url);
+
+            const favicon = forcedPortalBrand === "convert" ? forcedBrandFavicon : (tenantFavicon || forcedBrandFavicon);
+            const ico1 = document.getElementById("gecomFavicon");
+            const ico2 = document.getElementById("gecomFaviconShortcut");
+            if (ico1) ico1.setAttribute("href", favicon);
+            if (ico2) ico2.setAttribute("href", favicon);
+
+            document.querySelectorAll(".portal-brand-name").forEach((el) => {
+              el.textContent = forcedBrandName;
+            });
+
             document.querySelectorAll(".logo-element").forEach((el) => {
+              if (forcedPortalBrand === "convert" || forcedPortalBrand === "gecom") {
+                el.textContent = forcedMiniLogo;
+                return;
+              }
               if (logoUrl) {
                 el.innerHTML = `<img src="${safeHtml(logoUrl)}" alt="Logo" style="max-width:26px;max-height:26px;" />`;
                 return;
               }
-              el.textContent = "G+";
+              el.textContent = forcedMiniLogo;
             });
           }
 
@@ -2605,20 +2736,72 @@
       } catch { }
     }
 
+    function normalizeBrandText(value) {
+      return String(value == null ? "" : value).trim();
+    }
+
+    function isConvertPortalBrand() {
+      var forced = normalizeBrandText(window.__portalBrand).toLowerCase();
+      if (forced) return forced === "convert";
+      var host = String(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+      return host.indexOf("convert-plus.com") >= 0;
+    }
+
+    function rewriteBrandInText(value, brandMiniLogo) {
+      if (typeof value !== "string" || !value) return value;
+      return value
+        .replace(/\bGECOM\b/g, brandMiniLogo)
+        .replace(/\bGecom\b/g, brandMiniLogo)
+        .replace(/\bgecom\b/g, brandMiniLogo)
+        .replace(/\bG\+\b/g, brandMiniLogo);
+    }
+
+    function rewriteBrandInTranslationsNode(node, pathParts, brandMiniLogo) {
+      var path = Array.isArray(pathParts) ? pathParts : [];
+      var inLanding = path.some(function (part) {
+        return String(part || "").toLowerCase() === "landingpage";
+      });
+
+      if (node == null) return node;
+      if (typeof node === "string") {
+        return inLanding ? node : rewriteBrandInText(node, brandMiniLogo);
+      }
+      if (Array.isArray(node)) {
+        return node.map(function (item, idx) {
+          return rewriteBrandInTranslationsNode(item, path.concat(String(idx)), brandMiniLogo);
+        });
+      }
+      if (typeof node === "object") {
+        var out = {};
+        Object.keys(node).forEach(function (key) {
+          out[key] = rewriteBrandInTranslationsNode(node[key], path.concat(key), brandMiniLogo);
+        });
+        return out;
+      }
+      return node;
+    }
+
+    function applyPortalBrandingToTranslations(resources) {
+      if (!isConvertPortalBrand()) return resources;
+      var brandMiniLogo = normalizeBrandText(window.__portalBrandMiniLogo) || "C+";
+      return rewriteBrandInTranslationsNode(resources, [], brandMiniLogo);
+    }
+
     // ---------- i18next load + apply ----------
     async function loadTranslations(lang) {
       // You can also inject translations via window.__I18N_RESOURCES if you want
       // window.__I18N_RESOURCES = { "pt-BR": {...}, "en": {...}, "es": {...} }
       try {
         if (window.__I18N_RESOURCES && window.__I18N_RESOURCES[lang]) {
-          return window.__I18N_RESOURCES[lang];
+          return applyPortalBrandingToTranslations(window.__I18N_RESOURCES[lang]);
         }
       } catch { }
 
       var url = getI18nUrl(lang);
       var resp = await fetch(url, { method: "GET", headers: { "Accept": "application/json" }, cache: "no-store" });
       if (!resp.ok) throw new Error("Failed to load i18n: " + url + " (" + resp.status + ")");
-      return await resp.json();
+      var payload = await resp.json();
+      return applyPortalBrandingToTranslations(payload);
     }
 
     function applyI18nToDom() {

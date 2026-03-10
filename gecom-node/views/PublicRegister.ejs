@@ -4,13 +4,53 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Cadastro GECOM - escolha seu plano e comece a usar a plataforma." />
-  <meta name="author" content="GECOM" />
+  <meta id="registerMetaDescription" name="description" content="Cadastro GECOM - escolha seu plano e comece a usar a plataforma." />
+  <meta id="registerMetaAuthor" name="author" content="GECOM" />
   <meta name="google-maps-key" content="<%= googleKey || '' %>" />
-  <title>GECOM | Cadastro</title>
+  <title id="registerPageTitle">GECOM | Cadastro</title>
 
-  <link rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
-  <link rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link id="registerFaviconShortcut" rel="shortcut icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <link id="registerFavicon" rel="icon" href="/Pages/favicon.ico" type="image/x-icon" />
+  <script>
+    (function () {
+      function resolvePortalBrand() {
+        const host = String(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+        if (host.includes("convert-plus.com")) return "convert";
+        if (host.includes("portalgecom.log.br")) return "gecom";
+        return "convert";
+      }
+
+      function buildRocketFaviconDataUri() {
+        const svg =
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
+          "<rect width='64' height='64' rx='12' fill='#0f2c45'/>" +
+          "<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='36'>&#x1F680;</text>" +
+          "</svg>";
+        return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+      }
+
+      const brand = resolvePortalBrand();
+      const isConvert = brand === "convert";
+      const brandName = isConvert ? "Convert Plus" : "GECOM";
+      const description = isConvert
+        ? "Cadastro Convert Plus - escolha seu plano e comece a usar a plataforma."
+        : "Cadastro GECOM - escolha seu plano e comece a usar a plataforma.";
+      const favicon = isConvert ? buildRocketFaviconDataUri() : "/Pages/favicon.ico";
+      window.__portalBrand = brand;
+      document.documentElement.setAttribute("data-portal-brand", brand);
+
+      document.title = brandName + " | Cadastro";
+      const metaDescription = document.getElementById("registerMetaDescription");
+      const metaAuthor = document.getElementById("registerMetaAuthor");
+      if (metaDescription) metaDescription.setAttribute("content", description);
+      if (metaAuthor) metaAuthor.setAttribute("content", brandName);
+
+      const faviconDefault = document.getElementById("registerFavicon");
+      const faviconShortcut = document.getElementById("registerFaviconShortcut");
+      if (faviconDefault) faviconDefault.setAttribute("href", favicon);
+      if (faviconShortcut) faviconShortcut.setAttribute("href", favicon);
+    })();
+  </script>
 
   <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet" />
   <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
@@ -26,10 +66,51 @@
       background: linear-gradient(145deg, #f8fbfd 0%, #f0f5f8 45%, #e9f3ef 100%);
     }
 
+    html[data-portal-brand="convert"] body.register-marketing {
+      background: radial-gradient(circle at 15% 20%, #153f66 0%, #0a2038 38%, #061523 70%, #050f1c 100%);
+      background-size: 180% 180%;
+      animation: convertGradientShift 18s ease-in-out infinite;
+      color: #e8f4ff;
+    }
+
+    html[data-portal-brand="convert"] body.register-marketing::before {
+      content: "";
+      position: fixed;
+      inset: -12%;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 26%, rgba(0, 190, 255, 0.22) 0%, transparent 35%),
+        radial-gradient(circle at 82% 72%, rgba(84, 255, 180, 0.18) 0%, transparent 34%),
+        radial-gradient(circle at 48% 52%, rgba(14, 72, 130, 0.45) 0%, transparent 50%);
+      filter: blur(16px);
+      animation: convertAuraDrift 20s ease-in-out infinite alternate;
+    }
+
+    html[data-portal-brand="convert"] body.register-marketing::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 35%, rgba(64, 216, 255, 0.08) 100%);
+    }
+
+    @keyframes convertGradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes convertAuraDrift {
+      from { transform: translate3d(-2%, -1%, 0) scale(1); }
+      to { transform: translate3d(2%, 2%, 0) scale(1.04); }
+    }
+
     .register-tech-bg {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: 2;
       pointer-events: none;
       overflow: hidden;
     }
@@ -42,6 +123,12 @@
       color: rgba(35, 89, 123, 0.15);
       animation: registerTechScroll 150s linear infinite;
       will-change: transform;
+    }
+
+    html[data-portal-brand="convert"] .register-tech-track {
+      color: rgba(160, 230, 255, 0.3);
+      text-shadow: 0 0 10px rgba(88, 216, 255, 0.26);
+      animation-duration: 130s;
     }
 
     .register-tech-track--one {
@@ -63,6 +150,14 @@
       font-size: 30px;
       color: rgba(60, 95, 132, 0.12);
       animation-duration: 210s;
+    }
+
+    html[data-portal-brand="convert"] .register-tech-track--two {
+      color: rgba(119, 255, 219, 0.25);
+    }
+
+    html[data-portal-brand="convert"] .register-tech-track--three {
+      color: rgba(138, 200, 255, 0.22);
     }
 
     .register-tech-seq {
@@ -87,18 +182,122 @@
       }
     }
 
+    .convert-tech-surface {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    html[data-portal-brand="convert"] .convert-tech-surface {
+      display: block;
+    }
+
+    .convert-grid,
+    .convert-grid::after {
+      content: "";
+      position: absolute;
+      inset: -8%;
+      background-size: 42px 42px, 42px 42px;
+      background-image:
+        linear-gradient(to right, rgba(96, 204, 255, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(96, 204, 255, 0.12) 1px, transparent 1px);
+    }
+
+    .convert-grid {
+      transform: perspective(850px) rotateX(59deg) translateY(12%);
+      transform-origin: center top;
+      opacity: .56;
+      animation: convertGridMove 26s linear infinite;
+    }
+
+    .convert-grid::after {
+      inset: 0;
+      opacity: .42;
+      transform: translateY(18px);
+      background-image:
+        linear-gradient(to right, rgba(145, 255, 223, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(145, 255, 223, 0.1) 1px, transparent 1px);
+    }
+
+    @keyframes convertGridMove {
+      from {
+        transform: perspective(850px) rotateX(59deg) translate3d(0, 12%, 0);
+      }
+      to {
+        transform: perspective(850px) rotateX(59deg) translate3d(-42px, 18%, 0);
+      }
+    }
+
+    .convert-scanline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 190px;
+      background: linear-gradient(to bottom, rgba(127, 231, 255, 0), rgba(127, 231, 255, 0.16), rgba(127, 231, 255, 0));
+      filter: blur(1px);
+      animation: convertScan 8s ease-in-out infinite;
+      opacity: .68;
+    }
+
+    @keyframes convertScan {
+      0% { top: -220px; }
+      100% { top: 110%; }
+    }
+
+    .convert-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(22px);
+      opacity: .42;
+      animation: convertOrbFloat 13s ease-in-out infinite alternate;
+    }
+
+    .convert-orb--one {
+      width: 260px;
+      height: 260px;
+      top: -70px;
+      right: 8%;
+      background: rgba(82, 213, 255, 0.35);
+    }
+
+    .convert-orb--two {
+      width: 220px;
+      height: 220px;
+      bottom: -58px;
+      left: 7%;
+      background: rgba(112, 255, 208, 0.3);
+      animation-delay: -5s;
+    }
+
+    .convert-orb--three {
+      width: 160px;
+      height: 160px;
+      top: 28%;
+      left: 56%;
+      background: rgba(136, 165, 255, 0.26);
+      animation-delay: -2.8s;
+    }
+
+    @keyframes convertOrbFloat {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(14px, -18px, 0) scale(1.08); }
+    }
+
     #heroSection,
     #featuresPublic,
     #plansStage {
       position: relative;
-      z-index: 1;
+      z-index: 3;
     }
 
     .top-login-link {
       position: fixed;
       top: 14px;
       right: 18px;
-      z-index: 1002;
+      z-index: 1004;
       width: 42px;
       height: 42px;
       border-radius: 50%;
@@ -119,6 +318,18 @@
       border-color: #159a80;
       transform: translateY(-1px);
       text-decoration: none;
+    }
+
+    html[data-portal-brand="convert"] .top-login-link {
+      border-color: rgba(99, 224, 255, 0.45);
+      background: rgba(11, 40, 65, 0.8);
+      box-shadow: 0 8px 22px rgba(13, 35, 56, 0.45);
+    }
+
+    html[data-portal-brand="convert"] .top-login-link:hover,
+    html[data-portal-brand="convert"] .top-login-link:focus {
+      background: rgba(19, 58, 90, 0.92);
+      border-color: rgba(130, 235, 255, 0.65);
     }
 
     .gecom-spinner-overlay {
@@ -155,6 +366,21 @@
       max-width: 360px;
     }
 
+    html[data-portal-brand="convert"] .gecom-spinner-overlay {
+      background: rgba(3, 15, 28, 0.64);
+    }
+
+    html[data-portal-brand="convert"] .gecom-spinner-content {
+      background: rgba(8, 29, 47, 0.88);
+      border-color: rgba(102, 224, 255, 0.35);
+      color: #e4f2ff;
+      box-shadow: 0 12px 36px rgba(2, 7, 16, 0.5);
+    }
+
+    html[data-portal-brand="convert"] .gecom-spinner-text {
+      color: #d7ecff;
+    }
+
     .hero-wrap {
       padding: 120px 0 70px;
     }
@@ -171,12 +397,93 @@
       margin-bottom: 24px;
     }
 
+    html[data-portal-brand="convert"] .hero-subtitle {
+      color: rgba(220, 238, 255, 0.8);
+    }
+
     .hero-card {
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 18px 45px rgba(14, 34, 56, 0.12);
       padding: 24px;
       border: 1px solid #e9eef2;
+    }
+
+    html[data-portal-brand="convert"] .hero-card,
+    html[data-portal-brand="convert"] .plan-card,
+    html[data-portal-brand="convert"] .register-form-card,
+    html[data-portal-brand="convert"] .payment-step {
+      background: rgba(7, 25, 43, 0.74);
+      border: 1px solid rgba(102, 224, 255, 0.26);
+      box-shadow: 0 20px 50px rgba(2, 8, 17, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      backdrop-filter: blur(8px);
+    }
+
+    html[data-portal-brand="convert"] .register-form-card label,
+    html[data-portal-brand="convert"] .register-form-card .radio-inline,
+    html[data-portal-brand="convert"] .register-form-card .checkbox label {
+      color: #deefff;
+    }
+
+    html[data-portal-brand="convert"] .register-form-card .form-control {
+      background: rgba(247, 252, 255, 0.96);
+      border-color: #bfd4e5;
+      color: #15374f;
+    }
+
+    html[data-portal-brand="convert"] .register-form-card .form-control:focus {
+      border-color: #78c8ea;
+      box-shadow: 0 0 0 2px rgba(73, 178, 221, 0.18);
+    }
+
+    html[data-portal-brand="convert"] .register-form-card .form-control::placeholder {
+      color: #6a7b89;
+      opacity: 1;
+    }
+
+    html[data-portal-brand="convert"] .register-form-card .form-control[readonly],
+    html[data-portal-brand="convert"] .register-form-card .form-control[disabled] {
+      background: #e9f2f8;
+      color: #183a52;
+      border-color: #bfd4e5;
+      opacity: 1;
+      -webkit-text-fill-color: #183a52;
+    }
+
+    html[data-portal-brand="convert"] .register-form-card select.form-control,
+    html[data-portal-brand="convert"] .register-form-card select.form-control option {
+      color: #15374f;
+    }
+
+    html[data-portal-brand="convert"] .hero-title,
+    html[data-portal-brand="convert"] .hero-card h3,
+    html[data-portal-brand="convert"] .plan-name,
+    html[data-portal-brand="convert"] h1,
+    html[data-portal-brand="convert"] h2,
+    html[data-portal-brand="convert"] h3,
+    html[data-portal-brand="convert"] h4 {
+      color: #ebf7ff;
+    }
+
+    html[data-portal-brand="convert"] .text-muted,
+    html[data-portal-brand="convert"] p.text-muted {
+      color: rgba(207, 231, 255, 0.72) !important;
+    }
+
+    html[data-portal-brand="convert"] .btn-white,
+    html[data-portal-brand="convert"] a.btn-white {
+      background: rgba(247, 252, 255, 0.96);
+      border-color: #c8dceb;
+      color: #12344f !important;
+    }
+
+    html[data-portal-brand="convert"] .btn-white:hover,
+    html[data-portal-brand="convert"] .btn-white:focus,
+    html[data-portal-brand="convert"] a.btn-white:hover,
+    html[data-portal-brand="convert"] a.btn-white:focus {
+      background: #e6f1f9;
+      border-color: #b9d0e1;
+      color: #0f2b42 !important;
     }
 
     .feature-pill {
@@ -188,6 +495,12 @@
       margin: 4px 8px 4px 0;
       font-size: 12px;
       font-weight: 600;
+    }
+
+    html[data-portal-brand="convert"] .feature-pill {
+      background: rgba(109, 233, 255, 0.14);
+      border: 1px solid rgba(126, 240, 255, 0.22);
+      color: #b8efff;
     }
 
     .plans-stage {
@@ -220,6 +533,11 @@
       box-shadow: 0 20px 44px rgba(26, 179, 148, 0.2);
     }
 
+    html[data-portal-brand="convert"] .plan-card.selected {
+      border-color: rgba(130, 235, 255, 0.72);
+      box-shadow: 0 20px 44px rgba(6, 16, 33, 0.45);
+    }
+
     .plan-name {
       font-size: 24px;
       margin-bottom: 8px;
@@ -237,6 +555,11 @@
       font-size: 14px;
       color: #7f8b91;
       font-weight: 500;
+    }
+
+    html[data-portal-brand="convert"] .plan-price small,
+    html[data-portal-brand="convert"] .plan-list {
+      color: rgba(208, 229, 248, 0.82);
     }
 
     .plan-list {
@@ -257,6 +580,12 @@
       border-radius: 6px;
       margin: 22px 0 0;
       font-weight: 600;
+    }
+
+    html[data-portal-brand="convert"] .disclaimer-box {
+      border-left-color: #ffb85c;
+      background: rgba(255, 184, 92, 0.14);
+      color: #ffe1b8;
     }
 
     .register-form-wrap {
@@ -306,6 +635,13 @@
       margin-bottom: 10px;
       min-height: 74px;
       background: #fff;
+    }
+
+    html[data-portal-brand="convert"] .custom-module-option,
+    html[data-portal-brand="convert"] .payment-card-element {
+      background: rgba(7, 25, 43, 0.66);
+      border-color: rgba(110, 220, 255, 0.28);
+      color: #deefff;
     }
 
     .custom-module-option label {
@@ -416,6 +752,13 @@
       .register-tech-track {
         animation: none;
       }
+      html[data-portal-brand="convert"] body.register-marketing,
+      html[data-portal-brand="convert"] body.register-marketing::before,
+      .convert-grid,
+      .convert-scanline,
+      .convert-orb {
+        animation: none !important;
+      }
     }
   </style>
 </head>
@@ -502,6 +845,13 @@
       </div>
     </div>
   </div>
+  <div class="convert-tech-surface" aria-hidden="true">
+    <div class="convert-grid"></div>
+    <div class="convert-scanline"></div>
+    <span class="convert-orb convert-orb--one"></span>
+    <span class="convert-orb convert-orb--two"></span>
+    <span class="convert-orb convert-orb--three"></span>
+  </div>
 
   <a class="top-login-link" href="/" title="Login" aria-label="Ir para login">
     <i class="fa fa-sign-in"></i>
@@ -521,7 +871,7 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-7">
-          <h1 class="hero-title wow fadeInUp"><span>G+</span> a plataforma completa para sua operação</h1>
+          <h1 class="hero-title wow fadeInUp"><span style="color: #7bffcf;">Convert Plus</span> a plataforma completa para sua operação</h1>
           <p class="hero-subtitle wow fadeInUp" data-wow-delay="0.1s">
             Centralize processos, documentos, comunicação e rastreamento com visão executiva e controle operacional em tempo real.
           </p>
@@ -541,7 +891,7 @@
         </div>
         <div class="col-lg-5">
           <div class="hero-card wow zoomIn">
-            <h3 style="margin-top:0;">O que você ativa com o G+</h3>
+            <h3 style="margin-top:0;">O que você ativa com o C+</h3>
             <div class="feature-pill">Módulo de vendas</div>
             <div class="feature-pill">Módulo de serviço</div>
             <div class="feature-pill">Módulo de faturamento</div>
@@ -663,6 +1013,12 @@
                       <input id="userNameInput" type="text" class="form-control" required />
                     </div>
                   </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                      <label for="phoneInput">Telefone</label>
+                      <input id="phoneInput" type="text" class="form-control" maxlength="20" required />
+                    </div>
+                  </div>
                 </div>
 
                 <div class="row">
@@ -676,15 +1032,6 @@
                     <div class="form-group">
                       <label for="passwordInput">Senha inicial do admin</label>
                       <input id="passwordInput" type="password" class="form-control" minlength="8" required />
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-sm-6">
-                    <div class="form-group">
-                      <label for="phoneInput">Telefone</label>
-                      <input id="phoneInput" type="text" class="form-control" maxlength="20" required />
                     </div>
                   </div>
                 </div>
