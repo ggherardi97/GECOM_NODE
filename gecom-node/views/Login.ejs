@@ -443,7 +443,16 @@
 
     </style>
 </head>
-<body class="gray-bg brand-convert" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
+<body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
+    <script>
+        (function () {
+            try {
+                var host = String(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+                var isConvert = host.includes("convert-plus.com");
+                document.body.classList.add(isConvert ? "brand-convert" : "brand-gecom");
+            } catch (_) {}
+        })();
+    </script>
     <!-- <img src="../Assets/img/LogoGecom.jpg" style="position: fixed; min-width: 100%; min-height: 100%; opacity: 0.1;" /> -->
     <div class="register-tech-bg" aria-hidden="true">
         <div class="register-tech-track register-tech-track--one">
