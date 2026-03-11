@@ -34,8 +34,8 @@
 
   const loaderMessages = [
     "Estamos preparando seu ambiente...",
-    "Criando configuracoes de seguranca...",
-    "Configurando empresa e usuario administrador...",
+    "Criando configurações de segurança...",
+    "Configurando empresa e usuário administrador...",
     "Finalizando seu acesso inicial..."
   ];
 
@@ -243,7 +243,7 @@
       state.lastPostalLookup = postalDigits;
     } catch (error) {
       if (showAlertOnFail) {
-        showMessage("Endereco", "Nao foi possivel auto preencher pelo CEP. Continue manualmente.", "warning");
+        showMessage("Endereço", "Não foi possível auto preencher pelo CEP. Continue manualmente.", "warning");
       }
     } finally {
       state.postalLookupInFlight = false;
@@ -293,8 +293,8 @@
     }
 
     return state.paymentRequiresCard
-      ? '<i class="fa fa-lock"></i> Validar cartao e concluir cadastro'
-      : '<i class="fa fa-check"></i> Concluir cadastro sem cobranca';
+      ? '<i class="fa fa-lock"></i> Validar cartão e concluir cadastro'
+      : '<i class="fa fa-check"></i> Concluir cadastro sem cobrança';
   }
 
   function resetPaymentStep() {
@@ -375,7 +375,7 @@
 
     const loaded = await loadStripeJs();
     if (!loaded || !window.Stripe) {
-      throw new Error("Nao foi possivel carregar o Stripe.js.");
+      throw new Error("Não foi possível carregar o Stripe.js.");
     }
 
     if (!state.stripe || state.paymentPublishableKey !== key) {
@@ -675,7 +675,7 @@
     });
 
     if (modules.length === 0) {
-      container.innerHTML = '<div class="col-sm-12"><span class="text-muted">Nenhum modulo publico disponivel.</span></div>';
+      container.innerHTML = '<div class="col-sm-12"><span class="text-muted">Nenhum módulo público disponível.</span></div>';
       document.getElementById("customPlanTotal").textContent = formatMoney(0);
       return;
     }
@@ -742,7 +742,7 @@
             <h3 class="plan-name">${esc(plan.name)}</h3>
             <div class="plan-price">${esc(formatMoney(plan.monthly_price))} <small>/mes</small></div>
             <p class="text-muted">${esc(plan.description || "Plano pronto para iniciar seu ambiente.")}</p>
-            <ul class="plan-list">${features || "<li>Sem modulos listados.</li>"}</ul>
+            <ul class="plan-list">${features || "<li>Sem módulos listados.</li>"}</ul>
             <button class="btn btn-primary btn-plan plan-select-btn" data-plan-id="${esc(plan.id)}">
               Selecionar plano
             </button>
@@ -755,10 +755,10 @@
       <div class="col-lg-4 col-md-6">
         <div class="plan-card" data-plan-id="${CUSTOM_PLAN_ID}" data-plan-name="Plano custom" data-plan-type="custom">
           <h3 class="plan-name">Crie seu plano</h3>
-          <div class="plan-price">Voce escolhe <small>modulo a modulo</small></div>
-          <p class="text-muted">Monte um plano sob medida escolhendo os modulos que precisa e veja o total mensal.</p>
+          <div class="plan-price">Você escolhe <small>módulo a módulo</small></div>
+          <p class="text-muted">Monte um plano sob medida escolhendo os módulos que precisa e veja o total mensal.</p>
           <ul class="plan-list">
-            <li>Escolha os modulos desejados</li>
+            <li>Escolha os módulos desejados</li>
             <li>Total mensal calculado automaticamente</li>
             <li>Plano exclusivo associado ao seu tenant</li>
           </ul>
@@ -770,7 +770,7 @@
     `);
 
     const emptyWarning = state.plans.length === 0
-      ? '<div class="col-lg-12"><div class="alert alert-warning">Nao ha planos prontos publicados. Voce ainda pode montar um plano custom.</div></div>'
+      ? '<div class="col-lg-12"><div class="alert alert-warning">Não há planos prontos publicados. Você ainda pode montar um plano custom.</div></div>'
       : "";
 
     container.innerHTML = `<div class="row">${emptyWarning}${cards.join("")}</div>`;
@@ -782,7 +782,7 @@
     container.innerHTML = `
       <div class="row">
         <div class="col-lg-12">
-          <div class="alert alert-info">Carregando planos disponiveis...</div>
+          <div class="alert alert-info">Carregando planos disponíveis...</div>
         </div>
       </div>
     `;
@@ -933,23 +933,23 @@
     const acceptTerms = isChecked("acceptTermsInput");
 
     if (!state.selectedPlanId || !state.selectedPlanType) throw new Error("Selecione um plano antes de confirmar.");
-    if (!companyName) throw new Error("Nome da empresa e obrigatorio.");
-    if (!userName) throw new Error("Nome do utilizador e obrigatorio.");
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail valido.");
-    if (!phone) throw new Error("Telefone e obrigatorio.");
-    if (!password || password.length < 8) throw new Error("A senha do admin deve ter no minimo 8 caracteres.");
+    if (!companyName) throw new Error("Nome da empresa é obrigatório.");
+    if (!userName) throw new Error("Nome do utilizador é obrigatório.");
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail válido.");
+    if (!phone) throw new Error("Telefone é obrigatório.");
+    if (!password || password.length < 8) throw new Error("A senha do admin deve ter no mínimo 8 caracteres.");
     if (personType === "PJ" && companyNumberDigits.length !== 14) {
-      throw new Error("Informe um CNPJ valido com 14 digitos.");
+      throw new Error("Informe um CNPJ válido com 14 dígitos.");
     }
     if (personType === "PF" && companyNumberDigits.length !== 11) {
-      throw new Error("Informe um CPF valido com 11 digitos.");
+      throw new Error("Informe um CPF válido com 11 dígitos.");
     }
-    if (!companySector) throw new Error("Setor e obrigatorio.");
-    if (!companyCategory) throw new Error("Categoria e obrigatoria.");
-    if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereco.");
-    if (!acceptTerms) throw new Error("Voce precisa aceitar os termos para continuar.");
+    if (!companySector) throw new Error("Setor é obrigatório.");
+    if (!companyCategory) throw new Error("Categoria é obrigatória.");
+    if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereço.");
+    if (!acceptTerms) throw new Error("Você precisa aceitar os termos para continuar.");
     if (state.selectedPlanType === "custom" && state.customModuleIds.length === 0) {
-      throw new Error("Selecione ao menos um modulo para o plano custom.");
+      throw new Error("Selecione ao menos um módulo para o plano custom.");
     }
 
     const payload = {
@@ -1013,7 +1013,7 @@
 
     state.paymentClientSecret = normalizeString(paymentSession.setup_intent_client_secret);
     if (!state.paymentClientSecret) {
-      throw new Error("Nao foi possivel preparar a validacao do cartao.");
+      throw new Error("Não foi possível preparar a validação do cartão.");
     }
 
     await ensureStripeCardElement(paymentSession.stripe_publishable_key);
@@ -1037,7 +1037,7 @@
       showPaymentStep();
     } catch (error) {
       console.error("[PublicRegister] submit error:", error);
-      const msg = error && error.message ? error.message : "Nao foi possivel iniciar o pagamento.";
+      const msg = error && error.message ? error.message : "Não foi possível iniciar o pagamento.";
       showMessage("Falha no cadastro", msg, "error");
     } finally {
       setSubmitState(false);
@@ -1057,7 +1057,7 @@
       await prepareSignupPaymentSession(signupPayload, couponCode, false);
 
       if (!state.paymentSessionId) {
-        throw new Error("Sessao de pagamento invalida. Tente novamente.");
+        throw new Error("Sessão de pagamento inválida. Tente novamente.");
       }
 
       if (!state.paymentRequiresCard) {
@@ -1067,8 +1067,8 @@
 
         await syncCurrentUserFromMe();
         swal({
-          title: "Cadastro concluido!",
-          text: "Seu ambiente foi criado e sua sessao ja esta autenticada.",
+          title: "Cadastro concluído!",
+          text: "Seu ambiente foi criado e sua sessão já está autenticada.",
           type: "success"
         }, function () {
           window.location.href = "/Default";
@@ -1077,7 +1077,7 @@
       }
 
       if (!state.stripe || !state.paymentClientSecret || !state.stripeCardElement) {
-        throw new Error("Nao foi possivel iniciar validacao do cartao. Recarregue a tela e tente novamente.");
+        throw new Error("Não foi possível iniciar validação do cartão. Recarregue a tela e tente novamente.");
       }
 
       const billingName = normalizeString(getValue("userNameInput")) || normalizeString(getValue("companyNameInput"));
@@ -1104,12 +1104,12 @@
       });
 
       if (stripeResult.error) {
-        throw new Error(stripeResult.error.message || "Cartao nao validado. Verifique os dados.");
+        throw new Error(stripeResult.error.message || "Cartão não validado. Verifique os dados.");
       }
 
       const setupIntent = stripeResult && stripeResult.setupIntent ? stripeResult.setupIntent : null;
       if (!setupIntent || setupIntent.status !== "succeeded") {
-        throw new Error("Cartao nao validado pelo Stripe.");
+        throw new Error("Cartão não validado pelo Stripe.");
       }
 
       const paymentMethodId =
@@ -1117,7 +1117,7 @@
           ? setupIntent.payment_method
           : (setupIntent.payment_method && setupIntent.payment_method.id) || "";
       if (!paymentMethodId) {
-        throw new Error("Metodo de pagamento nao encontrado no setup intent.");
+        throw new Error("Método de pagamento não encontrado no setup intent.");
       }
 
       await postJson("/auth/signup/payment/complete", {
@@ -1128,8 +1128,8 @@
 
       await syncCurrentUserFromMe();
       swal({
-        title: "Cadastro concluido!",
-        text: "Seu ambiente foi criado com trial de 7 dias e sua sessao ja esta autenticada.",
+        title: "Cadastro concluído!",
+        text: "Seu ambiente foi criado com trial de 7 dias e sua sessão já está autenticada.",
         type: "success"
       }, function () {
         window.location.href = "/Default";
@@ -1137,8 +1137,8 @@
     } catch (error) {
       console.error("[PublicRegister] payment complete error:", error);
       const fallbackMsg = state.paymentRequiresCard
-        ? "Nao foi possivel validar o cartao."
-        : "Nao foi possivel concluir o cadastro.";
+        ? "Não foi possível validar o cartão."
+        : "Não foi possível concluir o cadastro.";
       const msg = error && error.message ? error.message : fallbackMsg;
       if (state.paymentRequiresCard) {
         setPaymentError(msg);
@@ -1164,7 +1164,7 @@
       await loadPublicCatalog(false);
     } catch (error) {
       console.error("[PublicRegister] failed to load catalog:", error);
-      const message = error && error.message ? error.message : "Nao foi possivel carregar os planos.";
+      const message = error && error.message ? error.message : "Não foi possível carregar os planos.";
       showMessage("Falha ao carregar planos", message, "error");
     }
   }

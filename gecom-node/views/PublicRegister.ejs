@@ -965,7 +965,7 @@
               <div id="customPlanBuilder" class="well well-sm section-hidden">
                 <h4 style="margin-top:0;">Crie seu plano</h4>
                 <p class="text-muted" style="margin-bottom: 12px;">
-                  Selecione os modulos desejados para montar seu plano custom.
+                  Selecione os módulos desejados para montar seu plano custom.
                 </p>
                 <div id="customModulesChecklist" class="row"></div>
                 <div class="text-right" style="margin-top: 10px;">
@@ -1140,7 +1140,7 @@
               <div id="paymentStepWrap" class="payment-step section-hidden">
                 <h4 style="margin-top:0;">Pagamento do plano</h4>
                 <p class="text-muted" style="margin-bottom:10px;">
-                  Informe um cartao de credito ou debito para validar sua assinatura. A cobranca inicia apos 7 dias de teste.
+                  Informe um cartão de crédito ou débito para validar sua assinatura. A cobrança inicia após 7 dias de teste.
                 </p>
                 <div class="form-group">
                   <label for="paymentCouponInput">Cupom de desconto (opcional)</label>
@@ -1152,10 +1152,10 @@
                     placeholder="Ex: MEUCUPOM" />                  
                 </div>
                 <div id="paymentNoChargeHint" class="alert alert-success section-hidden">
-                  Cupom NEVERPAY aplicado. Nenhum cartao sera cobrado neste cadastro.
+                  Cupom NEVERPAY aplicado. Nenhum cartão será cobrado neste cadastro.
                 </div>
                 <div id="paymentCardGroup" class="form-group">
-                  <label for="paymentCardElement">Dados do cartao</label>
+                  <label for="paymentCardElement">Dados do cartão</label>
                   <div id="paymentCardElement" class="payment-card-element"></div>
                   <div id="paymentCardError" class="payment-card-error" aria-live="polite"></div>
                 </div>
@@ -1387,7 +1387,7 @@
           fallbackState.lastPostalLookup = postalDigits;
         } catch (_error) {
           if (showAlertOnFail) {
-            showMessage("Endereco", "Nao foi possivel auto preencher pelo CEP. Continue manualmente.", "warning");
+            showMessage("Endereço", "Não foi possível auto preencher pelo CEP. Continue manualmente.", "warning");
           }
         } finally {
           fallbackState.postalLookupInFlight = false;
@@ -1531,7 +1531,7 @@
         });
 
         if (modules.length === 0) {
-          checklist.innerHTML = '<div class="col-sm-12"><span class="text-muted">Nenhum modulo publico disponivel.</span></div>';
+          checklist.innerHTML = '<div class="col-sm-12"><span class="text-muted">Nenhum módulo público disponível.</span></div>';
           var totalEmpty = byId("customPlanTotal");
           if (totalEmpty) totalEmpty.textContent = toMoney(0);
           return;
@@ -1642,7 +1642,7 @@
             + '    <h3 class="plan-name">' + esc((plan && plan.name) || "Plano") + '</h3>'
             + '    <div class="plan-price">' + esc(toMoney(plan && plan.monthly_price)) + ' <small>/mes</small></div>'
             + '    <p class="text-muted">' + esc((plan && plan.description) || "Plano pronto para iniciar seu ambiente.") + '</p>'
-            + '    <ul class="plan-list">' + (modules || "<li>Sem modulos listados.</li>") + '</ul>'
+            + '    <ul class="plan-list">' + (modules || "<li>Sem módulos listados.</li>") + '</ul>'
             + '    <button class="btn btn-primary btn-plan plan-select-btn" data-plan-id="' + esc(plan && plan.id) + '">Selecionar plano</button>'
             + '  </div>'
             + '</div>';
@@ -1652,10 +1652,10 @@
           + '<div class="col-lg-4 col-md-6">'
           + '  <div class="plan-card" data-plan-id="__CUSTOM__" data-plan-name="Plano custom" data-plan-type="custom" data-plan-price="0">'
           + '    <h3 class="plan-name">Crie seu plano</h3>'
-          + '    <div class="plan-price">Voce escolhe <small>modulo a modulo</small></div>'
-          + '    <p class="text-muted">Monte um plano sob medida escolhendo os modulos que precisa e veja o total mensal.</p>'
+          + '    <div class="plan-price">Você escolhe <small>módulo a módulo</small></div>'
+          + '    <p class="text-muted">Monte um plano sob medida escolhendo os módulos que precisa e veja o total mensal.</p>'
           + '    <ul class="plan-list">'
-          + '      <li>Escolha os modulos desejados</li>'
+          + '      <li>Escolha os módulos desejados</li>'
           + '      <li>Total mensal calculado automaticamente</li>'
           + '      <li>Plano exclusivo associado ao seu tenant</li>'
           + '    </ul>'
@@ -1664,7 +1664,7 @@
           + '</div>';
 
         var emptyWarning = plans.length === 0
-          ? '<div class="col-lg-12"><div class="alert alert-warning">Nao ha planos prontos publicados. Voce ainda pode montar um plano custom.</div></div>'
+          ? '<div class="col-lg-12"><div class="alert alert-warning">Não há planos prontos publicados. Você ainda pode montar um plano custom.</div></div>'
           : '';
 
         container.innerHTML = '<div class="row">' + emptyWarning + cards + '</div>';
@@ -1792,19 +1792,19 @@
         var acceptTerms = !!(acceptTermsEl && acceptTermsEl.checked);
 
         if (!fallbackState.selectedPlanId || !fallbackState.selectedPlanType) throw new Error("Selecione um plano antes de confirmar.");
-        if (!companyName) throw new Error("Nome da empresa e obrigatorio.");
-        if (!userName) throw new Error("Nome do utilizador e obrigatorio.");
-        if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail valido.");
-        if (!phone) throw new Error("Telefone e obrigatorio.");
-        if (!password || password.length < 8) throw new Error("A senha do admin deve ter no minimo 8 caracteres.");
-        if (personType === "PJ" && companyNumberDigits.length !== 14) throw new Error("Informe um CNPJ valido com 14 digitos.");
-        if (personType === "PF" && companyNumberDigits.length !== 11) throw new Error("Informe um CPF valido com 11 digitos.");
-        if (!companySector) throw new Error("Setor e obrigatorio.");
-        if (!companyCategory) throw new Error("Categoria e obrigatoria.");
-        if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereco.");
-        if (!acceptTerms) throw new Error("Voce precisa aceitar os termos para continuar.");
+        if (!companyName) throw new Error("Nome da empresa é obrigatório.");
+        if (!userName) throw new Error("Nome do utilizador é obrigatório.");
+        if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Informe um e-mail válido.");
+        if (!phone) throw new Error("Telefone é obrigatório.");
+        if (!password || password.length < 8) throw new Error("A senha do admin deve ter no mínimo 8 caracteres.");
+        if (personType === "PJ" && companyNumberDigits.length !== 14) throw new Error("Informe um CNPJ válido com 14 dígitos.");
+        if (personType === "PF" && companyNumberDigits.length !== 11) throw new Error("Informe um CPF válido com 11 dígitos.");
+        if (!companySector) throw new Error("Setor é obrigatório.");
+        if (!companyCategory) throw new Error("Categoria é obrigatória.");
+        if (!street || !number || !city || !stateUf || !postalCode || !country) throw new Error("Preencha todos os dados de endereço.");
+        if (!acceptTerms) throw new Error("Você precisa aceitar os termos para continuar.");
         if (fallbackState.selectedPlanType === "custom" && fallbackState.customModuleIds.length === 0) {
-          throw new Error("Selecione ao menos um modulo para o plano custom.");
+          throw new Error("Selecione ao menos um módulo para o plano custom.");
         }
 
         var payload = {
@@ -1865,13 +1865,13 @@
           var text = await response.text().catch(function () { return ""; });
           var data = {};
           try { data = text ? JSON.parse(text) : {}; } catch (_error) { data = {}; }
-          if (!response.ok) throw new Error((data && data.message) || "Nao foi possivel concluir o cadastro.");
+          if (!response.ok) throw new Error((data && data.message) || "Não foi possível concluir o cadastro.");
 
           await syncCurrentUserFromMeFallback();
           if (typeof window.swal === "function") {
             window.swal({
-              title: "Cadastro concluido!",
-              text: "Seu ambiente foi criado e sua sessao ja esta autenticada.",
+              title: "Cadastro concluído!",
+              text: "Seu ambiente foi criado e sua sessão já está autenticada.",
               type: "success"
             }, function () {
               window.location.href = "/Default";
@@ -1880,7 +1880,7 @@
             window.location.href = "/Default";
           }
         } catch (error) {
-          showMessage("Falha no cadastro", (error && error.message) || "Nao foi possivel concluir o cadastro.", "error");
+          showMessage("Falha no cadastro", (error && error.message) || "Não foi possível concluir o cadastro.", "error");
         } finally {
           setSubmitStateFallback(false);
         }
@@ -1890,7 +1890,7 @@
         revealPlansStage();
         var container = byId("dynamicPlansContainer");
         if (container) {
-          container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-info">Carregando planos disponiveis...</div></div></div>';
+          container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-info">Carregando planos disponíveis...</div></div></div>';
         }
 
         try {
@@ -1905,7 +1905,7 @@
           renderPublicPlans(plans);
         } catch (error) {
           if (container) {
-            container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-danger">Nao foi possivel carregar os planos.</div></div></div>';
+            container.innerHTML = '<div class="row"><div class="col-lg-12"><div class="alert alert-danger">Não foi possível carregar os planos.</div></div></div>';
           }
         }
       }

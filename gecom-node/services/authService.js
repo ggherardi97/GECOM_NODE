@@ -1,5 +1,20 @@
 const apiClient = require("./apiClient");
 
+function buildPortalHeaders(portalContext) {
+    const context = portalContext || {};
+    const headers = {};
+
+    if (context.host) {
+        headers["x-forwarded-host"] = String(context.host);
+    }
+
+    if (context.protocol) {
+        headers["x-forwarded-proto"] = String(context.protocol);
+    }
+
+    return headers;
+}
+
 async function login(email, password) {
     // Important: do NOT parse tokens here
     // Backend sets cookies via Set-Cookie header
@@ -36,16 +51,20 @@ async function signupPaymentComplete(payload) {
     });
 }
 
-async function forgotPassword(email) {
-    return apiClient.post("/auth/forgot-password", { email });
+async function forgotPassword(email, portalContext) {
+    return apiClient.post("/auth/forgot-password", { email }, {
+        headers: buildPortalHeaders(portalContext)
+    });
 }
 
-async function resetPassword({ userId, token, newPassword, confirmPassword }) {
+async function resetPassword({ userId, token, newPassword, confirmPassword }, portalContext) {
     return apiClient.post("/auth/reset-password", {
         user_id: userId,
         token,
         new_password: newPassword,
         confirm_password: confirmPassword
+    }, {
+        headers: buildPortalHeaders(portalContext)
     });
 }
 

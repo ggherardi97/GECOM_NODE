@@ -1,42 +1,19 @@
 // routes/processesApi.js
 const express = require("express");
+const {
+  getBackendBaseUrl,
+  getAuthHeader,
+  readJsonSafe,
+  resolveExternalAccessContext,
+  denyExternalWrite,
+  forceCompanyIdParam,
+  pickCompanyId,
+} = require("./_externalAccess");
 
 const router = express.Router();
 
-function getBackendBaseUrl() {
-  const baseUrl = process.env.API_BASE_URL;
-  if (!baseUrl) {
-    throw new Error("Missing BACKEND_API_BASE_URL (or API_BASE_URL) env var.");
-  }
-  return baseUrl.replace(/\/$/, "");
-}
-
-function getAuthHeader(req) {
-  const headerAuth = req.headers.authorization;
-  if (headerAuth && headerAuth.startsWith("Bearer ")) {
-    return headerAuth;
-  }
-
-  const token = req.cookies?.token || req.cookies?.access_token;
-  if (token) {
-    return `Bearer ${token}`;
-  }
-
-  return null;
-}
-
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
-}
-
-async function readJsonSafe(response) {
-  const text = await response.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { message: text };
-  }
 }
 
 /* -------------------- GET /api/processes -------------------- */
@@ -44,6 +21,7 @@ router.get("/processes", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     // Forward query params (e.g. ?company_id=...)
     const url = new URL(`${baseUrl}/processes`);
@@ -57,6 +35,9 @@ router.get("/processes", async (req, res) => {
       } else {
         url.searchParams.set(key, String(value));
       }
+    }
+    if (externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      forceCompanyIdParam(url.searchParams, externalContext.userCompanyId);
     }
 
     const response = await fetch(url.toString(), {
@@ -90,6 +71,7 @@ router.get("/processes/:id", async (req, res) => {
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     const response = await fetch(`${baseUrl}/processes/${encodeURIComponent(id)}`, {
       method: "GET",
@@ -100,6 +82,12 @@ router.get("/processes/:id", async (req, res) => {
     });
 
     const data = await readJsonSafe(response);
+    if (response.ok && externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      const processCompanyId = pickCompanyId(data);
+      if (!processCompanyId || String(processCompanyId) !== String(externalContext.userCompanyId)) {
+        return res.status(403).json({ message: "Acesso negado para processo de outra empresa." });
+      }
+    }
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("GET /api/processes/:id error:", error);
@@ -121,6 +109,25 @@ router.get("/processes/:id/events", async (req, res) => {
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+
+    if (externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      const processResp = await fetch(`${baseUrl}/processes/${encodeURIComponent(id)}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+      });
+      const processData = await readJsonSafe(processResp);
+      if (!processResp.ok) {
+        return res.status(processResp.status).json(processData ?? {});
+      }
+      const processCompanyId = pickCompanyId(processData);
+      if (!processCompanyId || String(processCompanyId) !== String(externalContext.userCompanyId)) {
+        return res.status(403).json({ message: "Acesso negado para processo de outra empresa." });
+      }
+    }
 
     const response = await fetch(
       `${baseUrl}/processes/${encodeURIComponent(id)}/events`,
@@ -146,6 +153,8 @@ router.post("/processes", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     // No hard validation here; backend is source of truth.
     // But we still forward exactly what the UI sends.
@@ -181,6 +190,8 @@ router.patch("/processes/:id/status", async (req, res) => {
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(
       `${baseUrl}/processes/${encodeURIComponent(id)}/status`,
@@ -217,6 +228,8 @@ router.delete("/processes/:id", async (req, res) => {
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/processes/${encodeURIComponent(id)}`, {
       method: "DELETE",
@@ -248,6 +261,8 @@ router.patch("/processes/:id", async (req, res) => {
 
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/processes/${encodeURIComponent(id)}`, {
       method: "PATCH",

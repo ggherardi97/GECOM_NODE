@@ -33,6 +33,28 @@ function hasOwn(obj, key) {
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key);
 }
 
+function toSingleHeaderValue(value) {
+  if (Array.isArray(value)) return String(value[0] || "").trim();
+  return String(value || "").trim();
+}
+
+function getPortalForwardHeaders(req) {
+  const hostRaw = req?.headers?.["x-forwarded-host"] || req?.headers?.host || "";
+  const protoRaw =
+    req?.headers?.["x-forwarded-proto"] ||
+    req?.headers?.["x-forwarded-protocol"] ||
+    req?.protocol ||
+    "";
+
+  const host = toSingleHeaderValue(hostRaw).split(",")[0]?.trim() || "";
+  const proto = toSingleHeaderValue(protoRaw).split(",")[0]?.trim() || "";
+
+  return {
+    ...(host ? { "x-forwarded-host": host } : {}),
+    ...(proto ? { "x-forwarded-proto": proto } : {}),
+  };
+}
+
 async function readJsonSafe(response) {
   const text = await response.text().catch(() => "");
   if (!text) return null;
@@ -186,6 +208,7 @@ router.post("/users", async (req, res) => {
         Accept: "application/json",
         "Content-Type": "application/json",
         ...(authHeader ? { Authorization: authHeader } : {}),
+        ...getPortalForwardHeaders(req),
       },
       body: JSON.stringify(payload),
     });

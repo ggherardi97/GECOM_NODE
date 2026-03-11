@@ -10,6 +10,25 @@ function forwardSetCookie(apiResponse, res) {
     }
 }
 
+function toSingleHeaderValue(value) {
+    if (Array.isArray(value)) return String(value[0] || "").trim();
+    return String(value || "").trim();
+}
+
+function getPortalContext(req) {
+    const hostRaw = req?.headers?.["x-forwarded-host"] || req?.headers?.host || "";
+    const protoRaw =
+        req?.headers?.["x-forwarded-proto"] ||
+        req?.headers?.["x-forwarded-protocol"] ||
+        req?.protocol ||
+        "";
+
+    const host = toSingleHeaderValue(hostRaw).split(",")[0]?.trim() || null;
+    const protocol = toSingleHeaderValue(protoRaw).split(",")[0]?.trim() || null;
+
+    return { host, protocol };
+}
+
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -107,7 +126,7 @@ router.post("/forgot-password", async (req, res) => {
             return res.status(400).json({ message: "Email is required." });
         }
 
-        const apiResponse = await authService.forgotPassword(email);
+        const apiResponse = await authService.forgotPassword(email, getPortalContext(req));
 
         // Usually forgot-password does not set cookies, but no harm forwarding if it does
         forwardSetCookie(apiResponse, res);
@@ -138,7 +157,7 @@ router.post("/reset-password", async (req, res) => {
             token,
             newPassword: new_password,
             confirmPassword: confirm_password
-        });
+        }, getPortalContext(req));
 
         const setCookieHeader = apiResponse.headers?.["set-cookie"];
         if (setCookieHeader) {

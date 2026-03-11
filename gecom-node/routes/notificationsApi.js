@@ -1,32 +1,16 @@
 // routes/notificationsApi.js
 const express = require("express");
+const {
+  getBackendBaseUrl,
+  getAuthHeader,
+  readJsonSafe,
+  resolveExternalAccessContext,
+  denyExternalWrite,
+  forceCompanyIdParam,
+  pickCompanyId,
+} = require("./_externalAccess");
+
 const router = express.Router();
-
-function getBackendBaseUrl() {
-  const baseUrl = process.env.BACKEND_API_BASE_URL || process.env.API_BASE_URL;
-  if (!baseUrl) throw new Error("Missing BACKEND_API_BASE_URL (or API_BASE_URL) env var.");
-  return baseUrl.replace(/\/$/, "");
-}
-
-function getAuthHeader(req) {
-  const headerAuth = req.headers.authorization;
-  if (headerAuth && headerAuth.startsWith("Bearer ")) return headerAuth;
-
-  const token = req.cookies?.token || req.cookies?.access_token;
-  if (token) return `Bearer ${token}`;
-
-  return null;
-}
-
-async function readJsonSafe(response) {
-  const text = await response.text();
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { message: text };
-  }
-}
 
 /**
  * GET /api/notifications/my?unread_only=true
@@ -36,6 +20,7 @@ router.get("/notifications/my", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    await resolveExternalAccessContext(req, { baseUrl });
 
     const qs = new URLSearchParams();
     if (req.query.unread_only !== undefined && req.query.unread_only !== "") {
@@ -68,6 +53,7 @@ router.get("/notifications/admin", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     const qs = new URLSearchParams();
     if (req.query.company_id) qs.set("company_id", String(req.query.company_id));
@@ -77,6 +63,9 @@ router.get("/notifications/admin", async (req, res) => {
     if (req.query.q) qs.set("q", String(req.query.q));
     if (req.query.include_expired !== undefined && req.query.include_expired !== "") {
       qs.set("include_expired", String(req.query.include_expired));
+    }
+    if (externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      forceCompanyIdParam(qs, externalContext.userCompanyId);
     }
 
     const url = `${baseUrl}/notifications/admin${qs.toString() ? `?${qs.toString()}` : ""}`;
@@ -106,6 +95,7 @@ router.get("/notifications/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     const notificationId = String(req.params.id || "").trim();
     if (!notificationId) return res.status(400).json({ message: "Missing notification id" });
@@ -119,6 +109,12 @@ router.get("/notifications/:id", async (req, res) => {
     });
 
     const data = await readJsonSafe(response);
+    if (response.ok && externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      const notificationCompanyId = pickCompanyId(data);
+      if (!notificationCompanyId || String(notificationCompanyId) !== String(externalContext.userCompanyId)) {
+        return res.status(403).json({ message: "Acesso negado para notificação de outra empresa." });
+      }
+    }
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("GET /api/notifications/:id error:", error);
@@ -134,6 +130,8 @@ router.post("/notifications", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/notifications`, {
       method: "POST",
@@ -161,6 +159,8 @@ router.patch("/notifications/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const notificationId = String(req.params.id || "").trim();
     if (!notificationId) return res.status(400).json({ message: "Missing notification id" });
@@ -191,6 +191,8 @@ router.delete("/notifications/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const notificationId = String(req.params.id || "").trim();
     if (!notificationId) return res.status(400).json({ message: "Missing notification id" });
@@ -219,6 +221,8 @@ router.post("/notifications/:id/read", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res, { allowPostPaths: [/^\/notifications\/[^/]+\/read$/i] })) return;
 
     const notificationId = String(req.params.id || "").trim();
     if (!notificationId) return res.status(400).json({ message: "Missing notification id" });

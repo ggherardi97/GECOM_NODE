@@ -1,5 +1,6 @@
 // routes/transportTypesApi.js
 const express = require("express");
+const { resolveExternalAccessContext, denyExternalWrite } = require("./_externalAccess");
 const router = express.Router();
 
 function getBackendBaseUrl() {
@@ -78,6 +79,8 @@ router.post("/transport-types", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/transport-types`, {
       method: "POST",
@@ -103,6 +106,8 @@ router.patch("/transport-types/:id", async (req, res) => {
     const { id } = req.params ?? {};
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/transport-types/${encodeURIComponent(id)}`, {
       method: "PATCH",
@@ -128,6 +133,8 @@ router.delete("/transport-types/:id", async (req, res) => {
     const { id } = req.params ?? {};
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/transport-types/${encodeURIComponent(id)}`, {
       method: "DELETE",

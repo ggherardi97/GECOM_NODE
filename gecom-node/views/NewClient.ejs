@@ -69,8 +69,8 @@
 </style>
 
 <% contentFor('headerLink') %>
-  <link href="../Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
-  <link href="../Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
+  <link href="/Assets/inspinia/css/plugins/steps/jquery.steps.css" rel="stylesheet">
   <% %>
 
     <div>
@@ -292,6 +292,34 @@
                         </div>
                       </fieldset>
 
+                      <!-- ===================== STEP 4: RELACIONADO ===================== -->
+                      <h1>Relacionado</h1>
+                      <fieldset>
+                        <h2>Vinculo relacionado (opcional)</h2>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>Tabela relacionada</label>
+                              <select id="company_related_table" class="form-control">
+                                <option value="">Nenhum</option>
+                                <option value="company">Cliente</option>
+                                <option value="process">Processo</option>
+                                <option value="invoice">Invoice</option>
+                                <option value="opportunity">Opportunity</option>
+                                <option value="contract">Contrato</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group">
+                              <label>ID relacionado</label>
+                              <input id="company_related_id" type="text" class="form-control" placeholder="UUID do registro relacionado">
+                              <small style="color:#999;">Preencha os dois campos para aplicar o vinculo.</small>
+                            </div>
+                          </div>
+                        </div>
+                      </fieldset>
+
                     </form>
 
                   </div>
@@ -305,7 +333,7 @@
     </div>
 
     <% contentFor('scripts') %>
-      <script src="../Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
+      <script src="/Assets/inspinia/js/plugins/iCheck/icheck.min.js"></script>
       <% %>
 
         <script>
@@ -317,7 +345,8 @@
               lastCnpjFetched: null,
               companyCreated: false,
               creatingCompany: false,
-              userRowsSeq: 0
+              userRowsSeq: 0,
+              userRoleOptions: []
             };
 
             // ===================== UI helpers =====================
@@ -725,6 +754,29 @@ function pickUserIdFromApiResponse(data) {
               return null;
             }
 
+            function readCompanyRelatedPayload() {
+              const relatedTable = String(document.getElementById("company_related_table")?.value || "").trim().toLowerCase();
+              const relatedId = String(document.getElementById("company_related_id")?.value || "").trim();
+              if (!relatedTable || !relatedId) return null;
+              return { related_table: relatedTable, related_id: relatedId };
+            }
+
+            function parseUnsupportedCompanyFieldsFromError(error) {
+              const msg = String(error?.message || "").toLowerCase();
+              const unsupported = [];
+              if (msg.includes("related_table") && msg.includes("should not exist")) unsupported.push("related_table");
+              if (msg.includes("related_id") && msg.includes("should not exist")) unsupported.push("related_id");
+              return unsupported;
+            }
+
+            function stripUnsupportedCompanyFields(payload, error) {
+              const unsupported = parseUnsupportedCompanyFieldsFromError(error);
+              if (!unsupported.length) return null;
+              const next = { ...(payload || {}) };
+              unsupported.forEach((field) => { delete next[field]; });
+              return next;
+            }
+
             // ===================== API calls =====================
             async function apiCreateUser(payload) {
               const response = await fetch("/api/users", {
@@ -789,6 +841,112 @@ function pickUserIdFromApiResponse(data) {
               if (tbody.children.length === 0) addUserRow();
             }
 
+            function defaultUserRoleOptions() {
+              return [
+                { code: "USER", label: "User Externo" }
+              ];
+            }
+
+            function normalizeRoleCode(value) {
+              return String(value || "").trim().toUpperCase();
+            }
+
+            function getCurrentUserRoleOptions() {
+              const options = Array.isArray(window.__newClientState.userRoleOptions)
+                ? window.__newClientState.userRoleOptions
+                : [];
+              if (!options.length) return defaultUserRoleOptions();
+              return options;
+            }
+
+            function getDefaultUserRoleCode() {
+              const options = getCurrentUserRoleOptions();
+              if (options.some((item) => item.code === "USER")) return "USER";
+              return options[0]?.code || "USER";
+            }
+
+            function buildUserRoleOptionsHtml(selectedRole) {
+              const currentRole = normalizeRoleCode(selectedRole) || getDefaultUserRoleCode();
+              const options = getCurrentUserRoleOptions();
+              return options
+                .map((opt) => {
+                  const code = normalizeRoleCode(opt.code);
+                  const label = String(opt.label || opt.name || code).trim() || code;
+                  return `<option value="${escapeHtml(code)}" ${code === currentRole ? "selected" : ""}>${escapeHtml(label)}</option>`;
+                })
+                .join("");
+            }
+
+            function applyRoleOptionsToExistingRows() {
+              const tbody = document.getElementById("usersTbody");
+              if (!tbody) return;
+              const roleSelects = Array.from(tbody.querySelectorAll("select[id$='_role']"));
+              roleSelects.forEach((selectEl) => {
+                const currentValue = normalizeUserRole(selectEl.value);
+                selectEl.innerHTML = buildUserRoleOptionsHtml(currentValue);
+                selectEl.value = currentValue;
+              });
+            }
+
+            function parseSystemRoleOptions(data) {
+              const rows = Array.isArray(data?.items)
+                ? data.items
+                : (Array.isArray(data) ? data : []);
+              const byCode = new Map();
+              rows.forEach((row) => {
+                if (row && row.is_active === false) return;
+                const code = normalizeRoleCode(row?.code || row?.role || row?.legacy_role || row?.name);
+                if (!code) return;
+                if (byCode.has(code)) return;
+                const label = String(row?.name || row?.code || code).trim() || code;
+                byCode.set(code, { code, label });
+              });
+              return Array.from(byCode.values());
+            }
+
+            function filterExternalRoleOptions(options) {
+              const list = Array.isArray(options) ? options : [];
+              return list.filter((item) => {
+                const label = String(item?.label || item?.name || "").trim()
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toUpperCase();
+                const code = String(item?.code || "").trim()
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toUpperCase();
+                return (
+                  label.includes("EXTERNO") ||
+                  label.includes("EXTERNAL") ||
+                  code.includes("EXTERNO") ||
+                  code.includes("EXTERNAL")
+                );
+              });
+            }
+
+            async function loadSystemUserRoles() {
+              try {
+                const response = await fetch("/api/admin/access/roles", {
+                  method: "GET",
+                  headers: { Accept: "application/json" }
+                });
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const data = await response.json().catch(() => ({}));
+                const parsed = parseSystemRoleOptions(data);
+                const externalOnly = filterExternalRoleOptions(parsed);
+                const selectedOptions = externalOnly.length ? externalOnly : defaultUserRoleOptions();
+                if (selectedOptions.length) {
+                  if (!externalOnly.length) {
+                    console.warn("[NewClient] no external roles found in admin/access/roles. Using local external fallback.");
+                  }
+                  window.__newClientState.userRoleOptions = selectedOptions;
+                  applyRoleOptionsToExistingRows();
+                }
+              } catch (error) {
+                console.warn("[NewClient] failed to load dynamic user roles, using fallback list:", error);
+              }
+            }
+
             function addUserRow(prefill) {
               const tbody = document.getElementById("usersTbody");
               if (!tbody) return;
@@ -818,9 +976,7 @@ function pickUserIdFromApiResponse(data) {
         </td>
         <td>
           <select class="form-control" id="${rowId}_role">
-            <option value="USER" ${role === "USER" ? "selected" : ""}><%= t('page.newClient.access.roles.user') %></option>
-            <option value="MANAGER" ${role === "MANAGER" ? "selected" : ""}><%= t('page.newClient.access.roles.manager') %></option>
-            <option value="ADMIN" ${role === "ADMIN" ? "selected" : ""}><%= t('page.newClient.access.roles.admin') %></option>
+            ${buildUserRoleOptionsHtml(role)}
           </select>
         </td>
         <td>
@@ -902,9 +1058,11 @@ function pickUserIdFromApiResponse(data) {
             }
 
             function normalizeUserRole(value) {
-              const role = String(value || "").trim().toUpperCase();
-              if (role === "ADMIN" || role === "MANAGER") return role;
-              return "USER";
+              const role = normalizeRoleCode(value);
+              const options = getCurrentUserRoleOptions();
+              const isKnownRole = options.some((item) => normalizeRoleCode(item.code) === role);
+              if (isKnownRole) return role;
+              return getDefaultUserRoleCode();
             }
 
             // ===================== Core rule: create company on step2 -> next =====================
@@ -916,6 +1074,7 @@ function pickUserIdFromApiResponse(data) {
 
               try {
                 // ✅ Create company directly (NO placeholder user)
+                const relatedPayload = readCompanyRelatedPayload();
                 const payloadCompany = {
                   company_name: getValue("companyname"),
                   // ✅ user_id removed
@@ -931,10 +1090,18 @@ function pickUserIdFromApiResponse(data) {
                   address_number: "",
                   address_city: getValue("city"),
                   address_state: getValue("state"),
-                  address_country: getValue("country") || "<%= t('page.newClient.defaults.country') %>"
+                  address_country: getValue("country") || "<%= t('page.newClient.defaults.country') %>",
+                  ...(relatedPayload || {})
                 };
 
-                const createdCompany = await apiCreateCompany(payloadCompany);
+                let createdCompany;
+                try {
+                  createdCompany = await apiCreateCompany(payloadCompany);
+                } catch (e) {
+                  const compatPayload = stripUnsupportedCompanyFields(payloadCompany, e);
+                  if (!compatPayload) throw e;
+                  createdCompany = await apiCreateCompany(compatPayload);
+                }
                 const companyId = pickCompanyIdFromApiResponse(createdCompany);
                 if (!companyId) throw new Error("<%= t('page.newClient.messages.companyCreatedNoId') %>");
 
@@ -976,7 +1143,9 @@ function pickUserIdFromApiResponse(data) {
               // create users (real)
               const createdUsers = [];
               for (const u of users) {
-                const password = u.send_access ? generateTempPassword() : "";
+                // Always create a valid temporary password.
+                // Email dispatch is controlled by first_access.
+                const password = generateTempPassword();
 
                 const payload = {
                   full_name: u.full_name,
@@ -985,6 +1154,7 @@ function pickUserIdFromApiResponse(data) {
                   role: normalizeUserRole(u.role),
                   status: "ACTIVE",
                   phonenumber: u.phonenumber || null,
+                  first_access: !!u.send_access,
 
                   // ✅ link on create (needs usersApi.js to forward company_id)
                   company_id: companyId
@@ -1020,10 +1190,12 @@ function pickUserIdFromApiResponse(data) {
               $("#subpageName").attr("href", "Clientes");
               $("#path").show();
 
-              $('.i-checks').iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green'
-              });
+              if ($.fn.iCheck) {
+                $('.i-checks').iCheck({
+                  checkboxClass: 'icheckbox_square-green',
+                  radioClass: 'iradio_square-green'
+                });
+              }
 
               attachPostalAutoFill();
               installCnpjAutoFill();
@@ -1032,6 +1204,8 @@ function pickUserIdFromApiResponse(data) {
               attachOptionSetListeners();
               attachClientTypeListeners();
               applyClientDocumentMode();
+              window.__newClientState.userRoleOptions = defaultUserRoleOptions();
+              loadSystemUserRoles();
 
               // initial table
               ensureAtLeastOneRow();
@@ -1105,3 +1279,5 @@ function pickUserIdFromApiResponse(data) {
 
           })();
         </script>
+
+

@@ -810,6 +810,43 @@
       return role === "admin" || role === "administrator";
     }
 
+    function normalizeAccessToken(value) {
+      return String(value || "")
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase();
+    }
+
+    function isExternalAccessUser() {
+      var auth = window.__auth || {};
+      var accessRoles = Array.isArray(auth?.access_roles)
+        ? auth.access_roles
+        : (Array.isArray(auth?.roles) ? auth.roles : []);
+
+      var fromAccessRole = accessRoles.some(function (entry) {
+        if (typeof entry === "string") {
+          var token = normalizeAccessToken(entry);
+          return token.includes("EXTERNO") || token.includes("EXTERNAL");
+        }
+
+        if (!entry || typeof entry !== "object") return false;
+        var candidates = [entry.code, entry.name, entry.label, entry.role, entry.legacy_role];
+        return candidates.some(function (value) {
+          var token = normalizeAccessToken(value);
+          return token.includes("EXTERNO") || token.includes("EXTERNAL");
+        });
+      });
+
+      if (fromAccessRole) return true;
+
+      var roleCandidates = [auth?.role, auth?.user_role, auth?.user?.role, auth?.user?.user_role];
+      return roleCandidates.some(function (value) {
+        var token = normalizeAccessToken(value);
+        return token.includes("EXTERNO") || token.includes("EXTERNAL");
+      });
+    }
+
     // -------------------- Dashboard view model --------------------
     var DASH_VIEW = {
       billing: "billing",
@@ -820,9 +857,10 @@
       po: "po",
     };
     var isAdmin = isAdminUser();
+    var isExternalUser = isExternalAccessUser();
 
     // Admin: default billing | Non-admin: default my
-    var selectedDashView = isAdmin ? DASH_VIEW.billing : DASH_VIEW.my;
+    var selectedDashView = isExternalUser ? DASH_VIEW.my : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
     var dashboardWrapByView = {};
     dashboardWrapByView[DASH_VIEW.billing] = "#dashBillingWrap";
     dashboardWrapByView[DASH_VIEW.my] = "#dashMyProcessesWrap";
@@ -834,6 +872,7 @@
       var requestedDashView = String(new URLSearchParams(window.location.search || "").get("view") || "").trim().toLowerCase();
       if (dashboardWrapByView[requestedDashView]) selectedDashView = requestedDashView;
     } catch (e) { }
+    if (isExternalUser) selectedDashView = DASH_VIEW.my;
 
     // -------------------- Picker --------------------
     function buildDashPicker() {
@@ -842,12 +881,16 @@
 
       $sel.empty();
 
-      if (isAdmin) $sel.append(`<option value="${DASH_VIEW.billing}"><%= t('page.dashboard.pageTitle') %></option>`);
-      $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
-      $sel.append(`<option value="${DASH_VIEW.finance}">Financeiro</option>`);
-      $sel.append(`<option value="${DASH_VIEW.hr}">RH</option>`);
-      $sel.append(`<option value="${DASH_VIEW.services}">Services</option>`);
-      $sel.append(`<option value="${DASH_VIEW.po}">Project & Operations</option>`);
+      if (isExternalUser) {
+        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
+      } else {
+        if (isAdmin) $sel.append(`<option value="${DASH_VIEW.billing}"><%= t('page.dashboard.pageTitle') %></option>`);
+        $sel.append(`<option value="${DASH_VIEW.my}">Meus Processos</option>`);
+        $sel.append(`<option value="${DASH_VIEW.finance}">Financeiro</option>`);
+        $sel.append(`<option value="${DASH_VIEW.hr}">RH</option>`);
+        $sel.append(`<option value="${DASH_VIEW.services}">Services</option>`);
+        $sel.append(`<option value="${DASH_VIEW.po}">Project & Operations</option>`);
+      }
 
       $sel.prop("disabled", false);
       $sel.closest(".dash-filterbar").show();
@@ -856,7 +899,9 @@
 
     // -------------------- View toggle --------------------
     function setView(viewName) {
-      var view = dashboardWrapByView[viewName] ? viewName : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
+      var defaultView = isExternalUser ? DASH_VIEW.my : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
+      var view = dashboardWrapByView[viewName] ? viewName : defaultView;
+      if (isExternalUser) view = DASH_VIEW.my;
 
       Object.keys(dashboardWrapByView).forEach(function (key) {
         var selector = dashboardWrapByView[key];
@@ -904,7 +949,8 @@
     $(document).on("change", "#dashboardPicker", function () {
       var v = String($(this).val() || "");
       if (dashboardWrapByView[v]) selectedDashView = v;
-      else selectedDashView = isAdmin ? DASH_VIEW.billing : DASH_VIEW.my;
+      else selectedDashView = isExternalUser ? DASH_VIEW.my : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
+      if (isExternalUser) selectedDashView = DASH_VIEW.my;
       loadDashboard();
     });
 
@@ -2268,9 +2314,32 @@ async function loadBillingDashboard() {
     }
 
     // -------------------- Init --------------------
-    buildDashPicker();
-    setSortIndicator();
-    loadDashboard();
+    async function refreshDashboardAccessContext() {
+      if (!(window.Auth && typeof window.Auth.refreshAccess === "function")) return;
+      try {
+        await window.Auth.refreshAccess();
+      } catch {}
+
+      isAdmin = isAdminUser();
+      isExternalUser = isExternalAccessUser();
+      selectedDashView = isExternalUser ? DASH_VIEW.my : (isAdmin ? DASH_VIEW.billing : DASH_VIEW.my);
+
+      try {
+        var requestedDashView = String(new URLSearchParams(window.location.search || "").get("view") || "")
+          .trim()
+          .toLowerCase();
+        if (dashboardWrapByView[requestedDashView]) selectedDashView = requestedDashView;
+      } catch {}
+
+      if (isExternalUser) selectedDashView = DASH_VIEW.my;
+    }
+
+    (async function initDashboardPage() {
+      await refreshDashboardAccessContext();
+      buildDashPicker();
+      setSortIndicator();
+      loadDashboard();
+    })();
   });
 </script>
 

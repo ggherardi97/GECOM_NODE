@@ -156,6 +156,94 @@
 
 <script>
   (function () {
+    function normalizeForCompare(value) {
+      const input = String(value || "").trim();
+      try {
+        return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+      } catch {
+        return input.toUpperCase();
+      }
+    }
+
+    function hasExternalToken(value) {
+      const token = normalizeForCompare(value);
+      return token.includes("EXTERNO") || token.includes("EXTERNAL");
+    }
+
+    function hasManagerToken(value) {
+      const token = normalizeForCompare(value);
+      return token.includes("MANAGER") || token.includes("GESTOR");
+    }
+
+    function collectRoleTokens(auth) {
+      const rows = [];
+      const push = (value) => {
+        if (!value) return;
+        if (Array.isArray(value)) {
+          value.forEach(push);
+          return;
+        }
+        if (typeof value === "object") {
+          [
+            value.code,
+            value.name,
+            value.label,
+            value.role,
+            value.user_role,
+            value.legacy_role,
+            value.legacyRole,
+          ].filter(Boolean).forEach(push);
+          return;
+        }
+        rows.push(String(value));
+      };
+
+      push(auth?.role);
+      push(auth?.roles);
+      push(auth?.access_roles);
+      push(auth?.user?.role);
+      push(auth?.user?.user_role);
+      push(auth?.user_role);
+      return rows;
+    }
+
+    function resolveExternalFlags() {
+      const auth = window.__auth || {};
+      const tokens = collectRoleTokens(auth);
+      const tokenHasExternal = tokens.some((token) => hasExternalToken(token));
+      const tokenHasManager = tokens.some((token) => hasManagerToken(token));
+      const isExternal = auth.isExternalManager === true || auth.isExternalUser === true || auth.isExternalAccess === true || tokenHasExternal;
+      const isExternalManager = auth.isExternalManager === true || (tokenHasExternal && tokenHasManager);
+      return {
+        isExternal,
+        isExternalManager,
+        isExternalUser: isExternal && !isExternalManager,
+      };
+    }
+
+    function applyMyDocumentsPermissionUi() {
+      const auth = window.__auth || {};
+      const external = resolveExternalFlags();
+      const isReadOnlyUser = auth?.isUser === true || external.isExternalUser;
+
+      if (isReadOnlyUser) {
+        $('a[name="btn_act_new"]').hide();
+        $('button[name="btn_act_new"]').hide();
+        $('input[name="btn_act_new"]').hide();
+      }
+
+      if (external.isExternalManager) {
+        $('a[name="btn_act_new"]').show();
+        $('button[name="btn_act_new"]').show();
+        $('input[name="btn_act_new"]').show();
+        $("#btnAddQuickUpload").show();
+        $("#btnUploadDoc").show().closest("li").show();
+        $("#btnUploadDoc").closest(".btn-group").show();
+        $("#btnNewFolder").hide().closest("li").hide();
+        $("#btnNewLink").hide().closest("li").hide();
+      }
+    }
+
     // ---------------------------
     // Page headers + permissions
     // ---------------------------
@@ -165,17 +253,9 @@
       $("#subpageName").text(t("page.myDocuments.pageTitle"));
       $("#subpageName").attr("href", "MyDocuments");
       $("#path").hide();
-
-      // Permissions (igual layout)
-      if (window.__auth?.isUser) {
-        $('a[name="btn_act_new"]').hide();
-        $('button[name="btn_act_new"]').hide();
-        $('input[name="btn_act_new"]').hide();
-      } else if (window.__auth?.isManager) {
-        // manager can create/upload in MyDocuments
-      } else if (window.__auth?.isAdmin) {
-        // ok
-      }
+      applyMyDocumentsPermissionUi();
+      setTimeout(applyMyDocumentsPermissionUi, 350);
+      setTimeout(applyMyDocumentsPermissionUi, 1200);
     });
 
     // ---------------------------
@@ -366,8 +446,9 @@
     }
 
     function updateTopActions() {
+      const external = resolveExternalFlags();
       const count = state.selected.size;
-      $("#btnDeleteSelected").toggle(count > 0);
+      $("#btnDeleteSelected").toggle(!external.isExternal && count > 0);
       $("#btnOpenSelected").toggle(count === 1);
       $("#btnBack").toggle(state.navStack.length > 0);
 
@@ -391,7 +472,11 @@
       qs.set("skip", "0");
 
       // ✅ Permissão: admin vê tudo, outros filtram por company
-      if (!window.__auth?.isAdmin && state.currentParentId === null) {
+      const external = resolveExternalFlags();
+      if (external.isExternal && state.currentParentId === null) {
+        qs.set("item_type", "FOLDER");
+      }
+      if (!window.__auth?.isAdmin && !external.isExternal && state.currentParentId === null) {
         const companyId = getUserCompanyId();
         qs.set("related_table", "company");
         qs.set("related_id", companyId || "00000000-0000-0000-0000-000000000000");
@@ -764,7 +849,8 @@ list.forEach(function (item) {
         qs.set("take", "500");
         qs.set("skip", "0");
 
-        if (!window.__auth?.isAdmin) {
+        const external = resolveExternalFlags();
+        if (!window.__auth?.isAdmin && !external.isExternal) {
           const companyId = getUserCompanyId();
           qs.set("related_table", "company");
           qs.set("related_id", companyId || "00000000-0000-0000-0000-000000000000");
@@ -815,8 +901,13 @@ list.forEach(function (item) {
 
         const query = buildListQuery();
         const data = await apiGet("/api/documents?" + query);
+        const list =
+          Array.isArray(data) ? data :
+          (Array.isArray(data?.data) ? data.data :
+          (Array.isArray(data?.rows) ? data.rows :
+          (Array.isArray(data?.items) ? data.items : [])));
 
-        renderGrid(data);
+        renderGrid(list);
         clearSelection();
         await loadLeftFolders();
       } catch (e) {
@@ -910,6 +1001,12 @@ list.forEach(function (item) {
     // Side modal forms
     // ---------------------------
     function openNewFolderSideModal() {
+      const external = resolveExternalFlags();
+      if (external.isExternalManager) {
+        alert("Manager Externo pode apenas fazer upload de documentos.");
+        return;
+      }
+
       openSideModal({
         title: t("page.clientDetails.documents.modals.newFolder.title"),
         okText: t("page.clientDetails.documents.modals.newFolder.create"),
@@ -980,6 +1077,12 @@ list.forEach(function (item) {
     }
 
     function openNewLinkSideModal() {
+      const external = resolveExternalFlags();
+      if (external.isExternalManager) {
+        alert("Manager Externo pode apenas fazer upload de documentos.");
+        return;
+      }
+
       openSideModal({
         title: t("page.clientDetails.documents.modals.newLink.title"),
         okText: t("page.clientDetails.documents.modals.newLink.save"),
@@ -1142,6 +1245,8 @@ list.forEach(function (item) {
     // Delete / Open selected
     // ---------------------------
     async function deleteSelected() {
+      const external = resolveExternalFlags();
+      if (external.isExternal) return;
       if (state.selected.size === 0) return;
 
       const ok = await confirmAsync(t("page.documents.confirm.deleteMany"), { danger: true, okText: t("page.layout.modal.delete"), cancelText: t("page.layout.modal.cancel") });

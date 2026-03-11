@@ -269,6 +269,30 @@
                 <div id="procDocFilesListInner"></div>
               </div>
             </fieldset>
+
+            <!-- STEP 4 -->
+            <h1>Relacionado</h1>
+            <fieldset>
+              <h3>Vinculo relacionado (opcional)</h3>
+              <div class="row">
+                <div class="form-group col-lg-6">
+                  <label>Tabela relacionada</label>
+                  <select id="process_related_table" class="form-control">
+                    <option value="">Nenhum</option>
+                    <option value="company">Cliente</option>
+                    <option value="product">Produto</option>
+                    <option value="invoice">Invoice</option>
+                    <option value="opportunity">Opportunity</option>
+                    <option value="contract">Contrato</option>
+                  </select>
+                </div>
+                <div class="form-group col-lg-6">
+                  <label>ID relacionado</label>
+                  <input id="process_related_id" type="text" class="form-control" placeholder="UUID do registro relacionado">
+                  <div class="muted" style="margin-top:4px;">Preencha os dois campos para aplicar o vinculo.</div>
+                </div>
+              </div>
+            </fieldset>
           </form>
 
         </div>
@@ -365,6 +389,8 @@
     if (!msg) return unsupported;
     if (msg.includes("total_value") && msg.includes("should not exist")) unsupported.push("total_value");
     if (msg.includes("status_config_id") && msg.includes("should not exist")) unsupported.push("status_config_id");
+    if (msg.includes("related_table") && msg.includes("should not exist")) unsupported.push("related_table");
+    if (msg.includes("related_id") && msg.includes("should not exist")) unsupported.push("related_id");
     return unsupported;
   }
 
@@ -940,12 +966,20 @@
   // =========================
   // Create process + transports
   // =========================
+  function readProcessRelatedPayload() {
+    const relatedTable = String($("#process_related_table").val() || "").trim().toLowerCase();
+    const relatedId = String($("#process_related_id").val() || "").trim();
+    if (!relatedTable || !relatedId) return null;
+    return { related_table: relatedTable, related_id: relatedId };
+  }
+
   function buildProcessPayload() {
     const companyId = String($("#company_id").val() || "").trim();
     const contactId = String($("#primary_contact_id").val() || "").trim();
     const statusConfigId = pickDefaultProcessStatusConfig();
     const legacyStatus = pickLegacyStatusByConfigId(statusConfigId);
     const totalValueRaw = parseCurrencyPtBr($("#total_value").val());
+    const relatedPayload = readProcessRelatedPayload();
 
     const payload = {
       status: legacyStatus != null ? legacyStatus : 0,
@@ -954,7 +988,8 @@
       invoice: String($("#invoice").val() || "").trim() || null,
       ship_date: toIsoZFromBr(document.getElementById("ship_date")?.value || "") || null,
       process_type_id: String($("#process_type_id").val() || "").trim() || null,
-      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null
+      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null,
+      ...(relatedPayload || {})
     };
 
     if (statusConfigId) payload.status_config_id = statusConfigId;

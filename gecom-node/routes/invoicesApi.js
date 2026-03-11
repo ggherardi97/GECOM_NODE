@@ -1,5 +1,11 @@
 // routes/invoicesApi.js
 const express = require("express");
+const {
+  resolveExternalAccessContext,
+  denyExternalWrite,
+  forceCompanyIdParam,
+  pickCompanyId,
+} = require("./_externalAccess");
 const router = express.Router();
 
 function getBackendBaseUrl() {
@@ -320,6 +326,7 @@ router.get("/invoices/:id/print", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
     const printLocale = resolvePrintLocale(req);
 
     if (!authHeader) {
@@ -342,6 +349,12 @@ router.get("/invoices/:id/print", async (req, res) => {
     const invoice = await readJsonSafe(response);
     if (!response.ok) {
       return res.status(response.status).send(invoice?.message || "Falha ao carregar invoice.");
+    }
+    if (externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      const invoiceCompanyId = pickCompanyId(invoice);
+      if (!invoiceCompanyId || String(invoiceCompanyId) !== String(externalContext.userCompanyId)) {
+        return res.status(403).send("Acesso negado para invoice de outra empresa.");
+      }
     }
 
     const company = invoice?.companies || invoice?.company || null;
@@ -480,12 +493,16 @@ router.get("/invoices", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     const qs = new URLSearchParams();
     if (req.query.company_id) qs.set("company_id", String(req.query.company_id));
     if (req.query.status) qs.set("status", String(req.query.status));
     if (req.query.status_config_id) qs.set("status_config_id", String(req.query.status_config_id));
     if (req.query.fields) qs.set("fields", String(req.query.fields));
+    if (externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      forceCompanyIdParam(qs, externalContext.userCompanyId);
+    }
 
     const response = await fetch(`${baseUrl}/invoices?${qs.toString()}`, {
       method: "GET",
@@ -508,6 +525,7 @@ router.get("/invoices/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
 
     const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(req.params.id)}`, {
       method: "GET",
@@ -518,6 +536,12 @@ router.get("/invoices/:id", async (req, res) => {
     });
 
     const data = await readJsonSafe(response);
+    if (response.ok && externalContext.enforceCompanyScope && externalContext.userCompanyId) {
+      const invoiceCompanyId = pickCompanyId(data);
+      if (!invoiceCompanyId || String(invoiceCompanyId) !== String(externalContext.userCompanyId)) {
+        return res.status(403).json({ message: "Acesso negado para invoice de outra empresa." });
+      }
+    }
     return res.status(response.status).json(data ?? {});
   } catch (error) {
     console.error("GET /api/invoices/:id error:", error);
@@ -530,6 +554,8 @@ router.post("/invoices/:id/clone", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
     const sourceId = String(req.params.id || "").trim();
 
     if (!sourceId) {
@@ -584,6 +610,8 @@ router.post("/invoices", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     // 🔎 debug (remove depois)
     console.log("[BFF] POST /api/invoices ->", {
@@ -630,6 +658,8 @@ router.patch("/invoices/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(req.params.id)}`, {
       method: "PATCH",
@@ -653,6 +683,8 @@ router.delete("/invoices/:id", async (req, res) => {
   try {
     const baseUrl = getBackendBaseUrl();
     const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
     const response = await fetch(`${baseUrl}/invoices/${encodeURIComponent(req.params.id)}`, {
       method: "DELETE",

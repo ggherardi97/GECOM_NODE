@@ -697,13 +697,22 @@
     }
 
     async function loadCurrencies() {
-      const data = await apiGet("/api/currencies");
-      const list = Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.currencies ?? []);
+      const normalizeRows = (data) => (
+        Array.isArray(data) ? data : (data?.data ?? data?.rows ?? data?.items ?? data?.currencies ?? [])
+      );
+
+      let data = await apiGet("/api/currencies?is_active=true");
+      let list = normalizeRows(data);
+      if (!Array.isArray(list) || list.length === 0) {
+        data = await apiGet("/api/currencies");
+        list = normalizeRows(data);
+      }
+
       currenciesCache = list
         .map((c) => ({
-          id: String(c?.id || "").trim(),
-          name: String(c?.name || "").trim(),
-          symbol: String(c?.symbol || ""),
+          id: String(c?.id || c?.currency_id || c?.currencyId || "").trim(),
+          name: String(c?.name || c?.currency_name || c?.currencyName || c?.code || "").trim(),
+          symbol: String(c?.symbol || c?.currency_symbol || ""),
           decimals: Number(c?.decimals ?? 2),
           code: String(c?.code || c?.iso_code || c?.currency_code || "").trim(), // ✅ pra Intl currency
         }))

@@ -57,6 +57,7 @@
           <ul class="nav nav-tabs">
             <li><a class="nav-link active" data-toggle="tab" href="#tab-info">Informações</a></li>
             <li><a class="nav-link" data-toggle="tab" href="#tab-pricing">Preços</a></li>
+            <li><a class="nav-link" data-toggle="tab" href="#tab-related">Relacionado</a></li>
           </ul>
 
           <div class="tab-content">
@@ -138,6 +139,34 @@
                   </div>
                 
 
+              </div>
+            </div>
+            </div>
+
+            <div id="tab-related" class="tab-pane">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>Tabela relacionada</label>
+                      <select id="related_table" class="form-control">
+                        <option value="">Nenhum</option>
+                        <option value="company">Cliente</option>
+                        <option value="process">Processo</option>
+                        <option value="invoice">Invoice</option>
+                        <option value="opportunity">Opportunity</option>
+                        <option value="contract">Contrato</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <div class="form-row">
+                      <label>ID relacionado</label>
+                      <input id="related_id" type="text" class="form-control" placeholder="UUID do registro relacionado" />
+                      <div class="muted" style="margin-top:6px;">Preencha os dois campos para vincular.</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -291,6 +320,9 @@ function installTaxMaskClassic() {
 }
 
       function getModel() {
+        const relatedTable = String($("#related_table").val() || "").trim().toLowerCase();
+        const relatedId = String($("#related_id").val() || "").trim();
+
         return {
           product_code: $("#product_code").val().trim(),
           name: $("#name").val().trim(),
@@ -300,8 +332,25 @@ function installTaxMaskClassic() {
           currency_id: $("#currency_id").val() || null,
          default_unit_price: moneyToDecimalString($("#default_unit_price").val()),
 default_tax_rate: moneyToDecimalString($("#default_tax_rate").val()),
-          is_active: $("#is_active").val() === "true"
+          is_active: $("#is_active").val() === "true",
+          ...(relatedTable && relatedId ? { related_table: relatedTable, related_id: relatedId } : {})
         };
+      }
+
+      function parseUnsupportedProductFieldsFromError(error) {
+        const msg = String(error?.message || "").toLowerCase();
+        const unsupported = [];
+        if (msg.includes("related_table") && msg.includes("should not exist")) unsupported.push("related_table");
+        if (msg.includes("related_id") && msg.includes("should not exist")) unsupported.push("related_id");
+        return unsupported;
+      }
+
+      function stripUnsupportedProductFields(payload, error) {
+        const unsupported = parseUnsupportedProductFieldsFromError(error);
+        if (!unsupported.length) return null;
+        const next = { ...(payload || {}) };
+        unsupported.forEach((field) => { delete next[field]; });
+        return next;
       }
 
       function validate(model) {
@@ -387,7 +436,14 @@ installTaxMaskClassic();
 
               $("#btnCreate").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Criando...');
 
-              const created = await apiPost("/api/products", payload);
+              let created;
+              try {
+                created = await apiPost("/api/products", payload);
+              } catch (e) {
+                const compatPayload = stripUnsupportedProductFields(payload, e);
+                if (!compatPayload) throw e;
+                created = await apiPost("/api/products", compatPayload);
+              }
 
               alert("Produto criado com sucesso.");
 
@@ -413,3 +469,4 @@ installTaxMaskClassic();
     })();
   </script>
   <% %>
+

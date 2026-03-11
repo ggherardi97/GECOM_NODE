@@ -460,16 +460,27 @@ display: none !important;
 
   async function loadCurrencies() {
     try {
-      const resp = await fetch("/api/currencies?is_active=true", {
+      let resp = await fetch("/api/currencies?is_active=true", {
         method: "GET",
         headers: { Accept: "application/json" }
       });
-      const data = await resp.json().catch(() => ({}));
+      let data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.loadFailed') %>");
 
+      let rows = toRows(data);
+      if (!Array.isArray(rows) || rows.length === 0) {
+        resp = await fetch("/api/currencies", {
+          method: "GET",
+          headers: { Accept: "application/json" }
+        });
+        data = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.loadFailed') %>");
+        rows = toRows(data);
+      }
+
       Object.keys(currencyById).forEach((k) => delete currencyById[k]);
-      toRows(data).forEach((row) => {
-        const id = String(row?.id || "").trim();
+      rows.forEach((row) => {
+        const id = String(row?.id || row?.currency_id || row?.currencyId || "").trim();
         if (!id) return;
         currencyById[id] = row;
       });

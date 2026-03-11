@@ -840,6 +840,12 @@
               <span class="nav-label" data-i18n="page.layout.menu.notifications"><%= t('page.layout.menu.notifications') %></span>
             </a>
           </li>
+          <li data-areas="home" data-divider-parent="home-settings" id="automationsMenuHome">
+            <a href="/automations">
+              <i class="fa fa-random"></i>
+              <span class="nav-label">Automações</span>
+            </a>
+          </li>
           <li data-areas="home" data-divider-parent="home-settings" id="configMainMenu">
             <a href="/configuracoes">
               <i class="fa fa-cogs"></i>
@@ -2450,12 +2456,16 @@
                   href: `/ProcessDetail?id=${encodeURIComponent(String(id))}`
                 });
               } else if (source === "invoices") {
+                const isAdmin = window.__auth?.isAdmin === true;
+                const invoiceHref = isAdmin
+                  ? `/NewInvoice?id=${encodeURIComponent(String(id))}`
+                  : `/api/invoices/${encodeURIComponent(String(id))}/print`;
                 mapped.push({
                   entityName: "Invoices",
                   id,
                   title: row?.invoice_number || row?.number || `Invoice ${id}`,
                   subtitle: row?.companies?.company_name || row?.company_name || row?.status || "",
-                  href: `/NewInvoice?id=${encodeURIComponent(String(id))}`
+                  href: invoiceHref
                 });
               } else if (source === "products") {
                 mapped.push({
@@ -3203,29 +3213,203 @@
       <!-- Script de permissÃµes -->
       <script>
         (function () {
-          try {
-            const raw = localStorage.getItem("currentUser");
-            if (!raw) return;
+          function normalizeForCompare(value) {
+            return String(value || "")
+              .trim()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .toUpperCase();
+          }
 
-            const user = JSON.parse(raw);
+          function hasExternalToken(value) {
+            const normalized = normalizeForCompare(value);
+            return normalized.includes("EXTERNO") || normalized.includes("EXTERNAL");
+          }
+
+          function hasManagerToken(value) {
+            const normalized = normalizeForCompare(value);
+            return normalized.includes("MANAGER") || normalized.includes("GESTOR");
+          }
+
+          function collectRoleEntries(auth) {
+            const list = [];
+            const append = (value) => {
+              if (!value) return;
+              if (Array.isArray(value)) {
+                value.forEach(append);
+                return;
+              }
+              if (typeof value === "object") {
+                append(value.code);
+                append(value.name);
+                append(value.label);
+                append(value.role);
+                append(value.user_role);
+                append(value.legacy_role);
+                append(value.legacyRole);
+                return;
+              }
+              list.push(String(value));
+            };
+
+            append(auth.access_roles);
+            append(auth.roles);
+            append(auth.role);
+            append(auth.user_role);
+            append(auth.user?.role);
+            append(auth.user?.user_role);
+            return list;
+          }
+
+          function isExternalAccessUser() {
+            const auth = window.__auth || {};
+            const roleEntries = collectRoleEntries(auth);
+            return roleEntries.some((entry) => hasExternalToken(entry));
+          }
+
+          function isExternalAccessManager() {
+            const auth = window.__auth || {};
+            const roleEntries = collectRoleEntries(auth);
+            const isExternal = roleEntries.some((entry) => hasExternalToken(entry));
+            const isManager = roleEntries.some((entry) => hasManagerToken(entry));
+            return isExternal && isManager;
+          }
+
+          function hideReadOnlyCreateActions() {
+            $('a[name="btn_act_new"]').hide();
+            $('button[name="btn_act_new"]').hide();
+            $('button[name="btn_act_new_manager"]').hide();
+            $('input[name="btn_act_new"]').hide();
+            $("[data-action='create']").hide();
+            $(".btn-create").hide();
+            $(".btn-new").hide();
+          }
+
+          function applyExternalSidebarWhitelist() {
+            const sideMenu = document.getElementById("side-menu");
+            if (!sideMenu) return;
+
+            const getAreas = (item) =>
+              String(item?.getAttribute("data-areas") || "")
+                .split(",")
+                .map((token) => String(token || "").trim().toLowerCase())
+                .filter(Boolean);
+
+            const isHomeArea = (item) => {
+              const areas = getAreas(item);
+              return areas.includes("home") || areas.includes("all");
+            };
+
+            const getPathFromItem = (item) => {
+              const anchor = item?.querySelector?.("a[href]");
+              const href = anchor ? String(anchor.getAttribute("href") || "").trim() : "";
+              if (!href) return "";
+              try {
+                return new URL(href, window.location.origin).pathname.toLowerCase();
+              } catch {
+                return "";
+              }
+            };
+
+            const listItems = Array.from(sideMenu.querySelectorAll("li[data-areas]"));
+            const homeItems = listItems.filter(isHomeArea);
+
+            homeItems.forEach((item) => {
+              item.style.display = "none";
+            });
+
+            Array.from(sideMenu.querySelectorAll("li.external-access-divider")).forEach((item) => item.remove());
+
+            const findHomeItemByPath = (path) =>
+              homeItems.find((item) => {
+                const pathName = getPathFromItem(item);
+                return pathName === path || pathName.startsWith(`${path}/`);
+              }) || null;
+
+            const dashboardItem = findHomeItemByPath("/default");
+            const serviceItems = [
+              findHomeItemByPath("/processos"),
+              findHomeItemByPath("/mydocuments"),
+              findHomeItemByPath("/servico/agenda"),
+              findHomeItemByPath("/notifications"),
+            ].filter(Boolean);
+
+            const salesItems = [
+              findHomeItemByPath("/invoices"),
+            ].filter(Boolean);
+
+            const setVisible = (item) => {
+              if (!item) return;
+              item.style.display = "";
+            };
+
+            const makeDivider = (label) => {
+              const li = document.createElement("li");
+              li.className = "external-access-divider";
+              li.setAttribute("data-areas", "home");
+              li.innerHTML = `<a class="menuDivider" style="padding-top:20px;">${label}</a>`;
+              return li;
+            };
+
+            const ordered = [];
+            if (dashboardItem) ordered.push(dashboardItem);
+            if (serviceItems.length) {
+              ordered.push(makeDivider("Serviços"));
+              ordered.push(...serviceItems);
+            }
+            if (salesItems.length) {
+              ordered.push(makeDivider("Vendas"));
+              ordered.push(...salesItems);
+            }
+
+            ordered.forEach((item) => {
+              setVisible(item);
+              sideMenu.appendChild(item);
+            });
+
+            const areaSwitcher = document.getElementById("sidebarAreaSwitcher");
+            if (areaSwitcher) areaSwitcher.style.display = "none";
+
+            try {
+              localStorage.setItem("gecom.sidebar.area", "home");
+            } catch {}
+          }
+
+          function applyPermissionUi() {
+            const auth = window.__auth || {};
+            const isExternal = isExternalAccessUser();
+            const isExternalManager = isExternalAccessManager();
+            if (isExternal) {
+              window.__auth = Object.assign({}, auth, {
+                isExternalAccess: true,
+                isExternalManager: isExternalManager,
+                isExternalUser: !isExternalManager,
+              });
+            }
+
+            if (auth.isUser || auth.isManager || isExternal) {
+              hideReadOnlyCreateActions();
+            }
+            if (auth.isUser) {
+              $("#profilePage").hide();
+            } else if (auth.isManager) {
+              $('button[name="btn_act_new_manager"]').hide();
+            }
+
+            const raw = localStorage.getItem("currentUser");
+            let user = null;
+            try {
+              user = raw ? JSON.parse(raw) : null;
+            } catch {
+              user = null;
+            }
 
             const name = (user && (user.full_name || user.name)) ? String(user.full_name || user.name).trim() : "";
             const el = document.getElementById("currentUserName");
             if (el && name) el.textContent = name;
 
-            if (window.__auth.isUser) {
-              $('a[name="btn_act_new"]').hide();
-              $('button[name="btn_act_new"]').hide();
-              $('button[name="btn_act_new_manager"]').hide();
-              $("#profilePage").hide();
-              $('input[name="btn_act_new"]').hide();//
-            }
-            else if (window.__auth.isManager) {
-              $('button[name="btn_act_new_manager"]').hide();
-            }
-
-            const role = String(user?.role || window.__auth?.role || "").trim().toUpperCase();
-            const isAdmin = role === "ADMIN" || window.__auth?.isAdmin === true || window.__auth?.is_admin === true;
+            const role = String(user?.role || auth?.role || "").trim().toUpperCase();
+            const isAdmin = role === "ADMIN" || auth?.isAdmin === true || auth?.is_admin === true;
             if (!isAdmin) {
               $("#metadataDesignerMenuHome").hide();
               $("#metadataDesignerMenuSettings").hide();
@@ -3233,6 +3417,25 @@
 
             if (!window.__features?.enableAI) $("#aiHubTab").hide();
 
+            if (isExternal) {
+              hideReadOnlyCreateActions();
+              applyExternalSidebarWhitelist();
+              setTimeout(applyExternalSidebarWhitelist, 300);
+              setTimeout(applyExternalSidebarWhitelist, 1200);
+              if (!window.__externalSidebarWhitelistHooked) {
+                window.__externalSidebarWhitelistHooked = true;
+                document.addEventListener("DOMContentLoaded", applyExternalSidebarWhitelist);
+              }
+            }
+          }
+
+          try {
+            applyPermissionUi();
+            if (window.Auth && typeof window.Auth.refreshAccess === "function") {
+              Promise.resolve(window.Auth.refreshAccess())
+                .then(() => applyPermissionUi())
+                .catch(() => applyPermissionUi());
+            }
           } catch (e) {
             console.warn("Failed to load currentUser from localStorage:", e);
           }

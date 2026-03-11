@@ -272,15 +272,19 @@
   </div>
   <div class="ibox-content">
       <p class="m-b-sm">
-        <strong>Voo:</strong> SVA809
+        <strong>Voo:</strong> <span id="airTrackingFlightCode">-</span>
       </p>
 
-      <a class="btn btn-primary"
-         target="_blank"
-         rel="noopener noreferrer"
-         href="https://www.flightradar24.com/SVA809">
-        Abrir no Flightradar24
-      </a>
+      <small id="airTrackingHint" class="text-muted">Carregando dados de rastreamento...</small>
+      <div style="margin-top:10px;">
+        <a class="btn btn-primary"
+           id="airTrackingLinkBtn"
+           target="_blank"
+           rel="noopener noreferrer"
+           href="https://www.flightradar24.com/">
+          Abrir no Flightradar24
+        </a>
+      </div>
 
   </div>
 </div>
@@ -1217,6 +1221,9 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 function renderTransports(list) {
   transportsCache = Array.isArray(list) ? list : [];
   window.transportsCache = transportsCache;
+  if (typeof window.refreshAirTrackingCard === "function") {
+    window.refreshAirTrackingCard(transportsCache);
+  }
   const tbody = document.getElementById("transportsTbody");
   if (!tbody) return;
 
@@ -1727,10 +1734,8 @@ async function loadProcessDocuments() {
     folderQs.set("item_type", "FOLDER");
     folderQs.set("take", "500");
     folderQs.set("skip", "0");
-    if (window.__auth?.isAdmin) {
-      folderQs.set("related_table", "process");
-      folderQs.set("related_id", String(processId));
-    }
+    folderQs.set("related_table", "process");
+    folderQs.set("related_id", String(processId));
 
     const folderRes = await apiGet(`/api/documents?${folderQs.toString()}`);
     const folders = normalizeArrayResponse(folderRes);
@@ -2001,149 +2006,334 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
                 </script>
 
                 <script>
-                    function loadMapLeft() {
-  setTimeout(function () {
-    // Reuse same map instance (avoid "Map container is already initialized")
-    if (window.__trackingMap) {
-      try { window.__trackingMap.remove(); } catch { /* ignore */ }
-      window.__trackingMap = null;
-    }
-
-    const mapEl = document.getElementById("map");
-    if (!mapEl) return;
-
-    // Leaflet map
-    const map = L.map("map").setView([0, 0], 2);
-    window.__trackingMap = map;
-
-    // Base tiles
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-
-    // Country "average" coordinates (enough for v1)
-    // Tip: if you want global coverage, you can fetch lat/lng from a Countries API and cache it (see notes in chat).
-    const COUNTRY_COORDS = {
-      "Brasil": [-14.2350, -51.9253],
-      "Brazil": [-14.2350, -51.9253],
-      "China": [35.8617, 104.1954],
-      "Ãndia": [20.5937, 78.9629],
-      "India": [20.5937, 78.9629],
-      "Portugal": [39.3999, -8.2245],
-      "Ãfrica do Sul": [-30.5595, 22.9375],
-      "South Africa": [-30.5595, 22.9375],
-      "Argentina": [-38.4161, -63.6167],
-      "Chile": [-35.6751, -71.5430],
-      "ColÃ´mbia": [4.5709, -74.2973],
-      "Colombia": [4.5709, -74.2973],
-      "MÃ©xico": [23.6345, -102.5528],
-      "Mexico": [23.6345, -102.5528],
-      "Estados Unidos": [37.0902, -95.7129],
-      "United States": [37.0902, -95.7129],
-      "CanadÃ¡": [56.1304, -106.3468],
-      "Canada": [56.1304, -106.3468],
-      "Espanha": [40.4637, -3.7492],
-      "Spain": [40.4637, -3.7492],
-      "FranÃ§a": [46.2276, 2.2137],
-      "France": [46.2276, 2.2137],
-      "Alemanha": [51.1657, 10.4515],
-      "Germany": [51.1657, 10.4515],
-      "ItÃ¡lia": [41.8719, 12.5674],
-      "Italy": [41.8719, 12.5674],
-      "Reino Unido": [55.3781, -3.4360],
-      "United Kingdom": [55.3781, -3.4360],
-      "Holanda": [52.1326, 5.2913],
-      "Netherlands": [52.1326, 5.2913],
-      "BÃ©lgica": [50.5039, 4.4699],
-      "Belgium": [50.5039, 4.4699],
-      "SuÃ­Ã§a": [46.8182, 8.2275],
-      "Switzerland": [46.8182, 8.2275],
-      "JapÃ£o": [36.2048, 138.2529],
-      "Japan": [36.2048, 138.2529],
-      "Coreia do Sul": [35.9078, 127.7669],
-      "South Korea": [35.9078, 127.7669],
-      "Emirados Ãrabes Unidos": [23.4241, 53.8478],
-      "United Arab Emirates": [23.4241, 53.8478],
-      "AustrÃ¡lia": [-25.2744, 133.7751],
-      "Australia": [-25.2744, 133.7751],
-      "Nova ZelÃ¢ndia": [-40.9006, 174.8860],
-      "New Zealand": [-40.9006, 174.8860]
-    };
-
-    function getCoords(countryName) {
-      const key = String(countryName || "").trim();
-      return COUNTRY_COORDS[key] || null;
-    }
-function getTransportLineColor(transportType) {
-  if (!transportType) return '#999';
-
-  const type = transportType.toLowerCase();
-
-  switch (type) {
-    case 'maritimo':
-    case 'marÃ­timo':
-    case 'sea':
-    case 'ocean':
-      return '#1c84c6'; // azul
-
-    case 'aereo':
-    case 'aÃ©reo':
-    case 'air':
-      return '#1ab394'; // verde
-
-    case 'terrestre':
-    case 'road':
-    case 'land':
-      return '#8b5a2b'; // marrom
-
-    default:
-      return '#999'; // fallback cinza
+                    (function () {
+  function normalizeGeoKey(value) {
+    return String(value || "")
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9 ]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
   }
-}
 
-    const transports = Array.isArray(window.transportsCache) ? window.transportsCache : [];
-    const routes = transports
-      .map(t => ({
-        origin: String(t?.origin || "").trim(),
-        destination: String(t?.destination || "").trim(),
-        status: String(getTransportStatusName(t?.transport_status_id) || "").trim()
-      }))
-      .filter(r => r.origin && r.destination);
+  const COUNTRY_COORDS_RAW = {
+    "Brasil": [-14.2350, -51.9253],
+    "Brazil": [-14.2350, -51.9253],
+    "Argentina": [-38.4161, -63.6167],
+    "Chile": [-35.6751, -71.5430],
+    "Colombia": [4.5709, -74.2973],
+    "Colômbia": [4.5709, -74.2973],
+    "ColÃ´mbia": [4.5709, -74.2973],
+    "Mexico": [23.6345, -102.5528],
+    "México": [23.6345, -102.5528],
+    "MÃ©xico": [23.6345, -102.5528],
+    "Estados Unidos": [37.0902, -95.7129],
+    "United States": [37.0902, -95.7129],
+    "Canada": [56.1304, -106.3468],
+    "Canadá": [56.1304, -106.3468],
+    "CanadÃ¡": [56.1304, -106.3468],
+    "Portugal": [39.3999, -8.2245],
+    "Espanha": [40.4637, -3.7492],
+    "Spain": [40.4637, -3.7492],
+    "França": [46.2276, 2.2137],
+    "France": [46.2276, 2.2137],
+    "FranÃ§a": [46.2276, 2.2137],
+    "Alemanha": [51.1657, 10.4515],
+    "Germany": [51.1657, 10.4515],
+    "Itália": [41.8719, 12.5674],
+    "Italy": [41.8719, 12.5674],
+    "ItÃ¡lia": [41.8719, 12.5674],
+    "Reino Unido": [55.3781, -3.4360],
+    "United Kingdom": [55.3781, -3.4360],
+    "Holanda": [52.1326, 5.2913],
+    "Netherlands": [52.1326, 5.2913],
+    "Bélgica": [50.5039, 4.4699],
+    "Belgium": [50.5039, 4.4699],
+    "BÃ©lgica": [50.5039, 4.4699],
+    "Suíça": [46.8182, 8.2275],
+    "Switzerland": [46.8182, 8.2275],
+    "SuÃ­Ã§a": [46.8182, 8.2275],
+    "Suécia": [60.1282, 18.6435],
+    "Sweden": [60.1282, 18.6435],
+    "SuÃ©cia": [60.1282, 18.6435],
+    "Noruega": [60.4720, 8.4689],
+    "Norway": [60.4720, 8.4689],
+    "Dinamarca": [56.2639, 9.5018],
+    "Denmark": [56.2639, 9.5018],
+    "Polônia": [51.9194, 19.1451],
+    "Poland": [51.9194, 19.1451],
+    "PolÃ´nia": [51.9194, 19.1451],
+    "Irlanda": [53.1424, -7.6921],
+    "Ireland": [53.1424, -7.6921],
+    "China": [35.8617, 104.1954],
+    "Japão": [36.2048, 138.2529],
+    "Japan": [36.2048, 138.2529],
+    "JapÃ£o": [36.2048, 138.2529],
+    "Coreia do Sul": [35.9078, 127.7669],
+    "South Korea": [35.9078, 127.7669],
+    "Índia": [20.5937, 78.9629],
+    "India": [20.5937, 78.9629],
+    "Ãndia": [20.5937, 78.9629],
+    "Emirados Árabes Unidos": [23.4241, 53.8478],
+    "United Arab Emirates": [23.4241, 53.8478],
+    "Emirados Ãrabes Unidos": [23.4241, 53.8478],
+    "Arábia Saudita": [23.8859, 45.0792],
+    "Saudi Arabia": [23.8859, 45.0792],
+    "ArÃ¡bia Saudita": [23.8859, 45.0792],
+    "Turquia": [38.9637, 35.2433],
+    "Turkey": [38.9637, 35.2433],
+    "Austrália": [-25.2744, 133.7751],
+    "Australia": [-25.2744, 133.7751],
+    "AustrÃ¡lia": [-25.2744, 133.7751],
+    "Nova Zelândia": [-40.9006, 174.8860],
+    "New Zealand": [-40.9006, 174.8860],
+    "Nova ZelÃ¢ndia": [-40.9006, 174.8860],
+    "África do Sul": [-30.5595, 22.9375],
+    "South Africa": [-30.5595, 22.9375],
+    "Ãfrica do Sul": [-30.5595, 22.9375]
+  };
 
-    if (!routes.length) {
-      map.setView([0, 0], 2);
-      return;
+  const COUNTRY_COORDS = new Map(
+    Object.entries(COUNTRY_COORDS_RAW).map(([name, coords]) => [normalizeGeoKey(name), coords]),
+  );
+
+  function getCoords(countryName) {
+    return COUNTRY_COORDS.get(normalizeGeoKey(countryName)) || null;
+  }
+
+  function getTransportLineColor(transportType) {
+    const type = normalizeGeoKey(transportType);
+    const compact = type.replace(/\s+/g, "");
+    if (!type) return "#999";
+    if (compact.includes("MARIT") || compact.includes("SEA") || compact.includes("OCEAN")) return "#1c84c6";
+    if (compact.includes("AEREO") || compact.includes("AREO") || compact.includes("AER") || compact.includes("AIR")) return "#1ab394";
+    if (compact.includes("TERRESTRE") || compact.includes("ROAD") || compact.includes("LAND")) return "#8b5a2b";
+    return "#999";
+  }
+
+  function isAirTransportTypeName(typeName) {
+    const token = normalizeGeoKey(typeName).replace(/\s+/g, "");
+    return token.includes("AEREO") || token.includes("AREO") || token.includes("AER") || token.includes("AIR");
+  }
+
+  function extractFlightCodeCandidate(value) {
+    const code = String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!code || code.length < 3) return null;
+    return code;
+  }
+
+  function extractFlightCodeFromTransportRow(transport) {
+    const candidates = [
+      transport?.flight_number,
+      transport?.flightNumber,
+      transport?.flight_code,
+      transport?.flightCode,
+      transport?.external_id,
+      transport?.externalId,
+      transport?.tracking_code,
+      transport?.trackingCode,
+      transport?.awb,
+      transport?.air_waybill,
+      transport?.airWaybill,
+      transport?.reference,
+      transport?.reference_code,
+      transport?.referenceCode,
+    ];
+
+    for (const candidate of candidates) {
+      const code = extractFlightCodeCandidate(candidate);
+      if (code) return code;
+    }
+    return null;
+  }
+
+  async function tryFetchFlightCodeFromTracking(transportId) {
+    const id = String(transportId || "").trim();
+    if (!id) return null;
+
+    try {
+      const response = await fetch(`/api/transports/${encodeURIComponent(id)}/tracking?refresh=false`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return null;
+      const data = await response.json().catch(() => ({}));
+
+      const candidates = [
+        data?.meta?.externalId,
+        data?.meta?.external_id,
+        data?.externalId,
+        data?.external_id,
+        data?.flightNumber,
+        data?.flight_number,
+      ];
+
+      for (const candidate of candidates) {
+        const code = extractFlightCodeCandidate(candidate);
+        if (code) return code;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function resolveAirTrackingInfo(transportsInput) {
+    const transports = Array.isArray(transportsInput) ? transportsInput : [];
+    const airRows = transports.filter((row) => isAirTransportTypeName(getTransportTypeName(row?.transport_type_id)));
+
+    if (!airRows.length) {
+      return {
+        flightCode: null,
+        href: "https://www.flightradar24.com/",
+        hint: "Nenhum transporte aéreo encontrado para este processo.",
+      };
     }
 
-    const allLatLngs = [];
-    routes.forEach((r) => {
-      const o = getCoords(r.origin);
-      const d = getCoords(r.destination);
+    for (const row of airRows) {
+      const fromTransport = extractFlightCodeFromTransportRow(row);
+      if (fromTransport) {
+        return {
+          flightCode: fromTransport,
+          href: `https://www.flightradar24.com/${encodeURIComponent(fromTransport)}`,
+          hint: "Voo identificado a partir dos dados do transporte.",
+        };
+      }
 
-      // If we don't know the coords, skip the route (v1).
-      // You can improve this later by geocoding/countries-api.
-      if (!o || !d) return;
+      const fromTracking = await tryFetchFlightCodeFromTracking(row?.id);
+      if (fromTracking) {
+        return {
+          flightCode: fromTracking,
+          href: `https://www.flightradar24.com/${encodeURIComponent(fromTracking)}`,
+          hint: "Voo identificado a partir do vínculo de rastreamento.",
+        };
+      }
+    }
 
-      // Markers
-      const oMarker = L.marker(o).addTo(map).bindPopup(`<b>${escapeHtml(r.origin)}</b>`);
-      const dMarker = L.marker(d).addTo(map).bindPopup(`<b>${escapeHtml(r.destination)}</b>`);
+    return {
+      flightCode: null,
+      href: "https://www.flightradar24.com/",
+      hint: "Transporte aéreo encontrado, mas sem número de voo vinculado.",
+    };
+  }
 
-      // Route line
-      const latlngs = [o, d];
-      const line = L.polyline(latlngs, { weight: 3 }).addTo(map);
-      line.bindPopup(`<b>${escapeHtml(r.origin)} â†’ ${escapeHtml(r.destination)}</b><br/><small>Status: ${escapeHtml(r.status || "-")}</small>`);
+  async function refreshAirTrackingCard(transportsInput) {
+    const codeEl = document.getElementById("airTrackingFlightCode");
+    const hintEl = document.getElementById("airTrackingHint");
+    const btnEl = document.getElementById("airTrackingLinkBtn");
+    if (!codeEl || !hintEl || !btnEl) return;
 
-      allLatLngs.push(...latlngs);
-    });
+    codeEl.textContent = "-";
+    hintEl.textContent = "Carregando dados de rastreamento...";
+    btnEl.setAttribute("href", "javascript:void(0)");
+    btnEl.classList.add("disabled");
+    btnEl.setAttribute("aria-disabled", "true");
 
-    if (allLatLngs.length) {
-      map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] });
+    const info = await resolveAirTrackingInfo(transportsInput);
+    codeEl.textContent = info.flightCode || "-";
+    hintEl.textContent = info.hint;
+
+    if (info.flightCode) {
+      btnEl.setAttribute("href", info.href);
+      btnEl.classList.remove("disabled");
+      btnEl.removeAttribute("aria-disabled");
     } else {
-      map.setView([0, 0], 2);
+      btnEl.setAttribute("href", "javascript:void(0)");
+      btnEl.classList.add("disabled");
+      btnEl.setAttribute("aria-disabled", "true");
     }
-  }, 500);
-}</script>
+  }
+
+  window.refreshAirTrackingCard = refreshAirTrackingCard;
+
+  window.loadMapLeft = function loadMapLeft() {
+    setTimeout(function () {
+      if (window.__trackingMap) {
+        try { window.__trackingMap.remove(); } catch { /* ignore */ }
+        window.__trackingMap = null;
+      }
+
+      const mapEl = document.getElementById("map");
+      if (!mapEl) return;
+
+      const map = L.map("map").setView([0, 0], 2);
+      window.__trackingMap = map;
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap",
+      }).addTo(map);
+
+      const transports = Array.isArray(window.transportsCache) ? window.transportsCache : [];
+      const routes = transports
+        .map((t) => ({
+          origin: String(t?.origin || "").trim(),
+          destination: String(t?.destination || "").trim(),
+          status: String(getTransportStatusName(t?.transport_status_id) || "").trim(),
+          typeName: String(getTransportTypeName(t?.transport_type_id) || "").trim(),
+        }))
+        .filter((route) => route.origin && route.destination);
+
+      if (!routes.length) {
+        map.setView([0, 0], 2);
+        setTimeout(() => map.invalidateSize(), 100);
+        return;
+      }
+
+      const allLatLngs = [];
+
+      routes.forEach((route) => {
+        const origin = getCoords(route.origin);
+        const destination = getCoords(route.destination);
+        if (!origin || !destination) return;
+
+        const lineColor = getTransportLineColor(route.typeName);
+        const latlngs = [origin, destination];
+
+        L.circleMarker(origin, {
+          radius: 7,
+          color: "#1ab394",
+          fillColor: "#1ab394",
+          fillOpacity: 0.85,
+          weight: 2,
+        }).addTo(map).bindPopup(`<b>Origem:</b> ${escapeHtml(route.origin)}`);
+
+        L.circleMarker(destination, {
+          radius: 7,
+          color: "#ed5565",
+          fillColor: "#ed5565",
+          fillOpacity: 0.85,
+          weight: 2,
+        }).addTo(map).bindPopup(`<b>Destino:</b> ${escapeHtml(route.destination)}`);
+
+        const line = L.polyline(latlngs, {
+          weight: 4,
+          color: lineColor,
+          opacity: 0.95,
+        }).addTo(map);
+
+        line.bindPopup(
+          `<b>${escapeHtml(route.origin)} → ${escapeHtml(route.destination)}</b><br/>` +
+          `<small>Tipo: ${escapeHtml(route.typeName || "-")} | Status: ${escapeHtml(route.status || "-")}</small>`,
+        );
+
+        allLatLngs.push(...latlngs);
+      });
+
+      if (allLatLngs.length) {
+        map.fitBounds(L.latLngBounds(allLatLngs), { padding: [24, 24] });
+      } else {
+        map.setView([0, 0], 2);
+      }
+
+      setTimeout(() => map.invalidateSize(), 100);
+    }, 350);
+  };
+})();
+</script>
 
 
 

@@ -1,57 +1,129 @@
 const express = require("express");
+const {
+  getBackendBaseUrl,
+  getAuthHeader,
+  readJsonSafe,
+  resolveExternalAccessContext,
+  denyExternalWrite,
+} = require("./_externalAccess");
+
 const router = express.Router();
-const { createProxyHandler } = require("../services/apiProxy");
 
-/**
- * GET /api/process-types
- * -> backend GET /process-types
- */
-router.get("/process-types", createProxyHandler({
-  backendPath: "/process-types"
-}));
+router.get("/process-types", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
 
-/**
- * GET /api/process-types/:id
- * -> backend GET /process-types/:id
- */
-router.get("/process-types/:id", (req, res, next) => {
-  const handler = createProxyHandler({
-    backendPath: `/process-types/${req.params.id}`
-  });
+    const response = await fetch(`${baseUrl}/process-types`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
 
-  return handler(req, res, next);
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/process-types error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
-/**
- * POST /api/process-types
- * -> backend POST /process-types
- */
-router.post("/process-types", createProxyHandler({
-  backendPath: "/process-types"
-}));
+router.get("/process-types/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
 
-/**
- * PUT /api/process-types/:id
- * -> backend PUT /process-types/:id
- */
-router.put("/process-types/:id", (req, res, next) => {
-  const handler = createProxyHandler({
-    backendPath: `/process-types/${req.params.id}`
-  });
+    const response = await fetch(`${baseUrl}/process-types/${encodeURIComponent(req.params.id)}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
 
-  return handler(req, res, next);
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("GET /api/process-types/:id error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
-/**
- * DELETE /api/process-types/:id
- * -> backend DELETE /process-types/:id
- */
-router.delete("/process-types/:id", (req, res, next) => {
-  const handler = createProxyHandler({
-    backendPath: `/process-types/${req.params.id}`
-  });
+router.post("/process-types", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
 
-  return handler(req, res, next);
+    const response = await fetch(`${baseUrl}/process-types`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("POST /api/process-types error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
+router.put("/process-types/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
+
+    const response = await fetch(`${baseUrl}/process-types/${encodeURIComponent(req.params.id)}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify(req.body ?? {}),
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("PUT /api/process-types/:id error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
+router.delete("/process-types/:id", async (req, res) => {
+  try {
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+    const externalContext = await resolveExternalAccessContext(req, { baseUrl });
+    if (denyExternalWrite(externalContext, req, res)) return;
+
+    const response = await fetch(`${baseUrl}/process-types/${encodeURIComponent(req.params.id)}`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+
+    if (response.status === 204) return res.status(204).send();
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("DELETE /api/process-types/:id error:", error);
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 module.exports = router;

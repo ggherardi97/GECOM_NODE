@@ -13,6 +13,15 @@
     return String(role || "").trim().toUpperCase();
   }
 
+  function normalizeForCompare(value) {
+    var s = String(value || "").trim();
+    try {
+      return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    } catch {
+      return s.toUpperCase();
+    }
+  }
+
   function canonicalRole(role) {
     var r = normalizeRole(role);
     if (!r) return "";
@@ -42,16 +51,85 @@
     return a === "READ";
   }
 
+  function roleTokensFromEntry(entry) {
+    if (!entry) return [];
+    if (typeof entry === "string") return [entry];
+    if (typeof entry !== "object") return [];
+    return [
+      entry.code,
+      entry.name,
+      entry.label,
+      entry.role,
+      entry.user_role,
+      entry.legacy_role,
+      entry.legacyRole
+    ].filter(Boolean);
+  }
+
+  function collectRoleTokens(auth) {
+    var tokens = [];
+    var push = function (value) {
+      if (value == null) return;
+      if (Array.isArray(value)) {
+        value.forEach(push);
+        return;
+      }
+      if (typeof value === "object") {
+        roleTokensFromEntry(value).forEach(function (t) { tokens.push(t); });
+        return;
+      }
+      tokens.push(String(value));
+    };
+
+    push(auth && auth.role);
+    push(auth && auth.user_role);
+    push(auth && auth.roles);
+    push(auth && auth.access_roles);
+    push(auth && auth.user && auth.user.role);
+    push(auth && auth.user && auth.user.user_role);
+    push(auth && auth.user && auth.user.role_name);
+    push(auth && auth.user && auth.user.roles);
+
+    return tokens.map(normalizeForCompare).filter(Boolean);
+  }
+
+  function deriveExternalFlags(auth) {
+    var tokens = collectRoleTokens(auth);
+    var hasExternal = tokens.some(function (token) {
+      return token.indexOf("EXTERNO") >= 0 || token.indexOf("EXTERNAL") >= 0;
+    });
+    var hasManager = tokens.some(function (token) {
+      return token.indexOf("MANAGER") >= 0 || token.indexOf("GESTOR") >= 0;
+    });
+    var isExternalManager = hasExternal && hasManager;
+    var isExternalUser = hasExternal && !isExternalManager;
+    return {
+      isExternalAccess: hasExternal,
+      isExternalManager: isExternalManager,
+      isExternalUser: isExternalUser
+    };
+  }
+
   function deriveRoleFlags(auth) {
+    var external = deriveExternalFlags(auth || {});
     var role = canonicalRole(auth.role || "");
     var isAdmin = role === "ADMIN" || toBool(auth.user && (auth.user.is_admin || auth.user.isAdmin));
-    var isManager = !isAdmin && (role === "MANAGER" || toBool(auth.user && (auth.user.is_manager || auth.user.isManager)));
+    var isManager = !isAdmin && (
+      role === "MANAGER" ||
+      toBool(auth.user && (auth.user.is_manager || auth.user.isManager)) ||
+      external.isExternalManager
+    );
     var isUser = !isAdmin && !isManager;
     return {
-      role: isAdmin ? "ADMIN" : (isManager ? "MANAGER" : (role || "USER")),
+      role: isAdmin
+        ? "ADMIN"
+        : (external.isExternalManager ? "MANAGER_EXTERNAL" : (isManager ? "MANAGER" : (external.isExternalUser ? "USER_EXTERNAL" : (role || "USER")))),
       isAdmin: isAdmin,
       isManager: isManager,
       isUser: isUser,
+      isExternalAccess: external.isExternalAccess,
+      isExternalManager: external.isExternalManager,
+      isExternalUser: external.isExternalUser,
     };
   }
 
@@ -72,7 +150,11 @@
       isAdmin: false,
       isManager: false,
       isUser: true,
+      isExternalAccess: false,
+      isExternalManager: false,
+      isExternalUser: false,
       companyId: user && (user.company_id || user.companyId) || null,
+      company_id: user && (user.company_id || user.companyId) || null,
       permission_map: {},
       permissions: [],
       access_roles: [],
@@ -94,6 +176,8 @@
       role: currentRole || current.role,
       roles: roleCodes.length ? roleCodes : (current.roles || []),
       access_roles: Array.isArray(payload.roles) ? payload.roles : [],
+      companyId: payload.company_id || payload.companyId || current.companyId || current.company_id || null,
+      company_id: payload.company_id || payload.companyId || current.company_id || current.companyId || null,
       permission_map: payload.permission_map && typeof payload.permission_map === "object" ? payload.permission_map : {},
       permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
       permissionsLoaded: true,
