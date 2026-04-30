@@ -4,6 +4,9 @@
 <% %>
 
 <style>
+  #masterHeader{
+    display: none;
+  }
   .cal-activities-layout {
     --cal-accent: #1ab394;
     --cal-accent-soft: #e6f7f3;
@@ -11,6 +14,17 @@
     --cal-border: #e5ebef;
     --cal-text-soft: #70808e;
     --cal-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+    --cal-page-zoom: 1;
+  }
+
+  .cal-zoom-zone {
+    zoom: var(--cal-page-zoom);
+    position: relative;
+  }
+
+  .cal-agenda-stage {
+    position: relative;
+    padding-right: 58px;
   }
 
   .cal-activities-layout .cal-main-card,
@@ -67,6 +81,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .cal-toolbar-actions .btn {
@@ -83,6 +98,147 @@
   .cal-toolbar-actions .btn-white {
     border-color: #d5dfe6;
     color: #415265;
+  }
+
+  .cal-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #dce7ef;
+    background: #f8fbfe;
+    color: #526476;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .cal-status-chip.is-connected {
+    border-color: #c7ebdf;
+    background: #eaf8f3;
+    color: #19795c;
+  }
+
+  .cal-status-chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #aebdca;
+  }
+
+  .cal-status-chip.is-connected .dot {
+    background: #1ab394;
+  }
+
+  .google-side {
+    width: 500px;
+  }
+
+  .cal-google-section {
+    border: 1px solid var(--cal-border);
+    border-radius: 14px;
+    padding: 14px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f6fafe 100%);
+    margin-bottom: 14px;
+  }
+
+  .cal-google-hero {
+    border-radius: 18px;
+    padding: 18px;
+    background: linear-gradient(145deg, #eef7ff 0%, #f7fbff 45%, #ffffff 100%);
+    border: 1px solid #dbe8f3;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+    margin-bottom: 14px;
+  }
+
+  .cal-google-hero h5 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #25384a;
+  }
+
+  .cal-google-hero p {
+    margin: 0;
+    color: #617387;
+    line-height: 1.55;
+    font-size: 13px;
+  }
+
+  .cal-google-hero-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .cal-google-hero-actions .btn {
+    border-radius: 10px;
+    font-weight: 700;
+    min-width: 170px;
+  }
+
+  .cal-google-section h5 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2a3a4c;
+  }
+
+  .cal-google-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: #667788;
+  }
+
+  .cal-google-account {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .cal-google-account strong {
+    display: block;
+    font-size: 15px;
+    color: #233547;
+  }
+
+  .cal-google-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .cal-google-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0 0;
+    color: #42586c;
+    font-size: 13px;
+  }
+
+  .cal-google-check input {
+    margin-top: 2px;
+  }
+
+  .cal-google-note {
+    margin-top: 8px;
+    color: #6b7c8d;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .cal-google-alert {
+    display: none;
+    margin-bottom: 12px;
+  }
+
+  .cal-google-alert.is-open {
+    display: block;
   }
 
   .cal-calendar-tip {
@@ -188,6 +344,79 @@
     font-weight: 600;
   }
 
+  .cal-filters-dock {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 6;
+    width: 336px;
+    max-width: calc(100vw - 44px);
+    pointer-events: none;
+  }
+
+  .cal-filters-shell {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: stretch;
+    transform: translateX(calc(100% - 56px));
+    transition: transform .24s ease, box-shadow .24s ease;
+    filter: drop-shadow(0 16px 30px rgba(15, 23, 42, 0.12));
+    pointer-events: auto;
+  }
+
+  .cal-filters-shell:hover,
+  .cal-filters-shell:focus-within {
+    transform: translateX(0);
+  }
+
+  .cal-filters-handle {
+    min-height: 190px;
+    border-radius: 18px 0 0 18px;
+    border: 1px solid #dce6ef;
+    border-right: 0;
+    background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+    color: #36516a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    cursor: default;
+    user-select: none;
+  }
+
+  .cal-filters-handle i {
+    font-size: 18px;
+  }
+
+  .cal-filters-handle span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 12px;
+  }
+
+  .cal-filters-flyout {
+    background: #fff;
+    border: 1px solid var(--cal-border);
+    border-radius: 0 20px 20px 20px;
+    overflow: hidden;
+    box-shadow: var(--cal-shadow);
+  }
+
+  .cal-filters-flyout-head {
+    border-bottom: 1px solid var(--cal-border);
+    background: linear-gradient(180deg, #f9fcfd 0%, #f3f7fa 100%);
+    padding: 16px 18px;
+  }
+
+  .cal-filters-flyout-body {
+    padding: 16px 18px;
+    max-height: 72vh;
+    overflow-y: auto;
+  }
+
   .activity-side-overlay {
     position: fixed;
     inset: 0;
@@ -272,10 +501,6 @@
   }
 
   @media (max-width: 991px) {
-    .cal-activities-layout .col-lg-3 {
-      margin-top: 16px;
-    }
-
     #calendarActivities {
       min-height: 560px;
     }
@@ -283,58 +508,126 @@
     .cal-toolbar-title h5 {
       font-size: 16px;
     }
+
+    .cal-agenda-stage {
+      padding-right: 0;
+    }
+
+    .cal-filters-dock {
+      position: static;
+      width: 100%;
+      max-width: none;
+      margin-top: 16px;
+      pointer-events: auto;
+    }
+
+    .cal-filters-shell {
+      display: block;
+      transform: none;
+      filter: none;
+    }
+
+    .cal-filters-handle {
+      display: none;
+    }
+
+    .cal-filters-flyout {
+      border-radius: 14px;
+      box-shadow: var(--cal-shadow);
+    }
+  }
+
+  @media (max-width: 1600px) and (min-width: 1200px) {
+    .cal-activities-layout {
+      --cal-page-zoom: .92;
+    }
+  }
+
+  @media (max-width: 1440px) and (min-width: 1200px) {
+    .cal-activities-layout {
+      --cal-page-zoom: .86;
+    }
+  }
+
+  @media (max-width: 1320px) and (min-width: 1200px) {
+    .cal-activities-layout {
+      --cal-page-zoom: .8;
+    }
+  }
+
+  @media (max-width: 1200px) and (min-width: 992px) {
+    .cal-activities-layout {
+      --cal-page-zoom: .75;
+    }
   }
 </style>
 
 <div class="wrapper wrapper-content cal-activities-layout">
-  <div class="row animated fadeInDown">
-    <div class="col-lg-9">
-      <div class="ibox cal-main-card">
-        <div class="ibox-title">
-          <div class="cal-toolbar">
-            <div class="cal-toolbar-title">
-              <h5>Agenda de Atividades</h5>
-              <small>Visualize compromissos, tarefas e eventos em um único calendário.</small>
-            </div>
-            <div class="cal-toolbar-actions">
-              <div class="btn-group">
-                <button id="calendarAddBtn" data-toggle="dropdown" class="btn btn-primary dropdown-toggle" type="button">
-                  <i class="fa fa-plus"></i> Adicionar <span class="caret"></span>
-                </button>
-                <ul id="calendarAddMenu" class="dropdown-menu"></ul>
+  <div class="cal-zoom-zone">
+    <div class="cal-agenda-stage">
+      <div class="row animated fadeInDown">
+        <div class="col-lg-12" style="padding-right: 30px !important;">
+          <div class="ibox cal-main-card">
+            <div class="ibox-title">
+              <div class="cal-toolbar">
+                <div class="cal-toolbar-title">
+                  <h5>Agenda de Atividades</h5>
+                  <small>Visualize compromissos, tarefas e eventos em um único calendário.</small>
+                </div>
+                <div class="cal-toolbar-actions">
+                  <span id="googleCalendarStatusPill" class="cal-status-chip">
+                    <span class="dot"></span>
+                    <span>Google Agenda não conectada</span>
+                  </span>
+                  <button id="googleCalendarOpenBtn" type="button" class="btn btn-white">
+                    <i class="fa fa-google"></i> Google Agenda
+                  </button>
+                  <div class="btn-group">
+                    <button id="calendarAddBtn" data-toggle="dropdown" class="btn btn-primary dropdown-toggle" type="button">
+                      <i class="fa fa-plus"></i> Adicionar <span class="caret"></span>
+                    </button>
+                    <ul id="calendarAddMenu" class="dropdown-menu"></ul>
+                  </div>
+                  <button id="calendarRefreshBtn" type="button" class="btn btn-white">
+                    <i class="fa fa-refresh"></i> Atualizar
+                  </button>
+                </div>
               </div>
-              <button id="calendarRefreshBtn" type="button" class="btn btn-white">
-                <i class="fa fa-refresh"></i> Atualizar
-              </button>
+            </div>
+            <div class="ibox-content">
+              <div class="cal-calendar-tip">
+                <i class="fa fa-info-circle"></i>
+                Clique em um evento para abrir detalhes.
+              </div>
+              <div id="calendarActivities"></div>
             </div>
           </div>
         </div>
-        <div class="ibox-content">
-          <div class="cal-calendar-tip">
-            <i class="fa fa-info-circle"></i>
-            Clique em um evento para abrir detalhes.
-          </div>
-          <div id="calendarActivities"></div>
-        </div>
       </div>
-    </div>
 
-    <div class="col-lg-3">
-      <div class="ibox cal-side-card">
-        <div class="ibox-title">
-          <div class="cal-toolbar-title">
-            <h5>Tipos de Atividade</h5>
-            <small>Use os filtros para focar nos eventos relevantes.</small>
+      <aside class="cal-filters-dock" tabindex="0" aria-label="Filtros da agenda">
+        <div class="cal-filters-shell">
+          <div class="cal-filters-handle">
+            <i class="fa fa-sliders"></i>
+            <span>Filtros</span>
+          </div>
+          <div class="cal-filters-flyout">
+            <div class="cal-filters-flyout-head">
+              <div class="cal-toolbar-title">
+                <h5>Tipos de Atividade</h5>
+                <small>Use os filtros para focar nos eventos relevantes.</small>
+              </div>
+            </div>
+            <div class="cal-filters-flyout-body">
+              <div id="activityFilters" class="activity-filters"></div>
+              <div class="activity-filter-actions">
+                <button id="activitySelectAll" type="button" class="btn btn-xs btn-primary">Selecionar todos</button>
+                <button id="activityClearAll" type="button" class="btn btn-xs btn-white">Limpar</button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="ibox-content">
-          <div id="activityFilters" class="activity-filters"></div>
-          <div class="activity-filter-actions">
-            <button id="activitySelectAll" type="button" class="btn btn-xs btn-primary">Selecionar todos</button>
-            <button id="activityClearAll" type="button" class="btn btn-xs btn-white">Limpar</button>
-          </div>
-        </div>
-      </div>
+      </aside>
     </div>
   </div>
 </div>
@@ -353,6 +646,93 @@
   <div class="activity-side-footer">
     <button id="activityCancelBtn" type="button" class="btn btn-white">Cancelar</button>
     <button id="activitySaveBtn" type="submit" form="activityForm" class="btn btn-primary"><i class="fa fa-save"></i> Salvar</button>
+  </div>
+</aside>
+
+<div id="googleCalendarOverlay" class="activity-side-overlay"></div>
+<aside id="googleCalendarPanel" class="activity-side google-side" aria-hidden="true">
+  <div class="activity-side-head">
+    <div>
+      <h4 style="margin:0;">Google Agenda</h4>
+      <small style="color:#6d7b88;">Conecte sua conta e sincronize eventos do Google para leitura na agenda interna.</small>
+    </div>
+    <button id="googleCalendarClose" type="button" class="btn btn-xs btn-default"><i class="fa fa-times"></i></button>
+  </div>
+  <div class="activity-side-body">
+    <div id="googleCalendarAlert" class="alert alert-info cal-google-alert"></div>
+
+    <section class="cal-google-hero">
+      <h5>Conectar Google Agenda</h5>
+      <p>
+        Entre com sua conta Google para trazer seus compromissos para a agenda interna da GECOM.
+        Neste MVP a sincronização é de leitura do Google para a plataforma.
+      </p>
+      <div class="cal-google-hero-actions">
+        <button id="googleCalendarConnectBtn" type="button" class="btn btn-primary">
+          <i class="fa fa-google"></i> Entrar com Google
+        </button>
+        <button id="googleCalendarSyncBtn" type="button" class="btn btn-white" disabled>
+          <i class="fa fa-refresh"></i> Sincronizar agora
+        </button>
+      </div>
+    </section>
+
+    <section class="cal-google-section">
+      <h5>Conta conectada</h5>
+      <div class="cal-google-account">
+        <div>
+          <strong id="googleCalendarEmail">Nenhuma conta conectada</strong>
+          <div class="cal-google-meta">
+            <span id="googleCalendarSyncLabel">Última sincronização: -</span>
+            <span id="googleCalendarExpiryLabel">Token válido até: -</span>
+          </div>
+        </div>
+        <span id="googleCalendarInlineStatus" class="label label-default">Desconectada</span>
+      </div>
+    </section>
+
+    <section class="cal-google-section">
+      <h5>Preferências</h5>
+      <div class="cal-google-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="googleCalendarSelect">Calendário do Google</label>
+          <select id="googleCalendarSelect" class="form-control">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="googleLookbackDays">Importar histórico</label>
+          <select id="googleLookbackDays" class="form-control">
+            <option value="7">Últimos 7 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="60">Últimos 60 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="180">Últimos 180 dias</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="cal-google-check">
+        <input id="googleImportDescription" type="checkbox" checked />
+        <span>Importar descrição do evento para os detalhes na agenda interna.</span>
+      </label>
+      <label class="cal-google-check">
+        <input id="googleImportPrivate" type="checkbox" />
+        <span>Importar também eventos privados do Google.</span>
+      </label>
+
+      <div class="cal-google-note">
+        Os eventos importados aparecem no calendário, mas não podem ser criados ou editados pela agenda interna.
+      </div>
+    </section>
+  </div>
+  <div class="activity-side-footer">
+    <button id="googleCalendarDisconnectBtn" type="button" class="btn btn-danger" style="display:none;">
+      <i class="fa fa-chain-broken"></i> Desconectar
+    </button>
+    <button id="googleCalendarSaveBtn" type="button" class="btn btn-primary" disabled>
+      <i class="fa fa-save"></i> Salvar preferências
+    </button>
   </div>
 </aside>
 
@@ -387,4 +767,5 @@
   <script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
   <script src="/js/servico/serviceApi.js"></script>
   <script src="/js/servico/calendar-activities.page.js"></script>
+  <script src="/js/servico/google-calendar-integration.page.js"></script>
 <% %>

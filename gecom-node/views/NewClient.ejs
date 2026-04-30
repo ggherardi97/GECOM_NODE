@@ -292,34 +292,6 @@
                         </div>
                       </fieldset>
 
-                      <!-- ===================== STEP 4: RELACIONADO ===================== -->
-                      <h1>Relacionado</h1>
-                      <fieldset>
-                        <h2>Vinculo relacionado (opcional)</h2>
-                        <div class="row">
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>Tabela relacionada</label>
-                              <select id="company_related_table" class="form-control">
-                                <option value="">Nenhum</option>
-                                <option value="company">Cliente</option>
-                                <option value="process">Processo</option>
-                                <option value="invoice">Invoice</option>
-                                <option value="opportunity">Opportunity</option>
-                                <option value="contract">Contrato</option>
-                              </select>
-                            </div>
-                          </div>
-                          <div class="col-lg-6">
-                            <div class="form-group">
-                              <label>ID relacionado</label>
-                              <input id="company_related_id" type="text" class="form-control" placeholder="UUID do registro relacionado">
-                              <small style="color:#999;">Preencha os dois campos para aplicar o vinculo.</small>
-                            </div>
-                          </div>
-                        </div>
-                      </fieldset>
-
                     </form>
 
                   </div>
@@ -366,8 +338,22 @@
               return String(value || "").replace(/\D/g, "").slice(0, 8);
             }
 
+            function formatPostalCode(value) {
+              const digits = normalizeCep(value);
+              if (digits.length <= 5) return digits;
+              return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+            }
+
             function onlyDigits(value) {
               return String(value || "").replace(/\D/g, "");
+            }
+
+            async function readJsonSafe(response) {
+              try {
+                return await response.json();
+              } catch {
+                return {};
+              }
             }
 
             function getPersonType() {
@@ -494,9 +480,13 @@ function pickUserIdFromApiResponse(data) {
                 headers: { "Accept": "application/json" }
               });
 
-              const data = await resp.json().catch(() => ({}));
+              const data = await readJsonSafe(resp);
               if (!resp.ok) throw new Error(data?.message || "<%= t('page.newClient.messages.cnpjLookupFail') %>");
               return data;
+            }
+
+            function shouldAutoLookupAddressByPostalCode() {
+              return !getValue("street") || !getValue("city") || !getValue("state");
             }
 
             async function tryAutoFillFromCnpj(options) {
@@ -524,14 +514,16 @@ function pickUserIdFromApiResponse(data) {
                     : "";
                 setIfEmpty("setor", setorText);
 
-                setIfEmpty("postalcode", data?.cep.replace(".", "") || "");
+                setIfEmpty("postalcode", formatPostalCode(data?.cep || ""));
                 setIfEmpty("street", data?.logradouro || "");
                 setIfEmpty("city", data?.municipio || "");
                 setIfEmpty("state", data?.uf || "");
                 setIfEmpty("country", "<%= t('page.newClient.defaults.country') %>");
 
                 const cep = normalizeCep(getValue("postalcode"));
-                if (cep.length === 8) lookupAddressByPostalCode();
+                if (cep.length === 8 && shouldAutoLookupAddressByPostalCode()) {
+                  await lookupAddressByPostalCode({ showAlert: false });
+                }
 
               } catch (e) {
                 console.error("[CNPJ] lookup failed:", e);
@@ -569,35 +561,82 @@ function pickUserIdFromApiResponse(data) {
               }, true);
             }
 
-            // ===================== CEP lookup (server-side proxy) =====================
+            // ===================== CEP lookup (Google / Cadastro-style + legacy fallback) =====================
             let cepTimer = null;
 
-            async function lookupAddressByPostalCode() {
+            function applyAddressDataIfEmpty(data) {
+              if (!data) return;
+              setIfEmpty("street", data.street || "");
+              setIfEmpty("city", data.city || "");
+              setIfEmpty("state", data.stateUf || data.state || "");
+              setIfEmpty("country", data.country || "<%= t('page.newClient.defaults.country') %>");
+              setIfEmpty("postalcode", formatPostalCode(data.postalCode || data.postalcode || ""));
+            }
+
+            async function fetchAddressByPostalCodeGoogle(postalCodeDigits) {
+              const response = await fetch(`/api/public/google/geocode/postal?postalCode=${encodeURIComponent(postalCodeDigits)}`, {
+                method: "GET",
+                headers: { Accept: "application/json" },
+                credentials: "include"
+              });
+
+              const data = await readJsonSafe(response);
+              if (!response.ok) {
+                const error = new Error(data?.message || "Postal code not found.");
+                error.status = response.status;
+                throw error;
+              }
+
+              return data || {};
+            }
+
+            async function fetchAddressByPostalCodeLegacy(postalCodeDigits) {
+              const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(postalCodeDigits)}`, {
+                method: "GET",
+                headers: { Accept: "application/json" }
+              });
+
+              const data = await readJsonSafe(response);
+              if (!response.ok) {
+                const error = new Error(data?.message || "Address lookup failed.");
+                error.status = response.status;
+                throw error;
+              }
+
+              return data || {};
+            }
+
+            async function lookupAddressByPostalCode(options) {
+              const opts = options || {};
               const cep = normalizeCep(getValue("postalcode"));
               if (cep.length !== 8) return;
 
               try {
                 showPostalLoading(true);
 
-                const response = await fetch(`/api/address/lookup?postalcode=${encodeURIComponent(cep)}`, {
-                  method: "GET",
-                  headers: { "Accept": "application/json" }
-                });
+                let addressData = null;
 
-                const data = await response.json().catch(() => ({}));
-                if (!response.ok) return;
+                try {
+                  addressData = await fetchAddressByPostalCodeGoogle(cep);
+                } catch (googleError) {
+                  console.warn("[CEP] google lookup failed, trying legacy endpoint:", googleError);
+                }
 
-                const street = document.getElementById("street");
-                const city = document.getElementById("city");
-                const state = document.getElementById("state");
-                const country = document.getElementById("country");
+                if (!addressData) {
+                  try {
+                    addressData = await fetchAddressByPostalCodeLegacy(cep);
+                  } catch (legacyError) {
+                    console.warn("[CEP] legacy lookup failed:", legacyError);
+                  }
+                }
 
-                if (street && !street.value.trim() && data.street) street.value = data.street;
-                if (city && !city.value.trim() && data.city) city.value = data.city;
-                if (state && !state.value.trim() && data.state) state.value = data.state;
-                if (country && !country.value.trim()) country.value = data.country || "<%= t('page.newClient.defaults.country') %>";
+                if (!addressData) return;
+                applyAddressDataIfEmpty(addressData);
               } catch (e) {
-                console.error("CEP lookup error:", e);
+                if (opts.showAlert) {
+                  showAlertOnce(e?.message || "<%= t('page.newClient.messages.cnpjAutoFillFail') %>");
+                }
+                console.error("[CEP] lookup error:", e);
               } finally {
                 showPostalLoading(false);
               }
@@ -752,29 +791,6 @@ function pickUserIdFromApiResponse(data) {
               const docValue = getValue("cnpj");
               if (!docValue) return "<%= t('page.newClient.messages.invalidForeignNumber') %>";
               return null;
-            }
-
-            function readCompanyRelatedPayload() {
-              const relatedTable = String(document.getElementById("company_related_table")?.value || "").trim().toLowerCase();
-              const relatedId = String(document.getElementById("company_related_id")?.value || "").trim();
-              if (!relatedTable || !relatedId) return null;
-              return { related_table: relatedTable, related_id: relatedId };
-            }
-
-            function parseUnsupportedCompanyFieldsFromError(error) {
-              const msg = String(error?.message || "").toLowerCase();
-              const unsupported = [];
-              if (msg.includes("related_table") && msg.includes("should not exist")) unsupported.push("related_table");
-              if (msg.includes("related_id") && msg.includes("should not exist")) unsupported.push("related_id");
-              return unsupported;
-            }
-
-            function stripUnsupportedCompanyFields(payload, error) {
-              const unsupported = parseUnsupportedCompanyFieldsFromError(error);
-              if (!unsupported.length) return null;
-              const next = { ...(payload || {}) };
-              unsupported.forEach((field) => { delete next[field]; });
-              return next;
             }
 
             // ===================== API calls =====================
@@ -1074,7 +1090,6 @@ function pickUserIdFromApiResponse(data) {
 
               try {
                 // ✅ Create company directly (NO placeholder user)
-                const relatedPayload = readCompanyRelatedPayload();
                 const payloadCompany = {
                   company_name: getValue("companyname"),
                   // ✅ user_id removed
@@ -1090,18 +1105,10 @@ function pickUserIdFromApiResponse(data) {
                   address_number: "",
                   address_city: getValue("city"),
                   address_state: getValue("state"),
-                  address_country: getValue("country") || "<%= t('page.newClient.defaults.country') %>",
-                  ...(relatedPayload || {})
+                  address_country: getValue("country") || "<%= t('page.newClient.defaults.country') %>"
                 };
 
-                let createdCompany;
-                try {
-                  createdCompany = await apiCreateCompany(payloadCompany);
-                } catch (e) {
-                  const compatPayload = stripUnsupportedCompanyFields(payloadCompany, e);
-                  if (!compatPayload) throw e;
-                  createdCompany = await apiCreateCompany(compatPayload);
-                }
+                const createdCompany = await apiCreateCompany(payloadCompany);
                 const companyId = pickCompanyIdFromApiResponse(createdCompany);
                 if (!companyId) throw new Error("<%= t('page.newClient.messages.companyCreatedNoId') %>");
 

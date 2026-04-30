@@ -1,0 +1,321 @@
+<style>
+  .incident-form-page .ibox-title {
+    padding: 15px 20px 18px 20px;
+  }
+  .incident-form-page .ibox-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .incident-alert {
+    display: none;
+    margin-bottom: 16px;
+  }
+  .incident-alert.is-open {
+    display: block;
+  }
+  .incident-main-tabs {
+    margin-top: 6px;
+  }
+  .incident-main-tabs .nav-tabs > li > a {
+    padding: 10px 14px;
+  }
+  .incident-main-tabs .nav-tabs > li.disabled > a {
+    color: #a7b1c2;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .incident-detail-layout {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .incident-detail-layout > [class*="col-"] {
+    display: flex;
+    margin-bottom: 16px;
+  }
+  .incident-card {
+    width: 100%;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    border: 1px solid #e7eaec;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+  }
+  .incident-card-head {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid #edf1f5;
+    background: linear-gradient(135deg, #f9fbff 0%, #eef5fb 100%);
+  }
+  .incident-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #233445;
+  }
+  .incident-card-subtitle {
+    margin-top: 4px;
+    color: #7d8b99;
+    font-size: 12px;
+  }
+  .incident-card-body {
+    padding: 16px 18px 18px;
+  }
+  .incident-form-tabs {
+    margin-bottom: 14px;
+  }
+  .incident-form-tabs > li > a {
+    padding: 8px 12px;
+  }
+  .incident-required {
+    color: #ed5565;
+    margin-left: 4px;
+  }
+  .incident-field-wrap {
+    margin-bottom: 14px;
+  }
+  .incident-field-wrap label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #66788a;
+    margin-bottom: 6px;
+  }
+  .incident-field-wrap .form-control[disabled] {
+    background: #f6f8fb;
+    color: #607284;
+  }
+  .incident-field-wrap textarea.form-control {
+    min-height: 108px;
+    resize: vertical;
+  }
+  .incident-summary-stack {
+    display: grid;
+    gap: 10px;
+  }
+  .incident-summary-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eef5fb;
+    color: #295d8a;
+  }
+  .incident-summary-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .incident-summary-item {
+    padding: 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .incident-summary-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #8a98a8;
+    margin-bottom: 4px;
+  }
+  .incident-summary-value {
+    color: #253645;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-word;
+  }
+  .incident-timeline-list {
+    display: grid;
+    gap: 12px;
+  }
+  .incident-timeline-item {
+    position: relative;
+    padding-left: 50px;
+    min-height: 46px;
+  }
+  .incident-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 34px;
+    bottom: -18px;
+    width: 2px;
+    background: #e7eaec;
+  }
+  .incident-timeline-item:last-child::before {
+    display: none;
+  }
+  .incident-timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+  .incident-timeline-content {
+    padding: 10px 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .incident-timeline-title {
+    font-weight: 600;
+    color: #223647;
+  }
+  .incident-timeline-meta,
+  .incident-timeline-description {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6d7e8f;
+  }
+  .incident-empty-state {
+    border: 1px dashed #cfd8e3;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    color: #7d8b99;
+    background: #fafcff;
+  }
+  .incident-related-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .incident-related-section {
+    border: 1px solid #e7eaec;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .incident-related-section .table {
+    margin-bottom: 0;
+  }
+  .incident-related-section .table > thead > tr > th {
+    border-bottom: 1px solid #edf1f5;
+    background: #f7f9fb;
+    font-size: 12px;
+    color: #607284;
+  }
+  .incident-related-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf1f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: linear-gradient(135deg, #fbfcfe 0%, #f1f7fb 100%);
+  }
+  .incident-related-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #233445;
+  }
+  .incident-related-count {
+    font-size: 12px;
+    color: #6b7f92;
+  }
+  .incident-sla-kpi-list {
+    display: grid;
+    gap: 10px;
+  }
+  .incident-sla-kpi-item {
+    padding: 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  @media (max-width: 991px) {
+    .incident-detail-layout > [class*="col-"] {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="row animated fadeInRight incident-form-page" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5 id="incidentPageTitle">Incidente</h5>
+        <div class="ibox-tools">
+          <button id="btnIncidentBack" class="btn btn-white btn-sm">Voltar</button>
+          <button id="btnIncidentNew" class="btn btn-default btn-sm" style="display:none;"><i class="fa fa-plus"></i> Novo</button>
+          <button id="btnIncidentCreateWorkOrder" class="btn btn-info btn-sm" style="display:none;"><i class="fa fa-wrench"></i> Gerar work order</button>
+          <button id="btnIncidentDelete" class="btn btn-danger btn-sm" style="display:none;"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnIncidentSave" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> Salvar</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="incidentMessage" class="alert incident-alert"></div>
+
+        <div class="tabs-container incident-main-tabs">
+          <ul class="nav nav-tabs" id="incidentMainTabs">
+            <li class="active"><a href="#incidentTab_details" data-toggle="tab" id="incidentDetailsTabLink">Detalhes</a></li>
+            <li class="disabled"><a href="#incidentTab_related" data-toggle="tab" id="incidentRelatedTabLink">Relacionados</a></li>
+          </ul>
+          <div class="tab-content">
+            <div id="incidentTab_details" class="tab-pane active">
+              <div class="row incident-detail-layout">
+                <div class="col-lg-5 col-md-6">
+                  <div class="incident-card">
+                    <div class="incident-card-head">
+                      <h4 class="incident-card-title" id="incidentFormCardTitle">Ficha do incidente</h4>
+                      <div class="incident-card-subtitle" id="incidentFormCardSubtitle">Preencha os dados principais do atendimento.</div>
+                    </div>
+                    <div class="incident-card-body">
+                      <div id="incidentFormTabsHost"></div>
+                      <form id="incidentFormFields"></form>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                  <div class="incident-card">
+                    <div class="incident-card-head">
+                      <h4 class="incident-card-title" id="incidentTimelineTitle">Timeline</h4>
+                      <div class="incident-card-subtitle" id="incidentTimelineSubtitle">Os eventos do caso aparecem aqui após o primeiro save.</div>
+                    </div>
+                    <div class="incident-card-body">
+                      <div id="incidentTimeline"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-12">
+                  <div class="incident-card">
+                    <div class="incident-card-head">
+                      <h4 class="incident-card-title" id="incidentSummaryTitle">Resumo</h4>
+                      <div class="incident-card-subtitle" id="incidentSummarySubtitle">Visão rápida do status e dos vínculos principais.</div>
+                    </div>
+                    <div class="incident-card-body">
+                      <div id="incidentSummary"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="incidentTab_related" class="tab-pane">
+              <div id="incidentRelated"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__incidentPage = <%- safeJson(incidentPage) %>;
+</script>
+<script src="/js/servico/serviceApi.js"></script>
+<script src="/js/servico/service.incident.resources.js"></script>
+<script src="/js/servico/incident.form.page.js"></script>

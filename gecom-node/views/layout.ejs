@@ -261,6 +261,68 @@
         background-color: unset !important;
       }
 
+      #side-menu li.gecom-sidebar-pin-enabled {
+        position: relative;
+      }
+
+      #side-menu li.gecom-sidebar-pin-enabled > a {
+        padding-right: 38px !important;
+      }
+
+      #side-menu li.gecom-sidebar-active > a {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+      }
+
+      #side-menu li.gecom-sidebar-active > a,
+      #side-menu li.gecom-sidebar-active > a .nav-label,
+      #side-menu li.gecom-sidebar-active > a > i.fa:first-child {
+        color: #ffffff !important;
+      }
+
+      #side-menu li.gecom-sidebar-pin-enabled > .gecom-sidebar-pin {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 22px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease, color .15s ease, background-color .15s ease;
+      }
+
+      #side-menu li.gecom-sidebar-pin-enabled:hover > .gecom-sidebar-pin,
+      #side-menu li.gecom-sidebar-pin-enabled.gecom-sidebar-active > .gecom-sidebar-pin,
+      #side-menu li.gecom-sidebar-pin-enabled.gecom-sidebar-pinned > .gecom-sidebar-pin {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      #side-menu li.gecom-sidebar-pin-enabled > .gecom-sidebar-pin:hover,
+      #side-menu li.gecom-sidebar-pin-enabled > .gecom-sidebar-pin:focus {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.12);
+        outline: none;
+      }
+
+      #side-menu li.gecom-sidebar-pin-enabled.gecom-sidebar-pinned > .gecom-sidebar-pin {
+        color: var(--gecom-primary);
+        background: rgba(26, 179, 148, 0.14);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      body.mini-navbar #side-menu li.gecom-sidebar-pin-enabled > .gecom-sidebar-pin {
+        display: none !important;
+      }
+
       #side-menu {
             max-height: 77%;
         overflow-y: auto;
@@ -506,6 +568,86 @@
           right: -70px;
         }
       }
+
+      .layout-legal-link {
+        color: #1778a7;
+        text-decoration: underline;
+        font-weight: 600;
+        margin-right: 8px;
+      }
+
+      .layout-legal-separator {
+        margin-right: 8px;
+        color: #9ba5af;
+      }
+
+      .cookie-policy-banner {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 14px;
+        z-index: 999999999;
+        background: #0e2237;
+        color: #eff6ff;
+        border-radius: 10px;
+        box-shadow: 0 10px 32px rgba(5, 16, 28, 0.36);
+        padding: 12px 14px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .cookie-policy-banner .cookie-policy-text {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .cookie-policy-banner .cookie-policy-link {
+        color: #7fe8ff;
+        text-decoration: underline;
+        font-weight: 600;
+      }
+
+      .cookie-policy-banner .cookie-policy-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .cookie-policy-banner .btn-cookie-accept {
+        border: 0;
+        border-radius: 6px;
+        background: #1ab394;
+        color: #fff;
+        font-weight: 700;
+        padding: 7px 12px;
+      }
+
+      .legal-modal-content h5 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .legal-modal-content p,
+      .legal-modal-content li {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #5f6770;
+      }
+
+      @media (max-width: 768px) {
+        .cookie-policy-banner {
+          left: 10px;
+          right: 10px;
+          bottom: 10px;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
   .text-muted { display:none !important; }
     </style>
 </head>
@@ -813,6 +955,13 @@
           </li>
 
           <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales">
+            <a href="/sales/whatsapp">
+              <i class="fa fa-whatsapp"></i>
+              <span class="nav-label">WhatsApp Sales</span>
+            </a>
+          </li>
+
+          <li data-areas="home" data-module-areas="sales" data-divider-parent="home-sales">
             <a href="/Opportunities">
               <i class="fa fa-bullseye"></i>
               <span class="nav-label">Opportunity</span>
@@ -925,6 +1074,12 @@
             </a>
           </li>
           <li data-areas="service" data-divider-parent="service-main">
+            <a href="/servico/schedule-board">
+              <i class="fa fa-columns"></i>
+              <span class="nav-label">Schedule Board</span>
+            </a>
+          </li>
+          <li data-areas="service" data-divider-parent="service-main">
             <a href="/servico/tarefas">
               <i class="fa fa-tasks"></i>
               <span class="nav-label">Tarefas</span>
@@ -969,6 +1124,13 @@
             <a href="/leads/pipeline">
               <i class="fa fa-filter"></i>
               <span class="nav-label" data-i18n="page.layout.menu.leads"><%= t('page.layout.menu.leads') %></span>
+            </a>
+          </li>
+
+          <li data-areas="sales" data-divider-parent="sales-main">
+            <a href="/sales/whatsapp">
+              <i class="fa fa-whatsapp"></i>
+              <span class="nav-label">WhatsApp Sales</span>
             </a>
           </li>
 
@@ -1048,6 +1210,12 @@
             <a href="/FinanceBankMovements">
               <i class="fa fa-exchange"></i>
               <span class="nav-label" data-i18n="page.layout.menu.financeMovements"><%= t('page.layout.menu.financeMovements') %></span>
+            </a>
+          </li>
+          <li data-areas="finance" data-divider-parent="finance-main">
+            <a href="/FinanceImports">
+              <i class="fa fa-cloud-upload"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.financeImports"><%= t('page.layout.menu.financeImports') %></span>
             </a>
           </li>
           <li data-areas="finance" data-divider-parent="finance-main">
@@ -1162,7 +1330,7 @@
               <span class="nav-label" data-i18n="page.layout.menu.poProjects"><%= t('page.layout.menu.poProjects') %></span>
             </a>
           </li>
-          <li data-areas="po" data-divider-parent="po-main">
+          <li data-areas="po" data-divider-parent="po-main" data-hide-on-convert="1">
             <a href="/POProjectProcesses">
               <i class="fa fa-link"></i>
               <span class="nav-label" data-i18n="page.layout.menu.poProjectProcesses"><%= t('page.layout.menu.poProjectProcesses') %></span>
@@ -1212,8 +1380,26 @@
           </li>
           <li data-areas="po" data-divider-parent="po-main">
             <a href="/POProjectStatuses">
-              <i class="fa fa-sliders"></i>
-              <span class="nav-label" data-i18n="page.layout.menu.poConfigurations"><%= t('page.layout.menu.poConfigurations') %></span>
+              <i class="fa fa-flag"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poProjectStatuses"><%= t('page.layout.menu.poProjectStatuses', { defaultValue: 'Status de projetos' }) %></span>
+            </a>
+          </li>
+          <li data-areas="po" data-divider-parent="po-main">
+            <a href="/PODeliverableStatuses">
+              <i class="fa fa-dropbox"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poDeliverableStatuses"><%= t('page.layout.menu.poDeliverableStatuses', { defaultValue: 'Status de entregas' }) %></span>
+            </a>
+          </li>
+          <li data-areas="po" data-divider-parent="po-main">
+            <a href="/POWorkOrderStatuses">
+              <i class="fa fa-wrench"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poWorkOrderStatuses"><%= t('page.layout.menu.poWorkOrderStatuses', { defaultValue: 'Status de work orders' }) %></span>
+            </a>
+          </li>
+          <li data-areas="po" data-divider-parent="po-main">
+            <a href="/POResourceRoles">
+              <i class="fa fa-users"></i>
+              <span class="nav-label" data-i18n="page.layout.menu.poResourceRoles"><%= t('page.layout.menu.poResourceRoles', { defaultValue: 'Papeis de recurso' }) %></span>
             </a>
           </li>
 
@@ -1408,9 +1594,24 @@
 
         <!-- Footer -->
         <div class="footer">
-          <div class="float-right" data-i18n="page.layout.appTitle">Sistema G+</div>
+          <div class="float-right">
+            <a href="/privacy-policy" class="layout-legal-link js-open-layout-legal" data-legal-doc="privacy">Privacy Policy</a>
+            <span class="layout-legal-separator">|</span>
+            <a href="/terms-of-use" class="layout-legal-link js-open-layout-legal" data-legal-doc="terms">Terms of Use</a>
+            <span data-i18n="page.layout.appTitle">Sistema G+</span>
+          </div>
           <div><strong>Copyright</strong> <span data-i18n="page.layout.footer.copyright">G+ ©</span></div>
         </div>
+    </div>
+  </div>
+
+  <div id="cookiePolicyBanner" class="cookie-policy-banner" role="region" aria-label="Cookie policy">
+    <p class="cookie-policy-text">
+      Usamos cookies para manter sessao, seguranca e melhor experiencia.
+      <a href="#" class="cookie-policy-link js-open-layout-legal" data-legal-doc="cookie">Cookie Policy</a>
+    </p>
+    <div class="cookie-policy-actions">
+      <button id="acceptCookiePolicyBtn" type="button" class="btn-cookie-accept">Aceitar</button>
     </div>
   </div>
 
@@ -1443,7 +1644,7 @@
   </button>
 
   <div class="modal inmodal fade" id="GlobalModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 9999999999 !important;">
-    <div class="modal-dialog">
+    <div class="modal-dialog" id="GlobalModalDialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
@@ -1474,12 +1675,15 @@
       <script>
         (function () {
           const SIDEBAR_AREA_KEY = "gecom.sidebar.area";
+          const SIDEBAR_PINNED_MENU_KEY = "gecom.sidebar.pinnedMenu.v1";
           const MODULE_ACCESS_CACHE_KEY = "gecom.billing.moduleAccess.v1";
           const MODULE_ACCESS_CACHE_TTL_MS = 1000 * 60 * 3;
           const DEV_FORCE_ALL_MENUS_KEY = "gecom.dev.forceAllMenus";
           const sidebarAreaLabels = new Map();
           const tenantManagedNodesByEntity = new Map();
           let tenantManagedReady = false;
+          let sidebarMenuRefreshTimer = null;
+          let sidebarMenuObserver = null;
           const SIDEBAR_AREA_ORDER = ["home", "service", "sales", "finance", "hr", "po", "settings"];
           const FIXED_MODULE_AREAS = new Set(["service", "sales", "finance", "hr", "po"]);
           let enabledModuleAreas = new Set(["service", "sales", "finance", "hr", "po"]);
@@ -1602,6 +1806,69 @@
             if (!normalized) return;
             try {
               localStorage.setItem(getSidebarAreaStorageKey(), normalized);
+            } catch {}
+          }
+
+          function getSidebarPinnedMenuStorageKey() {
+            const tenantId = resolveAuthTenantId();
+            if (!tenantId) return SIDEBAR_PINNED_MENU_KEY;
+            return `${SIDEBAR_PINNED_MENU_KEY}.${tenantId}`;
+          }
+
+          function getStoredPinnedMenuRaw() {
+            try {
+              const scopedKey = getSidebarPinnedMenuStorageKey();
+              const scoped = normalizeText(localStorage.getItem(scopedKey));
+              if (scoped) return scoped;
+
+              const legacy = normalizeText(localStorage.getItem(SIDEBAR_PINNED_MENU_KEY));
+              if (!legacy) return "";
+              if (scopedKey !== SIDEBAR_PINNED_MENU_KEY) {
+                try {
+                  localStorage.setItem(scopedKey, legacy);
+                  localStorage.removeItem(SIDEBAR_PINNED_MENU_KEY);
+                } catch {}
+              }
+              return legacy;
+            } catch {
+              return "";
+            }
+          }
+
+          function normalizePinnedMenuPayload(payload) {
+            if (!payload || typeof payload !== "object") return null;
+            const href = normalizePathForCompare(payload?.href || payload?.path || "");
+            if (!href || href === "/" || !href.startsWith("/")) return null;
+            const area = normalizeText(payload?.area).toLowerCase();
+            const label = normalizeText(payload?.label);
+            return { href, area, label };
+          }
+
+          function readStoredPinnedMenu() {
+            const raw = getStoredPinnedMenuRaw();
+            if (!raw) return null;
+            try {
+              return normalizePinnedMenuPayload(JSON.parse(raw));
+            } catch {
+              return null;
+            }
+          }
+
+          function setStoredPinnedMenu(payload) {
+            const normalized = normalizePinnedMenuPayload(payload);
+            try {
+              if (!normalized) {
+                localStorage.removeItem(getSidebarPinnedMenuStorageKey());
+                return null;
+              }
+              localStorage.setItem(getSidebarPinnedMenuStorageKey(), JSON.stringify(normalized));
+            } catch {}
+            return normalized;
+          }
+
+          function clearStoredPinnedMenu() {
+            try {
+              localStorage.removeItem(getSidebarPinnedMenuStorageKey());
             } catch {}
           }
 
@@ -1770,6 +2037,7 @@
             });
 
             setStoredSidebarArea(currentArea);
+            scheduleSidebarMenuRefresh();
           }
 
           function initTenantManagedMenuNodes() {
@@ -2066,6 +2334,167 @@
             }
           }
 
+          function scoreSidebarLinkMatch(linkPath, currentPath) {
+            if (!linkPath || !currentPath) return -1;
+            if (linkPath === currentPath) return 1000 + linkPath.length;
+            if (currentPath.startsWith(`${linkPath}/`)) return 700 + linkPath.length;
+            if (linkPath !== "/" && currentPath.startsWith(linkPath)) return 500 + linkPath.length;
+            return -1;
+          }
+
+          function getSidebarItemAreaTokens(li) {
+            return normalizeText(li?.getAttribute?.("data-areas"))
+              .split(",")
+              .map((token) => normalizeText(token).toLowerCase())
+              .filter((token) => token && token !== "all");
+          }
+
+          function getPreferredPinnedAreaForItem(li) {
+            const areaTokens = getSidebarItemAreaTokens(li).filter((token) => isAreaEnabled(token));
+            if (!areaTokens.length) return "";
+            const currentArea = normalizeText(getStoredSidebarAreaRaw()).toLowerCase();
+            if (currentArea && areaTokens.includes(currentArea)) return currentArea;
+            return areaTokens[0];
+          }
+
+          function findBestSidebarLinkMatch(currentPath) {
+            const preferredArea = normalizeText(getStoredSidebarAreaRaw()).toLowerCase();
+            const links = Array.from(document.querySelectorAll("#side-menu li[data-areas] > a[href]"));
+            let best = null;
+            let bestScore = -1;
+
+            links.forEach((link) => {
+              const href = normalizeText(link.getAttribute("href"));
+              if (!href || href === "#" || link.classList.contains("menuDivider")) return;
+              const li = link.closest("li[data-areas]");
+              if (!li) return;
+
+              const linkPath = normalizePathForCompare(href);
+              let score = scoreSidebarLinkMatch(linkPath, currentPath);
+              if (score < 0) return;
+
+              const areaTokens = getSidebarItemAreaTokens(li);
+              if (preferredArea && areaTokens.includes(preferredArea)) score += 75;
+              if (!li.classList.contains("sidebar-area-hidden") && !li.classList.contains("sidebar-module-hidden")) score += 25;
+
+              if (score > bestScore) {
+                bestScore = score;
+                best = { li, link, href: linkPath };
+              }
+            });
+
+            return best;
+          }
+
+          function syncSidebarActiveState() {
+            const currentPath = normalizePathForCompare(window.location.pathname || "/");
+            const best = findBestSidebarLinkMatch(currentPath);
+            document.querySelectorAll("#side-menu li.gecom-sidebar-active").forEach((item) => {
+              item.classList.remove("gecom-sidebar-active");
+            });
+            document.querySelectorAll("#side-menu a[aria-current='page']").forEach((link) => {
+              link.removeAttribute("aria-current");
+            });
+            if (!best?.li || !best?.link) return;
+            best.li.classList.add("gecom-sidebar-active");
+            best.link.setAttribute("aria-current", "page");
+          }
+
+          function updateSidebarPinButtonState(li, button, pinned) {
+            const link = li?.querySelector?.("a[href]");
+            const href = normalizePathForCompare(link?.getAttribute?.("href") || "");
+            const area = getPreferredPinnedAreaForItem(li);
+            const isPinned = !!pinned && pinned.href === href && (!pinned.area || pinned.area === area);
+            li.classList.toggle("gecom-sidebar-pinned", isPinned);
+            const title = isPinned ? "Desfixar esta página como inicial" : "Fixar esta página como inicial";
+            button.setAttribute("title", title);
+            button.setAttribute("aria-label", title);
+          }
+
+          function getSidebarPinButton(li) {
+            return Array.from(li?.children || []).find((node) => node.classList?.contains("gecom-sidebar-pin")) || null;
+          }
+
+          function initSidebarPinButtons() {
+            const pinned = readStoredPinnedMenu();
+            document.querySelectorAll("#side-menu li[data-areas]").forEach((li) => {
+              const link = li.querySelector("a[href]");
+              if (!link) return;
+              const href = normalizeText(link.getAttribute("href"));
+              if (!href || href === "#" || link.classList.contains("menuDivider")) return;
+
+              li.classList.add("gecom-sidebar-pin-enabled");
+
+              let button = getSidebarPinButton(li);
+              if (!button) {
+                button = document.createElement("button");
+                button.type = "button";
+                button.className = "gecom-sidebar-pin";
+                button.innerHTML = '<i class="fa fa-thumb-tack" aria-hidden="true"></i>';
+                button.addEventListener("click", function (ev) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+
+                  const currentPinned = readStoredPinnedMenu();
+                  const nextHref = normalizePathForCompare(link.getAttribute("href"));
+                  const nextArea = getPreferredPinnedAreaForItem(li);
+                  const nextLabel = normalizeText(li.querySelector(".nav-label")?.textContent || link.textContent || "");
+                  const samePin = !!currentPinned && currentPinned.href === nextHref && currentPinned.area === nextArea;
+
+                  if (samePin) {
+                    clearStoredPinnedMenu();
+                  } else {
+                    setStoredPinnedMenu({
+                      href: nextHref,
+                      area: nextArea,
+                      label: nextLabel,
+                    });
+                    if (nextArea) setStoredSidebarArea(nextArea);
+                  }
+
+                  scheduleSidebarMenuRefresh();
+                });
+                li.appendChild(button);
+              }
+
+              updateSidebarPinButtonState(li, button, pinned);
+            });
+          }
+
+          function syncSidebarPinStates() {
+            const pinned = readStoredPinnedMenu();
+            document.querySelectorAll("#side-menu li.gecom-sidebar-pin-enabled").forEach((li) => {
+              const button = getSidebarPinButton(li);
+              if (!button) return;
+              updateSidebarPinButtonState(li, button, pinned);
+            });
+          }
+
+          function refreshSidebarMenuDecorators() {
+            syncSidebarActiveState();
+            initSidebarPinButtons();
+            syncSidebarPinStates();
+          }
+
+          function scheduleSidebarMenuRefresh() {
+            if (sidebarMenuRefreshTimer) window.clearTimeout(sidebarMenuRefreshTimer);
+            sidebarMenuRefreshTimer = window.setTimeout(refreshSidebarMenuDecorators, 0);
+          }
+
+          function observeSidebarMenuChanges() {
+            const sideMenu = document.getElementById("side-menu");
+            if (!sideMenu || sidebarMenuObserver) return;
+            sidebarMenuObserver = new MutationObserver(() => {
+              scheduleSidebarMenuRefresh();
+            });
+            sidebarMenuObserver.observe(sideMenu, {
+              childList: true,
+              subtree: true,
+              attributes: true,
+              attributeFilter: ["class", "style", "data-areas"],
+            });
+          }
+
           function inferSidebarAreaFromCurrentPath(preferredAreaRaw) {
             const currentPath = normalizePathForCompare(window.location.pathname || "/");
             if (!currentPath) return "";
@@ -2133,6 +2562,7 @@
 
             await applyTenantThemeAndMenu();
             bindSidebarAreaPersistenceOnMenuClicks();
+            observeSidebarMenuChanges();
 
             let savedArea = "home";
             try {
@@ -2152,6 +2582,7 @@
 
             renderSidebarAreaOptions(savedArea);
             applySidebarArea(savedArea);
+            refreshSidebarMenuDecorators();
 
             trigger.addEventListener("click", function () {
               const isOpen = panel.classList.contains("is-open");
@@ -2757,6 +3188,15 @@
       return host.indexOf("convert-plus.com") >= 0;
     }
 
+    function applyConvertMenuVisibility() {
+      if (!isConvertPortalBrand()) return;
+      try {
+        document.querySelectorAll("[data-hide-on-convert='1']").forEach(function (el) {
+          el.style.display = "none";
+        });
+      } catch { }
+    }
+
     function rewriteBrandInText(value, brandMiniLogo) {
       if (typeof value !== "string" || !value) return value;
       return value
@@ -2874,6 +3314,7 @@
     setCookie("gecom_lang", lang);
     updateLabel(lang);
     rewriteLinks(lang);
+    applyConvertMenuVisibility();
 
     // Init i18next + apply translations
     initI18n(lang).catch(function (e) {
@@ -3646,6 +4087,183 @@
             });
           };
 
+        })();
+      </script>
+
+      <script>
+        (function () {
+          if (window.__gecomLegalPolicyUiReady) return;
+          window.__gecomLegalPolicyUiReady = true;
+
+          function normalizeText(value) {
+            return String(value == null ? "" : value).trim();
+          }
+
+          function escapeHtml(value) {
+            return String(value == null ? "" : value)
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/\"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+          }
+
+          function resolvePortalBrand() {
+            const host = normalizeText(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+            if (host.includes("portalgecom.log.br")) return "gecom";
+            if (host.includes("convert-plus.com")) return "convert";
+            return "convert";
+          }
+
+          function resolveBrandName() {
+            return resolvePortalBrand() === "gecom" ? "GECOM" : "Convert Plus";
+          }
+
+          function getCurrentUserId() {
+            try {
+              const raw = localStorage.getItem("currentUser");
+              if (raw) {
+                const user = JSON.parse(raw);
+                const userId = normalizeText(user && (user.id || user.user_id));
+                if (userId) return userId;
+              }
+            } catch {}
+
+            try {
+              return normalizeText(localStorage.getItem("currentUserId"));
+            } catch {
+              return "";
+            }
+          }
+
+          function getCookieConsentKey() {
+            const userId = getCurrentUserId();
+            return userId ? `gecom.cookie.policy.accepted.v1.${userId}` : "gecom.cookie.policy.accepted.v1.guest";
+          }
+
+          function hasAcceptedCookiePolicy() {
+            try {
+              return normalizeText(localStorage.getItem(getCookieConsentKey())) === "1";
+            } catch {
+              return false;
+            }
+          }
+
+          function acceptCookiePolicy() {
+            try {
+              localStorage.setItem(getCookieConsentKey(), "1");
+            } catch {}
+          }
+
+          function getLegalDocument(docType) {
+            const brandName = escapeHtml(resolveBrandName());
+            const kind = normalizeText(docType).toLowerCase();
+
+            if (kind === "privacy") {
+              return {
+                title: "Privacy Policy",
+                bodyHtml:
+                  '<div class="legal-modal-content">' +
+                  `<h5>Politica de Privacidade - ${brandName}</h5>` +
+                  "<p>Coletamos dados de cadastro, autenticacao e uso da plataforma para executar os servicos contratados.</p>" +
+                  "<p>Os dados ficam protegidos com controles de acesso, registro de auditoria e medidas de seguranca compativeis com o servico.</p>" +
+                  "<p>Nao comercializamos dados pessoais. Compartilhamentos ocorrem somente com fornecedores essenciais, como infraestrutura e pagamento.</p>" +
+                  "<p>Solicitacoes de correcao, exportacao e exclusao podem ser feitas pelos canais oficiais de suporte.</p>" +
+                  "<p>Ultima atualizacao: 11/03/2026.</p>" +
+                  "</div>",
+              };
+            }
+
+            if (kind === "cookie") {
+              return {
+                title: "Cookie Policy",
+                bodyHtml:
+                  '<div class="legal-modal-content">' +
+                  `<h5>Cookie Policy - ${brandName}</h5>` +
+                  "<p>Utilizamos cookies e armazenamento local para manter sua sessao, seguranca, idioma e preferencias do portal.</p>" +
+                  "<ul>" +
+                  "<li>Cookies essenciais: login, autenticacao e protecao contra uso indevido.</li>" +
+                  "<li>Cookies funcionais: preferencias de interface e lembrancas de configuracoes.</li>" +
+                  "<li>Sem esses cookies, partes importantes do sistema podem nao funcionar corretamente.</li>" +
+                  "</ul>" +
+                  "<p>Voce pode limpar os cookies no navegador, mas isso pode exigir novo login e reconfiguracao de preferencias.</p>" +
+                  "<p>Ultima atualizacao: 11/03/2026.</p>" +
+                  "</div>",
+              };
+            }
+
+            return {
+              title: "Terms of Use",
+              bodyHtml:
+                '<div class="legal-modal-content">' +
+                `<h5>Termos de Uso - ${brandName}</h5>` +
+                "<p>Ao utilizar a plataforma, voce declara que as informacoes informadas no cadastro sao verdadeiras e atualizadas.</p>" +
+                "<p>O acesso deve respeitar as leis vigentes e as boas praticas de seguranca da informacao.</p>" +
+                "<p>Planos, periodo de teste e faturamento seguem as condicoes contratadas durante o cadastro e assinatura.</p>" +
+                "<p>Cancelamentos podem ser solicitados em Perfil - Meu Plano, conforme regras do plano ativo.</p>" +
+                "<p>Ultima atualizacao: 11/03/2026.</p>" +
+                "</div>",
+            };
+          }
+
+          function openLayoutLegalModal(docType) {
+            const modalTitle = document.getElementById("modalTitle");
+            const modalBody = document.getElementById("modalBody");
+            const modalDialog = document.getElementById("GlobalModalDialog");
+            if (!modalTitle || !modalBody) return;
+
+            const doc = getLegalDocument(docType);
+            modalTitle.textContent = doc.title;
+            modalBody.innerHTML = doc.bodyHtml;
+            if (modalDialog) modalDialog.classList.add("modal-lg");
+            $("#GlobalModal").modal("show");
+          }
+
+          function hideCookieBanner() {
+            const banner = document.getElementById("cookiePolicyBanner");
+            if (!banner) return;
+            banner.style.display = "none";
+          }
+
+          function maybeShowCookieBanner() {
+            const banner = document.getElementById("cookiePolicyBanner");
+            if (!banner) return;
+            if (hasAcceptedCookiePolicy()) {
+              banner.style.display = "none";
+              return;
+            }
+            banner.style.display = "flex";
+          }
+
+          document.addEventListener("click", function (event) {
+            const link = event.target && typeof event.target.closest === "function"
+              ? event.target.closest(".js-open-layout-legal")
+              : null;
+            if (!link) return;
+            event.preventDefault();
+            openLayoutLegalModal(link.getAttribute("data-legal-doc"));
+          });
+
+          const acceptBtn = document.getElementById("acceptCookiePolicyBtn");
+          if (acceptBtn) {
+            acceptBtn.addEventListener("click", function () {
+              acceptCookiePolicy();
+              hideCookieBanner();
+            });
+          }
+
+          $("#GlobalModal").on("hidden.bs.modal", function () {
+            const modalDialog = document.getElementById("GlobalModalDialog");
+            if (modalDialog) modalDialog.classList.remove("modal-lg");
+          });
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", maybeShowCookieBanner);
+          } else {
+            maybeShowCookieBanner();
+          }
+
+          window.__openLegalDocumentModal = openLayoutLegalModal;
         })();
       </script>
 

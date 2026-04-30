@@ -1,0 +1,398 @@
+{
+  "page": {
+    "gecom": {
+      "meta": {
+        "title": "GECOM | Gestión estratégica de importación y exportación",
+        "description": "Reduzca costos ocultos, audite riesgos fiscales y opere con visibilidad real. GECOM integra consultoría, gestión y tecnología para su operación de comercio exterior.",
+        "keywords": "gestión de importación, exportación, comercio exterior, consultoría aduanera, auditoría NCM, portal gecom",
+        "ogTitle": "GECOM | Consultoría, gestión y operación de comercio exterior",
+        "ogDescription": "Deje de pagar más por falta de gestión. Diagnóstico gratuito, operación estructurada y Portal GECOM para acompañar todo en tiempo real."
+      },
+      "nav": {
+        "about": "Sobre",
+        "method": "Metodología",
+        "portal": "Portal GECOM",
+        "solutions": "Actuación",
+        "segments": "Segmentos",
+        "team": "Equipo",
+        "cta": "Hablar con un Especialista",
+        "openMenu": "Abrir menú",
+        "language": "Idioma"
+      },
+      "hero": {
+        "kicker": "Gestión estratégica de comercio exterior",
+        "headline": "Deje de pagar más caro por falta de gestión en su operación de importación.",
+        "headlineAlt": "¿Su importación y exportación están costando más de lo que deberían?",
+        "subheadline": "GECOM audita, estructura y opera su rutina de comercio exterior con visibilidad real de costos, compliance y plazos.",
+        "body": "Las empresas que operan solo con despachante, trading o consultoría suelen convivir con costos ocultos, reprocesos y poca previsibilidad. GECOM integra inteligencia operativa, ejecución y tecnología para eliminar esas pérdidas.",
+        "primaryCta": "Hablar con un Especialista",
+        "note1": "Diagnóstico gratuito y sin compromiso",
+        "note2": "Visibilidad operativa en tiempo real",
+        "panelEyebrow": "Dónde se pierde dinero",
+        "panelTitle": "Control fiscal, costo real y ejecución dentro de una misma operación.",
+        "panelItems": [
+          {
+            "title": "Auditoría fiscal",
+            "body": "Revisamos NCM, documentación y puntos de riesgo antes de que el error se convierta en costo."
+          },
+          {
+            "title": "Costos transparentes",
+            "body": "Visibilidad independiente de costos para negociar mejor y pagar menos."
+          },
+          {
+            "title": "Ejecución acompañada",
+            "body": "Estados, documentos y decisiones críticas centralizados en el Portal GECOM."
+          }
+        ]
+      },
+      "problems": {
+        "title": "¿Reconoce alguno de estos escenarios en su operación?",
+        "closing": "Si alguno de estos puntos ya aparece en su rutina, existe espacio real para reducir costo y aumentar control.",
+        "cards": [
+          {
+            "icon": "fa-folder-open-o",
+            "eyebrow": "Despachante",
+            "title": "Su despachante ejecuta. Pero ¿quién audita la clasificación fiscal?",
+            "body": "Su despachante ejecuta, pero ¿quién audita si la clasificación fiscal está correcta? Un error de NCM puede generar multas, diferencias tributarias y reprocesos sin que usted lo perciba."
+          },
+          {
+            "icon": "fa-exchange",
+            "eyebrow": "Trading",
+            "title": "La trading simplifica la operación. Pero ¿el costo real es visible?",
+            "body": "La trading simplifica su operación, pero vuelve opaca la formación de costos. Sin visibilidad independiente, usted puede estar pagando más sin saberlo."
+          },
+          {
+            "icon": "fa-lightbulb-o",
+            "eyebrow": "Consultoría",
+            "title": "La planificación sin ejecución suele drenar margen.",
+            "body": "La consultoría entrega el plan. La ejecución queda a cargo de su equipo. En comercio exterior, la brecha entre estrategia y operación es donde se pierde dinero."
+          }
+        ]
+      },
+      "method": {
+        "title": "Cómo GECOM conduce su operación",
+        "subtitle": "Integramos diagnóstico, diseño operativo y ejecución continua en un solo flujo de trabajo.",
+        "steps": [
+          {
+            "number": "01",
+            "title": "Auditamos",
+            "body": "Mapeamos documentos, clasificación fiscal, proveedores, costos visibles y costos ocultos para identificar dónde están las pérdidas."
+          },
+          {
+            "number": "02",
+            "title": "Estructuramos",
+            "body": "Diseñamos el modelo operativo adecuado para su volumen, complejidad, riesgos regulatorios y dependencia de intermediarios."
+          },
+          {
+            "number": "03",
+            "title": "Operamos",
+            "body": "Acompañamos la ejecución de punta a punta con indicadores, alertas y visibilidad en tiempo real a través del Portal GECOM."
+          }
+        ],
+        "cta": "Hablar con un Especialista"
+      },
+      "portal": {
+        "kicker": "Portal GECOM",
+        "title": "La operación deja de ser una caja negra cuando todo es visible en un solo lugar.",
+        "subtitle": "El Portal GECOM centraliza documentos, estados, plazos, responsables y hitos críticos para que el cliente siga la importación y exportación sin depender de hojas paralelas o reportes fragmentados.",
+        "summary": "En lugar de información dispersa entre correo, planillas, despachante, trading y equipo interno, el cliente sigue la operación en un único entorno: timeline de procesos, documentos, alertas, pendientes y visión consolidada de la rutina.",
+        "availability": "Disponible exclusivamente en la modalidad Operación Completa.",
+        "features": [
+          "Timeline de procesos con hitos operativos críticos",
+          "Documentos y pendientes centralizados en un solo panel",
+          "Alertas de plazo, embarque, despacho y etapas críticas",
+          "Visibilidad de responsables, estado y próximos pasos",
+          "Más previsibilidad para dirección, finanzas y operación"
+        ],
+        "mockup": {
+          "badge": "Mockup funcional del portal",
+          "menu": [
+            "Vista general",
+            "Procesos",
+            "Documentos",
+            "Alertas"
+          ],
+          "metricCards": [
+            {
+              "label": "Procesos activos",
+              "value": "18"
+            },
+            {
+              "label": "Pendientes críticos",
+              "value": "04"
+            },
+            {
+              "label": "Docs validados",
+              "value": "96%"
+            }
+          ],
+          "timelineTitle": "Timeline de la operación",
+          "timeline": [
+            {
+              "label": "Booking confirmado",
+              "meta": "Hoy, 09:10"
+            },
+            {
+              "label": "Revisión documental",
+              "meta": "En curso"
+            },
+            {
+              "label": "Llegada estimada",
+              "meta": "28 abr 2026"
+            }
+          ],
+          "alertsTitle": "Alertas y documentos",
+          "alerts": [
+            "DI en espera de validación final",
+            "Certificado del proveedor adjunto",
+            "Follow-up liberado para finanzas"
+          ]
+        }
+      },
+      "solutions": {
+        "title": "Modelos de actuación de GECOM",
+        "subtitle": "La actuación se calibra según la etapa, el volumen y la complejidad de su operación.",
+        "investmentNote": "La inversión se calibra al volumen y la complejidad de su operación, por eso primero realizamos un diagnóstico gratuito.",
+        "cards": [
+          {
+            "tag": "Control",
+            "title": "Deje de cometer errores evitables en su importación",
+            "audienceLabel": "Indicado para",
+            "audience": "Empresas que ya cuentan con estructura interna, pero necesitan más seguridad operativa y control técnico.",
+            "features": [
+              "Revisión documental completa",
+              "Validación de NCM",
+              "Análisis previo al embarque",
+              "Orientación técnica para reducir riesgo"
+            ],
+            "result": "Más seguridad operativa y menos costos evitables.",
+            "cta": "Hablar con un Especialista",
+            "featured": false
+          },
+          {
+            "tag": "Gestión",
+            "badge": "Más contratado",
+            "title": "Tome el control real de su operación",
+            "audienceLabel": "Indicado para",
+            "audience": "Empresas que buscan transparencia de costos, menos dependencia de intermediarios y más gobernanza sobre la rutina.",
+            "features": [
+              "Gestión completa de la importación",
+              "Soporte a la negociación internacional",
+              "Estructuración de proveedores",
+              "Seguimiento logístico continuo",
+              "Visibilidad operativa consolidada"
+            ],
+            "result": "Reducción efectiva de costos y control integral de la operación.",
+            "cta": "Hablar con un Especialista",
+            "featured": true
+          },
+          {
+            "tag": "Operación Completa",
+            "title": "Deje que GECOM opere todo por usted",
+            "audienceLabel": "Indicado para",
+            "audience": "Empresas que desean escalar sin ampliar el equipo interno y mantener visibilidad ejecutiva de la operación.",
+            "features": [
+              "Ejecución integral de la operación",
+              "Gestión de punta a punta",
+              "Reportes e indicadores periódicos",
+              "Seguimiento continuo del proceso",
+              "Portal GECOM incluido"
+            ],
+            "result": "Una operación profesionalizada con ejecución, gobernanza y tecnología integradas.",
+            "cta": "Hablar con un Especialista",
+            "featured": false
+          }
+        ]
+      },
+      "segments": {
+        "title": "Segmentos ya atendidos por GECOM",
+        "subtitle": "Experiencia práctica en operaciones con exigencias fiscales, técnicas y logísticas muy distintas entre sí.",
+        "items": [
+          {
+            "name": "Químico",
+            "details": [
+              "Importación de componentes para impermeabilizantes",
+              "Exportación de productos derivados del alquitrán"
+            ]
+          },
+          {
+            "name": "Deportivo",
+            "details": [
+              "Importación de accesorios para fitness",
+              "Exportación de platos (clay target) para tiro al blanco"
+            ]
+          },
+          {
+            "name": "Náutico",
+            "details": [
+              "Importación de piezas",
+              "Exportación de embarcaciones"
+            ]
+          },
+          {
+            "name": "Piscinas y Spas",
+            "details": [
+              "Importación de componentes"
+            ]
+          },
+          {
+            "name": "Textil",
+            "details": [
+              "Importación de hilos y máquinas, como conicaleiras y telares"
+            ]
+          },
+          {
+            "name": "Pet",
+            "details": [
+              "Importación de productos orientados a la salud animal"
+            ]
+          },
+          {
+            "name": "Energía Solar",
+            "details": [
+              "Importación de polímeros para extrusión e inyección plástica"
+            ]
+          },
+          {
+            "name": "Casa y Construcción",
+            "details": [
+              "Importación de polímeros para fabricación de zócalos"
+            ]
+          }
+        ]
+      },
+      "numbers": {
+        "kicker": "Resultados a escala real",
+        "title": "Experiencia, operación y tecnología aplicadas al comercio exterior",
+        "note": "Indicadores sujetos a validación final con el cliente antes de la publicación definitiva.",
+        "items": [
+          {
+            "value": 25,
+            "prefix": "+",
+            "suffix": "",
+            "label": "años de experiencia en comercio exterior"
+          },
+          {
+            "value": 500,
+            "prefix": "+",
+            "suffix": "",
+            "label": "operaciones gestionadas"
+          },
+          {
+            "value": 3,
+            "prefix": "",
+            "suffix": "",
+            "label": "frentes integradas: consultoría, gestión y tecnología"
+          },
+          {
+            "value": 100,
+            "prefix": "",
+            "suffix": "%",
+            "label": "visibilidad digital de la operación"
+          }
+        ]
+      },
+      "team": {
+        "title": "El equipo responsable de su operación",
+        "subtitle": "Profesionales con experiencia real en comercio exterior, gestión financiera, compliance y tecnología trabajando de forma integrada.",
+        "members": [
+          {
+            "name": "Anderson Bom Tempo",
+            "role": "CEO",
+            "photo": "/Assets/img/anderson.jpg",
+            "initials": "AB",
+            "bio": "Más de 25 años desarrollando operaciones internacionales para ejecutivos y empresarios. Graduado en Administración de Empresas con énfasis en Comercio Exterior por la Universidade de Sao Caetano do Sul, con validación por la Universidade de Sao Paulo."
+          },
+          {
+            "name": "Angelica Campos",
+            "role": "Socia Ejecutiva",
+            "photo": "/Assets/img/angelica.jpg",
+            "initials": "AC",
+            "bio": "Responsable de la estructura administrativa, financiera y de compliance de GECOM. Más de 20 años de experiencia en ferias internacionales, implementación de procesos y formación docente."
+          },
+          {
+            "name": "Gustavo Gherardi",
+            "role": "Arquitecto de Soluciones",
+            "photo": "/Assets/img/gustavo-gherardi.png",
+            "initials": "GG",
+            "bio": "Responsable del Portal GECOM y del desarrollo de las herramientas digitales de la empresa. Actúa conectando proceso operativo, visibilidad ejecutiva y tecnología aplicada al comercio exterior."
+          }
+        ]
+      },
+      "finalCta": {
+        "kicker": "Diagnóstico gratuito",
+        "title": "¿Listo para descubrir dónde su operación está dejando margen sobre la mesa?",
+        "body": "Una sola conversación ya aclara riesgo fiscal, estructura de costos y el formato de actuación más adecuado para su momento.",
+        "primaryCta": "Hablar con un Especialista",
+        "cardTitle": "Qué revisamos en el primer diagnóstico",
+        "cardItems": [
+          "Modelo operativo actual y dependencia de intermediarios",
+          "Riesgos fiscales, documentales y puntos de reproceso",
+          "Potencial de mejora en costo, visibilidad y gobernanza"
+        ]
+      },
+      "form": {
+        "title": "Hable con un especialista en comercio exterior",
+        "subtitle": "Complete sus datos y nuestro equipo volverá con los próximos pasos del diagnóstico gratuito.",
+        "submitLabel": "Hablar con un Especialista",
+        "loadingLabel": "Enviando...",
+        "microcopy": "Sin compromiso. Sin envío de materiales no solicitados. Respuesta en hasta un día hábil.",
+        "close": "Cerrar",
+        "successTitle": "Recibimos su solicitud",
+        "successBody": "Nuestro equipo analizará su operación y se pondrá en contacto en hasta un día hábil por el WhatsApp informado.",
+        "fields": {
+          "name": "Nombre completo",
+          "namePlaceholder": "Su nombre",
+          "phone": "WhatsApp",
+          "phonePlaceholder": "(00) 00000-0000",
+          "company": "Empresa",
+          "companyPlaceholder": "Nombre de la empresa",
+          "operationMode": "¿Cómo opera hoy?",
+          "importVolume": "Volumen mensual de importación",
+          "selectOption": "Seleccione una opción"
+        },
+        "operationOptions": [
+          "Uso despachante aduanero",
+          "Uso trading company",
+          "Uso consultoría",
+          "Equipo propio",
+          "Todavía no importo"
+        ],
+        "volumeOptions": [
+          "Hasta BRL 100 mil",
+          "BRL 100 mil a BRL 500 mil",
+          "Más de BRL 500 mil"
+        ],
+        "validation": {
+          "name": "Informe su nombre completo.",
+          "phone": "Informe un WhatsApp válido.",
+          "company": "Informe el nombre de la empresa.",
+          "operationMode": "Seleccione cómo opera hoy.",
+          "importVolume": "Seleccione el volumen mensual de importación."
+        },
+        "feedback": {
+          "invalid": "Revise los campos destacados e inténtelo nuevamente.",
+          "warning": "Su contacto fue registrado. La notificación interna quedó pendiente y será revisada por el equipo.",
+          "error": "No fue posible enviar su solicitud en este momento."
+        }
+      },
+      "footer": {
+        "brandCopy": "Consultoría, gestión y tecnología para importar y exportar con previsibilidad.",
+        "links": {
+          "home": "Inicio",
+          "method": "Metodología",
+          "portal": "Portal GECOM",
+          "solutions": "Actuación",
+          "segments": "Segmentos",
+          "contact": "Contacto"
+        },
+        "complianceTitle": "Compliance",
+        "complianceCopy": "Operación respaldada por protección de datos, trazabilidad documental y términos de uso del portal.",
+        "privacy": "Política de Privacidad",
+        "terms": "Términos de Uso",
+        "lgpd": "Protección de datos y privacidad",
+        "copyright": "GECOM. Todos los derechos reservados."
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+<style>
+  .service-task-kanban-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .service-task-kanban-board { display:flex; gap:12px; overflow-x:auto; padding-bottom:10px; }
+  .service-task-kanban-col {
+    min-width:260px;
+    max-width:260px;
+    border:1px solid #dce5ee;
+    border-radius:16px;
+    background:linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    box-shadow:0 12px 26px rgba(15, 23, 42, 0.06);
+    display:flex;
+    flex-direction:column;
+  }
+  .service-task-kanban-head { padding:14px 16px; border-bottom:1px solid #e8eef5; }
+  .service-task-kanban-head h4 { margin:0; font-size:14px; font-weight:700; color:#233445; }
+  .service-task-kanban-head small { color:#7b8b99; }
+  .service-task-kanban-cards { padding:12px; min-height:180px; display:grid; gap:10px; }
+  .service-task-card {
+    border:1px solid #e7eaec;
+    border-radius:12px;
+    padding:12px;
+    background:#fff;
+    cursor:pointer;
+    box-shadow:0 8px 16px rgba(15, 23, 42, 0.05);
+  }
+  .service-task-card:hover { border-color:#1ab394; }
+  .service-task-card h5 { margin:0 0 6px; font-size:13px; color:#233445; font-weight:700; }
+  .service-task-card-meta { font-size:11px; color:#7b8b99; margin-top:4px; }
+  .service-task-empty { color:#94a3b0; font-size:12px; text-align:center; padding:16px 8px; border:1px dashed #d8e1ea; border-radius:10px; background:#fbfdff; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-content">
+        <div class="service-task-kanban-toolbar">
+          <div>
+            <h3 id="taskKanbanTitle" style="margin:0;">Tarefas - Kanban</h3>
+            <small id="taskKanbanSubtitle">Visualize as tarefas por status.</small>
+          </div>
+          <div style="display:inline-flex; gap:8px;">
+            <button id="btnTaskKanbanList" class="btn btn-white btn-sm">Lista</button>
+            <button id="btnTaskKanbanRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+            <button id="btnTaskKanbanNew" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Nova tarefa</button>
+          </div>
+        </div>
+        <div id="taskKanbanBoard" class="service-task-kanban-board">
+          <div class="service-task-empty">Carregando tarefas...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__SERVICE_PAGE_CONFIG = <%- safeJson(servicePage || {}) %>;
+</script>
+<script src="/js/servico/serviceApi.js"></script>
+<script src="/js/servico/service.resources.js"></script>
+<script src="/js/servico/task.kanban.page.js"></script>

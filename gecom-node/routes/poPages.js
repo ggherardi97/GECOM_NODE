@@ -1,6 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
+const CONVERT_HIDDEN_KEYS = new Set(["projectProcesses"]);
 
 const resources = {
   projectStatuses: {
@@ -117,11 +118,33 @@ function renderForm(res, config) {
   return res.render("po/PoForm", { poPage: config });
 }
 
+function isConvertPortalRequest(req) {
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+  return host.includes("convert-plus.com");
+}
+
+function handleHiddenConvertResource(req, res, config) {
+  if (!isConvertPortalRequest(req) || !CONVERT_HIDDEN_KEYS.has(String(config?.key || ""))) return false;
+  res.redirect("/POProjects");
+  return true;
+}
+
 Object.values(resources).forEach((config) => {
-  router.get([config.gridPath, `/project-operations/${config.resource}`], (req, res) => renderGrid(res, config));
-  router.get([config.formPath, `/project-operations/${config.resource}/new`], (req, res) => renderForm(res, config));
+  router.get([config.gridPath, `/project-operations/${config.resource}`], (req, res) => {
+    if (handleHiddenConvertResource(req, res, config)) return;
+    renderGrid(res, config);
+  });
+  router.get([config.formPath, `/project-operations/${config.resource}/new`], (req, res) => {
+    if (handleHiddenConvertResource(req, res, config)) return;
+    renderForm(res, config);
+  });
   router.get(`/project-operations/${config.resource}/:id/edit`, (req, res) =>
-    res.redirect(`${config.formPath}?id=${encodeURIComponent(String(req.params.id || ""))}`),
+    handleHiddenConvertResource(req, res, config)
+      ? null
+      : res.redirect(`${config.formPath}?id=${encodeURIComponent(String(req.params.id || ""))}`),
   );
 });
 

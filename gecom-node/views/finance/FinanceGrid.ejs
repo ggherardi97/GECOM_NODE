@@ -33,6 +33,18 @@
   .finance-lookup-item:last-child { border-bottom: 0; }
   .finance-lookup-item:hover { background: #f5f9fc; }
   .finance-lookup-empty { padding: 8px 10px; color: #777; }
+  .finance-view-tabs {
+    display:none;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .finance-view-tabs .btn.active,
+  .finance-view-tabs .btn:focus {
+    background:#23c6c8;
+    border-color:#23c6c8;
+    color:#fff;
+  }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -52,6 +64,8 @@
           <button id="btnFinanceDelete" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> <%= t('page.finance.common.delete') %></button>
           <button id="btnFinanceClearSelection" class="btn btn-white btn-sm"><%= t('page.finance.common.clearSelection') %></button>
         </div>
+
+        <div id="financeViewTabs" class="finance-view-tabs"></div>
 
         <div class="table-responsive">
           <table class="table table-striped" id="financeGridTable">

@@ -191,6 +191,7 @@
     var path = String(window.location.pathname || "").toLowerCase();
     var isPublic =
       path === "/" ||
+      path === "/gecom" ||
       path.includes("landingpage") ||
       path.includes("publicprocessdetail") ||
       path === "/admin/billing" ||
@@ -257,6 +258,7 @@
   var path = String(window.location.pathname || "").toLowerCase();
   var isPublic =
     path === "/" ||
+    path === "/gecom" ||
     path.includes("landingpage") ||
     path.includes("publicprocessdetail") ||
     path === "/admin/billing" ||

@@ -44,6 +44,7 @@
   function lookupLabel(item) {
     return String(
       item?.company_name ||
+        item?.incident?.number ||
         item?.process_number ||
         item?.title ||
         item?.name ||
@@ -239,6 +240,7 @@
 
   function extractValue(row, key) {
     if (!row) return "";
+    if (key === "incident_number") return row.incident?.number || row.incident?.title || "";
     if (key === "project_name") return row.project?.name || "";
     if (key === "process_number") return row.process?.process_number || "";
     if (key === "status_name") return row.status?.name || row.status || "";

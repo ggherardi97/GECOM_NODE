@@ -1,0 +1,93 @@
+<style>
+  .service-entity-form .ibox-title { padding: 15px 20px 18px; }
+  .service-entity-form .ibox-tools { display:inline-flex; align-items:center; gap:8px; }
+  .service-entity-alert { display:none; margin-bottom:16px; }
+  .service-entity-alert.is-open { display:block; }
+  .service-entity-layout { margin-top:14px; display:flex; flex-wrap:wrap; }
+  .service-entity-layout > [class*="col-"] { display:flex; margin-bottom:16px; }
+  .service-entity-card {
+    width:100%;
+    background:linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    border:1px solid #e7eaec;
+    border-radius:12px;
+    box-shadow:0 10px 24px rgba(0,0,0,.04);
+    overflow:hidden;
+  }
+  .service-entity-card-head {
+    padding:16px 18px 12px;
+    border-bottom:1px solid #edf1f5;
+    background:linear-gradient(135deg, #f9fbff 0%, #eef5fb 100%);
+  }
+  .service-entity-card-title { margin:0; font-size:16px; font-weight:600; color:#233445; }
+  .service-entity-card-subtitle { margin-top:4px; color:#7d8b99; font-size:12px; }
+  .service-entity-card-body { padding:16px 18px 18px; }
+  .service-entity-field { margin-bottom:14px; }
+  .service-entity-field label { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#66788a; margin-bottom:6px; }
+  .service-entity-required { color:#ed5565; margin-left:4px; }
+  .service-entity-field textarea.form-control { min-height:108px; resize:vertical; }
+  .service-entity-field .form-control[disabled] { background:#f6f8fb; color:#607284; }
+  .service-entity-summary-grid { display:grid; gap:10px; }
+  .service-entity-summary-item { padding:12px; border:1px solid #edf1f5; border-radius:10px; background:#fff; }
+  .service-entity-summary-label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#8a98a8; margin-bottom:4px; }
+  .service-entity-summary-value { color:#253645; font-size:13px; font-weight:600; word-break:break-word; }
+  .service-entity-links { display:grid; gap:10px; margin-top:14px; }
+  .service-entity-empty { border:1px dashed #cfd8e3; border-radius:12px; padding:18px; text-align:center; color:#7d8b99; background:#fafcff; }
+  @media (max-width: 991px) {
+    .service-entity-layout > [class*="col-"] { width:100%; }
+  }
+</style>
+
+<div class="row animated fadeInRight service-entity-form" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5 id="serviceEntityPageTitle">Servico</h5>
+        <div class="ibox-tools">
+          <button id="btnServiceEntityBack" class="btn btn-white btn-sm">Voltar</button>
+          <button id="btnServiceEntityNew" class="btn btn-default btn-sm" style="display:none;"><i class="fa fa-plus"></i> Novo</button>
+          <button id="btnServiceEntityDelete" class="btn btn-danger btn-sm" style="display:none;"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnServiceEntitySave" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> Salvar</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="serviceEntityMessage" class="alert service-entity-alert"></div>
+
+        <div class="row service-entity-layout">
+          <div class="col-lg-8 col-md-7">
+            <div class="service-entity-card">
+              <div class="service-entity-card-head">
+                <h3 id="serviceEntityFormTitle" class="service-entity-card-title">Ficha</h3>
+                <div id="serviceEntityFormSubtitle" class="service-entity-card-subtitle">Preencha os dados principais do registro.</div>
+              </div>
+              <div class="service-entity-card-body">
+                <form id="serviceEntityForm">
+                  <div id="serviceEntityFields" class="row"></div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-5">
+            <div class="service-entity-card">
+              <div class="service-entity-card-head">
+                <h3 class="service-entity-card-title">Resumo</h3>
+                <div class="service-entity-card-subtitle">Informacoes rapidas e atalhos do registro.</div>
+              </div>
+              <div class="service-entity-card-body">
+                <div id="serviceEntitySummary" class="service-entity-summary-grid"></div>
+                <div id="serviceEntityLinks" class="service-entity-links"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__SERVICE_PAGE_CONFIG = <%- safeJson(servicePage || {}) %>;
+</script>
+<script src="/js/servico/serviceApi.js"></script>
+<script src="/js/servico/service.resources.js"></script>
+<script src="/js/servico/service.entity.form.page.js"></script>

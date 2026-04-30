@@ -89,7 +89,9 @@
     const menu = $("#calendarAddMenu");
     menu.empty();
 
-    state.definitions.forEach((def) => {
+    state.definitions
+      .filter((def) => def.create_enabled !== false)
+      .forEach((def) => {
       menu.append(`
         <li>
           <a href="#" class="js-add-activity" data-type="${esc(def.type)}">
@@ -98,7 +100,7 @@
           </a>
         </li>
       `);
-    });
+      });
 
     menu.find(".js-add-activity").on("click", function (ev) {
       ev.preventDefault();

@@ -1,5 +1,5 @@
 (function () {
-  const { resources, tt, waitForI18nReady, esc, normalizeArray, toMoney, toDateTimeBr } = window.FinanceResources || {};
+  const { resources, tt, waitForI18nReady, esc, normalizeArray, toMoney, toDateBr, toDateTimeBr, boolLabel, enumLabel } = window.FinanceResources || {};
   const page = window.__financePage || {};
   const config = resources?.[page.key];
   if (!config) return;
@@ -54,6 +54,22 @@
 
   function lookupSubtitle(item) {
     return String(item?.description || item?.document_number || item?.reference || item?.email || "").trim();
+  }
+
+  function translateEnumLabel(enumKey, value, fallback) {
+    if (typeof enumLabel === "function") return enumLabel(enumKey, value, fallback);
+    return fallback || value || "";
+  }
+
+  function resolveLookupDefaultValue(field) {
+    if (!field || field.type !== "lookup" || !field.lookup) return "";
+    const match = field.defaultLookupMatch;
+    if (!match || typeof match !== "object") return "";
+    const rows = state.lookups[field.lookup] || [];
+    const found = rows.find((item) =>
+      Object.entries(match).every(([key, expected]) => String(item?.[key] ?? "").toUpperCase() === String(expected ?? "").toUpperCase()),
+    );
+    return found?.id ? String(found.id) : "";
   }
 
   function normalizeText(value) {
@@ -144,7 +160,7 @@
       const base = String(field.name || "").replace(/_id$/i, "");
       const rel = row?.[base];
       if (rel?.id != null) return String(rel.id);
-      return "";
+      return resolveLookupDefaultValue(field);
     }
     if (field.type === "date" && value) return String(value).slice(0, 10);
     if (field.type === "datetime-local" && value) return new Date(value).toISOString().slice(0, 16);
@@ -306,7 +322,7 @@
     if (field.type === "select") {
       const options = (field.options || []).map((opt) => {
         const selected = String(value || field.defaultValue || "") === String(opt) ? "selected" : "";
-        return `<option value="${esc(opt)}" ${selected}>${esc(opt)}</option>`;
+        return `<option value="${esc(opt)}" ${selected}>${esc(translateEnumLabel(field.enumKey, opt, opt))}</option>`;
       });
       return `
         <div id="${esc(`${id}__wrap`)}" class="form-group finance-field-wrap" data-field="${esc(field.name)}">
@@ -334,10 +350,59 @@
     `;
   }
 
-  function fieldColumnClass(field) {
+  function fieldColumnClass(field, options) {
+    const opts = options || {};
+    if (field?.colClass) return field.colClass;
+    const span = Number(field?.boxSpan || field?.span || 0);
+    if (span === 12) return "col-sm-12";
+    if (span === 6) return "col-sm-6";
+    if (span === 4) return "col-sm-4";
     if (field.type === "textarea") return "col-md-12";
     if (field.type === "checkbox") return "col-md-12";
+    if (opts.boxLayout && config.layout === "bank-account-rich") return "col-md-6 col-sm-12";
+    if (opts.boxLayout) return "col-sm-12";
     return "col-md-6";
+  }
+
+  function getFieldsByNames(fieldNames) {
+    const source = Array.isArray(config.formFields) ? config.formFields : [];
+    const byName = new Map(source.map((field) => [String(field.name || ""), field]));
+    return (fieldNames || []).map((name) => byName.get(String(name || ""))).filter(Boolean);
+  }
+
+  function renderFieldsGrid(fields, row, prefix, options) {
+    return (fields || [])
+      .map((field) => {
+        const html = field.type === "lookup" ? renderLookupField(field, row, prefix) : renderNormalField(field, row, prefix);
+        return `<div class="${fieldColumnClass(field, options)}">${html}</div>`;
+      })
+      .join("");
+  }
+
+  function renderBoxLayout(row) {
+    const boxes = Array.isArray(config.layoutBoxes) ? config.layoutBoxes : [];
+    const cols = boxes
+      .map((box) => {
+        const fields = getFieldsByNames(box.fields);
+        const colClass =
+          config.layout === "bank-account-rich"
+            ? "col-lg-12 col-md-12 col-sm-12 finance-box-col"
+            : "col-lg-4 col-md-4 col-sm-12 finance-box-col";
+        return `
+          <div class="${colClass}">
+            <section class="finance-box">
+              <div class="finance-box-head">
+                <h4>${esc(tt(box.title, box.id || "Box"))}</h4>
+              </div>
+              <div class="finance-box-body">
+                <div class="row">${renderFieldsGrid(fields, row || {}, "ff", { boxLayout: true, boxId: box.id })}</div>
+              </div>
+            </section>
+          </div>
+        `;
+      })
+      .join("");
+    return `<div class="row finance-box-grid">${cols}</div>`;
   }
 
   function renderFormTabs(row) {
@@ -618,12 +683,132 @@
 
   function renderMainForm(row) {
     const fields = config.formFields || [];
-    $("#financeFormFields").html(renderFormTabs(row || {}));
+    const useBoxLayout = config.layout === "three-box" || config.layout === "bank-account-rich";
+    $("#financeFormFields").html(useBoxLayout ? renderBoxLayout(row || {}) : renderFormTabs(row || {}));
     const $scope = $("#financeFormFields");
-    bindTabClicks($scope);
+    if (!useBoxLayout) bindTabClicks($scope);
     bindLookupWidgets($scope, "ff", fields);
     bindMoneyMasks($scope, "ff", fields);
     bindValidationClear($scope, "ff", fields);
+    bindRecurringVisibility($scope);
+    renderAsidePanel(row || {});
+  }
+
+  function bindRecurringVisibility($scope) {
+    const $toggle = $scope.find("#ff_recurrence_enabled");
+    if (!$toggle.length) return;
+    const targets = [
+      "recurrence_frequency",
+      "recurrence_interval",
+      "recurrence_day_of_month",
+      "recurrence_occurrences",
+      "recurrence_end_date",
+    ];
+    const sync = function () {
+      const active = $toggle.is(":checked");
+      targets.forEach((fieldName) => {
+        const $wrap = $scope.find(`#ff_${fieldName}__wrap`).closest(".col-md-6, .col-md-12");
+        $wrap.toggle(active);
+      });
+    };
+    $toggle.off("change.finrec").on("change.finrec", sync);
+    sync();
+  }
+
+  function formatDateOnly(value) {
+    return toDateBr ? toDateBr(value) : value || "-";
+  }
+
+  function buildBankAccountActivity(row) {
+    const movements = normalizeArray(row?.movements || []).map((item) => ({
+      kind: "movement",
+      badge: tt("page.finance.activity.bankMovement", "Movimento"),
+      title: item?.description || tt("page.finance.activity.bankMovement", "Movimento bancário"),
+      subtitle: [item?.category?.name, item?.cost_center?.name].filter(Boolean).join(" • "),
+      date: item?.movement_date,
+      amount: item?.amount,
+      direction: item?.movement_type,
+    }));
+    const receivablePayments = normalizeArray(row?.receivable_payments || []).map((item) => ({
+      kind: "receivable",
+      badge: tt("page.finance.activity.receivable", "Recebimento"),
+      title: item?.receivable?.title_number || tt("page.finance.activity.receivable", "Recebimento"),
+      subtitle: item?.receivable?.company?.company_name || item?.reference || "",
+      date: item?.payment_date,
+      amount: item?.amount,
+      direction: "CREDIT",
+    }));
+    const payablePayments = normalizeArray(row?.payable_payments || []).map((item) => ({
+      kind: "payable",
+      badge: tt("page.finance.activity.payable", "Pagamento"),
+      title: item?.payable?.payable_number || tt("page.finance.activity.payable", "Pagamento"),
+      subtitle: item?.payable?.company?.company_name || item?.reference || "",
+      date: item?.payment_date,
+      amount: item?.amount,
+      direction: "DEBIT",
+    }));
+    return movements
+      .concat(receivablePayments, payablePayments)
+      .sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+      .slice(0, 20);
+  }
+
+  function renderAsidePanel(row) {
+    const $aside = $("#financeAsidePanel");
+    const $grid = $(".finance-rich-grid");
+    if (!$aside.length) return;
+
+    if (config.layout !== "bank-account-rich") {
+      $aside.hide().empty();
+      $grid.removeClass("has-aside");
+      return;
+    }
+
+    if (!state.id) {
+      $grid.removeClass("has-aside");
+      $aside.hide().html(`<div class="finance-box-empty">${esc(tt("page.finance.common.saveBeforeRelated", "Salve o registro para visualizar movimentações e liquidações associadas."))}</div>`);
+      return;
+    }
+
+    const activity = buildBankAccountActivity(row);
+    const itemsHtml = activity.length
+      ? activity
+          .map((item) => {
+            const amount = item.amount != null ? toMoney(item.amount) : "-";
+            const directionLabel =
+              item.direction === "CREDIT"
+                ? tt("page.finance.common.credit", "Crédito")
+                : item.direction === "DEBIT"
+                  ? tt("page.finance.common.debit", "Débito")
+                  : "";
+            return `
+              <div class="finance-activity-item">
+                <div class="finance-activity-badge">${esc(item.badge || "-")}</div>
+                <div class="finance-activity-meta">
+                  <span>${esc(formatDateOnly(item.date))}</span>
+                  <span>${esc(directionLabel)} ${esc(amount)}</span>
+                </div>
+                <div class="finance-activity-title">${esc(item.title || "-")}</div>
+                ${item.subtitle ? `<div class="finance-activity-subtitle">${esc(item.subtitle)}</div>` : ""}
+              </div>
+            `;
+          })
+          .join("")
+      : `<div class="finance-box-empty">${esc(tt("page.finance.common.noRelatedActivity", "Nenhuma transação associada encontrada."))}</div>`;
+
+    $aside
+      .show()
+      .html(`
+        <section class="finance-box">
+          <div class="finance-box-head">
+            <h4>${esc(tt("page.finance.boxes.relatedActivity", "Movimentações associadas"))}</h4>
+          </div>
+          <div class="finance-box-body">
+            <div class="finance-activity-list">${itemsHtml}</div>
+          </div>
+        </section>
+      `);
+    $grid.addClass("has-aside");
   }
 
   function renderPayments() {
@@ -640,7 +825,7 @@
         return `<tr data-id="${esc(payment.id)}">
           <td>${esc(toDateTimeBr(payment.payment_date))}</td>
           <td>${esc(toMoney(payment.amount))}</td>
-          <td>${esc(payment.payment_method || "-")}</td>
+          <td>${esc(translateEnumLabel("financialPaymentMethod", payment.payment_method, payment.payment_method || "-"))}</td>
           <td>${esc(bank)}</td>
           <td>${esc(payment.reference || "-")}</td>
           <td>
@@ -789,6 +974,13 @@
     try {
       const $scope = $("#financeFormFields");
       const payload = collectPayload(config.formFields || [], "ff", $scope, true);
+      if (payload.recurrence_enabled === false) {
+        payload.recurrence_frequency = null;
+        payload.recurrence_interval = 1;
+        payload.recurrence_day_of_month = null;
+        payload.recurrence_occurrences = null;
+        payload.recurrence_end_date = null;
+      }
       const isEdit = !!state.id;
       if (!isEdit && config.forceActiveOnCreate === true) {
         payload.is_active = true;

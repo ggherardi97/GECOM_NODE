@@ -187,9 +187,29 @@
       "actions": {
         "clone": "Clonar invoice"
       },
+      "clone": {
+        "title": "Clonar invoice",
+        "confirmQuestion": "Deseas clonar esta factura?",
+        "confirmButton": "Clonar"
+      },
+      "modal": {
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "close": "Cerrar"
+      },
       "messages": {
         "selectOneToClone": "Selecciona solo 1 invoice para clonar.",
         "selectOneToGenerate": "Selecciona solo 1 invoice para generar."
+      },
+      "errors": {
+        "loadFailed": "Error al cargar las invoices.",
+        "updateStatusFailed": "Error al actualizar el estado de la invoice.",
+        "deleteFailed": "Error al eliminar la invoice.",
+        "cloneFailed": "Error al clonar la invoice.",
+        "cloneNoId": "La clonacion se completo, pero no devolvio ID.",
+        "bulkSendFailed": "Error al enviar las invoices.",
+        "bulkDeleteFailed": "Error al eliminar las invoices."
       },
       "filters": {
         "all": "Todos",
@@ -576,6 +596,7 @@
         "financePayables": "Cuentas por Pagar",
         "financeBanks": "Caja y Bancos",
         "financeMovements": "Movimientos Bancarios",
+        "financeImports": "Importación Bancaria",
         "financeCashFlow": "Flujo de Caja",
         "financeCategories": "Categorias Financieras",
         "financeCostCenters": "Centros de Costo",
@@ -603,6 +624,10 @@
         "poWorkOrders": "Work Orders",
         "poWorkOrderAssignments": "Asignaciones",
         "poWorkOrderAppointments": "Agendamientos",
+        "poProjectStatuses": "Estados de proyectos",
+        "poDeliverableStatuses": "Estados de entregas",
+        "poWorkOrderStatuses": "Estados de work orders",
+        "poResourceRoles": "Roles de recurso",
         "poConfigurations": "Configuraciones"
       },
       "modal": {
@@ -742,6 +767,58 @@
       "bankMovements": {
         "title": "Movimientos Bancarios"
       },
+      "imports": {
+        "title": "Importación Bancaria",
+        "subtitle": "Importa OFX, CSV o PDF, revisa con IA y aplica con seguridad en finanzas.",
+        "uploadTitle": "Nuevo extracto",
+        "uploadHelp": "Sube un extracto bancario y elige la cuenta correcta para la conciliación.",
+        "jobsTitle": "Importaciones recientes",
+        "jobsEmpty": "Todavía no hay importaciones.",
+        "tableTitle": "Líneas importadas",
+        "detailsTitle": "Revisión de la sugerencia",
+        "emptyState": "Selecciona una importación para revisar las líneas y aplicar las sugerencias.",
+        "uploadButton": "Importar extracto",
+        "reanalyze": "Reanalizar con IA",
+        "applyApproved": "Aplicar aprobadas",
+        "applyAll": "Aplicar todo",
+        "approveLine": "Aprobar línea",
+        "saveReview": "Guardar revisión",
+        "fileLabel": "Archivo",
+        "bankAccountLabel": "Cuenta bancaria",
+        "sourceLabel": "Origen",
+        "statusLabel": "Estado",
+        "summaryLines": "Líneas",
+        "summaryCredits": "Entradas",
+        "summaryDebits": "Salidas",
+        "summaryApplied": "Aplicadas",
+        "lineDate": "Fecha",
+        "lineType": "Tipo",
+        "lineDescription": "Descripción",
+        "lineAmount": "Valor",
+        "lineSuggestion": "Sugerencia",
+        "lineConfidence": "Confianza",
+        "lineStatus": "Estado",
+        "reviewNote": "Nota de revisión",
+        "matchedReceivable": "Cuenta por cobrar",
+        "matchedPayable": "Cuenta por pagar",
+        "suggestedCategory": "Categoría sugerida",
+        "suggestedCostCenter": "Centro de costo sugerido",
+        "suggestedCompany": "Empresa sugerida",
+        "aiReasoning": "Lectura de la IA",
+        "applySuccess": "Importación aplicada con éxito.",
+        "uploadSuccess": "Extracto importado con éxito.",
+        "reviewSaved": "Revisión guardada.",
+        "noBankAccount": "Selecciona la cuenta bancaria.",
+        "noFile": "Selecciona un archivo OFX, CSV o PDF.",
+        "noLine": "Selecciona una línea para revisar.",
+        "allStatuses": "Todos los estados",
+        "allSuggestions": "Todas las sugerencias",
+        "filterApproved": "Aprobadas",
+        "filterSuggested": "Sugeridas",
+        "filterApplied": "Aplicadas",
+        "filterIgnored": "Ignoradas",
+        "filterError": "Con error"
+      },
       "receivables": {
         "title": "Cuentas por Cobrar"
       },
@@ -769,6 +846,31 @@
         "outgoing": "Salidas",
         "net": "Neto",
         "projectedBalance": "Saldo proyectado"
+      },
+      "boxes": {
+        "basic": "Datos básicos",
+        "relations": "Relaciones",
+        "schedule": "Plazos",
+        "relatedActivity": "Movimientos asociados"
+      },
+      "views": {
+        "allPayables": "Todos los gastos",
+        "fixedPayables": "Gastos fijos",
+        "variablePayables": "Gastos variables",
+        "personalPayables": "Gastos personales",
+        "taxPayables": "Impuestos",
+        "transferPayables": "Transferencias",
+        "allReceivables": "Todos los ingresos",
+        "fixedReceivables": "Ingresos fijos",
+        "variableReceivables": "Ingresos variables",
+        "personalReceivables": "Ingresos personales",
+        "taxReceivables": "Impuestos",
+        "transferReceivables": "Transferencias"
+      },
+      "activity": {
+        "bankMovement": "Movimiento bancario",
+        "receivable": "Cobro",
+        "payable": "Pago"
       },
       "tabs": {
         "basic": "Datos basicos",
@@ -805,14 +907,91 @@
         "actions": "Acciones",
         "noPayments": "Sin pagos.",
         "saveBeforePayments": "Guarde primero el registro.",
+        "saveBeforeRelated": "Guarde el registro para ver movimientos y liquidaciones asociadas.",
+        "noRelatedActivity": "No se encontraron transacciones asociadas.",
         "generateFromInvoice": "Generar por invoice",
         "generate": "Generar",
         "yes": "Si",
         "no": "No",
+        "credit": "Crédito",
+        "debit": "Débito",
         "selectOne": "Seleccione exactamente un registro.",
         "lookupPlaceholder": "Haga clic para ver recientes o escriba para buscar",
         "lookupEmpty": "No se encontraron registros.",
         "fillRequired": "Complete los campos obligatorios"
+      },
+      "enums": {
+        "financialCategoryKind": {
+          "revenue": "Ingreso",
+          "expense": "Gasto",
+          "transfer": "Transferencia"
+        },
+        "financialAccountType": {
+          "cash": "Caja",
+          "checking": "Cuenta corriente",
+          "savings": "Ahorros",
+          "investment": "Inversión",
+          "digital_wallet": "Billetera digital"
+        },
+        "financialMovementType": {
+          "credit": "Crédito",
+          "debit": "Débito"
+        },
+        "financialEntryStatus": {
+          "open": "Abierto",
+          "partial": "Parcial",
+          "paid": "Pagado",
+          "overdue": "Vencido",
+          "canceled": "Cancelado"
+        },
+        "financialEntryGroup": {
+          "fixed": "Fijo",
+          "variable": "Variable",
+          "personal": "Personal",
+          "tax": "Impuesto",
+          "transfer": "Transferencia"
+        },
+        "financialRecurrenceFrequency": {
+          "weekly": "Semanal",
+          "monthly": "Mensual",
+          "yearly": "Anual"
+        },
+        "financialPaymentMethod": {
+          "bank_transfer": "Transferencia bancaria",
+          "pix": "PIX",
+          "credit_card": "Tarjeta de crédito",
+          "debit_card": "Tarjeta de débito",
+          "cash": "Efectivo",
+          "boleto": "Boleto",
+          "check": "Cheque",
+          "other": "Otro"
+        },
+        "financialImportSuggestionKind": {
+          "create_movement": "Crear movimiento",
+          "match_receivable_payment": "Cobrar cuenta",
+          "match_payable_payment": "Pagar cuenta",
+          "create_receivable": "Crear cuenta por cobrar",
+          "create_payable": "Crear cuenta por pagar",
+          "transfer": "Transferencia",
+          "ignore": "Ignorar"
+        },
+        "financialImportSuggestionStatus": {
+          "suggested": "Sugerida",
+          "approved": "Aprobada",
+          "applied": "Aplicada",
+          "ignored": "Ignorada",
+          "error": "Error"
+        },
+        "financialImportJobStatus": {
+          "review": "En revisión",
+          "applied": "Aplicada",
+          "failed": "Falló"
+        },
+        "financialImportSourceType": {
+          "ofx": "OFX",
+          "csv": "CSV",
+          "pdf": "PDF"
+        }
       },
       "fields": {
         "code": "Codigo",
@@ -847,8 +1026,15 @@
         "invoice": "Invoice",
         "document": "Documento",
         "issueDate": "Emision",
+        "entryGroup": "Grupo",
         "installmentNumber": "Parcela",
         "installmentTotal": "Total de parcelas",
+        "recurrenceEnabled": "Recurrente",
+        "recurrenceFrequency": "Frecuencia",
+        "recurrenceInterval": "Intervalo",
+        "recurrenceDayOfMonth": "Dia del mes",
+        "recurrenceOccurrences": "Cant. de ocurrencias",
+        "recurrenceEndDate": "Generar hasta",
         "notes": "Observaciones",
         "payableNumber": "Titulo",
         "paymentDate": "Fecha de pago",
@@ -968,6 +1154,7 @@
       },
       "actions": {
         "cloneInvoice": "Clonar invoice",
+        "cloning": "Clonando...",
         "generateInvoice": "Generar invoice",
         "deleteInvoice": "Eliminar factura",
         "saveInvoice": "Guardar factura",
@@ -1057,6 +1244,8 @@
         "cancel": "Cancelar"
       },
       "confirm": {
+        "cloneModalTitle": "Clonar factura",
+        "cloneTitle": "Deseas clonar esta factura?",
         "deleteModalTitle": "Eliminar factura",
         "deleteTitle": "¿Seguro que deseas eliminar esta factura?"
       },
@@ -1065,6 +1254,8 @@
         "initFail": "Fallo al cargar los datos iniciales.",
         "createFail": "Fallo al crear la factura.",
         "saveFail": "Fallo al guardar la factura.",
+        "cloneFail": "Fallo al clonar la factura.",
+        "cloneNoId": "La clonacion se completo, pero no devolvio ID.",
         "deleteFail": "Fallo al eliminar la factura.",
         "deleteSuccess": "Factura eliminada con éxito.",
         "companyAndCurrencyRequired": "Empresa y Moneda son obligatorias.",
@@ -1856,6 +2047,42 @@
         "links": "Relaciones",
         "more": "Mas"
       },
+      "enums": {
+        "priority": {
+          "low": "Baja",
+          "medium": "Media",
+          "high": "Alta"
+        },
+        "milestoneStatus": {
+          "planned": "Planificado",
+          "done": "Concluido",
+          "canceled": "Cancelado"
+        },
+        "checklistItemStatus": {
+          "open": "Abierto",
+          "done": "Concluido",
+          "blocked": "Bloqueado"
+        },
+        "projectStatus": {
+          "planning": "Planificacion",
+          "in_progress": "En progreso",
+          "done": "Concluido",
+          "canceled": "Cancelado"
+        },
+        "deliverableStatus": {
+          "planned": "Planificada",
+          "in_progress": "En ejecucion",
+          "delivered": "Entregada",
+          "canceled": "Cancelada"
+        },
+        "workOrderStatus": {
+          "open": "Abierta",
+          "doing": "En ejecucion",
+          "blocked": "Bloqueada",
+          "done": "Concluida",
+          "canceled": "Cancelada"
+        }
+      },
       "fields": {
         "name": "Nombre",
         "code": "Codigo",
@@ -1884,6 +2111,7 @@
         "actualStart": "Inicio real",
         "actualEnd": "Fin real",
         "estimatedHours": "Horas estimadas",
+        "incident": "Incidente",
         "workOrder": "Work order",
         "resource": "Recurso",
         "role": "Rol",

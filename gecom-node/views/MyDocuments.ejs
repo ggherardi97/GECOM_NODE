@@ -60,6 +60,14 @@
           </ul>
         </div>
 
+        <button type="button" class="btn btn-default" id="btnSwitchToList" style="margin-left:8px;">
+          <i class="fa fa-list"></i> Ver como lista
+        </button>
+
+        <button type="button" class="btn btn-default" id="btnSwitchToFolders" style="margin-left:8px; display:none;">
+          <i class="fa fa-folder-open"></i> Ver como pastas
+        </button>
+
         <button type="button" class="btn btn-white" id="btnOpenSelected" style="margin-left:8px; display:none;">
           <i class="fa fa-external-link"></i> <%= t('page.myDocuments.toolbar.open') %>
         </button>
@@ -85,6 +93,37 @@
     <!-- GRID -->
     <div class="row" id="itemsGrid">
       <div class="col-lg-12 text-muted"><%= t('page.clientDetails.documentsToolbar.loading') %></div>
+    </div>
+
+    <div class="row" id="documentsListWrap" style="display:none; padding: 0 15px 15px 15px;">
+      <div class="col-lg-12" style="padding:0;">
+        <div id="documentsSavedViewsHost"></div>
+        <div class="table-responsive">
+          <table class="table table-striped" id="documentsListTable">
+            <thead>
+              <tr id="documentsFiltersRow">
+                <th data-column-key="name"><input type="text" class="form-control input-sm" data-filter="name" placeholder="Filtrar por nome" /></th>
+                <th data-column-key="type"><input type="text" class="form-control input-sm" data-filter="type" placeholder="Filtrar por tipo" /></th>
+                <th data-column-key="related"><input type="text" class="form-control input-sm" data-filter="related" placeholder="Filtrar por relacionado" /></th>
+                <th data-column-key="storage"><input type="text" class="form-control input-sm" data-filter="storage" placeholder="Filtrar por origem" /></th>
+                <th data-column-key="created_at_text"><input type="text" class="form-control input-sm" data-filter="created_at_text" placeholder="Filtrar por data" /></th>
+                <th data-column-key="__actions" data-sv-fixed="right"></th>
+              </tr>
+              <tr id="documentsHeaderRow">
+                <th class="sortable" data-sort-key="name" data-column-key="name">Nome <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="type" data-column-key="type">Tipo <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="related" data-column-key="related">Relacionado <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="storage" data-column-key="storage">Origem <span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort-key="created_at_text" data-column-key="created_at_text">Criado em <span class="sort-indicator"></span></th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="documentsListBody">
+              <tr><td colspan="6" class="text-muted"><%= t('page.clientDetails.documentsToolbar.loading') %></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -149,9 +188,28 @@
   .file-box.is-selected:hover .select-badge {
     opacity: 1;
   }
+  #documentsSavedViewsHost .sv-bar {
+    margin: 0 0 10px 0;
+  }
+  #documentsSavedViewsHost .sv-actions {
+    margin-left: unset !important;
+  }
+  #documentsListTable th.sortable {
+    cursor: pointer;
+    user-select: none;
+  }
+  #documentsListTable th.sortable .sort-indicator {
+    margin-left: 6px;
+    font-size: 11px;
+    opacity: .75;
+  }
+  #documentsListTable tbody tr td {
+    vertical-align: middle;
+  }
 </style>
 
 <% contentFor('scripts') %>
+<script src="/js/common/savedViewsSimpleGrid.js"></script>
 <script src="/Assets/inspinia/js/plugins/typehead/bootstrap3-typeahead.min.js"></script>
 
 <script>
@@ -357,6 +415,8 @@
       currentSearch: "",
       lastLoadedItems: [],
       lastClick: { id: null, ts: 0 },
+      viewMode: "folders",
+      listGridApi: null,
     };
 
     // ---------------------------
@@ -448,9 +508,12 @@
     function updateTopActions() {
       const external = resolveExternalFlags();
       const count = state.selected.size;
-      $("#btnDeleteSelected").toggle(!external.isExternal && count > 0);
-      $("#btnOpenSelected").toggle(count === 1);
+      const isListMode = state.viewMode === "list";
+      $("#btnDeleteSelected").toggle(!isListMode && !external.isExternal && count > 0);
+      $("#btnOpenSelected").toggle(!isListMode && count === 1);
       $("#btnBack").toggle(state.navStack.length > 0);
+      $("#btnSwitchToList").toggle(!isListMode);
+      $("#btnSwitchToFolders").toggle(isListMode);
 
       if (state.navStack.length === 0) {
         $("#currentFolderLabel").text("");
@@ -681,6 +744,211 @@
       updateTopActions();
     }
 
+    function documentTypeLabel(item) {
+      if (isFolder(item)) return "Pasta";
+      if (isLink(item)) return isDriveLink(item) ? "Link" : "Link";
+      return "Arquivo";
+    }
+
+    function documentStorageLabel(item) {
+      const provider = String(item?.storage_provider || "").trim().toUpperCase();
+      if (!provider || provider === "NONE") return "-";
+      if (provider === "DRIVE") return "Drive";
+      return provider;
+    }
+
+    function documentRelatedLabel(item) {
+      const relatedName = String(item?.related_name || "").trim();
+      if (!relatedName) return "-";
+      const relatedTable = String(item?.related_table || "").trim().toLowerCase();
+      if (relatedTable === "company") return `Cliente: ${relatedName}`;
+      if (relatedTable === "process") return `Processo: ${relatedName}`;
+      return relatedName;
+    }
+
+    function documentRowView(item) {
+      return {
+        id: String(item?.id || "").trim(),
+        name: String(item?.name || item?.filename || t("page.documents.defaults.unnamed")).trim(),
+        type: documentTypeLabel(item),
+        related: documentRelatedLabel(item),
+        storage: documentStorageLabel(item),
+        created_at_text: formatDate(item?.created_at),
+      };
+    }
+
+    function renderDocumentListRow(item) {
+      const view = documentRowView(item);
+      const disabledDelete = resolveExternalFlags().isExternal ? "disabled" : "";
+      return `
+        <tr data-document-id="${escapeHtml(view.id)}">
+          <td data-column-key="name"><a href="javascript:void(0)" class="doc-list-open">${escapeHtml(view.name)}</a></td>
+          <td data-column-key="type">${escapeHtml(view.type)}</td>
+          <td data-column-key="related">${escapeHtml(view.related)}</td>
+          <td data-column-key="storage">${escapeHtml(view.storage)}</td>
+          <td data-column-key="created_at_text">${escapeHtml(view.created_at_text || "-")}</td>
+          <td data-column-key="__actions" style="white-space:nowrap;">
+            <button type="button" class="btn btn-xs btn-white doc-list-open" title="Abrir">
+              <i class="fa fa-external-link"></i>
+            </button>
+            <button type="button" class="btn btn-xs btn-danger doc-list-delete" title="Excluir" ${disabledDelete}>
+              <i class="fa fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function syncDocumentListHeaderMeta() {
+      const $headerCells = $("#documentsHeaderRow").children("th");
+      const $filterCells = $("#documentsFiltersRow").children("th");
+      const fallbackKeys = ["name", "type", "related", "storage", "created_at_text", "__actions"];
+
+      $headerCells.each(function (index) {
+        const $th = $(this);
+        if (!$th.attr("data-column-key")) {
+          const key = String($th.data("sort-key") || fallbackKeys[index] || "").trim();
+          if (key) $th.attr("data-column-key", key);
+        }
+      });
+
+      $filterCells.each(function (index) {
+        const $th = $(this);
+        if (!$th.attr("data-column-key")) {
+          const key = String($headerCells.eq(index).attr("data-column-key") || fallbackKeys[index] || "").trim();
+          if (key) $th.attr("data-column-key", key);
+        }
+      });
+
+      $headerCells.last().attr("data-sv-fixed", "right");
+      $filterCells.last().attr("data-sv-fixed", "right");
+      if ($headerCells.last().text().indexOf("AÃ") === 0) {
+        $headerCells.last().html("A&ccedil;&otilde;es");
+      }
+    }
+
+    function syncDocumentListToVisibleColumns() {
+      syncDocumentListHeaderMeta();
+
+      const headerColumns = $("#documentsHeaderRow").children("th").map(function () {
+        const $th = $(this);
+        return {
+          key: String($th.attr("data-column-key") || $th.data("sort-key") || "").trim(),
+          visible: $th.is(":visible")
+        };
+      }).get().filter(col => !!col.key);
+
+      if (!headerColumns.length) return;
+
+      $("#documentsFiltersRow").children("th").each(function (index) {
+        const meta = headerColumns[index];
+        $(this).toggle(meta ? meta.visible : true);
+      });
+
+      $("#documentsListBody").children("tr").each(function () {
+        const $tr = $(this);
+        const $cells = $tr.children("td");
+        if (!$cells.length) return;
+
+        const cellsByKey = new Map();
+        $cells.each(function () {
+          const key = String($(this).attr("data-column-key") || "").trim();
+          if (!key) return;
+          cellsByKey.set(key, $(this));
+        });
+        if (!cellsByKey.size) return;
+
+        const orderedCells = [];
+        headerColumns.forEach((col) => {
+          const $cell = cellsByKey.get(col.key);
+          if (!$cell || !$cell.length) return;
+          $cell.toggle(col.visible);
+          orderedCells.push($cell);
+        });
+
+        if (orderedCells.length) $tr.empty().append(orderedCells);
+      });
+    }
+
+    function wireDocumentListActions() {
+      $("#documentsListBody .doc-list-open").off("click").on("click", async function (e) {
+        e.preventDefault();
+        const id = String($(this).closest("tr").data("document-id") || "").trim();
+        if (!id) return;
+        const item = state.lastLoadedItems.find((row) => String(row?.id || "") === id);
+        if (!item) return;
+        await openItem(item);
+      });
+
+      $("#documentsListBody .doc-list-delete").off("click").on("click", async function (e) {
+        e.preventDefault();
+        const external = resolveExternalFlags();
+        if (external.isExternal) return;
+
+        const id = String($(this).closest("tr").data("document-id") || "").trim();
+        if (!id) return;
+
+        const ok = await confirmAsync(t("page.documents.confirm.deleteMany"), {
+          danger: true,
+          okText: t("page.layout.modal.delete"),
+          cancelText: t("page.layout.modal.cancel")
+        });
+        if (!ok) return;
+
+        try {
+          showLoading(true);
+          await apiDelete("/api/documents/" + encodeURIComponent(id));
+          await loadCurrentFolder();
+          await loadLeftFolders();
+        } catch (err) {
+          alert(err?.message || t("page.clientDetails.documents.messages.deleteFail"));
+        } finally {
+          showLoading(false);
+        }
+      });
+    }
+
+    async function ensureDocumentsListGrid() {
+      if (state.listGridApi || !window.SavedViewsSimpleGrid) return state.listGridApi;
+      syncDocumentListHeaderMeta();
+
+      state.listGridApi = await window.SavedViewsSimpleGrid.init({
+        entityName: "documents",
+        hostSelector: "#documentsSavedViewsHost",
+        tableSelector: "#documentsListTable",
+        filtersRowSelector: "#documentsFiltersRow",
+        headerRowSelector: "#documentsHeaderRow",
+        bodySelector: "#documentsListBody",
+        loadingText: t("page.clientDetails.documentsToolbar.loading"),
+        emptyText: t("page.clientDetails.documents.messages.noneFound"),
+        loadRows: async function () {
+          return state.lastLoadedItems.slice();
+        },
+        rowToView: documentRowView,
+        renderRow: renderDocumentListRow,
+        onAfterRender: function () {
+          syncDocumentListToVisibleColumns();
+          wireDocumentListActions();
+        }
+      });
+
+      return state.listGridApi;
+    }
+
+    async function applyDocumentsViewMode(mode) {
+      state.viewMode = mode === "list" ? "list" : "folders";
+
+      const isListMode = state.viewMode === "list";
+      $("#itemsGrid").toggle(!isListMode);
+      $("#documentsListWrap").toggle(isListMode);
+      updateTopActions();
+
+      if (isListMode) {
+        await ensureDocumentsListGrid();
+        if (state.listGridApi?.reload) await state.listGridApi.reload();
+      }
+    }
+
     function applySelectionClasses() {
       $("#itemsGrid .file-box").removeClass("is-selected");
       for (const selId of state.selected) {
@@ -909,9 +1177,13 @@ list.forEach(function (item) {
 
         renderGrid(list);
         clearSelection();
+        if (state.viewMode === "list" && state.listGridApi?.reload) {
+          await state.listGridApi.reload();
+        }
         await loadLeftFolders();
       } catch (e) {
         $("#itemsGrid").html('<div class="col-lg-12 text-danger">' + escapeHtml(e?.message || t("page.clientDetails.documents.messages.loadFail")) + '</div>');
+        $("#documentsListBody").html('<tr><td colspan="6" class="text-danger">' + escapeHtml(e?.message || t("page.clientDetails.documents.messages.loadFail")) + '</td></tr>');
       } finally {
         updateTopActions();
         showLoading(false);
@@ -1349,6 +1621,7 @@ list.forEach(function (item) {
 
       await loadCurrentFolder();
       await loadLeftFolders();
+      await applyDocumentsViewMode("folders");
 
       $("#btnBack").on("click", async function () {
         state.navStack.pop();
@@ -1362,6 +1635,8 @@ list.forEach(function (item) {
 
       $("#btnDeleteSelected").on("click", deleteSelected);
       $("#btnOpenSelected").on("click", openSelected);
+      $("#btnSwitchToList").on("click", async function () { await applyDocumentsViewMode("list"); });
+      $("#btnSwitchToFolders").on("click", async function () { await applyDocumentsViewMode("folders"); });
 
       $("#btnSearch").on("click", async function () {
         state.currentSearch = ($("#txtSearch").val() || "").trim();

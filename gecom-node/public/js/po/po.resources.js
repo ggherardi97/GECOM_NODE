@@ -72,6 +72,22 @@
     return value ? tt("page.po.common.yes", "Sim") : tt("page.po.common.no", "Nao");
   }
 
+  function resolvePortalBrand() {
+    const forced = String(global.__portalBrand || "").trim().toLowerCase();
+    if (forced === "convert" || forced === "gecom") return forced;
+    const host = String(global.location && global.location.hostname ? global.location.hostname : "").toLowerCase();
+    return host.includes("convert-plus.com") ? "convert" : "gecom";
+  }
+
+  function removeFieldFromTabs(tabs, fieldName) {
+    return (tabs || [])
+      .map((tab) => ({
+        ...tab,
+        fields: (tab.fields || []).filter((field) => String(field || "") !== String(fieldName || "")),
+      }))
+      .filter((tab) => (tab.fields || []).length > 0);
+  }
+
   const resources = {
     projectStatuses: {
       apiBase: "/api/project-operations/project-statuses",
@@ -85,7 +101,7 @@
       formFields: [
         { name: "name", label: "page.po.fields.name", type: "text", required: true },
         { name: "code", label: "page.po.fields.code", type: "text", required: true },
-        { name: "color", label: "page.po.fields.color", type: "text" },
+        { name: "color", label: "page.po.fields.color", type: "color", defaultValue: "#1c84c6" },
         { name: "sort_order", label: "page.po.fields.sortOrder", type: "number", step: "1", defaultValue: 0 },
         { name: "is_default", label: "page.po.fields.isDefault", type: "checkbox", defaultValue: false },
       ],
@@ -161,7 +177,7 @@
       formFields: [
         { name: "code", label: "page.po.fields.code", type: "text" },
         { name: "name", label: "page.po.fields.name", type: "text", required: true },
-        { name: "status_id", label: "page.po.fields.status", type: "lookup", lookup: "projectStatuses" },
+        { name: "status_id", label: "page.po.fields.status", type: "lookup", lookup: "projectStatuses", defaultLookupMatch: { is_default: true } },
         { name: "owner_user_id", label: "page.po.fields.owner", type: "lookup", lookup: "users" },
         { name: "company_id", label: "page.po.fields.company", type: "lookup", lookup: "companies" },
         { name: "start_date", label: "page.po.fields.startDate", type: "date" },
@@ -201,52 +217,65 @@
     milestones: {
       apiBase: "/api/project-operations/milestones",
       gridColumns: [
-        { key: "process_number", label: "page.po.fields.process" },
+        { key: "project_name", label: "page.po.fields.project" },
         { key: "title", label: "page.po.fields.title" },
         { key: "due_date", label: "page.po.fields.dueDate", format: toDateBr },
         { key: "status", label: "page.po.fields.status" },
       ],
       formFields: [
-        { name: "process_id", label: "page.po.fields.process", type: "lookup", lookup: "processes", required: true },
+        { name: "project_id", label: "page.po.fields.project", type: "lookup", lookup: "projects" },
         { name: "title", label: "page.po.fields.title", type: "text", required: true },
-        { name: "status", label: "page.po.fields.status", type: "select", options: ["PLANNED", "DONE", "CANCELED"], defaultValue: "PLANNED" },
+        {
+          name: "status",
+          label: "page.po.fields.status",
+          type: "select",
+          options: ["PLANNED", "DONE", "CANCELED"],
+          defaultValue: "PLANNED",
+          enumKey: "milestoneStatus",
+        },
         { name: "due_date", label: "page.po.fields.dueDate", type: "date" },
         { name: "sort_order", label: "page.po.fields.sortOrder", type: "number", step: "1", defaultValue: 0 },
         { name: "description", label: "page.po.fields.description", type: "textarea" },
       ],
       formTabs: [
-        { id: "basic", label: "page.po.tabs.basic", fields: ["process_id", "title", "status", "due_date", "sort_order"] },
+        { id: "basic", label: "page.po.tabs.basic", fields: ["project_id", "title", "status", "due_date", "sort_order"] },
         { id: "notes", label: "page.po.tabs.notes", fields: ["description"] },
       ],
       lookupSources: {
-        processes: "/api/processes",
+        projects: "/api/project-operations/projects",
       },
     },
     deliverables: {
       apiBase: "/api/project-operations/deliverables",
       gridColumns: [
-        { key: "process_number", label: "page.po.fields.process" },
+        { key: "project_name", label: "page.po.fields.project" },
         { key: "title", label: "page.po.fields.title" },
         { key: "due_date", label: "page.po.fields.dueDate", format: toDateBr },
         { key: "value_amount", label: "page.po.fields.valueAmount", format: toMoney },
         { key: "status_name", label: "page.po.fields.status" },
       ],
       formFields: [
-        { name: "process_id", label: "page.po.fields.process", type: "lookup", lookup: "processes", required: true },
+        { name: "project_id", label: "page.po.fields.project", type: "lookup", lookup: "projects" },
         { name: "title", label: "page.po.fields.title", type: "text", required: true },
-        { name: "status_id", label: "page.po.fields.status", type: "lookup", lookup: "deliverableStatuses" },
+        {
+          name: "status_id",
+          label: "page.po.fields.status",
+          type: "lookup",
+          lookup: "deliverableStatuses",
+          defaultLookupMatch: { is_default: true },
+        },
         { name: "due_date", label: "page.po.fields.dueDate", type: "date" },
         { name: "value_amount", label: "page.po.fields.valueAmount", type: "number", step: "0.01" },
         { name: "currency_id", label: "page.po.fields.currency", type: "lookup", lookup: "currencies" },
         { name: "description", label: "page.po.fields.description", type: "textarea" },
       ],
       formTabs: [
-        { id: "basic", label: "page.po.tabs.basic", fields: ["process_id", "title", "status_id", "due_date"] },
+        { id: "basic", label: "page.po.tabs.basic", fields: ["project_id", "title", "status_id", "due_date"] },
         { id: "amounts", label: "page.po.tabs.amounts", fields: ["value_amount", "currency_id"] },
         { id: "notes", label: "page.po.tabs.notes", fields: ["description"] },
       ],
       lookupSources: {
-        processes: "/api/processes",
+        projects: "/api/project-operations/projects",
         deliverableStatuses: "/api/project-operations/deliverable-statuses?is_active=true",
         currencies: "/api/currencies?is_active=true",
       },
@@ -254,17 +283,17 @@
     checklists: {
       apiBase: "/api/project-operations/checklists",
       gridColumns: [
-        { key: "process_number", label: "page.po.fields.process" },
+        { key: "project_name", label: "page.po.fields.project" },
         { key: "name", label: "page.po.fields.name" },
         { key: "items_count", label: "page.po.fields.itemsCount" },
       ],
       formFields: [
-        { name: "process_id", label: "page.po.fields.process", type: "lookup", lookup: "processes", required: true },
+        { name: "project_id", label: "page.po.fields.project", type: "lookup", lookup: "projects" },
         { name: "name", label: "page.po.fields.name", type: "text", required: true },
       ],
-      formTabs: [{ id: "basic", label: "page.po.tabs.basic", fields: ["process_id", "name"] }],
+      formTabs: [{ id: "basic", label: "page.po.tabs.basic", fields: ["project_id", "name"] }],
       lookupSources: {
-        processes: "/api/processes",
+        projects: "/api/project-operations/projects",
       },
     },
     checklistItems: {
@@ -279,7 +308,14 @@
       formFields: [
         { name: "checklist_id", label: "page.po.fields.checklist", type: "lookup", lookup: "checklists", required: true },
         { name: "title", label: "page.po.fields.title", type: "text", required: true },
-        { name: "status", label: "page.po.fields.status", type: "select", options: ["OPEN", "DONE", "BLOCKED"], defaultValue: "OPEN" },
+        {
+          name: "status",
+          label: "page.po.fields.status",
+          type: "select",
+          options: ["OPEN", "DONE", "BLOCKED"],
+          defaultValue: "OPEN",
+          enumKey: "checklistItemStatus",
+        },
         { name: "is_required", label: "page.po.fields.isRequired", type: "checkbox", defaultValue: true },
         { name: "assigned_user_id", label: "page.po.fields.assignedUser", type: "lookup", lookup: "users" },
         { name: "due_date", label: "page.po.fields.dueDate", type: "date" },
@@ -299,20 +335,33 @@
       gridColumns: [
         { key: "code", label: "page.po.fields.code" },
         { key: "title", label: "page.po.fields.title" },
+        { key: "incident_number", label: "Incidente" },
         { key: "project_name", label: "page.po.fields.project" },
-        { key: "process_number", label: "page.po.fields.process" },
         { key: "priority", label: "page.po.fields.priority" },
         { key: "status_name", label: "page.po.fields.status" },
       ],
       formFields: [
-        { name: "code", label: "page.po.fields.code", type: "text" },
+        { name: "code", label: "page.po.fields.code", type: "text", manualUnlock: true, autoPlaceholder: "Automático ao salvar" },
         { name: "title", label: "page.po.fields.title", type: "text", required: true },
-        { name: "priority", label: "page.po.fields.priority", type: "select", options: ["LOW", "MEDIUM", "HIGH"], defaultValue: "MEDIUM" },
-        { name: "status_id", label: "page.po.fields.status", type: "lookup", lookup: "workOrderStatuses" },
+        {
+          name: "priority",
+          label: "page.po.fields.priority",
+          type: "select",
+          options: ["LOW", "MEDIUM", "HIGH"],
+          defaultValue: "MEDIUM",
+          enumKey: "priority",
+        },
+        {
+          name: "status_id",
+          label: "page.po.fields.status",
+          type: "lookup",
+          lookup: "workOrderStatuses",
+          defaultLookupMatch: { is_default: true },
+        },
         { name: "owner_user_id", label: "page.po.fields.owner", type: "lookup", lookup: "users" },
+        { name: "incident_id", label: "page.po.fields.incident", type: "lookup", lookup: "incidents" },
         { name: "project_id", label: "page.po.fields.project", type: "lookup", lookup: "projects" },
-        { name: "process_id", label: "page.po.fields.process", type: "lookup", lookup: "processes" },
-        { name: "planned_start", label: "page.po.fields.plannedStart", type: "datetime-local" },
+        { name: "planned_start", label: "page.po.fields.plannedStart", type: "datetime-local", sectionDividerBefore: "Planejamento" },
         { name: "planned_end", label: "page.po.fields.plannedEnd", type: "datetime-local" },
         { name: "actual_start", label: "page.po.fields.actualStart", type: "datetime-local" },
         { name: "actual_end", label: "page.po.fields.actualEnd", type: "datetime-local" },
@@ -320,15 +369,31 @@
         { name: "description", label: "page.po.fields.description", type: "textarea" },
       ],
       formTabs: [
-        { id: "general", label: "page.po.tabs.general", fields: ["code", "title", "priority", "status_id", "owner_user_id"] },
-        { id: "links", label: "page.po.tabs.links", fields: ["project_id", "process_id"] },
-        { id: "planning", label: "page.po.tabs.planning", fields: ["planned_start", "planned_end", "actual_start", "actual_end", "estimated_hours", "description"] },
+        {
+          id: "general",
+          label: "page.po.tabs.general",
+          fields: [
+            "code",
+            "title",
+            "priority",
+            "status_id",
+            "owner_user_id",
+            "incident_id",
+            "project_id",
+            "planned_start",
+            "planned_end",
+            "actual_start",
+            "actual_end",
+            "estimated_hours",
+            "description",
+          ],
+        },
       ],
       lookupSources: {
         workOrderStatuses: "/api/project-operations/work-order-statuses?is_active=true",
         users: "/api/users",
+        incidents: "/api/service/incidents",
         projects: "/api/project-operations/projects",
-        processes: "/api/processes",
       },
     },
     workOrderAssignments: {
@@ -378,8 +443,14 @@
     },
   };
 
+  const portalBrand = resolvePortalBrand();
+  if (portalBrand === "convert") {
+    delete resources.projectProcesses;
+  }
+
   global.PoResources = {
     resources,
+    portalBrand,
     tt,
     waitForI18nReady,
     esc,

@@ -97,8 +97,12 @@
           .filter(Boolean);
       }
 
+      function getFilterInputs() {
+        return $filtersRow.find("input[data-filter], select[data-filter], textarea[data-filter]");
+      }
+
       function initFilterState() {
-        $filtersRow.find("[data-filter]").each(function () {
+        getFilterInputs().each(function () {
           const k = String($(this).data("filter") || "").trim();
           if (!k) return;
           state.filterState[k] = "";
@@ -117,7 +121,7 @@
 
       function applyFiltersFromSavedView(definition) {
         Object.keys(state.filterState).forEach((k) => { state.filterState[k] = ""; });
-        $filtersRow.find("[data-filter]").each(function () { $(this).val(""); });
+        getFilterInputs().each(function () { $(this).val(""); });
 
         const filters = Array.isArray(definition?.filters) ? definition.filters : [];
         filters.forEach((f) => {
@@ -125,7 +129,7 @@
           const value = String(f?.value || "");
           if (!field || !Object.prototype.hasOwnProperty.call(state.filterState, field)) return;
           state.filterState[field] = value;
-          $filtersRow.find(`[data-filter="${field}"]`).val(value);
+          getFilterInputs().filter(`[data-filter="${field}"]`).val(value);
         });
       }
 
@@ -206,7 +210,7 @@
       }
 
       function bindEvents() {
-        $filtersRow.find("[data-filter]").off("input.svfg change.svfg").on("input.svfg change.svfg", function () {
+        getFilterInputs().off("input.svfg change.svfg").on("input.svfg change.svfg", function () {
           const key = String($(this).data("filter") || "").trim();
           if (!key) return;
           state.filterState[key] = String($(this).val() || "");

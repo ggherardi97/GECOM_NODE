@@ -1,0 +1,256 @@
+<style>
+  .schedule-shell { margin-top: 18px; }
+  .schedule-toolbar {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .schedule-title h2 { margin:0; font-size:24px; color:#17324d; font-weight:700; }
+  .schedule-title p { margin:6px 0 0; color:#6f8294; }
+  .schedule-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .schedule-metrics {
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .schedule-metric {
+    background:linear-gradient(135deg, #fff 0%, #f6fbff 100%);
+    border:1px solid #dde8f0;
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:0 8px 24px rgba(20, 53, 86, 0.06);
+  }
+  .schedule-metric .label { display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#7b8d9d; margin-bottom:8px; }
+  .schedule-metric .value { font-size:28px; font-weight:700; color:#17324d; }
+  .schedule-layout {
+    display:grid;
+    grid-template-columns:320px minmax(0, 1fr);
+    gap:18px;
+    align-items:start;
+  }
+  .schedule-panel,
+  .schedule-board-card {
+    background:#fff;
+    border:1px solid #dde8f0;
+    border-radius:18px;
+    box-shadow:0 14px 34px rgba(20, 53, 86, 0.08);
+  }
+  .schedule-panel-head,
+  .schedule-board-head {
+    padding:16px 18px;
+    border-bottom:1px solid #edf2f7;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+  }
+  .schedule-panel-head h3,
+  .schedule-board-head h3 { margin:0; font-size:16px; color:#17324d; font-weight:700; }
+  .schedule-panel-head p,
+  .schedule-board-head p { margin:4px 0 0; color:#7b8d9d; font-size:12px; }
+  .schedule-backlog {
+    max-height:calc(100vh - 280px);
+    overflow:auto;
+    padding:14px;
+  }
+  .schedule-empty {
+    padding:24px 18px;
+    text-align:center;
+    color:#7b8d9d;
+  }
+  .board-work-card {
+    border:1px solid #e1e9ef;
+    border-left:5px solid #1c84c6;
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:12px;
+    background:linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+    cursor:grab;
+  }
+  .board-work-card.is-selected {
+    border-color:#23a3ff;
+    box-shadow:0 0 0 2px rgba(35, 163, 255, 0.18);
+  }
+  .board-work-meta { display:flex; justify-content:space-between; gap:8px; margin-bottom:8px; align-items:center; }
+  .board-work-code { font-size:12px; font-weight:700; color:#1c84c6; text-transform:uppercase; letter-spacing:.04em; }
+  .board-work-priority { font-size:11px; padding:4px 8px; border-radius:999px; background:#edf6ff; color:#205d9c; font-weight:700; }
+  .board-work-title { font-weight:700; color:#17324d; margin-bottom:6px; }
+  .board-work-text { color:#6f8294; font-size:12px; line-height:1.45; max-height:34px; overflow:hidden; }
+  .board-work-footer { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .board-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 8px;
+    border-radius:999px;
+    background:#f2f7fb;
+    color:#597086;
+    font-size:11px;
+    font-weight:600;
+  }
+  .board-work-actions { display:flex; gap:8px; margin-top:12px; }
+  .schedule-board-scroller {
+    overflow:auto;
+    padding:0 0 16px;
+  }
+  .schedule-board-grid {
+    min-width:980px;
+    display:grid;
+    grid-template-columns:72px repeat(var(--resource-count, 1), minmax(220px, 1fr));
+  }
+  .schedule-time-col,
+  .schedule-resource-col { border-right:1px solid #edf2f7; }
+  .schedule-resource-head,
+  .schedule-time-head {
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:#fff;
+    min-height:76px;
+    border-bottom:1px solid #edf2f7;
+  }
+  .schedule-time-head { padding:16px 10px; }
+  .schedule-resource-head { padding:14px 14px 12px; }
+  .schedule-resource-name { font-weight:700; color:#17324d; }
+  .schedule-resource-meta { color:#7b8d9d; font-size:12px; margin-top:4px; }
+  .schedule-lane {
+    position:relative;
+    height:720px;
+    background:
+      linear-gradient(to bottom, rgba(237, 242, 247, 0.9) 1px, transparent 1px) top left / 100% 60px repeat-y,
+      linear-gradient(180deg, #fbfdff 0%, #f6fafd 100%);
+  }
+  .schedule-lane.is-over { background-color:#eef7ff; }
+  .schedule-slot {
+    position:absolute;
+    left:0;
+    right:0;
+    height:60px;
+    border-bottom:1px dashed rgba(28, 132, 198, 0.09);
+  }
+  .schedule-slot-label {
+    height:60px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding-top:4px;
+    color:#90a1b2;
+    font-size:11px;
+  }
+  .schedule-appointment {
+    position:absolute;
+    left:8px;
+    right:8px;
+    border-radius:14px;
+    color:#16324a;
+    padding:10px 12px;
+    overflow:hidden;
+    box-shadow:0 8px 18px rgba(17, 49, 78, 0.12);
+    border:1px solid rgba(18, 66, 107, 0.08);
+    cursor:grab;
+  }
+  .schedule-appointment-title { font-weight:700; font-size:12px; margin-bottom:4px; }
+  .schedule-appointment-meta { font-size:11px; opacity:.8; }
+  .schedule-appointment.is-linkable { outline:2px dashed rgba(28, 132, 198, 0.25); }
+  .schedule-legend { display:flex; gap:10px; flex-wrap:wrap; color:#708599; font-size:12px; }
+  .schedule-legend span { display:inline-flex; align-items:center; gap:6px; }
+  .schedule-legend i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .schedule-modal-list { display:grid; gap:10px; }
+  .schedule-suggestion-card {
+    border:1px solid #e2e9ef;
+    border-radius:12px;
+    padding:12px 14px;
+    background:#fbfdff;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+  }
+  @media (max-width: 1200px) {
+    .schedule-layout { grid-template-columns:1fr; }
+    .schedule-backlog { max-height:none; }
+  }
+</style>
+
+<div class="wrapper wrapper-content animated fadeInRight schedule-shell">
+  <div class="schedule-toolbar">
+    <div class="schedule-title">
+      <h2>Schedule Board</h2>
+      <p>Distribua work orders por recurso, respeitando agenda, exceções e capacidade.</p>
+    </div>
+    <div class="schedule-controls">
+      <input id="scheduleBoardDate" type="date" class="form-control" style="width:180px;">
+      <button id="btnScheduleBoardRefresh" class="btn btn-white"><i class="fa fa-refresh"></i> Atualizar</button>
+      <a href="/project-operations/work-orders" class="btn btn-default"><i class="fa fa-wrench"></i> Work Orders</a>
+    </div>
+  </div>
+
+  <div class="schedule-metrics">
+    <div class="schedule-metric">
+      <span class="label">Recursos Ativos</span>
+      <div class="value" id="metricResources">0</div>
+    </div>
+    <div class="schedule-metric">
+      <span class="label">Agendamentos do Dia</span>
+      <div class="value" id="metricAppointments">0</div>
+    </div>
+    <div class="schedule-metric">
+      <span class="label">Work Orders Sem Agenda</span>
+      <div class="value" id="metricUnscheduled">0</div>
+    </div>
+  </div>
+
+  <div class="schedule-layout">
+    <aside class="schedule-panel">
+      <div class="schedule-panel-head">
+        <div>
+          <h3>Backlog</h3>
+          <p>Work orders sem appointment. Arraste para uma faixa horária ou use sugestões.</p>
+        </div>
+      </div>
+      <div id="scheduleBacklog" class="schedule-backlog">
+        <div class="schedule-empty">Carregando board...</div>
+      </div>
+    </aside>
+
+    <section class="schedule-board-card">
+      <div class="schedule-board-head">
+        <div>
+          <h3>Recursos</h3>
+          <p>Clique em uma work order para destacar e arraste para o horário desejado.</p>
+        </div>
+        <div class="schedule-legend">
+          <span><i style="background:#1c84c6;"></i> Work order agendada</span>
+          <span><i style="background:#1ab394;"></i> Vinculada a incidente</span>
+        </div>
+      </div>
+      <div class="schedule-board-scroller">
+        <div id="scheduleBoardGrid" class="schedule-board-grid"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="scheduleSuggestionsModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <h4 class="modal-title">Sugestões de agendamento</h4>
+      </div>
+      <div class="modal-body">
+        <div id="scheduleSuggestionsBody" class="schedule-modal-list">
+          <div class="schedule-empty">Carregando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script src="/js/servico/serviceApi.js"></script>
+<script src="/js/servico/schedule-board.page.js"></script>

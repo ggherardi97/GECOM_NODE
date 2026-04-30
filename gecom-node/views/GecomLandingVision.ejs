@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GECOM - conceito moderno de landing page para comercio exterior.">
+  <meta name="author" content="GECOM">
+  <title>GECOM - Landing Vision</title>
+  <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --vision-bg: #07111f;
+      --vision-panel: rgba(12, 24, 43, 0.78);
+      --vision-panel-soft: rgba(15, 23, 42, 0.52);
+      --vision-line: rgba(148, 163, 184, 0.18);
+      --vision-cyan: #67e8f9;
+      --vision-mint: #6ee7b7;
+      --vision-sky: #38bdf8;
+      --vision-text: #e2e8f0;
+      --vision-muted: rgba(226, 232, 240, 0.72);
+      --vision-shadow: 0 32px 80px rgba(2, 8, 23, 0.38);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--vision-text);
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.22), transparent 24%),
+        radial-gradient(circle at 84% 14%, rgba(110, 231, 183, 0.18), transparent 18%),
+        radial-gradient(circle at 70% 68%, rgba(56, 189, 248, 0.16), transparent 22%),
+        linear-gradient(180deg, #07111f 0%, #081726 38%, #0a1220 100%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .vision-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .vision-shell::before,
+    .vision-shell::after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.24;
+      pointer-events: none;
+    }
+
+    .vision-shell::before {
+      top: -140px;
+      right: -160px;
+      background: #38bdf8;
+    }
+
+    .vision-shell::after {
+      bottom: -180px;
+      left: -120px;
+      background: #0f766e;
+    }
+
+    .vision-container {
+      width: min(1240px, calc(100% - 32px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .vision-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 28px 0 18px;
+    }
+
+    .vision-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .vision-brand-mark {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.24), rgba(56, 189, 248, 0.84));
+      border: 1px solid rgba(103, 232, 249, 0.3);
+      box-shadow: 0 20px 40px rgba(56, 189, 248, 0.16);
+    }
+
+    .vision-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .vision-nav a {
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: var(--vision-muted);
+      background: rgba(15, 23, 42, 0.48);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .vision-nav a:hover {
+      color: #fff;
+      background: rgba(14, 165, 233, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .vision-nav a.is-active,
+    .vision-nav a.vision-nav-login {
+      color: #04121f;
+      background: linear-gradient(135deg, var(--vision-cyan), var(--vision-mint));
+      border-color: transparent;
+    }
+
+    .vision-nav a.vision-nav-login:hover {
+      color: #04121f;
+      background: linear-gradient(135deg, #9be7f4, #8cf0c0);
+    }
+
+    .vision-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 26px;
+      padding: 18px 0 28px;
+      align-items: center;
+    }
+
+    .vision-hero-copy { padding: 26px 0; }
+
+    .vision-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(103, 232, 249, 0.08);
+      border: 1px solid rgba(103, 232, 249, 0.14);
+      color: var(--vision-cyan);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .vision-hero h1 {
+      margin: 20px 0 18px;
+      font-size: clamp(46px, 7.2vw, 92px);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      font-weight: 700;
+      max-width: 780px;
+    }
+
+    .vision-hero h1 span {
+      display: block;
+      color: transparent;
+      background: linear-gradient(135deg, #ffffff 0%, var(--vision-cyan) 46%, var(--vision-mint) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .vision-hero p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--vision-muted);
+      font-size: 18px;
+      line-height: 1.82;
+    }
+
+    .vision-hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .vision-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .vision-btn:hover { transform: translateY(-2px); }
+
+    .vision-btn--primary {
+      color: #052037;
+      background: linear-gradient(135deg, var(--vision-cyan) 0%, var(--vision-mint) 100%);
+      box-shadow: 0 18px 36px rgba(103, 232, 249, 0.2);
+    }
+
+    .vision-btn--ghost {
+      color: #fff;
+      border-color: rgba(226, 232, 240, 0.14);
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .vision-dashboard {
+      position: relative;
+      padding: 26px;
+      border-radius: 34px;
+      border: 1px solid var(--vision-line);
+      background: linear-gradient(180deg, rgba(8, 18, 32, 0.84) 0%, rgba(13, 25, 45, 0.72) 100%);
+      box-shadow: var(--vision-shadow);
+      overflow: hidden;
+    }
+
+    .vision-dashboard::before {
+      content: "";
+      position: absolute;
+      inset: 18px 18px auto auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(103, 232, 249, 0.12);
+      filter: blur(12px);
+    }
+
+    .vision-dashboard-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+    }
+
+    .vision-panel {
+      padding: 18px;
+      border-radius: 24px;
+      background: var(--vision-panel);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .vision-panel small {
+      display: block;
+      color: rgba(226, 232, 240, 0.58);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 11px;
+    }
+
+    .vision-big-number {
+      font-size: 46px;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      margin-bottom: 6px;
+    }
+
+    .vision-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .vision-mini {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .vision-mini strong {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .vision-mini span {
+      color: var(--vision-muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .vision-tabs { display: block; }
+    .vision-tab-pane { display: none; }
+    .vision-tab-pane.is-active { display: block; }
+
+    .vision-collection {
+      display: grid;
+      gap: 18px;
+      padding: 12px 0 74px;
+    }
+
+    body:not(.vision-home-active) .vision-collection { padding-top: 26px; }
+
+    .vision-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .vision-bento {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .vision-card {
+      padding: 26px;
+      border-radius: 30px;
+      background: var(--vision-panel-soft);
+      border: 1px solid var(--vision-line);
+      box-shadow: 0 18px 44px rgba(2, 8, 23, 0.2);
+      backdrop-filter: blur(14px);
+    }
+
+    .vision-card--tall { min-height: 100%; }
+    .vision-card--accent { background: linear-gradient(160deg, rgba(8, 47, 73, 0.88), rgba(15, 118, 110, 0.7)); }
+    .vision-card--light { background: linear-gradient(160deg, rgba(56, 189, 248, 0.14), rgba(14, 165, 233, 0.04)); }
+
+    .vision-card h2,
+    .vision-card h3 {
+      margin: 0 0 12px;
+      font-size: 30px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+
+    .vision-card p {
+      margin: 0;
+      color: var(--vision-muted);
+      font-size: 15px;
+      line-height: 1.82;
+    }
+
+    .vision-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .vision-item {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .vision-item-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(103, 232, 249, 0.08);
+      color: var(--vision-cyan);
+      font-size: 18px;
+    }
+
+    .vision-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+      color: #fff;
+    }
+
+    .vision-steps {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .vision-step {
+      position: relative;
+      padding: 18px 18px 18px 74px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .vision-step-index {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #04121f;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--vision-cyan), var(--vision-mint));
+    }
+
+    .vision-quote {
+      font-size: 22px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.94);
+      margin-bottom: 20px;
+    }
+
+    .vision-signature {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .vision-signature-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 700;
+    }
+
+    .vision-footer-cta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: center;
+      padding: 28px;
+      border-radius: 32px;
+      border: 1px solid var(--vision-line);
+      background: linear-gradient(135deg, rgba(8, 18, 32, 0.82), rgba(8, 47, 73, 0.7));
+      box-shadow: var(--vision-shadow);
+    }
+
+    .vision-footer-cta h3 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.04em;
+    }
+
+    .vision-footer-cta p {
+      margin: 0;
+      color: var(--vision-muted);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1080px) {
+      .vision-hero,
+      .vision-grid,
+      .vision-footer-cta { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 780px) {
+      .vision-container { width: min(100% - 20px, 1240px); }
+      .vision-topbar { padding-top: 18px; }
+      .vision-nav { display: none; }
+      .vision-row,
+      .vision-bento { grid-template-columns: 1fr; }
+      .vision-hero { padding-top: 12px; }
+      .vision-hero h1 { font-size: clamp(40px, 15vw, 64px); }
+    }
+  </style>
+</head>
+<body class="vision-home-active">
+  <% if (showGecomSwitcher) { %>
+    <%- include('partials/gecomLandingSwitcher', { currentLayout: gecomLayout || 'vision' }) %>
+  <% } %>
+
+  <div class="vision-shell">
+    <div class="vision-container">
+      <header class="vision-topbar">
+        <div class="vision-brand">
+          <div class="vision-brand-mark">GC</div>
+          <div>GECOM Vision Layer</div>
+        </div>
+        <nav class="vision-nav">
+          <a href="#vision-home" class="is-active" data-vision-tab="vision-home">Início</a>
+          <a href="#vision-operacao" data-vision-tab="vision-operacao">Operação</a>
+          <a href="#vision-comando" data-vision-tab="vision-comando">Comando</a>
+          <a href="#vision-implantacao" data-vision-tab="vision-implantacao">Implantação</a>
+          <a href="/" class="vision-nav-login">Entrar</a>
+        </nav>
+      </header>
+
+      <div class="vision-tabs">
+        <div id="vision-home" class="vision-tab-pane is-active">
+          <section class="vision-hero">
+            <div class="vision-hero-copy">
+              <span class="vision-kicker"><i class="fa fa-bolt"></i> conceito original para a Gecom</span>
+              <h1>
+                Comercio exterior com
+                <span>clareza operacional, comando visual e velocidade de decisao.</span>
+              </h1>
+              <p>
+                Esta terceira proposta abandona a estrutura tradicional de landing e apresenta a GECOM
+                como uma camada de coordenacao para clientes, operacao e financeiro. A ideia e passar
+                sensacao de plataforma premium, precisa e pronta para crescer com a empresa.
+              </p>
+              <div class="vision-hero-actions">
+                <a class="vision-btn vision-btn--primary" href="/">
+                  <i class="fa fa-rocket"></i>
+                  Solicitar demonstracao
+                </a>
+                <a class="vision-btn vision-btn--ghost" href="#vision-comando" data-vision-tab="vision-comando">
+                  <i class="fa fa-play-circle-o"></i>
+                  Ver a narrativa da pagina
+                </a>
+              </div>
+            </div>
+
+            <div class="vision-dashboard">
+              <div class="vision-dashboard-grid">
+                <div class="vision-panel">
+                  <small>Pulse da operacao</small>
+                  <div class="vision-big-number">94%</div>
+                  <div>das etapas monitoradas com historico, alertas e contexto no mesmo lugar.</div>
+                </div>
+                <div class="vision-row">
+                  <div class="vision-mini">
+                    <strong>+1.200</strong>
+                    <span>atualizacoes de processo, documentos e eventos em uma linguagem visual simples.</span>
+                  </div>
+                  <div class="vision-mini">
+                    <strong>17min</strong>
+                    <span>para gestores sairem do panorama geral e entrarem no detalhe que precisa de acao.</span>
+                  </div>
+                </div>
+                <div class="vision-panel">
+                  <small>Leitura compartilhada</small>
+                  <div>Operacao, cliente e diretoria passam a olhar para o mesmo quadro de controle, sem narrativas paralelas.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="vision-collection">
+            <section class="vision-footer-cta">
+              <div>
+                <h3>GECOM para empresas que precisam decidir com mais contexto e operar com menos atrito.</h3>
+                <p>
+                  Se a ideia for apresentar a Gecom com mais impacto visual e uma narrativa mais premium,
+                  esta versao pode ser a opcao mais memoravel para mostrar nesta semana.
+                </p>
+              </div>
+              <a class="vision-btn vision-btn--primary" href="/">
+                <i class="fa fa-paper-plane-o"></i>
+                Marcar apresentacao
+              </a>
+            </section>
+          </div>
+        </div>
+
+        <div id="vision-operacao" class="vision-tab-pane">
+          <div class="vision-collection">
+            <section class="vision-grid">
+              <article class="vision-card vision-card--accent vision-card--tall">
+                <h2>Uma plataforma que pensa como a operacao acontece de verdade.</h2>
+                <p>
+                  Em vez de apresentar apenas modulos, esta landing mostra a GECOM como uma infraestrutura
+                  de visibilidade. O que entra em jogo aqui e coordenacao: documentos, etapas, comunicacao,
+                  follow-up, financeiro e previsibilidade.
+                </p>
+                <div class="vision-list">
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-anchor"></i></div>
+                    <div>
+                      <strong>Ritmo de embarque sob controle</strong>
+                      <div>Status, ocorrencias e proximos passos em uma leitura que elimina busca manual por informacao.</div>
+                    </div>
+                  </div>
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-clone"></i></div>
+                    <div>
+                      <strong>Historico que explica o presente</strong>
+                      <div>Quem atualizou, quando mudou e qual evento precisa de resposta aparecem no mesmo fluxo.</div>
+                    </div>
+                  </div>
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-random"></i></div>
+                    <div>
+                      <strong>Colaboracao sem ruido</strong>
+                      <div>O time deixa de trabalhar por memoria, e-mail solto e planilha paralela.</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <div class="vision-bento">
+                <article class="vision-card vision-card--light">
+                  <h3>Portal com presenca premium</h3>
+                  <p>O cliente percebe organizacao antes mesmo de perguntar. Transparencia operacional vira parte do servico.</p>
+                </article>
+                <article class="vision-card">
+                  <h3>Financeiro conectado ao processo</h3>
+                  <p>Custos, contratos e etapas deixam de andar em trilhos separados e passam a reforcar a mesma narrativa de controle.</p>
+                </article>
+                <article class="vision-card">
+                  <h3>IA como apoio, nao enfeite</h3>
+                  <p>A inteligencia aparece para resumir contexto, acelerar leitura e orientar prioridade de acao.</p>
+                </article>
+                <article class="vision-card">
+                  <h3>Cada tenant com sua propria presenca</h3>
+                  <p>A plataforma agora suporta landing page por tenant, o que transforma configuracao em extensao da marca do cliente.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="vision-comando" class="vision-tab-pane">
+          <div class="vision-collection">
+            <section class="vision-grid">
+              <article class="vision-card">
+                <h2>Como esta pagina vende a GECOM sem parecer uma landing comum.</h2>
+                <p>
+                  O conceito aposta em contraste alto, blocos editoriais e uma linguagem de comando.
+                  A sensacao e de cockpit: dados organizados, decisao guiada e software preparado para quem responde pela operacao.
+                </p>
+                <div class="vision-steps">
+                  <div class="vision-step">
+                    <div class="vision-step-index">01</div>
+                    <strong>Apresenta a visao</strong>
+                    <div>Primeiro mostra posicionamento e impacto, antes de entrar na lista de funcionalidades.</div>
+                  </div>
+                  <div class="vision-step">
+                    <div class="vision-step-index">02</div>
+                    <strong>Conecta valor a rotina</strong>
+                    <div>Depois traduz a plataforma em controle de prazos, historico, cliente e financeiro.</div>
+                  </div>
+                  <div class="vision-step">
+                    <div class="vision-step-index">03</div>
+                    <strong>Fecha com implantacao segura</strong>
+                    <div>Termina reduzindo objecao: entrada gradual, configuracao por tenant e ganhos visiveis cedo.</div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="vision-card vision-card--accent">
+                <div class="vision-quote">
+                  "A proposta aqui nao e parecer uma template pronta. E fazer a Gecom se apresentar como um centro de comando para operacoes complexas."
+                </div>
+                <p>Esse layout foi desenhado para impressionar em apresentacao comercial, demo ao vivo e decisao de diretoria.</p>
+                <div class="vision-signature">
+                  <div class="vision-signature-mark">GC</div>
+                  <div>
+                    <strong>Conceito Vision</strong>
+                    <div style="color: var(--vision-muted);">Design pensado para posicionamento premium e narrativa de software operacional.</div>
+                  </div>
+                </div>
+              </article>
+            </section>
+          </div>
+        </div>
+
+        <div id="vision-implantacao" class="vision-tab-pane">
+          <div class="vision-collection">
+            <section class="vision-grid">
+              <article class="vision-card vision-card--tall">
+                <h2>Implantacao orientada por prioridade, nao por burocracia.</h2>
+                <p>
+                  A pagina fecha com uma mensagem importante para venda complexa: a GECOM entra por onde existe mais dor,
+                  organiza o que esta disperso e expande com governanca. Isso reduz ansiedade de troca e aumenta percepcao de aderencia.
+                </p>
+                <div class="vision-list">
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-search"></i></div>
+                    <div>
+                      <strong>Diagnostico rapido</strong>
+                      <div>Mapeia gargalos e escolhe um primeiro fluxo com impacto perceptivel.</div>
+                    </div>
+                  </div>
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-sliders"></i></div>
+                    <div>
+                      <strong>Configuracao por tenant</strong>
+                      <div>Cada operacao ganha sua propria landing, menus, tema e organizacao conforme o contexto real.</div>
+                    </div>
+                  </div>
+                  <div class="vision-item">
+                    <div class="vision-item-mark"><i class="fa fa-bar-chart"></i></div>
+                    <div>
+                      <strong>Valor demonstrado cedo</strong>
+                      <div>Quando a equipe ve controle e leitura melhorando, a adesao deixa de ser empurrada.</div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <div class="vision-bento">
+                <article class="vision-card">
+                  <h3>Feita para diretores</h3>
+                  <p>Passa autoridade, governanca e sensacao de sistema robusto para operacao critica.</p>
+                </article>
+                <article class="vision-card">
+                  <h3>Feita para comercial</h3>
+                  <p>Entrega uma historia mais forte do que "tem modulo X, Y e Z".</p>
+                </article>
+                <article class="vision-card vision-card--light">
+                  <h3>Feita para produto</h3>
+                  <p>Permite derivar componentes visuais fortes para futuras paginas de campanha.</p>
+                </article>
+                <article class="vision-card vision-card--accent">
+                  <h3>Feita para memoria de marca</h3>
+                  <p>Tem personalidade propria e nao se confunde com landing generica de software.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      function setActiveVisionTab(tabId) {
+        var targetId = String(tabId || 'vision-home').trim() || 'vision-home';
+        document.body.classList.toggle('vision-home-active', targetId === 'vision-home');
+        document.querySelectorAll('[data-vision-tab]').forEach(function (link) {
+          link.classList.toggle('is-active', String(link.getAttribute('data-vision-tab') || '') === targetId);
+        });
+        document.querySelectorAll('.vision-tab-pane').forEach(function (pane) {
+          pane.classList.toggle('is-active', String(pane.id || '') === targetId);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      document.querySelectorAll('[data-vision-tab]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          setActiveVisionTab(link.getAttribute('data-vision-tab'));
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

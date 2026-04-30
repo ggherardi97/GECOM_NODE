@@ -441,6 +441,36 @@
             }
         }
 
+        .login-legal-links {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #6b727a;
+        }
+
+        .login-legal-links a {
+            color: #1778a7;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .login-legal-links .separator {
+            margin: 0 6px;
+            color: #9aa4af;
+        }
+
+        .legal-modal-content h5 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .legal-modal-content p,
+        .legal-modal-content li {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #5f6770;
+        }
+
     </style>
 </head>
 <body class="gray-bg" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; position: relative;">
@@ -545,7 +575,7 @@
     </div>
 
     <div class="modal inmodal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog" id="loginModalDialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only"><%= t('page.login.modal.close') %></span></button>
@@ -601,6 +631,11 @@
         <div id="registerCtaWrapper" style="display:none; margin-top:8px;">
             <a style="color: #676a6c;
     font-size: 11px;" id="registerCta" href="/cadastro"><small>Não é cadastrado? Clique aqui para se cadastrar</small></a>
+        </div>
+        <div class="login-legal-links">
+            <a href="/privacy-policy" class="js-open-login-legal" data-legal-doc="privacy">Privacy Policy</a>
+            <span class="separator">|</span>
+            <a href="/terms-of-use" class="js-open-login-legal" data-legal-doc="terms">Terms of Use</a>
         </div>
         <p style="display: none;" class="text-muted text-center"><small><%= t('page.login.actions.hasAccessNumber') %></small></p>
         <a style="display: none;" class="btn btn-sm btn-white btn-block" onclick="changeView('#acessNumberForm')"><%= t('page.login.actions.accessNumberCta') %></a>
@@ -788,8 +823,63 @@
         }
 
         function showModalMessage(title, message) {
+            $("#loginModalDialog").removeClass("modal-lg");
             $("#modalTitle").text(title || "<%= t('page.login.messages.defaultModalTitle') %>");
             $("#loginModalBody").empty().append($("<p/>", { class: "m-b-none", text: message || "" }));
+            $("#loginModal").modal("show");
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? "" : value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function resolveLegalBrandName() {
+            return resolvePortalBrand() === "gecom" ? "GECOM" : "Convert Plus";
+        }
+
+        function getLegalDocumentContent(docType) {
+            const brandName = escapeHtml(resolveLegalBrandName());
+            const docKey = String(docType || "").toLowerCase();
+
+            if (docKey === "privacy") {
+                return {
+                    title: "Privacy Policy",
+                    bodyHtml:
+                        '<div class="legal-modal-content">' +
+                        "<h5>Politica de Privacidade - " + brandName + "</h5>" +
+                        "<p>Coletamos apenas os dados necessarios para criar conta, operar o sistema e manter suporte tecnico.</p>" +
+                        "<p>Os dados de cadastro e uso sao tratados com controles de seguranca, acesso restrito e registro de auditoria.</p>" +
+                        "<p>Nao vendemos dados pessoais. Compartilhamentos ocorrem apenas com parceiros essenciais, como provedor de pagamento e infraestrutura.</p>" +
+                        "<p>O titular pode solicitar atualizacao, exportacao ou exclusao de dados conforme legislacao aplicavel.</p>" +
+                        "<p>Ultima atualizacao: 11/03/2026.</p>" +
+                        "</div>"
+                };
+            }
+
+            return {
+                title: "Terms of Use",
+                bodyHtml:
+                    '<div class="legal-modal-content">' +
+                    "<h5>Termos de Uso - " + brandName + "</h5>" +
+                    "<p>Ao usar a plataforma, voce concorda em fornecer informacoes corretas e manter a confidencialidade de suas credenciais.</p>" +
+                    "<p>O periodo de avaliacao e condicoes de cobranca seguem o plano contratado no momento do cadastro.</p>" +
+                    "<p>O uso da conta deve respeitar leis vigentes e boas praticas de seguranca da informacao.</p>" +
+                    "<p>Cancelamentos podem ser solicitados a qualquer momento pela area Perfil - Meu Plano.</p>" +
+                    "<p>Ultima atualizacao: 11/03/2026.</p>" +
+                    "</div>"
+            };
+        }
+
+        function openLoginLegalModal(docType) {
+            const doc = getLegalDocumentContent(docType);
+            $("#modalTitle").text(doc.title);
+            $("#loginModalDialog").addClass("modal-lg");
+            $("#loginModalBody").html(doc.bodyHtml);
             $("#loginModal").modal("show");
         }
 
@@ -922,6 +1012,58 @@
             setTimeout(() => $("#email").focus(), 200);
         }
 
+        function normalizePathForRedirect(value) {
+            try {
+                const url = new URL(String(value || ""), window.location.origin);
+                const path = String(url.pathname || "/").replace(/\/+$/, "") || "/";
+                if (!path.startsWith("/") || path === "/") return "";
+                return path;
+            } catch {
+                return "";
+            }
+        }
+
+        function resolveTenantIdForScopedStorage(user) {
+            return String(
+                user?.tenant_id ||
+                user?.tenantId ||
+                user?.user?.tenant_id ||
+                user?.user?.tenantId ||
+                ""
+            ).trim();
+        }
+
+        function getScopedStorageKey(baseKey, tenantId) {
+            const cleanTenantId = String(tenantId || "").trim();
+            return cleanTenantId ? `${baseKey}.${cleanTenantId}` : baseKey;
+        }
+
+        function readPinnedSidebarMenuForUser(user) {
+            const tenantId = resolveTenantIdForScopedStorage(user);
+            const scopedKey = getScopedStorageKey("gecom.sidebar.pinnedMenu.v1", tenantId);
+            const areaKey = getScopedStorageKey("gecom.sidebar.area", tenantId);
+
+            try {
+                const raw = localStorage.getItem(scopedKey) || localStorage.getItem("gecom.sidebar.pinnedMenu.v1");
+                if (!raw) return null;
+
+                const parsed = JSON.parse(raw);
+                const href = normalizePathForRedirect(parsed?.href || parsed?.path || "");
+                const area = String(parsed?.area || "").trim().toLowerCase();
+                if (!href) return null;
+
+                if (area) {
+                    try {
+                        localStorage.setItem(areaKey, area);
+                    } catch { }
+                }
+
+                return { href, area };
+            } catch {
+                return null;
+            }
+        }
+
         document.getElementById("loginForm").addEventListener("submit", async (event) => {
             event.preventDefault();
 
@@ -958,7 +1100,8 @@
                     localStorage.setItem("companyId", String(me.company_id));
                 }
 
-                window.location.href = "/Default";
+                const pinnedMenu = readPinnedSidebarMenuForUser(me);
+                window.location.href = pinnedMenu?.href || "/Default";
             }
             catch (err) {
                 showModalMessage("<%= t('page.login.actions.login') %>", "<%= t('page.login.messages.unexpectedError') %>");
@@ -977,7 +1120,13 @@
             });
 
             $("#loginModal").on("hidden.bs.modal", function () {
+                $("#loginModalDialog").removeClass("modal-lg");
                 focusVisibleFormField();
+            });
+
+            $(document).on("click", ".js-open-login-legal", function (event) {
+                event.preventDefault();
+                openLoginLegalModal($(this).data("legalDoc"));
             });
 
         });

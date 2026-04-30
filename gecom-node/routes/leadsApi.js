@@ -75,6 +75,19 @@ router.get("/leads/stages", async (req, res) => {
   }
 });
 
+router.post("/public/gecom-contact", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "POST",
+      url: backendUrl("/leads/public/gecom-contact"),
+      withBody: true,
+    });
+  } catch (error) {
+    console.error("POST /api/public/gecom-contact error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 router.post("/leads/stages", async (req, res) => {
   try {
     return await proxyJson(req, res, { method: "POST", url: backendUrl("/leads/stages"), withBody: true });

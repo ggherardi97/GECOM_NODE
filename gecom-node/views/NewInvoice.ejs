@@ -48,6 +48,21 @@
   .line-actions .btn { margin-right: 6px; }
 
   .small-muted { font-size: 12px; color: #777; }
+  .fx-card {
+    border: 1px solid #e7eaec;
+    border-radius: 10px;
+    background: #fafcfd;
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+  .fx-card .fx-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #60758b;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+  }
 
   .typeahead.dropdown-menu { max-height: 260px; overflow-y: auto; }
 </style>
@@ -134,11 +149,27 @@
                           <label><%= t('page.newInvoice.form.dueDate') %></label>
                           <input id="due_at" type="date" class="form-control" />
                         </div>
+                      </div>
+                    </div>
 
-                        <div class="form-group" style="display:none;">
-                          <label><%= t('page.newInvoice.form.exchangeRate') %></label>
-                          <input id="exchange_rate" type="text" class="form-control" value="1.00000000" />
+                    <div class="fx-card" id="fxFields" style="display:none;">
+                      <div class="fx-title">Conversão para Real</div>
+                      <div class="row row-tight">
+                        <div class="col-lg-6">
+                          <div class="form-group" style="margin-bottom:8px;">
+                            <label>Cotação R$</label>
+                            <input id="exchange_rate" type="text" class="form-control" value="" placeholder="Ex: 5,43000000" />
+                          </div>
                         </div>
+                        <div class="col-lg-6">
+                          <div class="form-group" style="margin-bottom:8px;">
+                            <label>Recebimento Real</label>
+                            <input id="received_amount_brl" type="text" class="form-control" readonly />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="small-muted">
+                        Informe a cotação do dia para projetar o faturamento em real e usar esse valor nas contas a receber.
                       </div>
                     </div>
 
@@ -333,10 +364,38 @@
     // =========================
     function tSafe(key, fallback) {
       try {
-        if (typeof window.t === "function") return window.t(key);
-        if (typeof t === "function") return t(key);
+        if (typeof window.t === "function") {
+          const translated = window.t(key, { defaultValue: fallback ?? key });
+          if (translated != null && String(translated).trim() !== "" && translated !== key) return translated;
+        }
+        if (typeof t === "function") {
+          const translated = t(key, { defaultValue: fallback ?? key });
+          if (translated != null && String(translated).trim() !== "" && translated !== key) return translated;
+        }
       } catch { /* ignore */ }
       return fallback ?? key;
+    }
+
+    function stringifyErrorDetail(detail) {
+      if (!detail) return "";
+      if (typeof detail === "string") return detail.trim();
+      if (Array.isArray(detail)) return detail.map((item) => stringifyErrorDetail(item)).filter(Boolean).join(" | ");
+      if (typeof detail === "object") {
+        try { return JSON.stringify(detail); } catch { return ""; }
+      }
+      return String(detail).trim();
+    }
+
+    function buildVisibleErrorMessage(error, fallback) {
+      const base = String(error?.message || fallback || "").trim();
+      const status = Number.isFinite(Number(error?.status)) ? `HTTP ${Number(error.status)}` : "";
+      const detail = stringifyErrorDetail(
+        error?.payload?.details ||
+        error?.payload?.error ||
+        error?.payload?.errors ||
+        error?.payload?.detail
+      );
+      return [base, status, detail].filter(Boolean).join("\n");
     }
 
     // =========================
@@ -353,6 +412,7 @@
     const invoiceStatusByLegacy = {};
     let productsCache = [];
     let lines = [];
+    let exchangeRateTouched = false;
 
     let suppressCompanyClear = false;
 
@@ -380,6 +440,23 @@
         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .trim();
+    }
+
+    function resolveInvoiceId(candidate) {
+      const options = [
+        candidate?.id,
+        candidate?.invoice_id,
+        candidate?.invoiceId,
+        candidate?.data?.id,
+        candidate?.data?.invoice_id,
+        candidate?.invoice?.id,
+        candidate?.invoice?.invoice_id,
+      ];
+      for (const value of options) {
+        const normalized = String(value || "").trim();
+        if (normalized) return normalized;
+      }
+      return "";
     }
 
     function parseNumberSafe(value, fallback) {
@@ -493,6 +570,45 @@
       return sym ? (sym + " " + num) : num;
     }
 
+    function formatDecimalFixed(value, decimals) {
+      const n = parseNumberSafe(value, NaN);
+      if (!Number.isFinite(n)) return "";
+      return n.toFixed(Number.isFinite(decimals) ? decimals : 2);
+    }
+
+    function getSelectedCurrencyCode() {
+      return String(resolveCurrencyCode(getSelectedCurrency()) || "").trim().toUpperCase();
+    }
+
+    function isSelectedCurrencyBrl() {
+      const code = getSelectedCurrencyCode();
+      return !code || code === "BRL";
+    }
+
+    function getExchangeRateNumber() {
+      const raw = String($("#exchange_rate").val() || "").trim();
+      if (!raw) return null;
+      const rate = parseNumberSafe(raw, NaN);
+      return Number.isFinite(rate) && rate > 0 ? rate : null;
+    }
+
+    function getStatusSelectionMeta() {
+      const statusSelection = String($("#status").val() || "").trim();
+      const statusOption = invoiceStatusByValue[statusSelection] || null;
+      const legacyStatus = Number.isFinite(statusOption?.legacy)
+        ? Number(statusOption.legacy)
+        : parseLegacyStatusFromSelection(statusSelection);
+      const label = String(statusOption?.label || "").trim();
+      return { statusSelection, statusOption, legacyStatus, label };
+    }
+
+    function isPaidStatusSelected() {
+      const meta = getStatusSelectionMeta();
+      if (Number(meta.legacyStatus) === 4) return true;
+      const normalized = normalizeText(meta.label);
+      return normalized === "pago" || normalized === "paid";
+    }
+
     // =========================
     // Decimal mask for inputs (pt-BR typing + normalized parse)
     // =========================
@@ -573,10 +689,18 @@
       catch { return { message: text }; }
     }
 
+    function createApiError(data, fallback, status) {
+      const message = data?.message || data?.error || fallback;
+      const error = new Error(message);
+      error.status = status;
+      error.payload = data;
+      return error;
+    }
+
     async function apiGet(url) {
       const resp = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
+      if (!resp.ok) throw createApiError(data, tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."), resp.status);
       return data;
     }
 
@@ -587,7 +711,7 @@
         body: JSON.stringify(payload ?? {}),
       });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
+      if (!resp.ok) throw createApiError(data, tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."), resp.status);
       return data;
     }
 
@@ -598,7 +722,7 @@
         body: JSON.stringify(payload ?? {}),
       });
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."));
+      if (!resp.ok) throw createApiError(data, tSafe("page.newInvoice.messages.requestFail", "Falha na requisição."), resp.status);
       return data;
     }
 
@@ -606,7 +730,7 @@
       const resp = await fetch(url, { method: "DELETE", headers: { Accept: "application/json" } });
       if (resp.status === 204) return {};
       const data = await readJsonSafe(resp);
-      if (!resp.ok) throw new Error(data?.message || tSafe("page.newInvoice.messages.deleteFail", "Falha ao excluir."));
+      if (!resp.ok) throw createApiError(data, tSafe("page.newInvoice.messages.deleteFail", "Falha ao excluir."), resp.status);
       return data;
     }
 
@@ -905,12 +1029,9 @@
     // Header payloads
     // =========================
     function buildInvoiceHeaderPayload() {
-      const statusSelection = String($("#status").val() || "").trim();
-      const statusOption = invoiceStatusByValue[statusSelection] || null;
-      const statusConfigId = normalizeStatusConfigId(statusOption?.status_config_id);
-      const legacyStatus = Number.isFinite(statusOption?.legacy)
-        ? Number(statusOption.legacy)
-        : parseLegacyStatusFromSelection(statusSelection);
+      const meta = getStatusSelectionMeta();
+      const statusConfigId = normalizeStatusConfigId(meta.statusOption?.status_config_id);
+      const receivedAmountBrl = String($("#received_amount_brl").val() || "").trim();
 
       return {
         company_id: String($("#company_id").val() || "").trim() || null,
@@ -918,8 +1039,9 @@
         quote_at: $("#quote_at").val() || null,
         due_at: dateInputToIsoUtc($("#due_at").val()),
         exchange_rate: $("#exchange_rate").val() || null,
+        received_amount_brl: receivedAmountBrl || null,
         status_config_id: statusConfigId || null,
-        status: Number.isFinite(legacyStatus) ? legacyStatus : 0,
+        status: Number.isFinite(meta.legacyStatus) ? meta.legacyStatus : 0,
         discount_percent: parseNumberSafe($("#discount_percent").val(), 0),
         version: parseNumberSafe($("#version").val(), 1),
         notes: $("#notes").val() || "",
@@ -956,6 +1078,9 @@
     async function createInvoiceIfNeeded() {
       if (invoiceId || creatingInvoice) return true;
 
+      const fxReady = await requestExchangeRateForPaidInvoice();
+      if (!fxReady) return false;
+
       const payload = { ...buildInvoiceHeaderPayload(), ...buildBillingPayload(), lines: [] };
 
       if (!payload.company_id || !payload.currency_id) {
@@ -967,7 +1092,7 @@
         creatingInvoice = true;
         const created = await apiPost("/api/invoices", payload);
 
-        invoiceId = created?.id ? String(created.id) : null;
+        invoiceId = resolveInvoiceId(created) || null;
         setPrintEnabled();
 
         $("#uiInvoiceId").text(invoiceId || "-");
@@ -1023,6 +1148,122 @@
       return line;
     }
 
+    function syncFxFields(totalOverride) {
+      const total = Number.isFinite(Number(totalOverride))
+        ? Number(totalOverride)
+        : parseNumberSafe($("#received_amount_brl").val(), 0);
+      const isBrl = isSelectedCurrencyBrl();
+      $("#fxFields").toggle(!isBrl);
+
+      if (isBrl) {
+        if (!String($("#exchange_rate").val() || "").trim()) {
+          $("#exchange_rate").val("1.00000000");
+        }
+        $("#received_amount_brl").val(formatDecimalFixed(total, 2));
+        return;
+      }
+
+      const rate = getExchangeRateNumber();
+      if (!Number.isFinite(rate)) {
+        $("#received_amount_brl").val("");
+        return;
+      }
+
+      $("#received_amount_brl").val(formatDecimalFixed(total * rate, 2));
+    }
+
+    function maybeResetExchangeRateForForeignCurrency() {
+      if (invoiceId || exchangeRateTouched) return;
+      const current = parseNumberSafe($("#exchange_rate").val(), NaN);
+      if (!Number.isFinite(current) || current === 1) {
+        $("#exchange_rate").val("");
+        $("#received_amount_brl").val("");
+      }
+    }
+
+    function requestExchangeRateForPaidInvoice() {
+      if (isSelectedCurrencyBrl() || !isPaidStatusSelected()) {
+        syncFxFields(computeTotals()?.total || 0);
+        return Promise.resolve(true);
+      }
+
+      const currentRate = getExchangeRateNumber();
+      if (Number.isFinite(currentRate)) {
+        syncFxFields(computeTotals()?.total || 0);
+        return Promise.resolve(true);
+      }
+
+      const totals = computeTotals() || { total: 0 };
+      const currencyCode = getSelectedCurrencyCode() || "MOEDA";
+
+      return new Promise((resolve) => {
+        let done = false;
+        const finish = (value) => {
+          if (done) return;
+          done = true;
+          resolve(value);
+        };
+
+        window.SideModal.open({
+          title: "Cotação da moeda",
+          okText: "Aplicar cotação",
+          cancelText: "Cancelar",
+          html: `
+            <div class="alert alert-warning" style="margin-bottom:12px;">
+              Para marcar esta fatura como paga em ${escapeHtml(currencyCode)}, informe a cotação do dia em real.
+            </div>
+            <div class="form-group">
+              <label>Cotação R$</label>
+              <input id="fx_modal_rate" type="text" class="form-control" placeholder="Ex: 5,43000000" />
+            </div>
+            <div class="form-group">
+              <label>Total da fatura</label>
+              <input id="fx_modal_total" type="text" class="form-control" value="${escapeHtml(formatMoney(totals.total))}" readonly />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Recebimento Real</label>
+              <input id="fx_modal_received" type="text" class="form-control" readonly />
+            </div>
+          `,
+          onOpen: function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+            bindDecimalMaskOnce($root.find("#fx_modal_rate"), { decimals: 8, min: 0 });
+
+            const syncModal = function () {
+              const rate = parseNumberSafe($root.find("#fx_modal_rate").val(), NaN);
+              if (!Number.isFinite(rate) || rate <= 0) {
+                $root.find("#fx_modal_received").val("");
+                return;
+              }
+              $root.find("#fx_modal_received").val(formatDecimalFixed(totals.total * rate, 2));
+            };
+
+            $root.find("#fx_modal_rate").on("keyup change input", syncModal);
+            syncModal();
+          },
+          onOk: async function (ctx) {
+            const rootEl = (ctx && ctx.root) || document.getElementById("dynamicModalBody") || document.body;
+            const $root = $(rootEl);
+            const rate = parseNumberSafe($root.find("#fx_modal_rate").val(), NaN);
+            if (!Number.isFinite(rate) || rate <= 0) {
+              alert("Informe uma cotação válida para continuar.");
+              return true;
+            }
+
+            exchangeRateTouched = true;
+            $("#exchange_rate").val(formatDecimalFixed(rate, 8));
+            syncFxFields(totals.total);
+            finish(true);
+            return false;
+          },
+          onCancel: function () {
+            finish(false);
+          },
+        });
+      });
+    }
+
     function computeTotals() {
       (lines || []).forEach(recalcLine);
 
@@ -1046,6 +1287,16 @@
       $("#uiDiscountLines").text(formatMoney(lineDiscountTotal));
       $("#uiTaxTotal").text(formatMoney(taxTotal));
       $("#uiTotal").text(formatMoney(total));
+
+      syncFxFields(total);
+
+      return {
+        grossSubtotal,
+        taxTotal,
+        lineDiscountTotal,
+        headerDiscountAmount,
+        total,
+      };
     }
 
     $("#discount_percent").on("keyup change input", computeTotals);
@@ -1456,7 +1707,15 @@
       $("#quote_at").val(tryToDatetimeLocal(inv?.quote_at));
       $("#due_at").val(tryToDateInput(inv?.due_at)); // ✅ novo
 
-      $("#exchange_rate").val(inv?.exchange_rate ?? "1");
+      const receivedAmountBrl = inv?.received_amount_brl ?? inv?.receivedAmountBrl ?? null;
+      const selectedCurrencyCode = getSelectedCurrencyCode();
+      if ((receivedAmountBrl == null || receivedAmountBrl === "") && selectedCurrencyCode && selectedCurrencyCode !== "BRL") {
+        $("#exchange_rate").val("");
+      } else {
+        $("#exchange_rate").val(inv?.exchange_rate ?? "1");
+      }
+      $("#received_amount_brl").val(receivedAmountBrl == null ? "" : formatDecimalFixed(receivedAmountBrl, 2));
+      exchangeRateTouched = !!String($("#exchange_rate").val() || "").trim();
 
       $("#billing_address_line1").val(inv?.billing_address_line1 || "");
       $("#billing_address_line2").val(inv?.billing_address_line2 || "");
@@ -1492,6 +1751,9 @@
     // Save logic
     // =========================
     async function saveInvoice() {
+      const fxReady = await requestExchangeRateForPaidInvoice();
+      if (!fxReady) return false;
+
       const ok = await createInvoiceIfNeeded();
       if (!ok) {
         $("#invoiceNotCreatedBanner").show();
@@ -1532,14 +1794,19 @@
 
       try {
         const created = await apiPost(`/api/invoices/${encodeURIComponent(invoiceId)}/clone`, {});
-        const newId = String(created?.id || "").trim();
+        const newId = resolveInvoiceId(created);
         if (!newId) {
           throw new Error(tSafe("page.newInvoice.messages.cloneNoId", "A clonagem foi concluída, mas não retornou ID."));
         }
         window.location.href = `/NewInvoice?id=${encodeURIComponent(newId)}`;
       } catch (e) {
-        console.error(e);
-        alert(e?.message || tSafe("page.newInvoice.messages.cloneFail", "Falha ao clonar a fatura."));
+        console.error("cloneCurrentInvoice failed", {
+          invoiceId,
+          status: e?.status,
+          payload: e?.payload,
+          error: e,
+        });
+        alert(buildVisibleErrorMessage(e, tSafe("page.newInvoice.messages.cloneFail", "Falha ao clonar a fatura.")));
         setPrintEnabled();
       } finally {
         $btn.html(originalHtml);
@@ -1624,10 +1891,27 @@
     });
 
     $("#currency_id").on("change", async function () {
+      if (isSelectedCurrencyBrl()) {
+        exchangeRateTouched = false;
+        $("#exchange_rate").val("1.00000000");
+      } else {
+        maybeResetExchangeRateForForeignCurrency();
+      }
       try { await preloadProducts(); }
       catch (e) { console.error(e); productsCache = []; }
       computeTotals();
       renderLines();
+    });
+
+    $("#exchange_rate").on("keyup change input", function () {
+      exchangeRateTouched = String($(this).val() || "").trim().length > 0;
+      syncFxFields(computeTotals()?.total || 0);
+    });
+
+    $("#status").on("change", async function () {
+      if (!isSelectedCurrencyBrl() && isPaidStatusSelected()) {
+        await requestExchangeRateForPaidInvoice();
+      }
     });
 
     // =========================
@@ -1655,6 +1939,7 @@
         $("#btnAddManualLine").prop("disabled", true);
         $("#btnAddProduct").prop("disabled", true);
 
+        bindDecimalMaskOnce($("#exchange_rate"), { decimals: 8, min: 0 });
         renderLines();
         computeTotals();
 

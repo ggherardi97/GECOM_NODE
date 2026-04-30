@@ -187,9 +187,29 @@
       "actions": {
         "clone": "Clone invoice"
       },
+      "clone": {
+        "title": "Clone invoice",
+        "confirmQuestion": "Do you want to clone this invoice?",
+        "confirmButton": "Clone"
+      },
+      "modal": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save",
+        "close": "Close"
+      },
       "messages": {
         "selectOneToClone": "Select only 1 invoice to clone.",
         "selectOneToGenerate": "Select only 1 invoice to generate."
+      },
+      "errors": {
+        "loadFailed": "Failed to load invoices.",
+        "updateStatusFailed": "Failed to update the invoice status.",
+        "deleteFailed": "Failed to delete the invoice.",
+        "cloneFailed": "Failed to clone the invoice.",
+        "cloneNoId": "The clone completed, but no ID was returned.",
+        "bulkSendFailed": "Failed to send the invoices.",
+        "bulkDeleteFailed": "Failed to delete the invoices."
       },
       "filters": {
         "all": "All",
@@ -576,6 +596,7 @@
         "financePayables": "Accounts Payable",
         "financeBanks": "Cash and Banks",
         "financeMovements": "Bank Movements",
+        "financeImports": "Bank Import",
         "financeCashFlow": "Cash Flow",
         "financeCategories": "Financial Categories",
         "financeCostCenters": "Cost Centers",
@@ -603,6 +624,10 @@
         "poWorkOrders": "Work Orders",
         "poWorkOrderAssignments": "Assignments",
         "poWorkOrderAppointments": "Appointments",
+        "poProjectStatuses": "Project statuses",
+        "poDeliverableStatuses": "Deliverable statuses",
+        "poWorkOrderStatuses": "Work order statuses",
+        "poResourceRoles": "Resource roles",
         "poConfigurations": "Configurations"
       },
       "modal": {
@@ -742,6 +767,58 @@
       "bankMovements": {
         "title": "Bank Movements"
       },
+      "imports": {
+        "title": "Bank Import",
+        "subtitle": "Import OFX, CSV or PDF, review with AI and apply safely into finance.",
+        "uploadTitle": "New statement",
+        "uploadHelp": "Upload a bank statement and choose the correct account for reconciliation.",
+        "jobsTitle": "Recent imports",
+        "jobsEmpty": "No imports yet.",
+        "tableTitle": "Imported lines",
+        "detailsTitle": "Suggestion review",
+        "emptyState": "Select an import to review lines and apply suggestions.",
+        "uploadButton": "Import statement",
+        "reanalyze": "Reanalyze with AI",
+        "applyApproved": "Apply approved",
+        "applyAll": "Apply all",
+        "approveLine": "Approve line",
+        "saveReview": "Save review",
+        "fileLabel": "File",
+        "bankAccountLabel": "Bank account",
+        "sourceLabel": "Source",
+        "statusLabel": "Status",
+        "summaryLines": "Lines",
+        "summaryCredits": "Credits",
+        "summaryDebits": "Debits",
+        "summaryApplied": "Applied",
+        "lineDate": "Date",
+        "lineType": "Type",
+        "lineDescription": "Description",
+        "lineAmount": "Amount",
+        "lineSuggestion": "Suggestion",
+        "lineConfidence": "Confidence",
+        "lineStatus": "Status",
+        "reviewNote": "Review note",
+        "matchedReceivable": "Receivable",
+        "matchedPayable": "Payable",
+        "suggestedCategory": "Suggested category",
+        "suggestedCostCenter": "Suggested cost center",
+        "suggestedCompany": "Suggested company",
+        "aiReasoning": "AI reasoning",
+        "applySuccess": "Import applied successfully.",
+        "uploadSuccess": "Statement imported successfully.",
+        "reviewSaved": "Review saved.",
+        "noBankAccount": "Select the bank account.",
+        "noFile": "Select an OFX, CSV or PDF file.",
+        "noLine": "Select a line to review.",
+        "allStatuses": "All statuses",
+        "allSuggestions": "All suggestions",
+        "filterApproved": "Approved",
+        "filterSuggested": "Suggested",
+        "filterApplied": "Applied",
+        "filterIgnored": "Ignored",
+        "filterError": "Error"
+      },
       "receivables": {
         "title": "Accounts Receivable"
       },
@@ -769,6 +846,31 @@
         "outgoing": "Outgoing",
         "net": "Net",
         "projectedBalance": "Projected balance"
+      },
+      "boxes": {
+        "basic": "Basic data",
+        "relations": "Relationships",
+        "schedule": "Schedule",
+        "relatedActivity": "Related activity"
+      },
+      "views": {
+        "allPayables": "All expenses",
+        "fixedPayables": "Fixed expenses",
+        "variablePayables": "Variable expenses",
+        "personalPayables": "Personal expenses",
+        "taxPayables": "Taxes",
+        "transferPayables": "Transfers",
+        "allReceivables": "All income",
+        "fixedReceivables": "Fixed income",
+        "variableReceivables": "Variable income",
+        "personalReceivables": "Personal income",
+        "taxReceivables": "Taxes",
+        "transferReceivables": "Transfers"
+      },
+      "activity": {
+        "bankMovement": "Bank movement",
+        "receivable": "Receipt",
+        "payable": "Payment"
       },
       "tabs": {
         "basic": "Basic Data",
@@ -805,14 +907,91 @@
         "actions": "Actions",
         "noPayments": "No payments.",
         "saveBeforePayments": "Save the record first.",
+        "saveBeforeRelated": "Save the record to view related movements and settlements.",
+        "noRelatedActivity": "No related transactions found.",
         "generateFromInvoice": "Generate from invoice",
         "generate": "Generate",
         "yes": "Yes",
         "no": "No",
+        "credit": "Credit",
+        "debit": "Debit",
         "selectOne": "Select exactly one record.",
         "lookupPlaceholder": "Click to view recent records or type to search",
         "lookupEmpty": "No records found.",
         "fillRequired": "Fill the required fields"
+      },
+      "enums": {
+        "financialCategoryKind": {
+          "revenue": "Revenue",
+          "expense": "Expense",
+          "transfer": "Transfer"
+        },
+        "financialAccountType": {
+          "cash": "Cash",
+          "checking": "Checking",
+          "savings": "Savings",
+          "investment": "Investment",
+          "digital_wallet": "Digital wallet"
+        },
+        "financialMovementType": {
+          "credit": "Credit",
+          "debit": "Debit"
+        },
+        "financialEntryStatus": {
+          "open": "Open",
+          "partial": "Partial",
+          "paid": "Paid",
+          "overdue": "Overdue",
+          "canceled": "Canceled"
+        },
+        "financialEntryGroup": {
+          "fixed": "Fixed",
+          "variable": "Variable",
+          "personal": "Personal",
+          "tax": "Tax",
+          "transfer": "Transfer"
+        },
+        "financialRecurrenceFrequency": {
+          "weekly": "Weekly",
+          "monthly": "Monthly",
+          "yearly": "Yearly"
+        },
+        "financialPaymentMethod": {
+          "bank_transfer": "Bank transfer",
+          "pix": "PIX",
+          "credit_card": "Credit card",
+          "debit_card": "Debit card",
+          "cash": "Cash",
+          "boleto": "Boleto",
+          "check": "Check",
+          "other": "Other"
+        },
+        "financialImportSuggestionKind": {
+          "create_movement": "Create movement",
+          "match_receivable_payment": "Settle receivable",
+          "match_payable_payment": "Settle payable",
+          "create_receivable": "Create receivable",
+          "create_payable": "Create payable",
+          "transfer": "Transfer",
+          "ignore": "Ignore"
+        },
+        "financialImportSuggestionStatus": {
+          "suggested": "Suggested",
+          "approved": "Approved",
+          "applied": "Applied",
+          "ignored": "Ignored",
+          "error": "Error"
+        },
+        "financialImportJobStatus": {
+          "review": "In review",
+          "applied": "Applied",
+          "failed": "Failed"
+        },
+        "financialImportSourceType": {
+          "ofx": "OFX",
+          "csv": "CSV",
+          "pdf": "PDF"
+        }
       },
       "fields": {
         "code": "Code",
@@ -847,8 +1026,15 @@
         "invoice": "Invoice",
         "document": "Document",
         "issueDate": "Issue date",
+        "entryGroup": "Group",
         "installmentNumber": "Installment",
         "installmentTotal": "Installments total",
+        "recurrenceEnabled": "Recurring",
+        "recurrenceFrequency": "Frequency",
+        "recurrenceInterval": "Interval",
+        "recurrenceDayOfMonth": "Day of month",
+        "recurrenceOccurrences": "Occurrences",
+        "recurrenceEndDate": "Generate until",
         "notes": "Notes",
         "payableNumber": "Title",
         "paymentDate": "Payment date",
@@ -968,6 +1154,7 @@
       },
       "actions": {
         "cloneInvoice": "Clone invoice",
+        "cloning": "Cloning...",
         "generateInvoice": "Generate invoice",
         "deleteInvoice": "Delete invoice",
         "saveInvoice": "Save invoice",
@@ -1057,6 +1244,8 @@
         "cancel": "Cancel"
       },
       "confirm": {
+        "cloneModalTitle": "Clone invoice",
+        "cloneTitle": "Do you want to clone this invoice?",
         "deleteModalTitle": "Delete invoice",
         "deleteTitle": "Are you sure you want to delete this invoice?"
       },
@@ -1065,6 +1254,8 @@
         "initFail": "Failed to load initial data.",
         "createFail": "Failed to create the invoice.",
         "saveFail": "Failed to save the invoice.",
+        "cloneFail": "Failed to clone the invoice.",
+        "cloneNoId": "The clone completed, but no ID was returned.",
         "deleteFail": "Failed to delete the invoice.",
         "deleteSuccess": "Invoice deleted successfully.",
         "companyAndCurrencyRequired": "Company and Currency are required.",
@@ -1856,6 +2047,42 @@
         "links": "Links",
         "more": "More"
       },
+      "enums": {
+        "priority": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        },
+        "milestoneStatus": {
+          "planned": "Planned",
+          "done": "Done",
+          "canceled": "Canceled"
+        },
+        "checklistItemStatus": {
+          "open": "Open",
+          "done": "Done",
+          "blocked": "Blocked"
+        },
+        "projectStatus": {
+          "planning": "Planning",
+          "in_progress": "In progress",
+          "done": "Done",
+          "canceled": "Canceled"
+        },
+        "deliverableStatus": {
+          "planned": "Planned",
+          "in_progress": "In progress",
+          "delivered": "Delivered",
+          "canceled": "Canceled"
+        },
+        "workOrderStatus": {
+          "open": "Open",
+          "doing": "In progress",
+          "blocked": "Blocked",
+          "done": "Done",
+          "canceled": "Canceled"
+        }
+      },
       "fields": {
         "name": "Name",
         "code": "Code",
@@ -1884,6 +2111,7 @@
         "actualStart": "Actual start",
         "actualEnd": "Actual end",
         "estimatedHours": "Estimated hours",
+        "incident": "Incident",
         "workOrder": "Work order",
         "resource": "Resource",
         "role": "Role",

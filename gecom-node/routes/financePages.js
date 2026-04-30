@@ -98,5 +98,12 @@ router.get("/finance/payables/:id/edit", (req, res) =>
 );
 
 router.get(["/FinanceCashFlow", "/finance/cash-flow"], (req, res) => res.render("finance/FinanceCashFlow"));
+router.get(["/FinanceImports", "/finance/imports"], (req, res) =>
+  res.render("finance/FinanceImportHub", {
+    financeImportPage: {
+      titleKey: "page.finance.imports.title",
+    },
+  }),
+);
 
 module.exports = router;

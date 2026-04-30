@@ -979,19 +979,16 @@
   function setRelatedLayoutMode(enabled) {
     const $row = $("#hrFormMainRow");
     const $mainCol = $("#hrFormMainCol");
-    const $tipsCol = $("#hrTipsCol");
-    if (!$row.length || !$mainCol.length || !$tipsCol.length) return;
+    if (!$row.length || !$mainCol.length) return;
 
     if (enabled) {
       $row.addClass("hr-related-mode");
       $mainCol.removeClass("col-md-8").addClass("col-md-12");
-      $tipsCol.hide();
       return;
     }
 
     $row.removeClass("hr-related-mode");
-    $mainCol.removeClass("col-md-12").addClass("col-md-8");
-    $tipsCol.show();
+    $mainCol.removeClass("col-md-8").addClass("col-md-12");
   }
 
   function bindTabClicks($scope) {

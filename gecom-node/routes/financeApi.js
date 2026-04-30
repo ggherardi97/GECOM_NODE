@@ -32,16 +32,31 @@ async function proxyFinance(req, res) {
     const path = req.originalUrl.replace(/^\/api/, "");
     const backendUrl = `${getBackendBaseUrl()}${path}`;
     const hasBody = !["GET", "HEAD"].includes(String(req.method || "GET").toUpperCase());
+    const contentType = String(req.headers["content-type"] || "").toLowerCase();
+    const isMultipart = contentType.includes("multipart/form-data");
 
-    const response = await fetch(backendUrl, {
+    const headers = {
+      Accept: "application/json",
+      ...(authHeader ? { Authorization: authHeader } : {}),
+      ...(hasBody && !isMultipart ? { "Content-Type": "application/json" } : {}),
+      ...(isMultipart ? { "Content-Type": req.headers["content-type"] } : {}),
+    };
+
+    const requestOptions = {
       method: req.method,
-      headers: {
-        Accept: "application/json",
-        ...(hasBody ? { "Content-Type": "application/json" } : {}),
-        ...(authHeader ? { Authorization: authHeader } : {}),
-      },
-      ...(hasBody ? { body: JSON.stringify(req.body || {}) } : {}),
-    });
+      headers,
+    };
+
+    if (hasBody) {
+      if (isMultipart) {
+        requestOptions.body = req;
+        requestOptions.duplex = "half";
+      } else {
+        requestOptions.body = JSON.stringify(req.body || {});
+      }
+    }
+
+    const response = await fetch(backendUrl, requestOptions);
 
     const data = await readJsonSafe(response);
     return res.status(response.status).json(data || {});

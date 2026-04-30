@@ -1,1 +1,52 @@
-<%- include("./_crud-page") %>
+<style>
+  .ibox-title { padding: 15px 90px 20px 15px; }
+  .bulk-actions { display:none; align-items:center; gap:8px; margin-bottom:10px; }
+  #incidentGridHeader th.sortable { cursor: pointer; user-select:none; }
+  #incidentGridBody tr { cursor: pointer; }
+  #incidentGridBody tr.is-selected { background: #f2fbf8; }
+  #incidentGridBody td.incident-select-col,
+  #incidentGridHeader th.incident-select-col,
+  #incidentGridFilters th.incident-select-col { width: 42px; }
+  #incidentGridTable td[data-field="sla_summary"] { min-width: 170px; }
+  .incident-sla-cell { min-width: 150px; }
+  .incident-sla-progress { margin-bottom: 4px !important; height: 8px; background: #e9edf3; }
+  .incident-sla-label { color: #676a6c; font-size: 11px; }
+</style>
+
+<div class="row animated fadeInRight" style="margin-top: 25px;">
+  <div class="col-lg-12">
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5 id="incidentGridTitle">Incidentes</h5>
+        <div class="ibox-tools">
+          <button id="btnIncidentGridRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+          <button id="btnIncidentGridNew" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Novo</button>
+        </div>
+      </div>
+      <div class="ibox-content">
+        <div id="incidentBulkActions" class="bulk-actions">
+          <span><strong id="incidentSelectedCount">0</strong> selecionados</span>
+          <button id="btnIncidentGridDelete" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir</button>
+          <button id="btnIncidentGridClearSelection" class="btn btn-white btn-sm">Limpar seleção</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped" id="incidentGridTable">
+            <thead>
+              <tr id="incidentGridFilters"></tr>
+              <tr id="incidentGridHeader"></tr>
+            </thead>
+            <tbody id="incidentGridBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__incidentGridPage = <%- safeJson(incidentGridPage) %>;
+</script>
+<script src="/js/servico/serviceApi.js"></script>
+<script src="/js/servico/service.incident.resources.js"></script>
+<script src="/js/servico/incident.grid.page.js"></script>

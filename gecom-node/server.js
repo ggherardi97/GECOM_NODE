@@ -43,10 +43,13 @@ const poApiRoutes = require("./routes/poApi");
 const poPagesRoutes = require("./routes/poPages");
 const adminApiRoutes = require("./routes/adminApi");
 const calendarActivitiesApiRoutes = require("./routes/calendarActivitiesApi");
+const googleCalendarApiRoutes = require("./routes/googleCalendarApi");
+const whatsappApiRoutes = require("./routes/whatsappApi");
 const adminPagesRoutes = require("./routes/adminPages");
 const metadataDesignerApiRoutes = require("./routes/metadataDesignerApi");
 const metadataDesignerPagesRoutes = require("./routes/metadataDesignerPages");
 const scarletDriveRoutes = require("./routes/scarletDrive");
+const legalPagesRoutes = require("./routes/legalPages");
 
 const usersApiPath = require.resolve(path.join(__dirname, "routes", "usersApi"));
 const usersApiRoutes = require(usersApiPath);
@@ -109,6 +112,80 @@ async function fetchPublishedLandingPage(req) {
   }
 }
 
+function getRequestHost(req) {
+  const forwardedHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const host = forwardedHost || String(req.headers.host || '').trim();
+  return host || null;
+}
+
+function getRequestProtocol(req) {
+  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+  if (forwardedProto) return forwardedProto;
+  if (req.protocol) return String(req.protocol).toLowerCase();
+  return 'https';
+}
+
+function getAbsoluteRequestUrl(req) {
+  const host = getRequestHost(req);
+  const originalUrl = String(req.originalUrl || req.url || req.path || '/').trim() || '/';
+  if (!host) return null;
+  return `${getRequestProtocol(req)}://${host}${originalUrl}`;
+}
+
+async function fetchPublicLandingPage(req, tenantRef) {
+  const baseUrl = getBackendBaseUrl();
+  if (!baseUrl) return null;
+
+  try {
+    const path = tenantRef
+      ? `${baseUrl}/public/landing-page/${encodeURIComponent(String(tenantRef).trim())}`
+      : `${baseUrl}/public/landing-page`;
+    const url = new URL(path);
+    const absoluteUrl = getAbsoluteRequestUrl(req);
+    const host = getRequestHost(req);
+    const requestPath = String(req.path || req.originalUrl || '/').trim() || '/';
+
+    if (absoluteUrl) url.searchParams.set('url', absoluteUrl);
+    if (host) url.searchParams.set('host', host);
+    if (requestPath) url.searchParams.set('path', requestPath);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) return null;
+    const data = await readJsonSafe(response);
+    const publishedHtml = String(data?.published_html || '').trim();
+    if (!publishedHtml) return null;
+
+    return {
+      tenant_id: String(data?.tenant_id || '').trim() || null,
+      tenant_slug: String(data?.tenant_slug || '').trim() || null,
+      published_html: publishedHtml,
+      published_css: String(data?.published_css || ''),
+    };
+  } catch (error) {
+    console.error('Failed to fetch public landing page:', error);
+    return null;
+  }
+}
+
+function normalizeGecomLayout(value) {
+  return 'classic';
+}
+
+function renderGecomLanding(res, layoutName, options = {}) {
+  const gecomLayout = normalizeGecomLayout(layoutName);
+  return res.render('LandingPage', {
+    layout: false,
+    gecomLayout,
+    showGecomSwitcher: false,
+  });
+}
+
 /* ---------- View engine (EJS + layouts) ---------- */
 app.use(expressLayouts);
 app.set('layout', 'layout');
@@ -135,7 +212,7 @@ i18next
     fallbackLng: 'pt-BR',
     preload: ['pt-BR', 'en', 'es'],
     supportedLngs: ['pt-BR', 'en', 'es'],
-    ns: ['common', 'leads'],
+    ns: ['common', 'leads', 'gecom'],
     defaultNS: 'common',
     fallbackNS: ['leads'],
     backend: {
@@ -167,6 +244,10 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Assets', express.static(path.join(__dirname, 'public/Assets')));
 app.use('/locales', express.static(path.join(__dirname, 'locales')));
+app.use(
+  '/vendor/zod',
+  express.static(path.join(__dirname, '..', '..', '..', 'GECOM_BACKEND', 'node_modules', 'zod')),
+);
 
 /* ---------- API (BFF) ---------- */
 app.use('/auth', authRoutes);
@@ -207,6 +288,8 @@ app.use("/api", hrApiRoutes);
 app.use("/api", poApiRoutes);
 app.use("/api", adminApiRoutes);
 app.use("/api", calendarActivitiesApiRoutes);
+app.use("/api", googleCalendarApiRoutes);
+app.use("/api", whatsappApiRoutes);
 app.use("/api", metadataDesignerApiRoutes);
 app.use("/", billingPagesRoutes);
 app.use("/", servicePagesRoutes);
@@ -216,6 +299,7 @@ app.use("/", poPagesRoutes);
 app.use("/", adminPagesRoutes);
 app.use("/", metadataDesignerPagesRoutes);
 app.use("/", scarletDriveRoutes);
+app.use("/", legalPagesRoutes);
 
 // Backward-compatible alias for environments calling /cnpj/lookup without /api
 app.get("/cnpj/lookup", (req, res) => {
@@ -264,16 +348,21 @@ app.get(['/SalesGoals', '/sales-goals'], (req, res) => res.render('SalesGoals'))
 app.get(['/NewSalesGoal', '/new-sales-goal'], (req, res) => res.render('NewSalesGoal'));
 app.get(['/SalesCommissions', '/sales-commissions'], (req, res) => res.render('SalesCommissions'));
 app.get(['/NewSalesCommission', '/new-sales-commission'], (req, res) => res.render('NewSalesCommission'));
+app.get(['/sales/whatsapp', '/SalesWhatsapp'], (req, res) => res.render('sales/whatsapp'));
 app.get('/automations', (req, res) => res.render('automations/index'));
 app.get('/automations/new', (req, res) => res.render('automations/new'));
 app.get('/automations/:id/builder', (req, res) => res.render('automations/builder'));
 
 app.get('/', (req, res) => res.render('Login', { layout: false }));
 app.get('/PublicProcessDetail', (req, res) => res.render('PublicProcessDetail', { layout: false }));
-app.get('/LandingPage', async (req, res) => {
+app.get('/gecom', async (req, res) => {
+  return renderGecomLanding(res, 'classic', { showSwitcher: false });
+});
+
+app.get(['/LandingPage', '/landingpage'], async (req, res) => {
   const forceDefaultTemplate = String(req.query?.template || "").trim() === "1";
   if (forceDefaultTemplate) {
-    return res.render("LandingPage", { layout: false });
+    return renderGecomLanding(res, 'classic', { showSwitcher: false });
   }
 
   const published = await fetchPublishedLandingPage(req);
@@ -285,12 +374,43 @@ app.get('/LandingPage', async (req, res) => {
     });
   }
 
-  return res.render("LandingPage", { layout: false });
+  const publicLanding = await fetchPublicLandingPage(req);
+  if (publicLanding?.published_html) {
+    return res.render("LandingPageCustom", {
+      layout: false,
+      landingPageHtml: publicLanding.published_html,
+      landingPageCss: publicLanding.published_css || "",
+    });
+  }
+
+  return renderGecomLanding(res, 'classic', { showSwitcher: false });
+});
+
+app.get(['/LandingPage/:tenantRef', '/landingpage/:tenantRef'], async (req, res) => {
+  const forceDefaultTemplate = String(req.query?.template || "").trim() === "1";
+  if (forceDefaultTemplate) {
+    return renderGecomLanding(res, 'classic', { showSwitcher: false });
+  }
+
+  const tenantRef = String(req.params?.tenantRef || '').trim();
+  const publicLanding = await fetchPublicLandingPage(req, tenantRef);
+  if (publicLanding?.published_html) {
+    return res.render("LandingPageCustom", {
+      layout: false,
+      landingPageHtml: publicLanding.published_html,
+      landingPageCss: publicLanding.published_css || "",
+    });
+  }
+
+  return res.status(404).render('LandingPageNotFound', {
+    layout: false,
+    tenantRef,
+  });
 });
 app.get(['/cadastro', '/register'], (req, res) =>
   res.render('PublicRegister', {
     layout: false,
-    googleKey: String(process.env.GOOGLE_KEY || ""),
+    googleKey: String(process.env.GOOGLE_BROWSER_KEY || ""),
   }),
 );
 

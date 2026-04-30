@@ -4,7 +4,9 @@
 <% %>
 <style>
   .ibox-title { padding: 15px 60px 8px 15px; }
-
+h1{
+  font-size: 26px;
+}
   .truncate {
     max-width: 280px;
     white-space: nowrap;
@@ -1117,7 +1119,28 @@
 
     // -------- Invoice helpers (billing) --------
     function pickInvoiceDate(inv) { return inv?.quote_at || inv?.created_at || null; }
-    function pickInvoiceTotal(inv) { return inv?.total ?? 0; }
+      function pickInvoiceCurrencyCode(inv) {
+        return String(
+          inv?.currencies?.code ||
+          inv?.currency?.code ||
+          inv?.currency_code ||
+          inv?.currencyCode ||
+          ""
+        ).trim().toUpperCase();
+      }
+
+      function pickInvoiceTotal(inv) {
+        var total = inv?.total ?? 0;
+        var currencyCode = pickInvoiceCurrencyCode(inv);
+        if (currencyCode && currencyCode !== "BRL") {
+          var receivedInBrl = inv?.received_amount_brl ?? inv?.receivedAmountBrl;
+          if (receivedInBrl != null && receivedInBrl !== "") return receivedInBrl;
+
+          var rate = toNumber(inv?.exchange_rate ?? inv?.exchangeRate ?? 0);
+          if (rate > 0) return toNumber(total) * rate;
+        }
+        return total;
+      }
     function pickInvoiceStatus(inv) {
       var s = inv?.status ?? inv?.invoice_status ?? inv?.invoiceStatus ?? inv?.state ?? inv?.statecode ?? null;
       if (s == null) return null;

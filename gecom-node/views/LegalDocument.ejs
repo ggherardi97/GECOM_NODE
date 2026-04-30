@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= legalDocument.title %> | <%= brandName %></title>
+    <style>
+      :root {
+        --legal-bg: linear-gradient(145deg, #f4f8ff 0%, #eef7f4 45%, #ffffff 100%);
+        --legal-card: rgba(255, 255, 255, 0.94);
+        --legal-text: #233548;
+        --legal-muted: #5e7286;
+        --legal-line: rgba(32, 61, 94, 0.12);
+        --legal-accent: #19aa8d;
+        --legal-accent-soft: rgba(25, 170, 141, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--legal-bg);
+        color: var(--legal-text);
+      }
+
+      .legal-shell {
+        width: min(920px, calc(100vw - 32px));
+        margin: 48px auto;
+      }
+
+      .legal-card {
+        border: 1px solid var(--legal-line);
+        border-radius: 28px;
+        background: var(--legal-card);
+        box-shadow: 0 24px 60px rgba(29, 52, 84, 0.12);
+        overflow: hidden;
+      }
+
+      .legal-hero {
+        padding: 34px 36px 24px;
+        background:
+          radial-gradient(circle at top right, rgba(25, 170, 141, 0.18), transparent 34%),
+          radial-gradient(circle at left center, rgba(49, 112, 176, 0.12), transparent 28%);
+      }
+
+      .legal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--legal-accent-soft);
+        color: #157d68;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .legal-hero h1 {
+        margin: 18px 0 10px;
+        font-size: clamp(32px, 5vw, 48px);
+        line-height: 1.04;
+      }
+
+      .legal-subtitle {
+        margin: 0;
+        color: var(--legal-muted);
+        font-size: 18px;
+        line-height: 1.6;
+        max-width: 720px;
+      }
+
+      .legal-body {
+        padding: 0 36px 34px;
+      }
+
+      .legal-section {
+        border-top: 1px solid var(--legal-line);
+        padding-top: 26px;
+      }
+
+      .legal-section h2 {
+        margin: 0 0 18px;
+        font-size: 24px;
+      }
+
+      .legal-section p {
+        margin: 0 0 16px;
+        color: var(--legal-muted);
+        font-size: 16px;
+        line-height: 1.75;
+      }
+
+      .legal-updated {
+        margin-top: 24px;
+        padding-top: 18px;
+        border-top: 1px dashed var(--legal-line);
+        color: var(--legal-muted);
+        font-weight: 600;
+      }
+
+      .legal-footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px 36px 30px;
+        color: var(--legal-muted);
+        font-size: 14px;
+      }
+
+      .legal-footer a {
+        color: #1f7aec;
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      @media (max-width: 768px) {
+        .legal-shell {
+          width: min(100vw - 20px, 920px);
+          margin: 18px auto;
+        }
+
+        .legal-hero,
+        .legal-body,
+        .legal-footer {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        .legal-footer {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="legal-shell">
+      <article class="legal-card">
+        <header class="legal-hero">
+          <span class="legal-badge"><%= brandName %></span>
+          <h1><%= legalDocument.title %></h1>
+          <p class="legal-subtitle">
+            Documento publico da plataforma com as informacoes basicas exigidas para validacao e uso do portal.
+          </p>
+        </header>
+
+        <div class="legal-body">
+          <section class="legal-section">
+            <h2><%= legalDocument.heading %></h2>
+            <% legalDocument.paragraphs.forEach(function (paragraph) { %>
+              <p><%= paragraph %></p>
+            <% }); %>
+            <div class="legal-updated">Ultima atualizacao: <%= legalDocument.updatedAt %>.</div>
+          </section>
+        </div>
+
+        <footer class="legal-footer">
+          <span><%= brandName %> legal page</span>
+          <a href="/">Voltar</a>
+        </footer>
+      </article>
+    </main>
+  </body>
+</html>

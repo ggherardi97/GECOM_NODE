@@ -103,9 +103,28 @@
     return post("grid-filter", payload);
   }
 
+  async function getAiChat(input) {
+    const raw = Object.assign({}, input || {});
+    const payload = {
+      lang: raw.lang,
+      confirmed: !!raw.confirmed,
+      draft: raw.draft && typeof raw.draft === "object" && !Array.isArray(raw.draft) ? raw.draft : undefined,
+      messages: Array.isArray(raw.messages)
+        ? raw.messages
+            .map((item) => ({
+              role: item?.role === "assistant" ? "assistant" : "user",
+              content: String(item?.content || "").trim(),
+            }))
+            .filter((item) => item.content)
+        : [],
+    };
+    return post("chat", payload);
+  }
+
   window.GECOM_AI_API = {
     getAiDashboard,
     getAiHomeSearch,
     getAiGridFilter,
+    getAiChat,
   };
 })();

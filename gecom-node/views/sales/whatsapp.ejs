@@ -1,0 +1,957 @@
+<link href="/Assets/inspinia/css/plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+<style>
+  #masterHeader { display: none; }
+  .wa-sales-page {
+    --wa-green: #1faa59;
+    --wa-green-dark: #177c42;
+    --wa-green-soft: #e7f8ef;
+    --wa-ink: #243445;
+    --wa-muted: #6f8191;
+    --wa-border: #dce7e2;
+    --wa-card: #ffffff;
+    --wa-shadow: 0 18px 38px rgba(18, 38, 32, 0.08);
+  }
+  .wa-sales-page > .wa-shell { align-items: start; }
+  .wa-sales-page .wa-shell { display:grid; grid-template-columns: 380px minmax(0, 1fr); gap: 18px; }
+  .wa-sales-page .wa-card {
+    border: 1px solid var(--wa-border);
+    background: var(--wa-card);
+    border-radius: 18px;
+    box-shadow: var(--wa-shadow);
+    overflow: hidden;
+  }
+  .wa-sales-page .wa-hero {
+    padding: 22px 24px;
+    background:
+      radial-gradient(circle at top left, rgba(31,170,89,.20), transparent 40%),
+      linear-gradient(135deg, #f5fffa 0%, #f8fbff 46%, #ffffff 100%);
+    border-bottom: 1px solid var(--wa-border);
+  }
+  .wa-sales-page .wa-hero-head {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .wa-sales-page .wa-hero-title {
+    min-width: 0;
+  }
+  .wa-sales-page .wa-hero h2 { margin:0; font-size: 24px; color: var(--wa-ink); font-weight: 800; }
+  .wa-sales-page .wa-hero p { margin:8px 0 0; color: var(--wa-muted); line-height: 1.6; }
+  .wa-sales-page .wa-icon-btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border:1px solid var(--wa-border);
+    background:#fff;
+    color:#486072;
+    box-shadow: 0 10px 24px rgba(18, 38, 32, 0.08);
+  }
+  .wa-sales-page .wa-icon-btn:hover,
+  .wa-sales-page .wa-icon-btn:focus {
+    color: var(--wa-green-dark);
+    border-color:#bfe3cc;
+    background:#f7fcf9;
+  }
+  .wa-sales-page .wa-hero-grid { margin-top: 18px; display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+  .wa-sales-page .wa-metric {
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid #d9eee2;
+    background: rgba(255,255,255,.78);
+  }
+  .wa-sales-page .wa-metric strong { display:block; font-size: 24px; color: var(--wa-ink); }
+  .wa-sales-page .wa-metric span { color: var(--wa-muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .wa-sales-page .wa-pane-body { padding: 18px; }
+  .wa-sales-page .wa-section-title { margin: 0 0 10px; font-size: 15px; font-weight: 800; color: var(--wa-ink); }
+  .wa-sales-page .wa-muted { color: var(--wa-muted); }
+  .wa-sales-page .wa-stage {
+    position: relative;
+    background: #fff;
+  }
+  .wa-sales-page .wa-setup-stack { position: relative; }
+  .wa-sales-page .wa-setup-shell { display:flex; flex-direction:column; gap:18px; }
+  .wa-sales-page .wa-setup-flyout { display:flex; flex-direction:column; gap:18px; }
+  .wa-sales-page .wa-setup-handle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    color: #2f536b;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .wa-sales-page .wa-setup-handle i { font-size: 18px; }
+  .wa-sales-page .wa-setup-handle span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px;
+  }
+  .wa-sales-page .wa-status-pill {
+    display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:7px 12px;
+    background: var(--wa-green-soft); color: var(--wa-green-dark); font-weight: 700; font-size: 12px;
+  }
+  .wa-sales-page .wa-status-pill.is-off { background:#f4f7fa; color:#6a7c89; }
+  .wa-sales-page .wa-grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wa-sales-page .wa-stack { display:flex; flex-direction:column; gap: 14px; }
+  .wa-sales-page .wa-input, .wa-sales-page textarea, .wa-sales-page select {
+    width: 100%; border:1px solid var(--wa-border); border-radius: 12px; padding: 11px 12px;
+    color: var(--wa-ink); background:#fff;
+  }
+  .wa-sales-page textarea { min-height: 96px; resize: vertical; }
+  .wa-sales-page label { display:block; font-size: 12px; color: var(--wa-muted); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .wa-sales-page .wa-step-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom: 10px; }
+  .wa-sales-page .wa-step-badge {
+    display:inline-flex; align-items:center; justify-content:center; width: 30px; height: 30px;
+    min-width: 30px; min-height: 30px; flex: 0 0 30px; border-radius: 50%; background: var(--wa-green); color:#fff; font-weight: 800;
+  }
+  .wa-sales-page .wa-step-card {
+    border:1px solid #e4ece8; border-radius: 18px; padding: 16px; background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+  }
+  .wa-sales-page .wa-step-card.is-done {
+    border-color:#b8e5c7; box-shadow: inset 0 0 0 1px rgba(31,170,89,.12); background: linear-gradient(180deg, #ffffff 0%, #f5fff9 100%);
+  }
+  .wa-sales-page .wa-step-status {
+    display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+    background:#f4f7fa; color:#6a7c89; font-size:12px; font-weight:700;
+  }
+  .wa-sales-page .wa-step-status.is-done { background: var(--wa-green-soft); color: var(--wa-green-dark); }
+  .wa-sales-page .wa-step-summary { color: var(--wa-muted); line-height: 1.6; min-height: 42px; margin-bottom: 14px; }
+  .wa-sales-page .wa-step-actions-row { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+  .wa-sales-page .wa-tech-note {
+    border:1px dashed #cfe0d7; border-radius: 16px; padding: 16px; color: var(--wa-muted); background:#fafdfb; line-height: 1.6;
+  }
+  .wa-sales-page .wa-check-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .wa-sales-page .wa-check {
+    display:flex; align-items:flex-start; gap: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid #dce7e2; background:#f9fcfb;
+  }
+  .wa-sales-page .wa-intent-group { display:flex; flex-wrap: wrap; gap: 8px; }
+  .wa-sales-page .wa-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid #dce7e2; border-radius: 999px; background:#f9fcfb; font-weight: 700; color:#4c5d6b; }
+  .wa-sales-page .wa-list { display:flex; flex-direction:column; gap: 8px; max-height: 320px; overflow:auto; }
+  .wa-sales-page .wa-list button {
+    text-align:left; border:1px solid #dce7e2; background:#fff; border-radius: 14px; padding: 12px; transition: .18s ease;
+  }
+  .wa-sales-page .wa-list button.is-active, .wa-sales-page .wa-list button:hover { border-color:#a6dbbc; background:#f4fbf7; }
+  .wa-sales-page .wa-list-entry { display:grid; grid-template-columns: 48px minmax(0,1fr); gap:12px; align-items:flex-start; }
+  .wa-sales-page .wa-list-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, #d9f5e4 0%, #f1fbf5 100%);
+    border:1px solid #c7e8d2;
+    color:#1f7a47;
+    font-weight:800;
+    font-size:15px;
+  }
+  .wa-sales-page .wa-list-avatar img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .wa-sales-page .wa-list-main { min-width:0; }
+  .wa-sales-page .wa-list h5 { margin:0 0 6px; color: var(--wa-ink); font-size: 14px; font-weight: 800; }
+  .wa-sales-page .wa-list p { margin:0; color: var(--wa-muted); font-size: 12px; }
+  .wa-sales-page .wa-list-topline,
+  .wa-sales-page .wa-list-bottomline,
+  .wa-sales-page .wa-toolbar-row,
+  .wa-sales-page .wa-note-row,
+  .wa-sales-page .wa-quick-replies {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+  .wa-sales-page .wa-list-topline { justify-content:space-between; margin-bottom:6px; }
+  .wa-sales-page .wa-list-bottomline { margin-top:8px; }
+  .wa-sales-page .wa-badge-soft {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 9px;
+    border-radius:999px;
+    background:#f1f6f4;
+    color:#4c6272;
+    font-size:11px;
+    font-weight:700;
+  }
+  .wa-sales-page .wa-badge-soft.is-unread { background:#fff4d9; color:#8a6a0a; }
+  .wa-sales-page .wa-toolbar-stack { display:flex; flex-direction:column; gap:12px; }
+  .wa-sales-page .wa-toolbar-row { justify-content:space-between; }
+  .wa-sales-page .wa-toolbar-controls { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .wa-sales-page .wa-filter-inline {
+    min-width: 150px;
+    border:1px solid var(--wa-border);
+    border-radius:12px;
+    padding:10px 12px;
+    background:#fff;
+    color:var(--wa-ink);
+  }
+  .wa-sales-page .wa-ops-grid {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .wa-sales-page .wa-ops-cell {
+    border:1px solid #e2ece7;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background:#fbfefc;
+  }
+  .wa-sales-page .wa-ops-cell label { margin-bottom:4px; font-size:11px; }
+  .wa-sales-page .wa-note-box {
+    margin-top: 14px;
+    border-top:1px solid var(--wa-border);
+    padding-top: 14px;
+  }
+  .wa-sales-page .wa-note-list {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height: 220px;
+    overflow:auto;
+    margin-top: 12px;
+  }
+  .wa-sales-page .wa-note-item {
+    border:1px solid #e2ece7;
+    border-radius: 14px;
+    padding: 10px 12px;
+    background:#fbfefc;
+  }
+  .wa-sales-page .wa-note-item strong { color: var(--wa-ink); }
+  .wa-sales-page .wa-note-item p { margin:6px 0 0; color: var(--wa-muted); }
+  .wa-sales-page .wa-note-compose {
+    display:grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap:10px;
+    align-items:start;
+  }
+  .wa-sales-page .wa-quick-replies { margin-bottom: 10px; }
+  .wa-sales-page .wa-quick-reply {
+    border:1px solid #dce7e2;
+    background:#fff;
+    color:#476072;
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:12px;
+    font-weight:700;
+  }
+  .wa-sales-page .wa-quick-reply:hover,
+  .wa-sales-page .wa-quick-reply:focus {
+    border-color:#a6dbbc;
+    background:#f4fbf7;
+    color:var(--wa-green-dark);
+  }
+  .wa-sales-page .wa-detail-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+  .wa-sales-page .wa-chat {
+    min-height: 420px; max-height: 520px; overflow:auto; padding: 18px; background:
+      linear-gradient(180deg, rgba(245,255,250,.9), rgba(255,255,255,1)),
+      repeating-linear-gradient(45deg, rgba(31,170,89,.03) 0 14px, transparent 14px 28px);
+  }
+  .wa-sales-page .wa-bubble { max-width: 78%; padding: 12px 14px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0,0,0,.05); }
+  .wa-sales-page .wa-bubble.in { background:#fff; border:1px solid #dce7e2; border-top-left-radius: 6px; }
+  .wa-sales-page .wa-bubble.out { background: linear-gradient(135deg, #daf7e5 0%, #ebfff4 100%); margin-left:auto; border:1px solid #c4e9d1; border-top-right-radius: 6px; }
+  .wa-sales-page .wa-bubble small { display:block; margin-top: 6px; color: var(--wa-muted); }
+  .wa-sales-page .wa-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .wa-sales-page .wa-empty {
+    border:1px dashed #cfe0d7; border-radius: 16px; padding: 22px; text-align:center; color: var(--wa-muted); background:#fafdfb;
+  }
+  .wa-sales-page .wa-diag-card {
+    border:1px solid #dce7e2;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #fbfefc 0%, #f7fbf9 100%);
+  }
+  .wa-sales-page .wa-diag-grid {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px;
+  }
+  .wa-sales-page .wa-diag-item {
+    border:1px solid #e2ece7;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background:#fff;
+  }
+  .wa-sales-page .wa-diag-item label {
+    margin-bottom: 4px;
+    font-size: 11px;
+  }
+  .wa-sales-page .wa-diag-item div {
+    color: var(--wa-ink);
+    font-size: 13px;
+    font-weight: 700;
+    word-break: break-word;
+  }
+  .wa-sales-page .wa-json-box {
+    margin-top: 12px;
+    border:1px dashed #cfe0d7;
+    border-radius: 14px;
+    background:#fcfefd;
+    overflow: hidden;
+  }
+  .wa-sales-page .wa-json-box summary {
+    cursor:pointer;
+    padding: 10px 12px;
+    font-weight: 700;
+    color: var(--wa-ink);
+    list-style: none;
+  }
+  .wa-sales-page .wa-json-box summary::-webkit-details-marker { display:none; }
+  .wa-sales-page .wa-json-box pre {
+    margin:0;
+    padding: 0 12px 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color:#476072;
+    background: transparent;
+    border:0;
+    font-size: 12px;
+  }
+  .wa-sales-page .wa-footer-box { padding: 16px 18px; border-top:1px solid var(--wa-border); background:#f8fcfa; }
+  .wa-sales-page .wa-reply-box { display:grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; }
+  .wa-sales-page .wa-inline-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .wa-sales-page .wa-commercial-grid { display:grid; grid-template-columns: 320px minmax(0,1fr); gap:16px; }
+  .wa-sales-page .wa-mini-list { display:flex; flex-direction:column; gap:10px; max-height:420px; overflow:auto; }
+  .wa-sales-page .wa-mini-list button {
+    text-align:left;
+    border:1px solid #dce7e2;
+    background:#fff;
+    border-radius:16px;
+    padding:12px 14px;
+    transition:.18s ease;
+  }
+  .wa-sales-page .wa-mini-list button.is-active,
+  .wa-sales-page .wa-mini-list button:hover { border-color:#a6dbbc; background:#f4fbf7; }
+  .wa-sales-page .wa-mini-list h5 { margin:0 0 6px; font-size:14px; font-weight:800; color:var(--wa-ink); }
+  .wa-sales-page .wa-mini-list p { margin:0; font-size:12px; color:var(--wa-muted); }
+  .wa-sales-page .wa-form-grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .wa-sales-page .wa-form-grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; }
+  .wa-sales-page .wa-form-actions { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end; }
+  .wa-sales-page .wa-recipient-toolbar {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .wa-sales-page .wa-recipient-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; }
+  .wa-sales-page .wa-recipient-item {
+    border:1px solid #dce7e2;
+    border-radius:14px;
+    padding:12px 14px;
+    background:#fbfefc;
+  }
+  .wa-sales-page .wa-recipient-item strong { display:block; color:var(--wa-ink); }
+  .wa-sales-page .wa-recipient-item p { margin:6px 0 0; color:var(--wa-muted); font-size:12px; }
+  .wa-sales-page .wa-recipient-item .wa-inline-actions { margin-top:10px; }
+  .wa-sales-page .wa-consent-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px; }
+  .wa-sales-page .wa-soft-panel {
+    border:1px dashed #d7e5de;
+    border-radius:16px;
+    padding:14px 16px;
+    background:#fbfefc;
+  }
+  .wa-sales-page .wa-advanced {
+    border:1px dashed #d7e5de; border-radius: 14px; padding: 12px 14px; background:#fbfdfc;
+  }
+  .wa-sales-page .wa-advanced summary {
+    cursor:pointer; list-style:none; font-weight: 700; color: var(--wa-ink);
+  }
+  .wa-sales-page .wa-advanced summary::-webkit-details-marker { display:none; }
+  .wa-sales-page .wa-advanced[open] summary { margin-bottom: 10px; }
+  .wa-sales-page .wa-modal {
+    position: fixed; inset: 0; z-index: 1200; display: none; align-items: stretch; justify-content: flex-end;
+    background: rgba(17, 28, 24, 0.22);
+  }
+  .wa-sales-page .wa-modal.is-open { display:flex; }
+  .wa-sales-page .wa-modal-panel {
+    width: min(560px, 100vw); height: 100%; background:#fff; box-shadow: -18px 0 48px rgba(17,28,24,.18);
+    display:flex; flex-direction:column;
+  }
+  .wa-sales-page .wa-modal-head {
+    padding: 22px 22px 16px; border-bottom:1px solid var(--wa-border);
+    background: linear-gradient(135deg, #f5fffa 0%, #f8fbff 46%, #ffffff 100%);
+  }
+  .wa-sales-page .wa-modal-body { padding: 18px 22px 22px; overflow:auto; display:flex; flex-direction:column; gap:14px; }
+  .wa-sales-page .wa-modal-foot {
+    padding: 16px 22px; border-top:1px solid var(--wa-border); background:#f8fcfa; display:flex; gap:10px; justify-content:flex-end;
+  }
+  .wa-sales-page .wa-modal-diagnostics .modal-dialog {
+    width: min(980px, calc(100vw - 32px));
+  }
+  .wa-sales-page .wa-modal-diagnostics .modal-content {
+    border-radius: 18px;
+    border: 1px solid var(--wa-border);
+    box-shadow: 0 20px 50px rgba(18, 38, 32, 0.16);
+    overflow: hidden;
+  }
+  .wa-sales-page .wa-modal-diagnostics .modal-header {
+    border-bottom: 1px solid var(--wa-border);
+    background: linear-gradient(135deg, #f5fffa 0%, #f8fbff 46%, #ffffff 100%);
+  }
+  .wa-sales-page .wa-modal-diagnostics .modal-body {
+    background:#fbfefc;
+    padding: 18px;
+  }
+  .wa-sales-page .wa-tech-tabs {
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--wa-border);
+  }
+  .wa-sales-page .wa-tech-tabs > li > a {
+    border-radius: 12px 12px 0 0;
+    color: var(--wa-muted);
+    font-weight: 700;
+  }
+  .wa-sales-page .wa-tech-tabs > li.active > a,
+  .wa-sales-page .wa-tech-tabs > li.active > a:focus,
+  .wa-sales-page .wa-tech-tabs > li.active > a:hover {
+    color: var(--wa-green-dark);
+    background: #fff;
+    border: 1px solid var(--wa-border);
+    border-bottom-color: #fff;
+  }
+  .wa-sales-page .wa-tech-pane {
+    background:#fff;
+    border:1px solid var(--wa-border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .wa-sales-page .wa-tech-pane-head {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom: 12px;
+  }
+  .wa-sales-page .btn { border-radius: 12px; font-weight: 700; }
+  .wa-sales-page.is-docked .wa-stage { padding-right: 58px; }
+  .wa-sales-page.is-docked .wa-stage > .wa-shell {
+    display:block;
+    overflow: visible;
+  }
+  .wa-sales-page.is-docked .wa-stage > .wa-shell > .wa-card {
+    width: 100%;
+  }
+  .wa-sales-page.is-docked .wa-setup-stack {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 6;
+    width: 380px;
+    max-width: calc(100vw - 44px);
+    pointer-events: none;
+  }
+  .wa-sales-page.is-docked .wa-setup-shell {
+    display:grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    align-items: start;
+    transform: translateX(calc(100% - 56px));
+    transition: transform .24s ease, box-shadow .24s ease;
+    filter: drop-shadow(0 16px 30px rgba(18, 38, 32, 0.12));
+    pointer-events: auto;
+    z-index: 5;
+  }
+  .wa-sales-page.is-docked .wa-setup-shell:hover,
+  .wa-sales-page.is-docked .wa-setup-shell:focus-within {
+    transform: translateX(0);
+  }
+  .wa-sales-page.is-docked .wa-setup-handle {
+    display: flex;
+    position: relative;
+    width: 56px;
+    min-height: 188px;
+    border-radius: 18px 0 0 18px;
+    border: 1px solid #dce7e2;
+    border-right: 0;
+    background: linear-gradient(180deg, #f5fffa 0%, #edf7f2 100%);
+    cursor: default;
+    user-select: none;
+  }
+  .wa-sales-page.is-docked .wa-setup-flyout {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding-right: 4px;
+    padding-bottom: 12px;
+  }
+  .wa-sales-page.is-docked .wa-setup-flyout .wa-list {
+    max-height: none;
+    overflow: visible;
+  }
+  @media (max-width: 1200px) {
+    .wa-sales-page .wa-shell { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-hero-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .wa-sales-page .wa-diag-grid { grid-template-columns: 1fr 1fr; }
+    .wa-sales-page .wa-ops-grid { grid-template-columns: 1fr 1fr; }
+    .wa-sales-page .wa-commercial-grid { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-recipient-grid { grid-template-columns: 1fr; }
+    .wa-sales-page.is-docked .wa-stage { padding-right: 0; }
+    .wa-sales-page.is-docked .wa-stage > .wa-shell { display:grid; grid-template-columns: 1fr; }
+    .wa-sales-page.is-docked .wa-setup-stack {
+      position: relative;
+      width: auto;
+      max-width: none;
+      pointer-events: auto;
+    }
+    .wa-sales-page.is-docked .wa-setup-shell {
+      display:flex;
+      transform:none;
+      filter:none;
+      pointer-events:auto;
+    }
+    .wa-sales-page.is-docked .wa-setup-flyout {
+      max-height: none;
+      overflow: visible;
+      padding-right: 0;
+    }
+    .wa-sales-page.is-docked .wa-setup-handle { display:none; }
+  }
+  @media (max-width: 767px) {
+    .wa-sales-page .wa-grid-2, .wa-sales-page .wa-check-grid, .wa-sales-page .wa-reply-box { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-hero-grid { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-hero-head { flex-direction:column; align-items:stretch; }
+    .wa-sales-page .wa-bubble { max-width: 92%; }
+    .wa-sales-page .wa-step-actions-row { flex-direction:column; align-items:flex-start; }
+    .wa-sales-page .wa-diag-grid { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-toolbar-row,
+    .wa-sales-page .wa-toolbar-controls { flex-direction:column; align-items:stretch; }
+    .wa-sales-page .wa-note-compose { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-ops-grid { grid-template-columns: 1fr; }
+    .wa-sales-page .wa-form-grid-2,
+    .wa-sales-page .wa-form-grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="wa-sales-page" style="padding-top: 15px;">
+  <div class="wa-card">
+    <div class="wa-hero">
+      <div class="wa-hero-head">
+        <div class="wa-hero-title">
+          <h2>WhatsApp Sales</h2>
+          <p>Conecte o numero, receba mensagens, classifique com IA e agora opere o atendimento com responsavel, status, notas internas e respostas rapidas.</p>
+        </div>
+        <button type="button" class="btn wa-icon-btn" id="waOpenDiagnosticsBtn" title="Diagnostico da instancia">
+          <i class="fa fa-cog"></i>
+        </button>
+      </div>
+      <div class="wa-hero-grid">
+        <div class="wa-metric"><span>Instancias</span><strong id="waMetricIntegrations">0</strong></div>
+        <div class="wa-metric"><span>Conversas</span><strong id="waMetricConversations">0</strong></div>
+        <div class="wa-metric"><span>Qualificadas</span><strong id="waMetricQualified">0</strong></div>
+        <div class="wa-metric"><span>Leads</span><strong id="waMetricLeads">0</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wa-stage" style="margin-top:18px;">
+    <div class="wa-shell">
+      <div class="wa-stack wa-setup-stack">
+        <div class="wa-setup-shell">
+          <div class="wa-setup-handle">
+            <i class="fa fa-sliders"></i>
+            <span>Setup</span>
+          </div>
+          <div class="wa-setup-flyout">
+            <div class="wa-card">
+              <div class="wa-pane-body wa-stack">
+          <div class="wa-step-card" id="waStepCard1">
+            <div class="wa-step-head">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span class="wa-step-badge">1</span>
+                <div>
+                  <h4 class="wa-section-title">Conexao WhatsApp</h4>
+                  <div class="wa-muted">Dados da instancia e credencial principal.</div>
+                </div>
+              </div>
+              <span class="wa-step-status" id="waStepStatus1">Pendente</span>
+            </div>
+            <div class="wa-step-summary" id="waStepSummary1">Defina o nome, a credencial do numero e os dados principais da conexao.</div>
+            <div class="wa-step-actions-row">
+              <span class="wa-muted">A maior parte tecnica pode ficar fixa por padrao.</span>
+              <button type="button" class="btn btn-white wa-open-step" data-step="1">Configurar</button>
+            </div>
+          </div>
+
+          <div class="wa-step-card" id="waStepCard2">
+            <div class="wa-step-head">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span class="wa-step-badge">2</span>
+                <div>
+                  <h4 class="wa-section-title">Funil e automacao</h4>
+                  <div class="wa-muted">Defina quem recebe, em que etapa cai e o que vira lead.</div>
+                </div>
+              </div>
+              <span class="wa-step-status" id="waStepStatus2">Pendente</span>
+            </div>
+            <div class="wa-step-summary" id="waStepSummary2">Escolha owner, etapa padrao e as automacoes principais do comercial.</div>
+            <div class="wa-step-actions-row">
+              <span class="wa-muted">Essa parte fica 100% configuravel por cliente.</span>
+              <button type="button" class="btn btn-white wa-open-step" data-step="2">Configurar</button>
+            </div>
+          </div>
+
+          <div class="wa-step-card" id="waStepCard3">
+            <div class="wa-step-head">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span class="wa-step-badge">3</span>
+                <div>
+                  <h4 class="wa-section-title">IA e respostas</h4>
+                  <div class="wa-muted">Contexto do negocio, tom da IA e resposta inicial.</div>
+                </div>
+              </div>
+              <span class="wa-step-status" id="waStepStatus3">Pendente</span>
+            </div>
+            <div class="wa-step-summary" id="waStepSummary3">Personalize a triagem e a primeira resposta automatica para cada operacao.</div>
+            <div class="wa-step-actions-row">
+              <span class="wa-muted">Podemos deixar um texto padrao e o cliente ajusta depois.</span>
+              <button type="button" class="btn btn-white wa-open-step" data-step="3">Configurar</button>
+            </div>
+          </div>
+
+          <div class="wa-step-card" id="waStepCard4">
+            <div class="wa-step-head">
+              <div style="display:flex; gap:12px; align-items:flex-start;">
+                <span class="wa-step-badge">4</span>
+                <div>
+                  <h4 class="wa-section-title">Webhook e testes</h4>
+                  <div class="wa-muted">Conecte o webhook e valide o numero em poucos cliques.</div>
+                </div>
+              </div>
+              <span class="wa-step-status" id="waStepStatus4">Pendente</span>
+            </div>
+            <div class="wa-step-summary" id="waStepSummary4">A URL publica pode ficar pronta por padrao. Depois e so conectar e testar.</div>
+            <div class="wa-step-actions-row">
+              <span class="wa-muted">Em producao, essa etapa fica quase toda pronta.</span>
+              <button type="button" class="btn btn-white wa-open-step" data-step="4">Configurar</button>
+            </div>
+          </div>
+
+                <div class="wa-actions">
+                  <button type="button" class="btn btn-white" id="waProvisionBtn"><i class="fa fa-magic"></i> Criar instancia automatica</button>
+                  <button type="button" class="btn btn-primary" id="waSaveBtn"><i class="fa fa-save"></i> Salvar configuracao</button>
+                  <button type="button" class="btn btn-white" id="waConnectBtn"><i class="fa fa-link"></i> Conectar webhook</button>
+                  <button type="button" class="btn btn-white" id="waTestSendBtn"><i class="fa fa-paper-plane"></i> Enviar teste</button>
+                </div>
+                <div id="waFormMessage" class="wa-muted"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wa-card">
+        <div class="wa-pane-body wa-stack">
+          <div class="wa-toolbar-stack">
+            <div class="wa-toolbar-row">
+              <div>
+                <h4 class="wa-section-title">Inbox comercial</h4>
+                <div class="wa-muted">Conversas recebidas, responsavel, status operacional, notas internas e resposta manual.</div>
+              </div>
+              <div class="wa-toolbar-controls">
+                <input class="wa-input" id="waConversationSearch" placeholder="Buscar contato ou mensagem..." style="width:260px;" />
+                <button type="button" class="btn btn-white" id="waRefreshInboxBtn"><i class="fa fa-refresh"></i> Atualizar</button>
+              </div>
+            </div>
+            <div class="wa-toolbar-controls">
+              <select id="waOwnershipFilter" class="wa-filter-inline">
+                <option value="ALL">Todas as conversas</option>
+                <option value="MINE">Minhas conversas</option>
+                <option value="UNASSIGNED">Nao atribuidas</option>
+              </select>
+              <select id="waStatusFilter" class="wa-filter-inline">
+                <option value="">Todos os status</option>
+              </select>
+            </div>
+          </div>
+          <div class="wa-shell" style="grid-template-columns: 320px minmax(0,1fr); gap:16px;">
+            <div id="waConversationsList" class="wa-list"></div>
+            <div class="wa-card" style="box-shadow:none;">
+              <div class="wa-pane-body" id="waConversationMeta">
+                <div class="wa-empty">Selecione uma conversa para visualizar as mensagens e responder.</div>
+              </div>
+              <div id="waMessagesPanel" class="wa-chat"></div>
+              <div class="wa-footer-box">
+                <div id="waQuickReplies" class="wa-quick-replies"></div>
+                <div class="wa-reply-box">
+                  <input class="wa-input" id="waReplyInput" placeholder="Digite a resposta..." />
+                  <button type="button" class="btn btn-white" id="waReprocessBtn"><i class="fa fa-magic"></i> Reprocessar IA</button>
+                  <button type="button" class="btn btn-primary" id="waReplyBtn"><i class="fa fa-send"></i> Responder</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wa-card">
+        <div class="wa-pane-body wa-stack">
+          <div class="wa-toolbar-row">
+            <div>
+              <h4 class="wa-section-title">Templates e campanhas</h4>
+              <div class="wa-muted">Biblioteca de mensagens reutilizáveis para inbox e campanhas outbound com revisão de destinatários.</div>
+            </div>
+          </div>
+          <div class="wa-commercial-grid">
+            <div class="wa-stack">
+              <div class="wa-soft-panel">
+                <div class="wa-detail-head">
+                  <div>
+                    <h4 class="wa-section-title" style="margin-bottom:4px;">Templates</h4>
+                    <div class="wa-muted">Reaproveite textos comerciais e operacionais.</div>
+                  </div>
+                  <button type="button" class="btn btn-white btn-sm" id="waTemplateNewBtn"><i class="fa fa-plus"></i> Novo</button>
+                </div>
+                <div id="waTemplatesList" class="wa-mini-list" style="margin-top:12px;"></div>
+              </div>
+
+              <div class="wa-soft-panel">
+                <div class="wa-detail-head">
+                  <div>
+                    <h4 class="wa-section-title" style="margin-bottom:4px;">Campanhas</h4>
+                    <div class="wa-muted">Dispare outbound com rastreabilidade por destinatário.</div>
+                  </div>
+                  <button type="button" class="btn btn-white btn-sm" id="waCampaignNewBtn"><i class="fa fa-plus"></i> Nova</button>
+                </div>
+                <div id="waCampaignsList" class="wa-mini-list" style="margin-top:12px;"></div>
+              </div>
+            </div>
+
+            <div class="wa-stack">
+              <div class="wa-soft-panel">
+                <div class="wa-detail-head">
+                  <div>
+                    <h4 class="wa-section-title" style="margin-bottom:4px;">Editor de template</h4>
+                    <div class="wa-muted">Use variáveis como <strong>{{first_name}}</strong>, <strong>{{contact_name}}</strong> e <strong>{{integration_name}}</strong>.</div>
+                  </div>
+                </div>
+                <div class="wa-form-grid-3" style="margin-top:12px;">
+                  <div><label>Nome</label><input class="wa-input" id="waTemplateName" /></div>
+                  <div><label>Categoria</label><select id="waTemplateCategory"></select></div>
+                  <div><label>Uso</label><select id="waTemplateScope"></select></div>
+                </div>
+                <div style="margin-top:12px;">
+                  <label>Mensagem</label>
+                  <textarea id="waTemplateText" placeholder="Ex.: Oi {{first_name}}, se fizer sentido eu posso te mostrar uma proposta enxuta para começar."></textarea>
+                </div>
+                <div class="wa-consent-row">
+                  <label class="wa-check"><input type="checkbox" id="waTemplateActive" checked /> <span>Template ativo</span></label>
+                </div>
+                <div class="wa-form-actions" style="margin-top:14px;">
+                  <button type="button" class="btn btn-primary" id="waTemplateSaveBtn"><i class="fa fa-save"></i> Salvar template</button>
+                </div>
+              </div>
+
+              <div class="wa-soft-panel">
+                <div class="wa-detail-head">
+                  <div>
+                    <h4 class="wa-section-title" style="margin-bottom:4px;">Editor de campanha</h4>
+                    <div class="wa-muted">Monte a mensagem, revise a base e dispare somente para opt-ins.</div>
+                  </div>
+                  <div id="waCampaignStatusPill" class="wa-status-pill is-off">Rascunho</div>
+                </div>
+                <div class="wa-form-grid-3" style="margin-top:12px;">
+                  <div><label>Nome</label><input class="wa-input" id="waCampaignName" /></div>
+                  <div><label>Template base</label><select id="waCampaignTemplate"></select></div>
+                  <div><label>Status</label><input class="wa-input" id="waCampaignStatus" readonly /></div>
+                </div>
+                <div style="margin-top:12px;">
+                  <label>Mensagem da campanha</label>
+                  <textarea id="waCampaignText" placeholder="Escreva a mensagem final da campanha ou selecione um template base."></textarea>
+                </div>
+
+                <div class="wa-recipient-toolbar">
+                  <div>
+                    <h4 class="wa-section-title" style="margin-bottom:4px;">Destinatários</h4>
+                    <div class="wa-muted">Adicione da inbox atual ou inclua manualmente.</div>
+                  </div>
+                  <div class="wa-inline-actions">
+                    <button type="button" class="btn btn-white btn-sm" id="waCampaignAddCurrentBtn"><i class="fa fa-user-plus"></i> Conversa atual</button>
+                    <button type="button" class="btn btn-white btn-sm" id="waCampaignAddOptInsBtn"><i class="fa fa-users"></i> Opt-ins da inbox</button>
+                  </div>
+                </div>
+                <div class="wa-form-grid-2" style="margin-bottom:12px;">
+                  <div><label>Nome manual</label><input class="wa-input" id="waCampaignManualName" placeholder="Ex.: Cliente prioritário" /></div>
+                  <div><label>Telefone manual</label><input class="wa-input" id="waCampaignManualPhone" placeholder="5511999999999" /></div>
+                </div>
+                <div class="wa-inline-actions" style="margin-bottom:12px;">
+                  <button type="button" class="btn btn-white btn-sm" id="waCampaignAddManualBtn"><i class="fa fa-plus"></i> Adicionar manualmente</button>
+                </div>
+                <div id="waCampaignRecipients" class="wa-recipient-grid"></div>
+
+                <div class="wa-form-actions" style="margin-top:16px;">
+                  <button type="button" class="btn btn-white" id="waCampaignSaveBtn"><i class="fa fa-save"></i> Salvar campanha</button>
+                  <button type="button" class="btn btn-primary" id="waCampaignLaunchBtn"><i class="fa fa-paper-plane"></i> Disparar campanha</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div class="wa-modal" id="waStepModal">
+    <div class="wa-modal-panel">
+      <div class="wa-modal-head">
+        <div class="wa-step-head" style="margin-bottom:0;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <span class="wa-step-badge" id="waModalStepBadge">1</span>
+            <div>
+              <h4 class="wa-section-title" id="waModalTitle">Configurar etapa</h4>
+              <div class="wa-muted" id="waModalDescription">Preencha os dados desta etapa.</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-white btn-sm" id="waCloseModalBtn"><i class="fa fa-times"></i> Fechar</button>
+        </div>
+      </div>
+      <div class="wa-modal-body">
+        <div class="wa-step-modal-section" data-step="1">
+          <div class="wa-grid-2">
+            <div><label>Nome da instancia</label><input class="wa-input" id="waName" /></div>
+            <div>
+              <label>Provider</label>
+              <div class="wa-input" id="waProviderReadonly">Z-API</div>
+              <select id="waProvider" style="display:none;"></select>
+              <div class="wa-muted" id="waProviderHelp" style="margin-top:6px;">Provider fixo por padrao da plataforma.</div>
+            </div>
+            <div id="waApiKeyWrap"><label id="waApiKeyLabel">Token / API Key</label><input class="wa-input" id="waApiKey" placeholder="preenchido automaticamente quando usar a conta parceira" /></div>
+            <div id="waSessionWrap"><label id="waSessionLabel">Session / Instance ID</label><input class="wa-input" id="waSessionName" placeholder="preenchido automaticamente quando usar a conta parceira" /></div>
+            <div><label>Numero do WhatsApp</label><input class="wa-input" id="waPhoneNumber" placeholder="5511999999999" /></div>
+          </div>
+          <details class="wa-advanced" style="margin-top:12px;" id="waAdvancedConnection">
+            <summary>Opcoes avancadas</summary>
+            <div class="wa-grid-2" style="margin-top:12px;">
+              <div><label id="waBaseUrlLabel">API Base URL</label><input class="wa-input" id="waBaseUrl" placeholder="https://api.z-api.io" /></div>
+              <div><label>Client Token opcional</label><input class="wa-input" id="waProviderClientToken" placeholder="use apenas se o provider exigir header extra" /></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="wa-step-modal-section" data-step="2" style="display:none;">
+          <div class="wa-grid-2">
+            <div><label>Owner padrao</label><select id="waOwnerUser"></select></div>
+            <div><label>Etapa padrao do lead</label><select id="waStage"></select></div>
+          </div>
+          <div class="wa-check-grid" style="margin-top:12px;">
+            <label class="wa-check"><input type="checkbox" id="waClassifyWithAi" checked /> <span>Classificar com IA</span></label>
+            <label class="wa-check"><input type="checkbox" id="waAutoCreateLead" checked /> <span>Criar lead automaticamente</span></label>
+            <label class="wa-check"><input type="checkbox" id="waCreateLeadActivity" checked /> <span>Criar atividade no lead</span></label>
+            <label class="wa-check"><input type="checkbox" id="waNotifyTeam" checked /> <span>Notificar equipe</span></label>
+            <label class="wa-check"><input type="checkbox" id="waAutoReplyEnabled" /> <span>Responder automaticamente</span></label>
+            <label class="wa-check"><input type="checkbox" id="waIsActive" checked /> <span>Instancia ativa</span></label>
+          </div>
+          <div style="margin-top:12px;">
+            <label>Intencoes que criam lead</label>
+            <div class="wa-intent-group" id="waCreateLeadIntentGroup"></div>
+          </div>
+          <div style="margin-top:12px;">
+            <label>Usuarios a notificar</label>
+            <select id="waNotificationUsers" multiple></select>
+          </div>
+        </div>
+
+        <div class="wa-step-modal-section" data-step="3" style="display:none;">
+          <div class="wa-grid-2">
+            <div><label>Tom da IA</label><input class="wa-input" id="waAssistantTone" /></div>
+            <div><label>Template da atividade</label><input class="wa-input" id="waActivitySubjectTemplate" /></div>
+          </div>
+          <div style="margin-top:12px;"><label>Contexto do negocio</label><textarea id="waBusinessContext"></textarea></div>
+          <div style="margin-top:12px;"><label>Prompt de classificacao</label><textarea id="waClassifierPrompt"></textarea></div>
+          <div style="margin-top:12px;"><label>Prompt de resposta automatica</label><textarea id="waAutoReplyPrompt"></textarea></div>
+          <div style="margin-top:12px;">
+            <label>Respostas fixas por palavra-chave</label>
+            <textarea id="waKeywordReplyRules" placeholder="orcamento, orçamento => Poderia responder as perguntas abaixo...&#10;preco, preço => Vou te ajudar com isso. Me diga seu nome e o servico de interesse."></textarea>
+            <div class="wa-muted" style="margin-top:6px;">Uma regra por linha. Use palavras separadas por virgula e depois <strong>=&gt;</strong> com o texto fixo da resposta.</div>
+          </div>
+          <div style="margin-top:12px;">
+            <label>Respostas rapidas do inbox</label>
+            <textarea id="waQuickReplyTemplates" placeholder="Qualificar => Perfeito. Para eu te ajudar melhor...&#10;Dashboard => Me confirme quais indicadores voce quer acompanhar..."></textarea>
+            <div class="wa-muted" style="margin-top:6px;">Uma resposta por linha. Use <strong>=&gt;</strong> para separar o rotulo do texto que sera inserido no reply.</div>
+          </div>
+          <div style="margin-top:12px;"><label>Rodape das campanhas</label><textarea id="waCampaignFooterText" placeholder="Ex.: Para parar de receber mensagens, responda SAIR."></textarea></div>
+          <div style="margin-top:12px;"><label>Palavras de opt-out</label><input class="wa-input" id="waOptOutKeywords" placeholder="SAIR, PARAR, STOP, CANCELAR" /></div>
+          <div style="margin-top:12px;"><label>Resposta fallback</label><textarea id="waFallbackReply"></textarea></div>
+          <div style="margin-top:12px;">
+            <label>Intencoes com resposta automatica</label>
+            <div class="wa-intent-group" id="waAutoReplyIntentGroup"></div>
+          </div>
+        </div>
+
+        <div class="wa-step-modal-section" data-step="4" style="display:none;">
+          <div><label>Base publica do webhook</label><input class="wa-input" id="waWebhookBaseUrl" placeholder="https://convert-plus.com" /></div>
+          <div style="margin-top:12px;"><label>Webhook gerado</label><input class="wa-input" id="waWebhookPreview" readonly /></div>
+          <details class="wa-advanced" style="margin-top:12px;" open>
+            <summary>Conectar e testar</summary>
+            <div class="wa-inline-actions" style="margin-top:12px;">
+              <button type="button" class="btn btn-white" id="waShowQrBtn"><i class="fa fa-qrcode"></i> Mostrar QR Code</button>
+            </div>
+            <div id="waQrContainer" class="wa-empty" style="margin-top:12px;">Crie a instancia e gere o QR Code para conectar o numero.</div>
+            <div class="wa-grid-2" style="margin-top:12px;">
+              <div><label>Telefone de teste</label><input class="wa-input" id="waTestPhone" placeholder="5511999999999" /></div>
+              <div><label>Mensagem de teste</label><input class="wa-input" id="waTestMessage" value="Ola! Este e um teste da integracao WhatsApp Sales." /></div>
+            </div>
+            <div class="wa-inline-actions" style="margin-top:12px;">
+              <button type="button" class="btn btn-white" id="waModalConnectBtn"><i class="fa fa-link"></i> Conectar webhook</button>
+              <button type="button" class="btn btn-white" id="waModalTestSendBtn"><i class="fa fa-paper-plane"></i> Enviar teste</button>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div class="wa-modal-foot">
+        <button type="button" class="btn btn-white" id="waModalCloseFootBtn">Fechar</button>
+        <button type="button" class="btn btn-primary" id="waModalSaveBtn"><i class="fa fa-save"></i> Salvar configuracao</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade wa-modal-diagnostics" id="waDiagnosticsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">Diagnostico da instancia</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs wa-tech-tabs" role="tablist">
+            <li class="active"><a href="#waTechDiagnosticsTab" role="tab" data-toggle="tab">Diagnostico</a></li>
+            <li><a href="#waTechInstancesTab" role="tab" data-toggle="tab">Instancias</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="waTechDiagnosticsTab">
+              <div id="waDiagnosticsPanel" class="wa-diag-card">
+                <div class="wa-muted">Selecione uma instancia para ver diagnosticos de webhook, IA e atividade recente.</div>
+              </div>
+            </div>
+            <div class="tab-pane" id="waTechInstancesTab">
+              <div class="wa-tech-pane">
+                <div class="wa-tech-pane-head">
+                  <div>
+                    <h4 class="wa-section-title">Instancias WhatsApp</h4>
+                    <div class="wa-muted">Escolha uma integracao existente ou crie uma nova.</div>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" id="waNewIntegrationBtn"><i class="fa fa-plus"></i> Nova</button>
+                </div>
+                <div id="waIntegrationsList" class="wa-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/Assets/inspinia/js/plugins/sweetalert/sweetalert.min.js"></script>
+<script src="/js/sales/whatsapp.page.js"></script>

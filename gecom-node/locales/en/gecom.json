@@ -1,0 +1,398 @@
+{
+  "page": {
+    "gecom": {
+      "meta": {
+        "title": "GECOM | Strategic import and export management",
+        "description": "Reduce hidden costs, audit tax risks and operate with real visibility. GECOM combines consulting, management and technology for your foreign trade operation.",
+        "keywords": "import management, export management, foreign trade consulting, NCM audit, gecom portal",
+        "ogTitle": "GECOM | Consulting, management and foreign trade operations",
+        "ogDescription": "Stop paying more because of weak management. Free diagnostic, structured operations and the GECOM Portal to track everything in real time."
+      },
+      "nav": {
+        "about": "About",
+        "method": "Method",
+        "portal": "GECOM Portal",
+        "solutions": "Engagement",
+        "segments": "Segments",
+        "team": "Team",
+        "cta": "Talk to a Specialist",
+        "openMenu": "Open menu",
+        "language": "Language"
+      },
+      "hero": {
+        "kicker": "Strategic foreign trade management",
+        "headline": "Stop paying more because your import operation lacks management.",
+        "headlineAlt": "Are your import and export operations costing more than they should?",
+        "subheadline": "GECOM audits, structures and operates your foreign trade routine with real visibility into costs, compliance and deadlines.",
+        "body": "Companies that rely only on customs brokers, trading companies or consulting often live with hidden costs, rework and low predictability. GECOM integrates operational intelligence, execution and technology to remove those losses.",
+        "primaryCta": "Talk to a Specialist",
+        "note1": "Free diagnostic with no commitment",
+        "note2": "Real-time operational visibility",
+        "panelEyebrow": "Where money leaks",
+        "panelTitle": "Tax control, real cost visibility and execution inside the same operation.",
+        "panelItems": [
+          {
+            "title": "Tax audit",
+            "body": "We review NCM, documentation and risk points before an error turns into cost."
+          },
+          {
+            "title": "Transparent costs",
+            "body": "Independent cost visibility so you can negotiate better and pay less."
+          },
+          {
+            "title": "Tracked execution",
+            "body": "Statuses, documents and critical decisions centralized in the GECOM Portal."
+          }
+        ]
+      },
+      "problems": {
+        "title": "Do any of these scenarios look familiar in your operation?",
+        "closing": "If any of these points already show up in your routine, there is real room to reduce cost and increase control.",
+        "cards": [
+          {
+            "icon": "fa-folder-open-o",
+            "eyebrow": "Customs Broker",
+            "title": "Your broker executes. But who audits the tax classification?",
+            "body": "Your customs broker executes, but who checks whether the tax classification is correct? An NCM mistake can generate fines, tax differences and rework without you noticing."
+          },
+          {
+            "icon": "fa-exchange",
+            "eyebrow": "Trading Company",
+            "title": "A trading company simplifies operations. But is the real cost visible?",
+            "body": "A trading company simplifies your operation, but it also makes cost formation opaque. Without independent visibility, you may be paying more without knowing it."
+          },
+          {
+            "icon": "fa-lightbulb-o",
+            "eyebrow": "Consulting",
+            "title": "Planning without execution usually leaks margin.",
+            "body": "Consulting delivers the plan. Execution stays with your team. In foreign trade, the gap between strategy and operation is where money gets lost."
+          }
+        ]
+      },
+      "method": {
+        "title": "How GECOM leads your operation",
+        "subtitle": "We combine diagnostic work, operational design and ongoing execution in a single workflow.",
+        "steps": [
+          {
+            "number": "01",
+            "title": "We audit",
+            "body": "We map documents, tax classification, suppliers, visible costs and hidden costs to identify where losses are happening."
+          },
+          {
+            "number": "02",
+            "title": "We structure",
+            "body": "We design the right operating model for your volume, complexity, regulatory risks and dependence on intermediaries."
+          },
+          {
+            "number": "03",
+            "title": "We operate",
+            "body": "We support end-to-end execution with indicators, alerts and real-time visibility through the GECOM Portal."
+          }
+        ],
+        "cta": "Talk to a Specialist"
+      },
+      "portal": {
+        "kicker": "GECOM Portal",
+        "title": "Operations stop being a black box when everything is visible in one place.",
+        "subtitle": "The GECOM Portal centralizes documents, statuses, deadlines, owners and critical milestones so clients can follow import and export routines without parallel spreadsheets or fragmented updates.",
+        "summary": "Instead of information scattered across email, spreadsheets, brokers, trading companies and internal teams, the client follows the operation in one environment: process timeline, documents, alerts, pending items and a consolidated routine view.",
+        "availability": "Available exclusively in the Complete Operation engagement model.",
+        "features": [
+          "Process timeline with critical operational milestones",
+          "Documents and pending items centralized in one panel",
+          "Alerts for deadlines, shipment, customs clearance and critical stages",
+          "Visibility into owners, status and next steps",
+          "More predictability for leadership, finance and operations"
+        ],
+        "mockup": {
+          "badge": "Functional portal mockup",
+          "menu": [
+            "Overview",
+            "Processes",
+            "Documents",
+            "Alerts"
+          ],
+          "metricCards": [
+            {
+              "label": "Active processes",
+              "value": "18"
+            },
+            {
+              "label": "Critical pending items",
+              "value": "04"
+            },
+            {
+              "label": "Validated docs",
+              "value": "96%"
+            }
+          ],
+          "timelineTitle": "Operation timeline",
+          "timeline": [
+            {
+              "label": "Booking confirmed",
+              "meta": "Today, 09:10"
+            },
+            {
+              "label": "Document review",
+              "meta": "In progress"
+            },
+            {
+              "label": "Estimated arrival",
+              "meta": "Apr 28, 2026"
+            }
+          ],
+          "alertsTitle": "Alerts and documents",
+          "alerts": [
+            "Import declaration awaiting final check",
+            "Supplier certificate attached",
+            "Follow-up released for finance"
+          ]
+        }
+      },
+      "solutions": {
+        "title": "GECOM engagement models",
+        "subtitle": "The engagement model is calibrated to the stage, volume and complexity of your operation.",
+        "investmentNote": "The investment is calibrated to the volume and complexity of your operation, which is why we start with a free diagnostic.",
+        "cards": [
+          {
+            "tag": "Control",
+            "title": "Stop making avoidable import mistakes",
+            "audienceLabel": "Best for",
+            "audience": "Companies that already have an internal structure but need stronger operational safety and technical control.",
+            "features": [
+              "Full document review",
+              "NCM validation",
+              "Pre-shipment analysis",
+              "Technical guidance to reduce risk"
+            ],
+            "result": "More operational safety and fewer avoidable costs.",
+            "cta": "Talk to a Specialist",
+            "featured": false
+          },
+          {
+            "tag": "Management",
+            "badge": "Most requested",
+            "title": "Take real control of your operation",
+            "audienceLabel": "Best for",
+            "audience": "Companies seeking cost transparency, less dependence on intermediaries and stronger governance over routine work.",
+            "features": [
+              "Full import management",
+              "International negotiation support",
+              "Supplier structuring",
+              "Continuous logistics tracking",
+              "Consolidated operational visibility"
+            ],
+            "result": "Effective cost reduction and full control of the operation.",
+            "cta": "Talk to a Specialist",
+            "featured": true
+          },
+          {
+            "tag": "Complete Operation",
+            "title": "Let GECOM run everything for you",
+            "audienceLabel": "Best for",
+            "audience": "Companies that want to scale without expanding the internal team and still keep executive visibility.",
+            "features": [
+              "End-to-end execution",
+              "Full operation management",
+              "Periodic reports and indicators",
+              "Continuous process follow-up",
+              "GECOM Portal included"
+            ],
+            "result": "A professionalized operation with execution, governance and technology working together.",
+            "cta": "Talk to a Specialist",
+            "featured": false
+          }
+        ]
+      },
+      "segments": {
+        "title": "Segments already served by GECOM",
+        "subtitle": "Hands-on experience in operations with very different tax, technical and logistics requirements.",
+        "items": [
+          {
+            "name": "Chemical",
+            "details": [
+              "Import of components for waterproofing products",
+              "Export of coal tar derivative products"
+            ]
+          },
+          {
+            "name": "Sports",
+            "details": [
+              "Import of fitness accessories",
+              "Export of clay targets for shooting sports"
+            ]
+          },
+          {
+            "name": "Nautical",
+            "details": [
+              "Import of parts",
+              "Export of vessels"
+            ]
+          },
+          {
+            "name": "Pools and Spas",
+            "details": [
+              "Import of components"
+            ]
+          },
+          {
+            "name": "Textile",
+            "details": [
+              "Import of yarns and machines such as winders and looms"
+            ]
+          },
+          {
+            "name": "Pet",
+            "details": [
+              "Import of animal health products"
+            ]
+          },
+          {
+            "name": "Solar Energy",
+            "details": [
+              "Import of polymers for extrusion and plastic injection"
+            ]
+          },
+          {
+            "name": "Home and Construction",
+            "details": [
+              "Import of polymers for baseboard manufacturing"
+            ]
+          }
+        ]
+      },
+      "numbers": {
+        "kicker": "Results at real scale",
+        "title": "Experience, operations and technology applied to foreign trade",
+        "note": "Indicators subject to final validation with the client before final publication.",
+        "items": [
+          {
+            "value": 25,
+            "prefix": "+",
+            "suffix": "",
+            "label": "years of foreign trade experience"
+          },
+          {
+            "value": 500,
+            "prefix": "+",
+            "suffix": "",
+            "label": "managed operations"
+          },
+          {
+            "value": 3,
+            "prefix": "",
+            "suffix": "",
+            "label": "integrated fronts: consulting, management and technology"
+          },
+          {
+            "value": 100,
+            "prefix": "",
+            "suffix": "%",
+            "label": "digital visibility across the operation"
+          }
+        ]
+      },
+      "team": {
+        "title": "The team behind your operation",
+        "subtitle": "Professionals with real experience in foreign trade, financial management, compliance and technology working together.",
+        "members": [
+          {
+            "name": "Anderson Bom Tempo",
+            "role": "CEO",
+            "photo": "/Assets/img/anderson.jpg",
+            "initials": "AB",
+            "bio": "More than 25 years building international operations for executives and business owners. Holds a Business Administration degree with emphasis in Foreign Trade from Universidade de Sao Caetano do Sul, validated by Universidade de Sao Paulo."
+          },
+          {
+            "name": "Angelica Campos",
+            "role": "Executive Partner",
+            "photo": "/Assets/img/angelica.jpg",
+            "initials": "AC",
+            "bio": "Leads the administrative, financial and compliance structure at GECOM. More than 20 years of experience across international trade fairs, process implementation and teaching."
+          },
+          {
+            "name": "Gustavo Gherardi",
+            "role": "Solutions Architect",
+            "photo": "/Assets/img/gustavo-gherardi.png",
+            "initials": "GG",
+            "bio": "Responsible for the GECOM Portal and the company's digital tools. Works at the intersection of operational process, executive visibility and technology applied to foreign trade."
+          }
+        ]
+      },
+      "finalCta": {
+        "kicker": "Free diagnostic",
+        "title": "Ready to find out where your operation is leaving margin on the table?",
+        "body": "One conversation already clarifies tax risk, cost structure and the right engagement model for your current stage.",
+        "primaryCta": "Talk to a Specialist",
+        "cardTitle": "What we review in the first diagnostic",
+        "cardItems": [
+          "Current operating model and dependence on intermediaries",
+          "Tax and document risks plus rework points",
+          "Potential gains in cost, visibility and governance"
+        ]
+      },
+      "form": {
+        "title": "Talk to a foreign trade specialist",
+        "subtitle": "Fill in your details and our team will come back with the next steps for the free diagnostic.",
+        "submitLabel": "Talk to a Specialist",
+        "loadingLabel": "Sending...",
+        "microcopy": "No commitment. No unsolicited materials. We reply within one business day.",
+        "close": "Close",
+        "successTitle": "We received your request",
+        "successBody": "Our team will review your operation and contact you within one business day through the WhatsApp number provided.",
+        "fields": {
+          "name": "Full name",
+          "namePlaceholder": "Your name",
+          "phone": "WhatsApp",
+          "phonePlaceholder": "(00) 00000-0000",
+          "company": "Company",
+          "companyPlaceholder": "Company name",
+          "operationMode": "How do you operate today?",
+          "importVolume": "Monthly import volume",
+          "selectOption": "Select an option"
+        },
+        "operationOptions": [
+          "I use a customs broker",
+          "I use a trading company",
+          "I use consulting",
+          "Internal team",
+          "I do not import yet"
+        ],
+        "volumeOptions": [
+          "Up to BRL 100k",
+          "BRL 100k to BRL 500k",
+          "Above BRL 500k"
+        ],
+        "validation": {
+          "name": "Enter your full name.",
+          "phone": "Enter a valid WhatsApp number.",
+          "company": "Enter the company name.",
+          "operationMode": "Select how you operate today.",
+          "importVolume": "Select the monthly import volume."
+        },
+        "feedback": {
+          "invalid": "Review the highlighted fields and try again.",
+          "warning": "Your contact was registered. The internal notification is still pending and will be reviewed by the team.",
+          "error": "We could not send your request right now."
+        }
+      },
+      "footer": {
+        "brandCopy": "Consulting, management and technology to import and export with predictability.",
+        "links": {
+          "home": "Home",
+          "method": "Method",
+          "portal": "GECOM Portal",
+          "solutions": "Engagement",
+          "segments": "Segments",
+          "contact": "Contact"
+        },
+        "complianceTitle": "Compliance",
+        "complianceCopy": "Operations supported by data protection, document traceability and portal terms of use.",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Use",
+        "lgpd": "Data protection and privacy",
+        "copyright": "GECOM. All rights reserved."
+      }
+    }
+  }
+}

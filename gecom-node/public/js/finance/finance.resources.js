@@ -69,7 +69,14 @@
   }
 
   function boolLabel(value) {
-    return value ? tt("page.finance.common.yes", "Sim") : tt("page.finance.common.no", "Nao");
+    return value ? tt("page.finance.common.yes", "Sim") : tt("page.finance.common.no", "Não");
+  }
+
+  function enumLabel(enumKey, value, fallback) {
+    const normalizedEnum = String(enumKey || "").trim();
+    const normalizedValue = String(value || "").trim();
+    if (!normalizedEnum || !normalizedValue) return fallback || normalizedValue;
+    return tt(`page.finance.enums.${normalizedEnum}.${normalizedValue.toLowerCase()}`, fallback || normalizedValue);
   }
 
   const paymentFields = [
@@ -82,6 +89,7 @@
       name: "payment_method",
       label: "page.finance.fields.paymentMethod",
       type: "select",
+      enumKey: "financialPaymentMethod",
       options: [
         "BANK_TRANSFER",
         "PIX",
@@ -124,7 +132,7 @@
       gridColumns: [
         { key: "code", label: "page.finance.fields.code" },
         { key: "name", label: "page.finance.fields.name" },
-        { key: "kind", label: "page.finance.fields.kind" },
+        { key: "kind", label: "page.finance.fields.kind", enumKey: "financialCategoryKind" },
         { key: "cost_center_name", label: "page.finance.fields.costCenter" },
       ],
       formFields: [
@@ -134,6 +142,7 @@
           name: "kind",
           label: "page.finance.fields.kind",
           type: "select",
+          enumKey: "financialCategoryKind",
           options: ["REVENUE", "EXPENSE", "TRANSFER"],
           defaultValue: "EXPENSE",
         },
@@ -161,6 +170,14 @@
         { key: "currency_code", label: "page.finance.fields.currency" },
         { key: "current_balance", label: "page.finance.fields.currentBalance", format: toMoney },
       ],
+      layout: "bank-account-rich",
+      layoutBoxes: [
+        {
+          id: "basic",
+          title: "page.finance.boxes.basic",
+          fields: ["name", "bank_name", "agency", "account_number", "account_type", "currency_id", "opening_balance", "allow_negative", "reconciliation_date", "notes"],
+        },
+      ],
       formFields: [
         { name: "name", label: "page.finance.fields.name", type: "text", required: true },
         { name: "bank_name", label: "page.finance.fields.bank", type: "text" },
@@ -170,10 +187,11 @@
           name: "account_type",
           label: "page.finance.fields.accountType",
           type: "select",
+          enumKey: "financialAccountType",
           options: ["CASH", "CHECKING", "SAVINGS", "INVESTMENT", "DIGITAL_WALLET"],
           defaultValue: "CHECKING",
         },
-        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true },
+        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true, defaultLookupMatch: { code: "BRL" } },
         { name: "opening_balance", label: "page.finance.fields.openingBalance", type: "number", step: "0.01" },
         { name: "allow_negative", label: "page.finance.fields.allowNegative", type: "checkbox", defaultValue: false },
         { name: "reconciliation_date", label: "page.finance.fields.reconciliationDate", type: "date" },
@@ -195,7 +213,7 @@
       gridColumns: [
         { key: "movement_date", label: "page.finance.fields.dateTime", format: toDateTimeBr },
         { key: "bank_account_name", label: "page.finance.fields.bankAccount" },
-        { key: "movement_type", label: "page.finance.fields.type" },
+        { key: "movement_type", label: "page.finance.fields.type", enumKey: "financialMovementType" },
         { key: "amount", label: "page.finance.fields.amount", format: toMoney },
         { key: "description", label: "page.finance.fields.description" },
         { key: "reconciled", label: "page.finance.fields.reconciled", format: boolLabel },
@@ -203,7 +221,7 @@
       formFields: [
         { name: "movement_date", label: "page.finance.fields.dateTime", type: "datetime-local" },
         { name: "bank_account_id", label: "page.finance.fields.bankAccount", type: "lookup", lookup: "bankAccounts", required: true },
-        { name: "movement_type", label: "page.finance.fields.type", type: "select", options: ["CREDIT", "DEBIT"], required: true },
+        { name: "movement_type", label: "page.finance.fields.type", type: "select", enumKey: "financialMovementType", options: ["CREDIT", "DEBIT"], required: true },
         { name: "amount", label: "page.finance.fields.amount", type: "number", step: "0.01", required: true },
         { name: "category_id", label: "page.finance.fields.category", type: "lookup", lookup: "categories" },
         { name: "cost_center_id", label: "page.finance.fields.costCenter", type: "lookup", lookup: "costCenters" },
@@ -233,23 +251,68 @@
         { key: "due_date", label: "page.finance.fields.dueDate", format: toDateBr },
         { key: "original_amount", label: "page.finance.fields.originalAmount", format: toMoney },
         { key: "outstanding_amount", label: "page.finance.fields.outstandingAmount", format: toMoney },
-        { key: "status", label: "page.finance.fields.status" },
+        { key: "entry_group", label: "page.finance.fields.entryGroup", enumKey: "financialEntryGroup" },
+        { key: "status", label: "page.finance.fields.status", enumKey: "financialEntryStatus" },
+      ],
+      layout: "three-box",
+      layoutBoxes: [
+        {
+          id: "basic",
+          title: "page.finance.boxes.basic",
+          fields: ["title_number", "description", "original_amount", "currency_id", "entry_group", "notes"],
+        },
+        {
+          id: "relations",
+          title: "page.finance.boxes.relations",
+          fields: ["company_id", "invoice_id", "document_id", "category_id", "cost_center_id"],
+        },
+        {
+          id: "schedule",
+          title: "page.finance.boxes.schedule",
+          fields: [
+            "issue_date",
+            "due_date",
+            "installment_number",
+            "installment_total",
+            "recurrence_enabled",
+            "recurrence_frequency",
+            "recurrence_interval",
+            "recurrence_day_of_month",
+            "recurrence_occurrences",
+            "recurrence_end_date",
+          ],
+        },
+      ],
+      viewTabs: [
+        { id: "all", label: "page.finance.views.allReceivables", entryGroup: "" },
+        { id: "fixed", label: "page.finance.views.fixedReceivables", entryGroup: "FIXED" },
+        { id: "variable", label: "page.finance.views.variableReceivables", entryGroup: "VARIABLE" },
+        { id: "personal", label: "page.finance.views.personalReceivables", entryGroup: "PERSONAL" },
+        { id: "tax", label: "page.finance.views.taxReceivables", entryGroup: "TAX" },
+        { id: "transfer", label: "page.finance.views.transferReceivables", entryGroup: "TRANSFER" },
       ],
       formFields: [
-        { name: "title_number", label: "page.finance.fields.titleNumber", type: "text", required: true },
-        { name: "description", label: "page.finance.fields.description", type: "textarea" },
-        { name: "company_id", label: "page.finance.fields.company", type: "lookup", lookup: "companies", required: true },
-        { name: "invoice_id", label: "page.finance.fields.invoice", type: "lookup", lookup: "invoices" },
-        { name: "document_id", label: "page.finance.fields.document", type: "lookup", lookup: "documents" },
-        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true },
-        { name: "category_id", label: "page.finance.fields.category", type: "lookup", lookup: "categories" },
-        { name: "cost_center_id", label: "page.finance.fields.costCenter", type: "lookup", lookup: "costCenters" },
-        { name: "issue_date", label: "page.finance.fields.issueDate", type: "date" },
-        { name: "due_date", label: "page.finance.fields.dueDate", type: "date", required: true },
-        { name: "original_amount", label: "page.finance.fields.originalAmount", type: "number", step: "0.01", required: true },
-        { name: "installment_number", label: "page.finance.fields.installmentNumber", type: "number", step: "1", defaultValue: 1 },
-        { name: "installment_total", label: "page.finance.fields.installmentTotal", type: "number", step: "1", defaultValue: 1 },
-        { name: "notes", label: "page.finance.fields.notes", type: "textarea" },
+        { name: "title_number", label: "page.finance.fields.titleNumber", type: "text", required: true, boxSpan: 12 },
+        { name: "description", label: "page.finance.fields.description", type: "textarea", boxSpan: 12 },
+        { name: "company_id", label: "page.finance.fields.company", type: "lookup", lookup: "companies", required: true, boxSpan: 12 },
+        { name: "invoice_id", label: "page.finance.fields.invoice", type: "lookup", lookup: "invoices", boxSpan: 12 },
+        { name: "document_id", label: "page.finance.fields.document", type: "lookup", lookup: "documents", boxSpan: 12 },
+        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true, defaultLookupMatch: { code: "BRL" }, boxSpan: 6 },
+        { name: "entry_group", label: "page.finance.fields.entryGroup", type: "select", enumKey: "financialEntryGroup", options: ["FIXED", "VARIABLE", "PERSONAL", "TAX", "TRANSFER"], defaultValue: "VARIABLE", boxSpan: 6 },
+        { name: "category_id", label: "page.finance.fields.category", type: "lookup", lookup: "categories", boxSpan: 12 },
+        { name: "cost_center_id", label: "page.finance.fields.costCenter", type: "lookup", lookup: "costCenters", boxSpan: 12 },
+        { name: "issue_date", label: "page.finance.fields.issueDate", type: "date", boxSpan: 6 },
+        { name: "due_date", label: "page.finance.fields.dueDate", type: "date", required: true, boxSpan: 6 },
+        { name: "original_amount", label: "page.finance.fields.originalAmount", type: "number", step: "0.01", required: true, boxSpan: 6 },
+        { name: "installment_number", label: "page.finance.fields.installmentNumber", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "installment_total", label: "page.finance.fields.installmentTotal", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "recurrence_enabled", label: "page.finance.fields.recurrenceEnabled", type: "checkbox", defaultValue: false, boxSpan: 12 },
+        { name: "recurrence_frequency", label: "page.finance.fields.recurrenceFrequency", type: "select", enumKey: "financialRecurrenceFrequency", options: ["MONTHLY", "WEEKLY", "YEARLY"], defaultValue: "MONTHLY", boxSpan: 6 },
+        { name: "recurrence_interval", label: "page.finance.fields.recurrenceInterval", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "recurrence_day_of_month", label: "page.finance.fields.recurrenceDayOfMonth", type: "number", step: "1", boxSpan: 6 },
+        { name: "recurrence_occurrences", label: "page.finance.fields.recurrenceOccurrences", type: "number", step: "1", defaultValue: 12, boxSpan: 6 },
+        { name: "recurrence_end_date", label: "page.finance.fields.recurrenceEndDate", type: "date", boxSpan: 12 },
+        { name: "notes", label: "page.finance.fields.notes", type: "textarea", boxSpan: 12 },
       ],
       formTabs: [
         { id: "basic", label: "page.finance.tabs.basic", fields: ["title_number", "description"] },
@@ -277,22 +340,67 @@
         { key: "due_date", label: "page.finance.fields.dueDate", format: toDateBr },
         { key: "original_amount", label: "page.finance.fields.originalAmount", format: toMoney },
         { key: "outstanding_amount", label: "page.finance.fields.outstandingAmount", format: toMoney },
-        { key: "status", label: "page.finance.fields.status" },
+        { key: "entry_group", label: "page.finance.fields.entryGroup", enumKey: "financialEntryGroup" },
+        { key: "status", label: "page.finance.fields.status", enumKey: "financialEntryStatus" },
+      ],
+      layout: "three-box",
+      layoutBoxes: [
+        {
+          id: "basic",
+          title: "page.finance.boxes.basic",
+          fields: ["payable_number", "description", "original_amount", "currency_id", "entry_group", "notes"],
+        },
+        {
+          id: "relations",
+          title: "page.finance.boxes.relations",
+          fields: ["company_id", "document_id", "category_id", "cost_center_id"],
+        },
+        {
+          id: "schedule",
+          title: "page.finance.boxes.schedule",
+          fields: [
+            "issue_date",
+            "due_date",
+            "installment_number",
+            "installment_total",
+            "recurrence_enabled",
+            "recurrence_frequency",
+            "recurrence_interval",
+            "recurrence_day_of_month",
+            "recurrence_occurrences",
+            "recurrence_end_date",
+          ],
+        },
+      ],
+      viewTabs: [
+        { id: "all", label: "page.finance.views.allPayables", entryGroup: "" },
+        { id: "fixed", label: "page.finance.views.fixedPayables", entryGroup: "FIXED" },
+        { id: "variable", label: "page.finance.views.variablePayables", entryGroup: "VARIABLE" },
+        { id: "personal", label: "page.finance.views.personalPayables", entryGroup: "PERSONAL" },
+        { id: "tax", label: "page.finance.views.taxPayables", entryGroup: "TAX" },
+        { id: "transfer", label: "page.finance.views.transferPayables", entryGroup: "TRANSFER" },
       ],
       formFields: [
-        { name: "payable_number", label: "page.finance.fields.payableNumber", type: "text", required: true },
-        { name: "description", label: "page.finance.fields.description", type: "textarea" },
-        { name: "company_id", label: "page.finance.fields.company", type: "lookup", lookup: "companies" },
-        { name: "document_id", label: "page.finance.fields.document", type: "lookup", lookup: "documents" },
-        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true },
-        { name: "category_id", label: "page.finance.fields.category", type: "lookup", lookup: "categories" },
-        { name: "cost_center_id", label: "page.finance.fields.costCenter", type: "lookup", lookup: "costCenters" },
-        { name: "issue_date", label: "page.finance.fields.issueDate", type: "date" },
-        { name: "due_date", label: "page.finance.fields.dueDate", type: "date", required: true },
-        { name: "original_amount", label: "page.finance.fields.originalAmount", type: "number", step: "0.01", required: true },
-        { name: "installment_number", label: "page.finance.fields.installmentNumber", type: "number", step: "1", defaultValue: 1 },
-        { name: "installment_total", label: "page.finance.fields.installmentTotal", type: "number", step: "1", defaultValue: 1 },
-        { name: "notes", label: "page.finance.fields.notes", type: "textarea" },
+        { name: "payable_number", label: "page.finance.fields.payableNumber", type: "text", required: true, boxSpan: 12 },
+        { name: "description", label: "page.finance.fields.description", type: "textarea", boxSpan: 12 },
+        { name: "company_id", label: "page.finance.fields.company", type: "lookup", lookup: "companies", boxSpan: 12 },
+        { name: "document_id", label: "page.finance.fields.document", type: "lookup", lookup: "documents", boxSpan: 12 },
+        { name: "currency_id", label: "page.finance.fields.currency", type: "lookup", lookup: "currencies", required: true, defaultLookupMatch: { code: "BRL" }, boxSpan: 6 },
+        { name: "entry_group", label: "page.finance.fields.entryGroup", type: "select", enumKey: "financialEntryGroup", options: ["FIXED", "VARIABLE", "PERSONAL", "TAX", "TRANSFER"], defaultValue: "VARIABLE", boxSpan: 6 },
+        { name: "category_id", label: "page.finance.fields.category", type: "lookup", lookup: "categories", boxSpan: 12 },
+        { name: "cost_center_id", label: "page.finance.fields.costCenter", type: "lookup", lookup: "costCenters", boxSpan: 12 },
+        { name: "issue_date", label: "page.finance.fields.issueDate", type: "date", boxSpan: 6 },
+        { name: "due_date", label: "page.finance.fields.dueDate", type: "date", required: true, boxSpan: 6 },
+        { name: "original_amount", label: "page.finance.fields.originalAmount", type: "number", step: "0.01", required: true, boxSpan: 6 },
+        { name: "installment_number", label: "page.finance.fields.installmentNumber", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "installment_total", label: "page.finance.fields.installmentTotal", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "recurrence_enabled", label: "page.finance.fields.recurrenceEnabled", type: "checkbox", defaultValue: false, boxSpan: 12 },
+        { name: "recurrence_frequency", label: "page.finance.fields.recurrenceFrequency", type: "select", enumKey: "financialRecurrenceFrequency", options: ["MONTHLY", "WEEKLY", "YEARLY"], defaultValue: "MONTHLY", boxSpan: 6 },
+        { name: "recurrence_interval", label: "page.finance.fields.recurrenceInterval", type: "number", step: "1", defaultValue: 1, boxSpan: 6 },
+        { name: "recurrence_day_of_month", label: "page.finance.fields.recurrenceDayOfMonth", type: "number", step: "1", boxSpan: 6 },
+        { name: "recurrence_occurrences", label: "page.finance.fields.recurrenceOccurrences", type: "number", step: "1", defaultValue: 12, boxSpan: 6 },
+        { name: "recurrence_end_date", label: "page.finance.fields.recurrenceEndDate", type: "date", boxSpan: 12 },
+        { name: "notes", label: "page.finance.fields.notes", type: "textarea", boxSpan: 12 },
       ],
       formTabs: [
         { id: "basic", label: "page.finance.tabs.basic", fields: ["payable_number", "description"] },
@@ -323,5 +431,6 @@
     toDateTimeBr,
     toMoney,
     boolLabel,
+    enumLabel,
   };
 })(window);

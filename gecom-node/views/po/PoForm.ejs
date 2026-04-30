@@ -5,6 +5,13 @@
   .po-form-tabs { margin-bottom: 12px; }
   .po-form-tabs > li > a { padding: 8px 12px; }
   .po-required { color: #ed5565; margin-left: 4px; }
+  .po-alert {
+    display: none;
+    margin-bottom: 16px;
+  }
+  .po-alert.is-open {
+    display: block;
+  }
   .po-invalid {
     border-color: #ed5565 !important;
     box-shadow: 0 0 0 1px rgba(237, 85, 101, 0.12);
@@ -36,6 +43,221 @@
     padding: 8px 10px;
     color: #777;
   }
+  .po-main-tabs {
+    margin-top: 6px;
+  }
+  .po-main-tabs .nav-tabs > li > a {
+    padding: 10px 14px;
+  }
+  .po-main-tabs .nav-tabs > li.disabled > a {
+    color: #a7b1c2;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .po-detail-layout {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .po-detail-layout > [class*="col-"] {
+    display: flex;
+    margin-bottom: 16px;
+  }
+  .po-card {
+    width: 100%;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    border: 1px solid #e7eaec;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+  }
+  .po-card-head {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid #edf1f5;
+    background: linear-gradient(135deg, #f9fbff 0%, #eef5fb 100%);
+  }
+  .po-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #233445;
+  }
+  .po-card-subtitle {
+    margin-top: 4px;
+    color: #7d8b99;
+    font-size: 12px;
+  }
+  .po-card-body {
+    padding: 16px 18px 18px;
+  }
+  .po-summary-stack {
+    display: grid;
+    gap: 10px;
+  }
+  .po-summary-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eef5fb;
+    color: #295d8a;
+  }
+  .po-summary-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .po-summary-item {
+    padding: 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .po-summary-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #8a98a8;
+    margin-bottom: 4px;
+  }
+  .po-summary-value {
+    color: #253645;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-word;
+  }
+  .po-timeline-list {
+    display: grid;
+    gap: 12px;
+  }
+  .po-timeline-item {
+    position: relative;
+    padding-left: 50px;
+    min-height: 46px;
+  }
+  .po-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 34px;
+    bottom: -18px;
+    width: 2px;
+    background: #e7eaec;
+  }
+  .po-timeline-item:last-child::before {
+    display: none;
+  }
+  .po-timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+  .po-timeline-content {
+    padding: 10px 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .po-timeline-title {
+    font-weight: 600;
+    color: #223647;
+  }
+  .po-timeline-meta,
+  .po-timeline-description {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6d7e8f;
+  }
+  .po-empty-state {
+    border: 1px dashed #cfd8e3;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    color: #7d8b99;
+    background: #fafcff;
+  }
+  .po-related-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .po-related-section {
+    border: 1px solid #e7eaec;
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .po-related-section .table {
+    margin-bottom: 0;
+  }
+  .po-related-section .table > thead > tr > th {
+    border-bottom: 1px solid #edf1f5;
+    background: #f7f9fb;
+    font-size: 12px;
+    color: #607284;
+  }
+  .po-related-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf1f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: linear-gradient(135deg, #fbfcfe 0%, #f1f7fb 100%);
+  }
+  .po-related-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #233445;
+  }
+  .po-related-count {
+    font-size: 12px;
+    color: #6b7f92;
+  }
+  .po-form-divider {
+    margin: 6px 0 14px;
+    padding-top: 14px;
+    border-top: 1px solid #e7eaec;
+  }
+  .po-form-divider span {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #7d8b99;
+  }
+  .po-inline-action {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1c84c6;
+    cursor: pointer;
+  }
+  .po-inline-action:hover,
+  .po-inline-action:focus {
+    color: #17658d;
+    text-decoration: none;
+  }
+  @media (max-width: 991px) {
+    .po-detail-layout > [class*="col-"] {
+      width: 100%;
+    }
+  }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -51,17 +273,60 @@
         </div>
       </div>
       <div class="ibox-content">
-        <div class="row">
-          <div class="col-md-8">
-            <div id="poFormFields"></div>
-          </div>
-          <div class="col-md-4">
-            <div class="panel panel-default">
-              <div class="panel-heading"><strong><%= t('page.po.common.tips') %></strong></div>
-              <div class="panel-body">
-                <p class="text-muted"><%= t('page.po.common.quickEditHint') %></p>
+        <div id="poMessage" class="alert po-alert"></div>
+
+        <div id="poRichLayout" class="tabs-container po-main-tabs" style="display:none;">
+          <ul class="nav nav-tabs" id="poMainTabs">
+            <li class="active"><a href="#poTab_details" data-toggle="tab" id="poDetailsTabLink">Detalhes</a></li>
+            <li class="disabled" style="display:none;"><a href="#poTab_related" data-toggle="tab" id="poRelatedTabLink">Relacionados</a></li>
+          </ul>
+          <div class="tab-content">
+            <div id="poTab_details" class="tab-pane active">
+              <div class="row po-detail-layout">
+                <div class="col-lg-5 col-md-6">
+                  <div class="po-card">
+                    <div class="po-card-head">
+                      <h4 class="po-card-title" id="poFormCardTitle"><%= t(poPage.titleKey) %></h4>
+                      <div class="po-card-subtitle" id="poFormCardSubtitle"><%= t('page.po.common.quickEditHint') %></div>
+                    </div>
+                    <div class="po-card-body">
+                      <div id="poFormFieldsRich"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                  <div class="po-card">
+                    <div class="po-card-head">
+                      <h4 class="po-card-title" id="poTimelineTitle">Timeline</h4>
+                      <div class="po-card-subtitle" id="poTimelineSubtitle">Os relacionados aparecem aqui depois do primeiro save.</div>
+                    </div>
+                    <div class="po-card-body">
+                      <div id="poTimeline"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-12">
+                  <div class="po-card">
+                    <div class="po-card-head">
+                      <h4 class="po-card-title" id="poSummaryTitle">Resumo</h4>
+                      <div class="po-card-subtitle" id="poSummarySubtitle">Visão rápida do registro e dos vínculos principais.</div>
+                    </div>
+                    <div class="po-card-body">
+                      <div id="poSummary"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+            <div id="poTab_related" class="tab-pane">
+              <div id="poRelated"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="poSimpleLayout" class="row">
+          <div class="col-md-12">
+            <div id="poFormFields"></div>
           </div>
         </div>
       </div>

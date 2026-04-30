@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 function getGoogleApiKey() {
-  const key = process.env.API_KEY_GOOGLE;
+  const key = process.env.GOOGLE_SERVER_KEY;
   if (!key) {
-    throw new Error("Missing API_KEY_GOOGLE in .env");
+    throw new Error("Missing GOOGLE_SERVER_KEY in .env");
   }
   return key;
 }

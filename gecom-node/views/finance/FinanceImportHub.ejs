@@ -1,0 +1,318 @@
+<style>
+  .fi-shell { margin-top: 25px; }
+  .fi-card {
+    border: 1px solid #dbe4ee;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(25, 54, 78, 0.06);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .fi-card-head {
+    padding: 18px 22px;
+    background: linear-gradient(135deg, #f7fbff 0%, #edf5fc 100%);
+    border-bottom: 1px solid #dbe4ee;
+  }
+  .fi-card-head h3, .fi-card-head h4 {
+    margin: 0;
+    color: #274257;
+    font-weight: 700;
+  }
+  .fi-card-head p {
+    margin: 6px 0 0;
+    color: #738497;
+    font-size: 13px;
+  }
+  .fi-card-body { padding: 20px 22px; }
+  .fi-hero {
+    background:
+      radial-gradient(circle at top right, rgba(35, 198, 200, 0.18), transparent 42%),
+      linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
+  }
+  .fi-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .fi-stat {
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    background: #fff;
+    padding: 14px 16px;
+  }
+  .fi-stat-label {
+    display: block;
+    color: #738497;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 6px;
+  }
+  .fi-stat-value {
+    display: block;
+    color: #274257;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .fi-upload-drop {
+    border: 1px dashed #bcd1e2;
+    border-radius: 14px;
+    padding: 18px;
+    background: #fbfdff;
+    text-align: center;
+    color: #748596;
+    margin-top: 10px;
+  }
+  .fi-upload-drop i { font-size: 24px; color: #23c6c8; margin-bottom: 8px; }
+  .fi-job-list { display: flex; flex-direction: column; gap: 12px; max-height: 560px; overflow-y: auto; }
+  .fi-job-item {
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .fi-job-item:hover, .fi-job-item.active {
+    border-color: #23c6c8;
+    box-shadow: 0 10px 24px rgba(35, 198, 200, 0.14);
+    transform: translateY(-1px);
+  }
+  .fi-job-top, .fi-job-meta, .fi-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .fi-job-top strong { color: #274257; display: block; }
+  .fi-job-top small, .fi-job-meta small { color: #738497; }
+  .fi-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #edf5fc;
+    color: #35617f;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .fi-toolbar { flex-wrap: wrap; margin-bottom: 14px; }
+  .fi-toolbar .form-control { min-width: 180px; }
+  .fi-table-wrap {
+    border: 1px solid #dbe4ee;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .fi-table-wrap table { margin-bottom: 0; }
+  .fi-table-wrap tbody tr { cursor: pointer; }
+  .fi-table-wrap tbody tr.active { background: #eef8fb; }
+  .fi-empty {
+    padding: 28px;
+    text-align: center;
+    color: #778896;
+  }
+  .fi-review-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .fi-review-grid .full { grid-column: 1 / -1; }
+  .fi-ai-box {
+    border: 1px dashed #c8d8e5;
+    border-radius: 12px;
+    background: #fbfdff;
+    padding: 14px;
+    color: #5f7285;
+    min-height: 88px;
+  }
+  @media (max-width: 1199px) {
+    .fi-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 767px) {
+    .fi-summary-grid, .fi-review-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="row animated fadeInRight fi-shell">
+  <div class="col-lg-12">
+    <div class="fi-card fi-hero">
+      <div class="fi-card-head">
+        <h3><%= t('page.finance.imports.title') %></h3>
+        <p><%= t('page.finance.imports.subtitle') %></p>
+      </div>
+      <div class="fi-card-body">
+        <div class="fi-summary-grid">
+          <div class="fi-stat">
+            <span class="fi-stat-label"><%= t('page.finance.imports.summaryLines') %></span>
+            <span class="fi-stat-value" id="fiSummaryLines">0</span>
+          </div>
+          <div class="fi-stat">
+            <span class="fi-stat-label"><%= t('page.finance.imports.summaryCredits') %></span>
+            <span class="fi-stat-value" id="fiSummaryCredits">0,00</span>
+          </div>
+          <div class="fi-stat">
+            <span class="fi-stat-label"><%= t('page.finance.imports.summaryDebits') %></span>
+            <span class="fi-stat-value" id="fiSummaryDebits">0,00</span>
+          </div>
+          <div class="fi-stat">
+            <span class="fi-stat-label"><%= t('page.finance.imports.summaryApplied') %></span>
+            <span class="fi-stat-value" id="fiSummaryApplied">0</span>
+          </div>
+        </div>
+        <div class="fi-toolbar">
+          <div class="form-inline" style="display:flex; gap:10px; flex-wrap:wrap;">
+            <select id="fiStatusFilter" class="form-control"></select>
+          </div>
+          <div class="form-inline" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="btnFinanceImportRefresh" class="btn btn-white btn-sm"><i class="fa fa-refresh"></i> <%= t('page.finance.common.refresh') %></button>
+            <button id="btnFinanceImportReanalyze" class="btn btn-default btn-sm"><i class="fa fa-magic"></i> <%= t('page.finance.imports.reanalyze') %></button>
+            <button id="btnFinanceImportApplyApproved" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> <%= t('page.finance.imports.applyApproved') %></button>
+            <button id="btnFinanceImportApplyAll" class="btn btn-warning btn-sm"><i class="fa fa-bolt"></i> <%= t('page.finance.imports.applyAll') %></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="fi-card">
+      <div class="fi-card-head">
+        <h4><%= t('page.finance.imports.uploadTitle') %></h4>
+        <p><%= t('page.finance.imports.uploadHelp') %></p>
+      </div>
+      <div class="fi-card-body">
+        <div class="form-group">
+          <label for="fiBankAccount"><%= t('page.finance.imports.bankAccountLabel') %></label>
+          <select id="fiBankAccount" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label for="fiFile"><%= t('page.finance.imports.fileLabel') %></label>
+          <input id="fiFile" type="file" class="form-control" accept=".ofx,.csv,.pdf" />
+          <div class="fi-upload-drop">
+            <i class="fa fa-cloud-upload"></i>
+            <div>OFX, CSV ou PDF</div>
+          </div>
+        </div>
+        <button id="btnFinanceImportUpload" class="btn btn-primary btn-block"><i class="fa fa-upload"></i> <%= t('page.finance.imports.uploadButton') %></button>
+      </div>
+    </div>
+
+    <div class="fi-card">
+      <div class="fi-card-head">
+        <h4><%= t('page.finance.imports.jobsTitle') %></h4>
+      </div>
+      <div class="fi-card-body">
+        <div id="fiJobsList" class="fi-job-list">
+          <div class="fi-empty"><%= t('page.finance.imports.jobsEmpty') %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="fi-card">
+      <div class="fi-card-head">
+        <h4><%= t('page.finance.imports.tableTitle') %></h4>
+      </div>
+      <div class="fi-card-body">
+        <div class="fi-table-wrap">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th><%= t('page.finance.imports.lineDate') %></th>
+                <th><%= t('page.finance.imports.lineType') %></th>
+                <th><%= t('page.finance.imports.lineDescription') %></th>
+                <th><%= t('page.finance.imports.lineAmount') %></th>
+                <th><%= t('page.finance.imports.lineSuggestion') %></th>
+                <th><%= t('page.finance.imports.lineConfidence') %></th>
+                <th><%= t('page.finance.imports.lineStatus') %></th>
+              </tr>
+            </thead>
+            <tbody id="fiLinesBody">
+              <tr><td colspan="7" class="fi-empty"><%= t('page.finance.imports.emptyState') %></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="fi-card">
+      <div class="fi-card-head">
+        <h4><%= t('page.finance.imports.detailsTitle') %></h4>
+      </div>
+      <div class="fi-card-body">
+        <div id="fiReviewEmpty" class="fi-empty"><%= t('page.finance.imports.noLine') %></div>
+        <div id="fiReviewPanel" style="display:none;">
+          <div class="fi-review-grid">
+            <div>
+              <label><%= t('page.finance.imports.lineSuggestion') %></label>
+              <select id="fiReviewSuggestionKind" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.lineStatus') %></label>
+              <select id="fiReviewSuggestionStatus" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.suggestedCategory') %></label>
+              <select id="fiReviewCategory" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.suggestedCostCenter') %></label>
+              <select id="fiReviewCostCenter" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.suggestedCompany') %></label>
+              <select id="fiReviewCompany" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.matchedReceivable') %></label>
+              <select id="fiReviewReceivable" class="form-control"></select>
+            </div>
+            <div>
+              <label><%= t('page.finance.imports.matchedPayable') %></label>
+              <select id="fiReviewPayable" class="form-control"></select>
+            </div>
+            <div class="full">
+              <label><%= t('page.finance.imports.aiReasoning') %></label>
+              <div id="fiReviewReasoning" class="fi-ai-box"></div>
+            </div>
+            <div class="full">
+              <label><%= t('page.finance.imports.reviewNote') %></label>
+              <textarea id="fiReviewNote" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div style="margin-top:16px; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+            <button id="btnFinanceImportApproveLine" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> <%= t('page.finance.imports.approveLine') %></button>
+            <button id="btnFinanceImportSaveReview" class="btn btn-white btn-sm"><i class="fa fa-save"></i> <%= t('page.finance.imports.saveReview') %></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__financeImportPage = {
+    titleKey: <%- safeJson(financeImportPage.titleKey) %>,
+    labels: {
+      jobsEmpty: <%- safeJson(t('page.finance.imports.jobsEmpty')) %>,
+      emptyState: <%- safeJson(t('page.finance.imports.emptyState')) %>,
+      noBankAccount: <%- safeJson(t('page.finance.imports.noBankAccount')) %>,
+      noFile: <%- safeJson(t('page.finance.imports.noFile')) %>,
+      noLine: <%- safeJson(t('page.finance.imports.noLine')) %>,
+      uploadSuccess: <%- safeJson(t('page.finance.imports.uploadSuccess')) %>,
+      reviewSaved: <%- safeJson(t('page.finance.imports.reviewSaved')) %>,
+      applySuccess: <%- safeJson(t('page.finance.imports.applySuccess')) %>,
+      allStatuses: <%- safeJson(t('page.finance.imports.allStatuses')) %>,
+      filterApproved: <%- safeJson(t('page.finance.imports.filterApproved')) %>,
+      filterSuggested: <%- safeJson(t('page.finance.imports.filterSuggested')) %>,
+      filterApplied: <%- safeJson(t('page.finance.imports.filterApplied')) %>,
+      filterIgnored: <%- safeJson(t('page.finance.imports.filterIgnored')) %>,
+      filterError: <%- safeJson(t('page.finance.imports.filterError')) %>
+    }
+  };
+</script>
+<script src="/js/finance/finance.resources.js"></script>
+<script src="/js/finance/finance.import.page.js"></script>

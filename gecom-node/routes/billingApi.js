@@ -7,10 +7,55 @@ const BOOTSTRAP_PASSWORD = process.env.BILLING_BOOTSTRAP_PASSWORD || "Q!w2E#r4T%
 const BOOTSTRAP_COOKIE = "gecom_billing_bootstrap";
 const LOOP_GUARD_HEADER = "x-gecom-bff-hop";
 
-function getBackendBaseUrl() {
-  const baseUrl = process.env.BACKEND_API_BASE_URL || process.env.API_BASE_URL;
-  if (!baseUrl) throw new Error("Missing BACKEND_API_BASE_URL (or API_BASE_URL) env var.");
-  return baseUrl.replace(/\/$/, "");
+function normalizeBaseUrl(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  return text.replace(/\/$/, "");
+}
+
+function getRequestHost(req) {
+  const forwardedHost = String(req?.headers?.["x-forwarded-host"] || "").split(",")[0].trim();
+  const host = String(req?.headers?.host || "").split(",")[0].trim();
+  return forwardedHost || host || "";
+}
+
+function isSelfReferencingBaseUrl(baseUrl, req) {
+  const requestHost = getRequestHost(req);
+  if (!baseUrl || !requestHost) return false;
+
+  try {
+    const parsed = new URL(baseUrl);
+    return String(parsed.host || "").trim().toLowerCase() === requestHost.toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
+function getBackendBaseUrl(req) {
+  const configuredCandidates = [
+    process.env.BILLING_BACKEND_API_BASE_URL,
+    process.env.BACKEND_INTERNAL_API_BASE_URL,
+    process.env.BACKEND_API_BASE_URL,
+    process.env.API_BASE_URL,
+  ]
+    .map(normalizeBaseUrl)
+    .filter(Boolean);
+
+  const runtimeFallbackCandidates = [
+    "http://api:3000/api",
+    "http://127.0.0.1:3000/api",
+    "http://localhost:3000/api",
+  ];
+
+  const candidates = [...configuredCandidates, ...runtimeFallbackCandidates];
+  const preferred = candidates.find((candidate) => !isSelfReferencingBaseUrl(candidate, req));
+  const baseUrl = preferred || candidates[0] || "";
+
+  if (!baseUrl) {
+    throw new Error("Missing BACKEND_API_BASE_URL (or API_BASE_URL) env var.");
+  }
+
+  return baseUrl;
 }
 
 function getBearerAuthHeader(req) {
@@ -53,8 +98,8 @@ async function readJsonSafe(response) {
   }
 }
 
-function backendUrl(path) {
-  const base = getBackendBaseUrl();
+function backendUrl(path, req) {
+  const base = getBackendBaseUrl(req);
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
@@ -100,7 +145,7 @@ async function proxyJson(req, res, config) {
 
 router.get("/admin/billing/modules", async (req, res) => {
   try {
-    const url = new URL(backendUrl(billingBackendPath(req, "/modules")));
+    const url = new URL(backendUrl(billingBackendPath(req, "/modules"), req));
     appendQueryParams(url, req.query);
     return await proxyJson(req, res, {
       method: "GET",
@@ -115,7 +160,7 @@ router.get("/admin/billing/modules", async (req, res) => {
 
 router.get("/public/billing/modules", async (req, res) => {
   try {
-    const url = new URL(backendUrl("/public/billing/modules"));
+    const url = new URL(backendUrl("/public/billing/modules", req));
     appendQueryParams(url, req.query);
     return await proxyJson(req, res, { method: "GET", url: url.toString() });
   } catch (error) {
@@ -126,7 +171,7 @@ router.get("/public/billing/modules", async (req, res) => {
 
 router.get("/public/billing/plans", async (req, res) => {
   try {
-    const url = new URL(backendUrl("/public/billing/plans"));
+    const url = new URL(backendUrl("/public/billing/plans", req));
     appendQueryParams(url, req.query);
     return await proxyJson(req, res, { method: "GET", url: url.toString() });
   } catch (error) {
@@ -139,7 +184,7 @@ router.get("/public/bootstrap/billing/area-entity-config", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl("/public/bootstrap/billing/area-entity-config"),
+      url: backendUrl("/public/bootstrap/billing/area-entity-config", req),
       allowBasicAuth: true,
     });
   } catch (error) {
@@ -152,7 +197,7 @@ router.get("/public/bootstrap/billing/area-entity-config/entities", async (req, 
   try {
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl("/public/bootstrap/billing/area-entity-config/entities"),
+      url: backendUrl("/public/bootstrap/billing/area-entity-config/entities", req),
       allowBasicAuth: true,
     });
   } catch (error) {
@@ -165,7 +210,7 @@ router.put("/public/bootstrap/billing/area-entity-config", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "PUT",
-      url: backendUrl("/public/bootstrap/billing/area-entity-config"),
+      url: backendUrl("/public/bootstrap/billing/area-entity-config", req),
       withBody: true,
       allowBasicAuth: true,
     });
@@ -179,7 +224,7 @@ router.post("/admin/billing/modules", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "POST",
-      url: backendUrl(billingBackendPath(req, "/modules")),
+      url: backendUrl(billingBackendPath(req, "/modules"), req),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -195,6 +240,7 @@ router.get("/admin/billing/modules/:id", async (req, res) => {
       method: "GET",
       url: backendUrl(
         billingBackendPath(req, `/modules/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -210,6 +256,7 @@ router.put("/admin/billing/modules/:id", async (req, res) => {
       method: "PUT",
       url: backendUrl(
         billingBackendPath(req, `/modules/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
@@ -222,7 +269,7 @@ router.put("/admin/billing/modules/:id", async (req, res) => {
 
 router.get("/admin/billing/plans", async (req, res) => {
   try {
-    const url = new URL(backendUrl(billingBackendPath(req, "/plans")));
+    const url = new URL(backendUrl(billingBackendPath(req, "/plans"), req));
     appendQueryParams(url, req.query);
     return await proxyJson(req, res, {
       method: "GET",
@@ -239,7 +286,7 @@ router.get("/admin/billing/area-entity-config", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl(billingBackendPath(req, "/area-entity-config")),
+      url: backendUrl(billingBackendPath(req, "/area-entity-config"), req),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
   } catch (error) {
@@ -252,7 +299,7 @@ router.get("/admin/billing/area-entity-config/entities", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl(billingBackendPath(req, "/area-entity-config/entities")),
+      url: backendUrl(billingBackendPath(req, "/area-entity-config/entities"), req),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
   } catch (error) {
@@ -265,7 +312,7 @@ router.put("/admin/billing/area-entity-config", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "PUT",
-      url: backendUrl(billingBackendPath(req, "/area-entity-config")),
+      url: backendUrl(billingBackendPath(req, "/area-entity-config"), req),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -279,7 +326,7 @@ router.post("/admin/billing/plans", async (req, res) => {
   try {
     return await proxyJson(req, res, {
       method: "POST",
-      url: backendUrl(billingBackendPath(req, "/plans")),
+      url: backendUrl(billingBackendPath(req, "/plans"), req),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -295,6 +342,7 @@ router.get("/admin/billing/plans/:id", async (req, res) => {
       method: "GET",
       url: backendUrl(
         billingBackendPath(req, `/plans/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -310,6 +358,7 @@ router.put("/admin/billing/plans/:id", async (req, res) => {
       method: "PUT",
       url: backendUrl(
         billingBackendPath(req, `/plans/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
@@ -325,7 +374,7 @@ router.get("/admin/billing/plans/:id/modules", async (req, res) => {
     const planId = encodeURIComponent(String(req.params.id || ""));
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl(billingBackendPath(req, `/plans/${planId}/modules`)),
+      url: backendUrl(billingBackendPath(req, `/plans/${planId}/modules`), req),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
   } catch (error) {
@@ -339,7 +388,7 @@ router.post("/admin/billing/plans/:id/modules", async (req, res) => {
     const planId = encodeURIComponent(String(req.params.id || ""));
     return await proxyJson(req, res, {
       method: "POST",
-      url: backendUrl(billingBackendPath(req, `/plans/${planId}/modules`)),
+      url: backendUrl(billingBackendPath(req, `/plans/${planId}/modules`), req),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -355,6 +404,7 @@ router.put("/admin/billing/plan-modules/:id", async (req, res) => {
       method: "PUT",
       url: backendUrl(
         billingBackendPath(req, `/plan-modules/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       withBody: true,
       allowBasicAuth: shouldUseBootstrapBilling(req),
@@ -371,6 +421,7 @@ router.delete("/admin/billing/plan-modules/:id", async (req, res) => {
       method: "DELETE",
       url: backendUrl(
         billingBackendPath(req, `/plan-modules/${encodeURIComponent(String(req.params.id || ""))}`),
+        req,
       ),
       allowBasicAuth: shouldUseBootstrapBilling(req),
     });
@@ -385,7 +436,7 @@ router.get("/admin/billing/tenants/:tenantId/subscription", async (req, res) => 
     const tenantId = encodeURIComponent(String(req.params.tenantId || ""));
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl(`/admin/billing/tenants/${tenantId}/subscription`),
+      url: backendUrl(`/admin/billing/tenants/${tenantId}/subscription`, req),
     });
   } catch (error) {
     console.error("GET /api/admin/billing/tenants/:tenantId/subscription error:", error);
@@ -398,7 +449,7 @@ router.put("/admin/billing/tenants/:tenantId/subscription", async (req, res) => 
     const tenantId = encodeURIComponent(String(req.params.tenantId || ""));
     return await proxyJson(req, res, {
       method: "PUT",
-      url: backendUrl(`/admin/billing/tenants/${tenantId}/subscription`),
+      url: backendUrl(`/admin/billing/tenants/${tenantId}/subscription`, req),
       withBody: true,
     });
   } catch (error) {
@@ -412,7 +463,7 @@ router.get("/admin/billing/tenants/:tenantId/overrides", async (req, res) => {
     const tenantId = encodeURIComponent(String(req.params.tenantId || ""));
     return await proxyJson(req, res, {
       method: "GET",
-      url: backendUrl(`/admin/billing/tenants/${tenantId}/overrides`),
+      url: backendUrl(`/admin/billing/tenants/${tenantId}/overrides`, req),
     });
   } catch (error) {
     console.error("GET /api/admin/billing/tenants/:tenantId/overrides error:", error);
@@ -426,7 +477,7 @@ router.put("/admin/billing/tenants/:tenantId/overrides/:moduleId", async (req, r
     const moduleId = encodeURIComponent(String(req.params.moduleId || ""));
     return await proxyJson(req, res, {
       method: "PUT",
-      url: backendUrl(`/admin/billing/tenants/${tenantId}/overrides/${moduleId}`),
+      url: backendUrl(`/admin/billing/tenants/${tenantId}/overrides/${moduleId}`, req),
       withBody: true,
     });
   } catch (error) {
@@ -437,7 +488,7 @@ router.put("/admin/billing/tenants/:tenantId/overrides/:moduleId", async (req, r
 
 router.get("/admin/tenants/search", async (req, res) => {
   try {
-    const url = new URL(backendUrl("/admin/tenants/search"));
+    const url = new URL(backendUrl("/admin/tenants/search", req));
     appendQueryParams(url, req.query);
     return await proxyJson(req, res, { method: "GET", url: url.toString() });
   } catch (error) {

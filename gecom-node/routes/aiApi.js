@@ -90,5 +90,17 @@ router.post("/ai/home-search", async (req, res) => {
   }
 });
 
-module.exports = router;
+router.post("/ai/chat", async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: "POST",
+      url: backendUrl("/ai/chat"),
+      withBody: true,
+    });
+  } catch (error) {
+    console.error("POST /api/ai/chat error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
 
+module.exports = router;

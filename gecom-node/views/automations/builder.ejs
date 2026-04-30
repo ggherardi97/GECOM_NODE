@@ -1,93 +1,145 @@
 <link href="/Assets/inspinia/css/plugins/summernote/summernote-bs4.css" rel="stylesheet" />
 <style>
-  .automation-builder-layout { display:grid; grid-template-columns:240px 1fr; gap:16px; }
-  .builder-palette .palette-item { border:1px solid #e7eaec; border-radius:4px; padding:10px; margin-bottom:8px; background:#fff; cursor:grab; font-size:12px; }
-  .builder-canvas { border:1px dashed #d3d8de; border-radius:6px; min-height:360px; padding:14px; background-size:20px 20px; background-image:linear-gradient(to right, rgba(0,0,0,.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.03) 1px, transparent 1px); }
-  .workflow-trigger-card,.workflow-action-card { border:1px solid #e1e7ec; border-left-width:4px; border-radius:4px; background:#fff; padding:10px 12px; margin-bottom:10px; cursor:pointer; }
+  .automation-builder-layout { display:grid; grid-template-columns:260px 1fr; gap:18px; }
+  .builder-panel { border:1px solid #e4edf5; border-radius:12px; background:#fff; box-shadow:0 10px 30px rgba(16, 40, 67, .04); }
+  .builder-panel-body { padding:16px; }
+  .builder-palette .palette-item { border:1px solid #dce6ef; border-radius:10px; padding:12px; margin-bottom:10px; background:linear-gradient(180deg,#fff 0%,#f8fbfd 100%); cursor:grab; font-size:12px; transition:all .18s ease; }
+  .builder-palette .palette-item:hover { border-color:#1c84c6; transform:translateY(-1px); }
+  .builder-palette .palette-item.is-disabled { cursor:not-allowed; opacity:.55; background:#f3f5f7; border-color:#d7dde4; color:#7f8e9a; }
+  .builder-palette .palette-title { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#7f93a6; margin:0 0 10px; }
+  .builder-canvas { border:1px dashed #d4dce4; border-radius:14px; min-height:380px; padding:16px; background-size:24px 24px; background-image:linear-gradient(to right, rgba(0,0,0,.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,.03) 1px, transparent 1px); }
+  .workflow-trigger-card,.workflow-action-card { border:1px solid #e1e7ec; border-left-width:4px; border-radius:12px; background:#fff; padding:14px 16px; margin-bottom:12px; cursor:pointer; box-shadow:0 8px 20px rgba(21,41,63,.05); }
   .workflow-trigger-card { border-left-color:#1ab394; }
   .workflow-action-card { border-left-color:#23c6c8; position:relative; }
-  .workflow-action-card .btn-delete-action { position:absolute; top:8px; right:8px; border:0; background:transparent; color:#d9534f; font-size:14px; }
-  .workflow-action-card.is-selected,.workflow-trigger-card.is-selected { box-shadow:0 0 0 2px rgba(35,198,200,.2); }
-  .builder-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; align-items:center; }
+  .workflow-action-card .btn-delete-action { position:absolute; top:10px; right:10px; border:0; background:transparent; color:#d9534f; font-size:14px; }
+  .workflow-trigger-card.is-selected,.workflow-action-card.is-selected { box-shadow:0 0 0 2px rgba(28,132,198,.18), 0 12px 28px rgba(21,41,63,.08); }
+  .builder-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 16px; align-items:center; }
   .record-lookup-wrap { position:relative; min-width:280px; }
-  .record-lookup-menu { display:none; position:absolute; left:0; right:0; top:calc(100% + 2px); z-index:99999; max-height:220px; overflow-y:auto; background:#fff; border:1px solid #d9dee4; border-radius:4px; box-shadow:0 6px 18px rgba(0,0,0,.1); }
+  .record-lookup-menu { display:none; position:absolute; left:0; right:0; top:calc(100% + 2px); z-index:99999; max-height:220px; overflow-y:auto; background:#fff; border:1px solid #d9dee4; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.12); }
   .lookup-item { padding:8px 10px; border-bottom:1px solid #f0f2f4; cursor:pointer; }
   .lookup-item:last-child { border-bottom:0; }
   .lookup-item:hover { background:#f5f9fc; }
-  .automation-offcanvas { position:fixed; top:0; right:-520px; width:520px; height:100vh; background:#fff; border-left:1px solid #d9dee4; box-shadow:-3px 0 14px rgba(0,0,0,.15); z-index:999999; display:flex; flex-direction:column; transition:right .2s ease; }
+  .automation-offcanvas { position:fixed; top:0; right:-560px; width:560px; height:100vh; background:#fff; border-left:1px solid #d9dee4; box-shadow:-3px 0 14px rgba(0,0,0,.15); z-index:999999; display:flex; flex-direction:column; transition:right .2s ease; }
   .automation-offcanvas.is-open { right:0; }
-  .automation-offcanvas-header { padding:14px; border-bottom:1px solid #eef1f4; display:flex; justify-content:space-between; align-items:center; }
-  .automation-offcanvas-body { padding:14px; overflow-y:auto; flex:1; }
-  .automation-offcanvas-footer { padding:14px; border-top:1px solid #eef1f4; text-align:right; }
+  .automation-offcanvas-header { padding:14px 16px; border-bottom:1px solid #eef1f4; display:flex; justify-content:space-between; align-items:center; }
+  .automation-offcanvas-body { padding:16px; overflow-y:auto; flex:1; }
+  .automation-offcanvas-footer { padding:14px 16px; border-top:1px solid #eef1f4; text-align:right; }
   .automation-overlay { position:fixed; inset:0; background:rgba(0,0,0,.28); z-index:999998; display:none; }
   .automation-overlay.is-open { display:block; }
   .log-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; align-items:flex-end; }
   .log-filters .form-group { margin-bottom:0; }
-  .create-register-row { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin-bottom:8px; }
-  @media (max-width:991px) { .automation-builder-layout{grid-template-columns:1fr;} .automation-offcanvas{width:100%;right:-100%;} }
+  .automation-log-table tbody tr { cursor:pointer; transition:background .16s ease; }
+  .automation-log-table tbody tr:hover { background:#f7fbfe; }
+  .automation-log-summary { max-width:720px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#4c6478; }
+  .automation-log-meta { font-size:11px; color:#7f93a6; margin-top:4px; }
+  .automation-log-json { max-height:320px; overflow:auto; background:#f7fafc; border:1px solid #e1e7ec; border-radius:10px; padding:12px; white-space:pre-wrap; word-break:break-word; }
+  .automation-log-empty { color:#7f93a6; font-style:italic; }
+  .automation-builder-tabs { margin-top:8px; }
+  .automation-builder-tabs .nav-tabs { border-bottom:1px solid #dce6ef; }
+  .automation-builder-tabs .nav-tabs > li > a { border-radius:10px 10px 0 0; color:#567086; }
+  .automation-builder-tabs .nav-tabs > li.active > a,
+  .automation-builder-tabs .nav-tabs > li.active > a:focus,
+  .automation-builder-tabs .nav-tabs > li.active > a:hover { color:#23415c; font-weight:600; }
+  .automation-tab-pane { padding-top:16px; }
+  .config-card { border:1px solid #e6edf3; border-radius:10px; padding:14px; background:#fbfdff; margin-bottom:14px; }
+  .config-card h5 { margin:0 0 10px; color:#274a63; }
+  .mapping-row { border:1px solid #dde7f0; border-radius:10px; padding:12px; background:#fff; margin-bottom:10px; }
+  .mapping-row-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .mapping-editor-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .value-editor-note { font-size:12px; color:#73879a; margin-top:8px; }
+  .action-summary-line,.trigger-summary-line { color:#688092; font-size:12px; margin-top:6px; }
+  .action-name-pill { display:inline-flex; align-items:center; border-radius:999px; padding:4px 10px; background:#edf8fb; color:#227a8a; font-size:11px; margin-top:8px; }
+  .field-token-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .field-token { display:inline-flex; align-items:center; border-radius:999px; background:#f1f6fb; border:1px solid #d8e4ef; color:#34516a; padding:4px 10px; font-size:11px; }
+  .builder-note { border:1px solid #dbe8f2; border-radius:10px; background:#f5f9fd; color:#46627a; padding:12px; font-size:12px; }
+  @media (max-width: 991px) {
+    .automation-builder-layout { grid-template-columns:1fr; }
+    .automation-offcanvas { width:100%; right:-100%; }
+    .mapping-editor-grid { grid-template-columns:1fr; }
+  }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top:10px;">
   <div class="col-lg-12">
     <div class="ibox">
-      <div class="ibox-title"><h5>Builder de Automação</h5></div>
+      <div class="ibox-title"><h5 id="builderPageTitle">Builder de Automacao</h5></div>
       <div class="ibox-content">
         <div class="row">
-          <div class="col-md-4"><label>Nome</label><input id="automationName" class="form-control" /></div>
-          <div class="col-md-4"><label>Entidade</label><select id="automationEntity" class="form-control"><option value="">Carregando...</option></select></div>
-          <div class="col-md-4"><label>Descrição</label><input id="automationDescription" class="form-control" placeholder="Opcional" /></div>
+          <div class="col-md-4"><label id="labelAutomationName">Nome</label><input id="automationName" class="form-control" /></div>
+          <div class="col-md-4"><label id="labelAutomationEntity">Entidade</label><select id="automationEntity" class="form-control"><option value="">Carregando...</option></select></div>
+          <div class="col-md-4"><label id="labelAutomationDescription">Descricao</label><input id="automationDescription" class="form-control" placeholder="Opcional" /></div>
         </div>
 
-        <div class="builder-toolbar" style="margin-top:12px;">
-          <button id="btnSaveAutomation" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> Salvar</button>
+        <div class="builder-toolbar">
+          <button id="btnSaveAutomation" class="btn btn-primary btn-sm"><i class="fa fa-save"></i> <span id="btnSaveAutomationText">Salvar</span></button>
           <button id="btnToggleActive" class="btn btn-warning btn-sm">Ativar/Desativar</button>
-          <button id="btnExecuteNow" class="btn btn-success btn-sm"><i class="fa fa-play"></i> Executar agora</button>
+          <button id="btnExecuteNow" class="btn btn-success btn-sm"><i class="fa fa-play"></i> <span id="btnExecuteNowText">Executar agora</span></button>
           <div class="record-lookup-wrap">
             <input id="manualRecordLookup" class="form-control input-sm" placeholder="Buscar registro (opcional)" />
             <input id="manualRecordId" type="hidden" />
             <div id="manualRecordMenu" class="record-lookup-menu"></div>
           </div>
-          <a href="/automations" class="btn btn-default btn-sm">Voltar</a>
+          <a href="/automations" id="btnBackToAutomations" class="btn btn-default btn-sm">Voltar</a>
         </div>
 
-        <div class="automation-builder-layout">
-          <div class="builder-palette">
-            <h4>Paleta</h4>
-            <div class="palette-item" style="cursor:default;"><strong>Trigger</strong><br><span>Somente um por fluxo.</span></div>
-            <h5 style="margin-top:14px;">Actions</h5>
-            <div id="paletteActions">
-              <div class="palette-item" data-action-type="UPDATE_FIELD">UPDATE_FIELD</div>
-              <div class="palette-item" data-action-type="SEND_EMAIL">SEND_EMAIL</div>
-              <div class="palette-item" data-action-type="CREATE_TASK">CREATE_TASK</div>
-              <div class="palette-item" data-action-type="WEBHOOK">WEBHOOK</div>
-              <div class="palette-item" data-action-type="AI_ACTION">AI_ACTION</div>
-              <div class="palette-item" data-action-type="CREATE_REGISTER">CREATE_REGISTER</div>
+        <div class="automation-builder-tabs">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#builderTabPane" data-toggle="tab" id="builderTabLink">Builder</a></li>
+            <li><a href="#logsTabPane" data-toggle="tab" id="logsTabLink">Logs</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active automation-tab-pane" id="builderTabPane">
+              <div class="automation-builder-layout">
+                <div class="builder-panel builder-palette">
+                  <div class="builder-panel-body">
+                    <p class="palette-title" id="paletteTitle">Paleta</p>
+                    <div class="palette-item" style="cursor:default;">
+                      <strong id="paletteTriggerTitle">Trigger</strong><br>
+                      <span id="paletteTriggerNote">Somente um por fluxo.</span>
+                    </div>
+                    <h5 id="paletteActionsTitle" style="margin-top:14px;">Acoes</h5>
+                    <div id="paletteActions"></div>
+                  </div>
+                </div>
+                <div class="builder-panel">
+                  <div class="builder-panel-body">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;">
+                      <div>
+                        <h4 id="flowTitle" style="margin:0;">Fluxo linear</h4>
+                        <div id="flowSubtitle" class="action-summary-line">Arraste uma acao da paleta e clique nos blocos para configurar.</div>
+                      </div>
+                    </div>
+                    <div class="builder-canvas">
+                      <div id="workflowTriggerHost"></div>
+                      <div id="workflowActionsList"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane automation-tab-pane" id="logsTabPane">
+              <div class="builder-panel">
+                <div class="builder-panel-body">
+                  <h4 id="logsTitle" style="margin-top:0;">Logs de execucao</h4>
+                  <div class="log-filters">
+                    <div class="form-group"><label id="logStatusLabel">Status</label><select id="logStatusFilter" class="form-control input-sm"><option value="">Todos</option><option value="SUCCESS">SUCCESS</option><option value="ERROR">ERROR</option></select></div>
+                    <div class="form-group"><label id="logFromLabel">De</label><input id="logFromFilter" type="date" class="form-control input-sm" /></div>
+                    <div class="form-group"><label id="logToLabel">Ate</label><input id="logToFilter" type="date" class="form-control input-sm" /></div>
+                    <div class="form-group" style="min-width:240px;"><label id="logSearchLabel">Busca</label><input id="logSearchFilter" class="form-control input-sm" placeholder="Erro, input, output" /></div>
+                    <button id="btnApplyLogFilters" class="btn btn-primary btn-sm">Filtrar</button>
+                    <button id="btnRefreshLogs" class="btn btn-default btn-sm"><i class="fa fa-refresh"></i> Atualizar</button>
+                    <button id="btnClearLogFilters" class="btn btn-white btn-sm">Limpar</button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-striped automation-log-table">
+                      <thead><tr><th id="logDateHeader">Data/Hora</th><th id="logStatusHeader">Status</th><th id="logSummaryHeader">Resumo</th></tr></thead>
+                      <tbody id="automationLogsBody"><tr><td colspan="3" class="text-center">Carregando...</td></tr></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div>
-            <h4>Fluxo Linear</h4>
-            <div class="builder-canvas">
-              <div id="workflowTriggerHost"></div>
-              <div id="workflowActionsList"></div>
-            </div>
-          </div>
-        </div>
-
-        <hr>
-        <h4>Logs de Execução</h4>
-        <div class="log-filters">
-          <div class="form-group"><label>Status</label><select id="logStatusFilter" class="form-control input-sm"><option value="">Todos</option><option value="SUCCESS">SUCCESS</option><option value="ERROR">ERROR</option></select></div>
-          <div class="form-group"><label>De</label><input id="logFromFilter" type="date" class="form-control input-sm" /></div>
-          <div class="form-group"><label>Até</label><input id="logToFilter" type="date" class="form-control input-sm" /></div>
-          <div class="form-group" style="min-width:240px;"><label>Busca</label><input id="logSearchFilter" class="form-control input-sm" placeholder="Erro, input, output" /></div>
-          <button id="btnApplyLogFilters" class="btn btn-primary btn-sm">Filtrar</button>
-          <button id="btnClearLogFilters" class="btn btn-white btn-sm">Limpar</button>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead><tr><th>Data/Hora</th><th>Status</th><th>Erro</th><th>Input</th><th>Output</th></tr></thead>
-            <tbody id="automationLogsBody"><tr><td colspan="5" class="text-center">Carregando...</td></tr></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -97,29 +149,51 @@
 <div id="automationOverlay" class="automation-overlay"></div>
 <div id="automationOffcanvas" class="automation-offcanvas">
   <div class="automation-offcanvas-header">
-    <strong id="offcanvasTitle">Configuração</strong>
+    <strong id="offcanvasTitle">Configuracao</strong>
     <button id="btnCloseOffcanvas" class="btn btn-xs btn-default">Fechar</button>
   </div>
   <div id="offcanvasBody" class="automation-offcanvas-body"></div>
-  <div class="automation-offcanvas-footer"><button id="btnSaveOffcanvas" class="btn btn-primary btn-sm">Salvar configuração</button></div>
+  <div class="automation-offcanvas-footer"><button id="btnSaveOffcanvas" class="btn btn-primary btn-sm">Salvar configuracao</button></div>
 </div>
 
-<div id="createRegisterModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+<div id="automationLogModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Configuração CREATE_REGISTER</h4>
-        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="automationLogModalTitle">Detalhes do log</h4>
       </div>
       <div class="modal-body">
-        <div class="form-group"><label>Tabela destino</label><select id="createRegisterEntity" class="form-control"></select></div>
-        <label>Mapeamento de campos</label>
-        <div id="createRegisterMappingsBody"></div>
-        <button id="btnAddCreateRegisterField" class="btn btn-white btn-sm"><i class="fa fa-plus"></i> Adicionar campo</button>
+        <div class="row">
+          <div class="col-sm-4">
+            <label id="logModalDateLabel">Data/Hora</label>
+            <div id="automationLogModalDate" class="well well-sm" style="margin-bottom:0;"></div>
+          </div>
+          <div class="col-sm-4">
+            <label id="logModalStatusLabel">Status</label>
+            <div id="automationLogModalStatus" class="well well-sm" style="margin-bottom:0;"></div>
+          </div>
+          <div class="col-sm-4">
+            <label id="logModalSummaryLabel">Resumo</label>
+            <div id="automationLogModalSummary" class="well well-sm" style="margin-bottom:0;"></div>
+          </div>
+        </div>
+        <hr>
+        <div class="form-group">
+          <label id="logModalErrorLabel">Erro</label>
+          <div id="automationLogModalError" class="automation-log-json automation-log-empty">-</div>
+        </div>
+        <div class="form-group">
+          <label id="logModalInputLabel">Input</label>
+          <pre id="automationLogModalInput" class="automation-log-json"></pre>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label id="logModalOutputLabel">Output</label>
+          <pre id="automationLogModalOutput" class="automation-log-json"></pre>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-white" data-dismiss="modal">Cancelar</button>
-        <button type="button" id="btnSaveCreateRegister" class="btn btn-primary">Salvar</button>
+        <button type="button" id="btnCloseLogModal" class="btn btn-default" data-dismiss="modal">Fechar</button>
       </div>
     </div>
   </div>
@@ -131,58 +205,955 @@
   (function () {
     const automationIdMatch = window.location.pathname.match(/\/automations\/([^/]+)\/builder/i);
     const automationId = automationIdMatch ? decodeURIComponent(automationIdMatch[1]) : '';
-    const S = { automation:null, entities:[], fieldsByEntity:{}, selectedNode:null, createRegisterActionId:null, logs:[], workflow:{ version:1, trigger:{type:'MANUAL',config:{}}, actions:[], ui:{nodes:[{id:'trigger',x:120,y:80}]} } };
-    function esc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
-    function arr(d){if(Array.isArray(d))return d; if(Array.isArray(d?.data))return d.data; if(Array.isArray(d?.rows))return d.rows; if(Array.isArray(d?.items))return d.items; return [];}
-    function fmtDate(v){if(!v)return '-'; const d=new Date(v); return Number.isNaN(d.getTime())?'-':d.toLocaleString('pt-BR');}
-    function j(v){try{return JSON.stringify(v??{},null,2);}catch{return '{}';}}
-    function parseJson(v){try{const p=JSON.parse(String(v||'').trim()||'{}'); return p&&typeof p==='object'&&!Array.isArray(p)?p:{};}catch{return {};}}
-    async function api(url,opt){const r=await fetch(url,Object.assign({credentials:'include'},opt||{})); const t=await r.text(); let d={}; try{d=t?JSON.parse(t):{};}catch{d={message:t};} if(!r.ok)throw new Error(d?.message||('HTTP '+r.status)); return d;}
-    function uuid(){if(window.crypto?.randomUUID)return window.crypto.randomUUID(); return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
-    function normWorkflow(i){ if(!i||typeof i!=='object') return {version:1, trigger:{type:'MANUAL',config:{}}, actions:[], ui:{nodes:[{id:'trigger',x:120,y:80}]}}; const t=i.trigger&&typeof i.trigger==='object'?i.trigger:{type:'MANUAL',config:{}}; return { version:1, trigger:{type:String(t.type||'MANUAL').toUpperCase(), config:t.config&&typeof t.config==='object'?t.config:{} }, actions:(Array.isArray(i.actions)?i.actions:[]).filter(x=>x&&typeof x==='object').map((x,n)=>({id:String(x.id||('a'+(n+1))), type:String(x.type||'UPDATE_FIELD').toUpperCase(), config:x.config&&typeof x.config==='object'?x.config:{}})), ui:i.ui&&typeof i.ui==='object'?i.ui:{nodes:[{id:'trigger',x:120,y:80}]} }; }
-    function defaultConfig(t){const k=String(t||'').toUpperCase(); if(k==='UPDATE_FIELD')return{entityName:'',recordId:'',recordLabel:'',field:'',value:''}; if(k==='SEND_EMAIL')return{to:'',cc:'',bcc:'',subject:'',body:''}; if(k==='WEBHOOK')return{url:'',method:'POST',headers:{},body:{}}; if(k==='CREATE_TASK')return{title:'',description:''}; if(k==='AI_ACTION')return{prompt:'',outputKey:'ai_result'}; if(k==='CREATE_REGISTER')return{entityName:'',fieldMappings:[{field:'',value:''}]}; return{};}
-    function entityOpts(sel){const s=String(sel||'').trim().toLowerCase(); const list=S.entities.length?S.entities:[{name:'leads',label:'Leads'},{name:'invoices',label:'Invoices'}]; return list.map(e=>`<option value="${esc(e.name)}" ${e.name===s?'selected':''}>${esc(e.label||e.name)}</option>`).join('');}
-    async function loadEntities(){const rows=arr(await api('/api/automations/metadata/entities')); S.entities=rows.map(r=>({name:String(r?.name||'').trim().toLowerCase(),label:String(r?.label||'').trim()})).filter(r=>r.name); $('#automationEntity').html(entityOpts($('#automationEntity').val()||''));}
-    async function fields(entity){const e=String(entity||'').trim().toLowerCase(); if(!e)return[]; if(Array.isArray(S.fieldsByEntity[e]))return S.fieldsByEntity[e]; const rows=arr(await api('/api/automations/metadata/entities/'+encodeURIComponent(e)+'/fields')); S.fieldsByEntity[e]=rows.map(r=>({name:String(r?.name||'').trim().toLowerCase(),label:String(r?.label||'').trim(),dataType:String(r?.dataType||'').trim()})).filter(r=>r.name); return S.fieldsByEntity[e];}
-    async function records(entity,q){const e=String(entity||'').trim().toLowerCase(); if(!e)return[]; const qs=new URLSearchParams(); if(String(q||'').trim())qs.set('q',String(q).trim()); qs.set('limit','10'); const rows=arr(await api('/api/automations/metadata/entities/'+encodeURIComponent(e)+'/records?'+qs.toString())); return rows.map(r=>({id:String(r?.id||'').trim(),label:String(r?.label||'').trim(),subtitle:String(r?.subtitle||'').trim()})).filter(r=>r.id);}
-    function syncNodes(){const n=[{id:'trigger',x:120,y:80}]; S.workflow.actions.forEach((a,i)=>n.push({id:a.id,x:380+i*250,y:80})); S.workflow.ui={nodes:n};}
-    function renderCanvas(){syncNodes(); const t=String(S.workflow.trigger?.type||'MANUAL').toUpperCase(); const ts=S.selectedNode?.kind==='trigger'?'is-selected':''; $('#workflowTriggerHost').html(`<div id="workflowTriggerCard" class="workflow-trigger-card ${ts}"><strong>Trigger</strong><div>Tipo: ${esc(t)}</div></div>`); const selected=S.selectedNode?.kind==='action'?S.selectedNode.id:''; $('#workflowActionsList').html((S.workflow.actions||[]).map((a,i)=>`<div class="workflow-action-card ${selected===a.id?'is-selected':''}" data-action-id="${esc(a.id)}"><button type="button" class="btn-delete-action js-delete-action" data-action-id="${esc(a.id)}"><i class="fa fa-trash"></i></button><div><strong>Ação ${i+1}</strong></div><div>Tipo: ${esc(a.type)}</div><small>ID: ${esc(a.id)}</small></div>`).join('')); }
-    function openOff(t,html){$('#offcanvasTitle').text(t); $('#offcanvasBody').html(html); $('#automationOverlay').addClass('is-open'); $('#automationOffcanvas').addClass('is-open');}
-    function closeOff(){try{if($('#cfgBody').data('summernote'))$('#cfgBody').summernote('destroy');}catch{} $('#automationOverlay').removeClass('is-open'); $('#automationOffcanvas').removeClass('is-open');}
-    function initLookup(inputSel,idSel,menuSel,getEntity){const $i=$(inputSel),$id=$(idSel),$m=$(menuSel); if(!$i.length||!$m.length)return; let timer=null, req=0; const draw=(rows)=>{$m.html(rows.length?rows.map(r=>`<div class="lookup-item" data-id="${esc(r.id)}" data-label="${esc(r.label)}"><div><strong>${esc(r.label||r.id)}</strong></div>${r.subtitle?`<div style="font-size:11px;color:#81909c;">${esc(r.subtitle)}</div>`:''}</div>`).join(''):'<div class="lookup-item">Nenhum registro encontrado.</div>').show();}; const run=async(term)=>{const e=String(getEntity()||'').trim().toLowerCase(); if(!e){$m.hide();return;} const token=++req; try{const rows=await records(e,term); if(token!==req)return; draw(rows);}catch{if(token!==req)return; $m.html('<div class="lookup-item">Falha ao carregar.</div>').show();}}; $i.off('.lk'); $m.off('.lk'); $i.on('focus.lk',()=>run('')); $i.on('input.lk',function(){ $id.val(''); if(timer)clearTimeout(timer); timer=setTimeout(()=>run(String($(this).val()||'')),250);}); $m.on('mousedown.lk','.lookup-item',function(ev){ev.preventDefault(); const id=String($(this).data('id')||'').trim(); const label=String($(this).data('label')||'').trim(); if(!id)return; $id.val(id); $i.val(label||id); $m.hide();}); $i.on('blur.lk',()=>setTimeout(()=>$m.hide(),150));}
-    function statusLabel(s){const n=String(s||'').toUpperCase(); if(n==='SUCCESS')return '<span class="label label-primary">SUCCESS</span>'; if(n==='ERROR')return '<span class="label label-danger">ERROR</span>'; return '<span class="label label-default">-</span>';}
-    async function fillTriggerFieldChanged(entity,selected){const fs=await fields(entity); const opts=['<option value="">(qualquer campo)</option>'].concat(fs.map(f=>`<option value="${esc(f.name)}">${esc(f.label||f.name)}${f.dataType?' ('+esc(f.dataType)+')':''}</option>`)); $('#cfgTriggerFieldChanged').html(opts.join('')); if(selected)$('#cfgTriggerFieldChanged').val(String(selected).toLowerCase());}
-function openTrigger(){S.selectedNode={kind:'trigger'}; const t=S.workflow.trigger||{type:'MANUAL',config:{}}; const c=t.config||{}; const entity=String(c.entityName||$('#automationEntity').val()||'').toLowerCase(); openOff('Configura��o do Trigger', `<div class="form-group"><label>Tipo do Trigger</label><select id="cfgTriggerType" class="form-control"><option value="MANUAL" ${t.type==='MANUAL'?'selected':''}>MANUAL</option><option value="ENTITY_EVENT" ${t.type==='ENTITY_EVENT'?'selected':''}>ENTITY_EVENT</option><option value="SCHEDULE" ${t.type==='SCHEDULE'?'selected':''}>SCHEDULE</option></select></div><div id="cfgTrigEntityWrap" style="display:${t.type==='ENTITY_EVENT'?'block':'none'};"><div class="form-group"><label>Entidade</label><select id="cfgTriggerEntityName" class="form-control">${entityOpts(entity)}</select></div><div class="form-group"><label>Evento</label><select id="cfgTriggerEventType" class="form-control"><option value="CREATE" ${String(c.eventType||'').toUpperCase()==='CREATE'?'selected':''}>CREATE</option><option value="UPDATE" ${String(c.eventType||'').toUpperCase()==='UPDATE'?'selected':''}>UPDATE</option></select></div><div class="form-group"><label>fieldChanged (opcional)</label><select id="cfgTriggerFieldChanged" class="form-control"><option value="">Carregando campos...</option></select></div></div><div id="cfgTrigScheduleWrap" style="display:${t.type==='SCHEDULE'?'block':'none'};"><div class="form-group"><label>Cron</label><input id="cfgTriggerCron" class="form-control" value="${esc(c.cron||'')}" placeholder="0 9 * * *" /></div><div class="form-group"><label>Timezone</label><input id="cfgTriggerTimezone" class="form-control" value="${esc(c.timezone||'America/Sao_Paulo')}" /></div></div>`); $('#cfgTriggerType').on('change',function(){const k=String($(this).val()||'MANUAL').toUpperCase(); $('#cfgTrigEntityWrap').toggle(k==='ENTITY_EVENT'); $('#cfgTrigScheduleWrap').toggle(k==='SCHEDULE');}); $('#cfgTriggerEntityName').on('change',function(){fillTriggerFieldChanged(String($(this).val()||''),'').catch(()=>{$('#cfgTriggerFieldChanged').html('<option value="">(qualquer campo)</option>');});}); fillTriggerFieldChanged(entity,String(c.fieldChanged||'')).catch(()=>{$('#cfgTriggerFieldChanged').html('<option value="">(qualquer campo)</option>');}); renderCanvas();}async function fillUpdateFields(entity,selected){const fs=await fields(entity); const list=fs.length?fs:[{name:'',label:'Sem campos',dataType:''}]; const html=list.map(f=>`<option value="${esc(f.name)}">${esc(f.label||f.name)}${f.dataType?' ('+esc(f.dataType)+')':''}</option>`).join(''); $('#cfgFieldSelect').html(html); if(selected)$('#cfgFieldSelect').val(String(selected).toLowerCase());}
-    function openCreateRegister(action){S.createRegisterActionId=action.id; const c=action.config||{}; const e=String(c.entityName||$('#automationEntity').val()||'').toLowerCase(); $('#createRegisterEntity').html(entityOpts(e)).val(e); const rows=Array.isArray(c.fieldMappings)&&c.fieldMappings.length?c.fieldMappings:[{field:'',value:''}]; const draw=async()=>{const fs=await fields(String($('#createRegisterEntity').val()||'')); const opts=fs.map(f=>`<option value="${esc(f.name)}">${esc(f.label||f.name)}</option>`).join('')||'<option value="">Sem campos</option>'; $('#createRegisterMappingsBody').html(rows.map(r=>`<div class="create-register-row js-cr-row"><select class="form-control js-cr-field">${opts}</select><input class="form-control js-cr-value" value="${esc(r.value||'')}" placeholder="Valor" /><button type="button" class="btn btn-danger btn-sm js-remove-cr-row"><i class="fa fa-trash"></i></button></div>`).join('')); $('#createRegisterMappingsBody .js-cr-row').each(function(i){$(this).find('.js-cr-field').val(String(rows[i]?.field||'').toLowerCase());});}; draw().catch(()=>{}); $('#createRegisterModal').modal('show');}
-    function openAction(id){const a=S.workflow.actions.find(x=>x.id===id); if(!a)return; S.selectedNode={kind:'action',id:a.id}; const c=a.config||{}; if(a.type==='CREATE_REGISTER'){openCreateRegister(a); renderCanvas(); return;} let form=''; if(a.type==='UPDATE_FIELD'){const e=String(c.entityName||$('#automationEntity').val()||'').toLowerCase(); form=`<div class="form-group"><label>Tabela</label><select id="cfgUpdateEntity" class="form-control">${entityOpts(e)}</select></div><div class="form-group"><label>Registro da tabela (opcional)</label><div class="record-lookup-wrap"><input id="cfgUpdateLookup" class="form-control" value="${esc(c.recordLabel||c.recordId||'')}" placeholder="Buscar registro" /><input id="cfgUpdateRecordId" type="hidden" value="${esc(c.recordId||'')}" /><div id="cfgUpdateMenu" class="record-lookup-menu"></div></div><small class="text-muted">Se vazio, usa recordId do contexto.</small></div><div class="form-group"><label>Campo</label><select id="cfgFieldSelect" class="form-control"><option value="">Carregando...</option></select></div><div class="form-group"><label>Valor</label><input id="cfgValue" class="form-control" value="${esc(c.value||'')}" /></div>`;}
-      else if(a.type==='SEND_EMAIL'){form=`<div class="form-group"><label>Para</label><input id="cfgTo" class="form-control" value="${esc(c.to||'')}" /></div><div class="form-group"><label>CC</label><input id="cfgCc" class="form-control" value="${esc(c.cc||'')}" /></div><div class="form-group"><label>Bcc</label><input id="cfgBcc" class="form-control" value="${esc(c.bcc||'')}" /></div><div class="form-group"><label>Assunto</label><input id="cfgSubject" class="form-control" value="${esc(c.subject||'')}" /></div><div class="form-group"><label>Body (Rich Text)</label><textarea id="cfgBody" class="form-control" rows="6"></textarea></div>`;}
-      else if(a.type==='WEBHOOK'){form=`<div class="form-group"><label>URL</label><input id="cfgWebhookUrl" class="form-control" value="${esc(c.url||'')}" /></div><div class="form-group"><label>Método</label><select id="cfgWebhookMethod" class="form-control"><option value="POST" ${String(c.method||'POST').toUpperCase()==='POST'?'selected':''}>POST</option><option value="PUT" ${String(c.method||'').toUpperCase()==='PUT'?'selected':''}>PUT</option><option value="PATCH" ${String(c.method||'').toUpperCase()==='PATCH'?'selected':''}>PATCH</option></select></div><div class="form-group"><label>Headers (JSON)</label><textarea id="cfgWebhookHeaders" class="form-control" rows="4">${esc(j(c.headers||{}))}</textarea></div><div class="form-group"><label>Body template</label><textarea id="cfgWebhookBody" class="form-control" rows="6">${esc(j(c.body||{}))}</textarea></div>`;}
-      else if(a.type==='CREATE_TASK'){form=`<div class="form-group"><label>Título</label><input id="cfgTaskTitle" class="form-control" value="${esc(c.title||'')}" /></div><div class="form-group"><label>Descrição</label><textarea id="cfgTaskDescription" class="form-control" rows="4">${esc(c.description||'')}</textarea></div>`;}
-      else if(a.type==='AI_ACTION'){form=`<div class="form-group"><label>Prompt</label><textarea id="cfgAiPrompt" class="form-control" rows="5">${esc(c.prompt||'')}</textarea></div><div class="form-group"><label>outputKey</label><input id="cfgAiOutputKey" class="form-control" value="${esc(c.outputKey||'ai_result')}" /></div>`;}
-      openOff('Configuração da Action', `<div class="form-group"><label>Tipo da Action</label><input class="form-control" value="${esc(a.type)}" disabled /></div>${form}<hr><button type="button" id="btnDeleteAction" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir bloco</button>`);
-      if(a.type==='UPDATE_FIELD'){fillUpdateFields(String(c.entityName||$('#automationEntity').val()||''),c.field||'').catch(()=>{}); initLookup('#cfgUpdateLookup','#cfgUpdateRecordId','#cfgUpdateMenu',()=>$('#cfgUpdateEntity').val()); $('#cfgUpdateEntity').on('change',function(){fillUpdateFields(String($(this).val()||''),'').catch(()=>{}); $('#cfgUpdateLookup').val(''); $('#cfgUpdateRecordId').val('');});}
-      if(a.type==='SEND_EMAIL'){if($.fn.summernote){try{$('#cfgBody').summernote({height:180,toolbar:[['style',['bold','italic','underline','clear']],['para',['ul','ol','paragraph']],['insert',['link']],['view',['codeview']]]}); $('#cfgBody').summernote('code',String(c.body_html||c.body||''));}catch{$('#cfgBody').val(String(c.body||''));}} else $('#cfgBody').val(String(c.body||''));}
+    const currentLang = <%- JSON.stringify(lang || 'pt-BR') %>;
+    const locale = String(currentLang || 'pt-BR').toLowerCase().startsWith('en')
+      ? 'en'
+      : String(currentLang || 'pt-BR').toLowerCase().startsWith('es')
+        ? 'es'
+        : 'pt';
+
+    const COPY = {};
+    COPY.pt = {
+      builderTitle: 'Builder de Automacao',
+      name: 'Nome',
+      entity: 'Entidade',
+      description: 'Descricao',
+      optional: 'Opcional',
+      save: 'Salvar',
+      executeNow: 'Executar agora',
+      back: 'Voltar',
+      palette: 'Paleta',
+      builderTab: 'Builder',
+      logsTab: 'Logs',
+      trigger: 'Trigger',
+      triggerOneOnly: 'Somente um por fluxo.',
+      actions: 'Acoes',
+      flowTitle: 'Fluxo linear',
+      flowSubtitle: 'Arraste uma acao da paleta e clique nos blocos para configurar.',
+      logs: 'Logs de execucao',
+      status: 'Status',
+      from: 'De',
+      to: 'Ate',
+      search: 'Busca',
+      filter: 'Filtrar',
+      refresh: 'Atualizar',
+      clear: 'Limpar',
+      dateTime: 'Data/Hora',
+      summary: 'Resumo',
+      error: 'Erro',
+      input: 'Input',
+      output: 'Output',
+      viewLog: 'Detalhes do log',
+      noLogs: 'Nenhum log encontrado.',
+      noError: 'Nenhum erro registrado.',
+      noData: 'Nenhum dado.',
+      triggerMatched: 'Trigger executado e acao iniciada.',
+      triggerCreate: 'Trigger de criacao executado.',
+      triggerUpdate: 'Trigger de atualizacao executado.',
+      logSearchPlaceholder: 'Erro, input, output',
+      loading: 'Carregando...',
+      saveSuccess: 'Automacao salva com sucesso.',
+      saveFail: 'Falha ao salvar automacao.',
+      loadFail: 'Falha ao carregar automacao.',
+      executeFail: 'Falha ao executar automacao.',
+      logsFail: 'Falha ao carregar logs.',
+      invalidId: 'ID da automacao invalido.',
+      close: 'Fechar',
+      saveConfig: 'Salvar configuracao'
+    };
+    COPY.en = Object.assign({}, COPY.pt, {
+      builderTitle: 'Automation Builder',
+      name: 'Name',
+      entity: 'Entity',
+      description: 'Description',
+      optional: 'Optional',
+      save: 'Save',
+      executeNow: 'Run now',
+      back: 'Back',
+      palette: 'Palette',
+      builderTab: 'Builder',
+      logsTab: 'Logs',
+      triggerOneOnly: 'Only one per flow.',
+      actions: 'Actions',
+      flowTitle: 'Linear flow',
+      flowSubtitle: 'Drag actions from the palette and click blocks to configure them.',
+      logs: 'Execution logs',
+      from: 'From',
+      to: 'To',
+      search: 'Search',
+      filter: 'Filter',
+      refresh: 'Refresh',
+      clear: 'Clear',
+      dateTime: 'Date/Time',
+      summary: 'Summary',
+      error: 'Error',
+      viewLog: 'Log details',
+      noLogs: 'No logs found.',
+      noError: 'No error recorded.',
+      noData: 'No data.',
+      triggerMatched: 'Trigger matched and action started.',
+      triggerCreate: 'Create trigger executed.',
+      triggerUpdate: 'Update trigger executed.',
+      logSearchPlaceholder: 'Error, input, output',
+      loading: 'Loading...',
+      saveSuccess: 'Automation saved successfully.',
+      saveFail: 'Failed to save automation.',
+      loadFail: 'Failed to load automation.',
+      executeFail: 'Failed to run automation.',
+      logsFail: 'Failed to load logs.',
+      invalidId: 'Invalid automation id.',
+      close: 'Close',
+      saveConfig: 'Save configuration'
+    });
+    COPY.es = Object.assign({}, COPY.pt, {
+      builderTitle: 'Constructor de automatizaciones',
+      name: 'Nombre',
+      entity: 'Entidad',
+      description: 'Descripcion',
+      optional: 'Opcional',
+      save: 'Guardar',
+      executeNow: 'Ejecutar ahora',
+      back: 'Volver',
+      palette: 'Paleta',
+      builderTab: 'Builder',
+      logsTab: 'Logs',
+      actions: 'Acciones',
+      flowTitle: 'Flujo lineal',
+      flowSubtitle: 'Arrastra acciones de la paleta y haz clic en los bloques para configurarlos.',
+      logs: 'Logs de ejecucion',
+      status: 'Estado',
+      from: 'Desde',
+      to: 'Hasta',
+      search: 'Busqueda',
+      filter: 'Filtrar',
+      refresh: 'Actualizar',
+      clear: 'Limpiar',
+      dateTime: 'Fecha/Hora',
+      summary: 'Resumen',
+      error: 'Error',
+      viewLog: 'Detalles del log',
+      noLogs: 'No se encontraron logs.',
+      noError: 'No se registro ningun error.',
+      noData: 'Sin datos.',
+      triggerMatched: 'El trigger se ejecuto y la accion comenzo.',
+      triggerCreate: 'Se ejecuto el trigger de creacion.',
+      triggerUpdate: 'Se ejecuto el trigger de actualizacion.',
+      logSearchPlaceholder: 'Error, input, output',
+      loading: 'Cargando...',
+      saveSuccess: 'Automatizacion guardada con exito.',
+      saveFail: 'No se pudo guardar la automatizacion.',
+      loadFail: 'No se pudo cargar la automatizacion.',
+      executeFail: 'No se pudo ejecutar la automatizacion.',
+      logsFail: 'No se pudieron cargar los logs.',
+      invalidId: 'ID de automatizacion invalido.',
+      close: 'Cerrar',
+      saveConfig: 'Guardar configuracion'
+    });
+
+    const C = COPY[locale];
+    const ACTION_DEFS = [];
+    const TRIGGER_TYPES = [];
+    const EVENT_TYPES = [];
+    const CONDITION_OPERATORS = ['EQUALS','NOT_EQUALS','CONTAINS','GREATER_THAN','LESS_THAN','GREATER_OR_EQUAL','LESS_OR_EQUAL','CHANGED_TO','CHANGED_FROM','IS_TRUE','IS_FALSE','NOT_EMPTY','IS_EMPTY'];
+    const S = {
+      automation: null,
+      entities: [],
+      entityMap: {},
+      fieldsByEntity: { all: {}, writable: {} },
+      selectedNode: null,
+      logs: [],
+      whatsapp: { enabled: false, integrations: [] },
+      workflow: { version: 1, trigger: { type: 'MANUAL', config: {} }, actions: [], ui: { nodes: [{ id: 'trigger', x: 120, y: 80 }] } }
+    };
+
+    function esc(v) {
+      return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function arr(d) {
+      if (Array.isArray(d)) return d;
+      if (Array.isArray(d && d.data)) return d.data;
+      if (Array.isArray(d && d.rows)) return d.rows;
+      if (Array.isArray(d && d.items)) return d.items;
+      return [];
+    }
+
+    function api(url, opt) {
+      return fetch(url, Object.assign({ credentials: 'include' }, opt || {}))
+        .then((r) => r.text().then((t) => ({ ok: r.ok, status: r.status, text: t })))
+        .then((r) => {
+          let data = {};
+          try { data = r.text ? JSON.parse(r.text) : {}; } catch (_e) { data = { message: r.text }; }
+          if (!r.ok) throw new Error((data && data.message) || ('HTTP ' + r.status));
+          return data;
+        });
+    }
+
+    function uuid() {
+      if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+      return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    ACTION_DEFS.push(
+      { type: 'UPDATE_FIELD', icon: 'fa-pencil', label: { pt: 'Atualizar campo', en: 'Update field', es: 'Actualizar campo' } },
+      { type: 'SEND_EMAIL', icon: 'fa-envelope', label: { pt: 'Enviar email', en: 'Send email', es: 'Enviar email' } },
+      { type: 'CREATE_TASK', icon: 'fa-tasks', label: { pt: 'Create Task', en: 'Create task', es: 'Crear tarea' } },
+      { type: 'WEBHOOK', icon: 'fa-exchange', label: { pt: 'Webhook', en: 'Webhook', es: 'Webhook' } },
+      { type: 'AI_ACTION', icon: 'fa-magic', label: { pt: 'AI Action', en: 'AI Action', es: 'AI Action' } },
+      { type: 'CREATE_REGISTER', icon: 'fa-database', label: { pt: 'Criar registro', en: 'Create record', es: 'Crear registro' } },
+      { type: 'WHATSAPP', icon: 'fa-whatsapp', label: { pt: 'WhatsApp', en: 'WhatsApp', es: 'WhatsApp' } }
+    );
+    TRIGGER_TYPES.push(
+      { value: 'MANUAL', label: locale === 'pt' ? 'Manual' : locale === 'es' ? 'Manual' : 'Manual' },
+      { value: 'ENTITY_EVENT', label: locale === 'pt' ? 'Evento da entidade' : locale === 'es' ? 'Evento de entidad' : 'Entity event' },
+      { value: 'SCHEDULE', label: locale === 'pt' ? 'Agendado' : locale === 'es' ? 'Programado' : 'Scheduled' }
+    );
+    EVENT_TYPES.push(
+      { value: 'CREATE', label: locale === 'pt' ? 'Criado' : locale === 'es' ? 'Creado' : 'Created' },
+      { value: 'UPDATE', label: locale === 'pt' ? 'Atualizado' : locale === 'es' ? 'Actualizado' : 'Updated' }
+    );
+
+    function humanize(value) {
+      return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, function (s) { return s.toUpperCase(); });
+    }
+
+    function entityLabel(name) {
+      const normalized = String(name || '').trim().toLowerCase();
+      return (S.entityMap[normalized] && S.entityMap[normalized].label) || humanize(normalized || '');
+    }
+
+    function defaultActionTitle(type, index) {
+      const def = ACTION_DEFS.find(function (item) { return item.type === type; });
+      const base = def ? (def.label[locale] || def.label.pt) : humanize(type);
+      return base + ' ' + (index + 1);
+    }
+
+    function defaultConfig(type) {
+      if (type === 'UPDATE_FIELD') return { name: '', entityName: '', targetMode: 'CONTEXT', recordId: '', recordLabel: '', field: '', value: '', valueSource: 'FIXED', dynamicField: '' };
+      if (type === 'SEND_EMAIL') return { name: '', to: '', cc: '', bcc: '', subject: '', body: '' };
+      if (type === 'WEBHOOK') return { name: '', url: '', method: 'POST', headers: {}, body: {} };
+      if (type === 'CREATE_TASK') return { name: '', title: '', description: '' };
+      if (type === 'AI_ACTION') return { name: '', prompt: '', instructions: '', outputKey: 'ai_result' };
+      if (type === 'CREATE_REGISTER') return { name: '', entityName: '', fieldMappings: [] };
+      if (type === 'WHATSAPP') return { name: '', integrationId: '', recipientMode: 'TRIGGER_FIELD', phoneField: '', to: '', message: '' };
+      return { name: '' };
+    }
+
+    function normalizeWorkflow(input) {
+      if (!input || typeof input !== 'object') return { version: 1, trigger: { type: 'MANUAL', config: {} }, actions: [], ui: { nodes: [{ id: 'trigger', x: 120, y: 80 }] } };
+      const trigger = input.trigger && typeof input.trigger === 'object' ? input.trigger : { type: 'MANUAL', config: {} };
+      const actions = Array.isArray(input.actions) ? input.actions : [];
+      return {
+        version: 1,
+        trigger: {
+          type: String(trigger.type || 'MANUAL').toUpperCase(),
+          config: trigger.config && typeof trigger.config === 'object' ? trigger.config : {}
+        },
+        actions: actions.filter(Boolean).map(function (item, index) {
+          return {
+            id: String(item.id || ('action_' + (index + 1))),
+            type: String(item.type || 'UPDATE_FIELD').toUpperCase(),
+            config: Object.assign({}, defaultConfig(String(item.type || 'UPDATE_FIELD').toUpperCase()), item.config || {})
+          };
+        }),
+        ui: input.ui && typeof input.ui === 'object' ? input.ui : { nodes: [{ id: 'trigger', x: 120, y: 80 }] }
+      };
+    }
+
+    function fmtDate(v) {
+      if (!v) return '-';
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString(locale === 'pt' ? 'pt-BR' : locale === 'es' ? 'es-ES' : 'en-US');
+    }
+
+    function j(v) {
+      try { return JSON.stringify(v == null ? {} : v, null, 2); } catch (_e) { return '{}'; }
+    }
+
+    function parseJson(v) {
+      try {
+        const parsed = JSON.parse(String(v || '').trim() || '{}');
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch (_e) {
+        return {};
+      }
+    }
+
+    function isSameTriggerEntity(entityName) {
+      const triggerEntity = String((S.workflow.trigger && S.workflow.trigger.config && S.workflow.trigger.config.entityName) || $('#automationEntity').val() || '').trim().toLowerCase();
+      return !!triggerEntity && triggerEntity === String(entityName || '').trim().toLowerCase();
+    }
+
+    function triggerTokenForField(fieldName) {
+      const triggerType = String(S.workflow.trigger && S.workflow.trigger.type || 'MANUAL').toUpperCase();
+      if (triggerType === 'ENTITY_EVENT') return '{{payload.after.' + fieldName + '}}';
+      return '{{payload.' + fieldName + '}}';
+    }
+
+    function parseValueBinding(value) {
+      const raw = String(value == null ? '' : value).trim();
+      if (!raw) return { source: 'FIXED', value: '', dynamicField: '' };
+      if (raw === '{{recordId}}') return { source: 'CONTEXT_RECORD_ID', value: raw, dynamicField: '' };
+      const payloadMatch = raw.match(/^{{\s*payload\.(?:after\.)?([a-zA-Z0-9_]+)\s*}}$/);
+      if (payloadMatch) return { source: 'TRIGGER_FIELD', value: raw, dynamicField: payloadMatch[1] };
+      if (raw.indexOf('{{') >= 0) return { source: 'TEMPLATE', value: raw, dynamicField: '' };
+      return { source: 'FIXED', value: raw, dynamicField: '' };
+    }
+
+    function compileValueBinding(source, rawValue, dynamicField) {
+      if (source === 'CONTEXT_RECORD_ID') return '{{recordId}}';
+      if (source === 'TRIGGER_FIELD') return dynamicField ? triggerTokenForField(dynamicField) : '';
+      if (source === 'TEMPLATE') return String(rawValue || '').trim();
+      return String(rawValue == null ? '' : rawValue).trim();
+    }
+
+    function statusLabel(s) {
+      const n = String(s || '').toUpperCase();
+      if (n === 'SUCCESS') return '<span class="label label-primary">SUCCESS</span>';
+      if (n === 'ERROR') return '<span class="label label-danger">ERROR</span>';
+      return '<span class="label label-default">-</span>';
+    }
+
+    function summarizeLog(row) {
+      if (!row || typeof row !== 'object') return C.noData;
+      const error = String(row.error_message || '').trim();
+      if (error) return error;
+      const output = row.output_payload && typeof row.output_payload === 'object' ? row.output_payload : {};
+      const input = row.input_payload && typeof row.input_payload === 'object' ? row.input_payload : {};
+      if (String(output.message || '').trim()) return String(output.message || '').trim();
+      if (String(output.result || '').trim()) return String(output.result || '').trim();
+      if (String(output.status || '').trim()) return String(output.status || '').trim();
+      if (String(input.recordId || '').trim()) return C.triggerMatched + ' recordId=' + String(input.recordId).trim();
+      if (String(input.eventType || '').trim().toUpperCase() === 'CREATE') return C.triggerCreate;
+      if (String(input.eventType || '').trim().toUpperCase() === 'UPDATE') return C.triggerUpdate;
+      return C.noData;
+    }
+
+    function renderLogMeta(row) {
+      if (!row || typeof row !== 'object') return '';
+      const pieces = [];
+      if (row.input_payload && typeof row.input_payload === 'object') {
+        if (row.input_payload.entityName) pieces.push('entity=' + String(row.input_payload.entityName));
+        if (row.input_payload.eventType) pieces.push('event=' + String(row.input_payload.eventType));
+        if (row.input_payload.recordId) pieces.push('record=' + String(row.input_payload.recordId));
+      }
+      return pieces.length ? '<div class="automation-log-meta">' + esc(pieces.join(' · ')) + '</div>' : '';
+    }
+
+    function openLogModal(index) {
+      const row = S.logs[index];
+      if (!row) return;
+      $('#automationLogModalTitle').text(C.viewLog);
+      $('#automationLogModalDate').text(fmtDate(row.executed_at));
+      $('#automationLogModalStatus').html(statusLabel(row.status));
+      $('#automationLogModalSummary').text(summarizeLog(row));
+      const errorMessage = String(row.error_message || '').trim();
+      $('#automationLogModalError')
+        .text(errorMessage || C.noError)
+        .toggleClass('automation-log-empty', !errorMessage);
+      $('#automationLogModalInput').text(j(row.input_payload || {}));
+      $('#automationLogModalOutput').text(j(row.output_payload || {}));
+      $('#automationLogModal').modal('show');
+    }
+
+    function actionLabel(type) {
+      const def = ACTION_DEFS.find(function (item) { return item.type === type; });
+      return def ? (def.label[locale] || def.label.pt) : humanize(type);
+    }
+
+    function entityOptions(selected) {
+      return S.entities.map(function (entity) {
+        return '<option value="' + esc(entity.name) + '" ' + (entity.name === selected ? 'selected' : '') + '>' + esc(entity.label || humanize(entity.name)) + '</option>';
+      }).join('');
+    }
+
+    function operatorOptions(selected) {
+      return CONDITION_OPERATORS.map(function (item) {
+        return '<option value="' + esc(item) + '" ' + (String(selected || '') === item ? 'selected' : '') + '>' + esc(item) + '</option>';
+      }).join('');
+    }
+
+    function triggerTypeOptions(selected) {
+      return TRIGGER_TYPES.map(function (item) {
+        return '<option value="' + item.value + '" ' + (item.value === selected ? 'selected' : '') + '>' + esc(item.label) + '</option>';
+      }).join('');
+    }
+
+    function eventTypeOptions(selected) {
+      return EVENT_TYPES.map(function (item) {
+        return '<option value="' + item.value + '" ' + (item.value === selected ? 'selected' : '') + '>' + esc(item.label) + '</option>';
+      }).join('');
+    }
+
+    function syncNodes() {
+      const nodes = [{ id: 'trigger', x: 120, y: 80 }];
+      S.workflow.actions.forEach(function (action, index) {
+        nodes.push({ id: action.id, x: 380 + index * 250, y: 80 });
+      });
+      S.workflow.ui = { nodes: nodes };
+    }
+
+    function triggerConditionSummary(config) {
+      const condition = config && typeof config === 'object' ? config.condition : null;
+      if (!condition || typeof condition !== 'object') return '';
+      const field = String(condition.field || '').trim();
+      const operator = String(condition.operator || '').trim().toUpperCase();
+      const value = condition.value == null ? '' : String(condition.value).trim();
+      if (!field || !operator) return '';
+      const label = locale === 'en' ? 'Condition' : locale === 'es' ? 'Condicion' : 'Condicao';
+      return label + ': ' + field + ' ' + operator + (value ? ' ' + value : '');
+    }
+
+    function actionSummary(action) {
+      const config = action.config || {};
+      if (action.type === 'UPDATE_FIELD') return (config.field ? config.field + ' <- ' : '') + (config.value ? String(config.value).slice(0, 60) : '-');
+      if (action.type === 'SEND_EMAIL') return String(config.to || '').trim() || '-';
+      if (action.type === 'WEBHOOK') return String(config.url || '').trim() || '-';
+      if (action.type === 'CREATE_TASK') return String(config.title || '').trim() || 'MVP/stub';
+      if (action.type === 'AI_ACTION') return String(config.outputKey || 'ai_result');
+      if (action.type === 'CREATE_REGISTER') return String(config.entityName || '').trim() || '-';
+      if (action.type === 'WHATSAPP') return String(config.to || config.phoneField || '').trim() || '-';
+      return '-';
+    }
+
+    function renderPalette() {
+      $('#paletteActions').html(ACTION_DEFS.map(function (item) {
+        const isDisabled = item.type === 'WHATSAPP' && !S.whatsapp.enabled;
+        const title = isDisabled
+          ? (locale === 'en' ? 'You do not have a configured WhatsApp instance.' : locale === 'es' ? 'No tienes una instancia de WhatsApp configurada.' : 'Voce nao possui instancia de Whats app configurada.')
+          : '';
+        return '<div class="palette-item ' + (isDisabled ? 'is-disabled' : '') + '" data-toggle="tooltip" title="' + esc(title) + '" data-action-type="' + esc(item.type) + '" data-disabled="' + (isDisabled ? '1' : '0') + '">' +
+          '<strong><i class="fa ' + esc(item.icon) + '"></i> ' + esc(item.label[locale] || item.label.pt) + '</strong><br>' +
+          '<span>' + esc(item.type) + '</span></div>';
+      }).join(''));
+      $('[data-toggle="tooltip"]').tooltip();
+    }
+
+    function renderCanvas() {
+      syncNodes();
+      const trigger = S.workflow.trigger || { type: 'MANUAL', config: {} };
+      const config = trigger.config && typeof trigger.config === 'object' ? trigger.config : {};
+      const triggerLines = ['<div class="trigger-summary-line"><strong>' + esc(locale === 'en' ? 'Type' : locale === 'es' ? 'Tipo' : 'Tipo') + ':</strong> ' + esc(trigger.type) + '</div>'];
+      if (config.entityName) triggerLines.push('<div class="trigger-summary-line"><strong>' + esc(C.entity) + ':</strong> ' + esc(entityLabel(config.entityName)) + '</div>');
+      if (config.eventType) triggerLines.push('<div class="trigger-summary-line"><strong>' + esc(locale === 'en' ? 'Event' : locale === 'es' ? 'Evento' : 'Evento') + ':</strong> ' + esc(config.eventType) + '</div>');
+      if (config.fieldChanged) triggerLines.push('<div class="trigger-summary-line"><strong>' + esc(locale === 'en' ? 'Changed field' : locale === 'es' ? 'Campo alterado' : 'Campo alterado') + ':</strong> ' + esc(config.fieldChanged) + '</div>');
+      if (config.cron) triggerLines.push('<div class="trigger-summary-line"><strong>Cron:</strong> ' + esc(config.cron) + '</div>');
+      const conditionText = triggerConditionSummary(config);
+      if (conditionText) triggerLines.push('<div class="trigger-summary-line">' + esc(conditionText) + '</div>');
+
+      $('#workflowTriggerHost').html('<div id="workflowTriggerCard" class="workflow-trigger-card ' + (S.selectedNode && S.selectedNode.kind === 'trigger' ? 'is-selected' : '') + '">' +
+        '<strong>' + esc(C.trigger) + '</strong>' + triggerLines.join('') + '</div>');
+
+      $('#workflowActionsList').html(S.workflow.actions.map(function (action, index) {
+        const displayName = String(action.config && action.config.name || '').trim() || defaultActionTitle(action.type, index);
+        return '<div class="workflow-action-card ' + (S.selectedNode && S.selectedNode.kind === 'action' && S.selectedNode.id === action.id ? 'is-selected' : '') + '" data-action-id="' + esc(action.id) + '">' +
+          '<button type="button" class="btn-delete-action js-delete-action" data-action-id="' + esc(action.id) + '"><i class="fa fa-trash"></i></button>' +
+          '<div><strong>' + esc(displayName) + '</strong></div>' +
+          '<div class="action-summary-line"><strong>' + esc(locale === 'en' ? 'Type' : locale === 'es' ? 'Tipo' : 'Tipo') + ':</strong> ' + esc(actionLabel(action.type)) + '</div>' +
+          '<div class="action-summary-line">' + esc(actionSummary(action)) + '</div>' +
+          '<div class="action-name-pill">' + esc(action.type) + '</div>' +
+        '</div>';
+      }).join(''));
+    }
+
+    function openOffcanvas(title, html) {
+      $('#offcanvasTitle').text(title);
+      $('#offcanvasBody').html(html);
+      $('#automationOverlay').addClass('is-open');
+      $('#automationOffcanvas').addClass('is-open');
+    }
+
+    function closeOffcanvas() {
+      try { if ($('#cfgBody').data('summernote')) $('#cfgBody').summernote('destroy'); } catch (_e) {}
+      $('#automationOverlay').removeClass('is-open');
+      $('#automationOffcanvas').removeClass('is-open');
+    }
+
+    function initLookup(inputSel, idSel, menuSel, getEntity) {
+      const $input = $(inputSel);
+      const $id = $(idSel);
+      const $menu = $(menuSel);
+      if (!$input.length || !$menu.length) return;
+      let timer = null;
+      let requestId = 0;
+      function draw(rows) {
+        const noneText = locale === 'en' ? 'No records found.' : locale === 'es' ? 'No se encontraron registros.' : 'Nenhum registro encontrado.';
+        $menu.html(rows.length ? rows.map(function (row) {
+          return '<div class="lookup-item" data-id="' + esc(row.id) + '" data-label="' + esc(row.label) + '"><div><strong>' + esc(row.label || row.id) + '</strong></div>' + (row.subtitle ? '<div style="font-size:11px;color:#81909c;">' + esc(row.subtitle) + '</div>' : '') + '</div>';
+        }).join('') : '<div class="lookup-item">' + esc(noneText) + '</div>').show();
+      }
+      function run(term) {
+        const entity = String(getEntity() || '').trim().toLowerCase();
+        if (!entity) { $menu.hide(); return; }
+        const token = ++requestId;
+        const qs = new URLSearchParams();
+        if (String(term || '').trim()) qs.set('q', String(term || '').trim());
+        qs.set('limit', '10');
+        api('/api/automations/metadata/entities/' + encodeURIComponent(entity) + '/records?' + qs.toString())
+          .then(function (data) { if (token === requestId) draw(arr(data)); })
+          .catch(function () { if (token === requestId) $menu.html('<div class="lookup-item">Falha ao carregar.</div>').show(); });
+      }
+      $input.off('.lk');
+      $menu.off('.lk');
+      $input.on('focus.lk', function () { run(''); });
+      $input.on('input.lk', function () {
+        $id.val('');
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(function () { run(String($input.val() || '')); }, 250);
+      });
+      $menu.on('mousedown.lk', '.lookup-item', function (ev) {
+        ev.preventDefault();
+        const id = String($(this).data('id') || '').trim();
+        const label = String($(this).data('label') || '').trim();
+        if (!id) return;
+        $id.val(id);
+        $input.val(label || id);
+        $menu.hide();
+      });
+      $input.on('blur.lk', function () { setTimeout(function () { $menu.hide(); }, 150); });
+    }
+
+    function loadEntities() {
+      return api('/api/automations/metadata/entities').then(function (data) {
+        S.entities = arr(data).map(function (row) {
+          return { name: String(row.name || '').trim().toLowerCase(), label: String(row.label || '').trim() || humanize(row.name) };
+        }).filter(function (row) { return row.name; });
+        S.entityMap = {};
+        S.entities.forEach(function (entity) { S.entityMap[entity.name] = entity; });
+        $('#automationEntity').html(entityOptions(String($('#automationEntity').val() || '')));
+      });
+    }
+
+    function loadWhatsappMeta() {
+      return api('/api/sales/whatsapp/integrations').then(function (data) {
+        const rows = arr(data).map(function (row) {
+          return { id: String(row.id || '').trim(), name: String(row.name || '').trim() || 'WhatsApp', status: String(row.status || '').trim(), is_active: row.is_active !== false };
+        }).filter(function (row) { return row.id; });
+        S.whatsapp.integrations = rows;
+        S.whatsapp.enabled = rows.some(function (row) { return row.is_active; });
+      }).catch(function () {
+        S.whatsapp.integrations = [];
+        S.whatsapp.enabled = false;
+      }).then(renderPalette);
+    }
+
+    function loadFields(entityName, scope) {
+      const normalized = String(entityName || '').trim().toLowerCase();
+      const effectiveScope = scope === 'all' ? 'all' : 'writable';
+      if (!normalized) return Promise.resolve([]);
+      if (Array.isArray(S.fieldsByEntity[effectiveScope][normalized])) return Promise.resolve(S.fieldsByEntity[effectiveScope][normalized]);
+      const qs = effectiveScope === 'all' ? '?scope=all' : '';
+      return api('/api/automations/metadata/entities/' + encodeURIComponent(normalized) + '/fields' + qs).then(function (data) {
+        S.fieldsByEntity[effectiveScope][normalized] = arr(data).map(function (row) {
+          return {
+            name: String(row.name || '').trim().toLowerCase(),
+            label: String(row.label || '').trim() || humanize(row.name || ''),
+            dataType: String(row.dataType || '').trim(),
+            writable: row.writable !== false,
+            required: !!row.required,
+            relationEntity: row.relationEntity ? String(row.relationEntity).trim().toLowerCase() : '',
+            relationLabel: row.relationLabel ? String(row.relationLabel).trim() : '',
+            options: Array.isArray(row.options) ? row.options.map(function (opt) { return { value: String(opt.value || '').trim(), label: String(opt.label || '').trim() || String(opt.value || '').trim() }; }) : []
+          };
+        }).filter(function (row) { return row.name; });
+        return S.fieldsByEntity[effectiveScope][normalized];
+      });
+    }
+
+    function fieldByName(entityName, fieldName, scope) {
+      const normalizedEntity = String(entityName || '').trim().toLowerCase();
+      const normalizedField = String(fieldName || '').trim().toLowerCase();
+      const list = S.fieldsByEntity[scope === 'all' ? 'all' : 'writable'][normalizedEntity] || [];
+      return list.find(function (item) { return item.name === normalizedField; }) || null;
+    }
+
+    function fixedValueMarkup(prefix, fieldMeta, value) {
+      if (fieldMeta && fieldMeta.options && fieldMeta.options.length) {
+        return '<select id="' + prefix + 'FixedValue" class="form-control">' + fieldMeta.options.map(function (option) {
+          return '<option value="' + esc(option.value) + '" ' + (String(value || '') === option.value ? 'selected' : '') + '>' + esc(option.label) + '</option>';
+        }).join('') + '</select>';
+      }
+      if (fieldMeta && fieldMeta.relationEntity) {
+        return '<div class="record-lookup-wrap"><input id="' + prefix + 'LookupLabel" class="form-control" value="' + esc(value || '') + '" placeholder="Buscar registro" /><input id="' + prefix + 'LookupId" type="hidden" value="' + esc(value || '') + '" /><div id="' + prefix + 'LookupMenu" class="record-lookup-menu"></div></div>';
+      }
+      return '<input id="' + prefix + 'FixedValue" class="form-control" value="' + esc(value || '') + '" placeholder="Digite o valor" />';
+    }
+
+    function initFixedLookup(prefix, fieldMeta) {
+      if (fieldMeta && fieldMeta.relationEntity) {
+        initLookup('#' + prefix + 'LookupLabel', '#' + prefix + 'LookupId', '#' + prefix + 'LookupMenu', function () { return fieldMeta.relationEntity; });
+      }
+    }
+
+    function readFixedValue(prefix, fieldMeta) {
+      if (fieldMeta && fieldMeta.options && fieldMeta.options.length) return String($('#' + prefix + 'FixedValue').val() || '').trim();
+      if (fieldMeta && fieldMeta.relationEntity) return String($('#' + prefix + 'LookupId').val() || $('#' + prefix + 'LookupLabel').val() || '').trim();
+      return String($('#' + prefix + 'FixedValue').val() || '').trim();
+    }
+
+    function openTrigger() {
+      S.selectedNode = { kind: 'trigger' };
+      const trigger = S.workflow.trigger || { type: 'MANUAL', config: {} };
+      const config = trigger.config || {};
+      const condition = config.condition || {};
+      const entityName = String(config.entityName || $('#automationEntity').val() || '').trim().toLowerCase();
+      openOffcanvas(locale === 'en' ? 'Trigger configuration' : locale === 'es' ? 'Configuracion del trigger' : 'Configuracao do trigger',
+        '<div class="form-group"><label>Tipo</label><select id="cfgTriggerType" class="form-control">' + triggerTypeOptions(trigger.type) + '</select></div>' +
+        '<div id="cfgTriggerEntityWrap" style="display:' + (trigger.type === 'ENTITY_EVENT' ? 'block' : 'none') + ';">' +
+          '<div class="form-group"><label>' + esc(C.entity) + '</label><select id="cfgTriggerEntityName" class="form-control">' + entityOptions(entityName) + '</select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Event' : 'Evento') + '</label><select id="cfgTriggerEventType" class="form-control">' + eventTypeOptions(String(config.eventType || 'CREATE').toUpperCase()) + '</select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Changed field' : locale === 'es' ? 'Campo alterado' : 'Campo alterado') + '</label><select id="cfgTriggerFieldChanged" class="form-control"></select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Condition field' : locale === 'es' ? 'Campo de condicion' : 'Campo da condicao') + '</label><select id="cfgTriggerConditionField" class="form-control"></select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Operator' : locale === 'es' ? 'Operador' : 'Operador') + '</label><select id="cfgTriggerConditionOperator" class="form-control">' + operatorOptions(String(condition.operator || 'EQUALS').toUpperCase()) + '</select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Source' : locale === 'es' ? 'Origen' : 'Origem') + '</label><select id="cfgTriggerConditionSource" class="form-control"><option value="after">after</option><option value="before">before</option></select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Value' : locale === 'es' ? 'Valor' : 'Valor') + '</label><div id="cfgTriggerConditionValueWrap"></div></div>' +
+        '</div>' +
+        '<div id="cfgTriggerScheduleWrap" style="display:' + (trigger.type === 'SCHEDULE' ? 'block' : 'none') + ';">' +
+          '<div class="form-group"><label>Cron</label><input id="cfgTriggerCron" class="form-control" value="' + esc(config.cron || '') + '" placeholder="0 9 * * *" /></div>' +
+          '<div class="form-group"><label>Timezone</label><input id="cfgTriggerTimezone" class="form-control" value="' + esc(config.timezone || 'America/Sao_Paulo') + '" /></div>' +
+        '</div>'
+      );
+      $('#cfgTriggerConditionSource').val(String(condition.source || 'after'));
+      $('#cfgTriggerType').on('change', function () {
+        const value = String($(this).val() || 'MANUAL').toUpperCase();
+        $('#cfgTriggerEntityWrap').toggle(value === 'ENTITY_EVENT');
+        $('#cfgTriggerScheduleWrap').toggle(value === 'SCHEDULE');
+      });
+      loadFields(entityName, 'all').then(function (fields) {
+        const options = '<option value=""></option>' + fields.map(function (field) { return '<option value="' + esc(field.name) + '">' + esc(field.label) + '</option>'; }).join('');
+        $('#cfgTriggerFieldChanged').html('<option value=""></option>' + fields.map(function (field) { return '<option value="' + esc(field.name) + '">' + esc(field.label) + '</option>'; }).join('')).val(String(config.fieldChanged || '').trim().toLowerCase());
+        $('#cfgTriggerConditionField').html(options).val(String(condition.field || '').trim().toLowerCase());
+        function refreshValue() {
+          const fieldMeta = fieldByName(entityName, $('#cfgTriggerConditionField').val(), 'all');
+          const operator = String($('#cfgTriggerConditionOperator').val() || 'EQUALS').toUpperCase();
+          if (['IS_TRUE','IS_FALSE','NOT_EMPTY','IS_EMPTY'].indexOf(operator) >= 0) {
+            $('#cfgTriggerConditionValueWrap').html('');
+            return;
+          }
+          $('#cfgTriggerConditionValueWrap').html(fixedValueMarkup('cfgTriggerCondition', fieldMeta, condition.value));
+          initFixedLookup('cfgTriggerCondition', fieldMeta);
+        }
+        $('#cfgTriggerConditionField,#cfgTriggerConditionOperator').on('change', refreshValue);
+        refreshValue();
+      });
+    }
+
+    function openAction(actionId) {
+      const action = S.workflow.actions.find(function (item) { return item.id === actionId; });
+      if (!action) return;
+      S.selectedNode = { kind: 'action', id: action.id };
+      const config = action.config || {};
+      const actionName = String(config.name || '').trim();
+      let html = '<div class="form-group"><label>' + esc(locale === 'en' ? 'Action name' : locale === 'es' ? 'Nombre de la accion' : 'Nome da acao') + '</label><input id="cfgActionName" class="form-control" value="' + esc(actionName) + '" /></div>' +
+        '<div class="form-group"><label>Tipo</label><input class="form-control" value="' + esc(actionLabel(action.type)) + '" disabled /></div>';
+
+      if (action.type === 'UPDATE_FIELD') {
+        html += '<div class="form-group"><label>' + esc(locale === 'en' ? 'Target table' : locale === 'es' ? 'Tabla destino' : 'Tabela alvo') + '</label><select id="cfgUpdateEntity" class="form-control">' + entityOptions(String(config.entityName || $('#automationEntity').val() || '').trim().toLowerCase()) + '</select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Target record' : locale === 'es' ? 'Registro destino' : 'Registro alvo') + '</label><select id="cfgUpdateTargetMode" class="form-control"><option value="CONTEXT">Contexto</option><option value="LOOKUP">Lookup</option></select></div>' +
+          '<div id="cfgUpdateLookupWrap" class="form-group"><label>Lookup</label><div class="record-lookup-wrap"><input id="cfgUpdateLookup" class="form-control" value="' + esc(config.recordLabel || config.recordId || '') + '" /><input id="cfgUpdateRecordId" type="hidden" value="' + esc(config.recordId || '') + '" /><div id="cfgUpdateMenu" class="record-lookup-menu"></div></div></div>' +
+          '<div class="form-group"><label>Campo</label><select id="cfgUpdateField" class="form-control"></select></div>' +
+          '<div class="form-group"><label>' + esc(locale === 'en' ? 'Value source' : locale === 'es' ? 'Origen del valor' : 'Origem do valor') + '</label><select id="cfgUpdateValueSource" class="form-control"><option value="FIXED">FIXED</option><option value="TRIGGER_FIELD">TRIGGER_FIELD</option><option value="CONTEXT_RECORD_ID">CONTEXT_RECORD_ID</option><option value="TEMPLATE">TEMPLATE</option></select></div>' +
+          '<div class="form-group"><label>Valor</label><div id="cfgUpdateValueWrap"></div></div>';
+      } else if (action.type === 'SEND_EMAIL') {
+        html += '<div class="builder-note">O envio usa o no-reply da Gecom com template simples da Convert Plus.</div><div class="form-group"><label>Para</label><input id="cfgTo" class="form-control" value="' + esc(config.to || '') + '" /></div><div class="form-group"><label>CC</label><input id="cfgCc" class="form-control" value="' + esc(config.cc || '') + '" /></div><div class="form-group"><label>Bcc</label><input id="cfgBcc" class="form-control" value="' + esc(config.bcc || '') + '" /></div><div class="form-group"><label>Assunto</label><input id="cfgSubject" class="form-control" value="' + esc(config.subject || '') + '" /></div><div class="form-group"><label>Body</label><textarea id="cfgBody" class="form-control" rows="8"></textarea></div>';
+      } else if (action.type === 'CREATE_TASK') {
+        html += '<div class="builder-note">CREATE_TASK esta em modo MVP/stub e ainda nao grava tarefa real. O alvo planejado e service_tasks.</div><div class="form-group"><label>Titulo</label><input id="cfgTaskTitle" class="form-control" value="' + esc(config.title || '') + '" /></div><div class="form-group"><label>Descricao</label><textarea id="cfgTaskDescription" class="form-control" rows="4">' + esc(config.description || '') + '</textarea></div>';
+      } else if (action.type === 'WEBHOOK') {
+        html += '<div class="form-group"><label>URL</label><input id="cfgWebhookUrl" class="form-control" value="' + esc(config.url || '') + '" /></div><div class="form-group"><label>Metodo</label><select id="cfgWebhookMethod" class="form-control"><option value="POST">POST</option><option value="PUT">PUT</option><option value="PATCH">PATCH</option></select></div><div class="form-group"><label>Headers JSON</label><textarea id="cfgWebhookHeaders" class="form-control" rows="4">' + esc(j(config.headers || {})) + '</textarea></div><div class="form-group"><label>Body JSON</label><textarea id="cfgWebhookBody" class="form-control" rows="6">' + esc(j(config.body || {})) + '</textarea></div>';
+      } else if (action.type === 'AI_ACTION') {
+        html += '<div class="builder-note">A AI action recebe o contexto do registro e o catalogo do ERP.</div><div class="form-group"><label>Prompt</label><textarea id="cfgAiPrompt" class="form-control" rows="5">' + esc(config.prompt || '') + '</textarea></div><div class="form-group"><label>Instrucoes extras</label><textarea id="cfgAiInstructions" class="form-control" rows="3">' + esc(config.instructions || '') + '</textarea></div><div class="form-group"><label>Output key</label><input id="cfgAiOutputKey" class="form-control" value="' + esc(config.outputKey || 'ai_result') + '" /></div>';
+      } else if (action.type === 'CREATE_REGISTER') {
+        html += '<div class="builder-note">Suporta valores fixos e dinamicos do trigger. Relacoes com a tabela do trigger devem usar {{recordId}} ou campos do payload.</div><div class="form-group"><label>Tabela destino</label><select id="cfgCreateRegisterEntity" class="form-control">' + entityOptions(String(config.entityName || $('#automationEntity').val() || '').trim().toLowerCase()) + '</select></div><div class="form-group"><label>Mapeamentos JSON</label><textarea id="cfgCreateRegisterMappingsJson" class="form-control" rows="8">' + esc(j(config.fieldMappings || [])) + '</textarea></div>';
+      } else if (action.type === 'WHATSAPP') {
+        html += '<div class="form-group"><label>Instancia</label><select id="cfgWhatsappIntegration" class="form-control">' + S.whatsapp.integrations.map(function (row) { return '<option value="' + esc(row.id) + '" ' + (row.id === String(config.integrationId || '') ? 'selected' : '') + '>' + esc(row.name + (row.status ? ' (' + row.status + ')' : '')) + '</option>'; }).join('') + '</select></div><div class="form-group"><label>Modo</label><select id="cfgWhatsappRecipientMode" class="form-control"><option value="MANUAL">MANUAL</option><option value="TRIGGER_FIELD">TRIGGER_FIELD</option><option value="TEMPLATE">TEMPLATE</option></select></div><div class="form-group"><label>Destino</label><div id="cfgWhatsappRecipientWrap"></div></div><div class="form-group"><label>Mensagem</label><textarea id="cfgWhatsappMessage" class="form-control" rows="4">' + esc(config.message || '') + '</textarea></div>';
+      }
+      html += '<hr><button type="button" id="btnDeleteAction" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i> Excluir bloco</button>';
+      openOffcanvas(locale === 'en' ? 'Action configuration' : locale === 'es' ? 'Configuracion de la accion' : 'Configuracao da acao', html);
+      if (action.type === 'SEND_EMAIL') {
+        if ($.fn.summernote) { try { $('#cfgBody').summernote({ height: 180 }); $('#cfgBody').summernote('code', String(config.body_html || config.body || '')); } catch (_e) { $('#cfgBody').val(String(config.body || '')); } } else { $('#cfgBody').val(String(config.body || '')); }
+      }
+    }
+
+    function populateUpdateAction(config) {
+      const entityName = String(config.entityName || $('#automationEntity').val() || '').trim().toLowerCase();
+      loadFields(entityName, 'writable').then(function (fields) {
+        $('#cfgUpdateField').html(fields.length ? fields.map(function (field) { return '<option value="' + esc(field.name) + '">' + esc(field.label) + '</option>'; }).join('') : '<option value="">Sem campos</option>');
+        $('#cfgUpdateField').val(String(config.field || '').trim().toLowerCase());
+        $('#cfgUpdateTargetMode').val(String(config.targetMode || (config.recordId ? 'LOOKUP' : 'CONTEXT')).trim().toUpperCase());
+        $('#cfgUpdateValueSource').val(parseValueBinding(config.value).source);
+        renderUpdateValueEditor(config);
+      });
+      initLookup('#cfgUpdateLookup', '#cfgUpdateRecordId', '#cfgUpdateMenu', function () { return $('#cfgUpdateEntity').val(); });
+      $('#cfgUpdateTargetMode').on('change', function () { $('#cfgUpdateLookupWrap').toggle(String($(this).val() || 'CONTEXT') === 'LOOKUP'); }).trigger('change');
+      $('#cfgUpdateEntity').on('change', function () { populateUpdateAction({ entityName: $(this).val(), field: '', value: '' }); });
+      $('#cfgUpdateField,#cfgUpdateValueSource').on('change', function () { renderUpdateValueEditor(config); });
+    }
+
+    function renderUpdateValueEditor(config) {
+      const entityName = String($('#cfgUpdateEntity').val() || $('#automationEntity').val() || '').trim().toLowerCase();
+      const fieldName = String($('#cfgUpdateField').val() || config.field || '').trim().toLowerCase();
+      const fieldMeta = fieldByName(entityName, fieldName, 'writable');
+      const parsed = parseValueBinding(config.value);
+      const source = String($('#cfgUpdateValueSource').val() || parsed.source || 'FIXED').trim().toUpperCase();
+      let html = '';
+      if (source === 'TRIGGER_FIELD') {
+        const triggerEntity = String((S.workflow.trigger && S.workflow.trigger.config && S.workflow.trigger.config.entityName) || $('#automationEntity').val() || '').trim().toLowerCase();
+        const fields = S.fieldsByEntity.all[triggerEntity] || [];
+        html = '<select id="cfgUpdateDynamicField" class="form-control">' + fields.map(function (field) { return '<option value="' + esc(field.name) + '" ' + (field.name === parsed.dynamicField ? 'selected' : '') + '>' + esc(field.label) + '</option>'; }).join('') + '</select>';
+      } else if (source === 'CONTEXT_RECORD_ID') {
+        html = '<div class="builder-note">Usa o registro que disparou a automacao.</div>';
+      } else if (source === 'TEMPLATE') {
+        html = '<textarea id="cfgUpdateTemplateValue" class="form-control" rows="3">' + esc(parsed.source === 'TEMPLATE' ? parsed.value : (config.value || '')) + '</textarea>';
+      } else {
+        html = fixedValueMarkup('cfgUpdate', fieldMeta, parsed.source === 'FIXED' ? parsed.value : (config.value || ''));
+      }
+      $('#cfgUpdateValueWrap').html(html);
+      initFixedLookup('cfgUpdate', fieldMeta);
+    }
+
+    function renderWhatsappRecipient(config) {
+      const mode = String($('#cfgWhatsappRecipientMode').val() || 'MANUAL').trim().toUpperCase();
+      let html = '';
+      if (mode === 'TRIGGER_FIELD') {
+        const triggerEntity = String((S.workflow.trigger && S.workflow.trigger.config && S.workflow.trigger.config.entityName) || $('#automationEntity').val() || '').trim().toLowerCase();
+        const fields = S.fieldsByEntity.all[triggerEntity] || [];
+        html = '<select id="cfgWhatsappPhoneField" class="form-control">' + fields.map(function (field) { return '<option value="' + esc(field.name) + '" ' + (field.name === String(config.phoneField || '') ? 'selected' : '') + '>' + esc(field.label) + '</option>'; }).join('') + '</select>';
+      } else if (mode === 'TEMPLATE') {
+        html = '<textarea id="cfgWhatsappToTemplate" class="form-control" rows="2">' + esc(String(config.to || '')) + '</textarea>';
+      } else {
+        html = '<input id="cfgWhatsappTo" class="form-control" value="' + esc(String(config.to || '')) + '" />';
+      }
+      $('#cfgWhatsappRecipientWrap').html(html);
+    }
+
+    function saveOffcanvas() {
+      if (!S.selectedNode) return;
+      if (S.selectedNode.kind === 'trigger') {
+        const type = String($('#cfgTriggerType').val() || 'MANUAL').toUpperCase();
+        const config = {};
+        if (type === 'ENTITY_EVENT') {
+          config.entityName = String($('#cfgTriggerEntityName').val() || $('#automationEntity').val() || '').trim().toLowerCase();
+          config.eventType = String($('#cfgTriggerEventType').val() || 'CREATE').toUpperCase();
+          const fieldChanged = String($('#cfgTriggerFieldChanged').val() || '').trim().toLowerCase();
+          if (fieldChanged) config.fieldChanged = fieldChanged;
+          const field = String($('#cfgTriggerConditionField').val() || '').trim().toLowerCase();
+          const operator = String($('#cfgTriggerConditionOperator').val() || '').trim().toUpperCase();
+          if (field && operator) {
+            const fieldMeta = fieldByName(config.entityName, field, 'all');
+            const condition = { source: String($('#cfgTriggerConditionSource').val() || 'after'), field: field, operator: operator };
+            if (['IS_TRUE','IS_FALSE','NOT_EMPTY','IS_EMPTY'].indexOf(operator) < 0) condition.value = readFixedValue('cfgTriggerCondition', fieldMeta);
+            config.condition = condition;
+          }
+        }
+        if (type === 'SCHEDULE') {
+          config.cron = String($('#cfgTriggerCron').val() || '').trim();
+          config.timezone = String($('#cfgTriggerTimezone').val() || 'America/Sao_Paulo').trim() || 'America/Sao_Paulo';
+        }
+        S.workflow.trigger = { type: type, config: config };
+      } else {
+        const action = S.workflow.actions.find(function (item) { return item.id === S.selectedNode.id; });
+        if (!action) return;
+        if (action.type === 'UPDATE_FIELD') {
+          const entityName = String($('#cfgUpdateEntity').val() || '').trim().toLowerCase();
+          const fieldMeta = fieldByName(entityName, $('#cfgUpdateField').val(), 'writable');
+          const source = String($('#cfgUpdateValueSource').val() || 'FIXED').trim().toUpperCase();
+          let value = '';
+          if (source === 'TRIGGER_FIELD') value = compileValueBinding(source, '', String($('#cfgUpdateDynamicField').val() || '').trim());
+          else if (source === 'TEMPLATE') value = compileValueBinding(source, $('#cfgUpdateTemplateValue').val(), '');
+          else if (source === 'CONTEXT_RECORD_ID') value = '{{recordId}}';
+          else value = compileValueBinding(source, readFixedValue('cfgUpdate', fieldMeta), '');
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), entityName: entityName, targetMode: String($('#cfgUpdateTargetMode').val() || 'CONTEXT').trim().toUpperCase(), recordId: String($('#cfgUpdateRecordId').val() || '').trim(), recordLabel: String($('#cfgUpdateLookup').val() || '').trim(), field: String($('#cfgUpdateField').val() || '').trim().toLowerCase(), valueSource: source, value: value };
+        } else if (action.type === 'SEND_EMAIL') {
+          const body = $('#cfgBody').data('summernote') ? String($('#cfgBody').summernote('code') || '').trim() : String($('#cfgBody').val() || '').trim();
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), to: String($('#cfgTo').val() || '').trim(), cc: String($('#cfgCc').val() || '').trim(), bcc: String($('#cfgBcc').val() || '').trim(), subject: String($('#cfgSubject').val() || '').trim(), body: body, body_html: body };
+        } else if (action.type === 'CREATE_TASK') {
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), title: String($('#cfgTaskTitle').val() || '').trim(), description: String($('#cfgTaskDescription').val() || '').trim() };
+        } else if (action.type === 'WEBHOOK') {
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), url: String($('#cfgWebhookUrl').val() || '').trim(), method: String($('#cfgWebhookMethod').val() || 'POST').trim().toUpperCase(), headers: parseJson($('#cfgWebhookHeaders').val()), body: parseJson($('#cfgWebhookBody').val()) };
+        } else if (action.type === 'AI_ACTION') {
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), prompt: String($('#cfgAiPrompt').val() || '').trim(), instructions: String($('#cfgAiInstructions').val() || '').trim(), outputKey: String($('#cfgAiOutputKey').val() || 'ai_result').trim() || 'ai_result' };
+        } else if (action.type === 'CREATE_REGISTER') {
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), entityName: String($('#cfgCreateRegisterEntity').val() || '').trim().toLowerCase(), fieldMappings: (function () { try { const parsed = JSON.parse(String($('#cfgCreateRegisterMappingsJson').val() || '[]')); return Array.isArray(parsed) ? parsed : []; } catch (_e) { return []; } })() };
+        } else if (action.type === 'WHATSAPP') {
+          const mode = String($('#cfgWhatsappRecipientMode').val() || 'MANUAL').trim().toUpperCase();
+          let to = '';
+          let phoneField = '';
+          if (mode === 'TRIGGER_FIELD') { phoneField = String($('#cfgWhatsappPhoneField').val() || '').trim(); to = phoneField ? triggerTokenForField(phoneField) : ''; }
+          else if (mode === 'TEMPLATE') to = String($('#cfgWhatsappToTemplate').val() || '').trim();
+          else to = String($('#cfgWhatsappTo').val() || '').trim();
+          action.config = { name: String($('#cfgActionName').val() || '').trim(), integrationId: String($('#cfgWhatsappIntegration').val() || '').trim(), recipientMode: mode, phoneField: phoneField, to: to, message: String($('#cfgWhatsappMessage').val() || '').trim() };
+        }
+      }
+      renderCanvas();
+      closeOffcanvas();
+    }
+
+    function removeAction(actionId) {
+      S.workflow.actions = S.workflow.actions.filter(function (item) { return item.id !== actionId; });
+      if (S.selectedNode && S.selectedNode.kind === 'action' && S.selectedNode.id === actionId) {
+        S.selectedNode = null;
+        closeOffcanvas();
+      }
       renderCanvas();
     }
-    function saveOff(){if(!S.selectedNode)return; if(S.selectedNode.kind==='trigger'){const t=String($('#cfgTriggerType').val()||'MANUAL').toUpperCase(); const c={}; if(t==='ENTITY_EVENT'){c.entityName=String($('#cfgTriggerEntityName').val()||$('#automationEntity').val()||'').toLowerCase(); c.eventType=String($('#cfgTriggerEventType').val()||'CREATE').toUpperCase(); const f=String($('#cfgTriggerFieldChanged').val()||'').trim(); if(f)c.fieldChanged=f;} if(t==='SCHEDULE'){const cron=String($('#cfgTriggerCron').val()||'').trim(); const tz=String($('#cfgTriggerTimezone').val()||'').trim(); if(cron)c.cron=cron; if(tz)c.timezone=tz;} S.workflow.trigger={type:t,config:c};}
-      if(S.selectedNode.kind==='action'){const a=S.workflow.actions.find(x=>x.id===S.selectedNode.id); if(!a)return; if(a.type==='UPDATE_FIELD')a.config={entityName:String($('#cfgUpdateEntity').val()||$('#automationEntity').val()||'').toLowerCase(),recordId:String($('#cfgUpdateRecordId').val()||'').trim(),recordLabel:String($('#cfgUpdateLookup').val()||'').trim(),field:String($('#cfgFieldSelect').val()||'').toLowerCase(),value:String($('#cfgValue').val()||'').trim()}; else if(a.type==='SEND_EMAIL'){const b=$('#cfgBody').data('summernote')?String($('#cfgBody').summernote('code')||'').trim():String($('#cfgBody').val()||'').trim(); a.config={to:String($('#cfgTo').val()||'').trim(),cc:String($('#cfgCc').val()||'').trim(),bcc:String($('#cfgBcc').val()||'').trim(),subject:String($('#cfgSubject').val()||'').trim(),body:b,body_html:b};} else if(a.type==='WEBHOOK')a.config={url:String($('#cfgWebhookUrl').val()||'').trim(),method:String($('#cfgWebhookMethod').val()||'POST').toUpperCase(),headers:parseJson($('#cfgWebhookHeaders').val()),body:parseJson($('#cfgWebhookBody').val())}; else if(a.type==='CREATE_TASK')a.config={title:String($('#cfgTaskTitle').val()||'').trim(),description:String($('#cfgTaskDescription').val()||'').trim()}; else if(a.type==='AI_ACTION')a.config={prompt:String($('#cfgAiPrompt').val()||'').trim(),outputKey:String($('#cfgAiOutputKey').val()||'ai_result').trim()};}
-      renderCanvas(); closeOff();
+
+    function reorderActionsFromDom() {
+      const ids = $('#workflowActionsList .workflow-action-card').map(function () { return String($(this).data('action-id') || ''); }).get();
+      const map = new Map(S.workflow.actions.map(function (action) { return [action.id, action]; }));
+      S.workflow.actions = ids.map(function (id) { return map.get(id); }).filter(Boolean);
+      renderCanvas();
     }
-    function removeAction(id){const before=S.workflow.actions.length; S.workflow.actions=S.workflow.actions.filter(a=>a.id!==id); if(S.workflow.actions.length<before){if(S.selectedNode?.kind==='action'&&S.selectedNode.id===id){S.selectedNode=null; closeOff();} renderCanvas();}}
-    function setupSortables(){new Sortable(document.getElementById('paletteActions'),{group:{name:'actions',pull:'clone',put:false},sort:false,animation:120}); new Sortable(document.getElementById('workflowActionsList'),{group:{name:'actions',pull:true,put:true},animation:150,onAdd:function(evt){const fromPalette=evt.from&&evt.from.id==='paletteActions'; if(fromPalette){const type=String(evt.item?.dataset?.actionType||'').toUpperCase(); evt.item.remove(); if(type){const a={id:uuid(),type,config:defaultConfig(type)}; S.workflow.actions.splice(Math.max(0,Number(evt.newIndex||0)),0,a); renderCanvas(); openAction(a.id);} return;} const ids=$('#workflowActionsList .workflow-action-card').map(function(){return String($(this).data('action-id')||'');}).get(); const map=new Map(S.workflow.actions.map(a=>[a.id,a])); S.workflow.actions=ids.map(id=>map.get(id)).filter(Boolean); renderCanvas();},onUpdate:function(){const ids=$('#workflowActionsList .workflow-action-card').map(function(){return String($(this).data('action-id')||'');}).get(); const map=new Map(S.workflow.actions.map(a=>[a.id,a])); S.workflow.actions=ids.map(id=>map.get(id)).filter(Boolean); renderCanvas();}});}
-    async function loadAutomation(){const row=await api('/api/automations/'+encodeURIComponent(automationId)); S.automation=row; S.workflow=normWorkflow(row?.workflow_json||{}); const e=String(row?.entity_name||'leads').toLowerCase(); $('#automationName').val(row?.name||''); $('#automationEntity').html(entityOpts(e)).val(e); $('#automationDescription').val(row?.description||''); renderCanvas(); $('#btnToggleActive').text(row?.is_active?'Desativar':'Ativar').toggleClass('btn-warning',!!row?.is_active).toggleClass('btn-info',!row?.is_active); initLookup('#manualRecordLookup','#manualRecordId','#manualRecordMenu',()=>$('#automationEntity').val());}
-    async function saveAutomation(showMsg){if(!S.automation)return; if(String(S.workflow?.trigger?.type||'').toUpperCase()==='ENTITY_EVENT'){S.workflow.trigger.config=Object.assign({},S.workflow.trigger.config||{},{entityName:String($('#automationEntity').val()||'leads').toLowerCase()});} const p={name:String($('#automationName').val()||'').trim(),description:String($('#automationDescription').val()||'').trim()||null,entity_name:String($('#automationEntity').val()||'leads').toLowerCase(),is_active:!!S.automation.is_active,workflow_json:S.workflow}; const up=await api('/api/automations/'+encodeURIComponent(automationId),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)}); S.automation=up; S.workflow=normWorkflow(up?.workflow_json||S.workflow); renderCanvas(); $('#btnToggleActive').text(up?.is_active?'Desativar':'Ativar').toggleClass('btn-warning',!!up?.is_active).toggleClass('btn-info',!up?.is_active); if(showMsg)window.alert('Automação salva com sucesso.');}
-    async function toggleActive(){S.automation.is_active=!S.automation.is_active; await saveAutomation(false);}
-    async function executeNow(){const recordId=String($('#manualRecordId').val()||'').trim(); const out=await api('/api/automations/'+encodeURIComponent(automationId)+'/execute',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({record_id:recordId||undefined,payload:{source:'builder'}})}); await loadLogs(); window.alert('Execução concluída com status: '+String(out?.status||'-'));}
-    async function loadLogs(){const qs=new URLSearchParams(); const st=String($('#logStatusFilter').val()||'').trim(); const from=String($('#logFromFilter').val()||'').trim(); const to=String($('#logToFilter').val()||'').trim(); const search=String($('#logSearchFilter').val()||'').trim(); if(st)qs.set('status',st); if(from)qs.set('from',from); if(to)qs.set('to',to); if(search)qs.set('search',search); qs.set('limit','200'); const rows=arr(await api('/api/automations/'+encodeURIComponent(automationId)+'/executions?'+qs.toString())); S.logs=rows; const s=search.toLowerCase(); const f=s?rows.filter(r=>String(r?.error_message||'').toLowerCase().includes(s)||j(r?.input_payload||{}).toLowerCase().includes(s)||j(r?.output_payload||{}).toLowerCase().includes(s)):rows; $('#automationLogsBody').html(f.length?f.map(r=>`<tr><td>${esc(fmtDate(r.executed_at))}</td><td>${statusLabel(r.status)}</td><td>${esc(r.error_message||'-')}</td><td><pre style="white-space:pre-wrap;max-width:280px;">${esc(j(r.input_payload||{}))}</pre></td><td><pre style="white-space:pre-wrap;max-width:280px;">${esc(j(r.output_payload||{}))}</pre></td></tr>`).join(''):'<tr><td colspan="5" class="text-center">Nenhum log encontrado.</td></tr>');}
-    function saveCreateRegister(){const id=String(S.createRegisterActionId||'').trim(); const a=S.workflow.actions.find(x=>x.id===id); if(!a)return; const e=String($('#createRegisterEntity').val()||'').toLowerCase(); const map=$('#createRegisterMappingsBody .js-cr-row').map(function(){return{field:String($(this).find('.js-cr-field').val()||'').toLowerCase(),value:String($(this).find('.js-cr-value').val()||'').trim()};}).get().filter(x=>x.field); a.config={entityName:e,fieldMappings:map}; $('#createRegisterModal').modal('hide'); renderCanvas();}
-    function addCreateRegisterRow(){fields(String($('#createRegisterEntity').val()||'')).then(fs=>{const opts=(fs.map(f=>`<option value="${esc(f.name)}">${esc(f.label||f.name)}</option>`).join(''))||'<option value="">Sem campos</option>'; $('#createRegisterMappingsBody').append(`<div class="create-register-row js-cr-row"><select class="form-control js-cr-field">${opts}</select><input class="form-control js-cr-value" placeholder="Valor" /><button type="button" class="btn btn-danger btn-sm js-remove-cr-row"><i class="fa fa-trash"></i></button></div>`);}).catch(()=>{});}
-    $(document).on('click','#workflowTriggerCard',()=>openTrigger());
-    $(document).on('click','.workflow-action-card',function(){const id=String($(this).data('action-id')||'').trim(); if(id)openAction(id);});
-    $(document).on('click','.js-delete-action',async function(ev){ev.preventDefault();ev.stopPropagation(); const id=String($(this).data('action-id')||'').trim(); if(!id)return; const ok=await window.confirm('Excluir este bloco de ação do fluxo?'); if(ok)removeAction(id);});
-    $(document).on('click','#btnDeleteAction',async function(){if(!(S.selectedNode?.kind==='action'))return; const ok=await window.confirm('Excluir este bloco de ação do fluxo?'); if(ok)removeAction(S.selectedNode.id);});
-    $(document).on('click','.js-remove-cr-row',function(){if($('#createRegisterMappingsBody .js-cr-row').length>1)$(this).closest('.js-cr-row').remove();});
-    $('#createRegisterEntity').on('change',function(){const rows=$('#createRegisterMappingsBody .js-cr-row').map(function(){return{field:String($(this).find('.js-cr-field').val()||''),value:String($(this).find('.js-cr-value').val()||'')};}).get(); fields(String($(this).val()||'')).then(fs=>{const opts=(fs.map(f=>`<option value="${esc(f.name)}">${esc(f.label||f.name)}</option>`).join(''))||'<option value="">Sem campos</option>'; $('#createRegisterMappingsBody').html(rows.map(r=>`<div class="create-register-row js-cr-row"><select class="form-control js-cr-field">${opts}</select><input class="form-control js-cr-value" value="${esc(r.value||'')}" /><button type="button" class="btn btn-danger btn-sm js-remove-cr-row"><i class="fa fa-trash"></i></button></div>`).join('')); $('#createRegisterMappingsBody .js-cr-row').each(function(i){$(this).find('.js-cr-field').val(String(rows[i]?.field||'').toLowerCase());});}).catch(()=>{});});
-    $(document).ready(function(){ $('#masterHeader').hide(); $('#pageName').text('Builder de Automação'); $('#subpageName').text('Automações').attr('href','/automations'); $('#path').show(); $('#subSecoundPageName').text('Builder').attr('href',window.location.pathname); if(!automationId){window.alert('ID da automação inválido.'); return;} setupSortables(); $('#btnCloseOffcanvas,#automationOverlay').on('click',closeOff); $('#btnSaveOffcanvas').on('click',saveOff); $('#btnAddCreateRegisterField').on('click',addCreateRegisterRow); $('#btnSaveCreateRegister').on('click',saveCreateRegister); $('#btnSaveAutomation').on('click',()=>saveAutomation(true).catch(e=>window.alert(e?.message||'Falha ao salvar automação.'))); $('#btnToggleActive').on('click',()=>toggleActive().catch(e=>window.alert(e?.message||'Falha ao atualizar status.'))); $('#btnExecuteNow').on('click',()=>executeNow().catch(e=>window.alert(e?.message||'Falha ao executar automação.'))); $('#automationEntity').on('change',function(){initLookup('#manualRecordLookup','#manualRecordId','#manualRecordMenu',()=>$('#automationEntity').val()); $('#manualRecordLookup').val(''); $('#manualRecordId').val('');}); $('#btnApplyLogFilters').on('click',()=>loadLogs().catch(e=>window.alert(e?.message||'Falha ao carregar logs.'))); $('#btnClearLogFilters').on('click',function(){$('#logStatusFilter,#logFromFilter,#logToFilter,#logSearchFilter').val(''); loadLogs().catch(e=>window.alert(e?.message||'Falha ao carregar logs.'));}); loadEntities().catch(()=>{$('#automationEntity').html(entityOpts('leads'));}).then(loadAutomation).then(loadLogs).catch(e=>window.alert(e?.message||'Falha ao carregar automação.')); });
+
+    function setupSortables() {
+      new Sortable(document.getElementById('paletteActions'), { group: { name: 'actions', pull: 'clone', put: false }, sort: false, animation: 120 });
+      new Sortable(document.getElementById('workflowActionsList'), {
+        group: { name: 'actions', pull: true, put: true },
+        animation: 150,
+        onAdd: function (evt) {
+          const fromPalette = evt.from && evt.from.id === 'paletteActions';
+          if (fromPalette) {
+            const type = String(evt.item && evt.item.dataset && evt.item.dataset.actionType || '').toUpperCase();
+            const disabled = String(evt.item && evt.item.dataset && evt.item.dataset.disabled || '0') === '1';
+            evt.item.remove();
+            if (!type || disabled) return;
+            const action = { id: uuid(), type: type, config: defaultConfig(type) };
+            S.workflow.actions.splice(Math.max(0, Number(evt.newIndex || 0)), 0, action);
+            renderCanvas();
+            openAction(action.id);
+            if (type === 'UPDATE_FIELD') populateUpdateAction(action.config);
+            if (type === 'WHATSAPP') renderWhatsappRecipient(action.config);
+            return;
+          }
+          reorderActionsFromDom();
+        },
+        onUpdate: function () { reorderActionsFromDom(); }
+      });
+    }
+
+    function loadAutomation() {
+      return api('/api/automations/' + encodeURIComponent(automationId)).then(function (row) {
+        S.automation = row;
+        S.workflow = normalizeWorkflow(row.workflow_json || {});
+        const entityName = String(row.entity_name || 'leads').trim().toLowerCase();
+        $('#automationName').val(row.name || '');
+        $('#automationEntity').html(entityOptions(entityName)).val(entityName);
+        $('#automationDescription').val(row.description || '');
+        $('#btnToggleActive').text(row.is_active ? (locale === 'en' ? 'Deactivate' : locale === 'es' ? 'Desactivar' : 'Desativar') : (locale === 'en' ? 'Activate' : locale === 'es' ? 'Activar' : 'Ativar'))
+          .toggleClass('btn-warning', !!row.is_active)
+          .toggleClass('btn-info', !row.is_active);
+        initLookup('#manualRecordLookup', '#manualRecordId', '#manualRecordMenu', function () { return $('#automationEntity').val(); });
+        return loadFields(entityName, 'all').then(function () { return loadFields(entityName, 'writable'); }).then(renderCanvas);
+      });
+    }
+
+    function saveAutomation(showMessage) {
+      if (!S.automation) return Promise.resolve();
+      const payload = { name: String($('#automationName').val() || '').trim(), description: String($('#automationDescription').val() || '').trim() || null, entity_name: String($('#automationEntity').val() || '').trim().toLowerCase(), is_active: !!S.automation.is_active, workflow_json: S.workflow };
+      return api('/api/automations/' + encodeURIComponent(automationId), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(function (updated) {
+        S.automation = updated;
+        S.workflow = normalizeWorkflow(updated.workflow_json || S.workflow);
+        renderCanvas();
+        if (showMessage) window.alert(C.saveSuccess);
+      });
+    }
+
+    function toggleActive() {
+      if (!S.automation) return Promise.resolve();
+      S.automation.is_active = !S.automation.is_active;
+      return saveAutomation(false);
+    }
+
+    function executeNow() {
+      const recordId = String($('#manualRecordId').val() || '').trim();
+      return api('/api/automations/' + encodeURIComponent(automationId) + '/execute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ record_id: recordId || undefined, payload: { source: 'builder' } }) }).then(function (output) {
+        loadLogs();
+        window.alert((locale === 'en' ? 'Execution completed with status: ' : locale === 'es' ? 'Ejecucion completada con estado: ' : 'Execucao concluida com status: ') + String(output && output.status || '-'));
+      });
+    }
+
+    function loadLogs() {
+      $('#automationLogsBody').html('<tr><td colspan="3" class="text-center">' + esc(C.loading) + '</td></tr>');
+      const qs = new URLSearchParams();
+      if (String($('#logStatusFilter').val() || '').trim()) qs.set('status', String($('#logStatusFilter').val() || '').trim());
+      if (String($('#logFromFilter').val() || '').trim()) qs.set('from', String($('#logFromFilter').val() || '').trim());
+      if (String($('#logToFilter').val() || '').trim()) qs.set('to', String($('#logToFilter').val() || '').trim());
+      if (String($('#logSearchFilter').val() || '').trim()) qs.set('search', String($('#logSearchFilter').val() || '').trim());
+      qs.set('limit', '200');
+      return api('/api/automations/' + encodeURIComponent(automationId) + '/executions?' + qs.toString()).then(function (data) {
+        const rows = arr(data);
+        S.logs = rows;
+        $('#automationLogsBody').html(rows.length ? rows.map(function (row, index) {
+          return '<tr class="js-open-log" data-log-index="' + index + '"><td>' + esc(fmtDate(row.executed_at)) + '</td><td>' + statusLabel(row.status) + '</td><td><div class="automation-log-summary">' + esc(summarizeLog(row)) + '</div>' + renderLogMeta(row) + '</td></tr>';
+        }).join('') : '<tr><td colspan="3" class="text-center">' + esc(C.noLogs) + '</td></tr>');
+      });
+    }
+
+    function applyCopy() {
+      $('#builderPageTitle').text(C.builderTitle);
+      $('#labelAutomationName').text(C.name);
+      $('#labelAutomationEntity').text(C.entity);
+      $('#labelAutomationDescription').text(C.description);
+      $('#automationDescription').attr('placeholder', C.optional);
+      $('#btnSaveAutomationText').text(C.save);
+      $('#btnExecuteNowText').text(C.executeNow);
+      $('#btnBackToAutomations').text(C.back);
+      $('#builderTabLink').text(C.builderTab);
+      $('#logsTabLink').text(C.logsTab);
+      $('#paletteTitle').text(C.palette);
+      $('#paletteTriggerTitle').text(C.trigger);
+      $('#paletteTriggerNote').text(C.triggerOneOnly);
+      $('#paletteActionsTitle').text(C.actions);
+      $('#flowTitle').text(C.flowTitle);
+      $('#flowSubtitle').text(C.flowSubtitle);
+      $('#logsTitle').text(C.logs);
+      $('#logStatusLabel').text(C.status);
+      $('#logFromLabel').text(C.from);
+      $('#logToLabel').text(C.to);
+      $('#logSearchLabel').text(C.search);
+      $('#logSearchFilter').attr('placeholder', C.logSearchPlaceholder);
+      $('#btnApplyLogFilters').text(C.filter);
+      $('#btnRefreshLogs').html('<i class="fa fa-refresh"></i> ' + esc(C.refresh));
+      $('#btnClearLogFilters').text(C.clear);
+      $('#logDateHeader').text(C.dateTime);
+      $('#logStatusHeader').text(C.status);
+      $('#logSummaryHeader').text(C.summary);
+      $('#btnCloseOffcanvas').text(C.close);
+      $('#btnSaveOffcanvas').text(C.saveConfig);
+      $('#automationLogModalTitle').text(C.viewLog);
+      $('#logModalDateLabel').text(C.dateTime);
+      $('#logModalStatusLabel').text(C.status);
+      $('#logModalSummaryLabel').text(C.summary);
+      $('#logModalErrorLabel').text(C.error);
+      $('#logModalInputLabel').text(C.input);
+      $('#logModalOutputLabel').text(C.output);
+      $('#btnCloseLogModal').text(C.close);
+    }
+
+    $(document).on('click', '#workflowTriggerCard', openTrigger);
+    $(document).on('click', '.workflow-action-card', function () { const actionId = String($(this).data('action-id') || '').trim(); if (actionId) { openAction(actionId); const action = S.workflow.actions.find(function (item) { return item.id === actionId; }); if (action && action.type === 'UPDATE_FIELD') populateUpdateAction(action.config); if (action && action.type === 'WHATSAPP') { loadFields($('#automationEntity').val(), 'all').then(function () { renderWhatsappRecipient(action.config); $('#cfgWhatsappRecipientMode').on('change', function () { renderWhatsappRecipient(action.config); }); }); } } });
+    $(document).on('click', '.js-delete-action', function (ev) { ev.preventDefault(); ev.stopPropagation(); const actionId = String($(this).data('action-id') || '').trim(); if (actionId && window.confirm(locale === 'en' ? 'Delete this block?' : locale === 'es' ? 'Eliminar este bloque?' : 'Excluir este bloco?')) removeAction(actionId); });
+    $(document).on('click', '#btnDeleteAction', function () { if (S.selectedNode && S.selectedNode.kind === 'action' && window.confirm(locale === 'en' ? 'Delete this block?' : locale === 'es' ? 'Eliminar este bloque?' : 'Excluir este bloco?')) removeAction(S.selectedNode.id); });
+    $(document).on('click', '.js-open-log', function () { openLogModal(Number($(this).data('log-index'))); });
+
+    $(document).ready(function () {
+      applyCopy();
+      $('#masterHeader').hide();
+      $('#pageName').text(C.builderTitle);
+      $('#subpageName').text(C.actions).attr('href', '/automations');
+      $('#path').show();
+      $('#subSecoundPageName').text(C.builderTitle).attr('href', window.location.pathname);
+      if (!automationId) { window.alert(C.invalidId); return; }
+      setupSortables();
+      $('#btnCloseOffcanvas,#automationOverlay').on('click', closeOffcanvas);
+      $('#btnSaveOffcanvas').on('click', saveOffcanvas);
+      $('#btnSaveAutomation').on('click', function () { saveAutomation(true).catch(function (error) { window.alert((error && error.message) || C.saveFail); }); });
+      $('#btnToggleActive').on('click', function () { toggleActive().catch(function (error) { window.alert((error && error.message) || C.saveFail); }); });
+      $('#btnExecuteNow').on('click', function () { executeNow().catch(function (error) { window.alert((error && error.message) || C.executeFail); }); });
+      $('#automationEntity').on('change', function () { const entityName = String($(this).val() || '').trim().toLowerCase(); loadFields(entityName, 'all').then(function () { return loadFields(entityName, 'writable'); }).then(renderCanvas); initLookup('#manualRecordLookup', '#manualRecordId', '#manualRecordMenu', function () { return $('#automationEntity').val(); }); $('#manualRecordLookup').val(''); $('#manualRecordId').val(''); });
+      $('#btnApplyLogFilters').on('click', function () { loadLogs().catch(function (error) { window.alert((error && error.message) || C.logsFail); }); });
+      $('#btnRefreshLogs').on('click', function () { loadLogs().catch(function (error) { window.alert((error && error.message) || C.logsFail); }); });
+      $('#btnClearLogFilters').on('click', function () { $('#logStatusFilter,#logFromFilter,#logToFilter,#logSearchFilter').val(''); loadLogs().catch(function (error) { window.alert((error && error.message) || C.logsFail); }); });
+      Promise.all([loadEntities(), loadWhatsappMeta()]).then(function () { return loadAutomation(); }).then(function () { return loadLogs(); }).catch(function (error) { window.alert((error && error.message) || C.loadFail); });
+    });
   })();
 </script>

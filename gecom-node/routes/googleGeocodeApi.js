@@ -1,9 +1,25 @@
 const express = require("express");
 
 const router = express.Router();
+const POSTAL_CACHE_TTL_MS = 1000 * 60 * 60 * 6;
+const RATE_LIMIT_WINDOW_MS = 1000 * 60 * 10;
+const RATE_LIMIT_MAX_REQUESTS = 30;
+const postalLookupCache = new Map();
+const postalLookupRateLimit = new Map();
 
 function onlyDigits(value) {
   return String(value || "").replace(/\D/g, "");
+}
+
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function buildFormattedAddress(parts) {
+  return parts
+    .map((value) => normalizeText(value))
+    .filter(Boolean)
+    .join(", ");
 }
 
 async function readJsonSafe(response) {
@@ -35,17 +51,61 @@ async function fetchViaCep(postalCode) {
   if (!response.ok || !data || data.erro) return null;
 
   return {
-    postalCode: String(data.cep || postalCode || "").trim(),
-    street: String(data.logradouro || "").trim(),
+    postalCode: normalizeText(data.cep || postalCode),
+    street: normalizeText(data.logradouro),
     number: "",
-    district: String(data.bairro || "").trim(),
-    city: String(data.localidade || "").trim(),
-    stateUf: String(data.uf || "").trim(),
+    district: normalizeText(data.bairro),
+    city: normalizeText(data.localidade),
+    stateUf: normalizeText(data.uf),
     country: "Brasil",
-    formattedAddress: "",
+    formattedAddress: buildFormattedAddress([
+      data.logradouro,
+      data.bairro,
+      `${data.localidade || ""} ${data.uf || ""}`.trim(),
+      "Brasil",
+    ]),
     placeId: "",
     source: "viacep",
   };
+}
+
+function getClientIp(req) {
+  const forwardedFor = String(req.headers["x-forwarded-for"] || "").split(",")[0];
+  return normalizeText(forwardedFor || req.ip || req.socket?.remoteAddress || "unknown");
+}
+
+function isRateLimited(req) {
+  const now = Date.now();
+  const clientIp = getClientIp(req);
+  const current = postalLookupRateLimit.get(clientIp);
+
+  if (!current || now > current.resetAt) {
+    postalLookupRateLimit.set(clientIp, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  current.count += 1;
+  if (current.count > RATE_LIMIT_MAX_REQUESTS) return true;
+
+  return false;
+}
+
+function readPostalCache(postalCode) {
+  const cached = postalLookupCache.get(postalCode);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    postalLookupCache.delete(postalCode);
+    return null;
+  }
+
+  return cached.payload;
+}
+
+function writePostalCache(postalCode, payload) {
+  postalLookupCache.set(postalCode, {
+    expiresAt: Date.now() + POSTAL_CACHE_TTL_MS,
+    payload,
+  });
 }
 
 router.get("/public/google/geocode/postal", async (req, res) => {
@@ -55,9 +115,24 @@ router.get("/public/google/geocode/postal", async (req, res) => {
       return res.status(400).json({ message: "Validation error. Invalid postalCode." });
     }
 
-    const key = String(process.env.GOOGLE_SERVER_KEY || process.env.GOOGLE_KEY || "").trim();
+    if (isRateLimited(req)) {
+      return res.status(429).json({ message: "Too many postal code lookups. Please try again later." });
+    }
+
+    const cached = readPostalCache(postalCode);
+    if (cached) {
+      return res.status(200).json(cached);
+    }
+
+    const viaCepData = await fetchViaCep(postalCode).catch(() => null);
+    if (viaCepData) {
+      writePostalCache(postalCode, viaCepData);
+      return res.status(200).json(viaCepData);
+    }
+
+    const key = normalizeText(process.env.GOOGLE_SERVER_KEY);
     if (!key) {
-      return res.status(500).json({ message: "Missing GOOGLE_KEY env var." });
+      return res.status(503).json({ message: "Postal code lookup temporarily unavailable." });
     }
 
     const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
@@ -79,12 +154,6 @@ router.get("/public/google/geocode/postal", async (req, res) => {
 
     const status = String(data?.status || "").toUpperCase();
     if (status !== "OK") {
-      // Common in browser-restricted keys used server-side: fallback to ViaCEP.
-      if (status === "REQUEST_DENIED") {
-        const viaCepData = await fetchViaCep(postalCode);
-        if (viaCepData) return res.status(200).json(viaCepData);
-      }
-
       const message = data?.error_message || data?.message || `Google Geocoding status: ${status || "UNKNOWN"}`;
       const code = status === "ZERO_RESULTS" ? 404 : 400;
       return res.status(code).json({ message, status });
@@ -101,7 +170,7 @@ router.get("/public/google/geocode/postal", async (req, res) => {
       pickAddressComponent(components, "administrative_area_level_2", false) ||
       pickAddressComponent(components, "sublocality_level_1", false);
 
-    return res.status(200).json({
+    const payload = {
       postalCode: pickAddressComponent(components, "postal_code", false) || postalCode,
       street: pickAddressComponent(components, "route", false),
       number: pickAddressComponent(components, "street_number", false),
@@ -113,7 +182,11 @@ router.get("/public/google/geocode/postal", async (req, res) => {
       country: pickAddressComponent(components, "country", false),
       formattedAddress: String(result.formatted_address || "").trim(),
       placeId: String(result.place_id || "").trim(),
-    });
+      source: "google",
+    };
+
+    writePostalCache(postalCode, payload);
+    return res.status(200).json(payload);
   } catch (error) {
     console.error("GET /public/google/geocode/postal error:", error);
     return res.status(500).json({ message: "Internal server error" });

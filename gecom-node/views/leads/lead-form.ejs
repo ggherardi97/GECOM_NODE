@@ -1,130 +1,333 @@
 <style>
-  .lead-form-actions { display: flex; justify-content: end; gap: 8px; margin-top: 15px; }
-  .ibox-content .form-group label { font-weight: 600; }
-  .wizard-big.wizard > .content { min-height: 420px !important; }
-  #leadWizardForm .steps ul li a { font-weight: 600; }
+  .lead-form-page .ibox-title {
+    padding: 15px 20px 18px 20px;
+  }
+  .lead-form-page .ibox-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lead-alert {
+    display: none;
+    margin-bottom: 16px;
+  }
+  .lead-alert.is-open {
+    display: block;
+  }
+  .lead-detail-layout {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .lead-detail-layout > [class*="col-"] {
+    display: flex;
+    margin-bottom: 16px;
+  }
+  .lead-card {
+    width: 100%;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    border: 1px solid #e7eaec;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+  }
+  .lead-card-head {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid #edf1f5;
+    background: linear-gradient(135deg, #f9fbff 0%, #eef5fb 100%);
+  }
+  .lead-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #233445;
+  }
+  .lead-card-subtitle {
+    margin-top: 4px;
+    color: #7d8b99;
+    font-size: 12px;
+  }
+  .lead-card-body {
+    padding: 16px 18px 18px;
+  }
+  .lead-form-tabs {
+    margin-bottom: 14px;
+  }
+  .lead-form-tabs > li > a {
+    padding: 8px 12px;
+  }
+  .lead-required {
+    color: #ed5565;
+    margin-left: 4px;
+  }
+  .lead-field-wrap {
+    margin-bottom: 14px;
+  }
+  .lead-field-wrap label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #66788a;
+    margin-bottom: 6px;
+  }
+  .lead-field-wrap textarea.form-control {
+    min-height: 124px;
+    resize: vertical;
+  }
+  .lead-summary-stack {
+    display: grid;
+    gap: 10px;
+  }
+  .lead-summary-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eef5fb;
+    color: #295d8a;
+  }
+  .lead-summary-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .lead-summary-item {
+    padding: 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .lead-summary-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #8a98a8;
+    margin-bottom: 4px;
+  }
+  .lead-summary-value {
+    color: #253645;
+    font-size: 13px;
+    font-weight: 600;
+    word-break: break-word;
+  }
+  .lead-timeline-list {
+    display: grid;
+    gap: 12px;
+  }
+  .lead-timeline-item {
+    position: relative;
+    padding-left: 50px;
+    min-height: 46px;
+  }
+  .lead-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 34px;
+    bottom: -18px;
+    width: 2px;
+    background: #e7eaec;
+  }
+  .lead-timeline-item:last-child::before {
+    display: none;
+  }
+  .lead-timeline-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  }
+  .lead-timeline-content {
+    padding: 10px 12px;
+    border: 1px solid #edf1f5;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .lead-timeline-title {
+    font-weight: 600;
+    color: #223647;
+  }
+  .lead-timeline-meta,
+  .lead-timeline-description {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6d7e8f;
+  }
+  .lead-empty-state {
+    border: 1px dashed #cfd8e3;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    color: #7d8b99;
+    background: #fafcff;
+  }
+  @media (max-width: 991px) {
+    .lead-detail-layout > [class*="col-"] {
+      width: 100%;
+    }
+  }
 </style>
 
-<div class="row animated fadeInRight" style="margin-top: 25px;">
+<div class="row animated fadeInRight lead-form-page" style="margin-top: 25px;">
   <div class="col-lg-12">
     <div class="ibox">
       <div class="ibox-title">
-        <h5><%= t('page.leads.form.title') %></h5>
+        <h5 id="leadPageTitle"><%= t('page.leads.form.title') %></h5>
+        <div class="ibox-tools">
+          <button id="leadBackBtn" type="button" class="btn btn-white btn-sm"><%= t('page.leads.common.cancel') %></button>
+          <button id="leadNewBtn" type="button" class="btn btn-default btn-sm" style="display:none;"><i class="fa fa-plus"></i> <%= t('page.leads.pipeline.newLead') %></button>
+          <button id="leadSaveBtn" type="button" class="btn btn-primary btn-sm"><i class="fa fa-check"></i> <%= t('page.leads.form.save') %></button>
+        </div>
       </div>
       <div class="ibox-content">
-        <div class="lead-form-actions">
-          <button id="leadCancelBtn" type="button" class="btn btn-white"><%= t('page.leads.common.cancel') %></button>
+        <div id="leadMessage" class="alert lead-alert"></div>
+
+        <div class="row lead-detail-layout">
+          <div class="col-lg-5 col-md-6">
+            <div class="lead-card">
+              <div class="lead-card-head">
+                <h4 class="lead-card-title" id="leadFormCardTitle"><%= t('page.leads.form.title') %></h4>
+                <div class="lead-card-subtitle" id="leadFormCardSubtitle"><%= t('page.leads.form.sectionBasic') %></div>
+              </div>
+              <div class="lead-card-body">
+                <ul class="nav nav-tabs lead-form-tabs" id="leadFormTabs">
+                  <li class="active"><a href="#leadTab_main" data-toggle="tab"><%= t('page.leads.form.sectionBasic') %></a></li>
+                  <li><a href="#leadTab_qualification" data-toggle="tab"><%= t('page.leads.form.sectionQualification') %></a></li>
+                  <li><a href="#leadTab_notes" data-toggle="tab"><%= t('page.leads.form.sectionNotes') %></a></li>
+                </ul>
+
+                <form id="leadFormFields">
+                  <div class="tab-content">
+                    <div id="leadTab_main" class="tab-pane active">
+                      <div class="row">
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadName"><%= t('page.leads.columns.name') %><span class="lead-required">*</span></label>
+                          <input id="leadName" type="text" class="form-control" maxlength="255" />
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadType"><%= t('page.leads.form.type') %><span class="lead-required">*</span></label>
+                          <select id="leadType" class="form-control">
+                            <option value="COMPANY"><%= t('page.leads.form.typeCompany') %></option>
+                            <option value="PERSON"><%= t('page.leads.form.typePerson') %></option>
+                          </select>
+                        </div>
+                        <div class="col-md-12 lead-field-wrap">
+                          <label for="leadCompany"><%= t('page.leads.columns.company') %></label>
+                          <input id="leadCompany" type="text" class="form-control" list="leadCompanies" />
+                          <datalist id="leadCompanies"></datalist>
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadFirstName"><%= t('page.leads.form.firstName') %></label>
+                          <input id="leadFirstName" type="text" class="form-control" />
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadLastName"><%= t('page.leads.form.lastName') %></label>
+                          <input id="leadLastName" type="text" class="form-control" />
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadEmail"><%= t('page.leads.columns.email') %></label>
+                          <input id="leadEmail" type="email" class="form-control" />
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadPhone"><%= t('page.leads.columns.phone') %></label>
+                          <input id="leadPhone" type="text" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="leadTab_qualification" class="tab-pane">
+                      <div class="row">
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadStage"><%= t('page.leads.columns.stage') %><span class="lead-required">*</span></label>
+                          <select id="leadStage" class="form-control"></select>
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadStatus"><%= t('page.leads.columns.status') %><span class="lead-required">*</span></label>
+                          <select id="leadStatus" class="form-control"></select>
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadValue"><%= t('page.leads.columns.value') %></label>
+                          <input id="leadValue" type="text" class="form-control" inputmode="decimal" placeholder="0,00" />
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadCurrency"><%= t('page.leads.columns.currency') %></label>
+                          <select id="leadCurrency" class="form-control">
+                            <option value="BRL">BRL</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadOwner"><%= t('page.leads.columns.owner') %></label>
+                          <select id="leadOwner" class="form-control"></select>
+                        </div>
+                        <div class="col-md-6 lead-field-wrap">
+                          <label for="leadSource"><%= t('page.leads.columns.source') %></label>
+                          <select id="leadSource" class="form-control">
+                            <option value="">-</option>
+                            <option value="MANUAL"><%= t('page.leads.form.source.manual') %></option>
+                            <option value="WEBSITE"><%= t('page.leads.form.source.website') %></option>
+                            <option value="INDICATION"><%= t('page.leads.form.source.indication') %></option>
+                            <option value="IMPORT"><%= t('page.leads.form.source.import') %></option>
+                            <option value="OTHER"><%= t('page.leads.form.source.other') %></option>
+                          </select>
+                        </div>
+                        <div class="col-md-12 lead-field-wrap">
+                          <label for="leadNextAction"><%= t('page.leads.columns.nextActionAt') %></label>
+                          <input id="leadNextAction" type="datetime-local" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="leadTab_notes" class="tab-pane">
+                      <div class="row">
+                        <div class="col-md-12 lead-field-wrap">
+                          <label for="leadNotes"><%= t('page.leads.form.notes') %></label>
+                          <textarea id="leadNotes" class="form-control" rows="6"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6">
+            <div class="lead-card">
+              <div class="lead-card-head">
+                <h4 class="lead-card-title" id="leadTimelineTitle"><%= t('page.leads.detail.timeline') %></h4>
+                <div class="lead-card-subtitle" id="leadTimelineSubtitle">O historico aparece aqui apos o primeiro save.</div>
+              </div>
+              <div class="lead-card-body">
+                <div id="leadTimeline"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-12">
+            <div class="lead-card">
+              <div class="lead-card-head">
+                <h4 class="lead-card-title" id="leadSummaryTitle">Resumo</h4>
+                <div class="lead-card-subtitle" id="leadSummarySubtitle">Visao rapida do andamento comercial.</div>
+              </div>
+              <div class="lead-card-body">
+                <div id="leadSummary"></div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <form id="leadWizardForm" class="wizard-big">
-          <h1><%= t('page.leads.form.sectionBasic') %></h1>
-          <fieldset>
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="form-group">
-                  <label for="leadName"><%= t('page.leads.columns.name') %> *</label>
-                  <input id="leadName" type="text" class="form-control" maxlength="255" />
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="form-group">
-                  <label for="leadType"><%= t('page.leads.form.type') %> *</label>
-                  <select id="leadType" class="form-control">
-                    <option value="COMPANY"><%= t('page.leads.form.typeCompany') %></option>
-                    <option value="PERSON"><%= t('page.leads.form.typePerson') %></option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="leadCompany"><%= t('page.leads.columns.company') %></label>
-              <input id="leadCompany" type="text" class="form-control" list="leadCompanies" />
-              <datalist id="leadCompanies"></datalist>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-6 form-group">
-                <label for="leadFirstName"><%= t('page.leads.form.firstName') %></label>
-                <input id="leadFirstName" type="text" class="form-control" />
-              </div>
-              <div class="col-sm-6 form-group">
-                <label for="leadLastName"><%= t('page.leads.form.lastName') %></label>
-                <input id="leadLastName" type="text" class="form-control" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-6 form-group">
-                <label for="leadEmail"><%= t('page.leads.columns.email') %></label>
-                <input id="leadEmail" type="email" class="form-control" />
-              </div>
-              <div class="col-sm-6 form-group">
-                <label for="leadPhone"><%= t('page.leads.columns.phone') %></label>
-                <input id="leadPhone" type="text" class="form-control" />
-              </div>
-            </div>
-          </fieldset>
-
-          <h1><%= t('page.leads.form.sectionQualification') %></h1>
-          <fieldset>
-            <div class="row">
-              <div class="col-sm-6 form-group">
-                <label for="leadStage"><%= t('page.leads.columns.stage') %> *</label>
-                <select id="leadStage" class="form-control"></select>
-              </div>
-              <div class="col-sm-6 form-group">
-                <label for="leadStatus"><%= t('page.leads.columns.status') %> *</label>
-                <select id="leadStatus" class="form-control"></select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-6 form-group">
-                <label for="leadValue"><%= t('page.leads.columns.value') %></label>
-                <input id="leadValue" type="text" class="form-control" inputmode="decimal" placeholder="0,00" />
-              </div>
-              <div class="col-sm-6 form-group">
-                <label for="leadCurrency"><%= t('page.leads.columns.currency') %></label>
-                <select id="leadCurrency" class="form-control">
-                  <option value="BRL">BRL</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-6 form-group">
-                <label for="leadOwner"><%= t('page.leads.columns.owner') %></label>
-                <select id="leadOwner" class="form-control"></select>
-              </div>
-              <div class="col-sm-6 form-group">
-                <label for="leadSource"><%= t('page.leads.columns.source') %></label>
-                <select id="leadSource" class="form-control">
-                  <option value="">-</option>
-                  <option value="MANUAL"><%= t('page.leads.form.source.manual') %></option>
-                  <option value="WEBSITE"><%= t('page.leads.form.source.website') %></option>
-                  <option value="INDICATION"><%= t('page.leads.form.source.indication') %></option>
-                  <option value="IMPORT"><%= t('page.leads.form.source.import') %></option>
-                  <option value="OTHER"><%= t('page.leads.form.source.other') %></option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="leadNextAction"><%= t('page.leads.columns.nextActionAt') %></label>
-              <input id="leadNextAction" type="datetime-local" class="form-control" />
-            </div>
-
-            <hr />
-            <h4><%= t('page.leads.form.sectionNotes') %></h4>
-            <div class="form-group">
-              <label for="leadNotes"><%= t('page.leads.form.notes') %></label>
-              <textarea id="leadNotes" class="form-control" rows="4"></textarea>
-            </div>
-          </fieldset>
-        </form>
       </div>
     </div>
   </div>
@@ -134,4 +337,3 @@
   <script src="/js/common/apiClient.js"></script>
   <script src="/js/leads/lead.form.js"></script>
 <% %>
-

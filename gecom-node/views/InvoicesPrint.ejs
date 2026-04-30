@@ -41,7 +41,9 @@
 
       <div class="no-print" style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px;">
         <button class="btn btn-white" onclick="window.close()"><i class="fa fa-times"></i> <%= t('page.invoicePrint.actions.close') %></button>
-        <button id="btnToggleEdit" class="btn btn-warning" type="button"><i class="fa fa-pencil"></i> <%= t('page.invoicePrint.actions.edit') %></button>
+        <% if (canEditPrint) { %>
+          <button id="btnToggleEdit" class="btn btn-warning" type="button"><i class="fa fa-pencil"></i> <%= t('page.invoicePrint.actions.edit') %></button>
+        <% } %>
         <button id="btnPrint" class="btn btn-primary" type="button"><i class="fa fa-print"></i> <%= t('page.invoicePrint.actions.print') %></button>
       </div>
 
@@ -211,13 +213,15 @@
         isEditing = false;
       }
 
-      btnToggleEdit.addEventListener("click", function () {
-        if (!isEditing) enterEditMode();
-        else applyEdits();
-      });
+      if (btnToggleEdit) {
+        btnToggleEdit.addEventListener("click", function () {
+          if (!isEditing) enterEditMode();
+          else applyEdits();
+        });
+      }
 
       btnPrint.addEventListener("click", function () {
-        if (isEditing) applyEdits();
+        if (isEditing && btnToggleEdit) applyEdits();
         window.print();
       });
     })();

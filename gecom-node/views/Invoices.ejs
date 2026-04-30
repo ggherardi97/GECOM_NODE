@@ -234,6 +234,49 @@ display: none !important;
       .replace(/'/g, "&#039;");
   }
 
+  function stringifyErrorDetail(detail) {
+    if (!detail) return "";
+    if (typeof detail === "string") return detail.trim();
+    if (Array.isArray(detail)) return detail.map((item) => stringifyErrorDetail(item)).filter(Boolean).join(" | ");
+    if (typeof detail === "object") {
+      try { return JSON.stringify(detail); } catch { return ""; }
+    }
+    return String(detail).trim();
+  }
+
+  function buildVisibleErrorMessage(error, fallback) {
+    const base = String(error?.message || fallback || "").trim();
+    const status = Number.isFinite(Number(error?.status)) ? `HTTP ${Number(error.status)}` : "";
+    const detail = stringifyErrorDetail(
+      error?.payload?.details ||
+      error?.payload?.error ||
+      error?.payload?.errors ||
+      error?.payload?.detail
+    );
+    return [base, status, detail].filter(Boolean).join("\n");
+  }
+
+  function createApiError(data, fallback, status) {
+    const message = data?.message || data?.error || fallback;
+    const error = new Error(message);
+    error.status = status;
+    error.payload = data;
+    return error;
+  }
+
+  function resolveInvoiceId(candidate) {
+    return String(
+      candidate?.id ||
+      candidate?.invoice_id ||
+      candidate?.invoiceId ||
+      candidate?.data?.id ||
+      candidate?.data?.invoice_id ||
+      candidate?.invoice?.id ||
+      candidate?.invoice?.invoice_id ||
+      ""
+    ).trim();
+  }
+
   function toNumber(value) {
     const raw = String(value ?? "").trim();
     if (!raw) return 0;
@@ -656,7 +699,7 @@ display: none !important;
       body: JSON.stringify({}),
     });
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok) throw new Error(data?.message || "<%= t('page.invoices.errors.cloneFailed') %>");
+    if (!resp.ok) throw createApiError(data, "<%= t('page.invoices.errors.cloneFailed') %>", resp.status);
     return data;
   }
 
@@ -1319,12 +1362,17 @@ display: none !important;
       btnClone.disabled = true;
       try {
         const created = await cloneInvoiceById(sourceId);
-        const newId = String(created?.id || "").trim();
+        const newId = resolveInvoiceId(created);
         if (!newId) throw new Error("<%= t('page.invoices.errors.cloneNoId') %>");
         window.location.href = `/NewInvoice?id=${encodeURIComponent(newId)}`;
       } catch (err) {
-        console.error("bulk clone error:", err);
-        alert(err?.message || "<%= t('page.invoices.errors.cloneFailed') %>");
+        console.error("bulk clone error:", {
+          sourceId,
+          status: err?.status,
+          payload: err?.payload,
+          error: err,
+        });
+        alert(buildVisibleErrorMessage(err, "<%= t('page.invoices.errors.cloneFailed') %>"));
       } finally {
         btnClone.disabled = false;
       }

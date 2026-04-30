@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Landing page nao encontrada.">
+  <title>Landing Page nao encontrada</title>
+  <link href="/Assets/inspinia/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/Assets/inspinia/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 24%),
+        linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #0f172a;
+    }
+
+    .lp404 {
+      width: min(100%, 720px);
+      padding: 40px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+      text-align: center;
+    }
+
+    .lp404-mark {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      color: #0f172a;
+      background: linear-gradient(135deg, #a7f3d0 0%, #7dd3fc 100%);
+    }
+
+    .lp404 h1 {
+      margin: 0 0 14px;
+      font-size: clamp(32px, 6vw, 52px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .lp404 p {
+      margin: 0 auto 10px;
+      max-width: 520px;
+      color: #475569;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .lp404 code {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #0f172a;
+    }
+
+    .lp404-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .lp404-actions .btn {
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <section class="lp404">
+    <div class="lp404-mark"><i class="fa fa-search"></i></div>
+    <h1>Landing page nao encontrada</h1>
+    <p>
+      Nao achamos uma landing page publicada para este tenant. Se a URL foi enviada por alguem da equipe,
+      vale revisar se a landing ja foi publicada nas configuracoes do tenant.
+    </p>
+    <% if (tenantRef) { %>
+      <p><code><%= tenantRef %></code></p>
+    <% } %>
+    <div class="lp404-actions">
+      <a href="/gecom" class="btn btn-primary">Ver landing da Gecom</a>
+      <a href="/" class="btn btn-default">Ir para login</a>
+    </div>
+  </section>
+</body>
+</html>

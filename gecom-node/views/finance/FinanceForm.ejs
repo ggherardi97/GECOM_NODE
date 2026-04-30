@@ -5,6 +5,87 @@
   .finance-form-tabs { margin-bottom: 12px; }
   .finance-form-tabs > li > a { padding: 8px 12px; }
   .finance-required { color: #ed5565; margin-left: 4px; }
+  .finance-rich-grid { display:block; }
+  .finance-rich-main { width:100%; max-width:none; }
+  .finance-rich-aside { display:none; }
+  .finance-box-grid { margin: 0 -8px; }
+  .finance-box-col { padding:0 8px; margin-bottom:16px; }
+  .finance-box {
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    min-height: 100%;
+    width: 100%;
+  }
+  .finance-box-head {
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+    border-bottom: 1px solid #dbe4ee;
+  }
+  .finance-box-head h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #274257;
+  }
+  .finance-box-body { padding: 16px 18px 8px; }
+  .finance-box-body .row { margin-left: -8px; margin-right: -8px; }
+  .finance-box-body [class*="col-"] { padding-left: 8px; padding-right: 8px; }
+  .finance-box-empty {
+    padding: 18px;
+    border: 1px dashed #d4dce5;
+    border-radius: 10px;
+    color: #788896;
+    background: #fbfdff;
+  }
+  .finance-activity-list {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    max-height:72vh;
+    overflow-y:auto;
+    padding-right:6px;
+  }
+  .finance-activity-list::-webkit-scrollbar { width: 8px; }
+  .finance-activity-list::-webkit-scrollbar-thumb {
+    background:#cdd8e3;
+    border-radius:999px;
+  }
+  .finance-activity-list::-webkit-scrollbar-track { background:#f3f7fb; border-radius:999px; }
+  .finance-activity-item {
+    border: 1px solid #e3e8ef;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: #fff;
+  }
+  .finance-activity-meta {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:12px;
+    color:#7d8c99;
+    margin-bottom:4px;
+  }
+  .finance-activity-title { font-weight:700; color:#274257; }
+  .finance-activity-subtitle { font-size:12px; color:#7d8c99; margin-top:4px; }
+  .finance-activity-badge {
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    padding:4px 8px;
+    border-radius:999px;
+    background:#eef5fb;
+    color:#35617f;
+    margin-bottom:6px;
+  }
+  @media (min-width: 1200px) {
+    .finance-rich-grid.has-aside { display:flex; gap:16px; align-items:flex-start; }
+    .finance-rich-grid.has-aside .finance-rich-main { flex: 0 0 calc(70% - 8px); max-width: calc(70% - 8px); }
+    .finance-rich-grid.has-aside .finance-rich-aside { flex: 0 0 calc(30% - 8px); max-width: calc(30% - 8px); }
+  }
   .finance-invalid {
     border-color: #ed5565 !important;
     box-shadow: 0 0 0 1px rgba(237, 85, 101, 0.12);
@@ -52,18 +133,11 @@
         </div>
       </div>
       <div class="ibox-content">
-        <div class="row">
-          <div class="col-md-8">
+        <div class="finance-rich-grid">
+          <div class="finance-rich-main" id="financeRichMain">
             <div id="financeFormFields"></div>
           </div>
-          <div class="col-md-4">
-            <div class="panel panel-default">
-              <div class="panel-heading"><strong><%= t('page.finance.common.tips') %></strong></div>
-              <div class="panel-body">
-                <p class="text-muted"><%= t('page.finance.common.quickEditHint') %></p>
-              </div>
-            </div>
-          </div>
+          <div class="finance-rich-aside" id="financeAsidePanel"></div>
         </div>
 
         <div id="financePaymentsWrap" style="display:none; margin-top: 20px;">

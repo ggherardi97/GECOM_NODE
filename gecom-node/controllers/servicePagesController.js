@@ -2,6 +2,7 @@
   return {
     pathKey,
     title,
+    titleSingular: options?.titleSingular || null,
     apiPath,
     listPath: options?.listPath || null,
     idField: options?.idField || "id",
@@ -9,6 +10,10 @@
     formFields: options?.formFields || [],
     requiredFields: options?.requiredFields || [],
     rowActions: options?.rowActions || [],
+    detailLinks: options?.detailLinks || options?.rowActions || [],
+    newPageUrl: options?.newPageUrl || null,
+    editPageUrl: options?.editPageUrl || null,
+    kanbanPageUrl: options?.kanbanPageUrl || null,
   };
 }
 
@@ -30,6 +35,8 @@ const incidentChannelOptions = ["EMAIL", "PHONE", "WHATSAPP", "PORTAL", "INTERNA
 
 const servicePages = {
   incidentes: page("incidentes", "Serviço - Incidentes", "/api/service/incidents", {
+    newPageUrl: "/servico/incidentes/ficha",
+    editPageUrl: "/servico/incidentes/ficha?id={id}",
     columns: [
       col("number", "Número"),
       col("title", "Título"),
@@ -40,7 +47,7 @@ const servicePages = {
       col("created_at", "Criado em", "datetime"),
     ],
     formFields: [
-      f("number", "Número", "text", true),
+      f("number", "Número", "text", false),
       f("title", "Título", "text", true),
       f("description", "Descrição", "textarea", false),
       f("status", "Status", "select", false, { options: incidentStatusOptions }),
@@ -57,7 +64,7 @@ const servicePages = {
       f("resolved_at", "Resolvido em", "datetime-local", false),
       f("closed_at", "Fechado em", "datetime-local", false),
     ],
-    requiredFields: ["number", "title", "company_id"],
+    requiredFields: ["title", "company_id"],
   }),
 
   slaPoliticas: page("sla/politicas", "Serviço - SLA / Políticas", "/api/service/sla/policies", {
@@ -311,6 +318,8 @@ const servicePages = {
       col("name", "Nome"),
       col("user.full_name", "Usuário"),
       col("calendar.name", "Calendário"),
+      col("can_receive_cases", "Recebe casos", "boolean"),
+      col("max_open_incidents", "Máx. casos abertos"),
       col("is_active", "Ativo", "boolean"),
       col("capacity_per_day", "Capacidade/dia"),
     ],
@@ -320,6 +329,9 @@ const servicePages = {
       f("calendar_id", "Calendário", "select", false, { lookup: lookup("/api/service/calendars", "id", "name") }),
       f("skills_json", "Skills (JSON)", "textarea", false, { parseAsJson: true }),
       f("capacity_per_day", "Capacidade por dia", "number", false),
+      f("can_receive_cases", "Pode receber casos", "checkbox", false),
+      f("max_open_incidents", "Máximo de casos abertos", "number", false),
+      f("board_color", "Cor no board", "text", false),
       f("is_active", "Ativo", "checkbox", false),
     ],
     requiredFields: ["user_id", "name"],
@@ -396,30 +408,175 @@ const servicePages = {
   }),
 };
 
+const incidentFormPage = {
+  key: "incidents",
+  titleKey: "page.service.incidents.title",
+  gridPath: "/servico/incidentes",
+  detailPath: "/servico/incidentes/ficha",
+};
+
+const incidentGridPage = {
+  key: "incidents",
+  titleKey: "page.service.incidents.title",
+  gridPath: "/servico/incidentes",
+  detailPath: "/servico/incidentes/ficha",
+};
+
+const titleSingularMap = {
+  slaPoliticas: "Política SLA",
+  slaKpis: "KPI SLA",
+  slaInstancias: "Instância SLA",
+  slaInstanciasKpi: "KPI da Instância",
+  slaEventos: "Evento de SLA",
+  filas: "Fila",
+  filasMembros: "Membro da Fila",
+  ativos: "Ativo",
+  assuntos: "Assunto",
+  calendarios: "Calendário",
+  calendariosRegras: "Regra de Calendário",
+  calendariosExcecoes: "Exceção de Calendário",
+  recursos: "Recurso",
+  recursosAgendamentos: "Agendamento",
+  tarefas: "Tarefa",
+  tarefasTipos: "Tipo de Tarefa",
+};
+
+const enumGroupMap = {
+  filas: {
+    columns: { assignment_mode: "queueAssignmentMode" },
+    fields: { assignment_mode: "queueAssignmentMode" },
+  },
+  filasMembros: {
+    columns: { role: "queueMemberRole" },
+    fields: { role: "queueMemberRole" },
+  },
+  ativos: {
+    columns: { status: "assetStatus" },
+    fields: { status: "assetStatus" },
+  },
+  slaKpis: {
+    columns: { kpi_type: "slaKpiType" },
+    fields: { kpi_type: "slaKpiType", start_status: "incidentStatus", stop_status: "incidentStatus" },
+  },
+  slaInstancias: {
+    columns: { status: "slaInstanceStatus" },
+    fields: { status: "slaInstanceStatus" },
+  },
+  slaInstanciasKpi: {
+    columns: { status: "slaInstanceKpiStatus" },
+    fields: { status: "slaInstanceKpiStatus" },
+  },
+  slaEventos: {
+    columns: { event_type: "slaEventType" },
+    fields: { event_type: "slaEventType" },
+  },
+  calendariosRegras: {
+    columns: { day_of_week: "weekday" },
+    fields: { day_of_week: "weekday" },
+  },
+  calendariosExcecoes: {
+    columns: { type: "calendarExceptionType" },
+    fields: { type: "calendarExceptionType" },
+  },
+  recursosAgendamentos: {
+    columns: { status: "appointmentStatus" },
+    fields: { status: "appointmentStatus" },
+  },
+  tarefas: {
+    columns: { type: "taskChannel", status: "taskStatus", priority: "priority" },
+    fields: { type: "taskChannel", status: "taskStatus", priority: "priority" },
+  },
+  tarefasTipos: {
+    columns: { channel: "taskChannel" },
+    fields: { channel: "taskChannel" },
+  },
+};
+
+function applyPageDefaults(key, config) {
+  if (!config) return null;
+  const gridPath = `/servico/${config.pathKey}`;
+  const detailPath = `${gridPath}/ficha`;
+  const enumConfig = enumGroupMap[key] || {};
+
+  const columns = (config.columns || []).map((column) => {
+    const enumGroup = enumConfig.columns?.[column.key];
+    return enumGroup ? Object.assign({}, column, { enumGroup }) : column;
+  });
+
+  const formFields = (config.formFields || []).map((field) => {
+    const enumGroup = enumConfig.fields?.[field.name];
+    const next = Object.assign({}, field);
+    if (enumGroup) next.optionsGroup = enumGroup;
+    return next;
+  });
+
+  return Object.assign({}, config, {
+    key,
+    gridPath,
+    detailPath,
+    titleSingular: config.titleSingular || titleSingularMap[key] || config.title,
+    newPageUrl: config.newPageUrl || detailPath,
+    editPageUrl: config.editPageUrl || `${detailPath}?id={id}`,
+    kanbanPageUrl: config.kanbanPageUrl || (key === "tarefas" ? "/servico/tarefas/kanban" : null),
+    columns,
+    formFields,
+  });
+}
+
+function getPageConfig(key) {
+  return applyPageDefaults(key, servicePages[key] || null);
+}
+
 function render(viewName, key) {
   return (req, res) => {
-    const config = servicePages[key] || null;
+    const config = getPageConfig(key);
     res.render(`servico/${viewName}`, { servicePage: config });
   };
 }
 
+function renderForm(key) {
+  return (req, res) => {
+    const config = getPageConfig(key);
+    res.render("servico/ServiceEntityForm", { servicePage: config });
+  };
+}
+
 module.exports = {
-  incidentes: render("incidentes", "incidentes"),
+  incidentes: (req, res) => res.render("servico/incidentes", { incidentGridPage }),
+  incidenteFicha: (req, res) => res.render("servico/IncidentForm", { incidentPage: incidentFormPage }),
+  agendaBoard: (req, res) => res.render("servico/schedule-board"),
   slaPoliticas: render("sla-politicas", "slaPoliticas"),
+  slaPoliticasFicha: renderForm("slaPoliticas"),
   slaKpis: render("sla-kpis", "slaKpis"),
+  slaKpisFicha: renderForm("slaKpis"),
   slaInstancias: render("sla-instancias", "slaInstancias"),
+  slaInstanciasFicha: renderForm("slaInstancias"),
   slaInstanciasKpi: render("sla-instancias-kpi", "slaInstanciasKpi"),
+  slaInstanciasKpiFicha: renderForm("slaInstanciasKpi"),
   slaEventos: render("sla-eventos", "slaEventos"),
+  slaEventosFicha: renderForm("slaEventos"),
   filas: render("filas", "filas"),
+  filasFicha: renderForm("filas"),
   filasMembros: render("filas-membros", "filasMembros"),
+  filasMembrosFicha: renderForm("filasMembros"),
   ativos: render("ativos", "ativos"),
+  ativosFicha: renderForm("ativos"),
   assuntos: render("assuntos", "assuntos"),
+  assuntosFicha: renderForm("assuntos"),
   calendarios: render("calendarios", "calendarios"),
+  calendariosFicha: renderForm("calendarios"),
   calendariosRegras: render("calendarios-regras", "calendariosRegras"),
+  calendariosRegrasFicha: renderForm("calendariosRegras"),
   calendariosExcecoes: render("calendarios-excecoes", "calendariosExcecoes"),
+  calendariosExcecoesFicha: renderForm("calendariosExcecoes"),
   agendaAtividades: (req, res) => res.render("servico/agenda-atividades"),
   recursos: render("recursos", "recursos"),
+  recursosFicha: renderForm("recursos"),
   recursosAgendamentos: render("recursos-agendamentos", "recursosAgendamentos"),
+  recursosAgendamentosFicha: renderForm("recursosAgendamentos"),
   tarefas: render("tarefas", "tarefas"),
+  tarefasFicha: renderForm("tarefas"),
+  tarefasKanban: (req, res) => res.render("servico/TaskKanban", { servicePage: getPageConfig("tarefas") }),
   tarefasTipos: render("tarefas-tipos", "tarefasTipos"),
+  tarefasTiposFicha: renderForm("tarefasTipos"),
 };

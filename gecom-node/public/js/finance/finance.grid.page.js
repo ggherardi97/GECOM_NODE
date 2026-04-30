@@ -1,5 +1,5 @@
 (function () {
-  const { resources, tt, waitForI18nReady, esc, normalizeArray, toMoney, toDateBr, toDateTimeBr, boolLabel } = window.FinanceResources || {};
+  const { resources, tt, waitForI18nReady, esc, normalizeArray, toMoney, toDateBr, toDateTimeBr, boolLabel, enumLabel } = window.FinanceResources || {};
   const page = window.__financePage || {};
   const config = resources?.[page.key];
 
@@ -24,6 +24,7 @@
       sort: [],
       pageSize: 0,
     },
+    activeViewId: String(config.viewTabs?.[0]?.id || "all"),
   };
 
   function api(url, opts) {
@@ -65,6 +66,11 @@
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .trim();
+  }
+
+  function translateEnumLabel(enumKey, value, fallback) {
+    if (typeof enumLabel === "function") return enumLabel(enumKey, value, fallback);
+    return fallback || value || "";
   }
 
   function isIntegerField(field) {
@@ -248,6 +254,7 @@
   function formatCell(col, value) {
     if (col.format) return col.format(value);
     if (value == null || value === "") return "-";
+    if (col.enumKey) return translateEnumLabel(col.enumKey, value, value);
     if (String(col.key).includes("date") && String(value).includes("T")) return toDateTimeBr(value);
     if (String(col.key).includes("date")) return toDateBr(value);
     if (typeof value === "boolean") return boolLabel(value);
@@ -255,8 +262,31 @@
     return String(value);
   }
 
+  function activeViewConfig() {
+    const tabs = Array.isArray(config.viewTabs) ? config.viewTabs : [];
+    return tabs.find((tab) => String(tab.id || "") === String(state.activeViewId || "")) || tabs[0] || null;
+  }
+
+  function renderViewTabs() {
+    const $host = $("#financeViewTabs");
+    const tabs = Array.isArray(config.viewTabs) ? config.viewTabs : [];
+    if (!$host.length || !tabs.length) {
+      $host.hide().empty();
+      return;
+    }
+    const html = tabs
+      .map((tab) => {
+        const active = String(tab.id || "") === String(state.activeViewId || "") ? "active" : "";
+        return `<button type="button" class="btn btn-white btn-sm ${active}" data-view-id="${esc(tab.id)}">${esc(tt(tab.label, tab.id))}</button>`;
+      })
+      .join("");
+    $host.html(html).show();
+  }
+
   function applyFiltersAndSort() {
     const list = state.rows.filter((row) => {
+      const view = activeViewConfig();
+      if (view?.entryGroup && String(row?.entry_group || "") !== String(view.entryGroup)) return false;
       return Object.entries(state.filters).every(([key, raw]) => {
         const filter = String(raw || "").trim().toLowerCase();
         if (!filter) return true;
@@ -337,7 +367,7 @@
         if (field.type === "select") {
           const options = (field.options || []).map((opt) => {
             const selected = String(raw ?? field.defaultValue ?? "") === String(opt) ? "selected" : "";
-            return `<option value="${esc(opt)}" ${selected}>${esc(opt)}</option>`;
+            return `<option value="${esc(opt)}" ${selected}>${esc(translateEnumLabel(field.enumKey, opt, opt))}</option>`;
           });
           return `<div class="form-group"><label>${esc(label)}</label><select id="${esc(id)}" class="form-control">${options.join("")}</select></div>`;
         }
@@ -804,6 +834,12 @@
   });
 
   $("#btnFinanceRefresh").on("click", loadRows);
+
+  $(document).on("click", "#financeViewTabs [data-view-id]", function () {
+    state.activeViewId = String($(this).data("view-id") || "").trim() || "all";
+    renderViewTabs();
+    renderTable();
+  });
   $("#btnFinanceNew").on("click", function () {
     window.location.href = page.formPath;
   });
@@ -821,6 +857,7 @@
     setupHeaders();
     await loadLookups();
     await loadRows();
+    renderViewTabs();
     await initSavedViews();
   });
 })();

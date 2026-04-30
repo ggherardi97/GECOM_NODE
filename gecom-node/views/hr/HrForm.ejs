@@ -68,8 +68,6 @@
   }
   .hr-related-row-clickable { cursor: pointer; }
   .hr-related-row-clickable:hover { background: #f5f9fc; }
-  #hrFormMainRow.hr-related-mode #hrTipsCol { display: none; }
-  #hrFormMainRow.hr-related-mode #hrFormMainCol { width: 100%; }
 </style>
 
 <div class="row animated fadeInRight" style="margin-top: 25px;">
@@ -87,16 +85,8 @@
       </div>
       <div class="ibox-content">
         <div class="row" id="hrFormMainRow">
-          <div class="col-md-8" id="hrFormMainCol">
+          <div class="col-md-12" id="hrFormMainCol">
             <div id="hrFormFields"></div>
-          </div>
-          <div class="col-md-4" id="hrTipsCol">
-            <div class="panel panel-default">
-              <div class="panel-heading"><strong><%= t('page.hr.common.tips') %></strong></div>
-              <div class="panel-body">
-                <p class="text-muted"><%= t('page.hr.common.quickEditHint') %></p>
-              </div>
-            </div>
           </div>
         </div>
 

@@ -184,9 +184,29 @@
       "actions": {
         "clone": "Clonar invoice"
       },
+      "clone": {
+        "title": "Clonar invoice",
+        "confirmQuestion": "Deseja clonar esta invoice?",
+        "confirmButton": "Clonar"
+      },
+      "modal": {
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "save": "Salvar",
+        "close": "Fechar"
+      },
       "messages": {
         "selectOneToClone": "Selecione apenas 1 invoice para clonar.",
         "selectOneToGenerate": "Selecione apenas 1 invoice para gerar."
+      },
+      "errors": {
+        "loadFailed": "Falha ao carregar invoices.",
+        "updateStatusFailed": "Falha ao atualizar o status do invoice.",
+        "deleteFailed": "Falha ao excluir o invoice.",
+        "cloneFailed": "Falha ao clonar o invoice.",
+        "cloneNoId": "A clonagem foi concluída, mas não retornou ID.",
+        "bulkSendFailed": "Falha ao enviar os invoices.",
+        "bulkDeleteFailed": "Falha ao excluir os invoices."
       },
       "filters": {
         "all": "Todos",
@@ -575,7 +595,8 @@
         "financeReceivables": "Contas a Receber",
         "financePayables": "Contas a Pagar",
         "financeBanks": "Caixa e Bancos",
-        "financeMovements": "Movimentos Bancarios",
+        "financeMovements": "Movimentos Bancários",
+        "financeImports": "Importação Bancária",
         "financeCashFlow": "Fluxo de Caixa",
         "financeCategories": "Categorias Financeiras",
         "financeCostCenters": "Centros de Custo",
@@ -603,6 +624,10 @@
         "poWorkOrders": "Work Orders",
         "poWorkOrderAssignments": "Alocacoes",
         "poWorkOrderAppointments": "Agendamentos",
+        "poProjectStatuses": "Status de projetos",
+        "poDeliverableStatuses": "Status de entregas",
+        "poWorkOrderStatuses": "Status de work orders",
+        "poResourceRoles": "Papeis de recurso",
         "poConfigurations": "Configuracoes"
       },
       "modal": {
@@ -740,7 +765,59 @@
         "title": "Caixa e Bancos"
       },
       "bankMovements": {
-        "title": "Movimentos Bancarios"
+        "title": "Movimentos Bancários"
+      },
+      "imports": {
+        "title": "Importação Bancária",
+        "subtitle": "Importe OFX, CSV ou PDF, revise com IA e aplique no financeiro com segurança.",
+        "uploadTitle": "Novo extrato",
+        "uploadHelp": "Envie um extrato bancário e escolha a conta correta para conciliação.",
+        "jobsTitle": "Importações recentes",
+        "jobsEmpty": "Nenhuma importação realizada ainda.",
+        "tableTitle": "Linhas importadas",
+        "detailsTitle": "Revisão da sugestão",
+        "emptyState": "Selecione uma importação para revisar as linhas e aplicar as sugestões.",
+        "uploadButton": "Importar extrato",
+        "reanalyze": "Reanalisar com IA",
+        "applyApproved": "Aplicar aprovadas",
+        "applyAll": "Aplicar tudo",
+        "approveLine": "Aprovar linha",
+        "saveReview": "Salvar revisão",
+        "fileLabel": "Arquivo",
+        "bankAccountLabel": "Conta bancária",
+        "sourceLabel": "Origem",
+        "statusLabel": "Status",
+        "summaryLines": "Linhas",
+        "summaryCredits": "Entradas",
+        "summaryDebits": "Saídas",
+        "summaryApplied": "Aplicadas",
+        "lineDate": "Data",
+        "lineType": "Tipo",
+        "lineDescription": "Descrição",
+        "lineAmount": "Valor",
+        "lineSuggestion": "Sugestão",
+        "lineConfidence": "Confiança",
+        "lineStatus": "Status",
+        "reviewNote": "Observação da revisão",
+        "matchedReceivable": "Conta a receber",
+        "matchedPayable": "Conta a pagar",
+        "suggestedCategory": "Categoria sugerida",
+        "suggestedCostCenter": "Centro de custo sugerido",
+        "suggestedCompany": "Empresa sugerida",
+        "aiReasoning": "Leitura da IA",
+        "applySuccess": "Importação aplicada com sucesso.",
+        "uploadSuccess": "Extrato importado com sucesso.",
+        "reviewSaved": "Revisão salva.",
+        "noBankAccount": "Selecione a conta bancária.",
+        "noFile": "Selecione um arquivo OFX, CSV ou PDF.",
+        "noLine": "Selecione uma linha para revisar.",
+        "allStatuses": "Todos os status",
+        "allSuggestions": "Todas as sugestões",
+        "filterApproved": "Aprovadas",
+        "filterSuggested": "Sugestões",
+        "filterApplied": "Aplicadas",
+        "filterIgnored": "Ignoradas",
+        "filterError": "Com erro"
       },
       "receivables": {
         "title": "Contas a Receber"
@@ -751,41 +828,66 @@
       "cashFlow": {
         "title": "Fluxo de Caixa Projetado",
         "openingBalance": "Saldo inicial",
-        "openingBalanceHelp": "Saldo acumulado antes do periodo selecionado.",
+        "openingBalanceHelp": "Saldo acumulado antes do período selecionado.",
         "totalIncoming": "Total de entradas",
-        "totalIncomingHelp": "Somatorio de recebimentos previstos no periodo.",
-        "totalOutgoing": "Total de saidas",
-        "totalOutgoingHelp": "Somatorio de pagamentos previstos no periodo.",
+        "totalIncomingHelp": "Somatório de recebimentos previstos no período.",
+        "totalOutgoing": "Total de saídas",
+        "totalOutgoingHelp": "Somatório de pagamentos previstos no período.",
         "closingBalance": "Saldo final",
-        "closingBalanceHelp": "Saldo inicial + entradas - saidas no periodo.",
-        "dailyProjection": "Projecao diaria",
-        "dailyProjectionHelp": "Tabela detalhada do periodo selecionado.",
-        "lineChartTitle": "Linha - proximos 10 dias",
-        "lineChartHelp": "Evolucao de saldo, entradas e saidas para os 10 dias iniciais da projecao.",
-        "paymentMethodsTitle": "Distribuicao por forma de pagamento",
-        "paymentMethodsHelp": "Quantidade de pagamentos por metodo no periodo.",
+        "closingBalanceHelp": "Saldo inicial + entradas - saídas no período.",
+        "dailyProjection": "Projeção diária",
+        "dailyProjectionHelp": "Tabela detalhada do período selecionado.",
+        "lineChartTitle": "Linha - próximos 10 dias",
+        "lineChartHelp": "Evolução de saldo, entradas e saídas para os 10 dias iniciais da projeção.",
+        "paymentMethodsTitle": "Distribuição por forma de pagamento",
+        "paymentMethodsHelp": "Quantidade de pagamentos por método no período.",
         "noPaymentData": "Sem dados",
         "incoming": "Entradas",
         "outgoing": "Saidas",
-        "net": "Liquido",
+        "net": "Líquido",
         "projectedBalance": "Saldo projetado"
       },
+      "boxes": {
+        "basic": "Dados básicos",
+        "relations": "Relacionamentos",
+        "schedule": "Prazos",
+        "relatedActivity": "Movimentações associadas"
+      },
+      "views": {
+        "allPayables": "Todas as despesas",
+        "fixedPayables": "Despesas fixas",
+        "variablePayables": "Despesas variáveis",
+        "personalPayables": "Despesas pessoais",
+        "taxPayables": "Impostos",
+        "transferPayables": "Transferências",
+        "allReceivables": "Todas as receitas",
+        "fixedReceivables": "Receitas fixas",
+        "variableReceivables": "Receitas variáveis",
+        "personalReceivables": "Receitas pessoais",
+        "taxReceivables": "Impostos",
+        "transferReceivables": "Transferências"
+      },
+      "activity": {
+        "bankMovement": "Movimento bancário",
+        "receivable": "Recebimento",
+        "payable": "Pagamento"
+      },
       "tabs": {
-        "basic": "Dados basicos",
+        "basic": "Dados básicos",
         "relations": "Relacionamentos",
         "schedule": "Prazos",
         "amounts": "Valores",
-        "reconciliation": "Conciliacao",
-        "references": "Referencias",
-        "notes": "Observacoes",
-        "settings": "Configuracoes",
+        "reconciliation": "Conciliação",
+        "references": "Referências",
+        "notes": "Observações",
+        "settings": "Configurações",
         "more": "Mais campos"
       },
       "common": {
         "refresh": "Atualizar",
         "new": "Novo",
         "selected": "selecionado(s)",
-        "quickEdit": "Edicao rapida",
+        "quickEdit": "Edição rápida",
         "delete": "Excluir",
         "clearSelection": "Limpar",
         "filter": "Filtrar",
@@ -793,7 +895,7 @@
         "cancel": "Cancelar",
         "back": "Voltar",
         "tips": "Dicas",
-        "quickEditHint": "Use a selecao de linhas no grid para editar ou excluir em lote.",
+        "quickEditHint": "Use a seleção de linhas no grid para editar ou excluir em lote.",
         "payments": "Pagamentos",
         "newPayment": "Novo pagamento",
         "editPayment": "Editar pagamento",
@@ -801,44 +903,121 @@
         "confirmDeleteMany": "Deseja excluir os registros selecionados?",
         "confirmDeletePayment": "Deseja excluir este pagamento?",
         "empty": "Nenhum registro encontrado.",
-        "required": "e obrigatorio",
-        "actions": "Acoes",
+        "required": "é obrigatório",
+        "actions": "Ações",
         "noPayments": "Sem pagamentos.",
         "saveBeforePayments": "Salve primeiro o registro.",
+        "saveBeforeRelated": "Salve o registro para visualizar movimentações e liquidações associadas.",
+        "noRelatedActivity": "Nenhuma transação associada encontrada.",
         "generateFromInvoice": "Gerar por invoice",
         "generate": "Gerar",
         "yes": "Sim",
-        "no": "Nao",
+        "no": "Não",
+        "credit": "Crédito",
+        "debit": "Débito",
         "selectOne": "Selecione exatamente um registro.",
         "lookupPlaceholder": "Clique para ver recentes ou digite para buscar",
         "lookupEmpty": "Nenhum registro encontrado.",
-        "fillRequired": "Preencha os campos obrigatorios"
+        "fillRequired": "Preencha os campos obrigatórios"
+      },
+      "enums": {
+        "financialCategoryKind": {
+          "revenue": "Receita",
+          "expense": "Despesa",
+          "transfer": "Transferência"
+        },
+        "financialAccountType": {
+          "cash": "Caixa",
+          "checking": "Conta corrente",
+          "savings": "Poupança",
+          "investment": "Investimento",
+          "digital_wallet": "Carteira digital"
+        },
+        "financialMovementType": {
+          "credit": "Crédito",
+          "debit": "Débito"
+        },
+        "financialEntryStatus": {
+          "open": "Em aberto",
+          "partial": "Parcial",
+          "paid": "Pago",
+          "overdue": "Em atraso",
+          "canceled": "Cancelado"
+        },
+        "financialEntryGroup": {
+          "fixed": "Fixo",
+          "variable": "Variável",
+          "personal": "Pessoal",
+          "tax": "Imposto",
+          "transfer": "Transferência"
+        },
+        "financialRecurrenceFrequency": {
+          "weekly": "Semanal",
+          "monthly": "Mensal",
+          "yearly": "Anual"
+        },
+        "financialPaymentMethod": {
+          "bank_transfer": "Transferência bancária",
+          "pix": "PIX",
+          "credit_card": "Cartão de crédito",
+          "debit_card": "Cartão de débito",
+          "cash": "Dinheiro",
+          "boleto": "Boleto",
+          "check": "Cheque",
+          "other": "Outro"
+        },
+        "financialImportSuggestionKind": {
+          "create_movement": "Criar movimento",
+          "match_receivable_payment": "Baixar conta a receber",
+          "match_payable_payment": "Baixar conta a pagar",
+          "create_receivable": "Criar conta a receber",
+          "create_payable": "Criar conta a pagar",
+          "transfer": "Transferência",
+          "ignore": "Ignorar"
+        },
+        "financialImportSuggestionStatus": {
+          "suggested": "Sugerida",
+          "approved": "Aprovada",
+          "applied": "Aplicada",
+          "ignored": "Ignorada",
+          "error": "Erro"
+        },
+        "financialImportJobStatus": {
+          "review": "Em revisão",
+          "applied": "Aplicada",
+          "failed": "Falhou"
+        },
+        "financialImportSourceType": {
+          "ofx": "OFX",
+          "csv": "CSV",
+          "pdf": "PDF"
+        }
       },
       "fields": {
-        "code": "Codigo",
+        "code": "Código",
         "name": "Nome",
-        "description": "Descricao",
+        "description": "Descrição",
         "active": "Ativo",
         "kind": "Tipo",
         "costCenter": "Centro de custo",
         "parentCategory": "Categoria pai",
         "bank": "Banco",
-        "agency": "Agencia",
+        "agency": "Agência",
         "accountNumber": "Conta",
         "currency": "Moeda",
         "currentBalance": "Saldo atual",
         "openingBalance": "Saldo inicial",
         "allowNegative": "Permitir saldo negativo",
-        "reconciliationDate": "Data de conciliacao",
+        "reconciliationDate": "Data de conciliação",
         "dateTime": "Data/Hora",
         "type": "Tipo",
         "amount": "Valor",
         "category": "Categoria",
-        "referenceTable": "Tabela de referencia",
-        "referenceId": "ID de referencia",
+        "referenceTable": "Tabela de referência",
+        "referenceId": "ID de referência",
         "reconciled": "Conciliado",
-        "reconciliationNote": "Observacao de conciliacao",
-        "titleNumber": "Titulo",
+        "reconciliationNote": "Observação de conciliação",
+        "titleNumber": "Título",
         "company": "Empresa",
         "dueDate": "Vencimento",
         "originalAmount": "Valor original",
@@ -846,21 +1025,28 @@
         "status": "Status",
         "invoice": "Invoice",
         "document": "Documento",
-        "issueDate": "Emissao",
+        "issueDate": "Emissão",
+        "entryGroup": "Grupo",
         "installmentNumber": "Parcela",
         "installmentTotal": "Total de parcelas",
-        "notes": "Observacoes",
-        "payableNumber": "Titulo",
+        "recurrenceEnabled": "Recorrente",
+        "recurrenceFrequency": "Frequência",
+        "recurrenceInterval": "Intervalo",
+        "recurrenceDayOfMonth": "Dia do mês",
+        "recurrenceOccurrences": "Qtd. de ocorrências",
+        "recurrenceEndDate": "Gerar até",
+        "notes": "Observações",
+        "payableNumber": "Título",
         "paymentDate": "Data do pagamento",
         "paymentMethod": "Forma de pagamento",
-        "bankAccount": "Conta bancaria",
-        "reference": "Referencia",
+        "bankAccount": "Conta bancária",
+        "reference": "Referência",
         "interestAmount": "Juros",
         "discountAmount": "Desconto",
         "feeAmount": "Tarifa",
         "date": "Data",
         "from": "De",
-        "to": "Ate",
+        "to": "Até",
         "accountType": "Tipo de conta",
         "invoiceId": "Invoice ID",
         "intervalDays": "Intervalo (dias)",
@@ -968,6 +1154,7 @@
       },
       "actions": {
         "cloneInvoice": "Clonar invoice",
+        "cloning": "Clonando...",
         "generateInvoice": "Gerar invoice",
         "deleteInvoice": "Excluir fatura",
         "saveInvoice": "Salvar fatura",
@@ -1057,6 +1244,8 @@
         "cancel": "Cancelar"
       },
       "confirm": {
+        "cloneModalTitle": "Clonar fatura",
+        "cloneTitle": "Deseja clonar esta fatura?",
         "deleteModalTitle": "Excluir fatura",
         "deleteTitle": "Tem certeza que deseja excluir esta fatura?"
       },
@@ -1065,6 +1254,8 @@
         "initFail": "Falha ao carregar dados iniciais.",
         "createFail": "Falha ao criar a fatura.",
         "saveFail": "Falha ao salvar a fatura.",
+        "cloneFail": "Falha ao clonar a fatura.",
+        "cloneNoId": "A clonagem foi concluída, mas não retornou ID.",
         "deleteFail": "Falha ao excluir a fatura.",
         "deleteSuccess": "Fatura excluída com sucesso.",
         "companyAndCurrencyRequired": "Empresa e Moeda são obrigatórios.",
@@ -1855,6 +2046,42 @@
         "links": "Relacionamentos",
         "more": "Mais"
       },
+      "enums": {
+        "priority": {
+          "low": "Baixa",
+          "medium": "Média",
+          "high": "Alta"
+        },
+        "milestoneStatus": {
+          "planned": "Planejado",
+          "done": "Concluído",
+          "canceled": "Cancelado"
+        },
+        "checklistItemStatus": {
+          "open": "Aberto",
+          "done": "Concluído",
+          "blocked": "Bloqueado"
+        },
+        "projectStatus": {
+          "planning": "Planejamento",
+          "in_progress": "Em andamento",
+          "done": "Concluído",
+          "canceled": "Cancelado"
+        },
+        "deliverableStatus": {
+          "planned": "Planejada",
+          "in_progress": "Em execução",
+          "delivered": "Entregue",
+          "canceled": "Cancelada"
+        },
+        "workOrderStatus": {
+          "open": "Aberta",
+          "doing": "Em execução",
+          "blocked": "Bloqueada",
+          "done": "Concluída",
+          "canceled": "Cancelada"
+        }
+      },
       "fields": {
         "name": "Nome",
         "code": "Codigo",
@@ -1883,6 +2110,7 @@
         "actualStart": "Inicio real",
         "actualEnd": "Fim real",
         "estimatedHours": "Horas estimadas",
+        "incident": "Incidente",
         "workOrder": "Work order",
         "resource": "Recurso",
         "role": "Papel",

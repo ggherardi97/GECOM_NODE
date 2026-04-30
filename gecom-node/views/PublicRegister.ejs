@@ -722,6 +722,32 @@
       font-size: 12px;
     }
 
+    .register-legal-links {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6a7880;
+      line-height: 1.4;
+    }
+
+    .register-legal-link {
+      color: #1778a7;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    .register-legal-modal-content h5 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .register-legal-modal-content p,
+    .register-legal-modal-content li {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #5f6770;
+    }
+
     @media (max-width: 991px) {
       .hero-title {
         font-size: 34px;
@@ -886,7 +912,7 @@
               onclick="if (window.__openRegisterPlans) { window.__openRegisterPlans(); } else { var hero = document.getElementById('heroSection'); var features = document.getElementById('featuresPublic'); var plans = document.getElementById('plansStage'); if (hero) hero.classList.add('section-hidden'); if (features) features.classList.add('section-hidden'); if (plans) plans.classList.add('is-active'); }">
               Experimentar
             </button>
-            <a href="/LandingPage" class="btn btn-white btn-lg m-l-sm">Ver Detalhes</a>
+            <a href="/gecom" class="btn btn-white btn-lg m-l-sm">Ver Detalhes</a>
           </p>
         </div>
         <div class="col-lg-5">
@@ -1113,6 +1139,12 @@
                         <input id="acceptTermsInput" type="checkbox" />
                         Eu aceito os termos para criação da conta
                       </label>
+                      <div class="register-legal-links">
+                        Ler
+                        <a href="/terms-of-use" class="register-legal-link js-open-register-legal" data-legal-doc="terms">Terms of Use</a>
+                        e
+                        <a href="/privacy-policy" class="register-legal-link js-open-register-legal" data-legal-doc="privacy">Privacy Policy</a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1174,6 +1206,21 @@
       </div>
     </div>
   </section>
+
+  <div class="modal inmodal fade" id="registerLegalModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="registerLegalModalTitle"></h4>
+        </div>
+        <div class="modal-body" id="registerLegalModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-white" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="/Assets/inspinia/js/jquery-3.1.1.min.js"></script>
   <script src="/Assets/inspinia/js/popper.min.js"></script>
@@ -2006,6 +2053,87 @@
       });
 
       window.__publicRegisterHandlersReady = true;
+    })();
+  </script>
+  <script>
+    (function () {
+      if (window.__publicRegisterLegalReady) return;
+      window.__publicRegisterLegalReady = true;
+
+      function normalizeText(value) {
+        return String(value == null ? "" : value).trim();
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function resolveBrandName() {
+        var brand = normalizeText(window.__portalBrand).toLowerCase();
+        if (!brand) {
+          var host = normalizeText(window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+          brand = host.indexOf("portalgecom.log.br") >= 0 ? "gecom" : "convert";
+        }
+        return brand === "gecom" ? "GECOM" : "Convert Plus";
+      }
+
+      function getRegisterLegalDocument(docType) {
+        var brandName = escapeHtml(resolveBrandName());
+        var kind = normalizeText(docType).toLowerCase();
+
+        if (kind === "privacy") {
+          return {
+            title: "Privacy Policy",
+            bodyHtml:
+              '<div class="register-legal-modal-content">' +
+              "<h5>Politica de Privacidade - " + brandName + "</h5>" +
+              "<p>Os dados informados no cadastro sao usados para criar e operar sua conta na plataforma.</p>" +
+              "<p>Aplicamos controles de seguranca e acesso restrito para proteger dados pessoais e empresariais.</p>" +
+              "<p>Nao comercializamos dados. Compartilhamentos ocorrem apenas com parceiros necessarios para operacao do servico.</p>" +
+              "<p>Ultima atualizacao: 11/03/2026.</p>" +
+              "</div>"
+          };
+        }
+
+        return {
+          title: "Terms of Use",
+          bodyHtml:
+            '<div class="register-legal-modal-content">' +
+            "<h5>Termos de Uso - " + brandName + "</h5>" +
+            "<p>Ao concluir o cadastro, voce confirma que os dados enviados sao corretos e que possui autorizacao para usa-los.</p>" +
+            "<p>O uso da plataforma deve respeitar a legislacao vigente e as politicas de seguranca aplicaveis.</p>" +
+            "<p>Planos, periodo de teste e faturamento seguem as condicoes informadas no momento da contratacao.</p>" +
+            "<p>Ultima atualizacao: 11/03/2026.</p>" +
+            "</div>"
+        };
+      }
+
+      function openRegisterLegalModal(docType) {
+        var modalTitle = document.getElementById("registerLegalModalTitle");
+        var modalBody = document.getElementById("registerLegalModalBody");
+        if (!modalTitle || !modalBody) return;
+
+        var doc = getRegisterLegalDocument(docType);
+        modalTitle.textContent = doc.title;
+        modalBody.innerHTML = doc.bodyHtml;
+        $("#registerLegalModal").modal("show");
+      }
+
+      document.addEventListener("click", function (event) {
+        var target = event && event.target;
+        if (!target || typeof target.closest !== "function") return;
+
+        var link = target.closest(".js-open-register-legal");
+        if (!link) return;
+
+        event.preventDefault();
+        openRegisterLegalModal(link.getAttribute("data-legal-doc"));
+      });
     })();
   </script>
 </body>

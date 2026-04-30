@@ -95,7 +95,10 @@ router.get('/automations/metadata/entities/:entityName/fields', async (req, res)
 
     return await proxyJson(req, res, {
       method: 'GET',
-      url: backendUrl(`/automations/metadata/entities/${encodeURIComponent(entityName)}/fields`),
+      url: withQuery(
+        backendUrl(`/automations/metadata/entities/${encodeURIComponent(entityName)}/fields`),
+        req.query,
+      ),
     });
   } catch (error) {
     console.error('GET /api/automations/metadata/entities/:entityName/fields error:', error);
@@ -130,6 +133,19 @@ router.post('/automations', async (req, res) => {
     });
   } catch (error) {
     console.error('POST /api/automations error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.post('/automations/ai/chat', async (req, res) => {
+  try {
+    return await proxyJson(req, res, {
+      method: 'POST',
+      url: backendUrl('/automations/ai/chat'),
+      withBody: true,
+    });
+  } catch (error) {
+    console.error('POST /api/automations/ai/chat error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });

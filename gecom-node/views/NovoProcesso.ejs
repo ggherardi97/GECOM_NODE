@@ -4,15 +4,19 @@
   }
 
   .wizard-big.wizard > .content {
-    min-height: 420px !important;
+    min-height: 620px !important;
+    overflow: visible !important;
   }
-.wizard > .content > .body {
+
+  .wizard > .content > .body {
     float: left;
     position: absolute;
     width: 100% !important;
-    height: 95%;
-    padding: 2.5%;
-}
+    height: auto !important;
+    min-height: 560px;
+    padding: 18px 16px 10px;
+    overflow-y: visible !important;
+  }
   .muted {
     color: #888;
     font-size: 12px;
@@ -46,6 +50,10 @@
     position: relative;
   }
 
+  .table-responsive {
+    overflow-y: visible !important;
+  }
+
   .btn-xs2 {
     padding: 4px 8px;
     font-size: 12px;
@@ -61,7 +69,12 @@
     padding-right: 10px;
   }
 
-  /* ✅ Fix: typeahead dropdown position/z-index inside wizard/table */
+  .select2-container--open,
+  .select2-dropdown {
+    z-index: 200000 !important;
+  }
+
+  /* Fix: typeahead dropdown position/z-index inside wizard/table */
   .typeahead.dropdown-menu {
     z-index: 999999 !important;
     max-height: 240px;
@@ -75,7 +88,7 @@
     max-width: 100%;
   }
 
-  /* ✅ Dropzone usability */
+  /* Dropzone usability */
   #dropzoneForm {
     min-height: 160px;
     cursor: pointer;
@@ -85,9 +98,149 @@
     margin-top: 10px;
   }
 
-  /* List of files */
-  .proc-doc-row {
-    margin-bottom: 8px;
+  .proc-doc-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .proc-doc-breadcrumb {
+    font-size: 12px;
+    color: #777;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f4f6f8;
+  }
+
+  .proc-doc-draft-list .list-group-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .proc-doc-draft-list {
+    list-style: none;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  .proc-doc-draft-list > li {
+    list-style: none;
+  }
+
+  .proc-doc-panel {
+    border: 1px solid #e5e6e7;
+    border-radius: 6px;
+    background: #fff;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .proc-doc-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .proc-doc-summary-main {
+    font-size: 13px;
+    color: #4a4a4a;
+  }
+
+  .proc-doc-summary-badge {
+    background: #e7f7f4;
+    color: #0b8f77;
+    border: 1px solid #b7ece2;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #dropzoneForm {
+    border: 2px dashed #9bcad9;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #f9fdff 0%, #f4f8fb 100%);
+    min-height: 84px;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #dropzoneForm.dz-drag-hover {
+    border-color: #17a689;
+    background: #f0fbf8;
+  }
+
+  #dropzoneForm .dz-message {
+    margin: 0;
+    text-align: center;
+    padding: 10px 8px;
+    line-height: 1.25;
+  }
+
+  #dropzoneForm .dz-message strong {
+    font-size: 21px;
+  }
+
+  #dropzoneForm .dz-message .muted {
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  #procDocNotice {
+    padding: 8px 12px;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .proc-doc-list-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .proc-doc-list-actions .btn {
+    margin: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+  }
+
+  .proc-doc-draft-list .list-group-item {
+    padding: 10px 12px;
+  }
+
+  .proc-doc-panel .btn.btn-xs {
+    min-width: 30px;
+  }
+
+  @media (max-width: 768px) {
+    .wizard-big.wizard > .content {
+      min-height: 700px !important;
+    }
+
+    .proc-doc-summary {
+      align-items: flex-start;
+    }
+  }
+
+  .proc-doc-item-sub {
+    margin-top: 2px;
+  }
+
+  .proc-doc-fieldset {
+    overflow: visible !important;
+    padding-bottom: 8px;
   }
 </style>
 
@@ -98,7 +251,7 @@
 <link href="../Assets/inspinia/css/plugins/select2/select2-bootstrap.min.css" rel="stylesheet">
 <link href="../Assets/inspinia/css/plugins/datapicker/datepicker3.css" rel="stylesheet">
 
-<!-- ✅ Dropzone CSS (sem isso o clique/drag costuma ficar “esquisito”) -->
+<!-- Dropzone CSS (sem isso o clique/drag costuma ficar esquisito) -->
 <link href="../Assets/inspinia/css/plugins/dropzone/basic.css" rel="stylesheet">
 <link href="../Assets/inspinia/css/plugins/dropzone/dropzone.css" rel="stylesheet">
 <% %>
@@ -158,8 +311,8 @@
                     </div>
 
                     <div class="form-group col-lg-6">
-                      <label>Contato do Cliente *</label>
-                      <select id="primary_contact_id" class="form-control required"></select>
+                      <label>Contato do Cliente</label>
+                      <select id="primary_contact_id" class="form-control"></select>
                       <div class="muted" id="contactHelp" style="margin-top:4px; display:none;">
                         Selecione uma empresa para listar os contatos.
                       </div>
@@ -200,7 +353,7 @@
                 </div>
               </div>
 
-              <div class="table-responsive" style="height: 100%;">
+              <div class="table-responsive" style="height: 435px !important;">
                 <table class="table table-bordered table-striped transport-table">
                   <thead>
                     <tr>
@@ -227,72 +380,65 @@
 
             <!-- STEP 3 -->
             <h1>Documentos</h1>
-            <fieldset style="overflow: auto;">
-              <h3>Upload de documentos</h3>
-              <p class="muted">Anexe até <strong>5 arquivos</strong>. O upload será feito ao finalizar.</p>
+            <fieldset class="proc-doc-fieldset">
+              <h3>Documentos do processo</h3>
+              <p class="muted">Crie pastas, links e documentos. Tudo será associado à pasta do processo ao finalizar.</p>
 
-              <div class="row">
-                <div class="col-lg-6">
-                  <button type="button" class="btn btn-primary" id="btnPickProcDocs">
-                    <i class="fa fa-paperclip"></i> Selecionar arquivos
+              <div class="proc-doc-toolbar">
+                <button type="button" class="btn btn-default btn-xs" id="btnProcDocBack" style="display:none;">
+                  <i class="fa fa-arrow-left"></i> Voltar pasta
+                </button>
+                <div class="btn-group">
+                  <button data-toggle="dropdown" class="btn btn-primary btn-xs dropdown-toggle">
+                    <i class="fa fa-plus"></i> Adicionar <span class="caret"></span>
                   </button>
-                  <div class="muted" style="margin-top:6px;">Você também pode arrastar os arquivos para a área abaixo.</div>
+                  <ul class="dropdown-menu">
+                    <li><a href="#" id="btnProcNewFolder"><i class="fa fa-folder"></i> Nova pasta</a></li>
+                    <li><a href="#" id="btnProcUploadDoc"><i class="fa fa-upload"></i> Upload documento</a></li>
+                    <li><a href="#" id="btnProcNewLink"><i class="fa fa-link"></i> Link</a></li>
+                  </ul>
                 </div>
-
-                <div class="col-lg-6">
-                  <div id="procDocUploadProgress" style="display:none; margin-top: 6px;">
-                    <div class="progress progress-striped active" style="margin-bottom:6px;">
-                      <div id="procDocUploadProgressBar" class="progress-bar" style="width: 0%"></div>
-                    </div>
-                    <small id="procDocUploadProgressText" class="text-muted"></small>
-                  </div>
-                </div>
+                <span class="proc-doc-breadcrumb" id="procDocCurrentFolder">Raiz do processo</span>
               </div>
 
-              <div class="ibox-content" style="padding:0; margin-top:12px;">
-                <div class="dropzone dz-clickable" id="dropzoneForm" style="display: none;">
+              <div class="proc-doc-panel">
+                <div class="proc-doc-summary">
+                  <div class="proc-doc-summary-main" id="procDocSummary">
+                    Você está em <strong>Raiz do processo</strong>.
+                  </div>
+                  <div class="proc-doc-summary-badge" id="procDocPendingFiles">0/5 arquivos pendentes</div>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="btnPickProcDocs">
+                  <i class="fa fa-paperclip"></i> Selecionar arquivos
+                </button>
+
+                <div class="alert alert-info" id="procDocNotice" style="display:none; margin-top:10px; margin-bottom:10px;"></div>
+
+                <div class="dropzone dz-clickable" id="dropzoneForm" style="margin-top:10px;display:none !important">
                   <div class="dz-default dz-message">
                     <span>
                       <strong>Arraste arquivos aqui</strong><br>
-                      <span class="muted">Máximo 5 arquivos.</span><br>
-                      <span class="muted">Você poderá renomear cada arquivo abaixo antes de finalizar.</span>
+                      <span class="muted">Máximo 5 arquivos no total.</span>
                     </span>
                   </div>
                 </div>
+
+                <div id="procDocUploadProgress" style="display:none; margin-top: 6px;">
+                  <div class="progress progress-striped active" style="margin-bottom:6px;">
+                    <div id="procDocUploadProgressBar" class="progress-bar" style="width: 0%"></div>
+                  </div>
+                  <small id="procDocUploadProgressText" class="text-muted"></small>
+                </div>
+
+                <div class="small text-muted" style="margin: 10px 0 6px 0;">Itens na pasta atual</div>
+                <ul class="list-group proc-doc-draft-list" id="procDocDraftList">
+                  <li class="list-group-item text-muted">Nenhum item criado nesta pasta.</li>
+                </ul>
               </div>
 
-              <!-- Lista de arquivos + nomes -->
-              <div id="procDocFilesList" style="margin-top:12px; display:none;">
-                <div class="small text-muted" style="margin-bottom:6px;">
-                  Ajuste o nome de cada arquivo (nome no sistema).
-                </div>
-                <div id="procDocFilesListInner"></div>
-              </div>
             </fieldset>
 
-            <!-- STEP 4 -->
-            <h1>Relacionado</h1>
-            <fieldset>
-              <h3>Vinculo relacionado (opcional)</h3>
-              <div class="row">
-                <div class="form-group col-lg-6">
-                  <label>Tabela relacionada</label>
-                  <select id="process_related_table" class="form-control">
-                    <option value="">Nenhum</option>
-                    <option value="company">Cliente</option>
-                    <option value="product">Produto</option>
-                    <option value="invoice">Invoice</option>
-                    <option value="opportunity">Opportunity</option>
-                    <option value="contract">Contrato</option>
-                  </select>
-                </div>
-                <div class="form-group col-lg-6">
-                  <label>ID relacionado</label>
-                  <input id="process_related_id" type="text" class="form-control" placeholder="UUID do registro relacionado">
-                  <div class="muted" style="margin-top:4px;">Preencha os dois campos para aplicar o vinculo.</div>
-                </div>
-              </div>
-            </fieldset>
           </form>
 
         </div>
@@ -332,7 +478,11 @@
     // Step 3 (documents)
     __procDzInitialized: false,
     procDocDz: null,
-    procDocFilesUi: new Map(), // key: fileKey => { file, $row, $nameInput }
+    procDocDraftItems: [],
+    procDocDraftSeq: 0,
+    procDocCurrentParentTempId: null,
+    procDocNavStack: [],
+    procDocNoticeTimer: null,
   };
 
   // =========================
@@ -598,6 +748,7 @@
     }
     $el.siblings(".select2").remove();
 
+    const parent = dropdownParent || $(document.body);
     $el.select2({
       width: "100%",
       theme: "bootstrap",
@@ -605,7 +756,7 @@
       allowClear: true,
       minimumResultsForSearch: 0,
       language: "pt-BR",
-      dropdownParent: dropdownParent || undefined
+      dropdownParent: parent
     });
   }
 
@@ -816,7 +967,7 @@
     $scope.find(".autocompleteCountry").each(function () {
       const $input = $(this);
 
-      // ✅ destroy/re-init safe
+      // OK: destroy/re-init safe
       try {
         const ta = $input.data("typeahead");
         if (ta && ta.destroy) ta.destroy();
@@ -827,7 +978,7 @@
         $menuContainer.css("position", "relative");
       }
 
-      // ✅ main fix: fitToElement keeps dropdown aligned with the input
+      // OK: main fix: fitToElement keeps dropdown aligned with the input
       $input.typeahead({
         source: countries,
         autoSelect: true,
@@ -861,7 +1012,7 @@
     const trackingProviderOptions = `
       <option value="">-</option>
       <option value="FR24">FR24</option>
-      <option value="MARINETRAFFIC">MARINETRAFFIC</option>
+      <option value="MARINETRAFFIC">Marine Traffic</option>
     `;
 
     return `
@@ -892,6 +1043,47 @@
     `;
   }
 
+  function normalizeTransportTypeToken(value) {
+    const input = String(value || "").trim();
+    if (!input) return "";
+    try {
+      return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    } catch {
+      return input.toUpperCase();
+    }
+  }
+
+  function resolveTransportTrackingDefaults(typeId) {
+    const id = String(typeId || "").trim();
+    if (!id) return null;
+
+    const match = state.transportTypes.find((item) => String(item?.id || "").trim() === id);
+    const token = normalizeTransportTypeToken(match?.name || match?.label || match?.code || "");
+
+    if (!token) return null;
+    if (token.includes("MARIT") || token.includes("SEA")) {
+      return { mode: "SEA", provider: "MARINETRAFFIC" };
+    }
+    if (token.includes("AERE") || token.includes("AIR")) {
+      return { mode: "AIR", provider: "FR24" };
+    }
+
+    return null;
+  }
+
+  function applyTransportTrackingDefaults(rowId) {
+    const typeSelect = document.getElementById(`${rowId}_type`);
+    const modeSelect = document.getElementById(`${rowId}_tracking_mode`);
+    const providerSelect = document.getElementById(`${rowId}_tracking_provider`);
+    if (!typeSelect || !modeSelect || !providerSelect) return;
+
+    const defaults = resolveTransportTrackingDefaults(typeSelect.value);
+    if (!defaults) return;
+
+    $(modeSelect).val(defaults.mode).trigger("change");
+    $(providerSelect).val(defaults.provider).trigger("change");
+  }
+
   function addTransportRow() {
     const tbody = document.getElementById("transportsTbody");
     if (!tbody) return;
@@ -903,12 +1095,16 @@
     if (!tr) return;
 
     initDatePickers(tr);
-    initSelect2($(tr).find("select.transport-type"), "Selecionar...", null);
+    const $typeSelect = $(tr).find("select.transport-type");
+    initSelect2($typeSelect, "Selecionar...", null);
     initSelect2($(tr).find("select.transport-status"), "Selecionar...", null);
     initSelect2($(tr).find("select.transport-tracking-mode"), "Selecionar...", null);
     initSelect2($(tr).find("select.transport-tracking-provider"), "Selecionar...", null);
+    $typeSelect.off("change.transportDefaults").on("change.transportDefaults", function () {
+      applyTransportTrackingDefaults(rowId);
+    });
 
-    // ✅ typeahead align fix per row
+    // OK: typeahead align fix per row
     initCountriesTypeahead(tr);
   }
 
@@ -966,30 +1162,21 @@
   // =========================
   // Create process + transports
   // =========================
-  function readProcessRelatedPayload() {
-    const relatedTable = String($("#process_related_table").val() || "").trim().toLowerCase();
-    const relatedId = String($("#process_related_id").val() || "").trim();
-    if (!relatedTable || !relatedId) return null;
-    return { related_table: relatedTable, related_id: relatedId };
-  }
-
   function buildProcessPayload() {
     const companyId = String($("#company_id").val() || "").trim();
     const contactId = String($("#primary_contact_id").val() || "").trim();
     const statusConfigId = pickDefaultProcessStatusConfig();
     const legacyStatus = pickLegacyStatusByConfigId(statusConfigId);
     const totalValueRaw = parseCurrencyPtBr($("#total_value").val());
-    const relatedPayload = readProcessRelatedPayload();
 
     const payload = {
       status: legacyStatus != null ? legacyStatus : 0,
       company_id: companyId,
-      primary_contact_id: contactId,
+      primary_contact_id: contactId || null,
       invoice: String($("#invoice").val() || "").trim() || null,
       ship_date: toIsoZFromBr(document.getElementById("ship_date")?.value || "") || null,
       process_type_id: String($("#process_type_id").val() || "").trim() || null,
-      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null,
-      ...(relatedPayload || {})
+      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null
     };
 
     if (statusConfigId) payload.status_config_id = statusConfigId;
@@ -1002,7 +1189,6 @@
 
     const payload = buildProcessPayload();
     if (!payload.company_id) throw new Error("Empresa é obrigatória.");
-    if (!payload.primary_contact_id) throw new Error("Contato do Cliente é obrigatório.");
 
     state.creating = true;
     try {
@@ -1067,78 +1253,458 @@
     return n.substring(idx + 1).toLowerCase();
   }
 
-  function getFileKey(file) {
-    const uuid = file?.upload?.uuid;
-    if (uuid) return String(uuid);
-    return `${String(file?.name || "file")}__${String(file?.size || 0)}__${String(file?.lastModified || 0)}`;
-  }
-
   function defaultDisplayNameFor(file) {
     return String(file?.name || "").trim() || "Arquivo";
   }
 
-  function showFilesList(flag) {
-    $("#procDocFilesList").toggle(!!flag);
+  function showProcDocNotice(message, tone, autoHideMs) {
+    const $el = $("#procDocNotice");
+    if (!$el.length) return;
+    if (state.procDocNoticeTimer) {
+      clearTimeout(state.procDocNoticeTimer);
+      state.procDocNoticeTimer = null;
+    }
+    $el.removeClass("alert-info alert-success alert-warning");
+    if (tone === "success") $el.addClass("alert-success");
+    else if (tone === "warning") $el.addClass("alert-warning");
+    else $el.addClass("alert-info");
+    $el.stop(true, true).html(message || "").fadeIn(120);
+
+    const duration = Number.isFinite(Number(autoHideMs)) ? Number(autoHideMs) : 4200;
+    if (duration > 0) {
+      state.procDocNoticeTimer = setTimeout(function () {
+        $el.fadeOut(220);
+        state.procDocNoticeTimer = null;
+      }, duration);
+    }
   }
 
-  function addOrUpdateFileRow(file) {
-    const key = getFileKey(file);
-    if (state.procDocFilesUi.has(key)) return;
+  function addDraftFileItem(file, forcedName) {
+    const totalNow = countTotalPendingFileUploads();
+    if (totalNow >= 5) throw new Error("Máximo de 5 arquivos no total.");
 
-    showFilesList(true);
+    const baseName = String(forcedName || "").trim() || defaultDisplayNameFor(file);
+    state.procDocDraftItems.push({
+      temp_id: nextDraftTempId(),
+      parent_temp_id: state.procDocCurrentParentTempId,
+      item_type: "FILE",
+      name: baseName,
+      filename: file?.name || baseName,
+      ext: getExtFromName(file?.name || ""),
+      mime_type: file?.type || "application/octet-stream",
+      file
+    });
 
-    const sizeMb = ((file?.size || 0) / (1024 * 1024)).toFixed(2);
+    renderDraftList();
+  }
 
-    const row = document.createElement("div");
-    row.className = "well well-sm proc-doc-row";
-    row.setAttribute("data-file-key", key);
+  function pickFirst(selectors) {
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    return null;
+  }
 
-    row.innerHTML = `
-      <div class="row" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div style="flex: 1 1 260px; min-width:220px;">
-          <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-            ${escapeHtml(file?.name || "Arquivo")}
+  function replaceWithClone(el) {
+    if (!el || !el.parentNode) return el;
+    const clone = el.cloneNode(true);
+    el.parentNode.replaceChild(clone, el);
+    return clone;
+  }
+
+  function openSideModal(opts) {
+    const overlay = pickFirst(["#dynamicModalOverlay", ".dynamic-modal-overlay"]);
+    const modal = pickFirst(["#dynamicModal", ".dynamic-modal"]);
+    const titleEl = pickFirst(["#dynamicModalTitle", ".dynamic-modal-title"]);
+    const bodyEl = pickFirst(["#dynamicModalBody", ".dynamic-modal-body"]);
+    let btnClose = pickFirst(["#dynamicModalCloseBtn", ".dynamic-modal-close"]);
+    let btnCancel = pickFirst(["#dynamicModalCancelBtn", ".dynamic-modal-cancel"]);
+    let btnOk = pickFirst(["#dynamicModalOkBtn", ".dynamic-modal-ok"]);
+
+    if (!overlay || !modal || !titleEl || !bodyEl || !btnOk) {
+      alert("Modal lateral não encontrado no layout.");
+      return;
+    }
+
+    btnOk = replaceWithClone(btnOk);
+    if (btnCancel) btnCancel = replaceWithClone(btnCancel);
+    if (btnClose) btnClose = replaceWithClone(btnClose);
+
+    titleEl.textContent = (opts?.title || "");
+    bodyEl.innerHTML = (opts?.bodyHtml || "");
+    if (btnCancel) btnCancel.textContent = (opts?.cancelText || "Cancelar");
+    btnOk.textContent = (opts?.okText || "OK");
+
+    function close() {
+      overlay.style.display = "none";
+      modal.style.display = "none";
+    }
+
+    btnOk.addEventListener("click", async function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const keepOpen = (typeof opts?.onOk === "function") ? await opts.onOk() : false;
+      if (!keepOpen) close();
+    }, true);
+
+    if (btnCancel) {
+      btnCancel.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        close();
+      }, true);
+    }
+
+    if (btnClose) {
+      btnClose.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        close();
+      }, true);
+    }
+
+    overlay.style.display = "block";
+    modal.style.display = "block";
+
+    if (typeof opts?.onOpen === "function") {
+      setTimeout(() => {
+        try { opts.onOpen(); } catch (_) {}
+      }, 0);
+    }
+  }
+
+  function nextDraftTempId() {
+    state.procDocDraftSeq += 1;
+    return `draft_${state.procDocDraftSeq}`;
+  }
+
+  function getDraftItemsByParent(parentTempId) {
+    return state.procDocDraftItems.filter((item) => (item.parent_temp_id || null) === (parentTempId || null));
+  }
+
+  function getDraftItemById(tempId) {
+    return state.procDocDraftItems.find((item) => item.temp_id === tempId) || null;
+  }
+
+  function getCurrentDraftPathLabel() {
+    if (!state.procDocNavStack.length) return "Raiz do processo";
+    return ["Raiz do processo"].concat(state.procDocNavStack.map((n) => n.name)).join(" / ");
+  }
+
+  function updateProcDocSummaryUi() {
+    const currentFolder = getCurrentDraftPathLabel();
+    const totalPending = countTotalPendingFileUploads();
+    $("#procDocSummary").html(`Você está em <strong>${escapeHtml(currentFolder)}</strong>.`);
+    $("#procDocPendingFiles").text(`${totalPending}/5 arquivos pendentes`);
+  }
+
+  function updateProcDocFolderUi() {
+    $("#procDocCurrentFolder").text(getCurrentDraftPathLabel());
+    $("#btnProcDocBack").toggle(state.procDocNavStack.length > 0);
+    updateProcDocSummaryUi();
+  }
+
+  function removeDraftItemRecursive(tempId) {
+    const children = state.procDocDraftItems.filter((item) => item.parent_temp_id === tempId);
+    children.forEach((child) => removeDraftItemRecursive(child.temp_id));
+    state.procDocDraftItems = state.procDocDraftItems.filter((item) => item.temp_id !== tempId);
+  }
+
+  function renderDraftList() {
+    const $list = $("#procDocDraftList");
+    if (!$list.length) return;
+    $list.empty();
+
+    const rows = getDraftItemsByParent(state.procDocCurrentParentTempId).slice().sort((a, b) => {
+      const ta = String(a?.item_type || "").toUpperCase();
+      const tb = String(b?.item_type || "").toUpperCase();
+      if (ta === "FOLDER" && tb !== "FOLDER") return -1;
+      if (ta !== "FOLDER" && tb === "FOLDER") return 1;
+      return String(a?.name || "").localeCompare(String(b?.name || ""), "pt-BR", { sensitivity: "base" });
+    });
+    if (!rows.length) {
+      $list.append('<li class="list-group-item text-muted">Nenhum item criado nesta pasta.</li>');
+      updateProcDocFolderUi();
+      return;
+    }
+
+    rows.forEach((item) => {
+      const isFolder = String(item.item_type).toUpperCase() === "FOLDER";
+      const icon = isFolder ? "fa-folder" : (String(item.item_type).toUpperCase() === "LINK" ? "fa-link" : "fa-file-o");
+      const isLink = String(item.item_type).toUpperCase() === "LINK";
+      const subtitle = isFolder
+        ? "Pasta"
+        : (isLink
+          ? `Link: ${item.object_key || ""}`
+          : `Arquivo: ${item.filename || item.name || ""}`);
+      const statusBadge = isFolder
+        ? '<span class="label label-default">Pasta</span>'
+        : (isLink
+          ? '<span class="label label-info">Link</span>'
+          : '<span class="label label-warning">Pendente envio</span>');
+
+      const openBtn = isFolder
+        ? `<button type="button" class="btn btn-xs btn-white btn-proc-doc-open" data-id="${escapeHtml(item.temp_id)}"><i class="fa fa-folder-open"></i> Abrir</button>`
+        : "";
+
+      $list.append(`
+        <li class="list-group-item">
+          <div>
+            <strong><i class="fa ${icon}"></i> ${escapeHtml(item.name || "Sem nome")}</strong>
+            <div class="small text-muted proc-doc-item-sub">${escapeHtml(subtitle)}</div>
+            <div class="proc-doc-item-sub">${statusBadge}</div>
           </div>
-          <div class="small text-muted">Tamanho: ${escapeHtml(sizeMb)} MB</div>
+          <div class="proc-doc-list-actions">
+            ${openBtn}
+            <button type="button" class="btn btn-xs btn-white btn-proc-doc-rename" data-id="${escapeHtml(item.temp_id)}"><i class="fa fa-pencil"></i></button>
+            <button type="button" class="btn btn-xs btn-danger btn-proc-doc-remove" data-id="${escapeHtml(item.temp_id)}"><i class="fa fa-trash"></i></button>
+          </div>
+        </li>
+      `);
+    });
+
+    updateProcDocFolderUi();
+  }
+
+  function countDraftFileItems() {
+    return state.procDocDraftItems.filter((item) => String(item.item_type || "").toUpperCase() === "FILE").length;
+  }
+
+  function countTotalPendingFileUploads() {
+    return countDraftFileItems();
+  }
+
+  function openNewProcFolderModal() {
+    openSideModal({
+      title: "Nova pasta",
+      okText: "Criar",
+      cancelText: "Cancelar",
+      bodyHtml: `
+        <div class="form-group">
+          <label>Nome da pasta</label>
+          <input id="sm_procFolderName" type="text" class="form-control" maxlength="255" placeholder="Ex: Contratos" />
+          <div id="sm_procFolderError" class="text-danger" style="margin-top:8px; display:none;"></div>
         </div>
+      `,
+      onOpen: function () { setTimeout(function () { $("#sm_procFolderName").focus(); }, 80); },
+      onOk: async function () {
+        const name = String($("#sm_procFolderName").val() || "").trim();
+        $("#sm_procFolderError").hide().text("");
+        if (!name) {
+          $("#sm_procFolderError").show().text("Informe o nome da pasta.");
+          return true;
+        }
 
-        <div style="flex: 2 1 340px; min-width:260px;">
-          <label class="small" style="margin:0 0 4px 0;">Nome do arquivo (no sistema)</label>
-          <input type="text" class="form-control input-sm proc-doc-display" maxlength="255" value="${escapeHtml(defaultDisplayNameFor(file))}" />
+        state.procDocDraftItems.push({
+          temp_id: nextDraftTempId(),
+          parent_temp_id: state.procDocCurrentParentTempId,
+          item_type: "FOLDER",
+          name,
+          storage_provider: "NONE",
+        });
+        renderDraftList();
+        return false;
+      }
+    });
+  }
+
+  function openNewProcLinkModal() {
+    openSideModal({
+      title: "Novo link",
+      okText: "Salvar",
+      cancelText: "Cancelar",
+      bodyHtml: `
+        <div class="form-group">
+          <label>Nome</label>
+          <input id="sm_procLinkName" type="text" class="form-control" maxlength="255" placeholder="Ex: Pasta do Google Drive" />
         </div>
-      </div>
-    `;
+        <div class="form-group">
+          <label>URL</label>
+          <input id="sm_procLinkUrl" type="text" class="form-control" maxlength="1000" placeholder="https://..." />
+        </div>
+        <div id="sm_procLinkError" class="text-danger" style="display:none;"></div>
+      `,
+      onOpen: function () { setTimeout(function () { $("#sm_procLinkName").focus(); }, 80); },
+      onOk: async function () {
+        const name = String($("#sm_procLinkName").val() || "").trim();
+        const url = String($("#sm_procLinkUrl").val() || "").trim();
+        $("#sm_procLinkError").hide().text("");
 
-    document.getElementById("procDocFilesListInner").appendChild(row);
+        if (!name) {
+          $("#sm_procLinkError").show().text("Informe o nome do link.");
+          return true;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          $("#sm_procLinkError").show().text("Informe uma URL v?lida (http/https).");
+          return true;
+        }
 
-    const $row = $(row);
-    const $nameInput = $row.find("input.proc-doc-display");
-
-    state.procDocFilesUi.set(key, { file, $row, $nameInput });
+        state.procDocDraftItems.push({
+          temp_id: nextDraftTempId(),
+          parent_temp_id: state.procDocCurrentParentTempId,
+          item_type: "LINK",
+          name,
+          filename: null,
+          object_key: url,
+          storage_provider: "DRIVE",
+        });
+        renderDraftList();
+        return false;
+      }
+    });
   }
 
-  function removeFileRow(file) {
-    const key = getFileKey(file);
-    const entry = state.procDocFilesUi.get(key);
-    if (entry?.$row?.length) entry.$row.remove();
-    state.procDocFilesUi.delete(key);
+  function openProcUploadModal() {
+    openSideModal({
+      title: "Upload documento",
+      okText: "Adicionar",
+      cancelText: "Cancelar",
+      bodyHtml: `
+        <div class="form-group">
+          <label>Arquivo</label>
+          <input id="sm_procUploadFile" type="file" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Nome no sistema</label>
+          <input id="sm_procUploadName" type="text" class="form-control" maxlength="255" placeholder="Se vazio, usa o nome do arquivo" />
+        </div>
+        <div id="sm_procUploadError" class="text-danger" style="display:none;"></div>
+      `,
+      onOpen: function () {
+        setTimeout(function () {
+          const $file = $("#sm_procUploadFile");
+          const $name = $("#sm_procUploadName");
+          $file.off("change.__procName").on("change.__procName", function () {
+            const f = this.files && this.files[0];
+            if (!f) return;
+            if (!String($name.val() || "").trim()) $name.val(f.name || "");
+          });
+          try { document.getElementById("sm_procUploadFile")?.focus(); } catch (_) {}
+        }, 30);
+      },
+      onOk: async function () {
+        $("#sm_procUploadError").hide().text("");
+        const input = document.getElementById("sm_procUploadFile");
+        const file = input && input.files && input.files[0];
+        const displayName = String($("#sm_procUploadName").val() || "").trim();
 
-    if (state.procDocFilesUi.size === 0) showFilesList(false);
+        if (!file) {
+          $("#sm_procUploadError").show().text("Selecione um arquivo.");
+          return true;
+        }
+        if (countTotalPendingFileUploads() >= 5) {
+          $("#sm_procUploadError").show().text("M?ximo de 5 arquivos no total.");
+          return true;
+        }
+
+        addDraftFileItem(file, displayName || file.name || "Arquivo");
+        showProcDocNotice(`Arquivo <strong>${escapeHtml(file.name || "Arquivo")}</strong> adicionado em <strong>${escapeHtml(getCurrentDraftPathLabel())}</strong>.`, "success");
+        return false;
+      }
+    });
   }
 
-  function getSelectedProcDocFiles() {
-    const dz = state.procDocDz;
-    if (!dz || !Array.isArray(dz.files)) return [];
-    return dz.files.filter(f => !f?.status || f.status !== "error");
+  function openRenameProcItemModal(tempId) {
+    const item = getDraftItemById(tempId);
+    if (!item) return;
+
+    openSideModal({
+      title: "Renomear item",
+      okText: "Salvar",
+      cancelText: "Cancelar",
+      bodyHtml: `
+        <div class="form-group">
+          <label>Novo nome</label>
+          <input id="sm_procRenameName" type="text" class="form-control" maxlength="255" value="${escapeHtml(item.name || "")}" />
+          <div id="sm_procRenameError" class="text-danger" style="margin-top:8px; display:none;"></div>
+        </div>
+      `,
+      onOpen: function () {
+        setTimeout(function () {
+          const el = document.getElementById("sm_procRenameName");
+          if (!el) return;
+          el.focus();
+          try { el.setSelectionRange(0, el.value.length); } catch (_) {}
+        }, 40);
+      },
+      onOk: async function () {
+        const name = String($("#sm_procRenameName").val() || "").trim();
+        $("#sm_procRenameError").hide().text("");
+        if (!name) {
+          $("#sm_procRenameError").show().text("Informe um nome.");
+          return true;
+        }
+        item.name = name;
+        renderDraftList();
+        return false;
+      }
+    });
   }
 
-  function getDisplayNameForFile(file) {
-    const key = getFileKey(file);
-    const entry = state.procDocFilesUi.get(key);
-    const perFileName = entry?.$nameInput?.length ? String(entry.$nameInput.val() || "").trim() : "";
-    return perFileName || defaultDisplayNameFor(file);
-  }
+  function bindProcDocumentsToolbarOnce() {
+    if (window.__bindProcDocumentsToolbarDone) return;
+    window.__bindProcDocumentsToolbarDone = true;
 
+    $(document).off("click.gecomProcDocs", "#btnProcNewFolder");
+    $(document).on("click.gecomProcDocs", "#btnProcNewFolder", function (e) {
+      e.preventDefault();
+      openNewProcFolderModal();
+    });
+
+    $(document).off("click.gecomProcDocs", "#btnProcNewLink");
+    $(document).on("click.gecomProcDocs", "#btnProcNewLink", function (e) {
+      e.preventDefault();
+      openNewProcLinkModal();
+    });
+
+    $(document).off("click.gecomProcDocs", "#btnProcUploadDoc");
+    $(document).on("click.gecomProcDocs", "#btnProcUploadDoc", function (e) {
+      e.preventDefault();
+      openProcUploadModal();
+    });
+
+    $(document).off("click.gecomProcDocs", "#btnProcDocBack");
+    $(document).on("click.gecomProcDocs", "#btnProcDocBack", function (e) {
+      e.preventDefault();
+      state.procDocNavStack.pop();
+      state.procDocCurrentParentTempId = state.procDocNavStack.length
+        ? state.procDocNavStack[state.procDocNavStack.length - 1].temp_id
+        : null;
+      renderDraftList();
+    });
+
+    $(document).off("click.gecomProcDocs", ".btn-proc-doc-open");
+    $(document).on("click.gecomProcDocs", ".btn-proc-doc-open", function (e) {
+      e.preventDefault();
+      const tempId = String($(this).data("id") || "").trim();
+      const item = getDraftItemById(tempId);
+      if (!item || String(item.item_type).toUpperCase() !== "FOLDER") return;
+      state.procDocCurrentParentTempId = item.temp_id;
+      state.procDocNavStack.push({ temp_id: item.temp_id, name: item.name || "Pasta" });
+      renderDraftList();
+    });
+
+    $(document).off("click.gecomProcDocs", ".btn-proc-doc-rename");
+    $(document).on("click.gecomProcDocs", ".btn-proc-doc-rename", function (e) {
+      e.preventDefault();
+      const tempId = String($(this).data("id") || "").trim();
+      if (!tempId) return;
+      openRenameProcItemModal(tempId);
+    });
+
+    $(document).off("click.gecomProcDocs", ".btn-proc-doc-remove");
+    $(document).on("click.gecomProcDocs", ".btn-proc-doc-remove", function (e) {
+      e.preventDefault();
+      const tempId = String($(this).data("id") || "").trim();
+      if (!tempId) return;
+      removeDraftItemRecursive(tempId);
+      renderDraftList();
+    });
+  }
   async function getProcessById(processId) {
     const candidates = [
       `/api/processes/${encodeURIComponent(processId)}`,
@@ -1233,11 +1799,76 @@
     return docId;
   }
 
-  async function uploadDocumentsForProcessIfAny(processId) {
-    const files = getSelectedProcDocFiles();
-    if (!files.length) return;
+  async function syncDraftDocuments(processId, accountId, rootFolderId) {
+    const folderMap = new Map();
+    folderMap.set(null, rootFolderId);
 
-    if (files.length > 5) throw new Error("Máximo 5 arquivos.");
+    const unresolved = [...state.procDocDraftItems];
+    let guard = 0;
+
+    while (unresolved.length && guard < 1000) {
+      guard += 1;
+      const item = unresolved.shift();
+      const parentTempId = item.parent_temp_id || null;
+      const parentRealId = folderMap.get(parentTempId);
+
+      if (!parentRealId) {
+        unresolved.push(item);
+        continue;
+      }
+
+      const type = String(item.item_type || "").toUpperCase();
+
+      if (type === "FOLDER") {
+        const created = await apiPost("/api/documents", {
+          account_id: accountId,
+          parent_id: parentRealId,
+          item_type: "FOLDER",
+          name: String(item.name || "Pasta"),
+          filename: null,
+          storage_provider: "NONE",
+          related_table: "process",
+          related_id: processId
+        });
+        const createdId = String(created?.id || "").trim();
+        if (!createdId) throw new Error("Pasta criada sem ID.");
+        folderMap.set(item.temp_id, createdId);
+        continue;
+      }
+
+      if (type === "LINK") {
+        await apiPost("/api/documents", {
+          account_id: accountId,
+          parent_id: parentRealId,
+          item_type: "LINK",
+          name: String(item.name || "Link"),
+          filename: null,
+          object_key: String(item.object_key || ""),
+          storage_provider: "DRIVE",
+          related_table: "process",
+          related_id: processId
+        });
+        continue;
+      }
+
+      if (type === "FILE") {
+        await uploadOneFileToDocumentsApi({
+          file: item.file,
+          accountId,
+          parentFolderId: parentRealId,
+          relatedId: processId,
+          displayName: String(item.name || item.filename || "Arquivo")
+        });
+      }
+    }
+
+    if (unresolved.length) {
+      throw new Error("Não foi possível resolver a hierarquia de pastas dos documentos.");
+    }
+  }
+
+  async function uploadDocumentsForProcessIfAny(processId) {
+    if (countTotalPendingFileUploads() > 5) throw new Error("Máximo de 5 arquivos no total.");
 
     const accountId = getAccountIdForCreate();
     if (!accountId) throw new Error("Não foi possível identificar o account_id para anexar documentos.");
@@ -1245,29 +1876,13 @@
     showProcDocProgress(true, 2, "Criando pasta do processo...");
     const { folderId, folderName } = await ensureProcessFolder(processId, accountId);
 
-    const total = files.length;
-    let done = 0;
+    showProcDocProgress(true, 85, "Sincronizando pastas e itens...");
+    await syncDraftDocuments(processId, accountId, folderId);
 
-    for (const file of files) {
-      done += 1;
-      const displayName = getDisplayNameForFile(file);
-
-      showProcDocProgress(true, Math.min(90, Math.round(((done - 1) / total) * 100)), `Enviando ${done}/${total}: ${file.name}`);
-      await uploadOneFileToDocumentsApi({
-        file,
-        accountId,
-        parentFolderId: folderId,
-        relatedId: processId,
-        displayName
-      });
-
-      showProcDocProgress(true, Math.min(95, Math.round((done / total) * 100)), `Concluído ${done}/${total} (pasta: ${folderName})`);
-    }
-
-    showProcDocProgress(true, 100, `Upload concluído (${total} arquivo(s)).`);
+    showProcDocProgress(true, 100, `Sincronização concluída (pasta: ${folderName}).`);
   }
 
-  // ✅ Dropzone init (fix click + button)
+  // OK: Dropzone init (fix click + button)
   function initProcessDocumentsDropzone() {
     try {
       if (!window.Dropzone) return;
@@ -1283,31 +1898,26 @@
         parallelUploads: 1,
         uploadMultiple: false,
 
-        // ✅ Most important: make clickable reliable in wizard
+        // OK: Most important: make clickable reliable in wizard
         clickable: ["#btnPickProcDocs", "#dropzoneForm"],
 
         // Prevent weird invisible overlay issues
         createImageThumbnails: false,
 
-        dictDefaultMessage: "<strong>Arraste arquivos aqui</strong><br><span class='muted'>Máximo 5 arquivos.</span>",
+        dictDefaultMessage: "<strong>Arraste arquivos aqui</strong><br><span class='muted'>Eles entram na pasta atual.</span>",
       });
 
       state.procDocDz = dz;
 
       dz.on("addedfile", function (file) {
-        const files = getSelectedProcDocFiles();
-        if (files.length > 5) {
-          dz.removeFile(file);
-          alert("Máximo 5 arquivos.");
-          return;
+        try {
+          addDraftFileItem(file, file?.name || "Arquivo");
+          showProcDocNotice(`Arquivo <strong>${escapeHtml(file?.name || "Arquivo")}</strong> adicionado em <strong>${escapeHtml(getCurrentDraftPathLabel())}</strong>.`, "success");
+        } catch (err) {
+          alert(err?.message || "Falha ao adicionar arquivo.");
+        } finally {
+          try { dz.removeFile(file); } catch (_) {}
         }
-
-        addOrUpdateFileRow(file);
-        showProcDocProgress(false, 0, "");
-      });
-
-      dz.on("removedfile", function (file) {
-        removeFileRow(file);
         showProcDocProgress(false, 0, "");
       });
 
@@ -1315,7 +1925,7 @@
         console.warn("Dropzone error:", message);
       });
 
-      // ✅ Extra: ensure button triggers file picker even if Dropzone click fails in some browsers
+      // OK: Extra: ensure button triggers file picker even if Dropzone click fails in some browsers
       $(document).off("click.gecom", "#btnPickProcDocs");
       $(document).on("click.gecom", "#btnPickProcDocs", function (e) {
         e.preventDefault();
@@ -1369,8 +1979,7 @@
           if (msg) { alert(msg); return false; }
         }
 
-        const files = getSelectedProcDocFiles();
-        if (files.length > 5) { alert("Máximo 5 arquivos."); return false; }
+        if (countTotalPendingFileUploads() > 5) { alert("Máximo de 5 arquivos no total."); return false; }
 
         return true;
       },
@@ -1379,7 +1988,7 @@
         const currentBody = $(this).find(".body").eq(currentIndex);
         initDatePickers(currentBody);
 
-        // ✅ keep typeahead aligned even when wizard changes layout
+        // OK: keep typeahead aligned even when wizard changes layout
         initCountriesTypeahead(currentBody);
       },
 
@@ -1391,8 +2000,7 @@
         const msg = validateTransportRows();
         if (msg) { alert(msg); return false; }
 
-        const files = getSelectedProcDocFiles();
-        if (files.length > 5) { alert("Máximo 5 arquivos."); return false; }
+        if (countTotalPendingFileUploads() > 5) { alert("Máximo de 5 arquivos no total."); return false; }
 
         return true;
       },
@@ -1530,10 +2138,12 @@
 
     bindCompanyChangeOnce();
     bindAddTransportOnce();
+    bindProcDocumentsToolbarOnce();
 
-    // ✅ Dropzone
+    // OK: Dropzone
     Dropzone.autoDiscover = false;
     initProcessDocumentsDropzone();
+    renderDraftList();
 
     const bootWarnings = [];
 
@@ -1566,7 +2176,7 @@
       const warn = document.getElementById("transportWarning");
       if (warn) {
         warn.style.display = "block";
-        warn.innerHTML = bootWarnings.map(x => `• ${escapeHtml(x)}`).join("<br>");
+        warn.innerHTML = bootWarnings.map(x => `??? ${escapeHtml(x)}`).join("<br>");
       }
     }
 
@@ -1581,3 +2191,4 @@
 })();
 </script>
 <% %>
+

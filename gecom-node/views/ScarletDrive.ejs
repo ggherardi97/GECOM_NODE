@@ -3,932 +3,234 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ScarletDrive - Lista de Convidados</title>
+  <title>ScarletDrive - Controle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg-main: #0f1116;
-      --bg-panel: rgba(20, 24, 32, 0.92);
-      --bg-soft: rgba(255, 255, 255, 0.04);
-      --line: rgba(255, 255, 255, 0.14);
-      --text-main: #f7f8fa;
-      --text-soft: #c6c9d0;
-      --scarlet: #d92f2f;
-      --scarlet-soft: #ff5f5f;
-      --ok: #1fbe72;
-      --warn: #f4a528;
-      --danger: #ff4d4f;
-      --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--text-main);
-      font-family: "Space Grotesk", sans-serif;
-      background:
-        radial-gradient(circle at 12% 15%, rgba(217, 47, 47, 0.22), transparent 30%),
-        radial-gradient(circle at 88% 8%, rgba(255, 95, 95, 0.2), transparent 24%),
-        linear-gradient(140deg, #0a0b0f 0%, #131923 50%, #10141d 100%);
-      padding: 30px 16px 44px;
-    }
-
-    .page {
-      max-width: 1240px;
-      margin: 0 auto;
-      display: grid;
-      gap: 20px;
-    }
-
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--bg-panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
-    }
-
-    .hero {
-      overflow: hidden;
-      position: relative;
-      padding: 20px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: auto -120px -120px auto;
-      width: 260px;
-      height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(217, 47, 47, 0.25), transparent 70%);
-      pointer-events: none;
-    }
-
-    .hero-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
-      object-fit: cover;
-      border: 1px solid var(--line);
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .brand-title {
-      margin: 0;
-      font-family: "Oswald", sans-serif;
-      font-size: clamp(28px, 3.5vw, 42px);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      line-height: 1;
-    }
-
-    .brand-sub {
-      margin: 4px 0 0;
-      color: var(--text-soft);
-      font-size: 14px;
-    }
-
-    .counter-total {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.25);
-      white-space: nowrap;
-      font-weight: 700;
-    }
-
-    .counter-total strong {
-      color: var(--scarlet-soft);
-    }
-
-    .host-chips {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 10px;
-    }
-
-    .chip {
-      border: 1px solid var(--line);
-      background: var(--bg-soft);
-      border-radius: 10px;
-      padding: 10px 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      align-items: center;
-      font-size: 14px;
-    }
-
-    .chip strong {
-      color: var(--text-main);
-    }
-
-    .chip-value {
-      font-weight: 700;
-      color: var(--text-soft);
-    }
-
-    .chip.is-limit .chip-value {
-      color: var(--danger);
-    }
-
-    .layout-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 20px;
-    }
-
-    .panel-body {
-      padding: 18px;
-    }
-
-    .panel-title {
-      margin: 0 0 14px;
-      font-family: "Oswald", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      font-size: 24px;
-    }
-
-    .add-form {
-      display: grid;
-      grid-template-columns: 2fr 1fr 0.8fr 0.9fr auto;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field label {
-      color: var(--text-soft);
-      font-size: 12px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-
-    input[type="text"],
-    select {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-      border-radius: 10px;
-      padding: 10px 11px;
-      font: inherit;
-    }
-
-    input[type="text"]:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--scarlet-soft);
-      box-shadow: 0 0 0 2px rgba(217, 47, 47, 0.22);
-    }
-
-    /* Keep native dropdown options readable on light system popup backgrounds */
-    select option {
-      color: #1a1d23;
-      background: #ffffff;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 14px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.16s ease, opacity 0.16s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-add {
-      background: linear-gradient(120deg, #c32222, #f14545);
-      color: #fff;
-      white-space: nowrap;
-    }
-
-    .btn-delete {
-      background: rgba(255, 77, 79, 0.12);
-      color: #ff9f9f;
-      border: 1px solid rgba(255, 77, 79, 0.3);
-      padding: 8px 10px;
-    }
-
-    .feedback {
-      min-height: 22px;
-      margin: 10px 0 0;
-      font-size: 14px;
-      color: var(--text-soft);
-    }
-
-    .feedback.error {
-      color: #ff8f8f;
-    }
-
-    .feedback.success {
-      color: #8cf1ba;
-    }
-
-    .table-toolbar {
-      margin-top: 10px;
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .table-toolbar .field {
-      min-width: 220px;
-      margin: 0;
-    }
-
-    .filter-summary {
-      color: var(--text-soft);
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .table-wrap {
-      margin-top: 14px;
-      overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 760px;
-    }
-
-    thead th {
-      text-align: left;
-      font-size: 12px;
-      color: var(--text-soft);
-      letter-spacing: 0.45px;
-      text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 10px;
-      border-bottom: 1px solid var(--line);
-      white-space: nowrap;
-    }
-
-    tbody td {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 8px 10px;
-      vertical-align: middle;
-    }
-
-    tbody tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .name-input {
-      min-width: 180px;
-    }
-
-    .small-select {
-      min-width: 130px;
-    }
-
-    .charts-grid {
-      display: grid;
-      gap: 12px;
-    }
-
-    .chart-card {
-      border: 1px solid var(--line);
-      background: var(--bg-soft);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .chart-card h3 {
-      margin: 0 0 8px;
-      font-size: 14px;
-      text-transform: uppercase;
-      color: var(--text-soft);
-      letter-spacing: 0.6px;
-    }
-
-    .chart-container {
-      min-height: 220px;
-      position: relative;
-    }
-
-    .helper {
-      margin: 10px 0 0;
-      color: var(--text-soft);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 1080px) {
-      .layout-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 880px) {
-      .add-form {
-        grid-template-columns: 1fr;
-      }
-
-      .add-form .btn-add {
-        width: 100%;
-      }
-
-      .counter-total {
-        width: 100%;
-        text-align: center;
-      }
-
-      .table-toolbar .field {
-        min-width: 100%;
-      }
-
-      .filter-summary {
-        width: 100%;
-        white-space: normal;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/scarlet-drive.css" />
 </head>
 <body>
   <main class="page">
     <section class="panel hero">
       <div class="hero-top">
         <div class="brand">
-          <img id="scarletLogo" class="logo" src="/Assets/scarletdrive-logo.png" alt="Logo ScarletDrive" onerror="this.style.display='none'" />
+          <img class="logo" src="/Assets/scarletdrive-logo.png" alt="Logo ScarletDrive" onerror="this.style.display='none'" />
           <div>
-            <h1 class="brand-title">ScarletDrive Guestlist</h1>
-            <p class="brand-sub">Pagina publica provisoria para controle de convidados do show.</p>
+            <h1 class="brand-title">ScarletDrive Control</h1>
+            <p class="brand-sub">Guestlist, repertorio atual e votacao de opcoes no mesmo painel.</p>
           </div>
         </div>
-        <div id="totalCounter" class="counter-total">Total: <strong>0</strong> / <%= maxGuests %></div>
+        <div id="heroActions" class="hero-actions">
+          <div id="heroMusicBadge" class="pill">Repertorio: <strong>0</strong> musicas</div>
+          <div id="totalCounter" class="pill">Total: <strong>0</strong> / <%= maxGuests %></div>
+        </div>
+      </div>
+      <div class="hero-nav">
+        <button type="button" class="nav-tab is-active" data-view-target="lista">Lista</button>
+        <button type="button" class="nav-tab" data-view-target="repertorio">Repertorio atual</button>
+        <button type="button" class="nav-tab" data-view-target="votacao">Votacao de opcoes</button>
       </div>
       <div id="hostChips" class="host-chips"></div>
     </section>
 
-    <section class="layout-grid">
-      <article class="panel panel-body">
-        <h2 class="panel-title">Add convidado +</h2>
-        <form id="addForm" class="add-form">
-          <div class="field">
-            <label for="guestName">Nome</label>
-            <input id="guestName" type="text" maxlength="120" placeholder="Nome do convidado" required />
+    <section class="view is-active" data-view="lista">
+      <div class="layout-grid">
+        <article class="panel panel-body">
+          <div class="section-head">
+            <div>
+              <h2 class="panel-title">Add convidado +</h2>
+              <p class="panel-subtitle">A guestlist continua inteira na aba Lista.</p>
+            </div>
+            <button id="exportBtn" type="button" class="btn btn-secondary">Exportar lista final</button>
           </div>
-          <div class="field">
-            <label for="guestHost">Convidado por</label>
-            <select id="guestHost" required>
-              <% scarletHosts.forEach(function(host) { %>
-                <option value="<%= host %>"><%= host %></option>
-              <% }) %>
-            </select>
+          <form id="addForm" class="form-grid guest-form">
+            <label class="field"><span>Nome</span><input id="guestName" type="text" maxlength="120" placeholder="Nome do convidado" required /></label>
+            <label class="field"><span>Convidado por</span><select id="guestHost" required><% scarletHosts.forEach(function(host) { %><option value="<%= host %>"><%= host %></option><% }) %></select></label>
+            <label class="field"><span>Pago?</span><select id="guestPaid"><option value="false">Nao</option><option value="true">Sim</option></select></label>
+            <label class="field"><span>Confirmado?</span><select id="guestConfirmed"><option value="false">Nao</option><option value="true">Sim</option></select></label>
+            <button id="addBtn" type="submit" class="btn btn-primary">Adicionar +</button>
+          </form>
+          <div id="feedback" class="feedback"></div>
+          <div class="toolbar"><div id="filterSummary" class="muted">Mostrando todos os convidados.</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Convidado por</th><th>Pago?</th><th>Confirmado?</th><th>Excluir</th></tr>
+                <tr class="filter-row">
+                  <th><input id="filterName" class="filter-control" type="text" placeholder="Filtrar nome" /></th>
+                  <th><select id="filterHost" class="filter-control"><option value="">Todos</option><% scarletHosts.forEach(function(host) { %><option value="<%= host %>"><%= host %></option><% }) %></select></th>
+                  <th><select id="filterPaid" class="filter-control"><option value="">Todos</option><option value="true">Sim</option><option value="false">Nao</option></select></th>
+                  <th><select id="filterConfirmed" class="filter-control"><option value="">Todos</option><option value="true">Sim</option><option value="false">Nao</option></select></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="guestsTableBody"><tr><td colspan="5">Carregando...</td></tr></tbody>
+            </table>
           </div>
-          <div class="field">
-            <label for="guestPaid">Pago?</label>
-            <select id="guestPaid">
-              <option value="false">Nao</option>
-              <option value="true">Sim</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="guestConfirmed">Confirmado?</label>
-            <select id="guestConfirmed">
-              <option value="false">Nao</option>
-              <option value="true">Sim</option>
-            </select>
-          </div>
-          <button id="addBtn" type="submit" class="btn btn-add">Adicionar +</button>
-        </form>
-        <div id="feedback" class="feedback"></div>
-        <div class="table-toolbar">
-          <div class="field">
-            <label for="filterHost">Filtrar por convidado por</label>
-            <select id="filterHost">
-              <option value="">Todos</option>
-              <% scarletHosts.forEach(function(host) { %>
-                <option value="<%= host %>"><%= host %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div id="filterSummary" class="filter-summary">Mostrando todos os convidados.</div>
-        </div>
+        </article>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Convidado por</th>
-                <th>Pago?</th>
-                <th>Confirmado?</th>
-                <th>Excluir</th>
-              </tr>
-            </thead>
-            <tbody id="guestsTableBody">
-              <tr>
-                <td colspan="5">Carregando...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
+        <aside class="panel panel-body">
+          <h2 class="panel-title">Visao rapida</h2>
+          <div class="charts-grid">
+            <div class="chart-card"><h3>Confirmados vs nao confirmados</h3><div class="chart-box"><canvas id="confirmedChart"></canvas></div></div>
+            <div class="chart-card"><h3>Pago vs nao pago</h3><div class="chart-box"><canvas id="paidChart"></canvas></div></div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
-      <aside class="panel panel-body">
-        <h2 class="panel-title">Visao rapida</h2>
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>Confirmados vs nao confirmados</h3>
-            <div class="chart-container">
-              <canvas id="confirmedChart"></canvas>
+    <section class="view" data-view="repertorio">
+      <div class="layout-grid layout-grid--music">
+        <article class="panel panel-body">
+          <div class="section-head">
+            <h2 class="panel-title">Repertorio atual</h2>
+            <button id="printRepertoireBtn" type="button" class="btn btn-secondary">Imprimir repertorio</button>
+          </div>
+          <form id="songForm" class="form-grid song-form">
+            <label class="field"><span>Nome da musica</span><input id="songName" type="text" maxlength="160" placeholder="Ex.: Sweet Child O' Mine" required /></label>
+            <label class="field"><span>Quem sugeriu</span><select id="songSuggestedBy" required><% scarletHosts.forEach(function(host) { %><option value="<%= host %>"><%= host %></option><% }) %></select></label>
+            <button id="songAddBtn" type="submit" class="btn btn-primary">Adicionar musica</button>
+          </form>
+          <div id="songFeedback" class="feedback"></div>
+          <p class="helper">Arraste uma musica para cima ou para baixo para reorganizar o repertorio.</p>
+          <div id="repertoireList" class="stack"></div>
+        </article>
+
+        <aside class="panel panel-body">
+          <h2 class="panel-title">Preview do repertorio</h2>
+          <p class="panel-subtitle">Ordem atual das musicas para conferencia rapida.</p>
+          <div id="repertoireRanking" class="stack"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" data-view="votacao">
+      <div id="voterGate" class="panel panel-body narrow-panel">
+        <div>
+          <h2 class="panel-title">Quem esta votando?</h2>
+          <p class="panel-subtitle">Selecione o votante antes de entrar na tela de votacao.</p>
+        </div>
+        <div class="form-grid voter-grid">
+          <label class="field"><span>Votante</span><select id="voterSelect"><option value="">Selecione</option><% scarletHosts.forEach(function(host) { %><option value="<%= host %>"><%= host %></option><% }) %></select></label>
+          <button id="continueVotingBtn" type="button" class="btn btn-primary">Continuar</button>
+        </div>
+        <div id="voterFeedback" class="feedback"></div>
+        <button id="forceVoterAccessBtn" type="button" class="btn btn-secondary" hidden>Estou em outro aparelho - Continuar</button>
+      </div>
+
+      <div id="voteSessionHub" class="layout-grid layout-grid--music" hidden>
+        <article class="panel panel-body">
+          <div class="section-head">
+            <div>
+              <h2 class="panel-title">Votacoes ativas</h2>
+              <p class="panel-subtitle">Escolha uma votacao para abrir ou crie uma nova com as opcoes dessa rodada.</p>
+            </div>
+            <div class="inline-actions">
+              <span id="currentVoterBadge" class="pill">Votando: -</span>
+              <button id="openVoteBuilderBtn" type="button" class="btn btn-primary">Nova votacao</button>
+              <button id="changeVoterBtn" type="button" class="btn btn-secondary">Trocar votante</button>
             </div>
           </div>
-          <div class="chart-card">
-            <h3>Pago vs nao pago</h3>
-            <div class="chart-container">
-              <canvas id="paidChart"></canvas>
+          <div id="voteBuilder" class="builder" hidden>
+            <div class="section-head builder-head">
+              <div>
+                <h3 class="panel-title panel-title--small">Nova votacao</h3>
+                <p class="panel-subtitle">Defina o nome da votacao, monte a lista de opcoes e salve.</p>
+              </div>
+              <button id="closeVoteBuilderBtn" type="button" class="btn btn-secondary">Fechar</button>
+            </div>
+            <div class="builder-form">
+              <label class="field">
+                <span>Nome da votacao</span>
+                <input id="voteSessionName" type="text" maxlength="120" placeholder="Ex.: Compras do mes" />
+              </label>
+              <label class="field">
+                <span>Tipo de resposta</span>
+                <select id="voteSessionAnswerMode">
+                  <option value="yes_no">Sim ou nao</option>
+                  <option value="rating_1_5">Nota de 1 a 5</option>
+                </select>
+              </label>
+              <label class="field">
+                <span id="voteSessionMaxVotesLabel">Limite de votos Sim por pessoa</span>
+                <input id="voteSessionMaxVotes" type="number" min="1" max="99" step="1" value="5" />
+              </label>
+              <label class="field">
+                <span>Voto secreto?</span>
+                <select id="voteSessionIsSecret">
+                  <option value="false">Nao</option>
+                  <option value="true">Sim</option>
+                </select>
+              </label>
+              <div class="form-grid draft-grid">
+                <label class="field">
+                  <span>Adicionar opcao</span>
+                  <input id="voteDraftSongName" type="text" maxlength="160" placeholder="Digite a outra opcao" />
+                </label>
+                <button id="addDraftVoteSongBtn" type="button" class="btn btn-primary">Adicionar opcao</button>
+              </div>
+              <div id="voteBuilderFeedback" class="feedback"></div>
+              <div id="voteDraftSongs" class="stack"></div>
+              <button id="saveVoteSessionBtn" type="button" class="btn btn-primary">Salvar votacao</button>
             </div>
           </div>
-        </div>
-        <p class="helper">
-          Limites ativos: maximo de <strong><%= maxGuests %></strong> convidados no total e
-          <strong><%= maxPerHost %></strong> por convidador.
-        </p>
-      </aside>
+          <div id="voteSessionsList" class="stack"></div>
+        </article>
+
+        <aside class="panel panel-body">
+          <h2 class="panel-title">Ativas agora</h2>
+          <p class="panel-subtitle">Resumo rapido das votacoes abertas.</p>
+          <div id="voteSessionsPreview" class="stack"></div>
+        </aside>
+      </div>
+
+      <div id="voteWorkspace" class="layout-grid layout-grid--music" hidden>
+        <article class="panel panel-body">
+          <div class="section-head">
+            <div>
+              <h2 id="activeVoteSessionTitle" class="panel-title">Votacao</h2>
+              <p id="activeVoteSessionSubtitle" class="panel-subtitle">Adicione novas opcoes e vote com o limite configurado para esta votacao.</p>
+            </div>
+            <div class="inline-actions">
+              <button id="convertVoteSessionModeBtn" type="button" class="btn btn-secondary" hidden>Converter para notas 1 a 5</button>
+              <button id="backToVoteSessionsBtn" type="button" class="btn btn-secondary">Voltar para votacoes</button>
+            </div>
+          </div>
+          <div id="ratingLegend" class="helper" hidden>
+            <strong>1</strong> pior tipo de musica pra se tocar |
+            <strong>2</strong> ruim, mas tem piores |
+            <strong>3</strong> musica ok, tanto faz |
+            <strong>4</strong> boa, mas tem melhores |
+            <strong>5</strong> muito boa para repertorio
+          </div>
+          <form id="voteSongForm" class="form-grid draft-grid">
+            <label class="field"><span>Adicionar opcao</span><input id="voteSongName" type="text" maxlength="160" placeholder="Digite a outra opcao" required /></label>
+            <button id="voteSongAddBtn" type="submit" class="btn btn-primary">Adicionar opcao</button>
+          </form>
+          <div id="voteFeedback" class="feedback"></div>
+          <div class="vote-limit"><span id="voteProgressLabel">Seus votos Sim:</span> <strong id="positiveVoteCount">0</strong> / <span id="positiveVoteLimit">0</span></div>
+          <div id="voteSongList" class="stack"></div>
+        </article>
+
+        <aside class="panel panel-body">
+          <h2 class="panel-title">Preview</h2>
+          <p class="panel-subtitle">Ranking das opcoes dessa votacao por quantidade de votos.</p>
+          <div id="voteRanking" class="stack"></div>
+        </aside>
+      </div>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    (function () {
-      const HOSTS = <%- JSON.stringify(scarletHosts) %>;
-      const API_BASE = "/api/scarlet-drive/guests";
-      const MAX_PER_HOST = Number(<%- maxPerHost %>);
-
-      const addForm = document.getElementById("addForm");
-      const addBtn = document.getElementById("addBtn");
-      const guestName = document.getElementById("guestName");
-      const guestHost = document.getElementById("guestHost");
-      const guestPaid = document.getElementById("guestPaid");
-      const guestConfirmed = document.getElementById("guestConfirmed");
-      const filterHost = document.getElementById("filterHost");
-      const filterSummary = document.getElementById("filterSummary");
-      const feedback = document.getElementById("feedback");
-      const tableBody = document.getElementById("guestsTableBody");
-      const totalCounter = document.getElementById("totalCounter");
-      const hostChips = document.getElementById("hostChips");
-
-      let confirmedChart = null;
-      let paidChart = null;
-      let latestPayload = null;
-
-      function setFeedback(message, mode) {
-        feedback.textContent = message || "";
-        feedback.className = "feedback";
-        if (mode) feedback.classList.add(mode);
-      }
-
-      function parseJson(response) {
-        return response.json().catch(() => ({}));
-      }
-
-      function namesAreEqual(left, right) {
-        const a = String(left || "").trim();
-        const b = String(right || "").trim();
-        if (!a || !b) return false;
-        return a.localeCompare(b, "pt-BR", { sensitivity: "base" }) === 0;
-      }
-
-      function hasDuplicateGuestName(name, ignoreId) {
-        if (!latestPayload || !Array.isArray(latestPayload.guests)) {
-          return false;
-        }
-        return latestPayload.guests.some((guest) => {
-          if (ignoreId != null && Number(guest.id) === Number(ignoreId)) {
-            return false;
-          }
-          return namesAreEqual(guest.name, name);
-        });
-      }
-
-      function showDuplicateNameAlert(name) {
-        const text = "Ja existe convidado com esse nome: " + String(name || "").trim();
-        if (window.Swal && typeof window.Swal.fire === "function") {
-          return window.Swal.fire({
-            icon: "warning",
-            title: "Nome duplicado",
-            text,
-            confirmButtonText: "Ok",
-          });
-        }
-        window.alert(text);
-        return Promise.resolve();
-      }
-
-      async function request(url, options) {
-        const response = await fetch(url, {
-          headers: { "Content-Type": "application/json" },
-          ...options,
-        });
-
-        const data = await parseJson(response);
-        if (!response.ok) {
-          const err = new Error(data.message || "Erro na requisicao.");
-          err.code = data.code;
-          throw err;
-        }
-        return data;
-      }
-
-      function makeSelect(options, selectedValue) {
-        const select = document.createElement("select");
-        options.forEach((option) => {
-          const opt = document.createElement("option");
-          opt.value = String(option.value);
-          opt.textContent = option.label;
-          if (String(option.value) === String(selectedValue)) {
-            opt.selected = true;
-          }
-          select.appendChild(opt);
-        });
-        return select;
-      }
-
-      function renderHostChips(counters) {
-        hostChips.innerHTML = "";
-        HOSTS.forEach((host) => {
-          const count = (counters.byHost && counters.byHost[host]) || 0;
-          const chip = document.createElement("div");
-          chip.className = "chip";
-          if (count >= MAX_PER_HOST) chip.classList.add("is-limit");
-
-          const hostName = document.createElement("strong");
-          hostName.textContent = host;
-
-          const value = document.createElement("span");
-          value.className = "chip-value";
-          value.textContent = count + " / " + MAX_PER_HOST;
-
-          chip.appendChild(hostName);
-          chip.appendChild(value);
-          hostChips.appendChild(chip);
-        });
-      }
-
-      function renderTotal(counters, limits) {
-        totalCounter.innerHTML = "Total: <strong>" + counters.total + "</strong> / " + limits.maxGuests;
-      }
-
-      function getFilteredGuests(guests) {
-        const selectedHost = String(filterHost.value || "").trim();
-        if (!selectedHost) return guests;
-        return guests.filter((guest) => guest.invitedBy === selectedHost);
-      }
-
-      function renderFilterSummary(filteredCount, totalCount) {
-        const selectedHost = String(filterHost.value || "").trim();
-        if (!selectedHost) {
-          filterSummary.textContent = "Mostrando todos os convidados (" + totalCount + ").";
-          return;
-        }
-        filterSummary.textContent =
-          "Mostrando " + filteredCount + " de " + totalCount + " convidados de " + selectedHost + ".";
-      }
-
-      function renderCharts(counters) {
-        const commonConfig = {
-          type: "pie",
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                labels: {
-                  color: "#f7f8fa",
-                  font: { family: "Space Grotesk", size: 12 },
-                },
-              },
-            },
-          },
-        };
-
-        const confirmedData = {
-          labels: ["Confirmados", "Nao confirmados"],
-          datasets: [
-            {
-              data: [counters.confirmed.yes, counters.confirmed.no],
-              backgroundColor: ["#1fbe72", "#4a5468"],
-              borderColor: ["#0f1116", "#0f1116"],
-              borderWidth: 2,
-            },
-          ],
-        };
-
-        const paidData = {
-          labels: ["Pago", "Nao pago"],
-          datasets: [
-            {
-              data: [counters.paid.yes, counters.paid.no],
-              backgroundColor: ["#d92f2f", "#4a5468"],
-              borderColor: ["#0f1116", "#0f1116"],
-              borderWidth: 2,
-            },
-          ],
-        };
-
-        if (!confirmedChart) {
-          confirmedChart = new Chart(document.getElementById("confirmedChart"), {
-            ...commonConfig,
-            data: confirmedData,
-          });
-        } else {
-          confirmedChart.data = confirmedData;
-          confirmedChart.update();
-        }
-
-        if (!paidChart) {
-          paidChart = new Chart(document.getElementById("paidChart"), {
-            ...commonConfig,
-            data: paidData,
-          });
-        } else {
-          paidChart.data = paidData;
-          paidChart.update();
-        }
-      }
-
-      async function updateGuest(id, payload) {
-        const data = await request(API_BASE + "/" + encodeURIComponent(id), {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        });
-        renderAll(data);
-        setFeedback("Lista atualizada.", "success");
-      }
-
-      async function deleteGuest(id) {
-        const confirmed = window.confirm("Tem certeza que deseja excluir este convidado?");
-        if (!confirmed) return;
-
-        const data = await request(API_BASE + "/" + encodeURIComponent(id), {
-          method: "DELETE",
-        });
-        renderAll(data);
-        setFeedback("Convidado excluido.", "success");
-      }
-
-      function buildRow(guest) {
-        const tr = document.createElement("tr");
-
-        const nameTd = document.createElement("td");
-        const nameInput = document.createElement("input");
-        nameInput.type = "text";
-        nameInput.className = "name-input";
-        nameInput.maxLength = 120;
-        nameInput.value = guest.name || "";
-        nameInput.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            nameInput.blur();
-          }
-        });
-        nameInput.addEventListener("blur", async () => {
-          const nextValue = String(nameInput.value || "").trim();
-          if (!nextValue || nextValue === guest.name) {
-            nameInput.value = guest.name || "";
-            return;
-          }
-          if (hasDuplicateGuestName(nextValue, guest.id)) {
-            nameInput.value = guest.name || "";
-            showDuplicateNameAlert(nextValue);
-            return;
-          }
-          try {
-            nameInput.disabled = true;
-            await updateGuest(guest.id, { name: nextValue });
-          } catch (error) {
-            if (error.code === "DUPLICATE_NAME") {
-              showDuplicateNameAlert(nextValue);
-            }
-            setFeedback(error.message, "error");
-            nameInput.value = guest.name || "";
-          } finally {
-            nameInput.disabled = false;
-          }
-        });
-        nameTd.appendChild(nameInput);
-
-        const hostTd = document.createElement("td");
-        const hostSelect = makeSelect(
-          HOSTS.map((host) => ({ value: host, label: host })),
-          guest.invitedBy
-        );
-        hostSelect.className = "small-select";
-        hostSelect.addEventListener("change", async () => {
-          try {
-            hostSelect.disabled = true;
-            await updateGuest(guest.id, { invitedBy: hostSelect.value });
-          } catch (error) {
-            setFeedback(error.message, "error");
-            hostSelect.value = guest.invitedBy;
-          } finally {
-            hostSelect.disabled = false;
-          }
-        });
-        hostTd.appendChild(hostSelect);
-
-        const paidTd = document.createElement("td");
-        const paidSelect = makeSelect(
-          [
-            { value: "true", label: "Sim" },
-            { value: "false", label: "Nao" },
-          ],
-          String(!!guest.isPaid)
-        );
-        paidSelect.className = "small-select";
-        paidSelect.addEventListener("change", async () => {
-          try {
-            paidSelect.disabled = true;
-            await updateGuest(guest.id, { isPaid: paidSelect.value === "true" });
-          } catch (error) {
-            setFeedback(error.message, "error");
-            paidSelect.value = String(!!guest.isPaid);
-          } finally {
-            paidSelect.disabled = false;
-          }
-        });
-        paidTd.appendChild(paidSelect);
-
-        const confirmedTd = document.createElement("td");
-        const confirmedSelect = makeSelect(
-          [
-            { value: "true", label: "Sim" },
-            { value: "false", label: "Nao" },
-          ],
-          String(!!guest.isConfirmed)
-        );
-        confirmedSelect.className = "small-select";
-        confirmedSelect.addEventListener("change", async () => {
-          try {
-            confirmedSelect.disabled = true;
-            await updateGuest(guest.id, { isConfirmed: confirmedSelect.value === "true" });
-          } catch (error) {
-            setFeedback(error.message, "error");
-            confirmedSelect.value = String(!!guest.isConfirmed);
-          } finally {
-            confirmedSelect.disabled = false;
-          }
-        });
-        confirmedTd.appendChild(confirmedSelect);
-
-        const actionTd = document.createElement("td");
-        const deleteButton = document.createElement("button");
-        deleteButton.type = "button";
-        deleteButton.className = "btn btn-delete";
-        deleteButton.textContent = "Excluir";
-        deleteButton.addEventListener("click", async () => {
-          try {
-            deleteButton.disabled = true;
-            await deleteGuest(guest.id);
-          } catch (error) {
-            setFeedback(error.message, "error");
-          } finally {
-            deleteButton.disabled = false;
-          }
-        });
-        actionTd.appendChild(deleteButton);
-
-        tr.appendChild(nameTd);
-        tr.appendChild(hostTd);
-        tr.appendChild(paidTd);
-        tr.appendChild(confirmedTd);
-        tr.appendChild(actionTd);
-        return tr;
-      }
-
-      function renderTable(guests) {
-        tableBody.innerHTML = "";
-        if (!guests.length) {
-          const row = document.createElement("tr");
-          const cell = document.createElement("td");
-          cell.colSpan = 5;
-          cell.textContent = "Nenhum convidado cadastrado ainda.";
-          row.appendChild(cell);
-          tableBody.appendChild(row);
-          return;
-        }
-
-        guests.forEach((guest) => {
-          tableBody.appendChild(buildRow(guest));
-        });
-      }
-
-      function renderAll(data) {
-        latestPayload = data || { guests: [], counters: { total: 0, byHost: {}, paid: { yes: 0, no: 0 }, confirmed: { yes: 0, no: 0 } }, limits: { maxGuests: 0 } };
-        const guests = Array.isArray(latestPayload.guests) ? latestPayload.guests : [];
-        const filteredGuests = getFilteredGuests(guests);
-        renderTable(filteredGuests);
-        renderFilterSummary(filteredGuests.length, guests.length);
-        renderTotal(data.counters, data.limits);
-        renderHostChips(data.counters);
-        renderCharts(data.counters);
-      }
-
-      async function loadList() {
-        const data = await request(API_BASE);
-        renderAll(data);
-      }
-
-      addForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const name = String(guestName.value || "").trim();
-        if (!name) {
-          setFeedback("Informe o nome do convidado.", "error");
-          return;
-        }
-        if (hasDuplicateGuestName(name)) {
-          await showDuplicateNameAlert(name);
-          guestName.focus();
-          return;
-        }
-
-        addBtn.disabled = true;
-        try {
-          const data = await request(API_BASE, {
-            method: "POST",
-            body: JSON.stringify({
-              name,
-              invitedBy: guestHost.value,
-              isPaid: guestPaid.value === "true",
-              isConfirmed: guestConfirmed.value === "true",
-            }),
-          });
-
-          renderAll(data);
-          guestName.value = "";
-          guestPaid.value = "false";
-          guestConfirmed.value = "false";
-          guestName.focus();
-          setFeedback("Convidado adicionado com sucesso.", "success");
-        } catch (error) {
-          if (error.code === "DUPLICATE_NAME") {
-            await showDuplicateNameAlert(name);
-          }
-          setFeedback(error.message, "error");
-        } finally {
-          addBtn.disabled = false;
-        }
-      });
-
-      filterHost.addEventListener("change", () => {
-        if (!latestPayload) return;
-        renderAll(latestPayload);
-      });
-
-      loadList().catch((error) => {
-        setFeedback(error.message || "Falha ao carregar lista.", "error");
-        tableBody.innerHTML = "<tr><td colspan='5'>Erro ao carregar dados.</td></tr>";
-      });
-    })();
+    window.SCARLET_DRIVE_BOOT = {
+      hosts: <%- JSON.stringify(scarletHosts) %>,
+      maxGuests: <%- maxGuests %>,
+      maxPerHost: <%- maxPerHost %>,
+      maxPositiveVotesPerVoter: <%- maxPositiveVotesPerVoter %>
+    };
   </script>
+  <script src="/js/scarlet-drive.page.js"></script>
 </body>
 </html>

@@ -133,6 +133,8 @@
                                                     </li>
                                                     <li><a class="nav-link" href="#tab-3"
                                                             data-toggle="tab"><%= t('page.processDetail.sections.transports') %></a></li>
+                                                    <li id="tab-related-link" style="display:none;"><a class="nav-link" href="#tab-related"
+                                                            data-toggle="tab">Relacionados</a></li>
                                                     <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
                                                             data-toggle="tab"><%= t('page.processDetail.sections.trajectory') %></a></li>
                                                     <li><a class="nav-link" href="#tab-5" onclick="loadMapLeft()"
@@ -167,8 +169,8 @@
                                                                         <div class="vertical-timeline-content">
                                                                             <h2><%= t('page.processDetail.state.loading') %></h2>
                                                                             <p><%= t('page.processDetail.state.fetchingEvents') %></p>
-                                                                            <span
-                                                                                class="vertical-date"><small>â€”</small></span>
+                                                                                <span
+                                                                                class="vertical-date"><small>-</small></span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -246,6 +248,14 @@
                                                                     </tr>
                                                                 </tbody>
                                                             </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="tab-pane" id="tab-related" style="display:none;">
+                                                    <div class="panel-body" style="padding-top:0px;">
+                                                        <div id="processRelatedSummary" class="row">
+                                                            <div class="col-lg-12 text-muted">Carregando...</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -380,34 +390,34 @@ const COUNTRIES = [
   "Brasil",
   "Argentina",
   "Chile",
-  "ColÃ´mbia",
-  "MÃ©xico",
+  "Colômbia",
+  "México",
   "Estados Unidos",
-  "CanadÃ¡",
+  "Canadá",
   "Portugal",
   "Espanha",
-  "FranÃ§a",
+  "França",
   "Alemanha",
-  "ItÃ¡lia",
+  "Itália",
   "Reino Unido",
   "Holanda",
-  "BÃ©lgica",
-  "SuÃ­Ã§a",
-  "SuÃ©cia",
+  "Bélgica",
+  "Suíça",
+  "Suécia",
   "Noruega",
   "Dinamarca",
-  "PolÃ´nia",
+  "Polônia",
   "Irlanda",
   "China",
-  "JapÃ£o",
+  "Japão",
   "Coreia do Sul",
-  "Ãndia",
-  "Emirados Ãrabes Unidos",
-  "ArÃ¡bia Saudita",
+  "Índia",
+  "Emirados Árabes Unidos",
+  "Arábia Saudita",
   "Turquia",
-  "AustrÃ¡lia",
-  "Nova ZelÃ¢ndia",
-  "Ãfrica do Sul"
+  "Austrália",
+  "Nova Zelândia",
+  "África do Sul"
 ];
 
 
@@ -544,6 +554,40 @@ function getTransportTypeName(id) {
   return transportTypeById.get(key)?.name || key || "-";
 }
 
+function getUiLocale() {
+  const raw = String(window.i18next?.resolvedLanguage || window.i18next?.language || document.documentElement?.lang || "").toLowerCase();
+  if (raw.startsWith("en")) return "en";
+  if (raw.startsWith("es")) return "es";
+  return "pt";
+}
+
+function localizeProcessTypeName(name) {
+  const raw = String(name || "").trim();
+  if (!raw) return "-";
+
+  const normalized = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let canonical = "";
+  if (["export", "exportacao", "exportacion"].includes(normalized)) canonical = "export";
+  else if (["import", "importacao", "importacion"].includes(normalized)) canonical = "import";
+  else if (["national", "nacional", "domestic"].includes(normalized)) canonical = "national";
+  else return raw;
+
+  const locale = getUiLocale();
+  const labels = {
+    pt: { export: "Exportação", import: "Importação", national: "Nacional" },
+    en: { export: "Export", import: "Import", national: "National" },
+    es: { export: "Exportación", import: "Importación", national: "Nacional" },
+  };
+
+  return labels[locale]?.[canonical] || raw;
+}
+
 function buildCountryOptions(selectedValue) {
   const selected = String(selectedValue || "").trim();
   return COUNTRIES
@@ -609,7 +653,7 @@ function applyPhoneMask($input) {
                             processId = url.searchParams.get("id");
 
                             if (!processId) {
-                                alert("ParÃ¢metro ausente: id");
+                                alert("Parâmetro ausente: id");
                                 return;
                             }
 
@@ -617,7 +661,7 @@ function applyPhoneMask($input) {
                             wireSideModal();
                         } catch (e) {
                             console.error("Init error:", e);
-                            alert("Erro ao iniciar a pÃ¡gina.");
+                            alert("Erro ao iniciar a página.");
                         }
                     });
 
@@ -638,6 +682,7 @@ function applyPhoneMask($input) {
                             renderHistory(processRaw?.events || []);
                             await preloadTransportLookups();
                             renderTransports(processRaw?.transports || []);
+                            renderRelatedRecords();
                         
                             await loadProcessDocuments();
 } catch (e) {
@@ -665,7 +710,7 @@ function applyPhoneMask($input) {
 
                     async function openAddTransportModal() {
                         if (!processId) {
-                            alert("Processo nÃ£o encontrado.");
+                            alert("Processo não encontrado.");
                             return;
                         }
 
@@ -730,7 +775,7 @@ function applyPhoneMask($input) {
   </div>
 
   <div class="form-group">
-    <label for="dtDeparture">SaÃ­da prevista</label>
+    <label for="dtDeparture">Saída prevista</label>
     <input id="dtDeparture" type="date" class="form-control" />
   </div>
 
@@ -783,7 +828,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
 
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
                         return data;
                     }
                     async function deleteTransport(transportId) {
@@ -817,7 +862,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
                         return data;
                     }
 
@@ -922,9 +967,9 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                     }
 
                     function formatDateTimePtBR(iso) {
-                        if (!iso) return "â€”";
+                        if (!iso) return "-";
                         const d = new Date(iso);
-                        if (Number.isNaN(d.getTime())) return "â€”";
+                        if (Number.isNaN(d.getTime())) return "-";
                         return d.toLocaleString("pt-BR");
                     }
 
@@ -952,7 +997,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
                         return data;
                     }
 
@@ -965,7 +1010,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
                         return data;
                     }
 
@@ -978,7 +1023,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         const text = await r.text();
                         let data = {};
                         try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
-                        if (!r.ok) throw new Error(data?.message || "Erro na requisiÃ§Ã£o.");
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
                         return data;
                     }
 
@@ -1094,19 +1139,81 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                         $("#completedPercentText").text(`${completed}%`);
                     }
 
+                    function renderRelatedRecords() {
+                        const $host = $("#processRelatedSummary");
+                        if (!$host.length) return;
+
+                        const companyId = String(processRaw?.companies?.id || processRaw?.company_id || "").trim();
+                        const companyName = String(processRaw?.companies?.company_name || "-").trim() || "-";
+                        const contactName = String(processRaw?.users?.full_name || "-").trim() || "-";
+                        const invoiceNumber = String(processRaw?.invoice || "-").trim() || "-";
+                        const processTypeName = localizeProcessTypeName(processRaw?.process_types?.name || processRaw?.processType?.name || "");
+                        const transportsCount = Array.isArray(processRaw?.transports) ? processRaw.transports.length : 0;
+                        const docsCount = Array.isArray(processDocsItems) ? processDocsItems.length : 0;
+                        const folderLabel = String(processDocsFolder?.name || "Pasta do processo").trim();
+
+                        const cards = [
+                            {
+                                title: "Cliente",
+                                value: companyId
+                                  ? `<a href="/ClientDetails?id=${encodeURIComponent(companyId)}">${escapeHtml(companyName)}</a>`
+                                  : escapeHtml(companyName),
+                            },
+                            { title: "Contato principal", value: escapeHtml(contactName) },
+                            { title: "Invoice", value: escapeHtml(invoiceNumber) },
+                            { title: "Tipo de processo", value: escapeHtml(processTypeName) },
+                            { title: "Transportes", value: escapeHtml(String(transportsCount)) },
+                            {
+                                title: "Documentos",
+                                value: docsCount > 0
+                                  ? `${escapeHtml(String(docsCount))} arquivo(s)<br><small>${escapeHtml(folderLabel)}</small>`
+                                  : "Nenhum documento",
+                            },
+                        ];
+
+                        let docsPreview = "";
+                        if (docsCount > 0) {
+                            docsPreview = `
+                              <div class="col-lg-12" style="margin-top:10px;">
+                                <div class="well" style="margin-bottom:0;">
+                                  <strong>Arquivos relacionados</strong>
+                                  <ul style="margin:10px 0 0 18px; padding:0;">
+                                    ${processDocsItems.slice(0, 5).map((item) => {
+                                      const id = String(item?.id || "").trim();
+                                      const name = escapeHtml(item?.name || item?.filename || "Sem nome");
+                                      return `<li><a href="javascript:void(0)" onclick="openProcessDocById('${escapeHtml(id)}')">${name}</a></li>`;
+                                    }).join("")}
+                                  </ul>
+                                </div>
+                              </div>
+                            `;
+                        }
+
+                        $host.html(cards.map((card) => `
+                          <div class="col-lg-4 col-md-6">
+                            <div class="ibox" style="margin-bottom:12px;">
+                              <div class="ibox-content" style="min-height:110px;">
+                                <div class="text-muted" style="font-size:12px; text-transform:uppercase; margin-bottom:8px;">${escapeHtml(card.title)}</div>
+                                <div style="font-size:16px; font-weight:600; word-break:break-word;">${card.value}</div>
+                              </div>
+                            </div>
+                          </div>
+                        `).join("") + docsPreview);
+                    }
+
                     // =========================
                     // Events render
                     // =========================
                     function typeToMeta(type) {
                         const t = Number(type ?? 0);
                         switch (t) {
-                            case 8: return { icon: "fa fa-briefcase", btn: null, label: "InformaÃ§Ã£o", color: "#1ab394 !important" };
+                            case 8: return { icon: "fa fa-briefcase", btn: null, label: "Informação", color: "#1ab394 !important" };
                             case 1: return { icon: "fa fa-file-text", btn: { text: "Download documento" }, label: "Documento", color: "#1c84c6 !important" };
-                            case 2: return { icon: "fa fa-phone", btn: null, label: "ReuniÃ£o / Telefonema", color: "#f8ac59 !important" };
-                            case 3: return { icon: "fa fa-coffee", btn: null, label: "ReuniÃ£o presencial / CafÃ©", color: "#23c6c8 !important" };
-                            case 4: return { icon: "fa fa-plane", btn: null, label: "InformaÃ§Ã£o - AÃ©rea", color: "#e1bb00 !important" };
-                            case 5: return { icon: "fa fa-ship", btn: null, label: "InformaÃ§Ã£o - MarÃ­timo", color: "#445fad !important" };
-                            case 6: return { icon: "fa fa-truck", btn: null, label: "InformaÃ§Ã£o - terrestre", color: "#a17f72 !important" };
+                            case 2: return { icon: "fa fa-phone", btn: null, label: "Reunião / Telefonema", color: "#f8ac59 !important" };
+                            case 3: return { icon: "fa fa-coffee", btn: null, label: "Reunião presencial / Café", color: "#23c6c8 !important" };
+                            case 4: return { icon: "fa fa-plane", btn: null, label: "Informação - Aérea", color: "#e1bb00 !important" };
+                            case 5: return { icon: "fa fa-ship", btn: null, label: "Informação - Marítimo", color: "#445fad !important" };
+                            case 6: return { icon: "fa fa-truck", btn: null, label: "Informação - terrestre", color: "#a17f72 !important" };
                             case 7: return { icon: "fa fa-check-circle-o", btn: null, label: "Processo finalizado", color: "#dc3545 !important" };
                             case 9: return { icon: "fa fa-envelope-o", btn: null, label: "Email", color: "#1c84c6 !important" };
                             default: return { icon: "fa fa-info-circle", btn: null, label: "Evento" };
@@ -1126,8 +1233,8 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
           <div class="vertical-timeline-icon navy-bg"><i class="fa fa-briefcase"></i></div>
           <div class="vertical-timeline-content">
             <h2>Nenhum evento</h2>
-            <p>NÃ£o hÃ¡ eventos cadastrados para este processo.</p>
-            <span class="vertical-date"><small>â€”</small></span>
+            <p>Não há eventos cadastrados para este processo.</p>
+            <span class="vertical-date"><small>-</small></span>
           </div>
         </div>`;
                             return;
@@ -1140,7 +1247,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                             const meta = typeToMeta(ev?.type);
                             const title = escapeHtml(ev?.title || "Evento");
                             const desc = escapeHtml(ev?.description || "");
-                            const start = ev?.start_time ? formatDateTimePtBR(ev.start_time) : "â€”";
+                            const start = ev?.start_time ? formatDateTimePtBR(ev.start_time) : "-";
                             const end = ev?.end_time ? formatDateTimePtBR(ev.end_time) : null;
 
                             // Documento: mostrar botÃ£o, mas por enquanto sem upload: se nÃ£o existir URL, desabilita
@@ -1150,7 +1257,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                                 if (docUrl) {
                                     btnHtml = `<a href="${escapeHtml(docUrl)}" target="_blank" class="btn btn-sm btn-success">${escapeHtml(meta.btn.text)}</a>`;
                                 } else {
-                                    btnHtml = `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" onclick="alert('Documento ainda nÃ£o disponÃ­vel para download.')">${escapeHtml(meta.btn.text)}</a>`;
+                                    btnHtml = `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" onclick="alert('Documento ainda não disponível para download.')">${escapeHtml(meta.btn.text)}</a>`;
                                 }
                             }
 
@@ -1166,7 +1273,7 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
           ${btnHtml}
           <span class="vertical-date">
             ${escapeHtml(meta.label)}<br>
-            <small>${escapeHtml(start)}${end ? ` â€” ${escapeHtml(end)}` : ""}</small>
+            <small>${escapeHtml(start)}${end ? ` - ${escapeHtml(end)}` : ""}</small>
           </span>
         </div>
       `;
@@ -1191,12 +1298,12 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 
                         sorted.forEach((ev) => {
                             const isActive = Number(ev?.status ?? 0) === 0;
-                            const statusText = isActive ? "Ativo" : "ConcluÃ­do";
+                            const statusText = isActive ? "Ativo" : "Concluído";
                             const statusClass = isActive ? "label-primary" : "label-success";
 
                             const title = escapeHtml(ev?.title || "");
-                            const start = ev?.start_time ? escapeHtml(formatDateTimePtBR(ev.start_time)) : "â€”";
-                            const end = ev?.end_time ? escapeHtml(formatDateTimePtBR(ev.end_time)) : "â€”";
+                            const start = ev?.start_time ? escapeHtml(formatDateTimePtBR(ev.start_time)) : "-";
+                            const end = ev?.end_time ? escapeHtml(formatDateTimePtBR(ev.end_time)) : "-";
                             const desc = escapeHtml(ev?.description || "");
                             const eventId = String(ev?.id || "");
 
@@ -1231,7 +1338,7 @@ function renderTransports(list) {
 
   const rows = Array.isArray(list) ? list : [];
   if (rows.length === 0) {
-    // Agora sÃ£o 8 colunas (incluindo Tipo)
+    // Agora são 8 colunas (incluindo tipo)
     tbody.innerHTML = `<tr><td colspan="8">Nenhum transporte encontrado.</td></tr>`;
     return;
   }
@@ -1281,7 +1388,7 @@ function renderTransports(list) {
                     function editTransportById(transportId) {
                         const t = (transportsCache || []).find(x => String(x?.id) === String(transportId));
                         if (!t) {
-                            alert("Transporte nÃ£o encontrado.");
+                            alert("Transporte não encontrado.");
                             return;
                         }
                         openEditTransportModal(t);
@@ -1370,7 +1477,7 @@ async function openEditTransportModal(t) {
     </div>
 
     <div class="form-group">
-      <label for="dtDeparture">SaÃ­da prevista</label>
+      <label for="dtDeparture">Saída prevista</label>
       <input id="dtDeparture" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.departure_forecast))}" />
     </div>
 
@@ -1473,7 +1580,7 @@ async function openEditTransportModal(t) {
 
                         const html = `
       <div class="form-group">
-        <label for="txtCompleted">ConcluÃ­do (0 a 100)</label>
+        <label for="txtCompleted">Concluído (0 a 100)</label>
         <input id="txtCompleted" type="number" min="0" max="100" class="form-control" value="${escapeHtml(String(completed))}" />
       </div>
 
@@ -1545,29 +1652,29 @@ async function openEditTransportModal(t) {
         <label for="selEventType">Tipo</label>
         <select id="selEventType" class="form-control">
           <option value="1">1 - Documento</option>
-          <option value="2">2 - ReuniÃ£o / Telefonema</option>
-          <option value="3">3 - ReuniÃ£o presencial / CafÃ©</option>
-          <option value="4">4 - Info AÃ©reo</option>
-          <option value="5">5 - Info MarÃ­timo</option>
+          <option value="2">2 - Reunião / Telefonema</option>
+          <option value="3">3 - Reunião presencial / Café</option>
+          <option value="4">4 - Info Aéreo</option>
+          <option value="5">5 - Info Marítimo</option>
           <option value="6">6 - Info terrestre</option>
           <option value="7">7 - Processo finalizado</option>
-          <option value="8">8 - InformaÃ§Ã£o (GenÃ©rica)</option>
+          <option value="8">8 - Informação (Genérica)</option>
           <option value="9">9 - Email</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label for="txtEventTitle">TÃ­tulo</label>
+        <label for="txtEventTitle">Título</label>
         <input id="txtEventTitle" class="form-control" />
       </div>
 
       <div class="form-group">
-        <label for="txtEventDescription">DescriÃ§Ã£o</label>
+        <label for="txtEventDescription">Descrição</label>
         <textarea id="txtEventDescription" class="form-control" rows="4"></textarea>
       </div>
 
       <div class="form-group">
-        <label for="dtStart">InÃ­cio</label>
+        <label for="dtStart">Início</label>
         <input id="dtStart" type="datetime-local" class="form-control" />
       </div>
 
@@ -1586,7 +1693,7 @@ async function openEditTransportModal(t) {
                                     related_table: "process",
                                     related_id: String(processId),
                                     type: Number($("#selEventType").val()),
-                                    title: String($("#txtEventTitle").val() || "").trim() || "(Sem tÃ­tulo)",
+                                    title: String($("#txtEventTitle").val() || "").trim() || "(Sem título)",
                                     description: String($("#txtEventDescription").val() || "").trim() || null,
                                     start_time: $("#dtStart").val() ? new Date($("#dtStart").val()).toISOString() : new Date().toISOString(),
                                     end_time: $("#dtEnd").val() ? new Date($("#dtEnd").val()).toISOString() : null
@@ -1770,11 +1877,13 @@ async function loadProcessDocuments() {
     processDocsItems = (children || []).filter((x) => String(x?.item_type || "").toUpperCase() !== "FOLDER");
 
     renderProcessDocuments();
+    renderRelatedRecords();
     $hint.text("Clique no documento para abrir.");
   } catch (e) {
     console.error("loadProcessDocuments error:", e);
     $hint.text("Erro ao carregar documentos.");
     $list.html('<li class="text-danger">Erro ao carregar documentos.</li>');
+    renderRelatedRecords();
   }
 }
 
@@ -1817,7 +1926,7 @@ async function openProcessDocById(id) {
     window.GECOM?.spinner?.show("Abrindo documento...");
     const dl = await apiGet("/api/documents/" + encodeURIComponent(String(item.id)) + "/presign-download");
     const url = dl?.url || dl?.downloadUrl || dl?.signedUrl;
-    if (!url) throw new Error("NÃ£o foi possÃ­vel gerar o link de download.");
+    if (!url) throw new Error("Não foi possível gerar o link de download.");
     window.open(url, "_blank", "noopener,noreferrer");
   } catch (e) {
     alert(e?.message || "Erro ao abrir documento.");
@@ -1845,7 +1954,7 @@ async function ensureProcessFolderExists() {
   if (processDocsFolder?.id) return processDocsFolder;
 
   const accountId = getAccountIdForCreate();
-  if (!accountId) throw new Error("NÃ£o foi possÃ­vel identificar o account_id para criar documento.");
+  if (!accountId) throw new Error("Não foi possível identificar o account_id para criar documento.");
 
   const processName = String(processRaw?.name || $("#projectName").text() || "Processo").trim();
 
@@ -1867,7 +1976,7 @@ async function ensureProcessFolderExists() {
 async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
   const folder = await ensureProcessFolderExists();
   const accountId = getAccountIdForCreate();
-  if (!accountId) throw new Error("NÃ£o foi possÃ­vel identificar o account_id para enviar.");
+  if (!accountId) throw new Error("Não foi possível identificar o account_id para enviar.");
 
   const fileName = file.name;
   const displayName = displayNameRaw || fileName;
@@ -1903,7 +2012,7 @@ async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
   const putHeaders = presign?.headers || { "Content-Type": mimeType };
   const objectKey = presign?.object_key || presign?.key || null;
 
-  if (!putUrl) throw new Error("NÃ£o foi possÃ­vel gerar a URL de upload.");
+  if (!putUrl) throw new Error("Não foi possível gerar a URL de upload.");
 
   progressCb && progressCb(45, "Enviando arquivo para o Cloudflare R2...");
 
@@ -1925,7 +2034,7 @@ async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
     size_bytes: file.size
   });
 
-  progressCb && progressCb(100, "ConcluÃ­do!");
+  progressCb && progressCb(100, "Concluído!");
   return docId;
 }
 
@@ -1947,7 +2056,7 @@ function openProcessUploadSideModal() {
         <label>Nome</label>
         <input id="sm_uploadDisplayName" type="text" class="form-control" maxlength="255"
           placeholder="Vamos preencher automaticamente com o nome do arquivo" />
-        <small class="text-muted">VocÃª pode alterar o nome antes de enviar.</small>
+        <small class="text-muted">Você pode alterar o nome antes de enviar.</small>
       </div>
 
       <div id="sm_uploadProgress" style="display:none;">
@@ -2025,74 +2134,74 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
     "Chile": [-35.6751, -71.5430],
     "Colombia": [4.5709, -74.2973],
     "Colômbia": [4.5709, -74.2973],
-    "ColÃ´mbia": [4.5709, -74.2973],
+    "Colômbia": [4.5709, -74.2973],
     "Mexico": [23.6345, -102.5528],
     "México": [23.6345, -102.5528],
-    "MÃ©xico": [23.6345, -102.5528],
+    "México": [23.6345, -102.5528],
     "Estados Unidos": [37.0902, -95.7129],
     "United States": [37.0902, -95.7129],
     "Canada": [56.1304, -106.3468],
     "Canadá": [56.1304, -106.3468],
-    "CanadÃ¡": [56.1304, -106.3468],
+    "Canadá": [56.1304, -106.3468],
     "Portugal": [39.3999, -8.2245],
     "Espanha": [40.4637, -3.7492],
     "Spain": [40.4637, -3.7492],
     "França": [46.2276, 2.2137],
     "France": [46.2276, 2.2137],
-    "FranÃ§a": [46.2276, 2.2137],
+    "França": [46.2276, 2.2137],
     "Alemanha": [51.1657, 10.4515],
     "Germany": [51.1657, 10.4515],
     "Itália": [41.8719, 12.5674],
     "Italy": [41.8719, 12.5674],
-    "ItÃ¡lia": [41.8719, 12.5674],
+    "Itália": [41.8719, 12.5674],
     "Reino Unido": [55.3781, -3.4360],
     "United Kingdom": [55.3781, -3.4360],
     "Holanda": [52.1326, 5.2913],
     "Netherlands": [52.1326, 5.2913],
     "Bélgica": [50.5039, 4.4699],
     "Belgium": [50.5039, 4.4699],
-    "BÃ©lgica": [50.5039, 4.4699],
+    "Bélgica": [50.5039, 4.4699],
     "Suíça": [46.8182, 8.2275],
     "Switzerland": [46.8182, 8.2275],
-    "SuÃ­Ã§a": [46.8182, 8.2275],
+    "Suíça": [46.8182, 8.2275],
     "Suécia": [60.1282, 18.6435],
     "Sweden": [60.1282, 18.6435],
-    "SuÃ©cia": [60.1282, 18.6435],
+    "Suécia": [60.1282, 18.6435],
     "Noruega": [60.4720, 8.4689],
     "Norway": [60.4720, 8.4689],
     "Dinamarca": [56.2639, 9.5018],
     "Denmark": [56.2639, 9.5018],
     "Polônia": [51.9194, 19.1451],
     "Poland": [51.9194, 19.1451],
-    "PolÃ´nia": [51.9194, 19.1451],
+    "Polônia": [51.9194, 19.1451],
     "Irlanda": [53.1424, -7.6921],
     "Ireland": [53.1424, -7.6921],
     "China": [35.8617, 104.1954],
     "Japão": [36.2048, 138.2529],
     "Japan": [36.2048, 138.2529],
-    "JapÃ£o": [36.2048, 138.2529],
+    "Japão": [36.2048, 138.2529],
     "Coreia do Sul": [35.9078, 127.7669],
     "South Korea": [35.9078, 127.7669],
     "Índia": [20.5937, 78.9629],
     "India": [20.5937, 78.9629],
-    "Ãndia": [20.5937, 78.9629],
+    "Índia": [20.5937, 78.9629],
     "Emirados Árabes Unidos": [23.4241, 53.8478],
     "United Arab Emirates": [23.4241, 53.8478],
-    "Emirados Ãrabes Unidos": [23.4241, 53.8478],
+    "Emirados Árabes Unidos": [23.4241, 53.8478],
     "Arábia Saudita": [23.8859, 45.0792],
     "Saudi Arabia": [23.8859, 45.0792],
-    "ArÃ¡bia Saudita": [23.8859, 45.0792],
+    "Arábia Saudita": [23.8859, 45.0792],
     "Turquia": [38.9637, 35.2433],
     "Turkey": [38.9637, 35.2433],
     "Austrália": [-25.2744, 133.7751],
     "Australia": [-25.2744, 133.7751],
-    "AustrÃ¡lia": [-25.2744, 133.7751],
+    "Austrália": [-25.2744, 133.7751],
     "Nova Zelândia": [-40.9006, 174.8860],
     "New Zealand": [-40.9006, 174.8860],
-    "Nova ZelÃ¢ndia": [-40.9006, 174.8860],
+    "Nova Zelândia": [-40.9006, 174.8860],
     "África do Sul": [-30.5595, 22.9375],
     "South Africa": [-30.5595, 22.9375],
-    "Ãfrica do Sul": [-30.5595, 22.9375]
+    "África do Sul": [-30.5595, 22.9375]
   };
 
   const COUNTRY_COORDS = new Map(

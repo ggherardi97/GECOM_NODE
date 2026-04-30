@@ -270,6 +270,12 @@ function buildFromCompanyBlock(company, fallbackName) {
   };
 }
 
+function mergeCompanyData(primary, fallback) {
+  const left = primary && typeof primary === "object" ? primary : {};
+  const right = fallback && typeof fallback === "object" ? fallback : {};
+  return Object.assign({}, right, left);
+}
+
 function clampTaxRate01(value) {
   const n = Number(String(value ?? "").replace(",", "."));
   if (!Number.isFinite(n)) return 0;
@@ -283,8 +289,48 @@ function toNumberSafe(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function resolveInvoiceCompanyId(sourceInvoice) {
+  const value =
+    pickCompanyId(sourceInvoice) ||
+    pickCompanyId(sourceInvoice?.data) ||
+    pickCompanyId(sourceInvoice?.company) ||
+    pickCompanyId(sourceInvoice?.companies) ||
+    pickCompanyId(sourceInvoice?.data?.company) ||
+    pickCompanyId(sourceInvoice?.data?.companies) ||
+    sourceInvoice?.company_id ||
+    sourceInvoice?.companyId ||
+    sourceInvoice?.data?.company_id ||
+    sourceInvoice?.data?.companyId ||
+    "";
+
+  const normalized = String(value || "").trim();
+  return normalized || null;
+}
+
+function resolveInvoiceCurrencyId(sourceInvoice) {
+  const value =
+    sourceInvoice?.currency_id ??
+    sourceInvoice?.currencyId ??
+    sourceInvoice?.currency?.id ??
+    sourceInvoice?.currency?.currency_id ??
+    sourceInvoice?.currencies?.id ??
+    sourceInvoice?.currencies?.currency_id ??
+    sourceInvoice?.data?.currency_id ??
+    sourceInvoice?.data?.currencyId ??
+    sourceInvoice?.data?.currency?.id ??
+    sourceInvoice?.data?.currency?.currency_id ??
+    sourceInvoice?.data?.currencies?.id ??
+    sourceInvoice?.data?.currencies?.currency_id ??
+    "";
+
+  const normalized = String(value || "").trim();
+  return normalized || null;
+}
+
 function buildCloneInvoicePayload(sourceInvoice) {
-  const inv = sourceInvoice || {};
+  const inv = sourceInvoice?.data && typeof sourceInvoice.data === "object"
+    ? sourceInvoice.data
+    : (sourceInvoice || {});
   const apiLines = Array.isArray(inv.invoice_lines) ? inv.invoice_lines : [];
 
   const lines = apiLines.map((line) => ({
@@ -298,8 +344,8 @@ function buildCloneInvoicePayload(sourceInvoice) {
   }));
 
   return {
-    company_id: inv?.company_id ? String(inv.company_id).trim() : null,
-    currency_id: inv?.currency_id ? String(inv.currency_id).trim() : null,
+    company_id: resolveInvoiceCompanyId(sourceInvoice),
+    currency_id: resolveInvoiceCurrencyId(sourceInvoice),
     quote_at: inv?.quote_at || null,
     due_at: inv?.due_at || null,
     exchange_rate: inv?.exchange_rate ?? null,
@@ -423,30 +469,30 @@ const totals = {
       me?.tenant_id ||
       me?.tenantId ||
       me?.tenant?.id ||
+      externalContext?.tenantId ||
       null;
     const tenant = await fetchTenantById(baseUrl, authHeader, tenantId, req);
 
     const tenantPrincipalCompanyId =
-      tenant?.company_id ||
-      tenant?.companyId ||
-      tenant?.company?.id ||
-      tenant?.company?.company_id ||
+      pickCompanyId(tenant) ||
+      externalContext?.tenantCompanyId ||
       null;
 
     const meCompanyId =
-      me?.company_id ||
-      me?.companyId ||
-      me?.company?.id ||
-      me?.company?.company_id ||
+      pickCompanyId(me) ||
+      externalContext?.userCompanyId ||
       null;
 
     const senderCompanyId = tenantPrincipalCompanyId || meCompanyId;
     const senderCompany = await fetchCompanyById(baseUrl, authHeader, senderCompanyId, req);
+    const senderCompanyFallback = tenant?.company || null;
+    const senderCompanyResolved = mergeCompanyData(senderCompany, senderCompanyFallback);
     const senderFallbackName =
       tenant?.name ||
       tenant?.tenant_name ||
       tenant?.slug ||
       null;
+    const canEditPrint = !(externalContext?.isExternal || externalContext?.isExternalManager);
 
     let companyLogoDataUri = null;
     try {
@@ -466,12 +512,13 @@ const viewModel = {
   invoice,
   company,
   companyLogoDataUri,
-  from: buildFromCompanyBlock(senderCompany, senderFallbackName),
+  from: buildFromCompanyBlock(senderCompanyResolved, senderFallbackName),
   notesHtml: formatInvoiceNotesForPrint(invoice?.notes),
   invoiceDate: formatDateByLocale(invoice?.created_at || invoice?.invoice_date || invoice?.createdAt, printLocale),
   dueDate: formatDateByLocale(invoice?.due_at || invoice?.due_at, printLocale),
   lines,
   printLocale,
+  canEditPrint,
   totals, // ✅ usa o totals já calculado (subtotal, desconto, imposto, total)
 };
 
@@ -577,7 +624,20 @@ router.post("/invoices/:id/clone", async (req, res) => {
 
     const payload = buildCloneInvoicePayload(sourceData);
     if (!payload.company_id || !payload.currency_id) {
-      return res.status(422).json({ message: "Não foi possível clonar: invoice sem company_id ou currency_id." });
+      console.warn("[BFF] clone invoice validation failed", {
+        sourceId,
+        payload,
+        sourceKeys: Object.keys(sourceData || {}),
+        sourceDataKeys: Object.keys(sourceData?.data || {}),
+      });
+      return res.status(422).json({
+        message: "Não foi possível clonar: invoice sem company_id ou currency_id.",
+        details: {
+          source_invoice_id: sourceId,
+          company_id: payload.company_id,
+          currency_id: payload.currency_id,
+        },
+      });
     }
 
     const createResp = await fetch(`${baseUrl}/invoices`, {
@@ -592,11 +652,27 @@ router.post("/invoices/:id/clone", async (req, res) => {
 
     const created = await readJsonSafe(createResp);
     if (!createResp.ok) {
+      console.error("[BFF] clone invoice create failed", {
+        sourceId,
+        status: createResp.status,
+        payload,
+        response: created,
+      });
       return res.status(createResp.status).json(created ?? {});
     }
 
+    const createdId = String(
+      created?.id ||
+      created?.invoice_id ||
+      created?.invoiceId ||
+      created?.data?.id ||
+      created?.data?.invoice_id ||
+      ""
+    ).trim();
+
     return res.status(201).json({
       ...(created || {}),
+      ...(createdId ? { id: createdId } : {}),
       source_invoice_id: sourceId,
     });
   } catch (error) {
