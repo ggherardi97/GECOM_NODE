@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <title id="portalPageTitle">GECOM - Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <%- include('partials/google-ads-tag') %>
 
   <!-- Novo Processo links -->
   <link href="/Assets/inspinia/css/plugins/iCheck/custom.css" rel="stylesheet">
@@ -170,6 +171,7 @@
         padding: 20px;
         box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
         overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .dynamic-modal-header {
@@ -195,6 +197,23 @@
 
       .dynamic-modal-body {
         margin-bottom: 20px;
+      }
+
+      .dynamic-modal .select2-container {
+        display: block;
+        width: 100% !important;
+        min-width: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .dynamic-modal .select2-container .select2-selection {
+        width: 100%;
+      }
+
+      .dynamic-modal .select2-container--open .select2-dropdown {
+        z-index: 1000001 !important;
+        max-width: calc(100vw - 40px) !important;
       }
 
       /* Side modal form grid alignment (avoid clipped bootstrap rows) */

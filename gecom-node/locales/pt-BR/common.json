@@ -341,6 +341,7 @@
         "uploadDocument": "Upload de Documento",
         "driveLink": "Link do Drive",
         "open": "Abrir",
+        "edit": "Editar",
         "delete": "Excluir"
       },
       "state": {
@@ -376,6 +377,7 @@
         "accountIdMissing": "Não foi possível identificar o account_id para criar.",
         "accountIdMissingForUpload": "Não foi possível identificar o account_id para enviar o arquivo.",
         "createFolderFail": "Erro ao criar pasta.",
+        "updateFolderFail": "Erro ao editar pasta.",
         "saveLinkFail": "Erro ao salvar link.",
         "createRecordFail": "Falha ao criar registro do documento.",
         "uploadUrlFail": "Não foi possível gerar a URL de upload.",
@@ -400,6 +402,13 @@
           "urlLabel": "URL",
           "urlPlaceholder": "https://drive.google.com/...",
           "savedInObjectKey": "O link será salvo no campo object_key."
+        },
+        "editFolder": {
+          "title": "Editar Pasta",
+          "save": "Salvar",
+          "name": "Nome da pasta",
+          "placeholder": "Ex: Contratos",
+          "nameRequired": "Informe o nome da pasta."
         },
         "upload": {
           "singleFileOnly": "Selecione apenas um arquivo.",

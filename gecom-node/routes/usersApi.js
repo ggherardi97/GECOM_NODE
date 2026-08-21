@@ -278,6 +278,38 @@ router.patch("/users/:id", async (req, res) => {
   }
 });
 
+/* -------------------- POST /api/users/:id/resend-access-link -------------------- */
+router.post("/users/:id/resend-access-link", async (req, res) => {
+  try {
+    const { id } = req.params ?? {};
+
+    if (!isNonEmptyString(id)) {
+      return res.status(400).json({
+        message: "Validation error. Missing or invalid path parameter.",
+        missing: ["id"],
+      });
+    }
+
+    const baseUrl = getBackendBaseUrl();
+    const authHeader = getAuthHeader(req);
+
+    const response = await fetch(`${baseUrl}/users/${encodeURIComponent(id)}/resend-access-link`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+        ...getPortalForwardHeaders(req),
+      },
+    });
+
+    const data = await readJsonSafe(response);
+    return res.status(response.status).json(data ?? {});
+  } catch (error) {
+    console.error("POST /api/users/:id/resend-access-link error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 /* -------------------- DELETE /api/users/:id -------------------- */
 router.delete("/users/:id", async (req, res) => {
   try {

@@ -341,6 +341,7 @@
         "uploadDocument": "Subir Documento",
         "driveLink": "Enlace de Drive",
         "open": "Abrir",
+        "edit": "Editar",
         "delete": "Eliminar"
       },
       "state": {
@@ -376,6 +377,7 @@
         "accountIdMissing": "No fue posible identificar el account_id para crear.",
         "accountIdMissingForUpload": "No fue posible identificar el account_id para enviar el archivo.",
         "createFolderFail": "Error al crear carpeta.",
+        "updateFolderFail": "Error al editar carpeta.",
         "saveLinkFail": "Error al guardar enlace.",
         "createRecordFail": "Fallo al crear el registro del documento.",
         "uploadUrlFail": "No fue posible generar la URL de carga.",
@@ -400,6 +402,13 @@
           "urlLabel": "URL",
           "urlPlaceholder": "https://drive.google.com/...",
           "savedInObjectKey": "El enlace se guardará en el campo object_key."
+        },
+        "editFolder": {
+          "title": "Editar Carpeta",
+          "save": "Guardar",
+          "name": "Nombre de la carpeta",
+          "placeholder": "Ej: Contratos",
+          "nameRequired": "Ingresa el nombre de la carpeta."
         },
         "upload": {
           "singleFileOnly": "Selecciona solo un archivo.",

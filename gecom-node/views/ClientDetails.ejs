@@ -750,6 +750,17 @@
       return data;
     }
 
+    async function resendUserAccessLink(userId) {
+      const resp = await fetch(`/api/users/${encodeURIComponent(userId)}/resend-access-link`, {
+        method: "POST",
+        headers: { Accept: "application/json" }
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data?.message || "Falha ao reenviar link de acesso.");
+      return data;
+    }
+
     // -------------------- API: Invoices (sum totals) --------------------
     async function fetchInvoicesByCompany(companyId) {
       const qs = new URLSearchParams();
@@ -918,6 +929,11 @@
                   <i class="fa fa-pencil"></i>
                 </button>
 
+                <button type="button" class="btn btn-warning btn-sm" title="Reenviar link de acesso"
+                  onclick="event.stopPropagation(); onContactResendAccess(${index});">
+                  <i class="fa fa-envelope"></i>
+                </button>
+
                 <button type="button" class="btn btn-danger btn-sm" title="Excluir"
                   onclick="event.stopPropagation(); onContactDelete(${index});">
                   <i class="fa fa-trash"></i>
@@ -1051,6 +1067,29 @@
       });
     }
 
+    async function onContactResendAccess(index) {
+      const contacts = window.__contacts ?? [];
+      const c = contacts[index];
+      if (!c || !c.id) return;
+
+      const ok = await openGlobalConfirm({
+        title: "Atenção",
+        bodyHtml: "<p>Ao reenviar o link de acesso a senha será resetada, deseja prosseguir?</p>",
+        okText: "Sim",
+        okClass: "btn-warning"
+      });
+
+      if (!ok) return;
+
+      try {
+        const result = await resendUserAccessLink(c.id);
+        alert(result?.message || "Link de acesso reenviado com sucesso.");
+      } catch (error) {
+        console.error(error);
+        alert(error?.message || "Erro ao reenviar link de acesso.");
+      }
+    }
+
     async function onContactDelete(index) {
       const contacts = window.__contacts ?? [];
       const c = contacts[index];
@@ -1095,6 +1134,7 @@
     }
 
     window.onContactEdit = onContactEdit;
+    window.onContactResendAccess = onContactResendAccess;
     window.onContactDelete = onContactDelete;
 
     // -------------------- Side modal: New Contact (POST) --------------------

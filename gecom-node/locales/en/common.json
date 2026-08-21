@@ -341,6 +341,7 @@
         "uploadDocument": "Upload Document",
         "driveLink": "Drive link",
         "open": "Open",
+        "edit": "Edit",
         "delete": "Delete"
       },
       "state": {
@@ -376,6 +377,7 @@
         "accountIdMissing": "Could not identify the account_id to create.",
         "accountIdMissingForUpload": "Could not identify the account_id to upload the file.",
         "createFolderFail": "Error creating folder.",
+        "updateFolderFail": "Error editing folder.",
         "saveLinkFail": "Error saving link.",
         "createRecordFail": "Failed to create document record.",
         "uploadUrlFail": "Could not generate the upload URL.",
@@ -400,6 +402,13 @@
           "urlLabel": "URL",
           "urlPlaceholder": "https://drive.google.com/...",
           "savedInObjectKey": "The link will be saved in the object_key field."
+        },
+        "editFolder": {
+          "title": "Edit Folder",
+          "save": "Save",
+          "name": "Folder name",
+          "placeholder": "Ex: Contracts",
+          "nameRequired": "Enter the folder name."
         },
         "upload": {
           "singleFileOnly": "Select only one file.",

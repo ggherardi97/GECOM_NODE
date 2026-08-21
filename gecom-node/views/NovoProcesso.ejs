@@ -1,4 +1,4 @@
-<style>
+﻿<style>
   .ibox-title {
     padding: 15px 90px 20px 15px;
   }
@@ -71,12 +71,12 @@
 
   .select2-container--open,
   .select2-dropdown {
-    z-index: 200000 !important;
+    z-index: 1000001 !important;
   }
 
   /* Fix: typeahead dropdown position/z-index inside wizard/table */
   .typeahead.dropdown-menu {
-    z-index: 999999 !important;
+    z-index: 1000001 !important;
     max-height: 240px;
     overflow-y: auto;
   }
@@ -365,7 +365,8 @@
                       <th style="min-width:170px;">Status *</th>
                       <th style="min-width:120px;">Tracking Modo</th>
                       <th style="min-width:150px;">Tracking Provider</th>
-                      <th style="min-width:160px;">Tracking External ID</th>
+                      <th style="min-width:160px;">Tracking IMO/MMSI</th>
+                      <th style="min-width:150px;">Ship ID</th>
                       <th style="min-width:150px;">Previsão Embarque</th>
                       <th style="min-width:150px;">Previsão Chegada</th>
                       <th style="width:70px;" class="text-center">Ações</th>
@@ -473,6 +474,8 @@
     processStatusConfigs: [],
     processStatusByLegacy: new Map(),
     companiesById: new Map(),
+    transportRows: [],
+    transportEditIndex: null,
     transportSeq: 0,
 
     // Step 3 (documents)
@@ -550,6 +553,114 @@
     const next = { ...(payload || {}) };
     unsupported.forEach((field) => { delete next[field]; });
     return next;
+  }
+
+  function isUuidLike(value) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+  }
+
+  function normalizeLooseText(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+  }
+
+  function resolveProcessTypeIdFromUi() {
+    const $ddl = $("#process_type_id");
+    const rawValue = String($ddl.val() || "").trim();
+    if (isUuidLike(rawValue)) return rawValue;
+
+    const selectedValue = String($ddl.find("option:selected").val() || "").trim();
+    if (isUuidLike(selectedValue)) return selectedValue;
+
+    const selectedText = String($ddl.find("option:selected").text() || "").trim();
+    if (selectedText) {
+      const byName = (state.processTypes || []).find((item) => (
+        normalizeLooseText(item?.name) === normalizeLooseText(selectedText) ||
+        normalizeLooseText(item?.name) === normalizeLooseText(rawValue)
+      ));
+      if (byName?.id) return String(byName.id).trim();
+    }
+
+    return rawValue;
+  }
+
+  function validateProcessCreateFields() {
+    const companyId = String($("#company_id").val() || "").trim();
+    const processTypeId = resolveProcessTypeIdFromUi();
+
+    if (!companyId || !isUuidLike(companyId)) {
+      return "Selecione uma empresa válida antes de criar o processo.";
+    }
+
+    if (!processTypeId || !isUuidLike(processTypeId)) {
+      return "Selecione um tipo de processo válido antes de criar o processo.";
+    }
+
+    return null;
+  }
+
+  function collectProcessCreatePayload() {
+    const companyId = String($("#company_id").val() || "").trim();
+    const processTypeId = resolveProcessTypeIdFromUi();
+    const invoice = String($("#invoice").val() || "").trim();
+    const primaryContactId = String($("#primary_contact_id").val() || "").trim();
+    const shipDate = toIsoZFromBr(String($("#ship_date").val() || "").trim());
+    const totalValue = parseCurrencyPtBr($("#total_value").val());
+    const payload = {
+      company_id: companyId,
+      process_type_id: processTypeId,
+    };
+
+    if (invoice) payload.invoice = invoice;
+    if (primaryContactId) payload.primary_contact_id = primaryContactId;
+    if (shipDate) payload.ship_date = shipDate;
+    if (Number.isFinite(totalValue)) payload.total_value = totalValue;
+
+    const statusConfigId = pickDefaultProcessStatusConfig();
+    if (statusConfigId) payload.status_config_id = statusConfigId;
+
+    return payload;
+  }
+
+  async function ensureProcessCreated() {
+    if (state.processId) return state.processId;
+    if (state.creating) return state.processId;
+
+    state.creating = true;
+    try {
+      const validationError = validateProcessCreateFields();
+      if (validationError) {
+        throw new Error(validationError);
+      }
+
+      const payload = collectProcessCreatePayload();
+      let createdProcess;
+
+      try {
+        createdProcess = await apiPost("/api/processes", payload);
+      } catch (error) {
+        const strippedPayload = stripUnsupportedProcessFields(payload, error);
+        if (!strippedPayload) throw error;
+        createdProcess = await apiPost("/api/processes", strippedPayload);
+      }
+
+      const processId = String(createdProcess?.id || createdProcess?.process_id || "").trim();
+      if (!processId) {
+        throw new Error("O processo foi criado, mas não retornou ID.");
+      }
+
+      state.processId = processId;
+      const processNumber = String(createdProcess?.process_number || createdProcess?.processNumber || "").trim();
+      if (processNumber) {
+        $("#process_number").val(processNumber);
+      }
+
+      return processId;
+    } finally {
+      state.creating = false;
+    }
   }
 
   function parseDateBr(value) {
@@ -978,7 +1089,6 @@
         $menuContainer.css("position", "relative");
       }
 
-      // OK: main fix: fitToElement keeps dropdown aligned with the input
       $input.typeahead({
         source: countries,
         autoSelect: true,
@@ -994,251 +1104,370 @@
     });
   }
 
-  function buildTransportRow(rowId) {
-    const typeOptions = [`<option value="">Selecionar...</option>`]
-      .concat(state.transportTypes.map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.name)}</option>`))
-      .join("");
+  function nextTransportTempId() {
+    state.transportSeq = Number(state.transportSeq || 0) + 1;
+    return `trow_${state.transportSeq}`;
+  }
 
-    const statusOptions = [`<option value="">Selecionar...</option>`]
-      .concat(state.transportStatuses.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`))
-      .join("");
+  function getTransportTypeLabel(typeId) {
+    const id = String(typeId || '').trim();
+    if (!id) return '-';
+    const match = state.transportTypes.find((item) => String(item?.id || '').trim() === id);
+    return String(match?.name || match?.label || match?.code || id).trim() || '-';
+  }
 
-    const trackingModeOptions = `
-      <option value="">-</option>
-      <option value="AIR">AIR</option>
-      <option value="SEA">SEA</option>
-    `;
+  function getTransportStatusLabel(statusId) {
+    const id = String(statusId || '').trim();
+    if (!id) return '-';
+    const match = state.transportStatuses.find((item) => String(item?.id || '').trim() === id);
+    return String(match?.name || match?.status_name || match?.label || id).trim() || '-';
+  }
 
-    const trackingProviderOptions = `
-      <option value="">-</option>
-      <option value="FR24">FR24</option>
-      <option value="MARINETRAFFIC">Marine Traffic</option>
-    `;
+  function formatTransportDateForDisplay(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('pt-BR');
+  }
 
-    return `
-      <tr data-row-id="${escapeHtml(rowId)}">
-        <td><input type="text" class="form-control" id="${escapeHtml(rowId)}_company" placeholder="Ex: Maersk" /></td>
-        <td><input type="text" class="form-control phone-mask" id="${escapeHtml(rowId)}_phone" placeholder="(11) 99999-9999" /></td>
-        <td><input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_origin" placeholder="País de origem" autocomplete="off" /></td>
-        <td><input type="text" class="form-control autocompleteCountry" id="${escapeHtml(rowId)}_destination" placeholder="País de destino" autocomplete="off" /></td>
-        <td>
-          <select class="form-control transport-type" id="${escapeHtml(rowId)}_type">${typeOptions}</select>
-        </td>
-        <td>
-          <select class="form-control transport-status" id="${escapeHtml(rowId)}_status">${statusOptions}</select>
-        </td>
-        <td>
-          <select class="form-control transport-tracking-mode" id="${escapeHtml(rowId)}_tracking_mode">${trackingModeOptions}</select>
-        </td>
-        <td>
-          <select class="form-control transport-tracking-provider" id="${escapeHtml(rowId)}_tracking_provider">${trackingProviderOptions}</select>
-        </td>
-        <td><input type="text" class="form-control" id="${escapeHtml(rowId)}_tracking_external_id" placeholder="AZ1234 / IMO123..." /></td>
-        <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_departure" autocomplete="off" /></td>
-        <td><input type="text" class="form-control datepicker" id="${escapeHtml(rowId)}_arrival" autocomplete="off" /></td>
-        <td class="text-center">
-          <button type="button" class="btn btn-danger btn-xs2 btn-remove-transport"><i class="fa fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
+  function buildTransportTrackingSummary(transport) {
+    const parts = [];
+    const mode = String(transport?.tracking_mode || '').trim();
+    const provider = String(transport?.tracking_provider || '').trim();
+    const externalId = String(transport?.tracking_external_id || '').trim();
+    const shipId = String(transport?.ship_id || '').trim();
+
+    if (mode) parts.push(mode);
+    if (provider) parts.push(provider);
+    if (externalId) parts.push(externalId);
+    if (shipId) parts.push(`SHIP_ID:${shipId}`);
+
+    return parts.length ? parts.join(' â€¢ ') : '-';
+  }
+
+  function renderTransportTable() {
+    const tbody = document.getElementById('transportsTbody');
+    if (!tbody) return;
+
+    if (!state.transportRows.length) {
+      tbody.innerHTML = '<tr id="emptyTransportRow"><td colspan="13" class="text-muted">Nenhum transporte adicionado ainda.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = state.transportRows.map((transport, index) => {
+      return `
+        <tr data-transport-index="${index}">
+          <td>${escapeHtml(transport.transport_company || '-')}</td>
+          <td>${escapeHtml(transport.contact_phone || '-')}</td>
+          <td>${escapeHtml(transport.origin || '-')}</td>
+          <td>${escapeHtml(transport.destination || '-')}</td>
+          <td>${escapeHtml(getTransportTypeLabel(transport.transport_type_id))}</td>
+          <td>${escapeHtml(getTransportStatusLabel(transport.transport_status_id))}</td>
+          <td>${escapeHtml(transport.tracking_mode || '-')}</td>
+          <td>${escapeHtml(transport.tracking_provider || '-')}</td>
+          <td>${escapeHtml(transport.tracking_external_id || '-')}</td>
+          <td>${escapeHtml(transport.ship_id || '-')}</td>
+          <td>${escapeHtml(formatTransportDateForDisplay(transport.departure_forecast))}</td>
+          <td>${escapeHtml(formatTransportDateForDisplay(transport.arrival_forecast))}</td>
+          <td class="text-center">
+            <button type="button" class="btn btn-warning btn-xs2 btn-edit-transport" data-transport-index="${index}" title="Editar"><i class="fa fa-pencil"></i></button>
+            <button type="button" class="btn btn-danger btn-xs2 btn-delete-transport" data-transport-index="${index}" title="Excluir"><i class="fa fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   function normalizeTransportTypeToken(value) {
-    const input = String(value || "").trim();
-    if (!input) return "";
+    const input = String(value || '').trim();
+    if (!input) return '';
     try {
-      return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+      return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
     } catch {
       return input.toUpperCase();
     }
   }
 
-  function resolveTransportTrackingDefaults(typeId) {
-    const id = String(typeId || "").trim();
+  function resolveTransportTrackingDefaults(typeId, types) {
+    const id = String(typeId || '').trim();
     if (!id) return null;
 
-    const match = state.transportTypes.find((item) => String(item?.id || "").trim() === id);
-    const token = normalizeTransportTypeToken(match?.name || match?.label || match?.code || "");
+    const rows = Array.isArray(types) ? types : state.transportTypes;
+    const match = rows.find((item) => String(item?.id || '').trim() === id);
+    const token = normalizeTransportTypeToken(match?.name || match?.label || match?.code || '');
 
     if (!token) return null;
-    if (token.includes("MARIT") || token.includes("SEA")) {
-      return { mode: "SEA", provider: "MARINETRAFFIC" };
+    if (token.includes('MARIT') || token.includes('SEA')) {
+      return { mode: 'SEA', provider: 'MARINETRAFFIC' };
     }
-    if (token.includes("AERE") || token.includes("AIR")) {
-      return { mode: "AIR", provider: "FR24" };
+    if (token.includes('AERE') || token.includes('AIR')) {
+      return { mode: 'AIR', provider: 'FR24' };
     }
 
     return null;
   }
 
-  function applyTransportTrackingDefaults(rowId) {
-    const typeSelect = document.getElementById(`${rowId}_type`);
-    const modeSelect = document.getElementById(`${rowId}_tracking_mode`);
-    const providerSelect = document.getElementById(`${rowId}_tracking_provider`);
-    if (!typeSelect || !modeSelect || !providerSelect) return;
-
-    const defaults = resolveTransportTrackingDefaults(typeSelect.value);
-    if (!defaults) return;
-
-    $(modeSelect).val(defaults.mode).trigger("change");
-    $(providerSelect).val(defaults.provider).trigger("change");
-  }
-
-  function addTransportRow() {
-    const tbody = document.getElementById("transportsTbody");
-    if (!tbody) return;
-
-    const rowId = `trow_${++state.transportSeq}`;
-    tbody.insertAdjacentHTML("beforeend", buildTransportRow(rowId));
-
-    const tr = tbody.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
-    if (!tr) return;
-
-    initDatePickers(tr);
-    const $typeSelect = $(tr).find("select.transport-type");
-    initSelect2($typeSelect, "Selecionar...", null);
-    initSelect2($(tr).find("select.transport-status"), "Selecionar...", null);
-    initSelect2($(tr).find("select.transport-tracking-mode"), "Selecionar...", null);
-    initSelect2($(tr).find("select.transport-tracking-provider"), "Selecionar...", null);
-    $typeSelect.off("change.transportDefaults").on("change.transportDefaults", function () {
-      applyTransportTrackingDefaults(rowId);
-    });
-
-    // OK: typeahead align fix per row
-    initCountriesTypeahead(tr);
-  }
-
-  document.addEventListener("click", function (ev) {
-    const btn = ev.target && ev.target.closest(".btn-remove-transport");
-    if (!btn) return;
-    const tr = btn.closest("tr[data-row-id]");
-    if (tr) tr.remove();
-  }, true);
-
   function readTransportRows() {
-    const tbody = document.getElementById("transportsTbody");
-    const rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-row-id]")) : [];
+    return Array.isArray(state.transportRows) ? state.transportRows : [];
+  }
 
-    return rows.map(tr => {
-      const rowId = tr.getAttribute("data-row-id");
-      const transport_company = (document.getElementById(`${rowId}_company`)?.value || "").trim();
-      const contact_phone = (document.getElementById(`${rowId}_phone`)?.value || "").trim();
-      const origin = (document.getElementById(`${rowId}_origin`)?.value || "").trim();
-      const destination = (document.getElementById(`${rowId}_destination`)?.value || "").trim();
-      const transport_type_id = String(document.getElementById(`${rowId}_type`)?.value || "").trim();
-      const transport_status_id = String(document.getElementById(`${rowId}_status`)?.value || "").trim();
-      const tracking_mode = String(document.getElementById(`${rowId}_tracking_mode`)?.value || "").trim();
-      const tracking_provider = String(document.getElementById(`${rowId}_tracking_provider`)?.value || "").trim();
-      const tracking_external_id = String(document.getElementById(`${rowId}_tracking_external_id`)?.value || "").trim();
-
-      const departure_forecast = toIsoZFromBr(document.getElementById(`${rowId}_departure`)?.value || "");
-      const arrival_forecast = toIsoZFromBr(document.getElementById(`${rowId}_arrival`)?.value || "");
-
-      return {
-        transport_company,
-        contact_phone: contact_phone || null,
-        origin,
-        destination,
-        transport_type_id: transport_type_id || null,
-        transport_status_id: transport_status_id || null,
-        tracking_mode: tracking_mode || null,
-        tracking_provider: tracking_provider || null,
-        tracking_external_id: tracking_external_id || null,
-        departure_forecast: departure_forecast || null,
-        arrival_forecast: arrival_forecast || null
-      };
-    });
+  function validateTransportItem(item) {
+    if (!item.transport_company) return 'Preencha a companhia do transporte.';
+    if (!item.origin) return 'Preencha a origem do transporte.';
+    if (!item.destination) return 'Preencha o destino do transporte.';
+    if (!item.transport_type_id) return 'Selecione o tipo de transporte.';
+    if (!item.transport_status_id) return 'Selecione o status do transporte.';
+    return null;
   }
 
   function validateTransportRows() {
     const rows = readTransportRows();
-    if (!rows.length) return "Adicione pelo menos 1 transporte.";
-    const invalid = rows.find(r => !r.transport_company || !r.origin || !r.destination || !r.transport_type_id || !r.transport_status_id);
-    if (invalid) return "Preencha Companhia, Origem, Destino, Tipo e Status em todos os transportes.";
-
+    if (!rows.length) return 'Adicione pelo menos 1 transporte.';
+    const invalid = rows.find((row) => validateTransportItem(row));
+    if (invalid) return validateTransportItem(invalid);
     return null;
   }
 
-  // =========================
-  // Create process + transports
-  // =========================
-  function buildProcessPayload() {
-    const companyId = String($("#company_id").val() || "").trim();
-    const contactId = String($("#primary_contact_id").val() || "").trim();
-    const statusConfigId = pickDefaultProcessStatusConfig();
-    const legacyStatus = pickLegacyStatusByConfigId(statusConfigId);
-    const totalValueRaw = parseCurrencyPtBr($("#total_value").val());
+  function buildTransportModalBody(transport) {
+    const types = Array.isArray(state.transportTypes) ? state.transportTypes : [];
+    const statuses = Array.isArray(state.transportStatuses) ? state.transportStatuses : [];
+    const trackingMode = String(transport?.tracking_mode || '').trim();
+    const trackingProvider = String(transport?.tracking_provider || '').trim();
+    const currentTypeId = String(transport?.transport_type_id || '').trim();
+    const currentStatusId = String(transport?.transport_status_id || '').trim();
+    const departureValue = transport?.departure_forecast ? new Date(transport.departure_forecast).toLocaleDateString('pt-BR') : '';
+    const arrivalValue = transport?.arrival_forecast ? new Date(transport.arrival_forecast).toLocaleDateString('pt-BR') : '';
+    const currentShipId = String(transport?.ship_id || '').trim();
 
-    const payload = {
-      status: legacyStatus != null ? legacyStatus : 0,
-      company_id: companyId,
-      primary_contact_id: contactId || null,
-      invoice: String($("#invoice").val() || "").trim() || null,
-      ship_date: toIsoZFromBr(document.getElementById("ship_date")?.value || "") || null,
-      process_type_id: String($("#process_type_id").val() || "").trim() || null,
-      total_value: Number.isFinite(totalValueRaw) ? Number(totalValueRaw.toFixed(2)) : null
-    };
+    const typeOptions = ['<option value="">Selecionar...</option>']
+      .concat(types.map((t) => {
+        const id = String(t?.id ?? '');
+        const label = String(t?.name ?? t?.type_name ?? t?.label ?? id);
+        const selected = id === currentTypeId ? ' selected' : '';
+        return `<option value="${escapeHtml(id)}"${selected}>${escapeHtml(label)}</option>`;
+      }))
+      .join('');
 
-    if (statusConfigId) payload.status_config_id = statusConfigId;
-    return payload;
+    const statusOptions = ['<option value="">Selecionar...</option>']
+      .concat(statuses.map((s) => {
+        const id = String(s?.id ?? '');
+        const label = String(s?.name ?? s?.status_name ?? s?.label ?? id);
+        const selected = id === currentStatusId ? ' selected' : '';
+        return `<option value="${escapeHtml(id)}"${selected}>${escapeHtml(label)}</option>`;
+      }))
+      .join('');
+
+    const trackingModeOptions = `
+      <option value="">-</option>
+      <option value="AIR"${trackingMode === 'AIR' ? ' selected' : ''}>AIR</option>
+      <option value="SEA"${trackingMode === 'SEA' ? ' selected' : ''}>SEA</option>
+    `;
+
+    const trackingProviderOptions = `
+      <option value="">-</option>
+      <option value="FR24"${trackingProvider === 'FR24' ? ' selected' : ''}>FR24</option>
+      <option value="MARINETRAFFIC"${trackingProvider === 'MARINETRAFFIC' ? ' selected' : ''}>Marine Traffic</option>
+    `;
+
+    return `
+      <div class="form-group">
+        <label for="transportModalCompany">Transportadora</label>
+        <input id="transportModalCompany" type="text" class="form-control" value="${escapeHtml(transport?.transport_company || '')}" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalPhone">Telefone de contato</label>
+        <input id="transportModalPhone" type="text" class="form-control phone-mask" value="${escapeHtml(transport?.contact_phone || '')}" placeholder="(11) 99999-9999" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalOrigin">Origem</label>
+        <input id="transportModalOrigin" type="text" class="form-control autocompleteCountry" value="${escapeHtml(transport?.origin || '')}" placeholder="País de origem" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalDestination">Destino</label>
+        <input id="transportModalDestination" type="text" class="form-control autocompleteCountry" value="${escapeHtml(transport?.destination || '')}" placeholder="País de destino" autocomplete="off" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalType">Tipo de transporte</label>
+        <select id="transportModalType" class="form-control transport-modal-type">${typeOptions}</select>
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalStatus">Status do transporte</label>
+        <select id="transportModalStatus" class="form-control transport-modal-status">${statusOptions}</select>
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalTrackingMode">Tracking mode</label>
+        <select id="transportModalTrackingMode" class="form-control transport-modal-tracking-mode">${trackingModeOptions}</select>
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalTrackingProvider">Tracking provider</label>
+        <select id="transportModalTrackingProvider" class="form-control transport-modal-tracking-provider">${trackingProviderOptions}</select>
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalTrackingExternalId">Tracking IMO/MMSI</label>
+        <input id="transportModalTrackingExternalId" type="text" class="form-control" value="${escapeHtml(transport?.tracking_external_id || '')}" placeholder="IMO ou MMSI do navio" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalShipId">Ship ID</label>
+        <input id="transportModalShipId" type="text" class="form-control" value="${escapeHtml(currentShipId)}" placeholder="SHIP_ID do MarineTraffic" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalDeparture">Previsão de embarque</label>
+        <input id="transportModalDeparture" type="text" class="form-control datepicker" value="${escapeHtml(departureValue)}" />
+      </div>
+
+      <div class="form-group">
+        <label for="transportModalArrival">Previsão de chegada</label>
+        <input id="transportModalArrival" type="text" class="form-control datepicker" value="${escapeHtml(arrivalValue)}" />
+      </div>
+    `;
   }
 
-  async function ensureProcessCreated() {
-    if (state.processId) return state.processId;
-    if (state.creating) return null;
+  function collectTransportModalValues() {
+    return {
+      transport_company: String($('#transportModalCompany').val() || '').trim(),
+      contact_phone: String($('#transportModalPhone').val() || '').trim() || null,
+      origin: String($('#transportModalOrigin').val() || '').trim(),
+      destination: String($('#transportModalDestination').val() || '').trim(),
+      transport_type_id: String($('#transportModalType').val() || '').trim() || null,
+      transport_status_id: String($('#transportModalStatus').val() || '').trim() || null,
+      tracking_mode: String($('#transportModalTrackingMode').val() || '').trim() || null,
+      tracking_provider: String($('#transportModalTrackingProvider').val() || '').trim() || null,
+      tracking_external_id: String($('#transportModalTrackingExternalId').val() || '').trim() || null,
+      ship_id: String($('#transportModalShipId').val() || '').trim() || null,
+      departure_forecast: toIsoZFromBr(String($('#transportModalDeparture').val() || '').trim()) || null,
+      arrival_forecast: toIsoZFromBr(String($('#transportModalArrival').val() || '').trim()) || null
+    };
+  }
 
-    const payload = buildProcessPayload();
-    if (!payload.company_id) throw new Error("Empresa é obrigatória.");
+  function applyTransportModalDefaults(rootEl) {
+    const $root = rootEl ? $(rootEl) : $(document);
+    const typeSelect = $root.find('#transportModalType');
+    const trackingModeSelect = $root.find('#transportModalTrackingMode');
+    const trackingProviderSelect = $root.find('#transportModalTrackingProvider');
+    if (!typeSelect.length || !trackingModeSelect.length || !trackingProviderSelect.length) return;
 
-    state.creating = true;
-    try {
-      let created;
-      try {
-        created = await apiPost("/api/processes", payload);
-      } catch (e) {
-        const compatPayload = stripUnsupportedProcessFields(payload, e);
-        if (!compatPayload) throw e;
-        console.warn("Backend ainda não aceita alguns campos de processo. Reenviando payload compatível.", e?.message || e);
-        created = await apiPost("/api/processes", compatPayload);
+    const applyDefaults = function () {
+      const defaults = resolveTransportTrackingDefaults(typeSelect.val(), state.transportTypes);
+      if (!defaults) return;
+      trackingModeSelect.val(defaults.mode).trigger('change');
+      trackingProviderSelect.val(defaults.provider).trigger('change');
+    };
+
+    typeSelect.off('change.transportDefaults').on('change.transportDefaults', applyDefaults);
+    applyDefaults();
+  }
+
+  function openTransportSideModal(editIndex) {
+    const isEdit = Number.isInteger(editIndex) && editIndex >= 0 && editIndex < state.transportRows.length;
+    const current = isEdit ? state.transportRows[editIndex] : null;
+
+    openSideModal({
+      title: isEdit ? 'Editar transporte' : 'Adicionar transporte',
+      okText: isEdit ? 'Salvar' : 'Criar',
+      bodyHtml: buildTransportModalBody(current),
+      onOpen: function () {
+        const rootEl = document.getElementById('dynamicModalBody') || document.body;
+        initDatePickers(rootEl);
+        initCountriesTypeahead(rootEl);
+        applyTransportModalDefaults(rootEl);
+        if (!current?.departure_forecast) $('#transportModalDeparture').val('');
+        if (!current?.arrival_forecast) $('#transportModalArrival').val('');
+        if (!current?.ship_id) $('#transportModalShipId').val('');
+      },
+      onOk: async function () {
+        const item = collectTransportModalValues();
+        const error = validateTransportItem(item);
+        if (error) {
+          alert(error);
+          return true;
+        }
+
+        if (isEdit) {
+          state.transportRows[editIndex] = item;
+        } else {
+          state.transportRows.push(item);
+        }
+
+        renderTransportTable();
+        return false;
       }
-      const id = created?.id ? String(created.id) : (created?.process_id ? String(created.process_id) : null);
-      if (!id) throw new Error("Processo criado, mas não retornou ID.");
-      state.processId = id;
-      return id;
-    } finally {
-      state.creating = false;
-    }
+    });
+  }
+
+  function addTransportRow() {
+    openTransportSideModal(null);
+  }
+
+  function deleteTransportRow(index) {
+    const safeIndex = Number(index);
+    if (!Number.isInteger(safeIndex) || safeIndex < 0 || safeIndex >= state.transportRows.length) return;
+
+    const ok = confirm('Deseja excluir este transporte?');
+    if (!ok) return;
+
+    state.transportRows.splice(safeIndex, 1);
+    renderTransportTable();
+  }
+
+  function bindTransportTableActionsOnce() {
+    if (window.__bindTransportTableActionsDone) return;
+    window.__bindTransportTableActionsDone = true;
+
+    $(document).off('click.gecom', '.btn-edit-transport');
+    $(document).on('click.gecom', '.btn-edit-transport', function (e) {
+      e.preventDefault();
+      const index = Number($(this).data('transport-index'));
+      openTransportSideModal(index);
+    });
+
+    $(document).off('click.gecom', '.btn-delete-transport');
+    $(document).on('click.gecom', '.btn-delete-transport', function (e) {
+      e.preventDefault();
+      const index = Number($(this).data('transport-index'));
+      deleteTransportRow(index);
+    });
   }
 
   async function createTransportsForProcess(processId) {
     const rows = readTransportRows();
-    for (const t of rows) {
-      const createdTransport = await apiPost("/api/transports", {
-        transport_company: t.transport_company,
-        origin: t.origin,
-        destination: t.destination,
-        contact_phone: t.contact_phone,
-        transport_type_id: t.transport_type_id,
-        transport_status_id: t.transport_status_id,
-        departure_forecast: t.departure_forecast,
-        arrival_forecast: t.arrival_forecast,
+    for (const transport of rows) {
+      const createdTransport = await apiPost('/api/transports', {
+        transport_company: transport.transport_company,
+        origin: transport.origin,
+        destination: transport.destination,
+        contact_phone: transport.contact_phone,
+        ship_id: transport.ship_id,
+        transport_type_id: transport.transport_type_id,
+        transport_status_id: transport.transport_status_id,
+        departure_forecast: transport.departure_forecast,
+        arrival_forecast: transport.arrival_forecast,
         process_id: processId
       });
 
-      const transportId = String(createdTransport?.id || createdTransport?.transport_id || "").trim();
-      const hasTracking = !!(t.tracking_mode && t.tracking_provider && t.tracking_external_id);
+      const transportId = String(createdTransport?.id || createdTransport?.transport_id || '').trim();
+      const hasTracking = !!(transport.tracking_mode && transport.tracking_provider && transport.tracking_external_id);
       if (transportId && hasTracking) {
         await apiPut(`/api/transports/${encodeURIComponent(transportId)}/tracking/link`, {
-          mode: t.tracking_mode,
-          provider: t.tracking_provider,
-          externalId: t.tracking_external_id
+          mode: transport.tracking_mode,
+          provider: transport.tracking_provider,
+          externalId: transport.tracking_external_id
         });
       }
     }
   }
 
   // =========================
-  // Step 3 - Documents upload (MULTI up to 5)
+  // Create process + transports
   // =========================
   function showProcDocProgress(flag, pct, text) {
     $("#procDocUploadProgress").toggle(!!flag);
@@ -1959,7 +2188,7 @@
         document.getElementById("invoiceHelp").style.display = "block";
         document.getElementById("contactHelp").style.display = "block";
 
-        addTransportRow();
+        renderTransportTable();
       },
 
       onStepChanging: function (event, currentIndex, newIndex) {
@@ -2138,6 +2367,7 @@
 
     bindCompanyChangeOnce();
     bindAddTransportOnce();
+    bindTransportTableActionsOnce();
     bindProcDocumentsToolbarOnce();
 
     // OK: Dropzone
@@ -2176,7 +2406,7 @@
       const warn = document.getElementById("transportWarning");
       if (warn) {
         warn.style.display = "block";
-        warn.innerHTML = bootWarnings.map(x => `??? ${escapeHtml(x)}`).join("<br>");
+        warn.innerHTML = bootWarnings.map(x => `• ${escapeHtml(x)}`).join("<br>");
       }
     }
 
@@ -2191,4 +2421,5 @@
 })();
 </script>
 <% %>
+
 

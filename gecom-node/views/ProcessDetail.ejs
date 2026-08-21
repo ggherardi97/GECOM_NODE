@@ -2,6 +2,37 @@
     .fa {
         margin-right: 5px;
     }
+
+    .process-docs-folder-icon {
+        color: #666;
+    }
+
+    .process-docs-folder-node {
+        border-radius: 4px;
+        padding: 2px 6px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .process-docs-folder-node.is-selected {
+        background: #e7f0ff;
+    }
+
+    .process-docs-folder-toggle {
+        display: inline-flex;
+        width: 14px;
+        justify-content: center;
+        align-items: center;
+        margin-right: 4px;
+        color: #6f6f6f;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .process-docs-folder-toggle.is-placeholder {
+        visibility: hidden;
+        cursor: default;
+    }
 </style>
 
 <% contentFor('headerLink') %>
@@ -137,9 +168,9 @@
                                                             data-toggle="tab">Relacionados</a></li>
                                                     <li><a class="nav-link" href="#tab-4" onclick="loadMapLeft()"
                                                             data-toggle="tab"><%= t('page.processDetail.sections.trajectory') %></a></li>
-                                                    <li><a class="nav-link" href="#tab-5" onclick="loadMapLeft()"
+                                                    <li id="marineTrackingTabLink"><a class="nav-link" href="#tab-5" onclick="loadMapLeft()"
                                                             data-toggle="tab"><%= t('page.processDetail.sections.maritimeTrackingBeta') %></a></li>
-                                                    <li><a class="nav-link" href="#tab-6" onclick="loadMapLeft()"
+                                                    <li id="airTrackingTabLink"><a class="nav-link" href="#tab-6" onclick="loadMapLeft()"
                                                             data-toggle="tab"><%= t('page.processDetail.sections.airTrackingBeta') %></a></li>
                                                 </ul>
                                             </div>
@@ -236,6 +267,7 @@
     <th><%= t('page.processDetail.tableTransports.status') %></th>
     <th><%= t('page.processDetail.tableTransports.origin') %></th>
     <th><%= t('page.processDetail.tableTransports.destination') %></th>
+    <th>Ship ID</th>
     <th><%= t('page.processDetail.tableTransports.etaDeparture') %></th>
     <th><%= t('page.processDetail.tableTransports.etaArrival') %></th>
                                                                         <th style="width: 90px; text-align:center;">
@@ -243,9 +275,9 @@
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody id="transportsTbody">
-                                                                    <tr>
-                                                                        <td colspan="8"><%= t('page.processDetail.state.loading') %></td>
-                                                                    </tr>
+                                                                        <tr>
+                                                                            <td colspan="9"><%= t('page.processDetail.state.loading') %></td>
+                                                                        </tr>
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -265,13 +297,38 @@
                                                 </div>
 
                                                 <div class="tab-pane"  id="tab-5">
-                                                  <iframe
-  width="100%"
-  height="520"
-  frameborder="0"
-  scrolling="no"
-  src="https://www.marinetraffic.com/en/ais/embed/zoom:6/centery:-23.6/centerx:-46.6/maptype:0/shownames:false/mmsi:123456789/shipid:0/fleet:/fleet_id:/vtypes:/showmenu:false/remember:false">
-</iframe>
+                                                  <div class="ibox">
+                                                    <div class="ibox-title">
+                                                      <h5><%= t('page.processDetail.sections.maritimeTrackingBeta') %> (MarineTraffic)</h5>
+                                                    </div>
+                                                    <div class="ibox-content">
+                                                      <p class="m-b-sm">
+                                                        <strong>IMO/MMSI:</strong> <span id="marineTrafficMmsi">-</span>
+                                                      </p>
+                                                      <p class="m-b-sm">
+                                                        <strong>Ship ID:</strong> <span id="marineTrafficShipId">-</span>
+                                                      </p>
+                                                      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                                                        <a class="btn btn-primary"
+                                                           id="marineTrafficDetailsBtn"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer"
+                                                           href="javascript:void(0)"
+                                                           style="display:none;">
+                                                          Abrir detalhes no MarineTraffic
+                                                        </a>
+                                                        <a class="btn btn-info"
+                                                           id="marineTrafficTrackBtn"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer"
+                                                           href="javascript:void(0)"
+                                                           style="display:none;">
+                                                          Abrir rastreio
+                                                        </a>
+                                                      </div>
+                                                      <small id="marineTrafficHint" class="text-muted" style="display:block; margin-top:10px;">Carregando dados de rastreamento...</small>
+                                                    </div>
+                                                  </div>
 
                                                 </div>
 
@@ -325,11 +382,9 @@
                     <br />
                     <h4><%= t('page.processDetail.sections.documents') %></h4>
 <small id="processDocsHint" class="text-muted"><%= t('page.processDetail.state.loadingDocuments') %></small>
-<br />
-<br />
 
 <div id="processDocsFolderHeader" style="display:none; margin-bottom:8px;">
-  <i class="fa fa-folder-open"></i>
+  <i class="fa fa-folder-open process-docs-folder-icon"></i>
   <strong id="processDocsFolderName"></strong>
 </div>
 
@@ -337,8 +392,8 @@
   <li class="text-muted"><%= t('page.processDetail.state.loading') %></li>
 </ul>
 
-<div class="m-t-md">
-  <button type="button" class="btn btn-xs btn-primary" name="btn_act_new" onclick="openProcessUploadSideModal()">
+<div class="m-t-md" style="margin-bottom: 25px;">
+  <button type="button" class="btn btn-xs btn-primary" id="processDocsUploadBtn" name="btn_act_new" onclick="openProcessUploadSideModal()" disabled title="Selecione uma pasta para habilitar o envio.">
     <i class="fa fa-upload"></i> <%= t('page.processDetail.actions.addDocuments') %>
   </button>
 </div>
@@ -708,6 +763,36 @@ function applyPhoneMask($input) {
                         return transportTypesCache;
                     }
 
+                    function normalizeTransportTypeToken(value) {
+                        const input = String(value || "").trim();
+                        if (!input) return "";
+                        try {
+                            return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+                        } catch {
+                            return input.toUpperCase();
+                        }
+                    }
+
+                    function resolveTransportTrackingDefaults(typeId, types) {
+                        const id = String(typeId || "").trim();
+                        if (!id) return null;
+
+                        const rows = Array.isArray(types) ? types : [];
+                        const match = rows.find((item) => String(item?.id || "").trim() === id);
+                        const token = normalizeTransportTypeToken(match?.name || match?.type_name || match?.label || match?.code || "");
+                        if (!token) return null;
+
+                        if (token.includes("MARIT") || token.includes("SEA")) {
+                            return { mode: "SEA", provider: "MARINETRAFFIC" };
+                        }
+
+                        if (token.includes("AERE") || token.includes("AIR")) {
+                            return { mode: "AIR", provider: "FR24" };
+                        }
+
+                        return null;
+                    }
+
                     async function openAddTransportModal() {
                         if (!processId) {
                             alert("Processo não encontrado.");
@@ -731,7 +816,19 @@ function applyPhoneMask($input) {
                             return `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`;
                         }).join("");
 
-                  const html = `
+                        const trackingModeOptions = `
+      <option value="">-</option>
+      <option value="AIR">AIR</option>
+      <option value="SEA">SEA</option>
+    `;
+
+                        const trackingProviderOptions = `
+      <option value="">-</option>
+      <option value="FR24">FR24</option>
+      <option value="MARINETRAFFIC">Marine Traffic</option>
+    `;
+
+                        const html = `
   <div class="form-group">
     <label for="txtTransportCompany">Transportadora</label>
     <input id="txtTransportCompany" class="form-control" />
@@ -775,6 +872,30 @@ function applyPhoneMask($input) {
   </div>
 
   <div class="form-group">
+    <label for="selTrackingMode">Tracking mode</label>
+    <select id="selTrackingMode" class="form-control">
+      ${trackingModeOptions}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="selTrackingProvider">Tracking provider</label>
+    <select id="selTrackingProvider" class="form-control">
+      ${trackingProviderOptions}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="txtTrackingExternalId">Tracking IMO/MMSI</label>
+    <input id="txtTrackingExternalId" class="form-control" placeholder="IMO ou MMSI do navio" />
+  </div>
+
+  <div class="form-group">
+    <label for="txtShipId">Ship ID</label>
+    <input id="txtShipId" class="form-control" placeholder="SHIP_ID do MarineTraffic" />
+  </div>
+
+  <div class="form-group">
     <label for="dtDeparture">Saída prevista</label>
     <input id="dtDeparture" type="date" class="form-control" />
   </div>
@@ -785,18 +906,23 @@ function applyPhoneMask($input) {
   </div>
 `;
 
-
                        SideModal.open({
   title: "Adicionar transporte",
   okText: "Criar",
   html,
   onOk: async function () {
+    const trackingMode = String($("#selTrackingMode").val() || "").trim();
+    const trackingProvider = String($("#selTrackingProvider").val() || "").trim();
+    const trackingExternalId = String($("#txtTrackingExternalId").val() || "").trim();
+    const shipId = String($("#txtShipId").val() || "").trim();
+
     const payload = {
       process_id: String(processId),
       transport_company: String($("#txtTransportCompany").val() || "").trim() || null,
       origin: $("#selOrigin").val() || null,
       destination: $("#selDestination").val() || null,
       contact_phone: String($("#txtContactPhone").val() || "").trim() || null,
+      ship_id: shipId || null,
       transport_type_id: $("#selTransportType").val() || null,
       transport_status_id: $("#selTransportStatus").val() || null,
       departure_forecast: $("#dtDeparture").val()
@@ -807,10 +933,37 @@ function applyPhoneMask($input) {
         : null
     };
 
-    await apiPost("/api/transports", payload);
+    const createdTransport = await apiPost("/api/transports", payload);
+    const transportId = String(createdTransport?.id || createdTransport?.transport_id || "").trim();
+    const hasTracking = !!(trackingMode && trackingProvider && trackingExternalId);
+
+    if (transportId && hasTracking) {
+      await apiPut(`/api/transports/${encodeURIComponent(transportId)}/tracking/link`, {
+        mode: trackingMode,
+        provider: trackingProvider,
+        externalId: trackingExternalId
+      });
+    }
+
     await loadProcessDetail(processId);
   }
 });
+setTimeout(() => {
+  const typeSelect = document.getElementById("selTransportType");
+  const trackingModeSelect = document.getElementById("selTrackingMode");
+  const trackingProviderSelect = document.getElementById("selTrackingProvider");
+  if (!typeSelect || !trackingModeSelect || !trackingProviderSelect) return;
+
+  const applyDefaults = function () {
+    const defaults = resolveTransportTrackingDefaults(typeSelect.value, types);
+    if (!defaults) return;
+    $(trackingModeSelect).val(defaults.mode).trigger("change");
+    $(trackingProviderSelect).val(defaults.provider).trigger("change");
+  };
+
+  $(typeSelect).off("change.transportDefaults").on("change.transportDefaults", applyDefaults);
+  applyDefaults();
+}, 0);
 setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 
                     }
@@ -1017,6 +1170,19 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
                     async function apiPatch(url, body) {
                         const r = await fetch(url, {
                             method: "PATCH",
+                            headers: { "Content-Type": "application/json", Accept: "application/json" },
+                            body: JSON.stringify(body ?? {})
+                        });
+                        const text = await r.text();
+                        let data = {};
+                        try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+                        if (!r.ok) throw new Error(data?.message || "Erro na requisição.");
+                        return data;
+                    }
+
+                    async function apiPut(url, body) {
+                        const r = await fetch(url, {
+                            method: "PUT",
                             headers: { "Content-Type": "application/json", Accept: "application/json" },
                             body: JSON.stringify(body ?? {})
                         });
@@ -1328,8 +1494,12 @@ setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
 function renderTransports(list) {
   transportsCache = Array.isArray(list) ? list : [];
   window.transportsCache = transportsCache;
+  updateTrackingTabsVisibility(transportsCache);
   if (typeof window.refreshAirTrackingCard === "function") {
     window.refreshAirTrackingCard(transportsCache);
+  }
+  if (typeof window.refreshMarineTrackingCard === "function") {
+    window.refreshMarineTrackingCard(transportsCache);
   }
   const tbody = document.getElementById("transportsTbody");
   if (!tbody) return;
@@ -1338,8 +1508,7 @@ function renderTransports(list) {
 
   const rows = Array.isArray(list) ? list : [];
   if (rows.length === 0) {
-    // Agora são 8 colunas (incluindo tipo)
-    tbody.innerHTML = `<tr><td colspan="8">Nenhum transporte encontrado.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9">Nenhum transporte encontrado.</td></tr>`;
     return;
   }
 
@@ -1365,6 +1534,7 @@ function renderTransports(list) {
       <td>${escapeHtml(statusName || "-")}</td>
       <td>${escapeHtml(t?.origin || "-")}</td>
       <td>${escapeHtml(t?.destination || "-")}</td>
+      <td>${escapeHtml(t?.ship_id || "-")}</td>
       <td>${escapeHtml(formatDateOnlyPtBR(t?.departure_forecast))}</td>
       <td>${escapeHtml(formatDateOnlyPtBR(t?.arrival_forecast))}</td>
 
@@ -1383,6 +1553,64 @@ function renderTransports(list) {
 
     tbody.appendChild(tr);
   });
+}
+
+function updateTrackingTabsVisibility(transportsInput) {
+  const transports = Array.isArray(transportsInput) ? transportsInput : [];
+  const normalizeToken = (value) => String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9 ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const hasMarine = transports.some((row) => {
+    const token = normalizeToken(getTransportTypeName(row?.transport_type_id));
+    if (token.includes("MARIT") || token.includes("SEA") || token.includes("OCEAN")) return true;
+
+    const trackingLinks = Array.isArray(row?.tracking_links) ? row.tracking_links : [];
+    return trackingLinks.some((link) => {
+      const provider = normalizeToken(link?.provider);
+      const mode = normalizeToken(link?.mode);
+      return provider === "MARINETRAFFIC" || mode === "SEA";
+    });
+  });
+  const hasAir = transports.some((row) => {
+    const token = normalizeToken(getTransportTypeName(row?.transport_type_id));
+    if (token.includes("AEREO") || token.includes("AREO") || token.includes("AER") || token.includes("AIR")) return true;
+
+    const trackingLinks = Array.isArray(row?.tracking_links) ? row.tracking_links : [];
+    return trackingLinks.some((link) => {
+      const provider = normalizeToken(link?.provider);
+      const mode = normalizeToken(link?.mode);
+      return provider === "FR24" || mode === "AIR";
+    });
+  });
+
+  const marineTab = document.getElementById("marineTrackingTabLink");
+  const marinePane = document.getElementById("tab-5");
+  const airTab = document.getElementById("airTrackingTabLink");
+  const airPane = document.getElementById("tab-6");
+
+  if (marineTab) marineTab.style.display = hasMarine ? "" : "none";
+  if (marinePane) marinePane.style.display = hasMarine ? "" : "none";
+  if (airTab) airTab.style.display = hasAir ? "" : "none";
+  if (airPane) airPane.style.display = hasAir ? "" : "none";
+
+  const activeTab = document.querySelector(".nav-tabs .nav-link.active");
+  if (activeTab) {
+    const activeTarget = String(activeTab.getAttribute("href") || "").trim();
+    const activeHidden = (activeTarget === "#tab-5" && !hasMarine) || (activeTarget === "#tab-6" && !hasAir);
+    if (activeHidden && typeof window.$ === "function") {
+      try {
+        window.$('.nav-tabs .nav-link[href="#tab-1"]').tab("show");
+      } catch {
+        // ignore
+      }
+    }
+  }
 }
 
                     function editTransportById(transportId) {
@@ -1414,6 +1642,17 @@ async function openEditTransportModal(t) {
 
   const currentStatusId = String(t?.transport_status_id || "");
   const currentTypeId = String(t?.transport_type_id || "");
+  const currentTrackingLink = Array.isArray(t?.tracking_links)
+    ? t.tracking_links.find((link) => {
+        const provider = String(link?.provider || "").trim().toUpperCase();
+        const mode = String(link?.mode || "").trim().toUpperCase();
+        return provider === "MARINETRAFFIC" || provider === "FR24" || mode === "SEA" || mode === "AIR";
+      })
+    : null;
+  const currentTrackingMode = String(currentTrackingLink?.mode || t?.tracking_mode || "").trim();
+  const currentTrackingProvider = String(currentTrackingLink?.provider || t?.tracking_provider || "").trim();
+  const currentTrackingExternalId = String(currentTrackingLink?.external_id || t?.tracking_external_id || "").trim();
+  const currentShipId = String(t?.ship_id || t?.shipId || currentTrackingLink?.last_snapshot_json?.meta?.shipId || "").trim();
 
   const statusOptions = (statuses || [])
     .map((s) => {
@@ -1477,6 +1716,34 @@ async function openEditTransportModal(t) {
     </div>
 
     <div class="form-group">
+      <label for="selTrackingMode">Tracking mode</label>
+      <select id="selTrackingMode" class="form-control">
+        <option value="">-</option>
+        <option value="AIR"${currentTrackingMode === "AIR" ? " selected" : ""}>AIR</option>
+        <option value="SEA"${currentTrackingMode === "SEA" ? " selected" : ""}>SEA</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="selTrackingProvider">Tracking provider</label>
+      <select id="selTrackingProvider" class="form-control">
+        <option value="">-</option>
+        <option value="FR24"${currentTrackingProvider === "FR24" ? " selected" : ""}>FR24</option>
+        <option value="MARINETRAFFIC"${currentTrackingProvider === "MARINETRAFFIC" ? " selected" : ""}>Marine Traffic</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="txtTrackingExternalId">Tracking IMO/MMSI</label>
+      <input id="txtTrackingExternalId" class="form-control" value="${escapeHtml(currentTrackingExternalId)}" placeholder="IMO ou MMSI do navio" />
+    </div>
+
+    <div class="form-group">
+      <label for="txtShipId">Ship ID</label>
+      <input id="txtShipId" class="form-control" value="${escapeHtml(currentShipId)}" placeholder="SHIP_ID do MarineTraffic" />
+    </div>
+
+    <div class="form-group">
       <label for="dtDeparture">Saída prevista</label>
       <input id="dtDeparture" type="date" class="form-control" value="${escapeHtml(toDateValue(t?.departure_forecast))}" />
     </div>
@@ -1491,11 +1758,16 @@ async function openEditTransportModal(t) {
     title: "Editar transporte",
     html,
     onOk: async function () {
+      const trackingMode = String($("#selTrackingMode").val() || "").trim();
+      const trackingProvider = String($("#selTrackingProvider").val() || "").trim();
+      const trackingExternalId = String($("#txtTrackingExternalId").val() || "").trim();
+      const shipId = String($("#txtShipId").val() || "").trim();
       const payload = {
         transport_company: String($("#txtTransportCompany").val() || "").trim() || null,
         origin: $("#selOrigin").val() || null,
         destination: $("#selDestination").val() || null,
         contact_phone: String($("#txtContactPhone").val() || "").trim() || null,
+        ship_id: shipId || null,
         transport_type_id: $("#selTransportType").val() || null,
         transport_status_id: $("#selTransportStatus").val() || null,
         departure_forecast: $("#dtDeparture").val()
@@ -1507,12 +1779,40 @@ async function openEditTransportModal(t) {
       };
 
       await apiPatch(`/api/transports/${encodeURIComponent(id)}`, payload);
+
+      const hasTracking = !!(trackingMode && trackingProvider && trackingExternalId);
+      if (hasTracking) {
+        await apiPut(`/api/transports/${encodeURIComponent(id)}/tracking/link`, {
+          mode: trackingMode,
+          provider: trackingProvider,
+          externalId: trackingExternalId
+        });
+      } else if (currentTrackingLink?.id) {
+        await apiDelete(`/api/transports/${encodeURIComponent(id)}/tracking/link`);
+      }
+
       await loadProcessDetail(processId); // 1 GET refresh
     }
   });
 
   // Apply phone mask after modal renders
   setTimeout(() => applyPhoneMask($("#txtContactPhone")), 0);
+  setTimeout(() => {
+    const typeSelect = document.getElementById("selTransportType");
+    const trackingModeSelect = document.getElementById("selTrackingMode");
+    const trackingProviderSelect = document.getElementById("selTrackingProvider");
+    if (!typeSelect || !trackingModeSelect || !trackingProviderSelect) return;
+
+    const applyDefaults = function () {
+      const defaults = resolveTransportTrackingDefaults(typeSelect.value, types);
+      if (!defaults) return;
+      if (!String($(trackingModeSelect).val() || "").trim()) $(trackingModeSelect).val(defaults.mode).trigger("change");
+      if (!String($(trackingProviderSelect).val() || "").trim()) $(trackingProviderSelect).val(defaults.provider).trigger("change");
+    };
+
+    $(typeSelect).off("change.transportDefaultsEdit").on("change.transportDefaultsEdit", applyDefaults);
+    applyDefaults();
+  }, 0);
 }
 
                     // =========================
@@ -1775,11 +2075,15 @@ async function openEditTransportModal(t) {
                     }
 
 
-                    // =========================
+// =========================
 // Process documents (sidebar)
 // =========================
 let processDocsFolder = null; // folder doc item
-let processDocsItems = [];    // child items
+let processDocsItems = [];    // non-folder items (for summary cards)
+let processDocsTree = [];     // full tree (folders + files + links)
+const processDocsById = new Map();
+let selectedProcessDocsFolderId = null;
+const expandedProcessDocsFolderIds = new Set();
 
 function getAccountIdForCreate() {
   const id =
@@ -1803,7 +2107,7 @@ function isLinkDoc(item) {
   return String(item?.item_type || "").toUpperCase() === "LINK";
 }
 function iconForDoc(item) {
-  if (isFolderDoc(item)) return '<i class="fa fa-folder"></i>';
+  if (isFolderDoc(item)) return '<i class="fa fa-folder-open process-docs-folder-icon"></i>';
 
   if (isLinkDoc(item)) return '<i class="fa fa-link"></i>';
 
@@ -1833,6 +2137,11 @@ async function loadProcessDocuments() {
     $folderHeader.hide();
     processDocsFolder = null;
     processDocsItems = [];
+    processDocsTree = [];
+    processDocsById.clear();
+    selectedProcessDocsFolderId = null;
+    expandedProcessDocsFolderIds.clear();
+    updateProcessDocsUploadButtonState();
 
     // 1) Find folder of this process (usually root folder with process name)
     // Admin can query directly by relation. For non-admin, we query root folders and filter client-side.
@@ -1870,15 +2179,14 @@ async function loadProcessDocuments() {
     $folderName.text(processDocsFolder?.name || "Pasta do processo");
     $folderHeader.show();
 
-    // 2) Load children (files/links) from that folder
-    const childrenRes = await apiGet(`/api/documents?parent_id=${encodeURIComponent(String(processDocsFolder.id))}`);
-    const children = normalizeArrayResponse(childrenRes);
-
-    processDocsItems = (children || []).filter((x) => String(x?.item_type || "").toUpperCase() !== "FOLDER");
+    // 2) Load full tree recursively from process root folder
+    processDocsTree = await fetchProcessDocTree(String(processDocsFolder.id), new Set());
+    processDocsItems = flattenNonFolderDocs(processDocsTree);
+    indexProcessDocsTree(processDocsTree);
 
     renderProcessDocuments();
     renderRelatedRecords();
-    $hint.text("Clique no documento para abrir.");
+    $hint.text("Clique no arquivo para download, no link para abrir, ou selecione uma pasta para habilitar o envio.");
   } catch (e) {
     console.error("loadProcessDocuments error:", e);
     $hint.text("Erro ao carregar documentos.");
@@ -1895,24 +2203,25 @@ function renderProcessDocuments() {
     return;
   }
 
-  if (!processDocsItems.length) {
+  if (!processDocsTree.length) {
     $list.html('<li class="text-muted">Nenhum arquivo nesta pasta.</li>');
     return;
   }
 
-  const html = processDocsItems.map((d) => {
-    const id = String(d?.id || "");
-    const name = escapeHtml(d?.name || d?.filename || "Sem nome");
-    const icon = iconForDoc(d);
-    return `<li><a href="javascript:void(0)" onclick="openProcessDocById('${escapeHtml(id)}')">${icon}${name}</a></li>`;
-  }).join("");
+  const html = renderProcessDocsTreeHtml(processDocsTree, 0);
 
   $list.html(html);
+  updateProcessDocsUploadButtonState();
 }
 
 async function openProcessDocById(id) {
-  const item = (processDocsItems || []).find((x) => String(x?.id) === String(id));
+  const item = processDocsById.get(String(id));
   if (!item) return;
+
+  if (isFolderDoc(item)) {
+    selectProcessFolderById(String(item?.id || ""));
+    return;
+  }
 
   // LINK: open directly
   if (isLinkDoc(item)) {
@@ -1936,6 +2245,137 @@ async function openProcessDocById(id) {
 }
 window.openProcessDocById = openProcessDocById;
 
+function updateProcessDocsUploadButtonState() {
+  const btn = document.getElementById("processDocsUploadBtn");
+  if (!btn) return;
+
+  const selected = selectedProcessDocsFolderId
+    ? processDocsById.get(String(selectedProcessDocsFolderId))
+    : null;
+
+  const enabled = !!selected && isFolderDoc(selected);
+  btn.disabled = !enabled;
+  btn.title = enabled
+    ? "Enviar arquivo para a pasta selecionada."
+    : "Selecione uma pasta para habilitar o envio.";
+}
+
+function selectProcessFolderById(folderId) {
+  const id = String(folderId || "").trim();
+  const node = id ? processDocsById.get(id) : null;
+  if (!node || !isFolderDoc(node)) return;
+
+  selectedProcessDocsFolderId = id;
+  renderProcessDocuments();
+}
+window.selectProcessFolderById = selectProcessFolderById;
+
+function isProcessFolderExpanded(folderId) {
+  const id = String(folderId || "").trim();
+  if (!id) return false;
+  return expandedProcessDocsFolderIds.has(id);
+}
+
+function toggleProcessFolderExpand(folderId) {
+  const id = String(folderId || "").trim();
+  if (!id) return;
+  if (expandedProcessDocsFolderIds.has(id)) expandedProcessDocsFolderIds.delete(id);
+  else expandedProcessDocsFolderIds.add(id);
+  renderProcessDocuments();
+}
+window.toggleProcessFolderExpand = toggleProcessFolderExpand;
+
+async function fetchProcessDocTree(parentId, visited) {
+  const normalizedParentId = String(parentId || "").trim();
+  if (!normalizedParentId) return [];
+  if (visited.has(normalizedParentId)) return [];
+  visited.add(normalizedParentId);
+
+  const childrenRes = await apiGet(`/api/documents?parent_id=${encodeURIComponent(normalizedParentId)}&take=500&skip=0`);
+  const children = normalizeArrayResponse(childrenRes);
+
+  const nodes = [];
+  for (const child of (children || [])) {
+    const node = { ...(child || {}) };
+    if (isFolderDoc(node)) {
+      node.children = await fetchProcessDocTree(String(node?.id || ""), visited);
+    } else {
+      node.children = [];
+    }
+    nodes.push(node);
+  }
+
+  return nodes;
+}
+
+function flattenNonFolderDocs(nodes) {
+  const out = [];
+  const walk = (items) => {
+    for (const item of (items || [])) {
+      if (isFolderDoc(item)) {
+        walk(item?.children || []);
+      } else {
+        out.push(item);
+      }
+    }
+  };
+  walk(nodes || []);
+  return out;
+}
+
+function indexProcessDocsTree(nodes) {
+  const walk = (items) => {
+    for (const item of (items || [])) {
+      const id = String(item?.id || "").trim();
+      if (id) processDocsById.set(id, item);
+      if (isFolderDoc(item)) walk(item?.children || []);
+    }
+  };
+  walk(nodes || []);
+}
+
+function renderProcessDocsTreeHtml(nodes, depth) {
+  return (nodes || []).map((d) => {
+    const id = String(d?.id || "");
+    const name = escapeHtml(d?.name || d?.filename || "Sem nome");
+    const icon = iconForDoc(d);
+    const level = Number(depth || 0);
+    const nodeIndentPx = level * 18;
+
+    if (isFolderDoc(d)) {
+      const children = Array.isArray(d?.children) ? d.children : [];
+      const hasChildren = children.length > 0;
+      const expanded = hasChildren && isProcessFolderExpanded(id);
+      const childrenHtml = expanded ? renderProcessDocsTreeHtml(children, level + 1) : "";
+      const folderSelectedClass = String(selectedProcessDocsFolderId || "") === id ? "is-selected" : "";
+      const toggleIcon = hasChildren ? (expanded ? "fa fa-caret-down" : "fa fa-caret-right") : "fa fa-caret-right";
+      const toggleClasses = `process-docs-folder-toggle${hasChildren ? "" : " is-placeholder"}`;
+      return `
+        <li style="margin: 4px 0; padding-left:${nodeIndentPx}px;">
+          <span
+            class="${toggleClasses}"
+            ${hasChildren ? `onclick="toggleProcessFolderExpand('${escapeHtml(id)}')"` : ""}
+          ><i class="${toggleIcon}"></i></span>
+          <span
+            class="process-docs-folder-node ${folderSelectedClass}"
+            onclick="selectProcessFolderById('${escapeHtml(id)}')"
+            style="display:inline-flex; align-items:center;"
+          >${icon}${name}</span>
+          ${expanded
+            ? (childrenHtml
+              ? `<ul class="list-unstyled project-files" style="margin-left:0; margin-top:4px;">${childrenHtml}</ul>`
+              : `<ul class="list-unstyled project-files" style="margin-left:0; margin-top:4px;"><li class="text-muted"><small>Pasta vazia</small></li></ul>`
+            )
+            : ""
+          }
+        </li>
+      `;
+    }
+
+    return `<li style="margin: 3px 0; padding-left:${nodeIndentPx}px;"><a href="javascript:void(0)" onclick="openProcessDocById('${escapeHtml(id)}')" style="display:inline-flex; align-items:center;">${icon}${name}</a></li>`;
+  }).join("");
+}
+
 // ---------------------------
 // Upload flow (same contract as MyDocuments)
 // ---------------------------
@@ -1947,6 +2387,11 @@ function getExtFromName(fileName) {
 }
 
 async function ensureProcessFolderExists() {
+  if (selectedProcessDocsFolderId) {
+    const selectedNode = processDocsById.get(String(selectedProcessDocsFolderId));
+    if (selectedNode && isFolderDoc(selectedNode)) return selectedNode;
+  }
+
   if (processDocsFolder?.id) return processDocsFolder;
 
   // Try reload first
@@ -2039,6 +2484,11 @@ async function doUploadToProcessFolder(file, displayNameRaw, progressCb) {
 }
 
 function openProcessUploadSideModal() {
+  if (!selectedProcessDocsFolderId) {
+    alert("Selecione uma pasta na árvore para habilitar o envio.");
+    return;
+  }
+
   SideModal.open({
     title: "Upload de Documento",
     okText: "Enviar",
@@ -2233,6 +2683,133 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
     return code;
   }
 
+  function normalizeMarineTrafficExternalIdentifierCandidate(value) {
+    const cleaned = String(value || "").trim();
+    if (!cleaned) return null;
+
+    const prefixed = cleaned.match(/^(imo|mmsi)\s*[:=]?\s*(\d+)$/i);
+    if (prefixed) {
+      return {
+        kind: prefixed[1].toLowerCase(),
+        value: prefixed[2],
+      };
+    }
+
+    const digitsOnly = cleaned.replace(/\D+/g, "");
+    if (!digitsOnly) {
+      return {
+        kind: "imo",
+        value: cleaned,
+      };
+    }
+
+    return {
+      kind: digitsOnly.length === 9 ? "mmsi" : "imo",
+      value: digitsOnly,
+    };
+  }
+
+  function normalizeMarineTrafficShipIdCandidate(value) {
+    const cleaned = String(value || "").trim();
+    return cleaned ? cleaned : null;
+  }
+
+  function buildMarineTrafficDetailsUrl(externalIdentifier) {
+    const kind = String(externalIdentifier?.kind || "").trim().toLowerCase();
+    const value = String(externalIdentifier?.value || "").trim();
+    if (!kind || !value) return "about:blank";
+    return `https://www.marinetraffic.com/en/ais/details/ships/${kind}:${encodeURIComponent(value)}/`;
+  }
+
+  function buildMarineTrafficTrackUrl(shipId) {
+    const value = String(shipId || "").trim();
+    if (!value) return "about:blank";
+    return `https://www.marinetraffic.com/en/ais/home/shipid:${encodeURIComponent(value)}/zoom:14`;
+  }
+
+  function extractMarineTrafficSnapshotMeta(snapshot) {
+    const meta = snapshot?.meta && typeof snapshot.meta === "object" ? snapshot.meta : {};
+    const mtUrl = String(meta.mtUrl ?? meta.mt_url ?? meta.MT_URL ?? "").trim();
+    const shipId = String(meta.shipId ?? meta.shipID ?? meta.ship_id ?? meta.SHIP_ID ?? "").trim();
+    const vesselName = String(meta.vesselName ?? meta.vessel_name ?? meta.vessel ?? meta.SHIPNAME ?? "").trim();
+    const shipIdFromUrl = mtUrl.match(/shipid:(\d+)/i)?.[1] || "";
+
+    return {
+      mtUrl,
+      shipId: shipId || shipIdFromUrl,
+      vesselName,
+    };
+  }
+
+  function extractMarineTrafficCenterFromSnapshot(snapshot) {
+    const current = snapshot?.current ?? snapshot?.current_position ?? snapshot?.position ?? snapshot?.data?.position;
+    const lat = Number(current?.lat ?? current?.latitude);
+    const lon = Number(current?.lon ?? current?.lng ?? current?.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat, lon };
+  }
+
+  function extractMarineTrafficTrackingInfoFromTransport(transport) {
+    const trackingLinks = Array.isArray(transport?.tracking_links) ? transport.tracking_links : [];
+    let center = null;
+
+    for (const link of trackingLinks) {
+      const provider = normalizeGeoKey(link?.provider).replace(/\s+/g, "");
+      const mode = normalizeGeoKey(link?.mode).replace(/\s+/g, "");
+      if (mode && mode !== "SEA") continue;
+      if (provider && provider !== "MARINETRAFFIC") continue;
+
+      const snapshotMeta = extractMarineTrafficSnapshotMeta(link?.last_snapshot_json);
+      const shipId = normalizeMarineTrafficShipIdCandidate(
+        transport?.ship_id ??
+          transport?.shipId ??
+          snapshotMeta.shipId ??
+          link?.ship_id ??
+          link?.shipId ??
+          "",
+      );
+      const externalIdentifier = normalizeMarineTrafficExternalIdentifierCandidate(
+        link?.external_id ?? link?.externalId ?? transport?.tracking_external_id ?? transport?.trackingExternalId ?? "",
+      );
+      if (!center) {
+        center = extractMarineTrafficCenterFromSnapshot(link?.last_snapshot_json);
+      }
+
+      if (externalIdentifier || shipId || snapshotMeta.vesselName) {
+        return {
+          externalIdentifier,
+          center,
+          shipId,
+          vesselName: snapshotMeta.vesselName || null,
+        };
+      }
+    }
+
+    const externalCandidates = [transport?.tracking_external_id, transport?.trackingExternalId, transport?.external_id, transport?.externalId];
+
+    for (const candidate of externalCandidates) {
+      const externalIdentifier = normalizeMarineTrafficExternalIdentifierCandidate(candidate);
+      const shipId = normalizeMarineTrafficShipIdCandidate(transport?.ship_id ?? transport?.shipId ?? "");
+      if (externalIdentifier || shipId) {
+        return { externalIdentifier, center, shipId, vesselName: null };
+      }
+    }
+
+    return center ? { externalIdentifier: null, center, shipId: null, vesselName: null } : null;
+  }
+
+  function isMarineTrafficTransportRow(transport) {
+    const token = normalizeGeoKey(getTransportTypeName(transport?.transport_type_id)).replace(/\s+/g, "");
+    if (token.includes("MARIT") || token.includes("SEA") || token.includes("OCEAN")) return true;
+
+    const trackingLinks = Array.isArray(transport?.tracking_links) ? transport.tracking_links : [];
+    return trackingLinks.some((link) => {
+      const provider = normalizeGeoKey(link?.provider).replace(/\s+/g, "");
+      const mode = normalizeGeoKey(link?.mode).replace(/\s+/g, "");
+      return provider === "MARINETRAFFIC" || mode === "SEA";
+    });
+  }
+
   function extractFlightCodeFromTransportRow(transport) {
     const candidates = [
       transport?.flight_number,
@@ -2256,6 +2833,114 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
       if (code) return code;
     }
     return null;
+  }
+
+  async function resolveMarineTrackingInfo(transportsInput) {
+    const transports = Array.isArray(transportsInput) ? transportsInput : [];
+    if (!transports.length) {
+      return {
+        externalIdentifier: null,
+        shipId: null,
+        detailsUrl: "about:blank",
+        trackUrl: "about:blank",
+        hint: "Nenhum transporte foi encontrado para este processo.",
+      };
+    }
+
+    for (const row of transports) {
+      const trackingInfo = extractMarineTrafficTrackingInfoFromTransport(row);
+      const hasResolvedTrackingInfo = Boolean(trackingInfo?.externalIdentifier || trackingInfo?.shipId || trackingInfo?.center);
+      if (hasResolvedTrackingInfo) {
+        const detailsUrl = buildMarineTrafficDetailsUrl(trackingInfo.externalIdentifier);
+        const trackUrl = buildMarineTrafficTrackUrl(trackingInfo.shipId);
+        return {
+          externalIdentifier: trackingInfo.externalIdentifier,
+          shipId: trackingInfo.shipId,
+          detailsUrl,
+          trackUrl,
+          hint: trackingInfo.shipId
+            ? "SHIP_ID identificado a partir do transporte."
+            : trackingInfo.externalIdentifier
+                ? "IMO/MMSI identificado a partir do transporte."
+                : trackingInfo.center
+                  ? "Posição atual identificada a partir do transporte."
+                  : "Rastreamento identificado a partir do transporte.",
+        };
+      }
+
+      const fromTracking = await tryFetchMarineTrafficIdentifierFromTracking(row?.id);
+      const hasResolvedFromTracking = Boolean(fromTracking?.externalIdentifier || fromTracking?.shipId || fromTracking?.center);
+      if (hasResolvedFromTracking) {
+        const detailsUrl = buildMarineTrafficDetailsUrl(fromTracking.externalIdentifier);
+        const trackUrl = buildMarineTrafficTrackUrl(fromTracking.shipId);
+        return {
+          externalIdentifier: fromTracking.externalIdentifier,
+          shipId: fromTracking.shipId,
+          detailsUrl,
+          trackUrl,
+          hint: fromTracking.shipId
+            ? "SHIP_ID identificado a partir do rastreamento vinculado ao transporte."
+            : fromTracking.externalIdentifier
+                ? "IMO/MMSI identificado a partir do rastreamento vinculado ao transporte."
+                : fromTracking.center
+                  ? "Posição atual identificada a partir do rastreamento vinculado ao transporte."
+                  : "Rastreamento identificado a partir do rastreamento vinculado ao transporte.",
+          };
+      }
+    }
+
+    return {
+      externalIdentifier: null,
+      shipId: null,
+      detailsUrl: "about:blank",
+      trackUrl: "about:blank",
+      hint: "Nenhum rastreamento marítimo MarineTraffic válido foi encontrado nos transportes deste processo.",
+    };
+  }
+
+  async function tryFetchMarineTrafficIdentifierFromTracking(transportId) {
+    const id = String(transportId || "").trim();
+    if (!id) return null;
+
+    try {
+      const response = await fetch(`/api/transports/${encodeURIComponent(id)}/tracking?refresh=false`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return null;
+      const data = await response.json().catch(() => ({}));
+
+      const mode = String(data?.mode || "").trim().toUpperCase();
+      const provider = String(data?.meta?.provider || data?.provider || "").trim().toUpperCase();
+      if (mode && mode !== "SEA") return null;
+      if (provider && provider !== "MARINETRAFFIC") return null;
+
+      const snapshotMeta = extractMarineTrafficSnapshotMeta(data);
+      const center = extractMarineTrafficCenterFromSnapshot(data);
+      const candidates = [
+        data?.meta?.externalId,
+        data?.meta?.external_id,
+        data?.externalId,
+        data?.external_id,
+      ];
+      const shipId = normalizeMarineTrafficShipIdCandidate(snapshotMeta.shipId);
+
+      for (const candidate of candidates) {
+        const externalIdentifier = normalizeMarineTrafficExternalIdentifierCandidate(candidate);
+        if (externalIdentifier || shipId || snapshotMeta.vesselName) {
+          return {
+            externalIdentifier,
+            shipId,
+            center,
+            vesselName: snapshotMeta.vesselName || null,
+          };
+        }
+      }
+
+      return center ? { externalIdentifier: null, shipId, center, vesselName: snapshotMeta.vesselName || null } : null;
+    } catch {
+      return null;
+    }
   }
 
   async function tryFetchFlightCodeFromTracking(transportId) {
@@ -2292,7 +2977,16 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
 
   async function resolveAirTrackingInfo(transportsInput) {
     const transports = Array.isArray(transportsInput) ? transportsInput : [];
-    const airRows = transports.filter((row) => isAirTransportTypeName(getTransportTypeName(row?.transport_type_id)));
+    const airRows = transports.filter((row) => {
+      if (isAirTransportTypeName(getTransportTypeName(row?.transport_type_id))) return true;
+
+      const trackingLinks = Array.isArray(row?.tracking_links) ? row.tracking_links : [];
+      return trackingLinks.some((link) => {
+        const provider = normalizeGeoKey(link?.provider).replace(/\s+/g, "");
+        const mode = normalizeGeoKey(link?.mode).replace(/\s+/g, "");
+        return provider === "FR24" || mode === "AIR";
+      });
+    });
 
     if (!airRows.length) {
       return {
@@ -2357,6 +3051,51 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
   }
 
   window.refreshAirTrackingCard = refreshAirTrackingCard;
+
+  async function refreshMarineTrackingCard(transportsInput) {
+    const externalIdEl = document.getElementById("marineTrafficMmsi");
+    const shipIdEl = document.getElementById("marineTrafficShipId");
+    const detailsBtnEl = document.getElementById("marineTrafficDetailsBtn");
+    const trackBtnEl = document.getElementById("marineTrafficTrackBtn");
+    const hintEl = document.getElementById("marineTrafficHint");
+    if (!externalIdEl || !shipIdEl || !detailsBtnEl || !trackBtnEl || !hintEl) return;
+
+    externalIdEl.textContent = "-";
+    shipIdEl.textContent = "-";
+    detailsBtnEl.setAttribute("href", "javascript:void(0)");
+    detailsBtnEl.style.display = "none";
+    detailsBtnEl.classList.add("disabled");
+    detailsBtnEl.setAttribute("aria-disabled", "true");
+    trackBtnEl.setAttribute("href", "javascript:void(0)");
+    trackBtnEl.style.display = "none";
+    trackBtnEl.classList.add("disabled");
+    trackBtnEl.setAttribute("aria-disabled", "true");
+    hintEl.textContent = "Carregando dados de rastreamento...";
+
+    const info = await resolveMarineTrackingInfo(transportsInput);
+    const externalLabel = info.externalIdentifier
+      ? String(info.externalIdentifier.kind || "").trim().toUpperCase()
+      : "-";
+    externalIdEl.textContent = info.externalIdentifier ? `${externalLabel}: ${info.externalIdentifier.value}` : "-";
+    shipIdEl.textContent = info.shipId || "-";
+    hintEl.textContent = info.hint;
+
+    if (info.detailsUrl && info.detailsUrl !== "about:blank" && info.externalIdentifier) {
+      detailsBtnEl.setAttribute("href", info.detailsUrl);
+      detailsBtnEl.style.display = "";
+      detailsBtnEl.classList.remove("disabled");
+      detailsBtnEl.removeAttribute("aria-disabled");
+    }
+
+    if (info.trackUrl && info.trackUrl !== "about:blank" && info.shipId) {
+      trackBtnEl.setAttribute("href", info.trackUrl);
+      trackBtnEl.style.display = "";
+      trackBtnEl.classList.remove("disabled");
+      trackBtnEl.removeAttribute("aria-disabled");
+    }
+  }
+
+  window.refreshMarineTrackingCard = refreshMarineTrackingCard;
 
   window.loadMapLeft = function loadMapLeft() {
     setTimeout(function () {
@@ -2443,6 +3182,7 @@ window.openProcessUploadSideModal = openProcessUploadSideModal;
   };
 })();
 </script>
+
 
 
 
